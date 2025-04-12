@@ -65,7 +65,7 @@ const Header = () => {
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 py-2 px-4 bg-primary hover:bg-primary/90 text-white rounded-md font-medium transition-colors"
+                className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
               >
                 Log Out
               </button>

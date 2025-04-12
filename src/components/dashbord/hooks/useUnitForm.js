@@ -4,12 +4,14 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import toast from "react-hot-toast";
+
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "next/navigation";
 import {
   addUnit,
   deleteImage,
   uploadImages,
+  addDeveloper, // Add this import if it exists in serviceFetching
 } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 // import { uploadImages, deleteImage, addUnit } from '@/components/services/serviceFetching';
@@ -80,6 +82,7 @@ export const useUnitForm = (onClose, onSave) => {
       clientName: clientId,
       clientId: clientId,
       developer: "",
+      isNewDeveloper: false,
       unitId: uuidv4(),
       unitTitle: "",
       deliveryDate: "",
@@ -259,6 +262,51 @@ export const useUnitForm = (onClose, onSave) => {
     );
   };
 
+  // Add these to your existing imports
+ 
+  
+  // Inside your useUnitForm hook, add:
+  const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
+  
+  // Add this function to handle saving a new developer
+  const handleDeveloperSave = async (developerData) => {
+      try {
+        // Show loading toast
+        const loadingToast = toast.loading("Adding new developer...");
+        
+        // Create the developer data object
+        const developerToAdd = {
+          name: developerData.name,
+          logo:"",
+          description: developerData.description || "",
+         
+        };
+        
+        // Call the API to add the developer
+        const response = await addDeveloper(developerToAdd);
+        
+        // Directly update the form with the new developer value
+        formik.setFieldValue("developer", developerData.name);
+        // Set isNewDeveloper to false to show the select dropdown with the new value
+        formik.setFieldValue("isNewDeveloper", false);
+        
+        // Close the modal
+        setIsAddDeveloperModalOpen(false);
+        
+        // Dismiss loading toast and show success message
+        toast.dismiss(loadingToast);
+        toast.success("Developer added successfully");
+        
+        return response.data;
+        
+      } catch (error) {
+        console.error("Error adding developer:", error);
+        toast.error("Failed to add developer: " + (error.response?.data?.message || error.message));
+        throw error;
+      }
+    };
+  
+  // Make sure to include these in your return statement
   return {
     formik,
     isAddCompoundModalOpen,
@@ -277,5 +325,8 @@ export const useUnitForm = (onClose, onSave) => {
     handleRemovePaymentPlan,
     handleDragOver,
     handleCompoundSave,
+    isAddDeveloperModalOpen,
+    setIsAddDeveloperModalOpen,
+    handleDeveloperSave,
   };
 };

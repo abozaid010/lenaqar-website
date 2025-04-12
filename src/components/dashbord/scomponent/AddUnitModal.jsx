@@ -5,6 +5,7 @@ import AddCompoundModal from "./AddCompoundModal";
 import PaymentPlanPopup from "./PaymentPlanPopup";
 import { useUnitForm } from "../hooks/useUnitForm";
 import propertyEnums from "../data/propertyEnums.json";
+import AddDeveloperModal from "./AddDeveloperModal";
 
 const AddUnitModal = ({
   isOpen,
@@ -13,6 +14,7 @@ const AddUnitModal = ({
   comboundata,
   developersData,
 }) => {
+  // In the destructuring of useUnitForm
   const {
     formik,
     isAddCompoundModalOpen,
@@ -31,8 +33,11 @@ const AddUnitModal = ({
     handleRemovePaymentPlan,
     handleDragOver,
     handleCompoundSave,
+    isAddDeveloperModalOpen,
+    setIsAddDeveloperModalOpen,
+    handleDeveloperSave
   } = useUnitForm(onClose, onSave);
-
+  
   if (!isOpen) return null;
 
   return (
@@ -591,9 +596,18 @@ const AddUnitModal = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Developer
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Developer
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddDeveloperModalOpen(true)}
+                    className="text-xs text-primary hover:text-primary/80 mb-1"
+                  >
+                    + Add New
+                  </button>
+                </div>
                 <select
                   name="developer"
                   value={formik.values.developer}
@@ -758,6 +772,13 @@ const AddUnitModal = ({
         isOpen={isPaymentPlanPopupOpen}
         onClose={() => setIsPaymentPlanPopupOpen(false)}
         onAdd={handleAddPaymentPlan}
+      />
+
+      {/* Add Developer Modal */}
+      <AddDeveloperModal
+        isOpen={isAddDeveloperModalOpen}
+        onClose={() => setIsAddDeveloperModalOpen(false)}
+        onSave={handleDeveloperSave}
       />
     </div>
   );
