@@ -410,7 +410,7 @@ const RealEstateDashboard = ({ users }) => {
                   </h2>
                   <div>
                     <form onSubmit={formik.handleSubmit}>
-                      <div className="grid gap-12 mb-6 mt-5 mb-5">
+                      <div className="grid gap-12 mt-5 mb-5">
                         <div>
                           <label
                             htmlFor="spreadsheet_url"
