@@ -5,46 +5,55 @@ import UpdateUnitModal from "../scomponent/UpdateUnitModal";
 import { updateUnit, deleteUnit } from "@/components/services/serviceFetching";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+
 export default function UnitDetails({ unit }) {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updatedUnit, setUpdatedUnit] = useState(unit);
+  // Add a new state to keep track of the currently displayed main image
+  const [mainImageIndex, setMainImageIndex] = useState(0);
   const router = useRouter();
 
-    const handleDeleteUnit = async () => {
-        toast(
-            <div className='flex flex-col gap-4 text-black rounded-md'>
-                <p>Are you sure you want to delete this unit?</p>
-                <div className="flex gap-2">
-                    <button className='bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md' onClick={() => {
-                        deleteUnit(unit.unitId);
-                        toast.dismiss();
-                        router.push('/dashbord/units');
-                    }}>Delete</button>
-                    <button className='bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md' onClick={() => {
-                        toast.dismiss();
-                    }}>Cancel</button>
-                </div>
-            </div>
-        )
-    }
-    const handleUpdateUnit = async (updatedUnit) => {
-        console.log("updatedUnit", updatedUnit);
-        let newUnit = await updateUnit(updatedUnit);
-        console.log(newUnit);
-        setIsUpdateModalOpen(false);
-        toast.success('Unit updated successfully');
-        // setUpdatedUnit(newUnit);
-        router.refresh();
-    };
+  const handleDeleteUnit = async () => {
+    toast(
+      <div className='flex flex-col gap-4 text-black rounded-md'>
+        <p>Are you sure you want to delete this unit?</p>
+        <div className="flex gap-2">
+          <button className='bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md' onClick={() => {
+            deleteUnit(unit.unitId);
+            toast.dismiss();
+            router.push('/dashbord/units');
+          }}>Delete</button>
+          <button className='bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md' onClick={() => {
+            toast.dismiss();
+          }}>Cancel</button>
+        </div>
+      </div>
+    )
+  }
+
+  const handleUpdateUnit = async (updatedUnit) => {
+    let newUnit = await updateUnit(updatedUnit);
+    setIsUpdateModalOpen(false);
+    toast.success('Unit updated successfully');
+    // setUpdatedUnit(newUnit);
+    router.refresh();
+  };
+
+  // Function to handle clicking on a thumbnail image
+  const handleImageClick = (index) => {
+    setMainImageIndex(index);
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-6 border-b flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">{unit.unitTitle}</h1>
-          <p className="text-gray-600 mt-2">
-            {unit.buildingType} in {unit.compound}
-          </p>
+          <h1 className="text-3xl font-bold text-gray-800">{unit?.unitTitle}</h1>
+          <div className="flex flex-wrap gap-2 mt-2">
+            <p className="text-gray-600">
+              {unit?.buildingType} in {unit?.compound}
+            </p>
+          </div>
         </div>
         <div className="flex gap-4">
           <button
@@ -66,25 +75,28 @@ export default function UnitDetails({ unit }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="space-y-4">
           <div className="relative h-64 w-full rounded-lg overflow-hidden">
-            {updatedUnit.images && updatedUnit.images[0] && (
+            {updatedUnit.images && updatedUnit.images[mainImageIndex] && (
               <Image
-                src={updatedUnit.images[0].url}
-                alt={updatedUnit.unitTitle}
+                src={updatedUnit.images[mainImageIndex].url}
+                alt={`${updatedUnit.unitTitle} - Main Image`}
                 fill
                 className="object-cover"
               />
             )}
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-4 gap-2">
             {updatedUnit.images &&
-              updatedUnit.images.slice(1).map((image, index) => (
+              updatedUnit.images.map((image, index) => (
                 <div
                   key={index}
-                  className="relative h-32 rounded-lg overflow-hidden"
+                  className={`relative h-20 rounded-lg overflow-hidden cursor-pointer ${
+                    mainImageIndex === index ? "ring-2 ring-primary" : ""
+                  }`}
+                  onClick={() => handleImageClick(index)}
                 >
                   <Image
                     src={image.url}
-                    alt={`${updatedUnit.unitTitle} - ${index + 2}`}
+                    alt={`${updatedUnit.unitTitle} - ${index + 1}`}
                     fill
                     className="object-cover"
                   />
@@ -122,6 +134,26 @@ export default function UnitDetails({ unit }) {
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-gray-600">View</p>
               <p className="font-semibold">{updatedUnit.view}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-600">City</p>
+              <p className="font-semibold">{updatedUnit.city}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-600">Country</p>
+              <p className="font-semibold">{updatedUnit.country}</p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-600">Purpose</p>
+              <p className="font-semibold">
+                <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                  {updatedUnit.purpose}
+                </span>
+              </p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-gray-600">Building Type</p>
+              <p className="font-semibold">{updatedUnit.buildingType}</p>
             </div>
           </div>
 

@@ -1,116 +1,14 @@
 "use client";
 import React, { useState } from "react";
 import im from "../../../../public/images/building1.jpg";
-import {
-  Eye,
-  Edit,
-  Trash2,
-  MapPin,
-  Plus,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  Share2,
-} from "lucide-react";
+import { MapPin, Plus, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import AddUnitModal from "../scomponent/AddUnitModal";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import propertyEnums from "../data/propertyEnums.json";
+import toast from "react-hot-toast";
 // Sample data - replace with your actual data
-const realEstateData = [
-  {
-    id: 1,
-    name: "Sunset Heights",
-    image: im,
-    description: "Luxury apartments with stunning views",
-    location: "Downtown",
-    price: "$1,200,000",
-    developer: "Skyline Developers",
-    buildings: [
-      { id: 101, name: "Tower A", units: 45, image: im },
-      { id: 102, name: "Tower B", units: 52, image: im },
-      { id: 103, name: "Garden Villa", units: 10, image: im },
-    ],
-  },
-  {
-    id: 2,
-    name: "Pine Creek Estates",
-    image: im,
-    description: "Modern townhouses in a peaceful neighborhood",
-    location: "Suburban Area",
-    price: "$850,000",
-    developer: "Green Valley Construction",
-    buildings: [
-      {
-        id: 201,
-        name: "Block 1",
-        units: 24,
-        image: "/api/placeholder/400/300",
-      },
-      {
-        id: 202,
-        name: "Block 2",
-        units: 24,
-        image: "/api/placeholder/400/300",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Marina Bay Residences",
-    image: im,
-    description: "Waterfront properties with premium amenities",
-    location: "Marina District",
-    price: "$2,500,000",
-    developer: "Skyline Developers",
-    buildings: [
-      {
-        id: 301,
-        name: "North Tower",
-        units: 60,
-        image: "/api/placeholder/400/300",
-      },
-      {
-        id: 302,
-        name: "South Tower",
-        units: 60,
-        image: "/api/placeholder/400/300",
-      },
-      {
-        id: 303,
-        name: "Penthouse Block",
-        units: 15,
-        image: "/api/placeholder/400/300",
-      },
-    ],
-  },
-  {
-    id: 4,
-    name: "Urban Lofts",
-    image: im,
-    description: "Industrial-style lofts in the arts district",
-    location: "Arts District",
-    price: "$750,000",
-    developer: "Metropolitan Builders",
-    buildings: [
-      {
-        id: 401,
-        name: "The Gallery",
-        units: 35,
-        image: "/api/placeholder/400/300",
-      },
-      {
-        id: 402,
-        name: "The Studio",
-        units: 28,
-        image: "/api/placeholder/400/300",
-      },
-    ],
-  },
-];
 
 const RealEstateListings = ({ initialData, comboundata, developersData }) => {
-  const navigate = useRouter();
   const [selectedEstate, setSelectedEstate] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [developerFilter, setDeveloperFilter] = useState("all");
@@ -119,7 +17,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const itemsPerPage = 8;
-console.log(initialData)
+  
   // Filter estates based on search, developer filter, compound filter, and purpose filter
   const filteredEstates = initialData
     ? initialData.filter((estate) => {
@@ -141,13 +39,15 @@ console.log(initialData)
         if (compoundFilter !== "all") {
           matchesCompound = estate.compound === compoundFilter;
         }
-        
+
         let matchesPurpose = true;
         if (purposeFilter !== "all") {
           matchesPurpose = estate.purpose === purposeFilter;
         }
 
-        return matchesSearch && matchesDeveloper && matchesCompound && matchesPurpose;
+        return (
+          matchesSearch && matchesDeveloper && matchesCompound && matchesPurpose
+        );
       })
     : [];
 
@@ -182,15 +82,7 @@ console.log(initialData)
     // and possibly make an API call to save it
   };
 
-  const handleUpdateEstate = (id, e) => {
-    e.stopPropagation(); // Prevent card expansion
-    alert(`Update property with ID: ${id}`);
-  };
-
-  const handleDeleteEstate = (id, e) => {
-    e.stopPropagation(); // Prevent card expansion
-    alert(`Delete property with ID: ${id}`);
-  };
+ 
 
   // Generate pagination numbers
   const getPaginationNumbers = () => {
@@ -273,21 +165,22 @@ console.log(initialData)
                     </option>
                   ))}
               </select>
-              
+
               <select
                 className="flex-1 min-w-[180px] px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 value={purposeFilter}
                 onChange={(e) => setPurposeFilter(e.target.value)}
               >
                 <option value="all">All Purposes</option>
-                {propertyEnums && propertyEnums.EnumPropertyIntent.map((purpose, index) => (
-                  <option
-                    key={`purpose-${index}-${purpose}`}
-                    value={purpose.charAt(0).toUpperCase() + purpose.slice(1)}
-                  >
-                    {purpose.charAt(0).toUpperCase() + purpose.slice(1)}
-                  </option>
-                ))}
+                {propertyEnums &&
+                  propertyEnums.EnumPropertyIntent.map((purpose, index) => (
+                    <option
+                      key={`purpose-${index}-${purpose}`}
+                      value={purpose.charAt(0).toUpperCase() + purpose.slice(1)}
+                    >
+                      {purpose.charAt(0).toUpperCase() + purpose.slice(1)}
+                    </option>
+                  ))}
               </select>
 
               <button
@@ -311,33 +204,61 @@ console.log(initialData)
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentItems.map((estate, idx) => (
-              <Link href={`/dashbord/units/${estate.unitId}`}
-               
+              <Link
+                href={`/dashbord/units/${estate.unitId}`}
                 key={idx}
                 className="flex flex-col"
               >
                 {/* Estate Card with fixed height */}
                 <div
-                  className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 h-[450px] flex flex-col cursor-pointer"
+                  className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300  flex flex-col cursor-pointer"
                   onClick={() => handleCardClick(estate.id)}
                 >
                   <div className="relative h-56">
                     {estate.images && estate.images.length > 0 ? (
-                      <img
-                        src={estate.images[0].url}
-                        alt={estate.name || estate.compound || "Property"}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img
+                          src={estate.images[0].url}
+                          alt={estate.name || estate.compound || "Property"}
+                          className="w-full h-full object-cover"
+                        />
+                        <button 
+                          className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
+                          // onClick={(e) => {
+                          //   e.preventDefault();
+                          //   e.stopPropagation();
+                          //   const url = `${window.location.origin}/dashbord/units/${estate.unitId}`;
+                          //   navigator.clipboard.writeText(url);
+                          //   toast.success("Link copied to clipboard!");
+                          // }}
+                        >
+                          <Share2 className="w-4 h-4 text-gray-700 group-hover:text-white" />
+                        </button>
+                      </>
                     ) : (
-                      <img
-                        src={im.src}
-                        alt={estate.name || estate.compound || "Property"}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img
+                          src={im.src}
+                          alt={estate.name || estate.compound || "Property"}
+                          className="w-full h-full object-cover"
+                        />
+                        <button 
+                          className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
+                          // onClick={(e) => {
+                          //   e.preventDefault();
+                          //   e.stopPropagation();
+                          //   const url = `${window.location.origin}/dashbord/units/${estate.unitId}`;
+                          //   navigator.clipboard.writeText(url);
+                          //   toast.success("Link copied to clipboard!");
+                          // }}
+                        >
+                          <Share2 className="w-4 h-4 text-gray-700 group-hover:text-white" />
+                        </button>
+                      </>
                     )}
                   </div>
 
-                  <div className="p-4 flex-grow flex flex-col justify-between">
+                  <div className="p-4 flex-grow flex flex-col gap-4">
                     <div>
                       <h3 className="text-xl font-bold text-gray-800 mb-1 line-clamp-1 rtl:text-right">
                         {estate?.unitTitle || "Unnamed Property"}
@@ -348,9 +269,9 @@ console.log(initialData)
                           {estate.city || "Location not specified"}
                         </span>
                       </div>
-                      
+
                       {/* Compound and Purpose Display */}
-                      <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="flex flex-wrap gap-2 ">
                         {estate.compound && (
                           <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                             {estate.compound}
@@ -364,54 +285,21 @@ console.log(initialData)
                       </div>
                     </div>
 
-                    <div className="flex flex-col gap-2 mt-auto">
-                      {estate.bathrooms && (
-                        <div className="text-sm text-gray-600 rtl:text-right">
-                          <span className="font-medium">Bathrooms:</span>{" "}
-                          {estate.bathrooms}
-                        </div>
-                      )}
+                    <div className="flex flex-col gap-2 ">
+                   
                       {estate.finishing && (
                         <div className="text-sm text-gray-600 rtl:text-right">
                           <span className="font-medium">Finishing:</span>{" "}
                           {estate.finishing}
                         </div>
                       )}
-                      {estate.buildingType && (
+
+                      {estate.totalPrice && (
                         <div className="text-sm text-gray-600 rtl:text-right">
-                          <span className="font-medium">Building Type:</span>{" "}
-                          {estate.buildingType}
+                          <span className="font-medium">totalPrice :</span>{" "}
+                          {estate.totalPrice}
                         </div>
                       )}
-                      {estate.downPayment && (
-                        <div className="text-sm text-gray-600 rtl:text-right">
-                          <span className="font-medium">Down Payment:</span>{" "}
-                          {estate.downPayment}
-                        </div>
-                      )}
-
-                      <button
-                        // onClick={(e) => {
-                        //   e.stopPropagation();
-                        //   const url = `${window.location.origin}/dashbord/units/${estate.unitId}`;
-                        //   navigator.clipboard.writeText(url);
-                        //   toast.success("Link copied to clipboard!");
-                        // }}
-                        className="w-full py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-medium transition duration-300 flex items-center justify-center text-sm mt-2"
-                      >
-                        <Share2 className="mr-2 w-4 h-4" />
-                        Share unit
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          navigate.push(`/dashbord/units/${estate.unitId}`)
-                        }
-                        className="w-full py-2 px-4 bg-primary text-white rounded-md font-medium transition duration-300 flex items-center justify-center text-sm mt-2"
-                      >
-                        <Eye className="mr-2 w-4 h-4" />
-                        View Details
-                      </button>
                     </div>
                   </div>
                 </div>

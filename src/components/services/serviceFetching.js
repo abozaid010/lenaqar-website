@@ -116,8 +116,18 @@ export async function fetchDevelopers() {
     return { error: error.message };
   }
 }
-// Add this function to your serviceFetching.js file
 
+export async function addDeveloper(developerData) {
+  try {
+    const response = await axiosInstance.post(`/developers/`, developerData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add developer:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
+
+// Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {
     const response = await axiosInstance.post(`/add-unit/`, unitData);
