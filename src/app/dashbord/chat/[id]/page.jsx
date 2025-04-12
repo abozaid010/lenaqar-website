@@ -11,7 +11,7 @@ export default async function ChatPage({ params }) {
     <div className="relative container mx-auto flex flex-col h-full bg-gray-200 rounded-md pb-14">
       <ChatHistory data={data} />
 
-      <SendNewMessageForm />
+      <SendNewMessageForm userId={id} />
     </div>
   );
 }
