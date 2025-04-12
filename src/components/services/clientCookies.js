@@ -1,4 +1,5 @@
 "use server";
+
 import { cookies } from "next/headers";
 import toast from "react-hot-toast";
 
@@ -6,7 +7,6 @@ export const getClientid = async () => {
   const cookieStore = await cookies();
   const cookie = cookieStore.get("client_id");
 
-  console.log(cookie);
   if (!cookie || !cookie.value) return {};
 
   try {
@@ -16,6 +16,7 @@ export const getClientid = async () => {
     return {};
   }
 };
+
 export const removeClientId = async () => {
   const cookie = cookies().get("client_id");
 

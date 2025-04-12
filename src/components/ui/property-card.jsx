@@ -64,14 +64,14 @@ export default function PropertyCard({ data }) {
             src={hoveredImage || data.images[0].url}
             layout="fill"
             objectFit="cover"
-            alt="property_iamge"
+            alt="property_image"
           />
         ) : (
           <Image
             src="/images/property_placeholder.jpg"
             layout="fill"
             objectFit="cover"
-            alt="property_iamge"
+            alt="property_image"
           />
         )}
       </Link>

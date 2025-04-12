@@ -1,5 +1,4 @@
 import axiosInstance from "@/utils/axiosInstance";
-import Cookies from "js-cookie";
 import { getClientid } from "./clientCookies";
 
 
@@ -104,7 +103,7 @@ export async function fetchUsersData(cursor) {
     return response.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
-    return { error: error.message};
+    return { error: error.message };
   }
 }
 
@@ -158,8 +157,10 @@ export async function fetchData() {
 }
 
 export async function getChatHistory(userId) {
+  const cookieClientId = await getClientid();
+
   try {
-    const response = await axiosInstance.get(`history/ALL/${userId}`);
+    const response = await axiosInstance.get(`history/${cookieClientId}/${userId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
