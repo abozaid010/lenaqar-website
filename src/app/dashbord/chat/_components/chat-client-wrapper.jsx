@@ -17,7 +17,7 @@ export default function ChatClientWrapper({ initialData, userId }) {
       <ChatHistory data={chatHistory} />
 
       {/* Render the form and notify ChatHistory of new messages */}
-      <SendNewMessageForm userId={userId} OnNewMessage={OnNewMessage} />
+      <SendNewMessageForm userId={userId} onNewMessage={OnNewMessage} />
     </div>
   );
 }

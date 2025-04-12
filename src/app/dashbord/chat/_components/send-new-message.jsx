@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useEffect, useActionState, useState } from "react";
 import { sendNewMessage } from "../_actions/actions";
 import { Loader2 } from "lucide-react";
 
@@ -9,9 +9,27 @@ const initialState = {
   message: "",
 };
 
-export default function SendNewMessageForm({ userId }) {
+export default function SendNewMessageForm({ userId, onNewMessage }) {
   const [state, action, pending] = useActionState(sendNewMessage, initialState);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (state.success) {
+      const newMessage = {
+        user_message: "",
+        platform: "website",
+        bot_response: message,
+        properties: "",
+        timeStamp: new Date().valueOf(), // Get current
+      };
+
+      setMessage(""); // Clear the message input after successful submission
+      onNewMessage(newMessage); // Call the parent function to update the chat history
+    } else if (state.message) {
+      // Handle errors
+      console.error("Error sending message:", state.message);
+    }
+  }, [state]);
 
   return (
     <form
