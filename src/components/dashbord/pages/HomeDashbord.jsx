@@ -342,7 +342,6 @@ const RealEstateDashboard = ({ users }) => {
     },
   });
 
-  console.log(selectedId);
   const actionid = `${selectedId?.phoneNumber}_${selectedId?.client_id}`;
 
   useEffect(() => {
