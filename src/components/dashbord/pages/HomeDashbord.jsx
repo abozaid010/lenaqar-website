@@ -137,9 +137,10 @@ const RealEstateDashboard = ({ users }) => {
   );
 
   // Function to open property details modal
-  const openPropertyDetails = (requirement) => {
+  const openPropertyDetails = (requirement, score) => {
     const property =
       propertyDetails[requirement] || propertyDetails["Apartment"]; // Fallback
+    property["purchaseProbability"] = score;
     setSelectedProperty(property);
     setIsModalOpen(true);
   };
@@ -598,6 +599,7 @@ const RealEstateDashboard = ({ users }) => {
                         "Not specified";
                       const messageCount = user.conversation?.length || 0;
                       const status = user.actions?.action || "No Action";
+                      const score = user.profile?.Score?.score || user.profile?.score?.score || 0;
 
                       const statusStyle = getStatusStyle(status);
                       return (
@@ -647,7 +649,7 @@ const RealEstateDashboard = ({ users }) => {
                               className="text-blue-600 cursor-pointer hover:underline"
                               onClick={(e) => {
                                 e.stopPropagation(); // لمنع تفعيل onClick للـ tr
-                                openPropertyDetails(requirements);
+                                openPropertyDetails(requirements, score);
                               }}
                             >
                               {requirements}

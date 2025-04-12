@@ -35,7 +35,7 @@ const PropertyDetailsModal = ({ isOpen, onClose, property }) => {
 
         {/* Content */}
         <div className="p-6">
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col md:flex-row gap-6 items-center">
             {/* Left column - Property details */}
             <div className="flex-1 space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -186,6 +186,34 @@ const PropertyDetailsModal = ({ isOpen, onClose, property }) => {
                   <p className="text-sm text-gray-500 mt-1">
                     {property.lastUpdate}
                   </p>
+                </div>
+              </div>
+
+              {/* Added Purchase Probability Section */}
+              <div className="bg-blue-50 p-4 rounded-lg">
+                <div className="text-center">
+                  <p className="text-sm text-blue-800 font-medium">
+                    Purchase Probability
+                  </p>
+                  <div className="mt-2">
+                    <p className="text-lg font-semibold text-blue-600">
+                      {property.purchaseProbability}% {/* Display the probability */}
+                    </p>
+                    <div
+                      className="mt-2 h-2 rounded-full bg-blue-200" // Background color for the empty bar
+                      style={{
+                        width: '100%', // Always full width
+                      }}
+                    >
+                      {/* Progress bar filling based on percentage */}
+                      <div
+                        className="h-full rounded-full bg-blue-600" // Filling color
+                        style={{
+                          width: `${property.purchaseProbability}%`, // Fill width based on the percentage
+                        }}
+                      ></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
