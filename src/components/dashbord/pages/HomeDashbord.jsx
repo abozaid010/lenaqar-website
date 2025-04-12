@@ -381,7 +381,7 @@ const RealEstateDashboard = ({ users }) => {
             },
           }
         );
-        console.log(response);
+        // console.log(response);
         toast.success("Action updated successfully!");
         setIsOpenn(false);
       } catch (error) {
@@ -639,7 +639,7 @@ const RealEstateDashboard = ({ users }) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usersData?.map((user, x) => {
-                      console.log("Ahmed0000000000000000000", user?.actions, x);
+                      // console.log("Ahmed0000000000000000000", user?.actions, x);
 
                       const lastMessage =
                         user.conversation?.[0]?.user_message || "";
