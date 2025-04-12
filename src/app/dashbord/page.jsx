@@ -1,5 +1,6 @@
 import HomeDashbord from "@/components/dashbord/pages/HomeDashbord";
 import { fetchUsersData } from "@/components/services/serviceFetching";
+import ClientsTable from "./_components/clients-table";
 
 export const metadata = {
   title: "Dashbord",
@@ -7,13 +8,17 @@ export const metadata = {
 };
 
 export default async function DashbordPage({ searchParams }) {
-  // TODO: Get initial clients based on the searchParams
-  const users = await fetchUsersData();
+  const page = parseInt(searchParams.page) || 1;
 
-  console.log("users", searchParams);
+  // TODO: Get initial clients based on the searchParams
+  const initialClients = await fetchUsersData();
+  const hasMore = initialClients.data.pagination.has_more;
+
   return (
     <>
-      <HomeDashbord users={users.data} />
+      <HomeDashbord users={initialClients.data} />
+
+      <ClientsTable users={initialClients.data.users} />
     </>
   );
 }

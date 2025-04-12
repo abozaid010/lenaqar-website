@@ -250,6 +250,7 @@ const RealEstateDashboard = ({ users }) => {
   };
 
   const actionidd = `${selectedId?.phoneNumber}_${selectedId?.client_id}`;
+
   const formik = useFormik({
     initialValues: {
       spreadsheet_url: "",
@@ -277,7 +278,7 @@ const RealEstateDashboard = ({ users }) => {
         setLoading(true);
 
         const response = await axios.put(
-          `https://api.lenaai.net/actions/${actionidd}`,
+          `https://api.lenaai.net/action/${actionidd}`,
           payload,
           {
             headers: {
@@ -400,7 +401,7 @@ const RealEstateDashboard = ({ users }) => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `https://api.lenaai.net/actions/${actionid}`
+          `https://api.lenaai.net/action/${actionidd}`
         );
 
         setaction(response?.data);
@@ -639,8 +640,6 @@ const RealEstateDashboard = ({ users }) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usersData?.map((user, x) => {
-                      // console.log("Ahmed0000000000000000000", user?.actions, x);
-
                       const lastMessage =
                         user.conversation?.[0]?.user_message || "";
                       const lastActivity = new Date(
@@ -676,7 +675,7 @@ const RealEstateDashboard = ({ users }) => {
                               <span
                                 className="text-xs text-blue-600 cursor-pointer hover:underline"
                                 onClick={(e) => {
-                                  e.stopPropagation(); // لمنع تفعيل onClick للـ tr
+                                  e.stopPropagation();
                                   openPropertyDetails(requirements);
                                 }}
                               >
@@ -700,8 +699,8 @@ const RealEstateDashboard = ({ users }) => {
                             <span
                               className="text-blue-600 cursor-pointer hover:underline"
                               onClick={(e) => {
-                                e.stopPropagation(); // لمنع تفعيل onClick للـ tr
-                                openPropertyDetails(requirements, score);
+                                e.stopPropagation();
+                                openPropertyDetails(requirements, 50);
                               }}
                             >
                               {requirements}
@@ -784,7 +783,6 @@ const RealEstateDashboard = ({ users }) => {
           </div>
 
           {/* Modle in Action  */}
-
           {isOpenmodle && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000042] bg-opacity-50">
               <div className="relative p-4 w-full max-w-2xl max-h-full">
