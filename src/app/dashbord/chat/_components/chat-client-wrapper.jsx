@@ -8,7 +8,7 @@ import { useState } from "react";
 export default function ChatClientWrapper({ initialData, userId }) {
   const [chatHistory, setChatHistory] = useState(initialData);
 
-  const OnNewMessage = (newMessage) => {
+  const onNewMessage = (newMessage) => {
     setChatHistory((prev) => [...prev, newMessage]);
   };
 
@@ -17,7 +17,7 @@ export default function ChatClientWrapper({ initialData, userId }) {
       <ChatHistory data={chatHistory} />
 
       {/* Render the form and notify ChatHistory of new messages */}
-      <SendNewMessageForm userId={userId} onNewMessage={OnNewMessage} />
+      <SendNewMessageForm userId={userId} onNewMessage={onNewMessage} />
     </div>
   );
 }

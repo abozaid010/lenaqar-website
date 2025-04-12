@@ -6,7 +6,7 @@ export async function sendNewMessage(prevState, formData) {
 
     await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate network delay
 
-    const timeStamp = new Date().valueOf(); // Get current timestam
+    const timeStamp = new Date().valueOf(); // Get current timestamp
 
     console.log("Sending message:", message, "to user:", userId, "at", timeStamp);
 
