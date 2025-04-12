@@ -16,9 +16,16 @@ export default async function DashbordPage({ searchParams }) {
 
   return (
     <>
-      <HomeDashbord users={initialClients.data} />
-
-      <ClientsTable users={initialClients.data.users} />
+      <div className="bg-gray-50 min-h-screen p-2 sm:p-4">
+        <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
+          <ClientsTable
+            users={initialClients.data.users}
+            disableNext={!hasMore}
+            currentPage={page}
+          />
+        </div>
+      </div>
+      {/* <HomeDashbord users={initialClients.data} /> */}
     </>
   );
 }

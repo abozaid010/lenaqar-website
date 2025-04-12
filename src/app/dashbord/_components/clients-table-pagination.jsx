@@ -1,0 +1,35 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function ClientsTablePagination({ disableNext, currentPage }) {
+  const router = useRouter();
+
+  const handlePageChange = (newPage = 1) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", newPage);
+
+    router.push(`${window.location.pathname}?${params.toString()}`);
+  };
+
+  return (
+    <div className="flex justify-end items-center mt-4">
+      <div className="flex gap-2">
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage <= 1}
+          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        >
+          Previous
+        </button>
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={disableNext}
+          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md text-sm  font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
