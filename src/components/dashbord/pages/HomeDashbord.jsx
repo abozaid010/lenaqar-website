@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+
 import {
   Search,
   Filter,
@@ -20,13 +21,12 @@ import { fetchUsersData } from "@/components/services/serviceFetching";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
-import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 
 const RealEstateDashboard = ({ users }) => {
   // Sample data
   const router = useRouter();
-  const [usersData, setUsersData] = useState(users.users);
+  const [usersData, setUsersData] = useState(users?.users);
   const [hasMore, setHasMore] = useState(users?.pagination?.has_more);
   const [nextCursor, setNextCursor] = useState(users?.pagination?.next_cursor);
   const [previousCursor, setPreviousCursor] = useState(null);
@@ -115,7 +115,6 @@ const RealEstateDashboard = ({ users }) => {
       forRentSale: "Sale",
     },
   };
-
   // const [leads, setLeads] = useState(initialLeads);
   const [activeTab, setActiveTab] = useState("All Chats");
   const [searchTerm, setSearchTerm] = useState("");
@@ -136,17 +135,19 @@ const RealEstateDashboard = ({ users }) => {
   const [startDate, setStartDate] = useState("2025-03-26");
   const [endDate, setEndDate] = useState("2025-04-12");
   const [action, setaction] = useState(null);
-  const [activeTab2, setActiveTab2] = useState("form1");
+
+  const [activeTab2, setActiveTab2] = useState(null);
 
   const [displayDateRange, setDisplayDateRange] = useState(
     "26 Mar 25 - 12 Apr 25"
   );
 
   // Function to open property details modal
-  const openPropertyDetails = (requirement, score) => {
+  const openPropertyDetails = (requirement, score, newScore) => {
     const property =
       propertyDetails[requirement] || propertyDetails["Apartment"]; // Fallback
-    property["purchaseProbability"] = score;
+    property["purchaseProbability"] = score; // استخدام score
+    property["purchaseProbability"] = newScore; // استخدام newScore
     setSelectedProperty(property);
     setIsModalOpen(true);
   };
@@ -277,8 +278,9 @@ const RealEstateDashboard = ({ users }) => {
       try {
         setLoading(true);
 
-        const response = await axios.put(
-          `https://api.lenaai.net/action/${actionidd}`,
+        const response = await axiosInstance.put(
+          `/action/${actionidd}`,
+
           payload,
           {
             headers: {
@@ -291,7 +293,6 @@ const RealEstateDashboard = ({ users }) => {
         setLoading(false);
       } catch (error) {
         toast.error(error?.message);
-        console.error(error?.message);
       } finally {
         formikinput.resetForm();
       }
@@ -304,10 +305,9 @@ const RealEstateDashboard = ({ users }) => {
       client_id: action?.client_id || "",
       user_id: action?.user_id || "",
       created_at: action?.created_at || "",
-      preferred_time: action?.preferred_time || "",
+      preferred_time: action?.preferred_time,
       description: action?.description || "",
       action: action?.action || "",
-      comment: "",
     },
 
     onSubmit: async (values) => {
@@ -318,7 +318,6 @@ const RealEstateDashboard = ({ users }) => {
         preferred_time: values.preferred_time,
         description: values.description,
         action: values.action,
-        comment: "",
         actions_history: [
           {
             user: values.user_id || "current_user_id",
@@ -332,32 +331,33 @@ const RealEstateDashboard = ({ users }) => {
       try {
         setLoading(true);
         const response = await axiosInstance.put(
-          `/actions/${actionidd}`,
+          `/action/${actionidd}`,
+
           payload,
           {}
         );
+
         setIsOpenmodle(false);
+
         toast.success("Action updated successfully!");
+        setIsOpenn(false);
       } catch (error) {
         toast.error(error?.message || "Something went wrong");
-        console.error(error);
+        // console.error(error);
       } finally {
         setLoading(false);
+
         formikinput.resetForm();
       }
     },
   });
-
-  const initialCreatedAt = useMemo(() => {
-    return action?.created_at || new Date().toISOString();
-  }, [action?.created_at]);
 
   const formikaction = useFormik({
     enableReinitialize: true, // This allows the form to update when initialValues change
     initialValues: {
       client_id: SelectedAction?.user?.client_id || "",
       user_id: SelectedAction?.user?.phoneNumber || "",
-      created_at: initialCreatedAt,
+      created_at: action?.created_at || new Date().toISOString(),
       description: action?.description || "",
       action: action?.action || "",
     },
@@ -373,21 +373,17 @@ const RealEstateDashboard = ({ users }) => {
 
       try {
         setLoading(true);
-        const response = await axios.post(
-          `https://api.lenaai.net/action/`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        // console.log(response);
+        const response = await axiosInstance.post(`/action/`, payload, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        // console.log(response)
         toast.success("Action updated successfully!");
         setIsOpenn(false);
       } catch (error) {
         toast.error(error?.message || "Something went wrong");
-        console.error(error);
+        // console.error(error);
       } finally {
         setLoading(false);
         formikaction.resetForm();
@@ -397,21 +393,23 @@ const RealEstateDashboard = ({ users }) => {
 
   useEffect(() => {
     if (!selectedId) return;
-
     const fetchData = async () => {
+      const actionidd = `${selectedId?.phoneNumber}_${selectedId?.client_id}`;
+
       try {
-        const response = await axios.get(
-          `https://api.lenaai.net/action/${actionidd}`
-        );
+        const response = await axiosInstance.get(`/action/${actionidd}`);
 
         setaction(response?.data);
       } catch (error) {
-        console.error(error);
+        toast.error(error?.message);
+        // console.error(error);
       }
     };
 
     fetchData();
+    setActiveTab2(selectedId?.user?.actions?.actions_history);
   }, [selectedId]);
+  // console.log(activeTab2);
 
   return (
     <div className="min-h-screen bg-gray-50 p-2 sm:p-4 md:p-6">
@@ -614,7 +612,6 @@ const RealEstateDashboard = ({ users }) => {
               </div>
             </div>
           </div>
-
           {/* Table with responsive design */}
           <div className="overflow-x-auto -mx-3 sm:mx-0">
             <div className="inline-block min-w-full align-middle">
@@ -640,6 +637,8 @@ const RealEstateDashboard = ({ users }) => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {usersData?.map((user, x) => {
+                      // console.log("Ahmed0000000000000000000", user?.actions, x);
+
                       const lastMessage =
                         user.conversation?.[0]?.user_message || "";
                       const lastActivity = new Date(
@@ -699,11 +698,14 @@ const RealEstateDashboard = ({ users }) => {
                             <span
                               className="text-blue-600 cursor-pointer hover:underline"
                               onClick={(e) => {
-                                e.stopPropagation();
-                                openPropertyDetails(requirements, 50);
+                                e.stopPropagation(); // لمنع تفعيل onClick للـ tr
+                                openPropertyDetails(actions, score);
                               }}
                             >
+                              {/* {requirements}
+                               */}
                               {requirements}
+                              {/* {actions}  */}
                             </span>
                           </td>
 
@@ -736,6 +738,8 @@ const RealEstateDashboard = ({ users }) => {
                                 >Create Action
                                 </button> */}
 
+                                {/* {console.log(user?.actions.action)  } */}
+
                                 {user?.actions &&
                                 Object.keys(user.actions).length > 0 ? (
                                   <button
@@ -751,7 +755,7 @@ const RealEstateDashboard = ({ users }) => {
                                     }}
                                     className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
                                   >
-                                    Action
+                                    {user?.actions.action}
                                   </button>
                                 ) : (
                                   <button
@@ -789,7 +793,7 @@ const RealEstateDashboard = ({ users }) => {
                 <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                   <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                     <h3 className="text-xl font-semibold  dark:text-blue-500">
-                      change Action
+                      AI Action
                     </h3>
                     <button
                       onClick={() => setIsOpenmodle(false)}
@@ -818,107 +822,98 @@ const RealEstateDashboard = ({ users }) => {
                   <div className="p-4 md:p-5 space-y-4">
                     <div className="max-w-2xl mx-auto p-4">
                       {/* Tabs Header */}
-                      <div className="flex  mb-4 border-b border-blue-500">
+                      {/* <div className="flex  mb-4 border-b border-blue-500">
                         <button
                           onClick={() => setActiveTab2("form1")}
-                          className={`py-2 px-4 text-sm font-medium ${
-                            activeTab2 === "form1"
-                              ? "border-b-2 border-blue-500 text-[#1e3a8a]"
-                              : "text-gray-500"
-                          }`}
+                          className={`py-2 px-4 text-sm font-medium ${activeTab2 === "form1"
+                            ? "border-b-2 border-blue-500 text-[#1e3a8a]"
+                            : "text-gray-500"
+                            }`}
                         >
-                          Add Action
+                        
                         </button>
-                        <button
-                          onClick={() => setActiveTab2("form2")}
-                          className={`py-2 px-4 text-sm font-medium ${
-                            activeTab2 === "form2"
-                              ? "border-b-2 border-blue-500 text-[#1e3a8a]"
-                              : "text-gray-500"
-                          }`}
-                        >
-                          All comment Action
-                        </button>
-                      </div>
+              
+                      </div> */}
 
                       {/* Tab Content */}
-                      {activeTab2 === "form1" && (
-                        <form
-                          className="space-y-6 "
-                          onSubmit={formikinput.handleSubmit}
-                        >
-                          <div>
-                            <label
-                              htmlFor="action"
-                              className="block mb-1 text-sm font-medium text-gray-900 dark:text-white"
-                            >
-                              Action
-                            </label>
-                            <select
-                              id="action"
-                              name="action"
-                              onChange={formikinput.handleChange}
-                              value={formikinput.values.action}
-                              className="bg-gray-100 border-gray-300 text-sm rounded-lg block w-full p-3"
-                              required
-                            >
-                              <option value="">Select an option</option>
-                              <option value="Make a call">Make a call</option>
-                              <option value="Office visit">Office visit</option>
-                              <option value="Property view">
-                                Property view
-                              </option>
-                              <option value="Not interested">
-                                Not interested
-                              </option>
-                              <option value="Not qualified">
-                                Not qualified
-                              </option>
-                              <option value="Follow up later">
-                                Follow up later
-                              </option>
-                              <option value="Missing Requirement">
-                                Missing Requirement
-                              </option>
-                            </select>
+                      <form
+                        className="space-y-6 "
+                        onSubmit={formikinput.handleSubmit}
+                      >
+                        <div>
+                          <div className="mt-10 mb-10 space-y-4">
+                            {activeTab2?.map((item, index) => (
+                              <div
+                                key={index}
+                                className="flex justify-between items-start border-b pb-2"
+                              >
+                                <h5 className="font-bold">
+                                  {item?.user || "غير متاح"}
+                                </h5>
+                                <p>{item?.comment || "لا توجد تعليقات"}</p>
+                                <p>{item?.action || "لم يتم تحديد الإجراء"}</p>
+                              </div>
+                            ))}
                           </div>
 
-                          <div>
-                            <label
-                              htmlFor="comment"
-                              className="block mb-1 font-medium text-sm text-gray-900 dark:text-white"
-                            >
-                              Comment
-                            </label>
-                            <input
-                              type="text"
-                              id="comment"
-                              name="comment"
-                              onChange={formikinput.handleChange}
-                              value={formikinput.values.comment}
-                              className="bg-gray-200 border border-gray-300 text-black rounded-lg w-full p-3"
-                              placeholder="comment"
-                              required
-                            />
-                          </div>
-
-                          <button
-                            type="submit"
-                            disabled={loading}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg disabled:opacity-50"
+                          <label
+                            htmlFor="action"
+                            className="block mb-1 text-sm font-medium text-gray-900 dark:text-white"
                           >
-                            Send
-                          </button>
-                        </form>
-                      )}
-
-                      {activeTab2 === "form2" && (
-                        <div className="d-flex justify-between flex">
-                          <h5 className="font-bold">Test</h5>
-                          <p>Test</p>
-                          <p>Test</p>
+                            Action
+                          </label>
+                          <select
+                            id="action"
+                            name="action"
+                            onChange={formikinput.handleChange}
+                            value={formikinput.values.action}
+                            className="bg-gray-100 border-gray-300 text-sm rounded-lg block w-full p-3"
+                            required
+                          >
+                            <option value="">Select an option</option>
+                            <option value="Make a call">Make a call</option>
+                            <option value="Office visit">Office visit</option>
+                            <option value="Property view">Property view</option>
+                            <option value="Not interested">
+                              Not interested
+                            </option>
+                            <option value="Not qualified">Not qualified</option>
+                            <option value="Follow up later">
+                              Follow up later
+                            </option>
+                            <option value="Missing Requirement">
+                              Missing Requirement
+                            </option>
+                          </select>
                         </div>
-                      )}
+
+                        <div>
+                          <label
+                            htmlFor="comment"
+                            className="block mb-1 font-medium text-sm text-gray-900 dark:text-white"
+                          >
+                            Comment
+                          </label>
+                          <input
+                            type="text"
+                            id="comment"
+                            name="comment"
+                            onChange={formikinput.handleChange}
+                            value={formikinput.values.comment}
+                            className="bg-gray-200 border border-gray-300 text-black rounded-lg w-full p-3"
+                            placeholder="comment"
+                            required
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={loading}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg disabled:opacity-50"
+                        >
+                          Submit
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>
@@ -1062,7 +1057,6 @@ const RealEstateDashboard = ({ users }) => {
           )}
         </div>
       </div>
-
       {/* Property Details Modal */}
       <PropertyDetailsModal
         isOpen={isModalOpen}
@@ -1072,5 +1066,4 @@ const RealEstateDashboard = ({ users }) => {
     </div>
   );
 };
-
 export default RealEstateDashboard;
