@@ -2,7 +2,7 @@
 import React from "react";
 import UpdateUnitForm from "./UpdateUnitForm";
 
-const UpdateUnitModal = ({ isOpen, onClose, unit, onSubmit }) => {
+const UpdateUnitModal = ({ isOpen, onClose, unit, onSubmit ,developers,comboundata }) => {
   if (!isOpen) return null;
 
   return (
@@ -33,6 +33,8 @@ const UpdateUnitModal = ({ isOpen, onClose, unit, onSubmit }) => {
               unit={unit}
               onSubmit={onSubmit}
               onCancel={onClose}
+              developers={developers}
+              comboundata={comboundata}
             />
           </div>
         </div>
