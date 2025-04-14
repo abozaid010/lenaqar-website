@@ -1,6 +1,5 @@
 "use client";
 import {
-  updateUnit,
   uploadImages,
   deleteImage,
 } from "@/components/services/serviceFetching";
@@ -8,10 +7,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { Trash2, Upload, Plus, X } from "lucide-react";
 import propertyEnums from "../data/propertyEnums.json";
 import PaymentPlanPopup from "./PaymentPlanPopup";
-
 import AddCompoundModal from "./AddCompoundModal";
 import AddDeveloperModal from "./AddDeveloperModal";
-import { useRouter } from "next/navigation";
+
 const AMENITIES_LIST = [
   { id: "wifi", label: "WiFi" },
   { id: "air_condition", label: "Air Conditioning" },
@@ -25,13 +23,8 @@ const AMENITIES_LIST = [
   { id: "cleaning", label: "Cleaning Service" },
 ];
 
-const UpdateUnitForm = ({
-  unit,
-  onSubmit,
-  onCancel,
-  comboundata,
-  developers,
-}) => {
+const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) => {
+  // Form state
   const [formData, setFormData] = useState({
     unitTitle: "",
     unitId: "",
@@ -57,7 +50,6 @@ const UpdateUnitForm = ({
     clientName: "",
     dataSource: "",
     images: [],
-    // Add rental properties
     availability: false,
     startingDate: "",
     monthlyRent: 0,
@@ -69,7 +61,6 @@ const UpdateUnitForm = ({
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRef = useRef(null);
-
   const [isPaymentPlanPopupOpen, setIsPaymentPlanPopupOpen] = useState(false);
   const [isAddCompoundModalOpen, setIsAddCompoundModalOpen] = useState(false);
   const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
@@ -77,7 +68,7 @@ const UpdateUnitForm = ({
   const [isDevDropdownOpen, setIsDevDropdownOpen] = useState(false);
   const [isRentalProperty, setIsRentalProperty] = useState(false);
   const [isSellProperty, setIsSellProperty] = useState(false);
-  const router = useRouter();
+ 
 
   useEffect(() => {
     if (unit) {
@@ -107,7 +98,6 @@ const UpdateUnitForm = ({
         dataSource: unit.dataSource || "",
         images: unit.images || [],
         updatedAt: unit.updatedAt || "",
-        // Add rental properties
         availability: unit.availability || false,
         startingDate: unit.startingDate ? unit.startingDate.split("T")[0] : "",
         monthlyRent: unit.monthlyRent || 0,
@@ -129,14 +119,12 @@ const UpdateUnitForm = ({
       [name]: value,
     }));
 
-    // Update property type states when purpose changes
     if (name === "purpose") {
       setIsRentalProperty(value === "Rent");
       setIsSellProperty(value === "Sell" || value === "Buy");
     }
   };
 
-  // Reset file input to allow reselecting the same file
   const resetFileInput = () => {
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -145,38 +133,28 @@ const UpdateUnitForm = ({
 
   const handleFileSelection = (files) => {
     if (!files || files.length === 0) return;
-
-    // Convert FileList to Array - now allowing multiple files
     const newFiles = Array.from(files);
-
-    // Store the selected files without uploading immediately
-    setSelectedFiles((prev) => [...prev, ...newFiles]);
-
-    // If more than one image is selected, trigger upload automatically
+    setSelectedFiles(prev => [...prev, ...newFiles]);
+    
     if (newFiles.length > 1) {
-      // We'll use setTimeout to ensure state is updated before upload
       setTimeout(() => handleImageUpload(), 100);
     }
   };
 
   const handleImageUpload = async () => {
     if (selectedFiles.length === 0) return;
-
     setUploadingImages(true);
 
     try {
-      // Create an array to store all uploaded image data
       const uploadedImagesData = [];
-
-      // Upload each file one by one
+      
       for (const file of selectedFiles) {
         const formDataToUpload = new FormData();
         formDataToUpload.append("file", file);
-
+        
         // Upload the current file
         const uploadedImage = await uploadImages(formDataToUpload);
 
-        // Add to our array of uploaded images
         if (Array.isArray(uploadedImage)) {
           uploadedImagesData.push(...uploadedImage);
         } else {
@@ -184,16 +162,15 @@ const UpdateUnitForm = ({
         }
       }
 
-      // Update formData values with all new images
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...uploadedImagesData],
+        images: [...prev.images, ...uploadedImagesData]
       }));
 
       setSelectedFiles([]);
       resetFileInput();
     } catch (error) {
-      console.error("Error uploading image:", error);
+      console.error("Error uploading images:", error);
     } finally {
       setUploadingImages(false);
     }
@@ -205,10 +182,7 @@ const UpdateUnitForm = ({
 
   const removeUploadedImage = async (index, imageId) => {
     try {
-      // استخدام وظيفة deleteImage من serviceFetching
       await deleteImage(imageId);
-
-      // Remove from formData state after successful API deletion
       const updatedImages = [...formData.images];
       updatedImages.splice(index, 1);
       setFormData((prev) => ({
@@ -231,63 +205,45 @@ const UpdateUnitForm = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // This prevents the page from reloading
+    e.preventDefault();
     console.log("formData", formData);
 
     try {
-      // Create a copy of the form data to modify before submission
       const preparedFormData = { ...formData };
 
-      // Handle purpose-specific fields
       if (formData.purpose === "Rent") {
         console.log("Processing rental property");
-
-        // Convert rent values to numbers
         preparedFormData.monthlyRent = Number(formData.monthlyRent) || 0;
         preparedFormData.weeklyRent = Number(formData.weeklyRent) || 0;
         preparedFormData.dailyRent = Number(formData.dailyRent) || 0;
 
         console.log("Amenities before processing:", formData.amenities);
 
-        // Format amenities as an array of objects
         if (formData.amenities && typeof formData.amenities === "object") {
           const amenitiesArray = [];
-
-          // Convert the amenities object to array of objects format
           Object.entries(formData.amenities).forEach(([key, value]) => {
-            // Only include amenities that are available (true)
             if (value) {
               const amenityObj = {};
               amenityObj[key] = value;
               amenitiesArray.push(amenityObj);
             }
           });
-
           preparedFormData.amenities = amenitiesArray;
-          console.log(
-            "Formatted amenities as array of objects:",
-            preparedFormData.amenities
-          );
         } else {
           preparedFormData.amenities = [];
-          console.log("No amenities found, using empty array");
         }
       } else if (formData.purpose === "Sell" || formData.purpose === "Buy") {
-        // Convert price values to numbers
         preparedFormData.totalPrice = Number(formData.totalPrice) || 0;
         preparedFormData.downPayment = Number(formData.downPayment) || 0;
       }
 
-      // Call the onSubmit function with the prepared data
       await onSubmit(preparedFormData);
-
-      // Refresh the page
       window.location.reload();
     } catch (error) {
       console.error("Error updating unit:", error);
     }
 
-    return false; // Extra measure to prevent form submission
+    return false;
   };
 
   const handleAddPaymentPlan = (plan) => {
@@ -295,7 +251,6 @@ const UpdateUnitForm = ({
       ? formData.paymentPlans.split(", ")
       : [];
 
-    // Check if plan already exists
     if (!currentPlans.includes(plan)) {
       const updatedPlans = [...currentPlans, plan].join(", ");
       setFormData((prev) => ({
@@ -318,27 +273,25 @@ const UpdateUnitForm = ({
       paymentPlans: updatedPlans,
     }));
   };
-
+  
   const handleCompoundSave = (compoundData) => {
-    // Set the newly created compound name to the unit's compound field
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      compound: compoundData.name || compoundData.compoundName,
+      compound: compoundData.name || compoundData.compoundName
     }));
     setIsAddCompoundModalOpen(false);
   };
-
+  
   const handleDeveloperSave = (developerData) => {
-    // Set the newly created developer name to the unit's developer field
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      developer: developerData.name,
+      developer: developerData.name
     }));
     setIsAddDeveloperModalOpen(false);
   };
 
   return (
-    <>
+    <div>
       <form onSubmit={handleSubmit} className="mt-4">
         {/* Basic Information Section */}
         <div className="mb-8">
@@ -404,7 +357,7 @@ const UpdateUnitForm = ({
               </select>
             </div>
 
-            {/* Compound Field - Fixed Layout */}
+            {/* Compound Field */}
             <div className="relative">
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-sm font-medium text-gray-700">
@@ -419,18 +372,14 @@ const UpdateUnitForm = ({
                 </button>
               </div>
 
-              {/* Main dropdown button */}
               <div
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
-                onClick={() =>
-                  setIsCompoundDropdownOpen(!isCompoundDropdownOpen)
-                }
+                onClick={() => setIsCompoundDropdownOpen(!isCompoundDropdownOpen)}
               >
                 <span>{formData.compound || "Select Compound"}</span>
                 <span>{isCompoundDropdownOpen ? "▲" : "▼"}</span>
               </div>
 
-              {/* Dropdown menu */}
               {isCompoundDropdownOpen && (
                 <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {comboundata &&
@@ -453,7 +402,7 @@ const UpdateUnitForm = ({
               )}
             </div>
 
-            {/* Developer Field - Fixed Layout */}
+            {/* Developer Field */}
             <div className="relative">
               <div className="flex items-center justify-between mb-1">
                 <label className="block text-sm font-medium text-gray-700">
@@ -468,7 +417,6 @@ const UpdateUnitForm = ({
                 </button>
               </div>
 
-              {/* Main dropdown button */}
               <div
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
                 onClick={() => setIsDevDropdownOpen(!isDevDropdownOpen)}
@@ -477,7 +425,6 @@ const UpdateUnitForm = ({
                 <span>{isDevDropdownOpen ? "▲" : "▼"}</span>
               </div>
 
-              {/* Dropdown menu */}
               {isDevDropdownOpen && (
                 <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                   {developers &&
@@ -556,7 +503,7 @@ const UpdateUnitForm = ({
           </div>
         </div>
 
-        {/* Pricing Section - Only show if purpose is "Sell" or "Buy" */}
+        {/* Pricing Section */}
         {(isSellProperty || formData.purpose === "Buy") && (
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -728,22 +675,9 @@ const UpdateUnitForm = ({
               />
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Delivery Date
-            </label>
-            <input
-              type="date"
-              name="deliveryDate"
-              value={formData.deliveryDate}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
         </div>
 
-        {/* Rental Details Section - Only show if purpose is "Rent" */}
+        {/* Rental Details Section */}
         {isRentalProperty && (
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -829,7 +763,7 @@ const UpdateUnitForm = ({
                 Amenities
               </h4>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {/* Replace the propertyEnums.EnumAmenities with AMENITIES_LIST */}
+                {/* Replace propertyEnums.EnumAmenities with AMENITIES_LIST */}
                 {AMENITIES_LIST.map((amenity) => (
                   <div key={amenity.id} className="flex items-center">
                     <input
@@ -921,18 +855,84 @@ const UpdateUnitForm = ({
           </div>
 
           {/* Selected files preview */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Developer
-            </label>
-            <input
-              type="text"
-              name="developer"
-              value={formData.developer}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
+          {selectedFiles.length > 0 && (
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  Selected Images ({selectedFiles.length}):
+                </h4>
+                <button
+                  type="button"
+                  onClick={handleImageUpload}
+                  disabled={uploadingImages}
+                  className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
+                >
+                  {uploadingImages ? (
+                    "Uploading..."
+                  ) : (
+                    <>
+                      <Upload className="w-3 h-3 mr-1" /> Upload All
+                    </>
+                  )}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {selectedFiles.map((file, index) => (
+                  <div key={index} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Selected ${index + 1}`}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => removeSelectedFile(index)}
+                        className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
+                      {file.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Uploaded images */}
+          {formData.images && formData.images.length > 0 && (
+            <div>
+              <h4 className="text-md font-medium text-gray-700 mb-2">
+                Uploaded Images ({formData.images.length})
+              </h4>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {formData.images.map((image, index) => (
+                  <div
+                    key={index}
+                    className="relative group border rounded-lg overflow-hidden"
+                  >
+                    <img
+                      src={image.url}
+                      alt={`Property ${index + 1}`}
+                      className="w-full h-32 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                      <button
+                        type="button"
+                        onClick={() => removeUploadedImage(index, image._id)}
+                        className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Hidden fields */}
           <input
@@ -940,149 +940,33 @@ const UpdateUnitForm = ({
             name="dataSource"
             value={formData.dataSource || "website"}
           />
-          <input type="hidden" name="clientId" value={formData.clientId} />
-          <input type="hidden" name="clientName" value={formData.clientName} />
+          <input
+            type="hidden"
+            name="clientId"
+            value={formData.clientId}
+          />
+          <input
+            type="hidden"
+            name="clientName"
+            value={formData.clientName}
+          />
         </div>
 
-        {/* Image Upload Section */}
-        <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-700 mb-4">
-            Property Images
-          </h3>
-          <div
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4 mt-8">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
           >
-            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-500 mb-2">
-              Drag and drop images here, or click to select files
-            </p>
-            <p className="text-xs text-gray-400">
-              Supported formats: JPG, PNG, WEBP (Max 5MB each)
-            </p>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              id="image-upload"
-              ref={fileInputRef}
-              onChange={(e) => {
-                if (e.target.files && e.target.files.length > 0) {
-                  handleFileSelection(e.target.files);
-                }
-              }}
-              onClick={(e) => {
-                e.target.value = "";
-              }}
-            />
-            <label
-              htmlFor="image-upload"
-              className="mt-4 inline-block px-4 py-2 bg-primary cursor-pointer hover:bg-primary/90 text-white rounded-lg transition-colors mr-2"
-            >
-              {selectedFiles.length > 0 ? "Change Image" : "Select Image"}
-            </label>
-
-            {selectedFiles.length > 0 && (
-              <div className="mb-4">
-                <div className="flex justify-between items-center mb-2">
-                  <h4 className="text-md font-medium text-gray-700">
-                    Selected Images ({selectedFiles.length})
-                  </h4>
-                  <button
-                    type="button"
-                    onClick={handleImageUpload}
-                    disabled={uploadingImages}
-                    className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
-                  >
-                    {uploadingImages ? (
-                      "Uploading..."
-                    ) : (
-                      <>
-                        <Upload className="w-3 h-3 mr-1" /> Upload All
-                      </>
-                    )}
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {selectedFiles.map((file, index) => (
-                    <div
-                      key={index}
-                      className="relative group border rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={URL.createObjectURL(file)}
-                        alt={`Selected ${index + 1}`}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                        <button
-                          type="button"
-                          onClick={() => removeSelectedFile(index)}
-                          className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
-                        {file.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Uploaded images */}
-            {formData.images && formData.images.length > 0 && (
-              <div>
-                <h4 className="text-md font-medium text-gray-700 mb-2">
-                  Uploaded Images ({formData.images.length})
-                </h4>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                  {formData.images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="relative group border rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={image.url}
-                        alt={`Property ${index + 1}`}
-                        className="w-full h-32 object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                        <button
-                          type="button"
-                          onClick={() => removeUploadedImage(index, image._id)}
-                          className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex justify-end gap-4 mt-8">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-            >
-              Update Unit
-            </button>
-          </div>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+          >
+            Update Unit
+          </button>
         </div>
       </form>
 
@@ -1107,7 +991,7 @@ const UpdateUnitForm = ({
           onSave={handleDeveloperSave}
         />
       )}
-    </>
+    </div>
   );
 };
 
