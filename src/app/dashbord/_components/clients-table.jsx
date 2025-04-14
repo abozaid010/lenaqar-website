@@ -294,148 +294,148 @@ export default function ClientsTable({ users, currentPage, disableNext }) {
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden border border-gray-200 sm:rounded-lg">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
-                <th className="px-2 sm:px-4 py-2 sm:py-3">Name</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
-                  User Number
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3">Date</th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
-                  Requirements
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                  <MessageSquare size={16} />
-                </th>
-                <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {users.map((user, x) => {
-                const lastActivity = new Date(
-                  user.lastActivity
-                ).toLocaleDateString();
-                const requirements =
-                  user.requirements?.userBuildingType?.[0] || "Not specified";
-                const messageCount = user.conversation?.length || 0;
+        <div>
+          <div className="overflow-hidden border border-gray-200 sm:rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-100">
+                <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
+                  <th className="px-2 sm:px-4 py-2 sm:py-3">Name</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
+                    User Number
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3">Date</th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
+                    Requirements
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                    <MessageSquare size={16} />
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {users.map((user, x) => {
+                  const lastActivity = new Date(user.date).toLocaleDateString();
+                  const requirements =
+                    user.requirements?.userBuildingType?.[0] || "Not specified";
+                  const messageCount = user.conversation?.length || 0;
 
-                const status = user.actions?.action || "No Action";
+                  const status = user.actions?.action || "No Action";
 
-                return (
-                  <tr
-                    onClick={() =>
-                      router.push(`/dashbord/chat/${user.phoneNumber}`)
-                    }
-                    onKeyDown={(e) =>
-                      e.key === "Enter" &&
-                      router.push(`/dashbord/chat/${user.phoneNumber}`)
-                    }
-                    role="button"
-                    tabIndex={0}
-                    key={user.phoneNumber}
-                    className="hover:bg-gray-50 transition-colors text-xs sm:text-sm"
-                  >
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 font-medium text-gray-900">
-                      <div className="flex flex-col sm:hidden">
-                        <span className="text-xs text-gray-500">
+                  return (
+                    <tr
+                      onClick={() =>
+                        router.push(`/dashbord/chat/${user.phoneNumber}`)
+                      }
+                      onKeyDown={(e) =>
+                        e.key === "Enter" &&
+                        router.push(`/dashbord/chat/${user.phoneNumber}`)
+                      }
+                      role="button"
+                      tabIndex={0}
+                      key={user.phoneNumber}
+                      className="hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                    >
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 font-medium text-gray-900">
+                        <div className="flex flex-col sm:hidden">
+                          <span className="text-xs text-gray-500">
+                            {user.phoneNumber}
+                          </span>
+                          <span
+                            className="text-xs text-blue-600 cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openPropertyDetails(requirements);
+                            }}
+                          >
+                            {requirements}
+                          </span>
+                        </div>
+                        <span className="hidden sm:inline">
                           {user.phoneNumber}
                         </span>
+                      </td>
+
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600 hidden sm:table-cell">
+                        {user.phoneNumber}
+                      </td>
+
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600">
+                        {lastActivity}
+                      </td>
+
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
                         <span
-                          className="text-xs text-blue-600 cursor-pointer hover:underline"
+                          className="text-blue-600 cursor-pointer hover:underline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openPropertyDetails(requirements);
+                            openPropertyDetails(requirements, 50);
                           }}
                         >
                           {requirements}
                         </span>
-                      </div>
-                      <span className="hidden sm:inline">
-                        {user.phoneNumber}
-                      </span>
-                    </td>
+                      </td>
 
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600 hidden sm:table-cell">
-                      {user.phoneNumber}
-                    </td>
+                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center font-medium">
+                        {messageCount}
+                      </td>
 
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600">
-                      {lastActivity}
-                    </td>
-
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
-                      <span
-                        className="text-blue-600 cursor-pointer hover:underline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openPropertyDetails(requirements, 50);
-                        }}
-                      >
-                        {requirements}
-                      </span>
-                    </td>
-
-                    <td className="px-2 sm:px-4 py-2 sm:py-3 text-center font-medium">
-                      {messageCount}
-                    </td>
-
-                    <td className="px-2 sm:px-4 py-2 sm:py-3">
-                      <div className="flex justify-center">
-                        <span
-                          className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
-                            status === "Hot"
-                              ? "bg-green-100 text-green-700"
-                              : status === "Warm"
-                                ? "bg-yellow-100 text-yellow-700"
-                                : " text-gray-700"
-                          }`}
-                        >
-                          {user?.actions &&
-                          Object.keys(user.actions).length > 0 ? (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsOpenmodle(true);
-                                setSelectedId({
-                                  phoneNumber: user?.phoneNumber,
-                                  client_id: user?.client_id,
-                                  user: user,
-                                });
-                              }}
-                              className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                            >
-                              Action
-                            </button>
-                          ) : (
-                            <button
-                              className="btn text-white bg-[gray] hover:bg-gray-600 focus:ring-4 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-900 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setIsOpenn(true);
-                                setSelectedAction({
-                                  user: user,
-                                });
-                              }}
-                              aria-haspopup="dialog"
-                              aria-expanded={isOpen}
-                              aria-controls="hs-basic-modal"
-                            >
-                              Create Action
-                            </button>
-                          )}
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      <td className="px-2 sm:px-4 py-2 sm:py-3">
+                        <div className="flex justify-center">
+                          <span
+                            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
+                              status === "Hot"
+                                ? "bg-green-100 text-green-700"
+                                : status === "Warm"
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : " text-gray-700"
+                            }`}
+                          >
+                            {user?.actions &&
+                            Object.keys(user.actions).length > 0 ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsOpenmodle(true);
+                                  setSelectedId({
+                                    phoneNumber: user?.phoneNumber,
+                                    client_id: user?.client_id,
+                                    user: user,
+                                  });
+                                }}
+                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                              >
+                                Action
+                              </button>
+                            ) : (
+                              <button
+                                className="btn text-white bg-[gray] hover:bg-gray-600 focus:ring-4 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-900 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsOpenn(true);
+                                  setSelectedAction({
+                                    user: user,
+                                  });
+                                }}
+                                aria-haspopup="dialog"
+                                aria-expanded={isOpen}
+                                aria-controls="hs-basic-modal"
+                              >
+                                Create Action
+                              </button>
+                            )}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
           <ClientsTablePagination
             currentPage={currentPage}

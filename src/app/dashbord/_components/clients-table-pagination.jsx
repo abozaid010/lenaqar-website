@@ -18,14 +18,14 @@ export default function ClientsTablePagination({ disableNext, currentPage }) {
         <button
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage <= 1}
-          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="px-4 py-2 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           Previous
         </button>
         <button
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={disableNext}
-          className="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-md text-sm  font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="px-4 py-2 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm  font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           Next
         </button>
