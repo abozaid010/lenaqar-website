@@ -25,7 +25,6 @@ const AMENITIES_LIST = [
   { id: "cleaning", label: "Cleaning Service" },
 ];
 
-
 const UpdateUnitForm = ({
   unit,
   onSubmit,
@@ -33,11 +32,6 @@ const UpdateUnitForm = ({
   comboundata,
   developers,
 }) => {
-  // Form state
-
-
-const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
-
   const [formData, setFormData] = useState({
     unitTitle: "",
     unitId: "",
@@ -84,7 +78,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
   const [isRentalProperty, setIsRentalProperty] = useState(false);
   const [isSellProperty, setIsSellProperty] = useState(false);
   const router = useRouter();
-
 
   useEffect(() => {
     if (unit) {
@@ -164,7 +157,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
       // We'll use setTimeout to ensure state is updated before upload
       setTimeout(() => handleImageUpload(), 100);
     }
-
   };
 
   const handleImageUpload = async () => {
@@ -173,7 +165,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
     setUploadingImages(true);
 
     try {
-
       // Create an array to store all uploaded image data
       const uploadedImagesData = [];
 
@@ -197,7 +188,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
       setFormData((prev) => ({
         ...prev,
         images: [...prev.images, ...uploadedImagesData],
-
       }));
 
       setSelectedFiles([]);
@@ -243,7 +233,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // This prevents the page from reloading
     console.log("formData", formData);
-
 
     try {
       // Create a copy of the form data to modify before submission
@@ -301,7 +290,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
     return false; // Extra measure to prevent form submission
   };
 
-
   const handleAddPaymentPlan = (plan) => {
     const currentPlans = formData.paymentPlans
       ? formData.paymentPlans.split(", ")
@@ -331,7 +319,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
     }));
   };
 
-
   const handleCompoundSave = (compoundData) => {
     // Set the newly created compound name to the unit's compound field
     setFormData((prev) => ({
@@ -349,7 +336,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
     }));
     setIsAddDeveloperModalOpen(false);
   };
-
 
   return (
     <>
@@ -373,7 +359,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
                 required
               />
             </div>
-
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -568,7 +553,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
                 ))}
               </select>
             </div>
-
           </div>
         </div>
 
@@ -617,7 +601,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
               </div>
-
 
               <div className="md:col-span-3">
                 <div className="flex justify-between items-center mb-2">
@@ -670,7 +653,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Rooms Count
-
               </label>
               <input
                 type="number"
@@ -842,8 +824,7 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
             </div>
 
             {/* Amenities Section */}
-                        {/* Amenities Section */}
-                        <div className="mt-6">
+            <div className="mt-6">
               <h4 className="text-lg font-medium text-gray-700 mb-3">
                 Amenities
               </h4>
@@ -939,9 +920,7 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
             </p>
           </div>
 
-
           {/* Selected files preview */}
-
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Developer
@@ -961,161 +940,149 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
             name="dataSource"
             value={formData.dataSource || "website"}
           />
-          <input
-            type="hidden"
-            name="clientId"
-            value={formData.clientId}
-          />
-          <input
-            type="hidden"
-            name="clientName"
-            value={formData.clientName}
-          />
+          <input type="hidden" name="clientId" value={formData.clientId} />
+          <input type="hidden" name="clientName" value={formData.clientName} />
         </div>
-      </div>
 
-      {/* Image Upload Section */}
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold text-gray-700 mb-4">
-          Property Images
-        </h3>
-        <div
-          className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-          <p className="text-gray-500 mb-2">
-            Drag and drop images here, or click to select files
-          </p>
-          <p className="text-xs text-gray-400">
-            Supported formats: JPG, PNG, WEBP (Max 5MB each)
-          </p>
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            id="image-upload"
-            ref={fileInputRef}
-            onChange={(e) => {
-              if (e.target.files && e.target.files.length > 0) {
-                handleFileSelection(e.target.files);
-              }
-            }}
-            onClick={(e) => {
-              e.target.value = "";
-            }}
-          />
-          <label
-            htmlFor="image-upload"
-            className="mt-4 inline-block px-4 py-2 bg-primary cursor-pointer hover:bg-primary/90 text-white rounded-lg transition-colors mr-2"
+        {/* Image Upload Section */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-700 mb-4">
+            Property Images
+          </h3>
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
           >
-            {selectedFiles.length > 0 ? "Change Image" : "Select Image"}
-          </label>
-          
+            <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 mb-2">
+              Drag and drop images here, or click to select files
+            </p>
+            <p className="text-xs text-gray-400">
+              Supported formats: JPG, PNG, WEBP (Max 5MB each)
+            </p>
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="image-upload"
+              ref={fileInputRef}
+              onChange={(e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                  handleFileSelection(e.target.files);
+                }
+              }}
+              onClick={(e) => {
+                e.target.value = "";
+              }}
+            />
+            <label
+              htmlFor="image-upload"
+              className="mt-4 inline-block px-4 py-2 bg-primary cursor-pointer hover:bg-primary/90 text-white rounded-lg transition-colors mr-2"
+            >
+              {selectedFiles.length > 0 ? "Change Image" : "Select Image"}
+            </label>
 
-          {selectedFiles.length > 0 && (
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="text-md font-medium text-gray-700">
-                  Selected Images ({selectedFiles.length})
+            {selectedFiles.length > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h4 className="text-md font-medium text-gray-700">
+                    Selected Images ({selectedFiles.length})
+                  </h4>
+                  <button
+                    type="button"
+                    onClick={handleImageUpload}
+                    disabled={uploadingImages}
+                    className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
+                  >
+                    {uploadingImages ? (
+                      "Uploading..."
+                    ) : (
+                      <>
+                        <Upload className="w-3 h-3 mr-1" /> Upload All
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {selectedFiles.map((file, index) => (
+                    <div
+                      key={index}
+                      className="relative group border rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Selected ${index + 1}`}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => removeSelectedFile(index)}
+                          className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
+                        {file.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Uploaded images */}
+            {formData.images && formData.images.length > 0 && (
+              <div>
+                <h4 className="text-md font-medium text-gray-700 mb-2">
+                  Uploaded Images ({formData.images.length})
                 </h4>
-                <button
-                  type="button"
-                  onClick={handleImageUpload}
-                  disabled={uploadingImages}
-                  className="px-3 py-1 bg-primary text-white rounded-md text-sm hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center"
-                >
-                  {uploadingImages ? (
-                    "Uploading..."
-                  ) : (
-                    <>
-                      <Upload className="w-3 h-3 mr-1" /> Upload All
-                    </>
-                  )}
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="relative group border rounded-lg overflow-hidden"
-
-  
-                  >
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Selected ${index + 1}`}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={() => removeSelectedFile(index)}
-                        className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {formData.images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="relative group border rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={image.url}
+                        alt={`Property ${index + 1}`}
+                        className="w-full h-32 object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
+                        <button
+                          type="button"
+                          onClick={() => removeUploadedImage(index, image._id)}
+                          className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white text-xs p-1 truncate">
-                      {file.name}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Uploaded images */}
-          {formData.images && formData.images.length > 0 && (
-            <div>
-              <h4 className="text-md font-medium text-gray-700 mb-2">
-                Uploaded Images ({formData.images.length})
-              </h4>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {formData.images.map((image, index) => (
-                  <div
-                    key={index}
-                    className="relative group border rounded-lg overflow-hidden"
-                  >
-                    <img
-                      src={image.url}
-                      alt={`Property ${index + 1}`}
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all flex items-center justify-center">
-                      <button
-                        type="button"
-                        onClick={() => removeUploadedImage(index, image._id)}
-                        className="p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-          )}
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex justify-end gap-4 mt-8">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-          >
-            Update Unit
-          </button>
+          {/* Form Actions */}
+          <div className="flex justify-end gap-4 mt-8">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            >
+              Update Unit
+            </button>
+          </div>
         </div>
       </form>
 
@@ -1140,7 +1107,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
           onSave={handleDeveloperSave}
         />
       )}
-
     </>
   );
 };

@@ -83,18 +83,18 @@ export async function deleteUnit(id) {
   }
 }
 
-export async function fetchUsersData(searchParams, cursor) {
+export async function fetchUsersData(searchParams) {
   const clientId = await getClientid();
+
   try {
     const params = {
-      ...searchParams,
+      ...JSON.parse(searchParams),
       limit: 5,
-
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, { params });
-
     return response.data;
+
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
     return { error: error.message };

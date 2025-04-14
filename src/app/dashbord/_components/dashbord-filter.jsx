@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Filter, MessageSquare, ChevronDown } from "lucide-react";
 
 const ACTIONS = [
+  { label: "All actions", value: "" },
   { label: "Make a call", value: "Make a call" },
   { label: "Office visit", value: "Office visit" },
   { label: "Property view", value: "Property view" },
@@ -95,8 +96,6 @@ export default function DashbordFilter({ appliedFilters }) {
             value={filters.actions || "all"}
             className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-56 text-gray-700 hover:bg-gray-100 text-sm"
           >
-            {/* Default option */}
-            <option value="">{`Select an action`}</option>
             {ACTIONS.map((action) => (
               <option key={action.value} value={action.value}>
                 {action.label}
