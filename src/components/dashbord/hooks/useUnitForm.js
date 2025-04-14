@@ -33,26 +33,13 @@ export const useUnitForm = (onClose, onSave) => {
     city: Yup.string().required("City is required"),
     district: Yup.string(),
     view: Yup.string().required("View is required"),
-    // Make totalPrice and downPayment conditional based on purpose
-    totalPrice: Yup.number().when("purpose", {
-      is: "Sell",
-      then: () => Yup.number()
-        .positive("Price must be greater than zero")
-        .required("Total price is required"),
-      otherwise: () => Yup.number().nullable()
-    }),
-    downPayment: Yup.number().when("purpose", {
-      is: "Sell",
-      then: () => Yup.number()
-        .positive("Down payment must be greater than zero")
-        .required("Down payment is required"),
-      otherwise: () => Yup.number().nullable()
-    }),
-    deliveryDate: Yup.string().when("purpose", {
-      is: "Sell",
-      then: () => Yup.string().required("Delivery date is required"),
-      otherwise: () => Yup.string().nullable()
-    }),
+    totalPrice: Yup.number()
+      .positive("Price must be greater than zero")
+      .required("Total price is required"),
+    downPayment: Yup.number()
+      .positive("Down payment must be greater than zero")
+      .required("Down payment is required"),
+    deliveryDate: Yup.string().required("Delivery date is required"),
     roomsCount: Yup.number()
       .positive("Rooms count must be greater than zero")
       .required("Rooms count is required"),
@@ -69,34 +56,6 @@ export const useUnitForm = (onClose, onSave) => {
     developer: Yup.string().required("Developer is required"),
     dataSource: Yup.string().required("Data source is required"),
     paymentPlans: Yup.string(),
-    // Add validation for rental properties
-    availability: Yup.boolean().when("purpose", {
-      is: "Rent",
-      then: () => Yup.boolean().required("Availability is required"),
-      otherwise: () => Yup.boolean().nullable()
-    }),
-    startingDate: Yup.string().when("purpose", {
-      is: "Rent",
-      then: () => Yup.string().required("Starting date is required"),
-      otherwise: () => Yup.string().nullable()
-    }),
-    // At least one rent type is required for rental properties
-    monthlyRent: Yup.number().when(["purpose", "weeklyRent", "dailyRent"], {
-      is: (purpose, weeklyRent, dailyRent) => 
-        purpose === "Rent" && !weeklyRent && !dailyRent,
-      then: () => Yup.number().positive("Must be a positive number").required("At least one rent type is required"),
-      otherwise: () => Yup.number().nullable().min(0, "Must be a positive number")
-    }),
-    weeklyRent: Yup.number().when("purpose", {
-      is: "Rent",
-      then: () => Yup.number().nullable().min(0, "Must be a positive number"),
-      otherwise: () => Yup.number().nullable()
-    }),
-    dailyRent: Yup.number().when("purpose", {
-      is: "Rent",
-      then: () => Yup.number().nullable().min(0, "Must be a positive number"),
-      otherwise: () => Yup.number().nullable()
-    }),
   });
 
   const [isAddCompoundModalOpen, setIsAddCompoundModalOpen] = useState(false);
@@ -139,98 +98,37 @@ export const useUnitForm = (onClose, onSave) => {
       paymentPlans: "",
       garageArea: "",
       images: [],
-      // Add default amenities object
-      amenities: {},
-      // Add default rental fields
-      availability: false,
-      startingDate: "",
-      monthlyRent: "",
-      weeklyRent: "",
-      dailyRent: "",
     },
-    validationSchema, // Uncomment this line to enable validation
+    validationSchema,
     onSubmit: async (values) => {
-      console.log("test",values)
+      // التحقق من وجود صور قبل إرسال البيانات
+      if (values.images.length === 0) {
+        toast.error("يجب عليك رفع الصور على السيرفر أولاً");
+        return;
+      }
+
+      // Convert numeric fields to numbers
+      const preparedFormData = {
+        ...values,
+        updatedAt: new Date().toISOString(), // Add current timestamp
+        bathroomCount: values.bathroomCount ? Number(values.bathroomCount) : 0,
+        floor: values.floor ? Number(values.floor) : 0,
+        roomsCount: values.roomsCount ? Number(values.roomsCount) : 0,
+        landArea: values.landArea ? Number(values.landArea) : 0,
+        gardenSize: values.gardenSize ? Number(values.gardenSize) : 0,
+        downPayment: values.downPayment ? Number(values.downPayment) : 0,
+        totalPrice: values.totalPrice ? Number(values.totalPrice) : 0,
+        garageArea: values.garageArea ? Number(values.garageArea) : 0,
+      };
+
       try {
-        console.log("Form submission started with values:", values);
-        console.log("Purpose:", values.purpose);
-        
-        // Check if images are uploaded
-        if (values.images.length === 0) {
-          toast.error("Please upload images before saving the unit");
-          return;
-        }
-       
-        // Convert numeric fields to numbers
-        const preparedFormData = {
-          ...values,
-          updatedAt: new Date().toISOString(), // Add current timestamp
-          bathroomCount: values.bathroomCount ? Number(values.bathroomCount) : 0,
-          floor: values.floor ? Number(values.floor) : 0,
-          roomsCount: values.roomsCount ? Number(values.roomsCount) : 0,
-          landArea: values.landArea ? Number(values.landArea) : 0,
-          gardenSize: values.gardenSize ? Number(values.gardenSize) : 0,
-          garageArea: values.garageArea ? Number(values.garageArea) : 0,
-        };
-       console.log(values.purpose)
-        // Handle purpose-specific fields
-        if (values.purpose === "Sell") {
-          console.log(values.purpose)
-          preparedFormData.downPayment = values.downPayment ? Number(values.downPayment) : 0;
-          preparedFormData.totalPrice = values.totalPrice ? Number(values.totalPrice) : 0;
-        } 
-       
-        
-        else if (values.purpose === "Rent") {
-          console.log("Processing rental property");
-          
-          // Convert rent values to numbers
-          preparedFormData.monthlyRent = values.monthlyRent ? Number(values.monthlyRent) : 0;
-          preparedFormData.weeklyRent = values.weeklyRent ? Number(values.weeklyRent) : 0;
-          preparedFormData.dailyRent = values.dailyRent ? Number(values.dailyRent) : 0;
-          
-          console.log("Amenities before processing:", values.amenities);
-          
-          // Format amenities as an array of objects
-          if (values.amenities && typeof values.amenities === 'object') {
-            const amenitiesArray = [];
-            
-            // Convert the amenities object to array of objects format
-            Object.entries(values.amenities).forEach(([key, value]) => {
-              // Only include amenities that are available (true)
-              if (value) {
-                const amenityObj = {};
-                amenityObj[key] = value;
-                amenitiesArray.push(amenityObj);
-              }
-            });
-            
-            preparedFormData.amenities = amenitiesArray;
-            console.log("Formatted amenities as array of objects:", preparedFormData.amenities);
-          } else {
-            preparedFormData.amenities = [];
-            console.log("No amenities found, using empty array");
-          }
-          
-          // Remove any _amenitiesArray property
-          delete preparedFormData._amenitiesArray;
-        }
-        
-        console.log("Final data to submit:", preparedFormData);
-        
-        // Call the API to add the unit
+        // استخدام وظيفة addUnit من serviceFetching
         const response = await addUnit(preparedFormData);
-        console.log("API response:", response);
-    
-        toast.success("Unit added successfully");
-        
-        // Call onSave callback with the prepared data
-        if (typeof onSave === 'function') {
-          onSave(preparedFormData);
-        }
-        
+
+        toast.success("unit added successfuly");
+        onSave(preparedFormData);
         router.refresh(); // Refresh the data without page reload
-    
+
         // Reset form to initial values with a new UUID
         formik.resetForm();
         formik.setFieldValue("unitId", uuidv4());
@@ -239,18 +137,13 @@ export const useUnitForm = (onClose, onSave) => {
         formik.setFieldValue("view", defaultView.charAt(0).toUpperCase() + defaultView.slice(1));
         formik.setFieldValue("country", "Egypt");
         formik.setFieldValue("district", "");
-        formik.setFieldValue("clientId", clientId);
+        formik.setFieldValue("clientId", "DREAM_HOMES");
         formik.setFieldValue("images", []);
-        formik.setFieldValue("amenities", {}); // Reset to empty object, not array
-    
-        // Close the modal
-        if (typeof onClose === 'function') {
-          onClose();
-        }
+
+        onClose();
       } catch (error) {
         console.error("Error adding unit:", error);
-        console.error("Error details:", error.response?.data || error.message);
-        toast.error(error.response?.data?.message || error.message || "Failed to add unit");
+        toast.error(error.message || "فشل في إضافة الوحدة");
       }
     },
   });
@@ -270,26 +163,11 @@ export const useUnitForm = (onClose, onSave) => {
   const handleFileSelection = (files, replace = false) => {
     if (!files || files.length === 0) return;
 
-    // Convert FileList to Array
-    const newFiles = Array.from(files);
-    
-    // Validate each file (size and type)
-    const validFiles = newFiles.filter(file => {
-      const isValidType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type);
-      const isValidSize = file.size <= 5 * 1024 * 1024; // 5MB limit
-      
-      if (!isValidType) {
-        toast.error(`${file.name} is not a supported image format`);
-      }
-      if (!isValidSize) {
-        toast.error(`${file.name} exceeds the 5MB size limit`);
-      }
-      
-      return isValidType && isValidSize;
-    });
+    // Convert FileList to Array and take only the first file for single image upload
+    const newFile = Array.from(files).slice(0, 1);
 
-    // Store the selected files without uploading immediately
-    setSelectedFiles(prev => [...prev, ...validFiles]);
+    // Store the selected file without uploading immediately
+    setSelectedFiles(newFile);
   };
 
   const handleImageUpload = async () => {
@@ -298,35 +176,29 @@ export const useUnitForm = (onClose, onSave) => {
     setUploadingImages(true);
 
     try {
-      // Create an array to store all uploaded image data
-      const uploadedImagesData = [];
-      
-      // Upload each file one by one
-      for (const file of selectedFiles) {
-        const formDataToUpload = new FormData();
-        formDataToUpload.append("file", file);
-        
-        // Upload the current file
-        const uploadedImage = await uploadImages(formDataToUpload);
-        
-        // Add to our array of uploaded images
-        if (Array.isArray(uploadedImage)) {
-          uploadedImagesData.push(...uploadedImage);
-        } else {
-          uploadedImagesData.push(uploadedImage);
-        }
-      }
+      const formDataToUpload = new FormData();
 
-      // Update formik values with all new images
-      formik.setFieldValue("images", [...formik.values.images, ...uploadedImagesData]);
+      // Add the file with the key 'file'
+      formDataToUpload.append("file", selectedFiles[0]);
 
-      toast.success(`${uploadedImagesData.length} images uploaded successfully`);
+      // استخدام وظيفة uploadImages من serviceFetching
+      const uploadedImages = await uploadImages(formDataToUpload);
+
+      // التعامل مع الاستجابة
+      const imagesArray = Array.isArray(uploadedImages)
+        ? uploadedImages
+        : [uploadedImages];
+
+      // Update formik values
+      formik.setFieldValue("images", [...formik.values.images, ...imagesArray]);
+
+      toast.success(`Image uploaded successfully`);
       setSelectedFiles([]);
       resetFileInput();
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("Error uploading image:", error);
       toast.error(
-        `Failed to upload images: ${error.message || "Unknown error"}`
+        `Failed to upload image: ${error.message || "Unknown error"}`
       );
     } finally {
       setUploadingImages(false);
@@ -382,53 +254,6 @@ export const useUnitForm = (onClose, onSave) => {
     e.preventDefault();
   };
 
-  // Add this custom submit handler function
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    // Validate required fields based on purpose
-    const requiredFields = [
-      'unitTitle', 'compound', 'buildingType', 'purpose', 
-      'city', 'view', 'roomsCount', 'bathroomCount'
-    ];
-    
-    // Add purpose-specific required fields
-    if (formik.values.purpose === 'Sell') {
-      requiredFields.push('totalPrice', 'downPayment', 'deliveryDate');
-    } else if (formik.values.purpose === 'Rent') {
-      // For rental properties, check if at least one rent type is provided
-      if (!formik.values.monthlyRent && !formik.values.weeklyRent && !formik.values.dailyRent) {
-        formik.setFieldError('monthlyRent', 'At least one rent type is required');
-        toast.error('Please provide at least one rent type');
-        return;
-      }
-    }
-    
-    // Check for missing required fields
-    let hasErrors = false;
-    requiredFields.forEach(field => {
-      if (!formik.values[field]) {
-        formik.setFieldError(field, `${field} is required`);
-        formik.setFieldTouched(field, true);
-        hasErrors = true;
-      }
-    });
-    
-    if (hasErrors) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    
-    // Check if images are uploaded
-    if (formik.values.images.length === 0) {
-      toast.error("Please upload images before saving the unit");
-      return;
-    }
-    
-    // If validation passes, submit the form
-    formik.handleSubmit();
-  };
-
   const handleCompoundSave = (compoundData) => {
     // Set the newly created compound name to the unit's compound field
     formik.setFieldValue(
@@ -482,8 +307,6 @@ export const useUnitForm = (onClose, onSave) => {
     };
   
   // Make sure to include these in your return statement
-  // Update the return statement to include handleSubmit
-  // Fix the return statement by removing the extra closing brace
   return {
     formik,
     isAddCompoundModalOpen,
@@ -505,11 +328,5 @@ export const useUnitForm = (onClose, onSave) => {
     isAddDeveloperModalOpen,
     setIsAddDeveloperModalOpen,
     handleDeveloperSave,
-    handleSubmit,
-    // Add function to handle amenity checkbox changes
-    handleAmenityChange: (amenity, checked) => {
-      const updatedAmenities = { ...formik.values.amenities || {} };
-      updatedAmenities[amenity] = checked;
-      formik.setFieldValue("amenities", updatedAmenities);
-    }}
-  }; // This is the correct closing brace for the return statement
+  };
+};

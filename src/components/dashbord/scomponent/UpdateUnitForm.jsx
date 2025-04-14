@@ -1,16 +1,11 @@
 "use client";
 import { updateUnit, uploadImages, deleteImage } from "@/components/services/serviceFetching";
 import React, { useState, useEffect, useRef } from "react";
-import { Trash2, Upload, Plus, X, Router } from "lucide-react";
+import { Trash2, Upload, Plus, X } from "lucide-react";
 import propertyEnums from "../data/propertyEnums.json";
 import PaymentPlanPopup from "./PaymentPlanPopup";
-import AddCompoundModal from "./AddCompoundModal";
-import AddDeveloperModal from "./AddDeveloperModal";
-import { useRouter } from "next/navigation";
 
-
-const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) => {
-  // Form state
+const UpdateUnitForm = ({ unit, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState({
     unitTitle: "",
     unitId: "",
@@ -41,12 +36,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadingImages, setUploadingImages] = useState(false);
   const fileInputRef = useRef(null);
-  const [isPaymentPlanPopupOpen, setIsPaymentPlanPopupOpen] = useState(false);
-  const [isAddCompoundModalOpen, setIsAddCompoundModalOpen] = useState(false);
-  const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
-  const [isCompoundDropdownOpen, setIsCompoundDropdownOpen] = useState(false);
-  const [isDevDropdownOpen, setIsDevDropdownOpen] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     if (unit) {
@@ -98,17 +87,11 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
   const handleFileSelection = (files) => {
     if (!files || files.length === 0) return;
 
-    // Convert FileList to Array - now allowing multiple files
-    const newFiles = Array.from(files);
-    
-    // Store the selected files without uploading immediately
-    setSelectedFiles(prev => [...prev, ...newFiles]);
-    
-    // If more than one image is selected, trigger upload automatically
-    if (newFiles.length > 1) {
-      // We'll use setTimeout to ensure state is updated before upload
-      setTimeout(() => handleImageUpload(), 100);
-    }
+    // Convert FileList to Array and take only the first file for single image upload
+    const newFile = Array.from(files).slice(0, 1);
+
+    // Store the selected file without uploading immediately
+    setSelectedFiles(newFile);
   };
 
   const handleImageUpload = async () => {
@@ -117,35 +100,29 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
     setUploadingImages(true);
 
     try {
-      // Create an array to store all uploaded image data
-      const uploadedImagesData = [];
-      
-      // Upload each file one by one
-      for (const file of selectedFiles) {
-        const formDataToUpload = new FormData();
-        formDataToUpload.append("file", file);
-        
-        // Upload the current file
-        const uploadedImage = await uploadImages(formDataToUpload);
-        
-        // Add to our array of uploaded images
-        if (Array.isArray(uploadedImage)) {
-          uploadedImagesData.push(...uploadedImage);
-        } else {
-          uploadedImagesData.push(uploadedImage);
-        }
-      }
+      const formDataToUpload = new FormData();
 
-      // Update formData values with all new images
+      // Add the file with the key 'file'
+      formDataToUpload.append("file", selectedFiles[0]);
+
+      // استخدام وظيفة uploadImages من serviceFetching
+      const uploadedImages = await uploadImages(formDataToUpload);
+
+      // التعامل مع الاستجابة
+      const imagesArray = Array.isArray(uploadedImages)
+        ? uploadedImages
+        : [uploadedImages];
+
+      // Update formData values
       setFormData(prev => ({
         ...prev,
-        images: [...prev.images, ...uploadedImagesData]
+        images: [...prev.images, ...imagesArray]
       }));
 
       setSelectedFiles([]);
       resetFileInput();
     } catch (error) {
-      console.error("Error uploading images:", error);
+      console.error("Error uploading image:", error);
     } finally {
       setUploadingImages(false);
     }
@@ -185,28 +162,11 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
   const handleSubmit = async (e) => {
     e.preventDefault(); // This prevents the page from reloading
     console.log("formData", formData);
-    
-    try {
-      // Call the onSubmit function and wait for it to complete
-      await onSubmit(formData);
-      
-      // Instead of reloading the page, we can use router.push to navigate to the same page
-      // or use router.refresh() to refresh the data without a full page reload
-     window.location.reload()
-      
-      // Alternatively, you could show a success message
-      // toast.success("Unit updated successfully!");
-      
-      // Or close the form if it's in a modal
-      // onCancel();
-    } catch (error) {
-      console.error("Error updating unit:", error);
-      // يمكنك إضافة رسالة خطأ هنا إذا كنت تستخدم مكتبة للإشعارات
-      // toast.error("Failed to update unit");
-    }
-    
+    onSubmit(formData);
     return false; // Extra measure to prevent form submission
   };
+
+  const [isPaymentPlanPopupOpen, setIsPaymentPlanPopupOpen] = useState(false);
   
   const handleAddPaymentPlan = (plan) => {
     const currentPlans = formData.paymentPlans ? formData.paymentPlans.split(", ") : [];
@@ -231,24 +191,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
       ...prev,
       paymentPlans: updatedPlans
     }));
-  };
-  
-  const handleCompoundSave = (compoundData) => {
-    // Set the newly created compound name to the unit's compound field
-    setFormData(prev => ({
-      ...prev,
-      compound: compoundData.name || compoundData.compoundName
-    }));
-    setIsAddCompoundModalOpen(false);
-  };
-  
-  const handleDeveloperSave = (developerData) => {
-    // Set the newly created developer name to the unit's developer field
-    setFormData(prev => ({
-      ...prev,
-      developer: developerData.name
-    }));
-    setIsAddDeveloperModalOpen(false);
   };
 
   return (
@@ -312,96 +254,17 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
             </select>
           </div>
 
-          {/* Compound Field - Fixed Layout */}
-          <div className="relative">
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Compound
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsAddCompoundModalOpen(true)}
-                className="text-xs text-primary hover:text-primary/80"
-              >
-                + Add New
-              </button>
-            </div>
-            
-            {/* Main dropdown button */}
-            <div 
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
-              onClick={() => setIsCompoundDropdownOpen(!isCompoundDropdownOpen)}
-            >
-              <span>{formData.compound || "Select Compound"}</span>
-              <span>{isCompoundDropdownOpen ? "▲" : "▼"}</span>
-            </div>
-            
-            {/* Dropdown menu */}
-            {isCompoundDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {comboundata && comboundata.map((compound, index) => (
-                  <div 
-                    key={index} 
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        compound: compound.name
-                      }));
-                      setIsCompoundDropdownOpen(false);
-                    }}
-                  >
-                    {compound.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Developer Field - Fixed Layout */}
-          <div className="relative">
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">
-                Developer
-              </label>
-              <button
-                type="button"
-                onClick={() => setIsAddDeveloperModalOpen(true)}
-                className="text-xs text-primary hover:text-primary/80"
-              >
-                + Add New
-              </button>
-            </div>
-            
-            {/* Main dropdown button */}
-            <div 
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
-              onClick={() => setIsDevDropdownOpen(!isDevDropdownOpen)}
-            >
-              <span>{formData.developer || "Select Developer"}</span>
-              <span>{isDevDropdownOpen ? "▲" : "▼"}</span>
-            </div>
-            
-            {/* Dropdown menu */}
-            {isDevDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                {developers && developers.map((developer, index) => (
-                  <div 
-                    key={index} 
-                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    onClick={() => {
-                      setFormData(prev => ({
-                        ...prev,
-                        developer: developer.name
-                      }));
-                      setIsDevDropdownOpen(false);
-                    }}
-                  >
-                    {developer.name}
-                  </div>
-                ))}
-              </div>
-            )}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Compound
+            </label>
+            <input
+              type="text"
+              name="compound"
+              value={formData.compound}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
           </div>
         </div>
       </div>
@@ -491,19 +354,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Delivery Date
-            </label>
-            <input
-              type="date"
-              name="deliveryDate"
-              value={formData.deliveryDate}
-              onChange={handleChange}
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-            />
-          </div>
-
           <div className="md:col-span-3">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-medium text-gray-700">
@@ -543,6 +393,19 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
                   ))
               )}
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Delivery Date
+            </label>
+            <input
+              type="date"
+              name="deliveryDate"
+              value={formData.deliveryDate}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
           </div>
         </div>
       </div>
@@ -658,6 +521,19 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
             </select>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Developer
+            </label>
+            <input
+              type="text"
+              name="developer"
+              value={formData.developer}
+              onChange={handleChange}
+              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+            />
+          </div>
+
           {/* Hidden fields */}
           <input
             type="hidden"
@@ -697,7 +573,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
           <input
             type="file"
             accept="image/*"
-            multiple
             className="hidden"
             id="image-upload"
             ref={fileInputRef}
@@ -714,7 +589,7 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
             htmlFor="image-upload"
             className="mt-4 inline-block px-4 py-2 bg-primary cursor-pointer hover:bg-primary/90 text-white rounded-lg transition-colors mr-2"
           >
-            {selectedFiles.length > 0 ? "Add More Images" : "Select Images"}
+            {selectedFiles.length > 0 ? "Change Image" : "Select Image"}
           </label>
           
           {selectedFiles.length > 0 && (
@@ -734,7 +609,7 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
           <div className="mt-4">
             <div className="flex justify-between items-center mb-2">
               <h4 className="text-sm font-medium text-gray-700">
-                Selected Images ({selectedFiles.length}):
+                Selected Image:
               </h4>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
@@ -809,20 +684,6 @@ const UpdateUnitForm = ({ unit, onSubmit, onCancel, comboundata, developers }) =
       isOpen={isPaymentPlanPopupOpen}
       onClose={() => setIsPaymentPlanPopupOpen(false)}
       onAdd={handleAddPaymentPlan}
-    />
-    
-    {/* Add Compound Modal */}
-    <AddCompoundModal
-      isOpen={isAddCompoundModalOpen}
-      onClose={() => setIsAddCompoundModalOpen(false)}
-      onSave={handleCompoundSave}
-    />
-    
-    {/* Add Developer Modal */}
-    <AddDeveloperModal
-      isOpen={isAddDeveloperModalOpen}
-      onClose={() => setIsAddDeveloperModalOpen(false)}
-      onSave={handleDeveloperSave}
     />
     </>
   );

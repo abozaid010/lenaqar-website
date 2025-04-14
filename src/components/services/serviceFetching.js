@@ -83,23 +83,17 @@ export async function deleteUnit(id) {
   }
 }
 
-// You can add your other service fetching functions below
-
-export async function fetchUsersData(cursor) {
-
+export async function fetchUsersData(searchParams, cursor) {
   const clientId = await getClientid();
   try {
     const params = {
+      ...searchParams,
       limit: 5,
+
     };
 
-    if (cursor) {
-      params.cursor = cursor;
-    }
+    const response = await axiosInstance.get(`dashboard/${clientId}`, { params });
 
-    const response = await axiosInstance.get(`dashboard/${clientId}`, {
-      params: params,
-    });
     return response.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);

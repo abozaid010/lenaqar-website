@@ -1,5 +1,5 @@
 import UnitDetails from "@/components/dashbord/pages/UnitDetails";
-import { fetchcombounds, fetchDevelopers, fetchUnitById } from "@/components/services/serviceFetching";
+import { fetchUnitById } from "@/components/services/serviceFetching";
 import React from "react";
 
 export const generateMetadata = async ({ params }) => {
@@ -12,10 +12,8 @@ export const generateMetadata = async ({ params }) => {
 const Page = async ({ params }) => {
   const { id } = await params;
   const unit = await fetchUnitById(id);
-  const comboundata = await fetchcombounds();
-  const developers = await fetchDevelopers();
-  
-  return <UnitDetails unit={unit} comboundata={comboundata} developers={developers}  />;
+  console.log(unit);
+  return <UnitDetails unit={unit} />;
 };
 
 export default Page;

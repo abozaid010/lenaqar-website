@@ -1,16 +1,14 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import im from "../../../../public/images/building1.jpg";
 import { MapPin, Plus, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
 import AddUnitModal from "../scomponent/AddUnitModal";
 import Link from "next/link";
 import propertyEnums from "../data/propertyEnums.json";
 import toast from "react-hot-toast";
-import { useSearchParams } from "next/navigation";
 // Sample data - replace with your actual data
 
 const RealEstateListings = ({ initialData, comboundata, developersData }) => {
-  const searchParams = useSearchParams();
   const [selectedEstate, setSelectedEstate] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [developerFilter, setDeveloperFilter] = useState("all");
@@ -19,14 +17,6 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const itemsPerPage = 8;
-  
-  // Set current page from URL parameter when component mounts
-  useEffect(() => {
-    const page = searchParams.get('page');
-    if (page) {
-      setCurrentPage(parseInt(page));
-    }
-  }, [searchParams]);
   
   // Filter estates based on search, developer filter, compound filter, and purpose filter
   const filteredEstates = initialData
@@ -215,7 +205,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentItems.map((estate, idx) => (
               <Link
-                href={`/dashbord/units/${estate.unitId}?page=${currentPage}`}
+                href={`/dashbord/units/${estate.unitId}`}
                 key={idx}
                 className="flex flex-col"
               >

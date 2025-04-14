@@ -5,14 +5,13 @@ import { useRouter } from "next/navigation";
 import { Filter, MessageSquare, ChevronDown } from "lucide-react";
 
 const ACTIONS = [
-  { label: "All Actions", value: "all" },
-  { label: "Make a call", value: "make_call" },
-  { label: "Office visit", value: "office_visit" },
-  { label: "Property view", value: "property_view" },
-  { label: "Not interested", value: "not_interested" },
-  { label: "Not qualified", value: "not_qualified" },
-  { label: "Follow up later", value: "follow_up_later" },
-  { label: "Missing Requirement", value: "missing_requirement" },
+  { label: "Make a call", value: "Make a call" },
+  { label: "Office visit", value: "Office visit" },
+  { label: "Property view", value: "Property view" },
+  { label: "Not interested", value: "Not interested" },
+  { label: "Not qualified", value: "Qualified lead" },
+  { label: "Follow up later", value: "Follow up later" },
+  { label: "Missing Requirement", value: "Missing requirement" },
 ];
 
 export default function DashbordFilter({ appliedFilters }) {
@@ -39,6 +38,7 @@ export default function DashbordFilter({ appliedFilters }) {
    */
   const [filters, setFilters] = useState(() => {
     return {
+      cursor: appliedFilters.cursor || null,
       actions: appliedFilters.actions || "all",
       start_date:
         appliedFilters.start_date || sevenDaysAgo.toISOString().split("T")[0],
@@ -69,13 +69,16 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   const onFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      cursor: appliedFilters.cursor,
+    }));
 
     router.push(
       `${window.location.pathname}?${new URLSearchParams({
         ...filters,
         [key]: value,
-        page: "1",
       })}`
     );
   };
@@ -92,6 +95,8 @@ export default function DashbordFilter({ appliedFilters }) {
             value={filters.actions || "all"}
             className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-56 text-gray-700 hover:bg-gray-100 text-sm"
           >
+            {/* Default option */}
+            <option value="">{`Select an action`}</option>
             {ACTIONS.map((action) => (
               <option key={action.value} value={action.value}>
                 {action.label}

@@ -88,7 +88,7 @@ const propertyDetails = {
   },
 };
 
-export default function ClientsTable({ users, currentPage, disableNext }) {
+export default function ClientsTable({ users, nextCursor, disableNext }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -438,7 +438,7 @@ export default function ClientsTable({ users, currentPage, disableNext }) {
           </div>
 
           <ClientsTablePagination
-            currentPage={currentPage}
+            nextCursor={nextCursor}
             disableNext={disableNext}
           />
         </div>
