@@ -108,10 +108,12 @@ export default function UnitDetails({ unit }) {
         <div className="space-y-6">
           <div className="bg-gray-50 p-4 rounded-lg">
             <h2 className="text-2xl font-bold text-gray-800">
-              EGP {updatedUnit.totalPrice.toLocaleString()}
+
+              EGP {updatedUnit?.totalPrice ? updatedUnit?.totalPrice?.toLocaleString() : '0'}
             </h2>
             <p className="text-gray-600">
-              Down Payment: EGP {updatedUnit.downPayment.toLocaleString()}
+              Down Payment: EGP {updatedUnit?.downPayment ? updatedUnit?.downPayment?.toLocaleString() : '0'}
+
             </p>
             <p className="text-gray-600">
               Payment Plans: {updatedUnit.paymentPlans}
