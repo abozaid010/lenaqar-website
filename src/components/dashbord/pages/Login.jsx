@@ -11,6 +11,7 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Header */}
+          
           <div className="bg-primary p-6 text-center">
             <h1 className="text-3xl font-bold text-white">Lena Ai</h1>
             <p className="text-blue-100 mt-2">Sign in to your account</p>
