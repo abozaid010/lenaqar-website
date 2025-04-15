@@ -89,7 +89,7 @@ export async function fetchUsersData(searchParams) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      limit: 5,
+      limit: 20,
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, { params });
@@ -156,15 +156,23 @@ export async function loginUser(formData) {
   }
 }
 
-export async function fetchData() {
-  // Your fetching logic here
-}
-
 export async function getChatHistory(userId) {
   const cookieClientId = await getClientid();
 
   try {
     const response = await axiosInstance.get(`history/${cookieClientId}/${userId}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function getClientActions(phoneNumber) {
+  const cookieClientId = await getClientid();
+
+  try {
+    const response = await axiosInstance.get(`user-actions/${phoneNumber}/${cookieClientId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);

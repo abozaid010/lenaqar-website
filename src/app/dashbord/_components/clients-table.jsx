@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useEffect, useMemo, useState } from "react";
-import { MessageSquare } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
 import toast from "react-hot-toast";
@@ -9,6 +9,8 @@ import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
 import PropertyDetailsModal from "@/components/dashbord/scomponent/AddUnit/PropertyDetailsModal";
 import ClientsTablePagination from "./clients-table-pagination";
+import { getClientActions } from "@/components/services/serviceFetching";
+import ActionsModal from "./actions-modal";
 
 const propertyDetails = {
   "Three Bedroom": {
@@ -85,11 +87,25 @@ const propertyDetails = {
   },
 };
 
+const ACTIONS_COLORS = {
+  "Make a call": "text-blue-800",
+  "Office visit": "text-yellow-800",
+  "Property view": "text-teal-800",
+  "Not interested": "text-gray-800",
+  "Not qualified": "text-red-800",
+  "Follow up later": "text-orange-800",
+  "Missing Requirement": "text-purple-800",
+  "No Action": "text-gray-400",
+};
+
 export default function ClientsTable({ users, nextCursor, disableNext }) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState([]);
 
-  const [isOpen, setIsOpen] = useState(false);
+  const [loadingClientActions, setLoadingClientActions] = useState(null);
+  const [rowActions, setRowActions] = useState([]);
+  const [openActionModal, setOpenActionModal] = useState(false);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [isOpenmodle, setIsOpenmodle] = useState(false);
@@ -97,7 +113,6 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
   const [SelectedAction, setSelectedAction] = useState(null);
 
   const [action, setaction] = useState(null);
-  const [activeTab2, setActiveTab2] = useState("form1");
 
   const toggleSelectAll = () => {
     if (rowSelection.length === users.length) {
@@ -117,12 +132,21 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
     return rowSelection.includes(phoneNumber);
   };
 
-  const handleOpenModal = () => {
-    setIsOpen(true);
-  };
+  const handleclientAction = async (e, user) => {
+    e.stopPropagation();
+    // Set loading state for the specific row
+    setLoadingClientActions(user.phoneNumber);
 
-  const handleCloseModal = () => {
-    setIsOpen(false);
+    try {
+      const actions = await getClientActions(user.phoneNumber);
+
+      console.log("Actions:", actions); // Log the actions for debugging
+      setRowActions(actions); // Store the actions in state
+      setOpenActionModal(true); // Open the modal to display actions
+    } catch (error) {
+      console.error("Error fetching actions:", error); // Handle errors
+      setLoadingClientActions(null);
+    }
   };
 
   const [loading, setLoading] = useState(false);
@@ -138,53 +162,6 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
   };
 
   const actionidd = `${selectedId?.phoneNumber}_${selectedId?.client_id}`;
-
-  const formik = useFormik({
-    initialValues: {
-      spreadsheet_url: "",
-      media_url: "",
-    },
-    onSubmit: async (values) => {
-      const payload = {
-        client_id: values.client_id,
-        user_id: values.user_id,
-        created_at: values.created_at,
-        preferred_time: values.preferred_time,
-        description: values.description,
-        action: values.action,
-        actions_history: [
-          {
-            user: "",
-            comment: values.comment,
-            created_at: new Date().toISOString(),
-            action: values.action,
-          },
-        ],
-      };
-
-      try {
-        setLoading(true);
-
-        const response = await axios.put(
-          `https://api.lenaai.net/action/${actionidd}`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
-        toast.success(response.data);
-        setLoading(false);
-      } catch (error) {
-        toast.error(error?.message);
-        console.error(error?.message);
-      } finally {
-        formikinput.resetForm();
-      }
-    },
-  });
 
   const formikinput = useFormik({
     enableReinitialize: true, // This allows the form to update when initialValues change
@@ -339,12 +316,12 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user, x) => {
-                  const lastActivity = new Date(user.date).toLocaleDateString();
+                {users.map((user) => {
+                  const lastActivity = new Date(user.date)
+                    .toISOString()
+                    .split("T")[0];
                   const requirements =
                     user.requirements?.userBuildingType?.[0] || "Not specified";
-
-                  const status = user.actions?.action || "No Action";
 
                   return (
                     <tr
@@ -360,7 +337,7 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
                       key={user.phoneNumber}
                       className={`hover:bg-gray-50 transition-colors text-xs sm:text-sm text-center ${
                         isRowSelected(user.phoneNumber) && "bg-stone-100"
-                      }`}
+                      } ${loadingClientActions ? "pointer-events-none" : ""}`}
                     >
                       <td>
                         <input
@@ -385,69 +362,38 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 hidden md:table-cell line-clamp-1 ${user.requirements !== "Not Specified" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
+                        className={`px-2 py-1 sm:py-2 hidden md:table-cell ${user.requirements !== "Not Specified" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           openPropertyDetails(requirements, 50);
                         }}
                       >
-                        {user.requirements !== "Not Specified"
-                          ? user.requirements
-                          : "Not Specified"}
+                        <span className="line-clamp-1">
+                          {user.requirements !== "Not Specified"
+                            ? user.requirements
+                            : "Not Specified"}
+                        </span>
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-center font-medium">
                         {user.messages_count || 0}
                       </td>
 
-                      {/* TODO: Refactor this part */}
-                      <td className="px-2 py-1 sm:py-2">
-                        <div className="flex justify-center">
-                          <span
-                            className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
-                              status === "Hot"
-                                ? "bg-green-100 text-green-700"
-                                : status === "Warm"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : " text-gray-700"
-                            }`}
-                          >
-                            {user?.actions &&
-                            Object.keys(user.actions).length > 0 ? (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsOpenmodle(true);
-                                  setSelectedId({
-                                    phoneNumber: user?.phoneNumber,
-                                    client_id: user?.client_id,
-                                    user: user,
-                                  });
-                                }}
-                                className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                              >
-                                Action
-                              </button>
-                            ) : (
-                              <button
-                                className="btn text-white bg-[gray] hover:bg-gray-600 focus:ring-4 font-medium rounded-lg text-sm px-2 cursor-pointer py-1.5 me-2 mb-2 dark:bg-blue-900 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsOpenn(true);
-                                  setSelectedAction({
-                                    user: user,
-                                  });
-                                }}
-                                aria-haspopup="dialog"
-                                aria-expanded={isOpen}
-                                aria-controls="hs-basic-modal"
-                              >
-                                Create Action
-                              </button>
-                            )}
-                          </span>
-                        </div>
+                      <td
+                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.actions]}`}
+                        onClick={(e) => handleclientAction(e, user)}
+                      >
+                        {loadingClientActions === user.phoneNumber &&
+                        !openActionModal ? (
+                          <div>
+                            <Loader2
+                              size={18}
+                              className="animate-spin text-center"
+                            />
+                          </div>
+                        ) : (
+                          <span className="line-clamp-1">{user.actions}</span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -473,146 +419,18 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
           </div>
         </>
       )}
-
       {/* TODO: Modale should not be here.. */}
       {/* Modle in Action  */}
-      {isOpenmodle && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#00000042] bg-opacity-50">
-          <div className="relative p-4 w-full max-w-2xl max-h-full">
-            <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
-                <h3 className="text-xl font-semibold  dark:text-blue-500">
-                  change Action
-                </h3>
-                <button
-                  onClick={() => setIsOpenmodle(false)}
-                  type="button"
-                  className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                >
-                  <svg
-                    className="w-3 h-3"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 14 14"
-                  >
-                    <path
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M1 1l6 6m0 0l6 6M7 7l6-6M7 7L1 13"
-                    />
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-
-              <div className="p-4 md:p-5 space-y-4">
-                <div className="max-w-2xl mx-auto p-4">
-                  {/* Tabs Header */}
-                  <div className="flex  mb-4 border-b border-blue-500">
-                    <button
-                      onClick={() => setActiveTab2("form1")}
-                      className={`py-2 px-4 text-sm font-medium ${
-                        activeTab2 === "form1"
-                          ? "border-b-2 border-blue-500 text-[#1e3a8a]"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      Add Action
-                    </button>
-                    <button
-                      onClick={() => setActiveTab2("form2")}
-                      className={`py-2 px-4 text-sm font-medium ${
-                        activeTab2 === "form2"
-                          ? "border-b-2 border-blue-500 text-[#1e3a8a]"
-                          : "text-gray-500"
-                      }`}
-                    >
-                      All comment Action
-                    </button>
-                  </div>
-
-                  {/* Tab Content */}
-                  {activeTab2 === "form1" && (
-                    <form
-                      className="space-y-6 "
-                      onSubmit={formikinput.handleSubmit}
-                    >
-                      <div>
-                        <label
-                          htmlFor="action"
-                          className="block mb-1 text-sm font-medium text-gray-900 dark:text-white"
-                        >
-                          Action
-                        </label>
-                        <select
-                          id="action"
-                          name="action"
-                          onChange={formikinput.handleChange}
-                          value={formikinput.values.action}
-                          className="bg-gray-100 border-gray-300 text-sm rounded-lg block w-full p-3"
-                          required
-                        >
-                          <option value="">Select an option</option>
-                          <option value="Make a call">Make a call</option>
-                          <option value="Office visit">Office visit</option>
-                          <option value="Property view">Property view</option>
-                          <option value="Not interested">Not interested</option>
-                          <option value="Not qualified">Not qualified</option>
-                          <option value="Follow up later">
-                            Follow up later
-                          </option>
-                          <option value="Missing Requirement">
-                            Missing Requirement
-                          </option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          htmlFor="comment"
-                          className="block mb-1 font-medium text-sm text-gray-900 dark:text-white"
-                        >
-                          Comment
-                        </label>
-                        <input
-                          type="text"
-                          id="comment"
-                          name="comment"
-                          onChange={formikinput.handleChange}
-                          value={formikinput.values.comment}
-                          className="bg-gray-200 border border-gray-300 text-black rounded-lg w-full p-3"
-                          placeholder="comment"
-                          required
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg disabled:opacity-50"
-                      >
-                        Send
-                      </button>
-                    </form>
-                  )}
-
-                  {activeTab2 === "form2" && (
-                    <div className="d-flex justify-between flex">
-                      <h5 className="font-bold">Test</h5>
-                      <p>Test</p>
-                      <p>Test</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      {openActionModal && (
+        <ActionsModal
+          actions={rowActions}
+          userId={loadingClientActions}
+          onClose={() => {
+            setOpenActionModal(false);
+            setLoadingClientActions(null);
+          }}
+        />
       )}
-
       {/* TODO: Modale should not be here.. */}
       {/* Modle Create Action */}
       {isOpenn && (
@@ -718,7 +536,6 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
           </div>
         </div>
       )}
-
       {/* Property Details Modal */}
       <PropertyDetailsModal
         isOpen={isModalOpen}

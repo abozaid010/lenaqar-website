@@ -24,3 +24,42 @@
     --primary-foreground: #ffffff;
   }
 }
+
+.timeline {
+  list-style: none;
+  position: relative;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 12px;
+  top: 0px;
+  bottom: 0;
+  width: 2px;
+  background: #e5e7eb; /* Light gray */
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 12px;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 15px;
+  width: 10px;
+  height: 10px;
+  background: #3b82f6; /* Blue */
+  border-radius: 50%;
+}
+
+.timeline-content {
+  background: #f9fafb; /* Light background */
+  padding: 10px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
