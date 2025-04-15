@@ -69,8 +69,7 @@ const Footer = () => {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/30 text-center">
-          <p>&copy; {new Date().getFullYear()} Lena AI. All rights reserved.</p>
-          <p className="text-sm mt-2">Version 0.0.01</p>
+          <p>&copy; {new Date().getFullYear()} Lena AI. All rights reserved, Version 0.0.001 </p>
         </div>
       </div>
     </footer>

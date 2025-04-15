@@ -115,7 +115,7 @@ const Login = () => {
 
           {/* Footer */}
           <div className="px-8 py-4 bg-gray-50 border-t border-gray-100 text-center text-xs text-gray-500">
-            &copy; 2025 Lena Ai. All rights reserved.
+            &copy; 2025  Lena AI. All rights reserved, Version 0.0.001.
           </div>
         </div>
       </div>
