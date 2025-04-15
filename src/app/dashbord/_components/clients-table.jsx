@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { use, useEffect, useMemo, useState } from "react";
 import { MessageSquare } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
@@ -86,6 +86,9 @@ const propertyDetails = {
 };
 
 export default function ClientsTable({ users, nextCursor, disableNext }) {
+  const router = useRouter();
+  const [rowSelection, setRowSelection] = useState([]);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -96,7 +99,23 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
   const [action, setaction] = useState(null);
   const [activeTab2, setActiveTab2] = useState("form1");
 
-  const router = useRouter();
+  const toggleSelectAll = () => {
+    if (rowSelection.length === users.length) {
+      setRowSelection([]);
+    } else {
+      setRowSelection(users.map((user) => user.phoneNumber));
+    }
+  };
+  const toggleRowSelection = (phoneNumber) => {
+    if (rowSelection.includes(phoneNumber)) {
+      setRowSelection(rowSelection.filter((number) => number !== phoneNumber));
+    } else {
+      setRowSelection([...rowSelection, phoneNumber]);
+    }
+  };
+  const isRowSelected = (phoneNumber) => {
+    return rowSelection.includes(phoneNumber);
+  };
 
   const handleOpenModal = () => {
     setIsOpen(true);
@@ -291,33 +310,39 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
           </div>
         </div>
       ) : (
-        <div>
-          <div className="overflow-hidden border border-gray-200 sm:rounded-lg">
+        <>
+          <div className=" overflow-x-auto border border-gray-200 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
-                  <th className="px-2 sm:px-4 py-2 sm:py-3">Name</th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 hidden sm:table-cell">
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6">
+                    <input
+                      type="checkbox"
+                      checked={rowSelection.length === users.length}
+                      onChange={toggleSelectAll}
+                      className="cursor-pointer"
+                    />
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center">Name</th>
+                  <th className="px-2 sm:px-4 py-2 text-center hidden sm:table-cell">
                     User Number
                   </th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3">Date</th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
+                  <th className="px-2 sm:px-4 py-2 text-center">Date</th>
+                  <th className="px-2 sm:px-4 py-2 text-center hidden md:table-cell">
                     Requirements
                   </th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                    <MessageSquare size={16} />
+                  <th className="px-2 sm:px-4 py-2 text-center">
+                    Message Count
                   </th>
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center">
-                    Action
-                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center">Action</th>
                 </tr>
               </thead>
+
               <tbody className="bg-white divide-y divide-gray-200">
                 {users.map((user, x) => {
                   const lastActivity = new Date(user.date).toLocaleDateString();
                   const requirements =
                     user.requirements?.userBuildingType?.[0] || "Not specified";
-                  const messageCount = user.conversation?.length || 0;
 
                   const status = user.actions?.action || "No Action";
 
@@ -333,53 +358,50 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
                       role="button"
                       tabIndex={0}
                       key={user.phoneNumber}
-                      className="hover:bg-gray-50 transition-colors text-xs sm:text-sm"
+                      className={`hover:bg-gray-50 transition-colors text-xs sm:text-sm text-center ${
+                        isRowSelected(user.phoneNumber) && "bg-stone-100"
+                      }`}
                     >
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 font-medium text-gray-900">
-                        <div className="flex flex-col sm:hidden">
-                          <span className="text-xs text-gray-500">
-                            {user.phoneNumber}
-                          </span>
-                          <span
-                            className="text-xs text-blue-600 cursor-pointer hover:underline"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openPropertyDetails(requirements);
-                            }}
-                          >
-                            {requirements}
-                          </span>
-                        </div>
-                        <span className="hidden sm:inline">
-                          {user.phoneNumber}
-                        </span>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={rowSelection.includes(user.phoneNumber)}
+                          onChange={() => toggleRowSelection(user.phoneNumber)}
+                          onClick={(e) => e.stopPropagation()} // Prevent row navigation on click
+                          className="cursor-pointer"
+                        />
                       </td>
 
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600 hidden sm:table-cell">
+                      <td className="px-2 py-1 sm:py-2 font-medium text-gray-900">
                         {user.phoneNumber}
                       </td>
 
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-gray-600">
+                      <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
+                        {user.phoneNumber}
+                      </td>
+
+                      <td className="px-2 py-1 sm:py-2 text-gray-600">
                         {lastActivity}
                       </td>
 
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 hidden md:table-cell">
-                        <span
-                          className="text-blue-600 cursor-pointer hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openPropertyDetails(requirements, 50);
-                          }}
-                        >
-                          {requirements}
-                        </span>
+                      <td
+                        className={`px-2 py-1 sm:py-2 hidden md:table-cell line-clamp-1 ${user.requirements !== "Not Specified" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openPropertyDetails(requirements, 50);
+                        }}
+                      >
+                        {user.requirements !== "Not Specified"
+                          ? user.requirements
+                          : "Not Specified"}
                       </td>
 
-                      <td className="px-2 sm:px-4 py-2 sm:py-3 text-center font-medium">
-                        {messageCount}
+                      <td className="px-2 py-1 sm:py-2 text-center font-medium">
+                        {user.messages_count || 0}
                       </td>
 
-                      <td className="px-2 sm:px-4 py-2 sm:py-3">
+                      {/* TODO: Refactor this part */}
+                      <td className="px-2 py-1 sm:py-2">
                         <div className="flex justify-center">
                           <span
                             className={`inline-flex items-center px-2 sm:px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap ${
@@ -434,11 +456,22 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
             </table>
           </div>
 
-          <ClientsTablePagination
-            nextCursor={nextCursor}
-            disableNext={disableNext}
-          />
-        </div>
+          <div className="flex flex-col mt-4 gap-3">
+            <div className="flex justify-between items-center flex-row-reverse">
+              <ClientsTablePagination
+                nextCursor={nextCursor}
+                disableNext={disableNext}
+              />
+
+              {/* TODO: This button should open a modal to add action to the selected rows */}
+              {rowSelection.length > 0 && (
+                <button className="bg-[#1e3a8a] hover:opacity-95 cursor-pointer text-white py-1.5 rounded-md px-5">
+                  Add Action to {rowSelection.length} client(s)
+                </button>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {/* TODO: Modale should not be here.. */}

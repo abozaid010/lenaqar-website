@@ -9,8 +9,8 @@ export default function BotMessageCard({ message }) {
       <div className="text-sm">{bot_response}</div>
 
       {propertiesItems?.length > 0 &&
-        propertiesItems.map((itm) => (
-          <PropertyCard key={itm.property_id} data={itm.metadata} />
+        propertiesItems.map((itm, idx) => (
+          <PropertyCard key={idx} data={itm} />
         ))}
     </div>
   );
