@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 import formatDateForDisplay from "@/utils/formateDate";
-import PropertyDetailsModal from "../scomponent/PropertyDetailsModal";
+import PropertyDetailsModal from "../scomponent/AddUnit/PropertyDetailsModal";
 import { fetchUsersData } from "@/components/services/serviceFetching";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";

@@ -2,8 +2,12 @@
 import React, { useState } from "react";
 import { Search, Bell, User, MessageSquare, Menu } from "lucide-react";
 import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
+import Cookies from "js-cookie";
 
 const Header = () => {
+
+  const clientName = Cookies.get("client_id");
+  console.log(clientName)
   const handleMenuClick = () => {
     // Call the global toggleSidebar function
     if (typeof window !== "undefined" && window.toggleSidebar) {
@@ -69,7 +73,7 @@ const Header = () => {
               <User className="h-5 w-5 text-blue-600" />
             </div>
             <span className="ml-2 text-sm font-medium text-gray-700 hidden sm:inline">
-              User123
+             {clientName}
             </span>
           </button>
         </div>

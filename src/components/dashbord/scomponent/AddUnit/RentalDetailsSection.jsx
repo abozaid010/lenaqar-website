@@ -75,30 +75,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     formik.setFieldValue("amenities", currentAmenities);
   };
 
-  // Function to prepare amenities for submission - directly modify the amenities field
-  // Remove this useEffect that's modifying the form submission
-  // useEffect(() => {
-  //   const originalSubmit = formik.handleSubmit;
-    
-  //   formik.handleSubmit = (e) => {
-  //     // Convert amenities to array format before submission
-  //     if (formik.values.purpose === "Rent" && formik.values.amenities) {
-  //       const amenitiesArray = Object.entries(formik.values.amenities).map(([key, value]) => ({
-  //         amenitiy: key, // Note: API expects "amenitiy" with typo
-  //         availability: value
-  //       }));
-          
-  //       // Set the amenities directly, don't use _amenitiesArray
-  //       formik.setFieldValue("amenities", amenitiesArray);
-  //     }
-      
-  //     return originalSubmit(e);
-  //   };
-    
-  //   return () => {
-  //     formik.handleSubmit = originalSubmit;
-  //   };
-  // }, [formik.values.amenities]);
+  
 
   return (
     <div className="mb-8">
@@ -262,7 +239,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
       </div>
 
       {/* Custom Amenity Input */}
-      <div className="mt-4 flex items-center">
+      {/* <div className="mt-4 flex items-center">
         <input
           type="text"
           value={newAmenity}
@@ -289,7 +266,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
         >
           <Plus className="w-4 h-4" />
         </button>
-      </div>
+      </div> */}
 
       {/* Display Custom Amenities */}
       {formik.values.amenities && Object.entries(formik.values.amenities).filter(

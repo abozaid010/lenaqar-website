@@ -21,7 +21,7 @@ export const useUnitForm = (onClose, onSave) => {
   const router = useRouter();
 
   // Get client_id from cookies
-  const clientId = Cookies.get("client_id") || "DREAM_HOMES";
+  const clientId = Cookies.get("client_id");
 
   // Define validation schema using Yup
   const validationSchema = Yup.object({
@@ -35,21 +35,21 @@ export const useUnitForm = (onClose, onSave) => {
     view: Yup.string().required("View is required"),
     // Make totalPrice and downPayment conditional based on purpose
     totalPrice: Yup.number().when("purpose", {
-      is: "Sell",
+      is: (purpose) => purpose === "Sell" || purpose === "Buy",
       then: () => Yup.number()
         .positive("Price must be greater than zero")
         .required("Total price is required"),
       otherwise: () => Yup.number().nullable()
     }),
     downPayment: Yup.number().when("purpose", {
-      is: "Sell",
+      is: (purpose) => purpose === "Sell" || purpose === "Buy",
       then: () => Yup.number()
         .positive("Down payment must be greater than zero")
         .required("Down payment is required"),
       otherwise: () => Yup.number().nullable()
     }),
     deliveryDate: Yup.string().when("purpose", {
-      is: "Sell",
+      is: (purpose) => purpose === "Sell" || purpose === "Buy",
       then: () => Yup.string().required("Delivery date is required"),
       otherwise: () => Yup.string().nullable()
     }),
@@ -174,11 +174,17 @@ export const useUnitForm = (onClose, onSave) => {
         };
        console.log(values.purpose)
         // Handle purpose-specific fields
-        if (values.purpose === "Sell") {
+        if (values.purpose === "Sell" || values.purpose === "Buy") {
           console.log(values.purpose)
           preparedFormData.downPayment = values.downPayment ? Number(values.downPayment) : 0;
           preparedFormData.totalPrice = values.totalPrice ? Number(values.totalPrice) : 0;
-        } 
+          
+          // Ensure the same keys are sent for both Sell and Buy
+          if (values.purpose === "Sell") {
+            // Clone all the Buy-specific properties
+            
+          }
+        }
        
         
         else if (values.purpose === "Rent") {
@@ -393,7 +399,7 @@ export const useUnitForm = (onClose, onSave) => {
     ];
     
     // Add purpose-specific required fields
-    if (formik.values.purpose === 'Sell') {
+    if (formik.values.purpose === 'Sell' || formik.values.purpose === 'Buy') {
       requiredFields.push('totalPrice', 'downPayment', 'deliveryDate');
     } else if (formik.values.purpose === 'Rent') {
       // For rental properties, check if at least one rent type is provided

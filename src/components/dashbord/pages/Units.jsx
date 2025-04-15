@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import im from "../../../../public/images/building1.jpg";
 import { MapPin, Plus, ChevronLeft, ChevronRight, Share2 } from "lucide-react";
-import AddUnitModal from "../scomponent/AddUnitModal";
+import AddUnitModal from "../scomponent/AddUnit/AddUnitModal";
 import Link from "next/link";
 import propertyEnums from "../data/propertyEnums.json";
 import toast from "react-hot-toast";

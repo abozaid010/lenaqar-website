@@ -7,7 +7,7 @@ import { useFormik } from "formik";
 import toast from "react-hot-toast";
 import axios from "axios";
 import axiosInstance from "@/utils/axiosInstance";
-import PropertyDetailsModal from "@/components/dashbord/scomponent/PropertyDetailsModal";
+import PropertyDetailsModal from "@/components/dashbord/scomponent/AddUnit/PropertyDetailsModal";
 import ClientsTablePagination from "./clients-table-pagination";
 
 const propertyDetails = {

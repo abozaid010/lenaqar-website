@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 
 // Change this import to match the actual file extension
-import UpdateUnitModal from "../scomponent/UpdateUnitModal";
+
 import { updateUnit, deleteUnit } from "@/components/services/serviceFetching";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -14,6 +14,7 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
+import UpdateUnitModal from "../scomponent/UpdateUnit/UpdateUnitModal";
 
 
 export default function UnitDetails({ unit, developers, comboundata }) {
