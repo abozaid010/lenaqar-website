@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Filter, MessageSquare, ChevronDown } from "lucide-react";
+import { MessageSquare, ChevronDown } from "lucide-react";
 
 const ACTIONS = [
   { label: "All actions", value: "" },
@@ -25,12 +25,16 @@ export default function DashbordFilter({ appliedFilters }) {
    * - The `start_date` and `end_date` are initialized with dynamic default values.
        These values will automatically adjust when the component is MOUNTED.
    */
-  const today = useMemo(() => new Date(), []);
-  const sevenDaysAgo = useMemo(() => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - 7);
+  const tomorrow = useMemo(() => {
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
     return date;
-  }, [today]);
+  }, []);
+  const tenDaysAgo = useMemo(() => {
+    const date = new Date(tomorrow);
+    date.setDate(tomorrow.getDate() - 11);
+    return date;
+  }, [tomorrow]);
 
   /**
    * Why use a function to initialize state, what is the issue with Direct Initialization?
@@ -39,11 +43,10 @@ export default function DashbordFilter({ appliedFilters }) {
    */
   const [filters, setFilters] = useState(() => {
     return {
-      cursor: appliedFilters.cursor || null,
-      actions: appliedFilters.actions || "all",
+      actions: appliedFilters.actions || "",
       start_date:
-        appliedFilters.start_date || sevenDaysAgo.toISOString().split("T")[0],
-      end_date: appliedFilters.end_date || today.toISOString().split("T")[0],
+        appliedFilters.start_date || tenDaysAgo.toISOString().split("T")[0],
+      end_date: appliedFilters.end_date || tomorrow.toISOString().split("T")[0],
     };
   });
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -73,7 +76,6 @@ export default function DashbordFilter({ appliedFilters }) {
     setFilters((prev) => ({
       ...prev,
       [key]: value,
-      cursor: appliedFilters.cursor,
     }));
 
     router.push(

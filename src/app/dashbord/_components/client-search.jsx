@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function SearchBar({ q }) {
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(q || "");
 
+  const onSubmit = (e) => {
+    e.preventDefault();
+    // const params = new URLSearchParams(window.location.search);
+    // params.set("q", searchTerm);
+  };
+
   return (
-    <form className="flex items-center space-x-2 mb-2">
+    <form className="flex items-center space-x-2 mb-2" onSubmit={onSubmit}>
       <div className="relative flex-1">
         <Search
           size={20}
@@ -20,6 +28,13 @@ export default function SearchBar({ q }) {
           placeholder="Search client by name or number..."
           className="border border-gray-300 rounded-md p-2 w-full pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm"
         />
+
+        <button
+          disabled={!searchTerm}
+          className="absolute right-1 top-[9%] h-[82%] flex items-center justify-center cursor-pointer rounded-md bg-blue-500 text-white px-4 py-2 text-sm font-semibold hover:bg-blue-600 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        >
+          search
+        </button>
       </div>
     </form>
   );
