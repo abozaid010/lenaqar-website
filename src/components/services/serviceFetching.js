@@ -170,9 +170,24 @@ export async function getChatHistory(userId) {
 
 export async function getClientActions(phoneNumber) {
   const cookieClientId = await getClientid();
+  const actionID = `${phoneNumber}_${cookieClientId}`;
 
   try {
-    const response = await axiosInstance.get(`user-actions/${phoneNumber}/${cookieClientId}`);
+    const response = await axiosInstance.get(`action/${actionID}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function getClientRequirements(phoneNumber) {
+  const cookieClientId = await getClientid();
+
+  const requirementsId = `${phoneNumber}_${cookieClientId}`;
+
+  try {
+    const response = await axiosInstance.get(`requirements/${requirementsId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
