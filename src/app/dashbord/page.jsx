@@ -43,8 +43,6 @@ async function ClientsList({ searchParams }) {
   const nextCursor =
     initialClients.data.pagination.next_cursor || parseInt(searchParams.cursor);
 
-  console.log("initialClients", initialClients.data);
-
   return (
     <ClientsTable
       users={initialClients.data.users}
