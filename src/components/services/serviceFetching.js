@@ -170,10 +170,10 @@ export async function getChatHistory(userId) {
 
 export async function getClientActions(phoneNumber) {
   const cookieClientId = await getClientid();
-  const actionID = `${phoneNumber}_${cookieClientId}`;
+  // const actionID = `${phoneNumber}_${cookieClientId}`;
 
   try {
-    const response = await axiosInstance.get(`action/${actionID}`);
+    const response = await axiosInstance.get(`user-actions/${phoneNumber}/${cookieClientId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);

@@ -61,7 +61,6 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
     try {
       const actions = await getClientActions(phoneNumber);
 
-      console.log("Actions:", actions);
       setRowActions(actions);
       setOpenActionModal(true);
     } catch (error) {

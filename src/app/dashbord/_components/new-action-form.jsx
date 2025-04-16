@@ -20,7 +20,7 @@ const ACTIONS = [
   { label: "Missing Requirement", value: "Missing requirement" },
 ];
 
-export default function NewActionForm({ userId, clienId, onSuccess }) {
+export default function NewActionForm({ userId, clienId, onSuccess, actions }) {
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const [formData, setFormData] = useState({
     action_type: ACTIONS[0].value,
@@ -47,6 +47,7 @@ export default function NewActionForm({ userId, clienId, onSuccess }) {
     <form className="p-3" action={action}>
       <input type="hidden" name="userId" value={userId} />
       <input type="hidden" name="clientId" value={clienId} />
+      <input type="hidden" name="ai_action" value={JSON.stringify(actions)} />
 
       <select
         name="action_type"
@@ -55,6 +56,7 @@ export default function NewActionForm({ userId, clienId, onSuccess }) {
         onChange={(e) =>
           setFormData({ ...formData, action_type: e.target.value })
         }
+        required
       >
         {ACTIONS.map((action) => (
           <option key={action.value} value={action.value}>
