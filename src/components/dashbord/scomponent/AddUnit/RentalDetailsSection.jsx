@@ -1,19 +1,14 @@
 "use client"
 import React, { useState, useEffect } from "react";
 import { Plus, X } from "lucide-react";
+import propertyEnums from "../../data/propertyEnums.json";
 
-const AMENITIES_LIST = [
-  { id: "wifi", label: "WiFi" },
-  { id: "air_condition", label: "Air Conditioning" },
-  { id: "parking", label: "Parking" },
-  { id: "gym", label: "Gym" },
-  { id: "pool", label: "Swimming Pool" },
-  { id: "security", label: "Security" },
-  { id: "elevator", label: "Elevator" },
-  { id: "balcony", label: "Balcony" },
-  { id: "garden", label: "Garden" },
-  { id: "cleaning", label: "Cleaning Service" },
-];
+// Use the RentalPropertyAmenityEnum from propertyEnums
+const AMENITIES_LIST = propertyEnums.RentalPropertyAmenityEnum.map(amenity => ({
+  id: amenity.toLowerCase(), // يحتفظ بالمسافات
+  label: amenity
+}));
+
 
 const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
   const [newAmenity, setNewAmenity] = useState("");
@@ -75,8 +70,6 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     formik.setFieldValue("amenities", currentAmenities);
   };
 
-  
-
   return (
     <div className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -87,57 +80,89 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
           <div className="flex items-center">
             <input
               type="checkbox"
-              id="availability"
-              name="availability"
-              checked={formik.values.availability || false}
+              id="isAvailable"
+              name="isAvailable"
+              checked={formik.values.isAvailable || false}
               onChange={(e) => {
-                formik.setFieldValue("availability", e.target.checked);
+                formik.setFieldValue("isAvailable", e.target.checked);
               }}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
             />
-            <label htmlFor="availability" className="ml-2 text-sm text-gray-700">
+            <label htmlFor="isAvailable" className="ml-2 text-sm text-gray-700">
               Available for rent
             </label>
           </div>
-          {formik.touched.availability && formik.errors.availability && (
+          {formik.touched.isAvailable && formik.errors.isAvailable && (
             <p className="mt-1 text-sm text-red-500">
-              {formik.errors.availability}
+              {formik.errors.isAvailable}
             </p>
           )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Starting Date
+            Availability Date
           </label>
           <input
             type="date"
-            name="startingDate"
-            value={formik.values.startingDate || ""}
+            name="availabilityDate"
+            value={formik.values.availabilityDate || ""}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.startingDate && formik.errors.startingDate
+              formik.touched.availabilityDate && formik.errors.availabilityDate
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-primary"
             } focus:border-transparent`}
           />
-          {formik.touched.startingDate && formik.errors.startingDate && (
+          {formik.touched.availabilityDate && formik.errors.availabilityDate && (
             <p className="mt-1 text-sm text-red-500">
-              {formik.errors.startingDate}
+              {formik.errors.availabilityDate}
             </p>
           )}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Monthly Rent
+            Rent Duration Type
+          </label>
+          <select
+            name="rentDurationType"
+            value={formik.values.rentDurationType || ""}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`w-full px-4 py-2 rounded-lg border ${
+              formik.touched.rentDurationType && formik.errors.rentDurationType
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-primary"
+            } focus:border-transparent`}
+          >
+            <option value="" disabled>Select Duration</option>
+            {propertyEnums.RentDurationType.map((durationType, index) => (
+              <option 
+                key={index} 
+                value={durationType}
+              >
+                {durationType.charAt(0).toUpperCase() + durationType.slice(1)}
+              </option>
+            ))}
+          </select>
+          {formik.touched.rentDurationType && formik.errors.rentDurationType && (
+            <p className="mt-1 text-sm text-red-500">
+              {formik.errors.rentDurationType}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Rent Price
           </label>
           <input
             type="number"
-            name="monthlyRent"
+            name="rentPrice"
             min="0"
-            value={formik.values.monthlyRent || ""}
+            value={formik.values.rentPrice || ""}
             onChange={(e) => {
               const value = parseFloat(e.target.value);
               if (value < 0) e.target.value = 0;
@@ -145,70 +170,14 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             }}
             onBlur={formik.handleBlur}
             className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.monthlyRent && formik.errors.monthlyRent
+              formik.touched.rentPrice && formik.errors.rentPrice
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-primary"
             } focus:border-transparent`}
           />
-          {formik.touched.monthlyRent && formik.errors.monthlyRent && (
+          {formik.touched.rentPrice && formik.errors.rentPrice && (
             <p className="mt-1 text-sm text-red-500">
-              {formik.errors.monthlyRent}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Weekly Rent
-          </label>
-          <input
-            type="number"
-            name="weeklyRent"
-            min="0"
-            value={formik.values.weeklyRent || ""}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (value < 0) e.target.value = 0;
-              formik.handleChange(e);
-            }}
-            onBlur={formik.handleBlur}
-            className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.weeklyRent && formik.errors.weeklyRent
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
-          />
-          {formik.touched.weeklyRent && formik.errors.weeklyRent && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.weeklyRent}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Daily Rent
-          </label>
-          <input
-            type="number"
-            name="dailyRent"
-            min="0"
-            value={formik.values.dailyRent || ""}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (value < 0) e.target.value = 0;
-              formik.handleChange(e);
-            }}
-            onBlur={formik.handleBlur}
-            className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.dailyRent && formik.errors.dailyRent
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
-          />
-          {formik.touched.dailyRent && formik.errors.dailyRent && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.dailyRent}
+              {formik.errors.rentPrice}
             </p>
           )}
         </div>

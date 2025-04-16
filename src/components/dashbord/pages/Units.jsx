@@ -52,7 +52,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
 
         let matchesPurpose = true;
         if (purposeFilter !== "all") {
-          matchesPurpose = estate.purpose === purposeFilter;
+          matchesPurpose = estate.purpose.toLowerCase() === purposeFilter.toLowerCase();
         }
 
         return (
@@ -228,7 +228,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                     {estate.images && estate.images.length > 0 ? (
                       <>
                         <img
-                          src={estate.images[0].url}
+                          src={estate.images[0].url || im.src}
                           alt={estate.name || estate.compound || "Property"}
                           className="w-full h-full object-cover"
                         />

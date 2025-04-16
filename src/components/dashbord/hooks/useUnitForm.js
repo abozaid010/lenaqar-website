@@ -11,7 +11,8 @@ import {
   addUnit,
   deleteImage,
   uploadImages,
-  addDeveloper, // Add this import if it exists in serviceFetching
+  addDeveloper,
+  addUnitRent, // Add this import if it exists in serviceFetching
 } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 // import { uploadImages, deleteImage, addUnit } from '@/components/services/serviceFetching';
@@ -24,6 +25,7 @@ export const useUnitForm = (onClose, onSave) => {
   const clientId = Cookies.get("client_id");
 
   // Define validation schema using Yup
+  // Update validation schema to include rentDurationType and rentPrice
   const validationSchema = Yup.object({
     unitTitle: Yup.string().required("Unit title is required"),
     compound: Yup.string().required("Compound is required"),
@@ -31,7 +33,7 @@ export const useUnitForm = (onClose, onSave) => {
     purpose: Yup.string().required("Purpose is required"),
     country: Yup.string().required("Country is required"),
     city: Yup.string().required("City is required"),
-    district: Yup.string(),
+    // district: Yup.string(),
     view: Yup.string().required("View is required"),
     // Make totalPrice and downPayment conditional based on purpose
     totalPrice: Yup.number().when("purpose", {
@@ -53,6 +55,11 @@ export const useUnitForm = (onClose, onSave) => {
       then: () => Yup.string().required("Delivery date is required"),
       otherwise: () => Yup.string().nullable()
     }),
+    deliveryStatus: Yup.string().when("purpose", {
+      is: (purpose) => purpose === "Sell" || purpose === "Buy",
+      then: () => Yup.string().required("Delivery status is required"),
+      otherwise: () => Yup.string().nullable()
+    }),
     roomsCount: Yup.number()
       .positive("Rooms count must be greater than zero")
       .required("Rooms count is required"),
@@ -70,31 +77,27 @@ export const useUnitForm = (onClose, onSave) => {
     dataSource: Yup.string().required("Data source is required"),
     paymentPlans: Yup.string(),
     // Add validation for rental properties
-    availability: Yup.boolean().when("purpose", {
+    isAvailable: Yup.boolean().when("purpose", {
       is: "Rent",
       then: () => Yup.boolean().required("Availability is required"),
       otherwise: () => Yup.boolean().nullable()
     }),
-    startingDate: Yup.string().when("purpose", {
+    availabilityDate: Yup.string().when("purpose", {
       is: "Rent",
-      then: () => Yup.string().required("Starting date is required"),
+      then: () => Yup.string().required("Availability date is required"),
       otherwise: () => Yup.string().nullable()
     }),
-    // At least one rent type is required for rental properties
-    monthlyRent: Yup.number().when(["purpose", "weeklyRent", "dailyRent"], {
-      is: (purpose, weeklyRent, dailyRent) => 
-        purpose === "Rent" && !weeklyRent && !dailyRent,
-      then: () => Yup.number().positive("Must be a positive number").required("At least one rent type is required"),
-      otherwise: () => Yup.number().nullable().min(0, "Must be a positive number")
-    }),
-    weeklyRent: Yup.number().when("purpose", {
+    // Add validation for new rental fields
+    rentDurationType: Yup.string().when("purpose", {
       is: "Rent",
-      then: () => Yup.number().nullable().min(0, "Must be a positive number"),
-      otherwise: () => Yup.number().nullable()
+      then: () => Yup.string().required("Rent duration type is required"),
+      otherwise: () => Yup.string().nullable()
     }),
-    dailyRent: Yup.number().when("purpose", {
+    rentPrice: Yup.number().when("purpose", {
       is: "Rent",
-      then: () => Yup.number().nullable().min(0, "Must be a positive number"),
+      then: () => Yup.number()
+        .positive("Rent price must be greater than zero")
+        .required("Rent price is required"),
       otherwise: () => Yup.number().nullable()
     }),
   });
@@ -113,20 +116,22 @@ export const useUnitForm = (onClose, onSave) => {
   // Initialize formik with default values from the JSON file
   const formik = useFormik({
     initialValues: {
-      buildingType: defaultBuildingType.charAt(0).toUpperCase() + defaultBuildingType.slice(1),
+      buildingType: defaultBuildingType,
       purpose: defaultPurpose.charAt(0).toUpperCase() + defaultPurpose.slice(1),
       compound: "",
-      view: defaultView.charAt(0).toUpperCase() + defaultView.slice(1),
+      view: defaultView,
+      isGated: false,
       country: "Egypt",
       city: "",
-      district: "",
+      // district: "",
       clientName: clientId,
       clientId: clientId,
       developer: "",
-      isNewDeveloper: false,
+      // isNewDeveloper: false,
       unitId: uuidv4(),
       unitTitle: "",
       deliveryDate: "",
+      deliveryStatus: "", // Add this line to initialize deliveryStatus
       bathroomCount: "",
       floor: "",
       roomsCount: "",
@@ -142,11 +147,11 @@ export const useUnitForm = (onClose, onSave) => {
       // Add default amenities object
       amenities: {},
       // Add default rental fields
-      availability: false,
-      startingDate: "",
-      monthlyRent: "",
-      weeklyRent: "",
-      dailyRent: "",
+      isAvailable: false,
+      availabilityDate: "",
+      // Add new rental fields
+      rentDurationType: "",
+      rentPrice: "",
     },
     validationSchema, // Uncomment this line to enable validation
     onSubmit: async (values) => {
@@ -178,6 +183,14 @@ export const useUnitForm = (onClose, onSave) => {
           console.log(values.purpose)
           preparedFormData.downPayment = values.downPayment ? Number(values.downPayment) : 0;
           preparedFormData.totalPrice = values.totalPrice ? Number(values.totalPrice) : 0;
+          preparedFormData.isGated = values.isGated || false; // Ensure isGated is included for Sell/Buy
+          
+          // Remove rental-specific fields for Sell/Buy
+          delete preparedFormData.amenities;
+          delete preparedFormData.rentPrice;
+          delete preparedFormData.rentDurationType;
+          delete preparedFormData.isAvailable;
+          delete preparedFormData.availabilityDate;
           
           // Ensure the same keys are sent for both Sell and Buy
           if (values.purpose === "Sell") {
@@ -185,34 +198,40 @@ export const useUnitForm = (onClose, onSave) => {
             
           }
         }
-       
-        
         else if (values.purpose === "Rent") {
           console.log("Processing rental property");
           
-          // Convert rent values to numbers
-          preparedFormData.monthlyRent = values.monthlyRent ? Number(values.monthlyRent) : 0;
-          preparedFormData.weeklyRent = values.weeklyRent ? Number(values.weeklyRent) : 0;
-          preparedFormData.dailyRent = values.dailyRent ? Number(values.dailyRent) : 0;
+          // Handle the rent structure
+          preparedFormData.rentPrice = values.rentPrice ? Number(values.rentPrice) : 0;
+          preparedFormData.rentDurationType = values.rentDurationType;
+          preparedFormData.isAvailable = values.isAvailable || false;
+          preparedFormData.availabilityDate = values.availabilityDate || "";
+          
+          // Remove sell/buy specific fields for Rent
+          delete preparedFormData.paymentPlans;
+          delete preparedFormData.downPayment;
+          delete preparedFormData.deliveryDate;
+          delete preparedFormData.deliveryStatus; // Add this line to remove deliveryStatus for Rent
+          delete preparedFormData.totalPrice;
           
           console.log("Amenities before processing:", values.amenities);
           
-          // Format amenities as an array of objects
+          // Format amenities as an array of strings
           if (values.amenities && typeof values.amenities === 'object') {
             const amenitiesArray = [];
             
-            // Convert the amenities object to array of objects format
+            // Convert the amenities object to array of strings format
             Object.entries(values.amenities).forEach(([key, value]) => {
               // Only include amenities that are available (true)
               if (value) {
-                const amenityObj = {};
-                amenityObj[key] = value;
-                amenitiesArray.push(amenityObj);
+                // Capitalize the first letter of each amenity
+                const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+                amenitiesArray.push(capitalizedKey);
               }
             });
             
             preparedFormData.amenities = amenitiesArray;
-            console.log("Formatted amenities as array of objects:", preparedFormData.amenities);
+            console.log("Formatted amenities as array of strings:", preparedFormData.amenities);
           } else {
             preparedFormData.amenities = [];
             console.log("No amenities found, using empty array");
@@ -225,7 +244,14 @@ export const useUnitForm = (onClose, onSave) => {
         console.log("Final data to submit:", preparedFormData);
         
         // Call the API to add the unit
-        const response = await addUnit(preparedFormData);
+        let response;
+        if (values.purpose === "Rent") {
+          // Use addUnitRent for rental properties
+          response = await addUnitRent(preparedFormData);
+        } else {
+          // Use addUnit for buy/sell properties
+          response = await addUnit(preparedFormData);
+        }
         console.log("API response:", response);
     
         toast.success("Unit added successfully");
@@ -240,11 +266,11 @@ export const useUnitForm = (onClose, onSave) => {
         // Reset form to initial values with a new UUID
         formik.resetForm();
         formik.setFieldValue("unitId", uuidv4());
-        formik.setFieldValue("buildingType", defaultBuildingType.charAt(0).toUpperCase() + defaultBuildingType.slice(1));
+        formik.setFieldValue("buildingType", defaultBuildingType);
         formik.setFieldValue("purpose", defaultPurpose.charAt(0).toUpperCase() + defaultPurpose.slice(1));
-        formik.setFieldValue("view", defaultView.charAt(0).toUpperCase() + defaultView.slice(1));
+        formik.setFieldValue("view", defaultView);
         formik.setFieldValue("country", "Egypt");
-        formik.setFieldValue("district", "");
+        // formik.setFieldValue("district", "");
         formik.setFieldValue("clientId", clientId);
         formik.setFieldValue("images", []);
         formik.setFieldValue("amenities", {}); // Reset to empty object, not array
@@ -315,11 +341,20 @@ export const useUnitForm = (onClose, onSave) => {
         // Upload the current file
         const uploadedImage = await uploadImages(formDataToUpload);
         
-        // Add to our array of uploaded images
+        // Format the image data to match the required structure
         if (Array.isArray(uploadedImage)) {
-          uploadedImagesData.push(...uploadedImage);
+          // If response is an array, map each item to the required format
+          const formattedImages = uploadedImage.map(img => ({
+            url: img.url || img.imageUrl || "",
+            fileId: img.fileId || img._id || ""
+          }));
+          uploadedImagesData.push(...formattedImages);
         } else {
-          uploadedImagesData.push(uploadedImage);
+          // If response is a single object
+          uploadedImagesData.push({
+            url: uploadedImage.url || uploadedImage.imageUrl || "",
+            fileId: uploadedImage.fileId || uploadedImage._id || ""
+          });
         }
       }
 
@@ -402,12 +437,8 @@ export const useUnitForm = (onClose, onSave) => {
     if (formik.values.purpose === 'Sell' || formik.values.purpose === 'Buy') {
       requiredFields.push('totalPrice', 'downPayment', 'deliveryDate');
     } else if (formik.values.purpose === 'Rent') {
-      // For rental properties, check if at least one rent type is provided
-      if (!formik.values.monthlyRent && !formik.values.weeklyRent && !formik.values.dailyRent) {
-        formik.setFieldError('monthlyRent', 'At least one rent type is required');
-        toast.error('Please provide at least one rent type');
-        return;
-      }
+      // For rental properties, check if rent price and duration type are provided
+      requiredFields.push('rentDurationType', 'rentPrice', 'isAvailable', 'availabilityDate');
     }
     
     // Check for missing required fields
@@ -469,7 +500,7 @@ export const useUnitForm = (onClose, onSave) => {
         // Directly update the form with the new developer value
         formik.setFieldValue("developer", developerData.name);
         // Set isNewDeveloper to false to show the select dropdown with the new value
-        formik.setFieldValue("isNewDeveloper", false);
+        // formik.setFieldValue("isNewDeveloper", false);
         
         // Close the modal
         setIsAddDeveloperModalOpen(false);
@@ -487,9 +518,7 @@ export const useUnitForm = (onClose, onSave) => {
       }
     };
   
-  // Make sure to include these in your return statement
-  // Update the return statement to include handleSubmit
-  // Fix the return statement by removing the extra closing brace
+  
   return {
     formik,
     isAddCompoundModalOpen,

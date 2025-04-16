@@ -2,6 +2,7 @@
 import {
   uploadImages,
   deleteImage,
+  updateUnitRent,
 } from "@/components/services/serviceFetching";
 import React, { useState, useEffect, useRef } from "react";
 
@@ -12,9 +13,10 @@ import AddDeveloperModal from "../AddDeveloperModal";
 import PropertyDetailsSection from "./PropertyDetailsSection";
 import AdditionalDetailsSection from "./AdditionalDetailsSection";
 import ImagesSection from "./ImagesSection";
-import RentalDetailsSection from "./RentalDetailsSection";
+import RentalDetailsSection from "./RentalDetailsSectionUpdate";
 import PricingSection from "./PricingSection";
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const UpdateUnitForm = ({
   unit,
@@ -50,10 +52,7 @@ const UpdateUnitForm = ({
     dataSource: "",
     images: [],
     availability: false,
-    startingDate: "",
-    monthlyRent: 0,
-    weeklyRent: 0,
-    dailyRent: 0,
+    deliveryDate: "",
     amenities: {},
   });
 
@@ -79,7 +78,8 @@ const UpdateUnitForm = ({
         country: unit.country || "",
         compound: unit.compound || "",
         developer: unit.developer || "",
-        purpose: unit.purpose.charAt(0).toUpperCase() + unit.purpose.slice(1) || "",
+        purpose:
+          unit.purpose.charAt(0).toUpperCase() + unit.purpose.slice(1) || "",
         finishing: unit.finishing || "",
         view: unit.view || "",
         floor: unit.floor || 0,
@@ -98,11 +98,14 @@ const UpdateUnitForm = ({
         images: unit.images || [],
         updatedAt: unit.updatedAt || "",
         availability: unit.availability || false,
-        startingDate: unit.startingDate ? unit.startingDate.split("T")[0] : "",
-        monthlyRent: unit.monthlyRent || 0,
-        weeklyRent: unit.weeklyRent || 0,
-        dailyRent: unit.dailyRent || 0,
+        deliveryDate: unit.deliveryDate ? unit.deliveryDate.split("T")[0] : "",
         amenities: unit.amenities || {},
+        isGated: unit.isGated || false,
+        rentPrice: unit.rentPrice || 0,
+        availabilityDate: unit.availabilityDate || "",
+        rentDurationType: unit.rentDurationType || "",
+        isAvailable: unit.isAvailable || false,
+        deliveryStatus: unit.deliveryStatus || "",
       });
 
       // Set the property type states based on the purpose
@@ -113,7 +116,7 @@ const UpdateUnitForm = ({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Update the form data
     setFormData((prev) => ({
       ...prev,
@@ -124,15 +127,16 @@ const UpdateUnitForm = ({
     if (name === "purpose") {
       setIsRentalProperty(value === "Rent");
       setIsSellProperty(value === "Sell" || value === "Buy");
-      
+
       // Initialize amenities correctly when switching to Rent
       if (value === "Rent") {
-        setFormData(prev => ({
+        setFormData((prev) => ({
           ...prev,
           [name]: value,
-          amenities: prev.amenities && Object.keys(prev.amenities).length > 0 
-            ? prev.amenities 
-            : {}
+          amenities:
+            prev.amenities && Object.keys(prev.amenities).length > 0
+              ? prev.amenities
+              : {},
         }));
       }
     }
@@ -222,36 +226,84 @@ const UpdateUnitForm = ({
     console.log("formData", formData);
 
     try {
+      // For rental properties, check if availabilityDate is provided
+      if (formData.purpose === "Rent" && (!formData.availabilityDate || formData.availabilityDate.trim() === "")) {
+        toast.error("Please provide an availability date for rental properties");
+        return;
+      }
+
+      // For Buy properties, check if all required fields are filled
+      if (formData.purpose === "Buy") {
+        const requiredBuyFields = [
+          { name: 'totalPrice', label: 'Total Price' },
+          { name: 'downPayment', label: 'Down Payment' },
+          { name: 'deliveryDate', label: 'Delivery Date' },
+          { name: 'deliveryStatus', label: 'Delivery Status' }
+        ];
+        
+        for (const field of requiredBuyFields) {
+          if (!formData[field.name] || formData[field.name].toString().trim() === "") {
+            toast.error(`Please provide ${field.label} for Buy properties`);
+            return;
+          }
+        }
+      }
+
       const preparedFormData = { ...formData };
+
+      // Convert finishing to lowercase
+      if (preparedFormData.finishing) {
+        preparedFormData.finishing = preparedFormData.finishing.toLowerCase();
+      }
+
+      // Convert view to lowercase
+      if (preparedFormData.view) {
+        preparedFormData.view = preparedFormData.view.toLowerCase();
+      }
 
       if (formData.purpose === "Rent") {
         console.log("Processing rental property");
-        preparedFormData.monthlyRent = Number(formData.monthlyRent) || 0;
-        preparedFormData.weeklyRent = Number(formData.weeklyRent) || 0;
-        preparedFormData.dailyRent = Number(formData.dailyRent) || 0;
+
+        // For rental properties, keep the existing values
+        // No need to modify rentPrice, it will be sent as is
+        
+        // Remove sell/buy specific fields for Rent
+        delete preparedFormData.paymentPlans;
+        delete preparedFormData.downPayment;
+        delete preparedFormData.deliveryDate;
+        delete preparedFormData.totalPrice;
+        delete preparedFormData.availability;
+        delete preparedFormData.deliveryStatus;
 
         console.log("Amenities before processing:", formData.amenities);
 
-        if (formData.amenities && typeof formData.amenities === "object") {
+        // Only process amenities if needed
+        if (formData.amenities && typeof formData.amenities === "object" && !Array.isArray(formData.amenities)) {
           const amenitiesArray = [];
           Object.entries(formData.amenities).forEach(([key, value]) => {
             if (value) {
-              const amenityObj = {};
-              amenityObj[key] = value;
-              amenitiesArray.push(amenityObj);
+              amenitiesArray.push(key);
             }
           });
           preparedFormData.amenities = amenitiesArray;
-        } else {
-          preparedFormData.amenities = [];
         }
       } else if (formData.purpose === "Sell" || formData.purpose === "Buy") {
         preparedFormData.totalPrice = Number(formData.totalPrice) || 0;
         preparedFormData.downPayment = Number(formData.downPayment) || 0;
-      }
 
-      await onSubmit(preparedFormData);
-     
+        // Remove rental-specific fields for Sell/Buy properties
+        delete preparedFormData.amenities;
+        delete preparedFormData.availability;
+        delete preparedFormData.availabilityDate;
+        delete preparedFormData.rentDurationType;
+        delete preparedFormData.rentPrice;
+        delete preparedFormData.isAvailable;
+      }
+      // let newUnit = await updateUnit(preparedFormData);
+      // let newUnit = await updateUnitRent(updatedUnit);
+   console.log(formData.purpose)
+      await onSubmit(preparedFormData,formData.purpose);
+
       window.location.reload();
     } catch (error) {
       console.error("Error updating unit:", error);
@@ -339,10 +391,7 @@ const UpdateUnitForm = ({
               >
                 <option value="">Select Building Type</option>
                 {propertyEnums.EnumBuildingType.map((type, index) => (
-                  <option
-                    key={index}
-                    value={type.charAt(0).toUpperCase() + type.slice(1)}
-                  >
+                  <option key={index} value={type}>
                     {type.charAt(0).toUpperCase() + type.slice(1)}
                   </option>
                 ))}
@@ -359,8 +408,10 @@ const UpdateUnitForm = ({
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
               >
-                
-                <option value={formData?.purpose}>{formData?.purpose.charAt(0).toUpperCase() + formData?.purpose.slice(1)}</option>
+                <option value={formData?.purpose}>
+                  {formData?.purpose.charAt(0).toUpperCase() +
+                    formData?.purpose.slice(1)}
+                </option>
                 {propertyEnums.EnumPropertyIntent.map((intent, index) => (
                   <option
                     key={index}
@@ -506,7 +557,7 @@ const UpdateUnitForm = ({
                 onChange={handleChange}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
               >
-                <option value="">Select View</option>
+                <option value={formData.view}>{formData.view}</option>
                 {propertyEnums.EnumViewType.map((view, index) => (
                   <option
                     key={index}
@@ -516,6 +567,30 @@ const UpdateUnitForm = ({
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Gated Community
+              </label>
+              <div className="flex items-center mt-2">
+                <input
+                  type="checkbox"
+                  id="isGated"
+                  name="isGated"
+                  checked={formData.isGated || false}
+                  onChange={(e) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      isGated: e.target.checked,
+                    }));
+                  }}
+                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                />
+                <label htmlFor="isGated" className="ml-2 text-sm text-gray-700">
+                  Is this a gated community?
+                </label>
+              </div>
             </div>
           </div>
         </div>

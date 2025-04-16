@@ -25,6 +25,11 @@
     "twinhouse",
     "house"
   ],
+  "RentDurationType": [
+    "daily",
+    "weekly",
+    "monthly"
+  ],
   "EnumFinishingType": [
     "fully finished",
     "semi finished",
@@ -42,6 +47,34 @@
     "residential",
     "commercial",
     "mixed-use"
+  ],
+  "RentalPropertyAmenityEnum": [
+    "Wifi",
+    "Kitchen",
+    "Washer",
+    "Dryer",
+    "Air conditioning",
+    "Heating",
+    "Dedicated workspace",
+    "TV",
+    "Hair dryer",
+    "Iron",
+    "Essentials",
+    "Pool",
+    "Hot tub",
+    "Free parking",
+    "EV charger",
+    "Crib",
+    "King bed",
+    "Gym",
+    "BBQ grill",
+    "Breakfast",
+    "Indoor fireplace",
+    "Smoking allowed",
+    "Beachfront",
+    "Waterfront",
+    "Smoke alarm",
+    "Carbon monoxide alarm"
   ],
   "EnumPropertyPurpose": [
     "housing",

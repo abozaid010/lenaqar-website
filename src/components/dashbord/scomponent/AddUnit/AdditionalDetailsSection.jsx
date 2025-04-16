@@ -1,4 +1,5 @@
 import React from "react";
+import propertyEnums from "../../data/propertyEnums.json";
 
 const AdditionalDetailsSection = ({
   formik,
@@ -22,13 +23,24 @@ const AdditionalDetailsSection = ({
             value={formik.values.finishing}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+            className={`w-full px-4 py-2 rounded-lg border ${
+              formik.touched.finishing && formik.errors.finishing
+                ? "border-red-500 focus:ring-red-500"
+                : "border-gray-300 focus:ring-primary"
+            } focus:border-transparent`}
           >
             <option value="">Select Finishing</option>
-            <option value="Fully Finished">Fully Finished</option>
-            <option value="Semi Finished">Semi Finished</option>
-            <option value="Core & Shell">Core & Shell</option>
+            {propertyEnums.EnumFinishingType.map((finishing, index) => (
+              <option key={index} value={finishing}>
+                {finishing.charAt(0).toUpperCase() + finishing.slice(1)}
+              </option>
+            ))}
           </select>
+          {formik.touched.finishing && formik.errors.finishing && (
+            <p className="mt-1 text-sm text-red-500">
+              {formik.errors.finishing}
+            </p>
+          )}
         </div>
         <div>
           <div className="flex items-center justify-between">
@@ -46,7 +58,11 @@ const AdditionalDetailsSection = ({
 
           <div className="relative">
             <div
-              className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer flex justify-between items-center"
+              className={`w-full px-4 py-2 rounded-lg border ${
+                formik.touched.developer && formik.errors.developer
+                  ? "border-red-500 focus:ring-red-500"
+                  : "border-gray-300 focus:ring-primary"
+              } focus:border-transparent cursor-pointer flex justify-between items-center`}
               onClick={() => setIsDevDropdownOpen(!isDevDropdownOpen)}
             >
               <span>{formik.values.developer || "Select Developer"}</span>
@@ -62,8 +78,14 @@ const AdditionalDetailsSection = ({
                       className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                       onClick={() => {
                         formik.setFieldValue("developer", developer.name);
-                        formik.setFieldTouched("developer", true);
+                        formik.setFieldTouched("developer", true, false); // Set touched but don't validate yet
                         setIsDevDropdownOpen(false);
+                        // Manually validate the form after setting the value
+                        setTimeout(() => {
+                          formik.validateForm().then(() => {
+                            formik.setFieldError("developer", undefined); // Clear any error for developer
+                          });
+                        }, 0);
                       }}
                     >
                       {developer.name}

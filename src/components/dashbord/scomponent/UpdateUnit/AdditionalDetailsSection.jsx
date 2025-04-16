@@ -22,9 +22,9 @@ const AdditionalDetailsSection = ({ formData, handleChange }) => {
             {propertyEnums.EnumFinishingType.map((type, index) => (
               <option
                 key={index}
-                value={type.charAt(0).toUpperCase() + type.slice(1)}
+                value={type}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {type}
               </option>
             ))}
           </select>

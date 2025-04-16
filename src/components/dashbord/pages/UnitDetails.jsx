@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-
+import im from "../../../../public/images/building1.jpg"
 // Change this import to match the actual file extension
 
-import { updateUnit, deleteUnit } from "@/components/services/serviceFetching";
+import { updateUnit, deleteUnit, updateUnitRent } from "@/components/services/serviceFetching";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 // Import Swiper components and styles
@@ -63,11 +63,17 @@ export default function UnitDetails({ unit, developers, comboundata }) {
     );
   };
 
-  const handleUpdateUnit = async (updatedUnit) => {
-    let newUnit = await updateUnit(updatedUnit);
+  const handleUpdateUnit = async (updatedUnit, purpose) => {
+    let newUnit;
+  
+    if (purpose === "Sell" || purpose === "Buy") {
+      newUnit = await updateUnit(updatedUnit);
+    } else if (purpose === "Rent") {
+      newUnit = await updateUnitRent(updatedUnit);
+    }
+  
     setIsUpdateModalOpen(false);
     toast.success('Unit updated successfully');
-    // Instead of just refreshing, we'll redirect to the same page with the page parameter
     router.push(`/dashbord/units/${unit.unitId}?page=${pageParam}`);
   };
 
@@ -135,7 +141,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           >
             {updatedUnit.images && updatedUnit.images[mainImageIndex] && (
               <Image
-                src={updatedUnit.images[mainImageIndex].url}
+                src={updatedUnit.images[mainImageIndex].url || im.src}
                 alt={`${updatedUnit.unitTitle} - Main Image`}
                 fill
                 className="object-cover border h-[500px]  transition-transform duration-300 group-hover:scale-105"
@@ -173,7 +179,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                     onClick={() => setMainImageIndex(index)}
                   >
                     <Image
-                      src={image.url}
+                      src={image.url || im.src}
                       alt={`${updatedUnit.unitTitle} - ${index + 1}`}
                       fill
                       className="object-cover "
@@ -325,7 +331,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                 <SwiperSlide key={index} className="flex items-center justify-center">
                   <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto ">
                     <Image
-                      src={image.url}
+                      src={image.url || im.src}
                       alt={`${updatedUnit.unitTitle} - ${index + 1}`}
                       fill
                       className="object-contain"

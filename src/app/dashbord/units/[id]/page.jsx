@@ -15,6 +15,7 @@ const Page = async ({ params }) => {
   const unit = await fetchUnitById(id);
   const comboundata = await fetchcombounds();
   const developers = await fetchDevelopers();
+  console.log(unit)
   
   return <UnitDetails unit={unit} comboundata={comboundata} developers={developers}  />;
 };

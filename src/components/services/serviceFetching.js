@@ -28,11 +28,14 @@ export async function fetchcombounds() {
 export async function uploadImages(formData) {
   try {
     const response = await axiosInstance.post(`/images/`, formData, {
+      
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
+    console.log("responseImage",response)
     return response.data;
+    
   } catch (error) {
     console.error("Failed to upload images:", error.message);
     return { error: error.message };
@@ -61,7 +64,16 @@ export async function fetchUnitById(id) {
 
 export async function updateUnit(unit) {
   try {
-    const response = await axiosInstance.post(`/update-unit/`, unit);
+    const response = await axiosInstance.post(`/update_sale_unit/`, unit);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update unit:", error.message);
+    return { error: error.message };
+  }
+}
+export async function updateUnitRent(unit) {
+  try {
+    const response = await axiosInstance.post(`/update_rent_unit/`, unit);
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
@@ -124,7 +136,16 @@ export async function addDeveloper(developerData) {
 // Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {
-    const response = await axiosInstance.post(`/add-unit/`, unitData);
+    const response = await axiosInstance.post(`/add_sale_unit/`, unitData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
+export async function addUnitRent(unitData) {
+  try {
+    const response = await axiosInstance.post(`/add_rent_unit/`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);

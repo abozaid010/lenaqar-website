@@ -50,6 +50,7 @@ const AddUnitModal = ({
   const [isRentalProperty, setIsRentalProperty] = useState(false);
   const [isSellProperty, setIsSellProperty] = useState(false);
   const [isStep1Valid, setIsStep1Valid] = useState(false);
+  const [isStep2Valid, setIsStep2Valid] = useState(false);
 
   // Initialize amenities as an empty array
   useEffect(() => {
@@ -80,16 +81,67 @@ const AddUnitModal = ({
     ];
     
     const step1Valid = requiredStep1Fields.every(field => 
-      formik.values[field] && !formik.errors[field]
+      formik.values[field] && formik.values[field].trim() !== ""
     );
     
-    setIsStep1Valid(step1Valid && formik.values.purpose !== "");
-  }, [formik.values, formik.errors]);
+    setIsStep1Valid(step1Valid);
+  }, [formik.values]);
+
+  // Validate step 2 fields
+  useEffect(() => {
+    if (currentStep === 2) {
+      if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
+        // Changed the required fields to match what's actually in your form
+        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate', 'deliveryStatus'];
+        const isFinancialValid = financialFields.every(field => 
+          formik.values[field] && formik.values[field].toString().trim() !== ""
+        );
+        
+        setIsStep2Valid(isFinancialValid);
+      } else if (formik.values.purpose === "Rent") {
+        const rentalFields = ['rentDurationType', 'rentPrice'];
+        const isRentalValid = rentalFields.every(field => 
+          formik.values[field] && formik.values[field].toString().trim() !== ""
+        );
+        
+        setIsStep2Valid(isRentalValid);
+      }
+    }
+  }, [formik.values, currentStep]);
 
   const handleNextStep = () => {
-    if (currentStep === 1 && isStep1Valid) {
-      setCurrentStep(2);
+    // Touch all fields in the current step to show validation errors
+    if (currentStep === 1) {
+      // Touch all fields in step 1 to show all validation errors
+      Object.keys(formik.values).forEach(field => {
+        formik.setFieldTouched(field, true, true);
+      });
+      
+      // Only proceed if all required fields are filled
+      if (isStep1Valid) {
+        setCurrentStep(2);
+      } else {
+        toast.error("Please fill all required fields");
+      }
     } else if (currentStep === 2) {
+      // Touch all fields in step 2 to show all validation errors
+      Object.keys(formik.values).forEach(field => {
+        formik.setFieldTouched(field, true, true);
+      });
+      
+      // Validate fields based on purpose
+      if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
+        if (!isStep2Valid) {
+          toast.error("Please fill all required financial fields");
+          return;
+        }
+      } else if (formik.values.purpose === "Rent") {
+        if (!isStep2Valid) {
+          toast.error("Please fill all required rental fields");
+          return;
+        }
+      }
+      
       setCurrentStep(3);
     }
   };
@@ -305,7 +357,7 @@ const AddUnitModal = ({
                         {propertyEnums.EnumBuildingType.map((type, index) => (
                           <option
                             key={index}
-                            value={type.charAt(0).toUpperCase() + type.slice(1)}
+                            value={type}
                             className="py-2"
                           >
                             {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -410,28 +462,7 @@ const AddUnitModal = ({
                     )}
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      District
-                    </label>
-                    <input
-                      type="text"
-                      name="district"
-                      value={formik.values.district}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        formik.touched.district && formik.errors.district
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-primary"
-                      } focus:border-transparent`}
-                    />
-                    {formik.touched.district && formik.errors.district && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {formik.errors.district}
-                      </p>
-                    )}
-                  </div>
+                 
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -452,7 +483,7 @@ const AddUnitModal = ({
                       {propertyEnums.EnumViewType.map((view, index) => (
                         <option
                           key={index}
-                          value={view.charAt(0).toUpperCase() + view.slice(1)}
+                          value={view}
                         >
                           {view.charAt(0).toUpperCase() + view.slice(1)}
                         </option>
@@ -463,6 +494,27 @@ const AddUnitModal = ({
                         {formik.errors.view}
                       </p>
                     )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Is Gated
+                    </label>
+                    <div className="flex items-center mt-2">
+                      <input
+                        type="checkbox"
+                        id="isGated"
+                        name="isGated"
+                        checked={formik.values.isGated || false}
+                        onChange={(e) => {
+                          formik.setFieldValue("isGated", e.target.checked);
+                        }}
+                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                      />
+                      <label htmlFor="isGated" className="ml-2 text-sm text-gray-700">
+                        Property is in a gated community
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
