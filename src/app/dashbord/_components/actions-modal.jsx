@@ -25,74 +25,50 @@ export default function ActionsModal({ actions, onClose, userId }) {
           </button>
         </div>
 
-        {Object.keys(actions).length > 0 && (
+        {actions.length > 0 && (
           <ul className="timeline px-3">
-            <li className="timeline-item">
-              <div className="timeline-content">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-sm text-gray-800">
-                      {actions.action}
-                    </p>
-
-                    {/* <div className="text-[10px] mt-1 bg-blue-600 rounded-xl px-2 text-center text-white font-semibold">
-                      AI action
-                    </div> */}
-                  </div>
-
-                  <small className="text-gray-500 font-medium">
-                    {new Date(actions.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </small>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {actions.description}
-                </p>
-
-                {!NOPREFRERED_TIME.includes(actions.action) &&
-                  actions.preferred_time && (
-                    <small className="underline text-xs text-green-600 font-medium">
-                      {new Date(actions.preferred_time).toLocaleDateString(
-                        "en-US",
-                        {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        }
-                      )}
-                    </small>
-                  )}
-              </div>
-            </li>
-
-            {actions.actions_history?.map((action, index) => (
-              <li className="timeline-item" key={index}>
+            {actions.map((a, idx) => (
+              <li className="timeline-item" key={idx}>
                 <div className="timeline-content">
                   <div className="flex items-center justify-between">
-                    <p className="font-bold text-sm text-gray-800">
-                      {action.action}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-sm text-gray-800">
+                        {a.action}
+                      </p>
+
+                      <div className="text-[10px] mt-1 bg-blue-600 rounded-xl px-2 text-center text-white font-semibold">
+                        {a.user}
+                      </div>
+                    </div>
+
                     <small className="text-gray-500 font-medium">
-                      {new Date(action.created_at).toLocaleDateString("en-US", {
+                      {new Date(a.created_at).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",
                       })}
                     </small>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{action.comment}</p>
+                  <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
+
+                  {!NOPREFRERED_TIME.includes(a.action) && a.preferred_time && (
+                    <small className="underline text-xs text-green-600 font-medium">
+                      {new Date(a.preferred_time).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </small>
+                  )}
                 </div>
               </li>
             ))}
           </ul>
         )}
 
-        <NewActionForm userId={userId} onSuccess={onClose} actions={actions} />
+        <NewActionForm userId={userId} onSuccess={onClose} />
       </div>
     </div>
   );

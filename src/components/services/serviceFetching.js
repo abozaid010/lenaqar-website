@@ -28,14 +28,14 @@ export async function fetchcombounds() {
 export async function uploadImages(formData) {
   try {
     const response = await axiosInstance.post(`/images/`, formData, {
-      
+
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("responseImage",response)
+    console.log("responseImage", response);
     return response.data;
-    
+
   } catch (error) {
     console.error("Failed to upload images:", error.message);
     return { error: error.message };
@@ -190,11 +190,9 @@ export async function getChatHistory(userId) {
 }
 
 export async function getClientActions(phoneNumber) {
-  const cookieClientId = await getClientid();
-  // const actionID = `${phoneNumber}_${cookieClientId}`;
-
   try {
-    const response = await axiosInstance.get(`user-actions/${phoneNumber}/${cookieClientId}`);
+    const response = await axiosInstance.get(`action/${phoneNumber}`);
+
     return response.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
