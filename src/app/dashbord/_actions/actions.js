@@ -8,42 +8,57 @@ export async function addNewAction(prevState, formData) {
     const clientId = await getClientid();
     const phoneNumber = formData.get('userId');
     const actionID = `${phoneNumber}_${clientId}`;
+    const AIActions = JSON.parse(formData.get('ai_action'));
 
-    let AIActions = JSON.parse(formData.get('ai_action'));
-
+    // Case1: there is no AI action
     if (Object.keys(AIActions).length === 0) {
-        AIActions = {
-            "client_id": clientId,
-            "user_id": phoneNumber,
-            "created_at": new Date().toISOString(),
-            "preferred_time": new Date().toISOString(),
-            "action": "Not interested",
-            "description": "The client is not interested or not qualified in the property",
+        const payload = {
+            client_id: clientId,
+            user_id: formData.get('userId'),
+            action: formData.get('action_type'),
+            description: formData.get('comment'),
+            created_at: new Date().toISOString()
         };
+
+        try {
+            await axiosInstance.post(`/action/`, payload);
+
+            revalidatePath('/dashbord');
+            return {
+                success: true,
+                message: "Action posted successfully",
+            };
+
+
+        } catch (error) {
+            console.error("Error posting action:", error);
+            return {
+                success: false,
+                message: "Failed to post action",
+            };
+        }
     }
 
-    const newAction = {
-        action: formData.get('action_type'),
-        comment: formData.get('comment'),
-        created_at: new Date().toISOString(),
-        user: "sales",
-    };
-
-    const payload = {
-        ...AIActions,
-        "actions_history": AIActions.actions_history ? [...AIActions.actions_history, newAction] : [
-            newAction,
-        ],
-    };
-
+    // case2: there is AI action
     try {
-        await axiosInstance.put(`/action/${actionID}`, JSON.stringify(payload), {
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
+        const newAction = {
+            action: formData.get('action_type'),
+            comment: formData.get('comment'),
+            created_at: new Date().toISOString(),
+            user: "sales",
+        };
+
+        const payload = {
+            ...AIActions,
+            "actions_history": AIActions.actions_history ? [...AIActions.actions_history, newAction] : [
+                newAction,
+            ],
+        };
+
+        await axiosInstance.put(`/action/${actionID}`, JSON.stringify(payload));
 
         revalidatePath('/dashbord');
+
         return {
             success: true,
             message: "Action posted successfully",

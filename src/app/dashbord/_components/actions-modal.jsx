@@ -35,9 +35,9 @@ export default function ActionsModal({ actions, onClose, userId }) {
                       {actions.action}
                     </p>
 
-                    <div className="text-[10px] mt-1 bg-blue-600 rounded-xl px-2 text-center text-white font-semibold">
+                    {/* <div className="text-[10px] mt-1 bg-blue-600 rounded-xl px-2 text-center text-white font-semibold">
                       AI action
-                    </div>
+                    </div> */}
                   </div>
 
                   <small className="text-gray-500 font-medium">
