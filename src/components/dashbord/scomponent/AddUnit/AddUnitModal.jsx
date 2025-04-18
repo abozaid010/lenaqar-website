@@ -41,6 +41,7 @@ const AddUnitModal = ({
     isAddDeveloperModalOpen,
     setIsAddDeveloperModalOpen,
     handleDeveloperSave,
+    uploadStatus 
   } = useUnitForm(onClose, onSave);
   
   const [isDevDropdownOpen, setIsDevDropdownOpen] = useState(false);
@@ -91,15 +92,15 @@ const AddUnitModal = ({
   useEffect(() => {
     if (currentStep === 2) {
       if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
-        // Changed the required fields to match what's actually in your form
-        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate', 'deliveryStatus'];
+        // Remove deliveryStatus from required fields since it's now set automatically
+        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate'];
         const isFinancialValid = financialFields.every(field => 
           formik.values[field] && formik.values[field].toString().trim() !== ""
         );
         
         setIsStep2Valid(isFinancialValid);
       } else if (formik.values.purpose === "Rent") {
-        const rentalFields = ['rentDurationType', 'rentPrice'];
+        const rentalFields = ['rentDurationType', 'rentPrice' , 'availabilityDate'];
         const isRentalValid = rentalFields.every(field => 
           formik.values[field] && formik.values[field].toString().trim() !== ""
         );
@@ -110,10 +111,13 @@ const AddUnitModal = ({
   }, [formik.values, currentStep]);
 
   const handleNextStep = () => {
-    // Touch all fields in the current step to show validation errors
     if (currentStep === 1) {
-      // Touch all fields in step 1 to show all validation errors
-      Object.keys(formik.values).forEach(field => {
+      // Touch only step 1 fields to show validation errors
+      const step1Fields = [
+        'compound', 'unitTitle', 'buildingType', 'purpose', 'city', 'view'
+      ];
+      
+      step1Fields.forEach(field => {
         formik.setFieldTouched(field, true, true);
       });
       
@@ -124,22 +128,27 @@ const AddUnitModal = ({
         toast.error("Please fill all required fields");
       }
     } else if (currentStep === 2) {
-      // Touch all fields in step 2 to show all validation errors
-      Object.keys(formik.values).forEach(field => {
-        formik.setFieldTouched(field, true, true);
-      });
+      // Touch only step 2 fields based on property type
+      if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
+        // Remove deliveryStatus from fields to touch since it's now set automatically
+        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate'];
+        financialFields.forEach(field => {
+          formik.setFieldTouched(field, true, true);
+        });
+      } else if (formik.values.purpose === "Rent") {
+        const rentalFields = ['rentDurationType', 'rentPrice'];
+        rentalFields.forEach(field => {
+          formik.setFieldTouched(field, true, true);
+        });
+      }
       
       // Validate fields based on purpose
-      if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
-        if (!isStep2Valid) {
-          toast.error("Please fill all required financial fields");
-          return;
-        }
-      } else if (formik.values.purpose === "Rent") {
-        if (!isStep2Valid) {
-          toast.error("Please fill all required rental fields");
-          return;
-        }
+      if ((formik.values.purpose === "Sell" || formik.values.purpose === "Buy") && !isStep2Valid) {
+        toast.error("Please fill all required financial fields");
+        return;
+      } else if (formik.values.purpose === "Rent" && !isStep2Valid) {
+        toast.error("Please fill all required rental fields");
+        return;
       }
       
       setCurrentStep(3);
@@ -443,18 +452,45 @@ const AddUnitModal = ({
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       City
                     </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formik.values.city}
-                      onChange={formik.handleChange}
-                      onBlur={formik.handleBlur}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        formik.touched.city && formik.errors.city
-                          ? "border-red-500 focus:ring-red-500"
-                          : "border-gray-300 focus:ring-primary"
-                      } focus:border-transparent`}
-                    />
+                    <div className="relative">
+                      <select
+                        name="city"
+                        value={formik.values.city}
+                        onChange={formik.handleChange}
+                        onBlur={formik.handleBlur}
+                        className={`w-full px-4 py-2 rounded-lg border appearance-none bg-white cursor-pointer ${
+                          formik.touched.city && formik.errors.city
+                            ? "border-red-500 focus:ring-red-500"
+                            : "border-gray-300 hover:border-gray-400 focus:ring-primary focus:border-primary"
+                        } focus:outline-none focus:ring-2 focus:ring-opacity-50 shadow-sm transition-all duration-200`}
+                      >
+                        <option value="">Select City</option>
+                        <option value="Cairo">Cairo</option>
+                        <option value="Alexandria">Alexandria</option>
+                        <option value="Giza">Giza</option>
+                        <option value="New Cairo">New Cairo</option>
+                        <option value="6th of October">6th of October</option>
+                        <option value="Madinaty">Madinaty</option>
+                        <option value="El Shorouk">El Shorouk</option>
+                        <option value="Sheikh Zayed">Sheikh Zayed</option>
+                        <option value="El Rehab">El Rehab</option>
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                        <svg
+                          className="h-5 w-5"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                          aria-hidden="true"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                    </div>
                     {formik.touched.city && formik.errors.city && (
                       <p className="mt-1 text-sm text-red-500">
                         {formik.errors.city}
@@ -496,7 +532,7 @@ const AddUnitModal = ({
                     )}
                   </div>
 
-                  <div>
+                  {/* <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Is Gated
                     </label>
@@ -515,7 +551,7 @@ const AddUnitModal = ({
                         Property is in a gated community
                       </label>
                     </div>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -566,6 +602,7 @@ const AddUnitModal = ({
                 handleImageUpload={handleImageUpload}
                 removeSelectedFile={removeSelectedFile}
                 removeUploadedImage={removeUploadedImage}
+                uploadStatus={uploadStatus} // Add this line
               />
             </div>
           )}
@@ -603,10 +640,15 @@ const AddUnitModal = ({
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-md flex items-center"
+                disabled={uploadingImages}
+                className={`px-6 py-3 ${
+                  uploadingImages 
+                  ? "bg-gray-400 cursor-not-allowed" 
+                  : "bg-primary hover:bg-primary/90"
+                } text-white font-medium rounded-lg transition-colors shadow-md flex items-center`}
               >
                 <Save className="w-5 h-5 mr-2" />
-                Save Unit
+                {uploadingImages ? "Uploading..." : "Save Unit"}
               </button>
             )}
           </div>

@@ -32,7 +32,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
   const filteredEstates = initialData
     ? initialData.filter((estate) => {
         const matchesSearch =
-          (estate.name?.toLowerCase() || "").includes(
+          (estate.unitTitle?.toLowerCase() || "").includes(
             searchTerm.toLowerCase()
           ) ||
           (estate.compound?.toLowerCase() || "").includes(
@@ -228,7 +228,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                     {estate.images && estate.images.length > 0 ? (
                       <>
                         <img
-                          src={estate.images[0].url || im.src}
+                          src={estate.images[0].url}
                           alt={estate.name || estate.compound || "Property"}
                           className="w-full h-full object-cover"
                         />
@@ -248,7 +248,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                     ) : (
                       <>
                         <img
-                          src={im.src}
+                          src={estate.images[0].url}
                           alt={estate.name || estate.compound || "Property"}
                           className="w-full h-full object-cover"
                         />
@@ -304,11 +304,20 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                         </div>
                       )}
 
-                      {estate.totalPrice && (
-                        <div className="text-sm text-gray-600 rtl:text-right">
-                          <span className="font-medium">totalPrice :</span>{" "}
-                          {estate.totalPrice}
-                        </div>
+                      {estate.purpose === "Rent" || estate.purpose === "rent"   ? (
+                        estate.rentPrice && (
+                          <div className="text-sm text-gray-600 rtl:text-right">
+                            <span className="font-medium">Rent Price:</span>{" "}
+                            {estate.rentPrice} EGP
+                          </div>
+                        )
+                      ) : (
+                        estate.totalPrice && (
+                          <div className="text-sm text-gray-600 rtl:text-right">
+                            <span className="font-medium">Total Price:</span>{" "}
+                            {estate.totalPrice} EGP
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -318,42 +327,44 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
           </div>
         )}
 
-        {/* Pagination remains the same */}
+        {/* Pagination with fixed position */}
         {filteredEstates.length > 0 && (
-          <div className="mt-10 flex justify-center">
-            <nav className="flex items-center bg-white px-4 py-3 rounded-xl shadow-lg">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`mx-1 p-2 rounded-full ${currentPage === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-primary hover:bg-primary/10 border border-gray-200"} transition-all duration-300 flex items-center justify-center`}
-              >
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-
-              {getPaginationNumbers().map((pageNumber) => (
+          <div className="fixed max-w-md mx-auto bottom-0 left-0 right-0  z-10">
+            <div className=" flex justify-center">
+              <nav className="flex items-center  px-4 py-3 rounded-xl ">
                 <button
-                  key={`page-${pageNumber}`}
-                  onClick={() => setCurrentPage(pageNumber)}
-                  className={`mx-1 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
-                    currentPage === pageNumber
-                      ? "bg-primary text-white font-medium shadow-md transform scale-110"
-                      : "text-gray-700 hover:bg-primary/10 border border-gray-200"
-                  }`}
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`mx-1 p-2 rounded-full ${currentPage === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-primary hover:bg-primary/10 border border-gray-200"} transition-all duration-300 flex items-center justify-center`}
                 >
-                  {pageNumber}
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
-              ))}
 
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className={`mx-1 p-2 rounded-full ${currentPage === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-primary hover:bg-primary/10 border border-gray-200"} transition-all duration-300 flex items-center justify-center`}
-              >
-                <ChevronRight className="w-5 h-5" />
-              </button>
-            </nav>
+                {getPaginationNumbers().map((pageNumber) => (
+                  <button
+                    key={`page-${pageNumber}`}
+                    onClick={() => setCurrentPage(pageNumber)}
+                    className={`mx-1 w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300 ${
+                      currentPage === pageNumber
+                        ? "bg-primary text-white font-medium shadow-md transform scale-110"
+                        : "text-gray-700 hover:bg-primary/10 border border-gray-200"
+                    }`}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className={`mx-1 p-2 rounded-full ${currentPage === totalPages ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-primary hover:bg-primary/10 border border-gray-200"} transition-all duration-300 flex items-center justify-center`}
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </nav>
+            </div>
           </div>
         )}
 

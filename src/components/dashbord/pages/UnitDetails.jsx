@@ -1,9 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import im from "../../../../public/images/building1.jpg"
-// Change this import to match the actual file extension
-
 import { updateUnit, deleteUnit, updateUnitRent } from "@/components/services/serviceFetching";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
@@ -26,6 +23,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageParam = searchParams.get('page') || '1';
+  
+  // Check if the unit is for rent
+  const isRent = updatedUnit?.purpose?.toLowerCase() === "rent";
 
   // Reference to the fullscreen swiper
   const fullscreenSwiperRef = useRef(null);
@@ -93,6 +93,12 @@ export default function UnitDetails({ unit, developers, comboundata }) {
     setIsFullscreen(false);
   };
 
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-6 border-b flex justify-between items-center">
@@ -141,10 +147,10 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           >
             {updatedUnit.images && updatedUnit.images[mainImageIndex] && (
               <Image
-                src={updatedUnit.images[mainImageIndex].url || im.src}
+                src={updatedUnit.images[mainImageIndex].url}
                 alt={`${updatedUnit.unitTitle} - Main Image`}
                 fill
-                className="object-cover border h-[500px]  transition-transform duration-300 group-hover:scale-105"
+                className="object-cover border h-[500px] transition-transform duration-300 group-hover:scale-105"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -179,10 +185,10 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                     onClick={() => setMainImageIndex(index)}
                   >
                     <Image
-                      src={image.url || im.src}
+                      src={image.url}
                       alt={`${updatedUnit.unitTitle} - ${index + 1}`}
                       fill
-                      className="object-cover "
+                      className="object-cover"
                     />
                     {mainImageIndex === index && (
                       <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
@@ -197,17 +203,55 @@ export default function UnitDetails({ unit, developers, comboundata }) {
         </div>
 
         <div className="space-y-6">
+          {/* Price information section - changes based on purpose */}
           <div className="bg-gray-50 p-4 rounded-lg">
-            <h2 className="text-2xl font-bold text-gray-800">
-
-              EGP {updatedUnit?.totalPrice ? updatedUnit.totalPrice.toLocaleString() : '0'}
-            </h2>
-            <p className="text-gray-600">
-              Down Payment: EGP {updatedUnit?.downPayment ? updatedUnit.downPayment.toLocaleString() : '0'}
-            </p>
-            <p className="text-gray-600">
-              Payment Plans: {updatedUnit?.paymentPlans || 'N/A'}
-            </p>
+            {isRent ? (
+              <>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  EGP {updatedUnit?.rentPrice ? updatedUnit.rentPrice.toLocaleString() : '0'} 
+                  <span className="text-lg font-medium text-gray-600">
+                    / {updatedUnit?.rentDurationType || 'Daily'}
+                  </span>
+                </h2>
+                <p className="text-gray-600 mt-2">
+                  Available from: {formatDate(updatedUnit?.availabilityDate)}
+                </p>
+                {updatedUnit?.amenities && updatedUnit.amenities.length > 0 && (
+                  <div className="mt-3">
+                    <p className="font-semibold text-gray-700 mb-2">Amenities:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {updatedUnit.amenities.map((amenity, index) => (
+                        <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                          {amenity}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  EGP {updatedUnit?.totalPrice ? updatedUnit.totalPrice.toLocaleString() : '0'}
+                </h2>
+                <p className="text-gray-600">
+                  Down Payment: EGP {updatedUnit?.downPayment ? updatedUnit.downPayment.toLocaleString() : '0'}
+                </p>
+                <p className="text-gray-600">
+                  Payment Plans: {updatedUnit?.paymentPlans || 'N/A'}
+                </p>
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-gray-600">Delivery Date:</p>
+                    <p className="font-semibold">{formatDate(updatedUnit?.deliveryDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-600">Delivery Status:</p>
+                    <p className="font-semibold">{updatedUnit?.deliveryStatus || 'N/A'}</p>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -238,7 +282,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-gray-600">Purpose</p>
               <p className="font-semibold">
-                <span className="inline-block px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                  isRent ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                }`}>
                   {updatedUnit.purpose}
                 </span>
               </p>
@@ -262,12 +308,6 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             <div className="flex justify-between">
               <span className="text-gray-600">Garden Size</span>
               <span className="font-semibold">{updatedUnit.gardenSize} m²</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Delivery Date</span>
-              <span className="font-semibold">
-                {updatedUnit.deliveryDate ? new Date(updatedUnit.deliveryDate).toLocaleDateString() : 'N/A'}
-              </span>
             </div>
           </div>
         </div>
@@ -329,9 +369,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             >
               {updatedUnit.images && updatedUnit.images.map((image, index) => (
                 <SwiperSlide key={index} className="flex items-center justify-center">
-                  <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto ">
+                  <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto">
                     <Image
-                      src={image.url || im.src}
+                      src={image.url}
                       alt={`${updatedUnit.unitTitle} - ${index + 1}`}
                       fill
                       className="object-contain"

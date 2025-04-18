@@ -53,7 +53,7 @@ const PricingSection = ({
           />
         </div>
 
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Delivery Status
           </label>
@@ -73,7 +73,7 @@ const PricingSection = ({
               </option>
             ))}
           </select>
-        </div>
+        </div> */}
 
         <div className="md:col-span-3">
           <div className="flex justify-between items-center mb-2">

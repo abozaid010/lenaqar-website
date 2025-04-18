@@ -20,17 +20,25 @@ const validationSchema = Yup.object({
   developer_name: Yup.string().required("Developer name is required"),
   city: Yup.string().required("City is required"),
   country: Yup.string().required("Country is required"),
-  area: Yup.number()
-    .typeError("Area must be a number")
-    .positive("Area must be greater than zero")
-    .required("Area is required"),
+  // area field removed from validation schema
   video_url: Yup.string()
     .url("Please enter a valid URL")
     .nullable()
     .transform((value) => (value === "" ? null : value))
     .required("Please enter a link"),
+  // Add this validation to your Formik validation schema in useCompoundForm:
   google_map_link: Yup.string()
-    .url("Please enter a valid URL")
+    .url('Must be a valid URL')
+    .test(
+      'is-google-maps',
+      'Must be a valid Google Maps URL',
+      (value) => {
+        if (!value) return true; // Allow empty values
+        return value.includes('google.com/maps') || 
+               value.includes('goo.gl/maps') || 
+               value.includes('maps.app.goo.gl');
+      }
+    )
     .nullable()
     .transform((value) => (value === "" ? null : value))
     .required("Please enter a link"),
@@ -44,7 +52,14 @@ export const useCompoundForm = (onClose, onSave) => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [deletingImage, setDeletingImage] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(null); // 'success', 'error', or null
   const fileInputRef = useRef(null);
+  const [developersData, setDevelopersData] = useState([]);
+
+  // Function to update developers list after adding a new one
+  const updateDevelopers = (newDeveloperData) => {
+    setDevelopersData(prevData => [...prevData, newDeveloperData]);
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -53,14 +68,14 @@ export const useCompoundForm = (onClose, onSave) => {
       developer_name: "",
       city: "",
       country: "Egypt",
-      area: 0,
+      area: 100, // Added back with default value of 100
       gated: false,
       video_url: "",
       google_map_link: "",
       master_plan: null,
     },
     validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting, resetForm }) => {
       // Check if master plan image exists
       if (!values.master_plan) {
         toast.error(
@@ -85,6 +100,10 @@ export const useCompoundForm = (onClose, onSave) => {
           onSave(response);
         }
 
+        // Reset the form to clear all data
+        resetForm();
+        setSelectedFile(null);
+        
         // Show success message
         toast.success("Compound added successfully");
 
@@ -121,6 +140,8 @@ export const useCompoundForm = (onClose, onSave) => {
     if (!selectedFile) return;
 
     setUploadingImage(true);
+    setUploadStatus(null);
+    
     try {
       const imageFormData = new FormData();
       imageFormData.append("file", selectedFile);
@@ -128,17 +149,23 @@ export const useCompoundForm = (onClose, onSave) => {
       // Use uploadImages function from serviceFetching
       const uploadedImages = await uploadImages(imageFormData);
 
+      // Check if there was an error response
+      if (uploadedImages.status === 500 || uploadedImages.error) {
+        throw new Error(uploadedImages.message || "Server error occurred");
+      }
+
       const uploadedImage = Array.isArray(uploadedImages)
         ? uploadedImages[0]
         : uploadedImages;
       formik.setFieldValue("master_plan", uploadedImage);
-      setSelectedFile(null);
+      setUploadStatus('success');
       resetFileInput();
 
       toast.success("Master plan uploaded successfully");
     } catch (error) {
       console.error("Error uploading image:", error);
       toast.error(error.message || "Failed to upload image");
+      setUploadStatus('error');
     } finally {
       setUploadingImage(false);
     }
@@ -169,11 +196,15 @@ export const useCompoundForm = (onClose, onSave) => {
     uploadingImage,
     selectedFile,
     deletingImage,
+    uploadStatus,
     fileInputRef,
     handleFileSelect,
     removeSelectedFile,
     handleImageUpload,
     removeUploadedImage,
     setNewDeveloper,
+    developersData,
+    setDevelopersData,
+    updateDevelopers,
   };
 };

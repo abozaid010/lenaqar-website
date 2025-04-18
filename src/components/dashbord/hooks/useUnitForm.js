@@ -2,7 +2,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import axios from "axios";
 import toast from "react-hot-toast";
 
 import { v4 as uuidv4 } from "uuid";
@@ -55,11 +54,7 @@ export const useUnitForm = (onClose, onSave) => {
       then: () => Yup.string().required("Delivery date is required"),
       otherwise: () => Yup.string().nullable()
     }),
-    deliveryStatus: Yup.string().when("purpose", {
-      is: (purpose) => purpose === "Sell" || purpose === "Buy",
-      then: () => Yup.string().required("Delivery status is required"),
-      otherwise: () => Yup.string().nullable()
-    }),
+    // Remove deliveryStatus validation since it's set automatically
     roomsCount: Yup.number()
       .positive("Rooms count must be greater than zero")
       .required("Rooms count is required"),
@@ -106,6 +101,8 @@ export const useUnitForm = (onClose, onSave) => {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isPaymentPlanPopupOpen, setIsPaymentPlanPopupOpen] = useState(false);
+  const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState([]); // Move this line here
   const fileInputRef = useRef(null);
 
   // Get default values from the JSON file
@@ -184,6 +181,15 @@ export const useUnitForm = (onClose, onSave) => {
           preparedFormData.downPayment = values.downPayment ? Number(values.downPayment) : 0;
           preparedFormData.totalPrice = values.totalPrice ? Number(values.totalPrice) : 0;
           preparedFormData.isGated = values.isGated || false; // Ensure isGated is included for Sell/Buy
+          
+          // Set deliveryStatus dynamically based on deliveryDate
+          if (values.deliveryDate) {
+            const deliveryDate = new Date(values.deliveryDate);
+            const today = new Date();
+            preparedFormData.deliveryStatus = deliveryDate > today ? "Off Plan" : "Ready to Move";
+          } else {
+            preparedFormData.deliveryStatus = "Ready to Move"; // Default value
+          }
           
           // Remove rental-specific fields for Sell/Buy
           delete preparedFormData.amenities;
@@ -324,63 +330,112 @@ export const useUnitForm = (onClose, onSave) => {
     setSelectedFiles(prev => [...prev, ...validFiles]);
   };
 
+  // Remove this line: const [uploadStatus, setUploadStatus] = useState([]);
+  
+  // Then modify the handleImageUpload function
   const handleImageUpload = async () => {
     if (selectedFiles.length === 0) return;
-
+  
     setUploadingImages(true);
-
+  
+    // Initialize upload status for each file
+    const initialStatus = selectedFiles.map(() => 'loading');
+    setUploadStatus(initialStatus);
+  
     try {
       // Create an array to store all uploaded image data
       const uploadedImagesData = [];
       
       // Upload each file one by one
-      for (const file of selectedFiles) {
+      for (let i = 0; i < selectedFiles.length; i++) {
+        const file = selectedFiles[i];
         const formDataToUpload = new FormData();
         formDataToUpload.append("file", file);
         
-        // Upload the current file
-        const uploadedImage = await uploadImages(formDataToUpload);
-        
-        // Format the image data to match the required structure
-        if (Array.isArray(uploadedImage)) {
-          // If response is an array, map each item to the required format
-          const formattedImages = uploadedImage.map(img => ({
-            url: img.url || img.imageUrl || "",
-            fileId: img.fileId || img._id || ""
-          }));
-          uploadedImagesData.push(...formattedImages);
-        } else {
-          // If response is a single object
-          uploadedImagesData.push({
-            url: uploadedImage.url || uploadedImage.imageUrl || "",
-            fileId: uploadedImage.fileId || uploadedImage._id || ""
+        try {
+          // Upload the current file
+          const uploadedImage = await uploadImages(formDataToUpload);
+          
+          // Format the image data to match the required structure
+          if (Array.isArray(uploadedImage)) {
+            // If response is an array, map each item to the required format
+            const formattedImages = uploadedImage.map(img => ({
+              url: img.url || img.imageUrl || "",
+              fileId: img.fileId || img._id || ""
+            }));
+            uploadedImagesData.push(...formattedImages);
+          } else {
+            // If response is a single object
+            uploadedImagesData.push({
+              url: uploadedImage.url || uploadedImage.imageUrl || "",
+              fileId: uploadedImage.fileId || uploadedImage._id || ""
+            });
+          }
+          
+          // Update status for this file to success
+          setUploadStatus(prev => {
+            const newStatus = [...prev];
+            newStatus[i] = 'success';
+            return newStatus;
+          });
+        } catch (error) {
+          console.error(`Error uploading image ${i}:`, error);
+          
+          // Update status for this file to error
+          setUploadStatus(prev => {
+            const newStatus = [...prev];
+            newStatus[i] = 'error';
+            return newStatus;
           });
         }
       }
-
+  
       // Update formik values with all new images
       formik.setFieldValue("images", [...formik.values.images, ...uploadedImagesData]);
-
-      toast.success(`${uploadedImagesData.length} images uploaded successfully`);
-      setSelectedFiles([]);
+  
+      // Only show success message for successfully uploaded images
+      const successCount = uploadStatus.filter(status => status === 'success').length;
+      if (successCount > 0) {
+        toast.success(`${successCount} images uploaded successfully`);
+      }
+      
+      // Keep only failed images in the selected files
+      const failedIndices = uploadStatus.map((status, index) => status === 'error' ? index : -1).filter(index => index !== -1);
+      const failedFiles = failedIndices.map(index => selectedFiles[index]);
+      setSelectedFiles(failedFiles);
+      
+      // Reset upload status for remaining files
+      setUploadStatus(failedFiles.map(() => null));
+      
       resetFileInput();
     } catch (error) {
-      console.error("Error uploading images:", error);
-      toast.error(
-        `Failed to upload images: ${error.message || "Unknown error"}`
-      );
+      console.error("Error in upload process:", error);
+      toast.error(`Failed to upload images: ${error.message || "Unknown error"}`);
+      
+      // Mark all as failed
+      setUploadStatus(selectedFiles.map(() => 'error'));
     } finally {
       setUploadingImages(false);
     }
   };
 
+  // Add the removeSelectedFile function
   const removeSelectedFile = (index) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    
+    // Also update the upload status array
+    setUploadStatus((prev) => {
+      if (prev.length > 0) {
+        return prev.filter((_, i) => i !== index);
+      }
+      return prev;
+    });
   };
 
+  // Add the removeUploadedImage function
   const removeUploadedImage = async (index, imageId) => {
     try {
-      // استخدام وظيفة deleteImage من serviceFetching
+      // Use the deleteImage function from serviceFetching
       await deleteImage(imageId);
 
       // Remove from formik state after successful API deletion
@@ -397,154 +452,92 @@ export const useUnitForm = (onClose, onSave) => {
     }
   };
 
+  // Add missing functions for compound and developer handling
+  const handleCompoundSave = (compoundData) => {
+    // Update the compound field with the new compound
+    formik.setFieldValue("compound", compoundData.name);
+    setIsAddCompoundModalOpen(false);
+  };
+
+  const handleDeveloperSave = async (developerData) => {
+    try {
+      // Call the API to add a new developer
+      const response = await addDeveloper(developerData);
+      
+      // Update the developer field with the new developer
+      formik.setFieldValue("developer", developerData.name);
+      setIsAddDeveloperModalOpen(false);
+      
+      toast.success("Developer added successfully");
+    } catch (error) {
+      console.error("Error adding developer:", error);
+      toast.error(`Failed to add developer: ${error.message || "Unknown error"}`);
+    }
+  };
+
+  // Add missing functions for payment plan handling
+  const handleAddPaymentPlan = (planData) => {
+    formik.setFieldValue("paymentPlans", planData);
+    setIsPaymentPlanPopupOpen(false);
+  };
+
+  const handleRemovePaymentPlan = () => {
+    formik.setFieldValue("paymentPlans", "");
+  };
+
+  // Add missing drag and drop handlers
   const handleDrop = (e) => {
     e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    handleFileSelection(files);
-  };
-
-  // Update the handleAddPaymentPlan function to concatenate strings
-  const handleAddPaymentPlan = (planText) => {
-    const currentPlans = formik.values.paymentPlans;
-    formik.setFieldValue(
-      "paymentPlans",
-      currentPlans ? `${currentPlans}, ${planText}` : planText
-    );
-  };
-
-  // Update the handleRemovePaymentPlan function to work with string
-  const handleRemovePaymentPlan = (index) => {
-    const plansArray = formik.values.paymentPlans.split(", ");
-    plansArray.splice(index, 1);
-    formik.setFieldValue("paymentPlans", plansArray.join(", "));
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileSelection(e.dataTransfer.files);
+    }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
   };
 
-  // Add this custom submit handler function
+  // Add missing handleSubmit function
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Validate required fields based on purpose
-    const requiredFields = [
-      'unitTitle', 'compound', 'buildingType', 'purpose', 
-      'city', 'view', 'roomsCount', 'bathroomCount'
-    ];
-    
-    // Add purpose-specific required fields
-    if (formik.values.purpose === 'Sell' || formik.values.purpose === 'Buy') {
-      requiredFields.push('totalPrice', 'downPayment', 'deliveryDate');
-    } else if (formik.values.purpose === 'Rent') {
-      // For rental properties, check if rent price and duration type are provided
-      requiredFields.push('rentDurationType', 'rentPrice', 'isAvailable', 'availabilityDate');
-    }
-    
-    // Check for missing required fields
-    let hasErrors = false;
-    requiredFields.forEach(field => {
-      if (!formik.values[field]) {
-        formik.setFieldError(field, `${field} is required`);
-        formik.setFieldTouched(field, true);
-        hasErrors = true;
-      }
-    });
-    
-    if (hasErrors) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-    
-    // Check if images are uploaded
     if (formik.values.images.length === 0) {
-      toast.error("Please upload images before saving the unit");
+      toast.error("You must upload images to the server first");
       return;
     }
     
-    // If validation passes, submit the form
     formik.handleSubmit();
   };
 
-  const handleCompoundSave = (compoundData) => {
-    // Set the newly created compound name to the unit's compound field
-    formik.setFieldValue(
-      "compound",
-      compoundData.name || compoundData.compoundName
-    );
-  };
-
-  // Add these to your existing imports
- 
-  
-  // Inside your useUnitForm hook, add:
-  const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
-  
-  // Add this function to handle saving a new developer
-  const handleDeveloperSave = async (developerData) => {
-      try {
-        // Show loading toast
-        const loadingToast = toast.loading("Adding new developer...");
-        
-        // Create the developer data object
-        const developerToAdd = {
-          name: developerData.name,
-          logo:"",
-          description: developerData.description || "",
-         
-        };
-        
-        // Call the API to add the developer
-        const response = await addDeveloper(developerToAdd);
-        
-        // Directly update the form with the new developer value
-        formik.setFieldValue("developer", developerData.name);
-        // Set isNewDeveloper to false to show the select dropdown with the new value
-        // formik.setFieldValue("isNewDeveloper", false);
-        
-        // Close the modal
-        setIsAddDeveloperModalOpen(false);
-        
-        // Dismiss loading toast and show success message
-        toast.dismiss(loadingToast);
-        toast.success("Developer added successfully");
-        
-        return response.data;
-        
-      } catch (error) {
-        console.error("Error adding developer:", error);
-        toast.error("Failed to add developer: " + (error.response?.data?.message || error.message));
-        throw error;
-      }
-    };
-  
-  
-  return {
-    formik,
-    isAddCompoundModalOpen,
-    uploadingImages,
-    selectedFiles,
-    isPaymentPlanPopupOpen,
-    fileInputRef,
-    setIsAddCompoundModalOpen,
-    setIsPaymentPlanPopupOpen,
-    handleFileSelection,
-    handleImageUpload,
-    removeSelectedFile,
-    removeUploadedImage,
-    handleDrop,
-    handleAddPaymentPlan,
-    handleRemovePaymentPlan,
-    handleDragOver,
-    handleCompoundSave,
-    isAddDeveloperModalOpen,
-    setIsAddDeveloperModalOpen,
-    handleDeveloperSave,
-    handleSubmit,
-    // Add function to handle amenity checkbox changes
-    handleAmenityChange: (amenity, checked) => {
-      const updatedAmenities = { ...formik.values.amenities || {} };
-      updatedAmenities[amenity] = checked;
-      formik.setFieldValue("amenities", updatedAmenities);
-    }}
-  }; // This is the correct closing brace for the return statement
+// Make sure to return uploadStatus in your hook's return object
+return {
+  formik,
+  isAddCompoundModalOpen,
+  uploadingImages,
+  selectedFiles,
+  isPaymentPlanPopupOpen,
+  fileInputRef,
+  uploadStatus,
+  setIsAddCompoundModalOpen,
+  setIsPaymentPlanPopupOpen,
+  handleFileSelection,
+  handleImageUpload,
+  removeSelectedFile,
+  removeUploadedImage,
+  handleDrop,
+  handleAddPaymentPlan,
+  handleRemovePaymentPlan,
+  handleDragOver,
+  handleCompoundSave,
+  isAddDeveloperModalOpen,
+  setIsAddDeveloperModalOpen,
+  handleDeveloperSave,
+  handleSubmit,
+  // Add function to handle amenity checkbox changes
+  handleAmenityChange: (amenity, checked) => {
+    const updatedAmenities = { ...formik.values.amenities || {} };
+    updatedAmenities[amenity] = checked;
+    formik.setFieldValue("amenities", updatedAmenities);
+  }}
+}; // This is the correct closing brace for the return statement

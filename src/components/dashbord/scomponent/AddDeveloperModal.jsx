@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { X } from "lucide-react";
+import { X, Loader } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
@@ -15,7 +15,9 @@ const AddDeveloperModal = ({ isOpen, onClose, onSave }) => {
       description: "",
     },
     validationSchema: Yup.object({
-      name: Yup.string().required("Developer name is required"),
+      name: Yup.string()
+        .required("Developer name is required")
+        .matches(/^[\u0600-\u06FFa-zA-Z\s]+$/, "Name must contain only letters (Arabic or English)"),
       description: Yup.string(),
     }),
     onSubmit: async (values) => {
@@ -98,9 +100,16 @@ const AddDeveloperModal = ({ isOpen, onClose, onSave }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-70"
+              className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-70 flex items-center gap-2"
             >
-              {isSubmitting ? "Saving..." : "Save Developer"}
+              {isSubmitting ? (
+                <>
+                  <Loader className="w-4 h-4 animate-spin" />
+                  <span>Saving</span>
+                </>
+              ) : (
+                "Save Developer"
+              )}
             </button>
           </div>
         </form>

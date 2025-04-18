@@ -66,36 +66,6 @@ const FinancialDetailsSection = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Delivery Status
-          </label>
-          <select
-            name="deliveryStatus"
-            value={formik.values.deliveryStatus || ""}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.deliveryStatus && formik.errors.deliveryStatus
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
-            required
-          >
-            <option value="">Select Status</option>
-            {propertyEnums.EnumPropertyStatus && propertyEnums.EnumPropertyStatus.map((status, index) => (
-              <option key={index} value={status}>
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </option>
-            ))}
-          </select>
-          {formik.touched.deliveryStatus && formik.errors.deliveryStatus && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.deliveryStatus}
-            </p>
-          )}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
             Total Price
           </label>
           <input

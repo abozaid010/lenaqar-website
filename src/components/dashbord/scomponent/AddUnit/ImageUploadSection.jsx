@@ -1,5 +1,5 @@
 import React from "react";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, CheckCircle, XCircle, Loader } from "lucide-react";
 
 const ImageUploadSection = ({
   formik,
@@ -12,7 +12,14 @@ const ImageUploadSection = ({
   handleImageUpload,
   removeSelectedFile,
   removeUploadedImage,
+  uploadStatus,
 }) => {
+  // دالة للتحقق مما إذا كانت الصورة قد تم تحميلها
+  const isImageUploaded = (file) => {
+    return formik.values.images.some((img) => img.name === file.name);
+  };
+  console.log(isImageUploaded)
+
   return (
     <div className="mb-8">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -58,9 +65,16 @@ const ImageUploadSection = ({
             type="button"
             onClick={handleImageUpload}
             disabled={uploadingImages}
-            className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400"
+            className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400  items-center justify-center"
           >
-            {uploadingImages ? "Uploading..." : "Upload Image"}
+            {uploadingImages ? (
+              <>
+                <Loader className="w-4 h-4 mr-2 animate-spin" />
+                Uploading...
+              </>
+            ) : (
+              "Upload Images"
+            )}
           </button>
         )}
       </div>
@@ -70,21 +84,33 @@ const ImageUploadSection = ({
         <div className="mt-4">
           <div className="flex justify-between items-center mb-2">
             <h4 className="text-sm font-medium text-gray-700">
-              Selected Image:
+              Selected Images:
             </h4>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {selectedFiles.map((file, index) => (
               <div key={index} className="relative group">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={`Selected image ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-md"
-                />
+                <div className="relative">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt={`Selected image ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-md"
+                  />
+                  {uploadStatus && uploadStatus[index] === 'loading' ? (
+                    <div className="absolute inset-0 flex items-center justify-center  rounded-md">
+                      <Loader className="w-8 h-8 text-white animate-spin" />
+                    </div>
+                  ) : isImageUploaded(file) ? (
+                    <div className="absolute   flex items-center justify-center border-2 border-red-500  b rounded-md">
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                  ) : null}
+                </div>
                 <button
                   type="button"
                   onClick={() => removeSelectedFile(index)}
                   className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                  disabled={uploadingImages}
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -95,7 +121,7 @@ const ImageUploadSection = ({
       )}
 
       {/* Display uploaded images */}
-      {formik.values.images.length > 0 && (
+      {formik.values.images && formik.values.images.length > 0 && (
         <div className="mt-4">
           <h4 className="text-sm font-medium text-gray-700 mb-2">
             Uploaded Images:
@@ -104,7 +130,7 @@ const ImageUploadSection = ({
             {formik.values.images.map((image, index) => (
               <div key={index} className="relative group">
                 <img
-                  src={image.url || image.url}
+                  src={image.url}
                   alt={`Property image ${index + 1}`}
                   className="w-full h-24 object-cover rounded-md"
                 />
