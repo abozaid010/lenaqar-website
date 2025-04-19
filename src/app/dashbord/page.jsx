@@ -11,13 +11,13 @@ export const metadata = {
 };
 
 export default async function DashbordPage({ searchParams: rawSearchParams }) {
-  const searchParams = await rawSearchParams;
+  const searchParams = await rawSearchParams; // Ensure searchParams is awaited
   return (
     <div className="bg-gray-50 min-h-screen p-2 sm:p-4">
       <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
         <DashbordFilter appliedFilters={searchParams} />
 
-        <SearchBar q={searchParams.query} />
+        <SearchBar q={searchParams.q} />
 
         <Suspense
           key={JSON.stringify(searchParams)}
@@ -47,7 +47,7 @@ async function ClientsList({ searchParams }) {
   const nextCursor = initialData.pagination.next_cursor;
   const previousCursor = initialData.pagination.prev_cursor;
 
-  console.log("initialClients", initialData);
+  // console.log("initialClients", initialClients.data.pagination);
   return (
     <ClientsTable
       users={initialData.users}

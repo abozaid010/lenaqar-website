@@ -14,7 +14,7 @@ import AddDeveloperModal from "../AddDeveloperModal";
 import PropertyDetailsSection from "./PropertyDetailsSection";
 import AdditionalDetailsSection from "./AdditionalDetailsSection";
 import ImagesSection from "./ImagesSection";
-import RentalDetailsSection from "./RentalDetailsSectionUpdate";
+import RentalDetailsSectionUpdate from "./RentalDetailsSectionUpdate";
 import PricingSection from "./PricingSection";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -44,6 +44,7 @@ const UpdateUnitForm = ({
     buildingType: "",
     city: "",
     country: "",
+    district: "", // Added district field with empty string default
     compound: "",
     developer: "",
     purpose: "",
@@ -82,16 +83,23 @@ const UpdateUnitForm = ({
   const [isRentalProperty, setIsRentalProperty] = useState(false);
   const [isSellProperty, setIsSellProperty] = useState(false);
   const [availableCities, setAvailableCities] = useState([]);
+  const initialLoad = useRef(true);
   const router = useRouter();
+  
+  // For debugging
+  useEffect(() => {
+    console.log("formData updated:", formData);
+  }, [formData]);
 
   useEffect(() => {
-    if (unit) {
+    if (unit && initialLoad.current) {
       setFormData({
         unitTitle: unit.unitTitle || "",
         unitId: unit.unitId || "",
         buildingType: unit.buildingType || "",
         city: unit.city || "",
         country: unit.country || "",
+        district: unit.district || "", // Added district field
         compound: unit.compound || "",
         developer: unit.developer || "",
         purpose:
@@ -106,7 +114,11 @@ const UpdateUnitForm = ({
         garageArea: unit.garageArea || 0,
         totalPrice: unit.totalPrice || 0,
         downPayment: unit.downPayment || 0,
-        paymentPlans: unit.paymentPlans || "",
+        paymentPlans: unit.paymentPlans || {
+          years: 0,
+          price: 0,
+          maintenance: 0
+        },
         deliveryDate: unit.deliveryDate ? unit.deliveryDate.split("T")[0] : "",
         clientId: unit.clientId || "",
         clientName: unit.clientName || "",
@@ -132,6 +144,8 @@ const UpdateUnitForm = ({
       if (unit.country && citiesByCountry[unit.country]) {
         setAvailableCities(citiesByCountry[unit.country]);
       }
+      
+      initialLoad.current = false;
     }
   }, [unit]);
 
@@ -318,7 +332,7 @@ const UpdateUnitForm = ({
           const deliveryDate = new Date(formData.deliveryDate);
           
           // Set deliveryStatus based on date comparison
-          preparedFormData.deliveryStatus = deliveryDate > today ? "Off Plan" : "Ready to Move";
+          preparedFormData.deliveryStatus = deliveryDate > today ? "off-plan" : "ready to move";
         }
 
         if (formData.purpose === "Rent") {
@@ -373,50 +387,72 @@ const UpdateUnitForm = ({
       return false;
     };
 
-    const handleAddPaymentPlan = (plan) => {
-      const currentPlans = formData.paymentPlans
-        ? formData.paymentPlans.split(", ")
-        : [];
-
-      if (!currentPlans.includes(plan)) {
-        const updatedPlans = [...currentPlans, plan].join(", ");
-        setFormData((prev) => ({
-          ...prev,
-          paymentPlans: updatedPlans,
-        }));
-      }
-
+    const handleAddPaymentPlan = (planData) => {
+      // Update payment plans as an object with the new structure
+      setFormData((prev) => ({
+        ...prev,
+        paymentPlans: {
+          years: planData.years || 0,
+          price: planData.price || 0,
+          maintenance: planData.maintenance || 0
+        }
+      }));
       setIsPaymentPlanPopupOpen(false);
     };
 
-    const handleRemovePaymentPlan = (indexToRemove) => {
-      const currentPlans = formData.paymentPlans.split(", ");
-      const updatedPlans = currentPlans
-        .filter((_, index) => index !== indexToRemove)
-        .join(", ");
-
+    const handleRemovePaymentPlan = () => {
+      // Reset payment plans to default values
       setFormData((prev) => ({
         ...prev,
-        paymentPlans: updatedPlans,
+        paymentPlans: {
+          years: 0,
+          price: 0,
+          maintenance: 0
+        }
       }));
     };
 
     const handleCompoundSave = (compoundData) => {
-      setFormData((prev) => ({
-        ...prev,
-        compound: compoundData.name || compoundData.compoundName,
-      }));
+      // Using a callback to ensure we're working with the latest state
+      setFormData((prev) => {
+        const updated = {
+          ...prev,
+          compound: compoundData.name,
+        };
+        
+        // Log to confirm the update
+        console.log("Updating compound to:", compoundData.name);
+        return updated;
+      });
+      
+      // Close the modal after state update is queued
       setIsAddCompoundModalOpen(false);
+      
+      // Set timeout to verify compound value after state update has processed
+      setTimeout(() => {
+        console.log("Compound value after update:", formData.compound);
+      }, 100);
     };
 
     const handleDeveloperSave = (developerData) => {
-      setFormData((prev) => ({
-        ...prev,
-        developer: developerData.name,
-      }));
+      // Using the same pattern as compound save to ensure consistency
+      setFormData((prev) => {
+        const updated = {
+          ...prev,
+          developer: developerData.name,
+        };
+        console.log("Updating developer to:", developerData.name);
+        return updated;
+      });
+      
       setIsAddDeveloperModalOpen(false);
+      
+      setTimeout(() => {
+        console.log("Developer value after update:", formData.developer);
+      }, 100);
     };
 
+    // Fixed the missing closing of the grid layout in the Location section
     return (
       <div>
         <form onSubmit={handleSubmit} className="mt-4">
@@ -578,7 +614,7 @@ const UpdateUnitForm = ({
             </div>
           </div>
 
-          {/* Location Section */}
+          {/* Location Section - Fixed layout issue */}
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-gray-700 mb-4">Location</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -616,7 +652,6 @@ const UpdateUnitForm = ({
                     ))}
                   </div>
                 )}
-              </div>
               </div>
 
               {/* City Dropdown */}
@@ -658,6 +693,21 @@ const UpdateUnitForm = ({
                   </div>
                 )}
               </div>
+              
+              {/* District field */}
+              <div className="relative">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  District
+                </label>
+                <input
+                  type="text"
+                  name="district"
+                  value={formData.district || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Pricing Section */}
@@ -678,7 +728,7 @@ const UpdateUnitForm = ({
 
           {/* Rental Details Section */}
           {(isRentalProperty || formData.purpose === "Rent") && (
-            <RentalDetailsSection
+            <RentalDetailsSectionUpdate
               formData={formData}
               setFormData={setFormData}
               handleChange={handleChange}
@@ -762,4 +812,5 @@ const UpdateUnitForm = ({
       </div>
     );
 };
+
 export default UpdateUnitForm;

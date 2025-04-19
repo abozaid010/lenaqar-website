@@ -8,6 +8,11 @@ const AdditionalDetailsSection = ({
   setIsDevDropdownOpen,
   setIsAddDeveloperModalOpen,
 }) => {
+  // تحديد قائمة الـ finishing types بناءً على الـ purpose
+  const finishingTypes = formik.values.purpose === "Rent" 
+    ? propertyEnums.EnumFinishingType.slice(3) // إظهار القيم بعد الأربعة الأولى فقط للإيجار
+    : propertyEnums.EnumFinishingType; // إظهار كل القيم لغير الإيجار
+
   return (
     <div className="mb-8">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -30,7 +35,7 @@ const AdditionalDetailsSection = ({
             } focus:border-transparent`}
           >
             <option value="">Select Finishing</option>
-            {propertyEnums.EnumFinishingType.map((finishing, index) => (
+            {finishingTypes.map((finishing, index) => (
               <option key={index} value={finishing}>
                 {finishing.charAt(0).toUpperCase() + finishing.slice(1)}
               </option>

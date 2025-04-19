@@ -19,15 +19,15 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const itemsPerPage = 8;
-
+  
   // Set current page from URL parameter when component mounts
   useEffect(() => {
-    const page = searchParams.get("page");
+    const page = searchParams.get('page');
     if (page) {
       setCurrentPage(parseInt(page));
     }
   }, [searchParams]);
-
+  
   // Filter estates based on search, developer filter, compound filter, and purpose filter
   const filteredEstates = initialData
     ? initialData.filter((estate) => {
@@ -52,8 +52,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
 
         let matchesPurpose = true;
         if (purposeFilter !== "all") {
-          matchesPurpose =
-            estate.purpose.toLowerCase() === purposeFilter.toLowerCase();
+          matchesPurpose = estate.purpose.toLowerCase() === purposeFilter.toLowerCase();
         }
 
         return (
@@ -92,6 +91,8 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
     // Here you would typically add the new unit to your data
     // and possibly make an API call to save it
   };
+
+ 
 
   // Generate pagination numbers
   const getPaginationNumbers = () => {
@@ -214,7 +215,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {currentItems.map((estate, idx) => (
               <Link
-                href={`/dashboard/units/${estate.unitId}?page=${currentPage}`}
+                href={`/dashbord/units/${estate.unitId}?page=${currentPage}`}
                 key={idx}
                 className="flex flex-col"
               >
@@ -231,12 +232,12 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                           alt={estate.name || estate.compound || "Property"}
                           className="w-full h-full object-cover"
                         />
-                        <button
+                        <button 
                           className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
                           // onClick={(e) => {
                           //   e.preventDefault();
                           //   e.stopPropagation();
-                          //   const url = `${window.location.origin}/dashboard/units/${estate.unitId}`;
+                          //   const url = `${window.location.origin}/dashbord/units/${estate.unitId}`;
                           //   navigator.clipboard.writeText(url);
                           //   toast.success("Link copied to clipboard!");
                           // }}
@@ -251,12 +252,12 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                           alt={estate.name || estate.compound || "Property"}
                           className="w-full h-full object-cover"
                         />
-                        <button
+                        <button 
                           className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
                           // onClick={(e) => {
                           //   e.preventDefault();
                           //   e.stopPropagation();
-                          //   const url = `${window.location.origin}/dashboard/units/${estate.unitId}`;
+                          //   const url = `${window.location.origin}/dashbord/units/${estate.unitId}`;
                           //   navigator.clipboard.writeText(url);
                           //   toast.success("Link copied to clipboard!");
                           // }}
@@ -295,6 +296,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                     </div>
 
                     <div className="flex flex-col gap-2 ">
+                   
                       {estate.finishing && (
                         <div className="text-sm text-gray-600 rtl:text-right">
                           <span className="font-medium">Finishing:</span>{" "}
@@ -302,19 +304,21 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                         </div>
                       )}
 
-                      {estate.purpose === "Rent" || estate.purpose === "rent"
-                        ? estate.rentPrice && (
-                            <div className="text-sm text-gray-600 rtl:text-right">
-                              <span className="font-medium">Rent Price:</span>{" "}
-                              {estate.rentPrice} EGP
-                            </div>
-                          )
-                        : estate.totalPrice && (
-                            <div className="text-sm text-gray-600 rtl:text-right">
-                              <span className="font-medium">Total Price:</span>{" "}
-                              {estate.totalPrice} EGP
-                            </div>
-                          )}
+                      {estate.purpose === "Rent" || estate.purpose === "rent"   ? (
+                        estate.rentPrice && (
+                          <div className="text-sm text-gray-600 rtl:text-right">
+                            <span className="font-medium">Rent Price:</span>{" "}
+                            {estate.rentPrice} EGP
+                          </div>
+                        )
+                      ) : (
+                        estate.totalPrice && (
+                          <div className="text-sm text-gray-600 rtl:text-right">
+                            <span className="font-medium">Total Price:</span>{" "}
+                            {estate.totalPrice} EGP
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -329,9 +333,7 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
             <div className=" flex justify-center">
               <nav className="flex items-center  px-4 py-3 rounded-xl ">
                 <button
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                   className={`mx-1 p-2 rounded-full ${currentPage === 1 ? "bg-gray-100 text-gray-400 cursor-not-allowed" : "bg-white text-primary hover:bg-primary/10 border border-gray-200"} transition-all duration-300 flex items-center justify-center`}
                 >

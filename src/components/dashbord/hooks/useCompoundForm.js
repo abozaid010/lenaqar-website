@@ -93,6 +93,7 @@ export const useCompoundForm = (onClose, onSave) => {
 
         // Use addCompound function from serviceFetching
         const response = await addCompound(submissionData);
+        console.log(response)
         router.refresh();
 
         // Call the onSave function provided by the parent component with the response data

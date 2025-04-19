@@ -1,5 +1,5 @@
-import React from "react";
-import  propertyEnums  from "../../data/propertyEnums.json";
+import React, { useState } from "react";
+import propertyEnums from "../../data/propertyEnums.json";
 
 // Convert the enum array to the format needed for the component
 const AMENITIES_LIST = propertyEnums.RentalPropertyAmenityEnum?.map(amenity => ({
@@ -12,6 +12,27 @@ const RentalDetailsSectionUpdate = ({
   setFormData,
   handleChange,
 }) => {
+  const [activeDurationType, setActiveDurationType] = useState("daily");
+
+  // Handle rent duration type changes
+  const handleRentDurationChange = (durationType, field, value) => {
+    const numValue = value === "" ? 0 : Number(value);
+    
+    // Create a deep copy of the current rentDurationType
+    const updatedRentDurationType = {
+      ...(formData.rentDurationType || {}),
+      [durationType]: {
+        ...(formData.rentDurationType?.[durationType] || {}),
+        [field]: numValue
+      }
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      rentDurationType: updatedRentDurationType
+    }));
+  };
+
   return (
     <div className="mb-8">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -43,7 +64,6 @@ const RentalDetailsSectionUpdate = ({
         </div>
 
         <div>
-          {console.log(formData.availabilityDate)}
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Availability Date
           </label>
@@ -59,42 +79,103 @@ const RentalDetailsSectionUpdate = ({
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rent Duration Type
-          </label>
-          <select
-            name="rentDurationType"
-            value={formData.rentDurationType || ""}
-            onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-          >
-            <option value="" disabled>
-              Select Duration
-            </option>
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
-            <option value="monthly">Monthly</option>
-          </select>
+      {/* Rent Duration Types Section */}
+      <div className="mt-6">
+        <h4 className="text-lg font-medium text-gray-700 mb-3">Rent Duration Options</h4>
+        
+        {/* Tabs for duration types */}
+        <div className="flex border-b mb-4">
+          {["daily", "weekly", "monthly"].map((type) => (
+            <button
+              key={type}
+              type="button"
+              className={`py-2 px-4 font-medium text-sm ${
+                activeDurationType === type
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveDurationType(type)}
+            >
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rent Price
-          </label>
-          <input
-            type="number"
-            name="rentPrice"
-            min="0"
-            value={formData.rentPrice || ""}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (value < 0) e.target.value = 0;
-              handleChange(e);
-            }}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
-          />
+        
+        {/* Fields for the active duration type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formData.rentDurationType?.[activeDurationType]?.price || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "price", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Security Deposit
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formData.rentDurationType?.[activeDurationType]?.securityDeposit || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "securityDeposit", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cleaning Fee
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formData.rentDurationType?.[activeDurationType]?.cleaningFee || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "cleaningFee", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Service Fee
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formData.rentDurationType?.[activeDurationType]?.serviceFee || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "serviceFee", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -24,7 +24,6 @@ export const useUnitForm = (onClose, onSave) => {
   const clientId = Cookies.get("client_id");
 
   // Define validation schema using Yup
-  // Update validation schema to include rentDurationType and rentPrice
   const validationSchema = Yup.object({
     unitTitle: Yup.string().required("Unit title is required"),
     compound: Yup.string().required("Compound is required"),
@@ -32,29 +31,8 @@ export const useUnitForm = (onClose, onSave) => {
     purpose: Yup.string().required("Purpose is required"),
     country: Yup.string().required("Country is required"),
     city: Yup.string().required("City is required"),
-    // district: Yup.string(),
+    district: Yup.string(), // Optional
     view: Yup.string().required("View is required"),
-    // Make totalPrice and downPayment conditional based on purpose
-    totalPrice: Yup.number().when("purpose", {
-      is: (purpose) => purpose === "Sell" || purpose === "Buy",
-      then: () => Yup.number()
-        .positive("Price must be greater than zero")
-        .required("Total price is required"),
-      otherwise: () => Yup.number().nullable()
-    }),
-    downPayment: Yup.number().when("purpose", {
-      is: (purpose) => purpose === "Sell" || purpose === "Buy",
-      then: () => Yup.number()
-        .positive("Down payment must be greater than zero")
-        .required("Down payment is required"),
-      otherwise: () => Yup.number().nullable()
-    }),
-    deliveryDate: Yup.string().when("purpose", {
-      is: (purpose) => purpose === "Sell" || purpose === "Buy",
-      then: () => Yup.string().required("Delivery date is required"),
-      otherwise: () => Yup.string().nullable()
-    }),
-    // Remove deliveryStatus validation since it's set automatically
     roomsCount: Yup.number()
       .positive("Rooms count must be greater than zero")
       .required("Rooms count is required"),
@@ -70,31 +48,76 @@ export const useUnitForm = (onClose, onSave) => {
     finishing: Yup.string().required("Finishing type is required"),
     developer: Yup.string().required("Developer is required"),
     dataSource: Yup.string().required("Data source is required"),
-    paymentPlans: Yup.string(),
-    // Add validation for rental properties
-    isAvailable: Yup.boolean().when("purpose", {
-      is: "Rent",
-      then: () => Yup.boolean().required("Availability is required"),
-      otherwise: () => Yup.boolean().nullable()
+    
+    // Fix conditional validation for Buy/Sell properties
+    totalPrice: Yup.number().when('purpose', {
+      is: (val) => val === "Sell" || val === "Buy",
+      then: (schema) => schema.positive("Price must be greater than zero").required("Total price is required"),
+      otherwise: (schema) => schema.nullable()
     }),
-    availabilityDate: Yup.string().when("purpose", {
-      is: "Rent",
-      then: () => Yup.string().required("Availability date is required"),
-      otherwise: () => Yup.string().nullable()
+    downPayment: Yup.number().when('purpose', {
+      is: (val) => val === "Sell" || val === "Buy",
+      then: (schema) => schema.positive("Down payment must be greater than zero").required("Down payment is required"),
+      otherwise: (schema) => schema.nullable()
     }),
-    // Add validation for new rental fields
-    rentDurationType: Yup.string().when("purpose", {
-      is: "Rent",
-      then: () => Yup.string().required("Rent duration type is required"),
-      otherwise: () => Yup.string().nullable()
+    deliveryDate: Yup.string().when('purpose', {
+      is: (val) => val === "Sell" || val === "Buy",
+      then: (schema) => schema.required("Delivery date is required"),
+      otherwise: (schema) => schema.nullable()
     }),
-    rentPrice: Yup.number().when("purpose", {
-      is: "Rent",
-      then: () => Yup.number()
-        .positive("Rent price must be greater than zero")
-        .required("Rent price is required"),
-      otherwise: () => Yup.number().nullable()
+    
+    // Basic payment plans validation
+    paymentPlans: Yup.object({
+      years: Yup.number().min(0, "Years cannot be negative"),
+      price: Yup.number().min(0, "Price cannot be negative"),
+      maintenance: Yup.number().min(0, "Maintenance cannot be negative")
     }),
+    
+    // Fix conditional validation for Rent properties
+    isAvailable: Yup.boolean().when('purpose', {
+      is: "Rent",
+      then: (schema) => schema.required("Availability is required"),
+      otherwise: (schema) => schema.nullable()
+    }),
+    availabilityDate: Yup.string().when('purpose', {
+      is: "Rent",
+      then: (schema) => schema.required("Availability date is required"),
+      otherwise: (schema) => schema.nullable()
+    }),
+    rentPrice: Yup.number().when('purpose', {
+      is: "Rent",
+      then: (schema) => schema.min(0, "Rent price cannot be negative").required("Rent price is required"),
+      otherwise: (schema) => schema.nullable()
+    }),
+    
+    // Validation for rent duration types
+    rentDurationType: Yup.object().when('purpose', {
+      is: "Rent",
+      then: (schema) => Yup.object({
+        daily: Yup.object({
+          price: Yup.number().min(0, "Price cannot be negative").default(0),
+          securityDeposit: Yup.number().min(0, "Security deposit cannot be negative").default(0),
+          cleaningFee: Yup.number().min(0, "Cleaning fee cannot be negative").default(0),
+          serviceFee: Yup.number().min(0, "Service fee cannot be negative").default(0),
+          currency: Yup.string().default("EGP")
+        }),
+        weekly: Yup.object({
+          price: Yup.number().min(0, "Price cannot be negative").default(0),
+          securityDeposit: Yup.number().min(0, "Security deposit cannot be negative").default(0),
+          cleaningFee: Yup.number().min(0, "Cleaning fee cannot be negative").default(0),
+          serviceFee: Yup.number().min(0, "Service fee cannot be negative").default(0),
+          currency: Yup.string().default("EGP")
+        }),
+        monthly: Yup.object({
+          price: Yup.number().min(0, "Price cannot be negative").default(0),
+          securityDeposit: Yup.number().min(0, "Security deposit cannot be negative").default(0),
+          cleaningFee: Yup.number().min(0, "Cleaning fee cannot be negative").default(0),
+          serviceFee: Yup.number().min(0, "Service fee cannot be negative").default(0),
+          currency: Yup.string().default("EGP")
+        })
+      }),
+      otherwise: (schema) => schema.nullable()
+    })
   });
 
   const [isAddCompoundModalOpen, setIsAddCompoundModalOpen] = useState(false);
@@ -102,7 +125,7 @@ export const useUnitForm = (onClose, onSave) => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [isPaymentPlanPopupOpen, setIsPaymentPlanPopupOpen] = useState(false);
   const [isAddDeveloperModalOpen, setIsAddDeveloperModalOpen] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState([]); // Move this line here
+  const [uploadStatus, setUploadStatus] = useState([]);
   const fileInputRef = useRef(null);
 
   // Get default values from the JSON file
@@ -120,37 +143,59 @@ export const useUnitForm = (onClose, onSave) => {
       isGated: false,
       country: "Egypt",
       city: "",
-      // district: "",
+      district: "",
       clientName: clientId,
       clientId: clientId,
       developer: "",
-      // isNewDeveloper: false,
       unitId: uuidv4(),
       unitTitle: "",
       deliveryDate: "",
-      deliveryStatus: "", // Add this line to initialize deliveryStatus
+      deliveryStatus: "",
       bathroomCount: "",
       floor: "",
       roomsCount: "",
       landArea: "",
       gardenSize: "",
       finishing: "",
-      dataSource: "website", // Set default value for dataSource
+      dataSource: "website",
       downPayment: "",
       totalPrice: "",
-      paymentPlans: "",
+      paymentPlans: {
+        years: 0,
+        price: 0,
+        maintenance: 0
+      },
       garageArea: "",
       images: [],
-      // Add default amenities object
       amenities: {},
-      // Add default rental fields
       isAvailable: false,
       availabilityDate: "",
-      // Add new rental fields
-      rentDurationType: "",
-      rentPrice: "",
+      rentDurationType: {
+        daily: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        },
+        weekly: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        },
+        monthly: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        }
+      },
+      rentPrice: 0,
     },
-    validationSchema, // Uncomment this line to enable validation
+    validationSchema,
     onSubmit: async (values) => {
       console.log("test",values)
       try {
@@ -173,6 +218,7 @@ export const useUnitForm = (onClose, onSave) => {
           landArea: values.landArea ? Number(values.landArea) : 0,
           gardenSize: values.gardenSize ? Number(values.gardenSize) : 0,
           garageArea: values.garageArea ? Number(values.garageArea) : 0,
+          district: values.district || "", // Ensure district is included in the payload
         };
        console.log(values.purpose)
         // Handle purpose-specific fields
@@ -182,13 +228,20 @@ export const useUnitForm = (onClose, onSave) => {
           preparedFormData.totalPrice = values.totalPrice ? Number(values.totalPrice) : 0;
           preparedFormData.isGated = values.isGated || false; // Ensure isGated is included for Sell/Buy
           
+          // Ensure paymentPlans is in the correct format
+          preparedFormData.paymentPlans = {
+            years: values.paymentPlans.years ? Number(values.paymentPlans.years) : 0,
+            price: values.paymentPlans.price ? Number(values.paymentPlans.price) : 0,
+            maintenance: values.paymentPlans.maintenance ? Number(values.paymentPlans.maintenance) : 0
+          };
+          
           // Set deliveryStatus dynamically based on deliveryDate
           if (values.deliveryDate) {
             const deliveryDate = new Date(values.deliveryDate);
             const today = new Date();
-            preparedFormData.deliveryStatus = deliveryDate > today ? "Off Plan" : "Ready to Move";
+            preparedFormData.deliveryStatus = deliveryDate > today ? "off-plan" : "ready to move";
           } else {
-            preparedFormData.deliveryStatus = "Ready to Move"; // Default value
+            preparedFormData.deliveryStatus = "ready to move"; // Default value
           }
           
           // Remove rental-specific fields for Sell/Buy
@@ -197,12 +250,6 @@ export const useUnitForm = (onClose, onSave) => {
           delete preparedFormData.rentDurationType;
           delete preparedFormData.isAvailable;
           delete preparedFormData.availabilityDate;
-          
-          // Ensure the same keys are sent for both Sell and Buy
-          if (values.purpose === "Sell") {
-            // Clone all the Buy-specific properties
-            
-          }
         }
         else if (values.purpose === "Rent") {
           console.log("Processing rental property");
@@ -217,7 +264,7 @@ export const useUnitForm = (onClose, onSave) => {
           delete preparedFormData.paymentPlans;
           delete preparedFormData.downPayment;
           delete preparedFormData.deliveryDate;
-          delete preparedFormData.deliveryStatus; // Add this line to remove deliveryStatus for Rent
+          delete preparedFormData.deliveryStatus;
           delete preparedFormData.totalPrice;
           
           console.log("Amenities before processing:", values.amenities);
@@ -276,7 +323,6 @@ export const useUnitForm = (onClose, onSave) => {
         formik.setFieldValue("purpose", defaultPurpose.charAt(0).toUpperCase() + defaultPurpose.slice(1));
         formik.setFieldValue("view", defaultView);
         formik.setFieldValue("country", "Egypt");
-        // formik.setFieldValue("district", "");
         formik.setFieldValue("clientId", clientId);
         formik.setFieldValue("images", []);
         formik.setFieldValue("amenities", {}); // Reset to empty object, not array
@@ -329,10 +375,7 @@ export const useUnitForm = (onClose, onSave) => {
     // Store the selected files without uploading immediately
     setSelectedFiles(prev => [...prev, ...validFiles]);
   };
-
-  // Remove this line: const [uploadStatus, setUploadStatus] = useState([]);
   
-  // Then modify the handleImageUpload function
   const handleImageUpload = async () => {
     if (selectedFiles.length === 0) return;
   
@@ -419,7 +462,6 @@ export const useUnitForm = (onClose, onSave) => {
     }
   };
 
-  // Add the removeSelectedFile function
   const removeSelectedFile = (index) => {
     setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
     
@@ -432,7 +474,6 @@ export const useUnitForm = (onClose, onSave) => {
     });
   };
 
-  // Add the removeUploadedImage function
   const removeUploadedImage = async (index, imageId) => {
     try {
       // Use the deleteImage function from serviceFetching
@@ -452,7 +493,6 @@ export const useUnitForm = (onClose, onSave) => {
     }
   };
 
-  // Add missing functions for compound and developer handling
   const handleCompoundSave = (compoundData) => {
     // Update the compound field with the new compound
     formik.setFieldValue("compound", compoundData.name);
@@ -475,17 +515,24 @@ export const useUnitForm = (onClose, onSave) => {
     }
   };
 
-  // Add missing functions for payment plan handling
   const handleAddPaymentPlan = (planData) => {
-    formik.setFieldValue("paymentPlans", planData);
+    // Assuming planData contains years, price, and maintenance fields
+    formik.setFieldValue("paymentPlans", {
+      years: Number(planData.years) || 0,
+      price: Number(planData.price) || 0,
+      maintenance: Number(planData.maintenance) || 0
+    });
     setIsPaymentPlanPopupOpen(false);
   };
 
   const handleRemovePaymentPlan = () => {
-    formik.setFieldValue("paymentPlans", "");
+    formik.setFieldValue("paymentPlans", {
+      years: 0,
+      price: 0,
+      maintenance: 0
+    });
   };
 
-  // Add missing drag and drop handlers
   const handleDrop = (e) => {
     e.preventDefault();
     
@@ -498,7 +545,6 @@ export const useUnitForm = (onClose, onSave) => {
     e.preventDefault();
   };
 
-  // Add missing handleSubmit function
   const handleSubmit = (e) => {
     e.preventDefault();
     
@@ -510,34 +556,34 @@ export const useUnitForm = (onClose, onSave) => {
     formik.handleSubmit();
   };
 
-// Make sure to return uploadStatus in your hook's return object
-return {
-  formik,
-  isAddCompoundModalOpen,
-  uploadingImages,
-  selectedFiles,
-  isPaymentPlanPopupOpen,
-  fileInputRef,
-  uploadStatus,
-  setIsAddCompoundModalOpen,
-  setIsPaymentPlanPopupOpen,
-  handleFileSelection,
-  handleImageUpload,
-  removeSelectedFile,
-  removeUploadedImage,
-  handleDrop,
-  handleAddPaymentPlan,
-  handleRemovePaymentPlan,
-  handleDragOver,
-  handleCompoundSave,
-  isAddDeveloperModalOpen,
-  setIsAddDeveloperModalOpen,
-  handleDeveloperSave,
-  handleSubmit,
-  // Add function to handle amenity checkbox changes
-  handleAmenityChange: (amenity, checked) => {
-    const updatedAmenities = { ...formik.values.amenities || {} };
-    updatedAmenities[amenity] = checked;
-    formik.setFieldValue("amenities", updatedAmenities);
-  }}
-}; // This is the correct closing brace for the return statement
+  return {
+    formik,
+    isAddCompoundModalOpen,
+    uploadingImages,
+    selectedFiles,
+    isPaymentPlanPopupOpen,
+    fileInputRef,
+    uploadStatus,
+    setIsAddCompoundModalOpen,
+    setIsPaymentPlanPopupOpen,
+    handleFileSelection,
+    handleImageUpload,
+    removeSelectedFile,
+    removeUploadedImage,
+    handleDrop,
+    handleAddPaymentPlan,
+    handleRemovePaymentPlan,
+    handleDragOver,
+    handleCompoundSave,
+    isAddDeveloperModalOpen,
+    setIsAddDeveloperModalOpen,
+    handleDeveloperSave,
+    handleSubmit,
+    // Add function to handle amenity checkbox changes
+    handleAmenityChange: (amenity, checked) => {
+      const updatedAmenities = { ...formik.values.amenities || {} };
+      updatedAmenities[amenity] = checked;
+      formik.setFieldValue("amenities", updatedAmenities);
+    }
+  };
+};

@@ -88,6 +88,7 @@ const PricingSection = ({
               <Plus className="w-3 h-3 mr-1" /> Add Plan
             </button>
           </div>
+          {console.log(formData.paymentPlans)}
 
           <div className="flex flex-wrap gap-2">
             {!formData.paymentPlans ? (
@@ -95,21 +96,20 @@ const PricingSection = ({
                 No payment plans added yet.
               </p>
             ) : (
-              formData.paymentPlans.split(", ").map((plan, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm"
+              <div className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span>
+                  {formData.paymentPlans.years} Years - 
+                  {formData.paymentPlans.price} EGP - 
+                  {formData.paymentPlans.maintenance} EGP Maintenance
+                </span>
+                <button
+                  type="button"
+                  onClick={() => handleRemovePaymentPlan()}
+                  className="text-gray-500 hover:text-red-500 ml-1"
                 >
-                  <span>{plan}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemovePaymentPlan(index)}
-                    className="text-gray-500 hover:text-red-500 ml-1"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             )}
           </div>
         </div>

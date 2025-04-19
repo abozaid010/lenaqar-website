@@ -6,6 +6,7 @@ import { useCompoundForm } from "../hooks/useCompoundForm";
 import AddDeveloperModal from "./AddDeveloperModal";
 import { useUnitForm } from "../hooks/useUnitForm";
 import { addDeveloper } from "@/components/services/serviceFetching";
+import { v4 as uuidv4 } from 'uuid';
 
 const AddCompoundModal = ({ isOpen, onClose, onSave, developersData }) => {
   const [showDeveloperModal, setShowDeveloperModal] = useState(false);
@@ -36,7 +37,9 @@ const AddCompoundModal = ({ isOpen, onClose, onSave, developersData }) => {
     
       
       // Create the developer data object
+         const id = uuidv4();
       const developerToAdd = {
+         id:id,
         name: developerData.name,
         logo: "",
         description: developerData.description || "",
@@ -44,9 +47,9 @@ const AddCompoundModal = ({ isOpen, onClose, onSave, developersData }) => {
       
       // Call the API to add the developer
       const response = await addDeveloper(developerToAdd);
-      
+      console.log(response)
       // Update the form with the new developer name
-      formik.setFieldValue("developer_name", response.name);
+      formik.setFieldValue("developer_name", response.data.name);
       
       // Close the modal and set newDeveloper to true to show the input field
       setShowDeveloperModal(false);
@@ -243,6 +246,7 @@ const AddCompoundModal = ({ isOpen, onClose, onSave, developersData }) => {
                       </option>
                     ))
                   }
+                  {console.log("formik.values developer",formik.values)}
                   {/* If developer_name is set but not in the list, add it as an option */}
                   {formik.values.developer_name && 
                    !developersData?.some(dev => dev.name === formik.values.developer_name) && (

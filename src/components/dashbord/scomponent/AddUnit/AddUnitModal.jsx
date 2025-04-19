@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, Upload, Trash2, Plus, ArrowRight, Save } from "lucide-react";
+import { X, Upload, Trash2, Plus, ArrowRight, Save as SaveIcon } from "lucide-react";
 import AddCompoundModal from "../AddCompoundModal";
 import PaymentPlanPopup from "../PaymentPlanPopup";
 import { useUnitForm } from "../../hooks/useUnitForm";
@@ -100,12 +100,17 @@ const AddUnitModal = ({
         
         setIsStep2Valid(isFinancialValid);
       } else if (formik.values.purpose === "Rent") {
-        const rentalFields = ['rentDurationType', 'rentPrice' , 'availabilityDate'];
-        const isRentalValid = rentalFields.every(field => 
-          formik.values[field] && formik.values[field].toString().trim() !== ""
-        );
+        // تعديل التحقق من rentDurationType ليتعامل معه ككائن
+        const isRentDurationValid = formik.values.rentDurationType && 
+          typeof formik.values.rentDurationType === 'object' &&
+          (formik.values.rentDurationType.daily?.price > 0 || 
+           formik.values.rentDurationType.weekly?.price > 0 || 
+           formik.values.rentDurationType.monthly?.price > 0);
         
-        setIsStep2Valid(isRentalValid);
+        const isAvailabilityDateValid = formik.values.availabilityDate && 
+          formik.values.availabilityDate.toString().trim() !== "";
+        
+        setIsStep2Valid(isRentDurationValid && isAvailabilityDateValid);
       }
     }
   }, [formik.values, currentStep]);
@@ -136,10 +141,9 @@ const AddUnitModal = ({
           formik.setFieldTouched(field, true, true);
         });
       } else if (formik.values.purpose === "Rent") {
-        const rentalFields = ['rentDurationType', 'rentPrice'];
-        rentalFields.forEach(field => {
-          formik.setFieldTouched(field, true, true);
-        });
+        // تعديل التحقق من الحقول للإيجار
+        formik.setFieldTouched("availabilityDate", true, true);
+        // لا نحتاج لتعيين rentDurationType كـ touched لأنه كائن الآن
       }
       
       // Validate fields based on purpose
@@ -147,7 +151,7 @@ const AddUnitModal = ({
         toast.error("Please fill all required financial fields");
         return;
       } else if (formik.values.purpose === "Rent" && !isStep2Valid) {
-        toast.error("Please fill all required rental fields");
+        toast.error("Please fill at least one rental duration price and availability date");
         return;
       }
       
@@ -647,7 +651,7 @@ const AddUnitModal = ({
                   : "bg-primary hover:bg-primary/90"
                 } text-white font-medium rounded-lg transition-colors shadow-md flex items-center`}
               >
-                <Save className="w-5 h-5 mr-2" />
+                <SaveIcon className="w-5 h-5 mr-2" />
                 {uploadingImages ? "Uploading..." : "Save Unit"}
               </button>
             )}

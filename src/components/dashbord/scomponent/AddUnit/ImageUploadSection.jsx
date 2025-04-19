@@ -18,7 +18,11 @@ const ImageUploadSection = ({
   const isImageUploaded = (file) => {
     return formik.values.images.some((img) => img.name === file.name);
   };
-  console.log(isImageUploaded)
+  
+  // دالة للتحقق مما إذا كانت الصورة قد فشل تحميلها
+  const isImageFailed = (index) => {
+    return uploadStatus && uploadStatus[index] === 'failed';
+  };
 
   return (
     <div className="mb-8">
@@ -97,12 +101,17 @@ const ImageUploadSection = ({
                     className="w-full h-24 object-cover rounded-md"
                   />
                   {uploadStatus && uploadStatus[index] === 'loading' ? (
-                    <div className="absolute inset-0 flex items-center justify-center  rounded-md">
+                    <div className="absolute inset-0 flex items-center justify-center rounded-md">
                       <Loader className="w-8 h-8 text-white animate-spin" />
                     </div>
                   ) : isImageUploaded(file) ? (
-                    <div className="absolute   flex items-center justify-center border-2 border-red-500  b rounded-md">
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
                       <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                  ) : isImageFailed(index) ? (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-md">
+                      <XCircle className="w-8 h-8 text-red-500" />
+                      <span className="absolute bottom-1 text-xs text-white font-medium">Upload Failed</span>
                     </div>
                   ) : null}
                 </div>

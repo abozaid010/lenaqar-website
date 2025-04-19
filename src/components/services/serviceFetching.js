@@ -8,7 +8,7 @@ export async function fetchUnits() {
 
   try {
     const response = await axiosInstance.get(`/units/by-client/${clientId}`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
     return { error: error.message };
@@ -18,7 +18,7 @@ export async function fetchUnits() {
 export async function fetchcombounds() {
   try {
     const response = await axiosInstance.get(`projects/`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
     return { error: error.message };
@@ -54,8 +54,9 @@ export async function deleteImage(imageId) {
 
 export async function fetchUnitById(id) {
   try {
-    const response = await axiosInstance.get(`/units_details/${id}`);
-    return response.data;
+    const response = await axiosInstance.get(`/units/details/${id}`);
+    console.log(response)
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch unit by id:", error.message);
     return { error: error.message };
@@ -64,7 +65,7 @@ export async function fetchUnitById(id) {
 
 export async function updateUnit(unit) {
   try {
-    const response = await axiosInstance.post(`/update_sale_unit/`, unit);
+    const response = await axiosInstance.post(`/units/update-sale`, unit);
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
@@ -73,7 +74,7 @@ export async function updateUnit(unit) {
 }
 export async function updateUnitRent(unit) {
   try {
-    const response = await axiosInstance.post(`/update_rent_unit/`, unit);
+    const response = await axiosInstance.post(`/units/update-rent`, unit);
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
@@ -83,10 +84,8 @@ export async function updateUnitRent(unit) {
 
 export async function deleteUnit(id) {
   try {
-    const response = await axiosInstance.delete(`/delete-unit`, {
-      headers: {
-        unitId: id
-      }
+    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`, {
+    
     });
     return response.data;
   } catch (error) {
@@ -116,7 +115,7 @@ export async function fetchUsersData(searchParams) {
 export async function fetchDevelopers() {
   try {
     const response = await axiosInstance.get(`/developers/`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);
     return { error: error.message };
@@ -125,7 +124,7 @@ export async function fetchDevelopers() {
 
 export async function addDeveloper(developerData) {
   try {
-    const response = await axiosInstance.post(`/developers/`, developerData);
+    const response = await axiosInstance.post(`/developers/create`, developerData);
     return response.data;
   } catch (error) {
     console.error("Failed to add developer:", error.message);
@@ -136,7 +135,7 @@ export async function addDeveloper(developerData) {
 // Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {
-    const response = await axiosInstance.post(`/add_sale_unit/`, unitData);
+    const response = await axiosInstance.post(`/units/add-sale`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
@@ -145,7 +144,7 @@ export async function addUnit(unitData) {
 }
 export async function addUnitRent(unitData) {
   try {
-    const response = await axiosInstance.post(`/add_rent_unit/`, unitData);
+    const response = await axiosInstance.post(`/units/add-rent`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
@@ -156,7 +155,7 @@ export async function addUnitRent(unitData) {
 export async function addCompound(compoundData) {
   try {
     const response = await axiosInstance.post(`/projects/`, compoundData);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
     throw { message: error.response?.data?.message || error.message };

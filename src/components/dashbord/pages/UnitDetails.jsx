@@ -1,11 +1,7 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
-import {
-  updateUnit,
-  deleteUnit,
-  updateUnitRent,
-} from "@/components/services/serviceFetching";
+import { updateUnit, deleteUnit, updateUnitRent } from "@/components/services/serviceFetching";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 // Import Swiper components and styles
@@ -17,6 +13,7 @@ import "swiper/css/pagination";
 import "swiper/css/thumbs";
 import UpdateUnitModal from "../scomponent/UpdateUnit/UpdateUnitModal";
 
+
 export default function UnitDetails({ unit, developers, comboundata }) {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updatedUnit, setUpdatedUnit] = useState(unit);
@@ -25,8 +22,8 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pageParam = searchParams.get("page") || "1";
-
+  const pageParam = searchParams.get('page') || '1';
+  
   // Check if the unit is for rent
   const isRent = updatedUnit?.purpose?.toLowerCase() === "rent";
 
@@ -35,7 +32,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   // Handle back navigation with page parameter
   const handleBackToUnits = () => {
-    router.push(`/dashboard/units?page=${pageParam}`);
+    router.push(`/dashbord/units?page=${pageParam}`);
   };
 
   const handleDeleteUnit = async () => {
@@ -43,18 +40,18 @@ export default function UnitDetails({ unit, developers, comboundata }) {
       <div className="flex flex-col gap-4 text-black rounded-md">
         <p>Are you sure you want to delete this unit?</p>
         <div className="flex gap-2">
-          <button
-            className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md"
+          <button 
+            className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md" 
             onClick={() => {
               deleteUnit(unit.unitId);
               toast.dismiss();
-              router.push(`/dashboard/units?page=${pageParam}`);
+              router.push(`/dashbord/units?page=${pageParam}`);
             }}
           >
             Delete
           </button>
-          <button
-            className="bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md"
+          <button 
+            className="bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md" 
             onClick={() => {
               toast.dismiss();
             }}
@@ -68,16 +65,16 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   const handleUpdateUnit = async (updatedUnit, purpose) => {
     let newUnit;
-
+  
     if (purpose === "Sell" || purpose === "Buy") {
       newUnit = await updateUnit(updatedUnit);
     } else if (purpose === "Rent") {
       newUnit = await updateUnitRent(updatedUnit);
     }
-
+  
     setIsUpdateModalOpen(false);
-    toast.success("Unit updated successfully");
-    router.push(`/dashboard/units/${unit.unitId}?page=${pageParam}`);
+    toast.success('Unit updated successfully');
+    router.push(`/dashbord/units/${unit.unitId}?page=${pageParam}`);
   };
 
   // Open fullscreen gallery when clicking on the main image
@@ -98,7 +95,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString();
   };
 
@@ -106,9 +103,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-6 border-b flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            {unit?.unitTitle}
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-800">{unit?.unitTitle}</h1>
           <div className="flex flex-wrap gap-2 mt-2">
             <p className="text-gray-600">
               {unit?.buildingType} in {unit?.compound}
@@ -117,25 +112,16 @@ export default function UnitDetails({ unit, developers, comboundata }) {
         </div>
         <div className="flex gap-4">
           {/* Back button that preserves pagination */}
-          <button
+          <button 
             onClick={handleBackToUnits}
             className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-md flex items-center"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-1"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-                clipRule="evenodd"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
             </svg>
             Back to Units
           </button>
-
+          
           <button
             onClick={() => setIsUpdateModalOpen(true)}
             className="cursor-pointer bg-primary text-white px-4 py-2 rounded-md"
@@ -155,7 +141,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
         <div className="space-y-4">
           {/* Main image with enhanced fullscreen indicator */}
-          <div
+          <div 
             className="relative h-[600px] w-full rounded-lg overflow-hidden cursor-pointer shadow-lg group"
             onClick={openFullscreenGallery}
           >
@@ -169,25 +155,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
               <div className="flex items-center gap-2 text-white mb-4 px-4 py-2 rounded-full bg-black/40 backdrop-blur-sm">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <span>Click to view in fullscreen</span>
               </div>
             </div>
           </div>
-
+          
           {/* Thumbnail swiper */}
           {updatedUnit.images && updatedUnit.images.length > 0 && (
             <Swiper
@@ -201,10 +176,10 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             >
               {updatedUnit.images.map((image, index) => (
                 <SwiperSlide key={index}>
-                  <div
+                  <div 
                     className={`relative h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
-                      mainImageIndex === index
-                        ? "ring-2 ring-primary scale-95 shadow-md"
+                      mainImageIndex === index 
+                        ? "ring-2 ring-primary scale-95 shadow-md" 
                         : "hover:ring-1 hover:ring-primary/50"
                     }`}
                     onClick={() => setMainImageIndex(index)}
@@ -233,28 +208,20 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             {isRent ? (
               <>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  EGP{" "}
-                  {updatedUnit?.rentPrice
-                    ? updatedUnit.rentPrice.toLocaleString()
-                    : "0"}
-                  <span className="text-lg font-medium text-gray-600">
-                    / {updatedUnit?.rentDurationType || "Daily"}
-                  </span>
+                  EGP {updatedUnit?.rentPrice ? updatedUnit.rentPrice.toLocaleString() : '0'} 
+                  {/* <span className="text-lg font-medium text-gray-600">
+                    / {updatedUnit?.rentDurationType || 'Daily'}
+                  </span> */}
                 </h2>
                 <p className="text-gray-600 mt-2">
                   Available from: {formatDate(updatedUnit?.availabilityDate)}
                 </p>
                 {updatedUnit?.amenities && updatedUnit.amenities.length > 0 && (
                   <div className="mt-3">
-                    <p className="font-semibold text-gray-700 mb-2">
-                      Amenities:
-                    </p>
+                    <p className="font-semibold text-gray-700 mb-2">Amenities:</p>
                     <div className="flex flex-wrap gap-2">
                       {updatedUnit.amenities.map((amenity, index) => (
-                        <span
-                          key={index}
-                          className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium"
-                        >
+                        <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                           {amenity}
                         </span>
                       ))}
@@ -265,32 +232,22 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             ) : (
               <>
                 <h2 className="text-2xl font-bold text-gray-800">
-                  EGP{" "}
-                  {updatedUnit?.totalPrice
-                    ? updatedUnit.totalPrice.toLocaleString()
-                    : "0"}
+                  EGP {updatedUnit?.totalPrice ? updatedUnit.totalPrice.toLocaleString() : '0'}
                 </h2>
-                <p className="text-gray-600">
-                  Down Payment: EGP{" "}
-                  {updatedUnit?.downPayment
-                    ? updatedUnit.downPayment.toLocaleString()
-                    : "0"}
+                {/* <p className="text-gray-600">
+                  Down Payment: EGP {updatedUnit?.downPayment ? updatedUnit.downPayment.toLocaleString() : '0'}
                 </p>
                 <p className="text-gray-600">
-                  Payment Plans: {updatedUnit?.paymentPlans || "N/A"}
-                </p>
+                  Payment Plans: {updatedUnit?.paymentPlans || 'N/A'}
+                </p> */}
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   <div>
                     <p className="text-gray-600">Delivery Date:</p>
-                    <p className="font-semibold">
-                      {formatDate(updatedUnit?.deliveryDate)}
-                    </p>
+                    <p className="font-semibold">{formatDate(updatedUnit?.deliveryDate)}</p>
                   </div>
                   <div>
                     <p className="text-gray-600">Delivery Status:</p>
-                    <p className="font-semibold">
-                      {updatedUnit?.deliveryStatus || "N/A"}
-                    </p>
+                    <p className="font-semibold">{updatedUnit?.deliveryStatus || 'N/A'}</p>
                   </div>
                 </div>
               </>
@@ -325,13 +282,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             <div className="bg-gray-50 p-4 rounded-lg">
               <p className="text-gray-600">Purpose</p>
               <p className="font-semibold">
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                    isRent
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-purple-100 text-purple-800"
-                  }`}
-                >
+                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                  isRent ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                }`}>
                   {updatedUnit.purpose}
                 </span>
               </p>
@@ -393,23 +346,12 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             <div className="text-white text-lg font-medium">
               {updatedUnit.unitTitle} - Image Gallery
             </div>
-            <button
+            <button 
               onClick={closeFullscreenGallery}
               className="text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-70 transition-colors"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
@@ -425,23 +367,19 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               initialSlide={mainImageIndex}
               onSlideChange={(swiper) => setMainImageIndex(swiper.activeIndex)}
             >
-              {updatedUnit.images &&
-                updatedUnit.images.map((image, index) => (
-                  <SwiperSlide
-                    key={index}
-                    className="flex items-center justify-center"
-                  >
-                    <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto">
-                      <Image
-                        src={image.url}
-                        alt={`${updatedUnit.unitTitle} - ${index + 1}`}
-                        fill
-                        className="object-contain"
-                        priority
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))}
+              {updatedUnit.images && updatedUnit.images.map((image, index) => (
+                <SwiperSlide key={index} className="flex items-center justify-center">
+                  <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto">
+                    <Image
+                      src={image.url}
+                      alt={`${updatedUnit.unitTitle} - ${index + 1}`}
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
+                </SwiperSlide>
+              ))}
             </Swiper>
           </div>
           <div className="p-4 flex justify-between items-center bg-black bg-opacity-50 backdrop-blur-sm">

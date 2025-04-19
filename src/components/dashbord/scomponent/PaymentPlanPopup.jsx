@@ -4,20 +4,23 @@ import { X } from "lucide-react";
 
 const PaymentPlanPopup = ({ isOpen, onClose, onAdd }) => {
   const [years, setYears] = useState("");
-  const [amount, setAmount] = useState("");
+  const [price, setPrice] = useState("");
+  const [maintenance, setMaintenance] = useState("");
   const [errors, setErrors] = useState({
     years: "",
-    amount: ""
+    price: "",
+    maintenance: ""
   });
 
   const validate = () => {
     const newErrors = {
       years: !years ? "Years is required" : "",
-      amount: !amount ? "Amount is required" : ""
+      price: !price ? "Price is required" : "",
+      maintenance: !maintenance ? "Maintenance is required" : ""
     };
     
     setErrors(newErrors);
-    return !newErrors.years && !newErrors.amount;
+    return !newErrors.years && !newErrors.price && !newErrors.maintenance;
   };
 
   const handleSubmit = (e) => {
@@ -25,10 +28,18 @@ const PaymentPlanPopup = ({ isOpen, onClose, onAdd }) => {
     
     if (!validate()) return;
 
-    onAdd(`${years}-Years Plan: ${amount} EGP`);
+    // Pass an object with the payment plan data
+    onAdd({
+      years: Number(years),
+      price: Number(price),
+      maintenance: Number(maintenance)
+    });
+    
+    // Reset form
     setYears("");
-    setAmount("");
-    setErrors({ years: "", amount: "" });
+    setPrice("");
+    setMaintenance("");
+    setErrors({ years: "", price: "", maintenance: "" });
     onClose();
   };
 
@@ -70,25 +81,47 @@ const PaymentPlanPopup = ({ isOpen, onClose, onAdd }) => {
             )}
           </div>
 
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (EGP)
+              Price (EGP)
             </label>
             <input
               type="number"
-              value={amount}
+              value={price}
               onChange={(e) => {
-                setAmount(e.target.value);
-                if (e.target.value) setErrors({...errors, amount: ""});
+                setPrice(e.target.value);
+                if (e.target.value) setErrors({...errors, price: ""});
               }}
               className={`w-full px-4 py-2 rounded-lg border ${
-                errors.amount ? "border-red-500" : "border-gray-300"
+                errors.price ? "border-red-500" : "border-gray-300"
               } focus:ring-2 focus:ring-primary focus:border-transparent`}
-              placeholder="Monthly payment amount"
+              placeholder="Total price"
               min="1"
             />
-            {errors.amount && (
-              <p className="text-red-500 text-sm mt-1">{errors.amount}</p>
+            {errors.price && (
+              <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+            )}
+          </div>
+
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Maintenance (EGP)
+            </label>
+            <input
+              type="number"
+              value={maintenance}
+              onChange={(e) => {
+                setMaintenance(e.target.value);
+                if (e.target.value) setErrors({...errors, maintenance: ""});
+              }}
+              className={`w-full px-4 py-2 rounded-lg border ${
+                errors.maintenance ? "border-red-500" : "border-gray-300"
+              } focus:ring-2 focus:ring-primary focus:border-transparent`}
+              placeholder="Maintenance cost"
+              min="0"
+            />
+            {errors.maintenance && (
+              <p className="text-red-500 text-sm mt-1">{errors.maintenance}</p>
             )}
           </div>
 

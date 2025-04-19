@@ -13,7 +13,42 @@ const AMENITIES_LIST = propertyEnums.RentalPropertyAmenityEnum.map(amenity => ({
 const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
   const [newAmenity, setNewAmenity] = useState("");
   const [amenityAvailability, setAmenityAvailability] = useState(true);
-  console.log(formik.values)
+  const [activeDurationType, setActiveDurationType] = useState("daily");
+  
+  // إضافة دالة handleRentDurationChange
+  const handleRentDurationChange = (durationType, field, value) => {
+    const numValue = value === "" ? 0 : Number(value);
+    formik.setFieldValue(`rentDurationType.${durationType}.${field}`, numValue);
+  };
+  
+  // Initialize rentDurationType structure if not already set
+  useEffect(() => {
+    if (!formik.values.rentDurationType || typeof formik.values.rentDurationType !== 'object') {
+      formik.setFieldValue("rentDurationType", {
+        daily: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        },
+        weekly: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        },
+        monthly: {
+          price: 0,
+          securityDeposit: 0,
+          cleaningFee: 0,
+          serviceFee: 0,
+          currency: "EGP"
+        }
+      });
+    }
+  }, []);
   
   // Ensure amenities is initialized as an object for UI handling
   useEffect(() => {
@@ -121,65 +156,103 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             </p>
           )}
         </div>
+      </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rent Duration Type
-          </label>
-          <select
-            name="rentDurationType"
-            value={formik.values.rentDurationType || ""}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.rentDurationType && formik.errors.rentDurationType
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
-          >
-            <option value="" disabled>Select Duration</option>
-            {propertyEnums.RentDurationType.map((durationType, index) => (
-              <option 
-                key={index} 
-                value={durationType}
-              >
-                {durationType.charAt(0).toUpperCase() + durationType.slice(1)}
-              </option>
-            ))}
-          </select>
-          {formik.touched.rentDurationType && formik.errors.rentDurationType && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.rentDurationType}
-            </p>
-          )}
+      {/* Rent Duration Types Section */}
+      <div className="mt-6">
+        <h4 className="text-lg font-medium text-gray-700 mb-3">Rent Duration Options</h4>
+        
+        {/* Tabs for duration types */}
+        <div className="flex border-b mb-4">
+          {["daily", "weekly", "monthly"].map((type) => (
+            <button
+              key={type}
+              type="button"
+              className={`py-2 px-4 font-medium text-sm ${
+                activeDurationType === type
+                  ? "border-b-2 border-primary text-primary"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+              onClick={() => setActiveDurationType(type)}
+            >
+              {type.charAt(0).toUpperCase() + type.slice(1)}
+            </button>
+          ))}
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Rent Price
-          </label>
-          <input
-            type="number"
-            name="rentPrice"
-            min="0"
-            value={formik.values.rentPrice || ""}
-            onChange={(e) => {
-              const value = parseFloat(e.target.value);
-              if (value < 0) e.target.value = 0;
-              formik.handleChange(e);
-            }}
-            onBlur={formik.handleBlur}
-            className={`w-full px-4 py-2 rounded-lg border ${
-              formik.touched.rentPrice && formik.errors.rentPrice
-                ? "border-red-500 focus:ring-red-500"
-                : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
-          />
-          {formik.touched.rentPrice && formik.errors.rentPrice && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.rentPrice}
-            </p>
-          )}
+        
+        {/* Fields for the active duration type */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formik.values.rentDurationType?.[activeDurationType]?.price || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "price", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Security Deposit
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formik.values.rentDurationType?.[activeDurationType]?.securityDeposit || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "securityDeposit", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Cleaning Fee
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formik.values.rentDurationType?.[activeDurationType]?.cleaningFee || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "cleaningFee", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Service Fee
+            </label>
+            <div className="relative">
+              <input
+                type="number"
+                min="0"
+                value={formik.values.rentDurationType?.[activeDurationType]?.serviceFee || 0}
+                onChange={(e) => handleRentDurationChange(activeDurationType, "serviceFee", e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
+              />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <span className="text-gray-500">EGP</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -270,5 +343,10 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     </div>
   );
 };
+
+
+
+
+// Handle rent duration type field changes
 
 export default RentalDetailsSection;

@@ -4,6 +4,7 @@ import { X, Loader } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import toast from "react-hot-toast";
+import { v4 as uuidv4 } from 'uuid'; // Import UUID library
 
 const AddDeveloperModal = ({ isOpen, onClose, onSave }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -11,22 +12,39 @@ const AddDeveloperModal = ({ isOpen, onClose, onSave }) => {
   // Initialize formik outside of any conditional statements
   const formik = useFormik({
     initialValues: {
+      id: uuidv4(), // Generate UUID4 for id
       name: "",
       description: "",
+      logo: "", // Add logo field with empty string default
     },
     validationSchema: Yup.object({
       name: Yup.string()
         .required("Developer name is required")
         .matches(/^[\u0600-\u06FFa-zA-Z\s]+$/, "Name must contain only letters (Arabic or English)"),
       description: Yup.string(),
+      logo: Yup.string(), // Add validation for logo field
     }),
     onSubmit: async (values) => {
       try {
         setIsSubmitting(true);
+    
+        const id = uuidv4(); // Generate the UUID once
+        const data = {
+          ...values,
+          id,
+          logo: "",
+        };
+    
+        // Set the UUID in the form values (if needed for display, etc.)
+        formik.setFieldValue('id', id);
+    
         // Call the onSave function passed from parent component
-        await onSave(values);
+        await onSave(data);
+    
         // Reset form after successful save
         formik.resetForm();
+    
+        // Close the form/modal
         onClose();
       } catch (error) {
         console.error("Error saving developer:", error);
@@ -34,8 +52,8 @@ const AddDeveloperModal = ({ isOpen, onClose, onSave }) => {
       } finally {
         setIsSubmitting(false);
       }
-    },
-  });
+    }
+  });    
 
   // Return null after initializing all hooks
   if (!isOpen) return null;

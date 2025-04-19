@@ -112,23 +112,20 @@ const FinancialDetailsSection = ({
                 No payment plans added yet.
               </p>
             ) : (
-              formik.values.paymentPlans
-                .split(", ")
-                .map((plan, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm"
-                  >
-                    <span>{plan}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemovePaymentPlan(index)}
-                      className="text-gray-500 hover:text-red-500 ml-1"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))
+              <div className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
+                <span>
+                  {formik.values.paymentPlans.years} Years - 
+                  {formik.values.paymentPlans.price} EGP - 
+                  {formik.values.paymentPlans.maintenance} EGP Maintenance
+                </span>
+                <button
+                  type="button"
+                  onClick={handleRemovePaymentPlan}
+                  className="text-gray-500 hover:text-red-500 ml-1"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
             )}
           </div>
           {formik.touched.paymentPlans && formik.errors.paymentPlans && (
