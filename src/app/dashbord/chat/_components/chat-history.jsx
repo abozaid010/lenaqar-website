@@ -13,6 +13,14 @@ export default function ChatHistory({ data }) {
     }
   }, [data]);
 
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-gray-500">No messages yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-lg px-4 pt-4 overflow-y-auto h-full">
       {data.map((message, index) => (

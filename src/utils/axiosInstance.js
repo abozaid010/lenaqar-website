@@ -1,4 +1,7 @@
+'use server';
+
 import axios from "axios";
+import { cookies } from "next/headers";
 
 const axiosInstance = axios.create({
   baseURL: "https://api.lenaai.net",
@@ -7,18 +10,19 @@ const axiosInstance = axios.create({
   },
 });
 
-axiosInstance.interceptors.request.use(
-  (config) => {
-    return config;
-  },
+axiosInstance.interceptors.request.use(async (config) => {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('access_token')?.value;
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+},
   (error) => {
     return Promise.reject(error);
   }
-  //     return config;
-  // },
-  // (error) => {
-  //     return Promise.reject(error);
-  // }
 );
 
 export default axiosInstance;

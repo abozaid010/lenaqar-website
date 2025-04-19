@@ -1,13 +1,13 @@
+'use server';
+
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "./clientCookies";
-
-
 
 export async function fetchUnits() {
   const clientId = await getClientid();
 
   try {
-    const response = await axiosInstance.get(`units/${clientId}`);
+    const response = await axiosInstance.get(`/units/by-client/${clientId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
@@ -167,8 +167,8 @@ export async function getChatHistory(userId) {
   const cookieClientId = await getClientid();
 
   try {
-    const response = await axiosInstance.get(`history/${cookieClientId}/${userId}`);
-    return response.data;
+    const response = await axiosInstance.get(`/messages/messages/${cookieClientId}/${userId}`);
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
     return { error: error.message };
@@ -179,7 +179,7 @@ export async function getClientActions(phoneNumber) {
   try {
     const response = await axiosInstance.get(`action/${phoneNumber}`);
 
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
     return { error: error.message };
@@ -193,7 +193,7 @@ export async function getClientRequirements(phoneNumber) {
 
   try {
     const response = await axiosInstance.get(`requirements/${requirementsId}`);
-    return response.data;
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
     return { error: error.message };
