@@ -22,7 +22,13 @@ const ACTIONS_COLORS = {
   "No Action": "text-gray-400",
 };
 
-export default function ClientsTable({ users, nextCursor, disableNext }) {
+export default function ClientsTable({
+  users,
+  nextCursor,
+  disableNext,
+  disablePrev,
+  previousCursor,
+}) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState([]);
 
@@ -227,6 +233,8 @@ export default function ClientsTable({ users, nextCursor, disableNext }) {
               <ClientsTablePagination
                 nextCursor={nextCursor}
                 disableNext={disableNext}
+                previousCursor={previousCursor}
+                disablePrev={disablePrev}
               />
 
               {/* TODO: This button should open a modal to add action to the selected rows */}

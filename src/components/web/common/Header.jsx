@@ -106,7 +106,7 @@ const Header = () => {
               <LanguageSwitcher />
               {!ci ? (
                 <Link
-                  href="/auth/login"
+                  href="/login"
                   className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
                 >
                   Sign In
@@ -161,13 +161,13 @@ const Header = () => {
                   {!ci ? (
                     <>
                       <Link
-                        href="/auth/signup"
+                        href="/signup"
                         className="text-white border border-blue-400 px-5 py-1.5 rounded-full hover:border-blue-200 hover:text-blue-200 transition-all duration-300"
                       >
                         Sign Up
                       </Link>
                       <Link
-                        href="/auth/login"
+                        href="/login"
                         className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
                       >
                         Sign In

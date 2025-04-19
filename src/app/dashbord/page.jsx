@@ -38,16 +38,23 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 }
 
 async function ClientsList({ searchParams }) {
-  const initialClients = await fetchUsersData(JSON.stringify(searchParams));
-  const hasMore = initialClients.data.pagination.has_more;
-  const nextCursor =
-    initialClients.data.pagination.next_cursor || parseInt(searchParams.cursor);
+  const res = await fetchUsersData(JSON.stringify(searchParams));
 
+  const initialData = res.data.data;
+  const hasMoreNext = initialData.pagination.has_more_next;
+  const hasMorePrev = initialData.pagination.has_more_prev;
+
+  const nextCursor = initialData.pagination.next_cursor;
+  const previousCursor = initialData.pagination.prev_cursor;
+
+  // console.log("initialClients", initialClients.data.pagination);
   return (
     <ClientsTable
-      users={initialClients.data.users}
-      disableNext={!hasMore}
+      users={initialData.users}
+      disableNext={!hasMoreNext}
+      disablePrev={!hasMorePrev}
       nextCursor={nextCursor}
+      previousCursor={previousCursor}
     />
   );
 }
