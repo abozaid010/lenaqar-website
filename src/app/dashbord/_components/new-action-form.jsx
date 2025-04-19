@@ -25,6 +25,7 @@ export default function NewActionForm({ userId, onSuccess }) {
   const [formData, setFormData] = useState({
     action_type: ACTIONS[0].value,
     comment: "",
+    meeting_time: "",
   });
 
   useEffect(() => {
@@ -47,21 +48,33 @@ export default function NewActionForm({ userId, onSuccess }) {
     <form className="p-3" action={action}>
       <input type="hidden" name="userId" value={userId} />
 
-      <select
-        name="action_type"
-        className="w-full mb-2 border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm"
-        value={formData.action_type}
-        onChange={(e) =>
-          setFormData({ ...formData, action_type: e.target.value })
-        }
-        required
-      >
-        {ACTIONS.map((action) => (
-          <option key={action.value} value={action.value}>
-            {action.label}
-          </option>
-        ))}
-      </select>
+      <div className="flex items-end gap-2 mb-2">
+        <select
+          name="action_type"
+          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm"
+          value={formData.action_type}
+          onChange={(e) =>
+            setFormData({ ...formData, action_type: e.target.value })
+          }
+          required
+        >
+          {ACTIONS.map((action) => (
+            <option key={action.value} value={action.value}>
+              {action.label}
+            </option>
+          ))}
+        </select>
+
+        <input
+          type="date"
+          name="meeting_time"
+          value={formData.meeting_time}
+          onChange={(e) =>
+            setFormData({ ...formData, meeting_time: e.target.value })
+          }
+          className="w-full border border-gray-300 rounded-md p-2 text-sm"
+        />
+      </div>
 
       <textarea
         name="comment"

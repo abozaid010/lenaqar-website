@@ -26,7 +26,7 @@ export default function ActionsModal({ actions, onClose, userId }) {
         </div>
 
         {actions.length > 0 && (
-          <ul className="timeline px-3">
+          <ul className="timeline px-3 max-h-[280px] overflow-y-auto">
             {actions.map((a, idx) => (
               <li className="timeline-item" key={idx}>
                 <div className="timeline-content">
@@ -51,9 +51,9 @@ export default function ActionsModal({ actions, onClose, userId }) {
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
 
-                  {!NOPREFRERED_TIME.includes(a.action) && a.preferred_time && (
+                  {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
                     <small className="underline text-xs text-green-600 font-medium">
-                      {new Date(a.preferred_time).toLocaleDateString("en-US", {
+                      {new Date(a.meeting_time).toLocaleDateString("en-US", {
                         year: "numeric",
                         month: "short",
                         day: "numeric",

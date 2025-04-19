@@ -15,6 +15,7 @@ export async function addNewAction(prevState, formData) {
             created_at: new Date().toISOString(),
             user: clientId,
             phone_number: phoneNumber,
+            meeting_time: formData.get('meeting_time') || null,
         };
 
         await axiosInstance.post('/action/', payload);
