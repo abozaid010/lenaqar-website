@@ -54,7 +54,7 @@ export default function PropertyCard({ data }) {
   return (
     <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-62 h-96">
       <Link
-        href={`/dashbord/units/${unitId}`}
+        href={`/dashboard/units/${unitId}`}
         className="rounded-md bg-gray-100 h-44 overflow-hidden relative"
       >
         {data.images?.length > 0 ? (
@@ -78,7 +78,7 @@ export default function PropertyCard({ data }) {
 
       <div>
         <Link
-          href={`/dashbord/units/${unitId}`}
+          href={`/dashboard/units/${unitId}`}
           className="mb-2 line-clamp-1 text-sm font-medium text-gray-800 hover:text-primary hover:underline"
         >
           {clientName} | {buildingType}{" "}
@@ -121,7 +121,7 @@ export default function PropertyCard({ data }) {
         {/* Actions */}
         {/* <div className="flex items-center mt-2 gap-1">
           <Link
-            href={`/dashbord/units/${unitId}`}
+            href={`/dashboard/units/${unitId}`}
             role="button"
             className="flex-1"
           >

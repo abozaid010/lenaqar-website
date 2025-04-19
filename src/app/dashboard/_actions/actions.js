@@ -18,9 +18,9 @@ export async function addNewAction(prevState, formData) {
             meeting_time: formData.get('meeting_time') || null,
         };
 
-        await axiosInstance.post('/action/', payload);
+        await axiosInstance.post('/action/create', payload);
 
-        revalidatePath('/dashbord');
+        revalidatePath('/dashboard');
 
         return {
             success: true,

@@ -10,12 +10,12 @@ export default function ClientsTablePagination({
 }) {
   const router = useRouter();
 
-  const handlePageChange = (cursor) => {
-    console.log("cursor", cursor);
+  const handlePageChange = (cursor, direction) => {
     if (!cursor) return;
 
     const params = new URLSearchParams(window.location.search);
     params.set("cursor", cursor);
+    params.set("direction", direction);
 
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
@@ -23,18 +23,18 @@ export default function ClientsTablePagination({
   return (
     <div className="flex gap-1">
       <button
-        onClick={() => handlePageChange(previousCursor)}
-        disabled={disablePrev}
-        className="px-4 py-1 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-      >
-        Previous
-      </button>
-      <button
-        onClick={() => handlePageChange(nextCursor)}
+        onClick={() => handlePageChange(nextCursor, "forward")}
         disabled={disableNext}
         className="px-4 py-1 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
         Next
+      </button>
+      <button
+        onClick={() => handlePageChange(previousCursor, "backward")}
+        disabled={disablePrev}
+        className="px-4 py-1 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+      >
+        Previous
       </button>
     </div>
   );
