@@ -15,7 +15,7 @@ const ACTIONS = [
   { label: "Make a call", value: "Make a call" },
   { label: "Property view", value: "Property view" },
   { label: "Not interested", value: "Not interested" },
-  { label: "Not qualified", value: "Qualified lead" },
+  { label: "Not qualified", value: "Not qualified" },
   { label: "Follow up later", value: "Follow up later" },
   { label: "Missing Requirement", value: "Missing requirement" },
 ];

@@ -10,7 +10,7 @@ const ACTIONS = [
   { label: "Office visit", value: "Office visit" },
   { label: "Property view", value: "Property view" },
   { label: "Not interested", value: "Not interested" },
-  { label: "Not qualified", value: "Qualified lead" },
+  { label: "Not qualified", value: "Not qualified" },
   { label: "Follow up later", value: "Follow up later" },
   { label: "Missing Requirement", value: "Missing requirement" },
 ];
@@ -27,7 +27,7 @@ export default function DashbordFilter({ appliedFilters }) {
    */
   const tomorrow = useMemo(() => {
     const date = new Date();
-    date.setDate(date.getDate() + 1);
+    date.setDate(date.getDate() + 2);
     return date;
   }, []);
   const tenDaysAgo = useMemo(() => {

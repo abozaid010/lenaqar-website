@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { debounce } from "@/utils/debounce";
 
 export default function SearchBar({ q }) {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(q || "");
 
-  const onSubmit = (e) => {
-    e.preventDefault();
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      const params = new URLSearchParams(window.location.search);
+      if (term) {
+        params.set("query", term);
+      } else {
+        params.delete("query");
+      }
+      router.push(`${window.location.pathname}?${params.toString()}`);
+    }, 300),
+    [router]
+  );
 
-    const params = new URLSearchParams(window.location.search);
-    params.set("query", searchTerm);
-
-    router.push(`${window.location.pathname}?${params.toString()}`);
-  };
+  useEffect(() => {
+    debouncedSearch(searchTerm);
+  }, [searchTerm, debouncedSearch]);
 
   const handleSearchClear = () => {
     setSearchTerm("");
@@ -26,7 +35,10 @@ export default function SearchBar({ q }) {
   };
 
   return (
-    <form className="flex items-center space-x-2 mb-2" onSubmit={onSubmit}>
+    <form
+      className="flex items-center space-x-2 mb-2"
+      onSubmit={(e) => e.preventDefault()}
+    >
       <div className="relative flex-1">
         <Search
           size={20}
@@ -35,7 +47,9 @@ export default function SearchBar({ q }) {
         <input
           type="text"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
           placeholder="Search client by name or number..."
           className="border border-gray-300 rounded-md p-2 w-full pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 text-sm"
         />
