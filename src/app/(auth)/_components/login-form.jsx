@@ -22,7 +22,7 @@ export default function LoginForm() {
   useEffect(() => {
     if (state.success) {
       toast.success("Login successful");
-      router.replace("/dashboard"); // Use replace to prevent going back to the login page
+      router.replace("/dashbord"); // Use replace to prevent going back to the login page
     } else if (state.success === false) {
       toast.error(state.message);
     }

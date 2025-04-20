@@ -1,6 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { X, Upload, Trash2, Plus, ArrowRight, Save as SaveIcon } from "lucide-react";
+import {
+  X,
+  Upload,
+  Trash2,
+  Plus,
+  ArrowRight,
+  Save as SaveIcon,
+} from "lucide-react";
 import AddCompoundModal from "../AddCompoundModal";
 import PaymentPlanPopup from "../PaymentPlanPopup";
 import { useUnitForm } from "../../hooks/useUnitForm";
@@ -41,9 +48,9 @@ const AddUnitModal = ({
     isAddDeveloperModalOpen,
     setIsAddDeveloperModalOpen,
     handleDeveloperSave,
-    uploadStatus 
+    uploadStatus,
   } = useUnitForm(onClose, onSave);
-  
+
   const [isDevDropdownOpen, setIsDevDropdownOpen] = useState(false);
   const [isCompoundDropdownOpen, setIsCompoundDropdownOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -56,9 +63,14 @@ const AddUnitModal = ({
   // Initialize amenities as an empty array
   useEffect(() => {
     setIsRentalProperty(formik.values.purpose === "Rent");
-    setIsSellProperty(formik.values.purpose === "Sell" || formik.values.purpose === "Buy");
+    setIsSellProperty(
+      formik.values.purpose === "Sell" || formik.values.purpose === "Buy"
+    );
 
-    if (formik.values.purpose === "Rent" && !Array.isArray(formik.values.amenities)) {
+    if (
+      formik.values.purpose === "Rent" &&
+      !Array.isArray(formik.values.amenities)
+    ) {
       formik.setFieldValue("amenities", []);
     }
   }, [formik.values.purpose]);
@@ -73,18 +85,18 @@ const AddUnitModal = ({
   // Validate step 1
   useEffect(() => {
     const requiredStep1Fields = [
-      'compound',
-      'unitTitle',
-      'buildingType',
-      'purpose',
-      'city',
+      "compound",
+      "unitTitle",
+      "buildingType",
+      "purpose",
+      "city",
       // 'district'
     ];
-    
-    const step1Valid = requiredStep1Fields.every(field => 
-      formik.values[field] && formik.values[field].trim() !== ""
+
+    const step1Valid = requiredStep1Fields.every(
+      (field) => formik.values[field] && formik.values[field].trim() !== ""
     );
-    
+
     setIsStep1Valid(step1Valid);
   }, [formik.values]);
 
@@ -93,23 +105,27 @@ const AddUnitModal = ({
     if (currentStep === 2) {
       if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
         // Remove deliveryStatus from required fields since it's now set automatically
-        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate'];
-        const isFinancialValid = financialFields.every(field => 
-          formik.values[field] && formik.values[field].toString().trim() !== ""
+        const financialFields = ["totalPrice", "deliveryDate"];
+        const isFinancialValid = financialFields.every(
+          (field) =>
+            formik.values[field] &&
+            formik.values[field].toString().trim() !== ""
         );
-        
+
         setIsStep2Valid(isFinancialValid);
       } else if (formik.values.purpose === "Rent") {
         // تعديل التحقق من rentDurationType ليتعامل معه ككائن
-        const isRentDurationValid = formik.values.rentDurationType && 
-          typeof formik.values.rentDurationType === 'object' &&
-          (formik.values.rentDurationType.daily?.price > 0 || 
-           formik.values.rentDurationType.weekly?.price > 0 || 
-           formik.values.rentDurationType.monthly?.price > 0);
-        
-        const isAvailabilityDateValid = formik.values.availabilityDate && 
+        const isRentDurationValid =
+          formik.values.rentDurationType &&
+          typeof formik.values.rentDurationType === "object" &&
+          (formik.values.rentDurationType.daily?.price > 0 ||
+            formik.values.rentDurationType.weekly?.price > 0 ||
+            formik.values.rentDurationType.monthly?.price > 0);
+
+        const isAvailabilityDateValid =
+          formik.values.availabilityDate &&
           formik.values.availabilityDate.toString().trim() !== "";
-        
+
         setIsStep2Valid(isRentDurationValid && isAvailabilityDateValid);
       }
     }
@@ -119,13 +135,18 @@ const AddUnitModal = ({
     if (currentStep === 1) {
       // Touch only step 1 fields to show validation errors
       const step1Fields = [
-        'compound', 'unitTitle', 'buildingType', 'purpose', 'city', 'view'
+        "compound",
+        "unitTitle",
+        "buildingType",
+        "purpose",
+        "city",
+        "view",
       ];
-      
-      step1Fields.forEach(field => {
+
+      step1Fields.forEach((field) => {
         formik.setFieldTouched(field, true, true);
       });
-      
+
       // Only proceed if all required fields are filled
       if (isStep1Valid) {
         setCurrentStep(2);
@@ -136,8 +157,8 @@ const AddUnitModal = ({
       // Touch only step 2 fields based on property type
       if (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") {
         // Remove deliveryStatus from fields to touch since it's now set automatically
-        const financialFields = ['totalPrice', 'downPayment', 'deliveryDate'];
-        financialFields.forEach(field => {
+        const financialFields = ["totalPrice", "downPayment", "deliveryDate"];
+        financialFields.forEach((field) => {
           formik.setFieldTouched(field, true, true);
         });
       } else if (formik.values.purpose === "Rent") {
@@ -145,16 +166,21 @@ const AddUnitModal = ({
         formik.setFieldTouched("availabilityDate", true, true);
         // لا نحتاج لتعيين rentDurationType كـ touched لأنه كائن الآن
       }
-      
+
       // Validate fields based on purpose
-      if ((formik.values.purpose === "Sell" || formik.values.purpose === "Buy") && !isStep2Valid) {
+      if (
+        (formik.values.purpose === "Sell" || formik.values.purpose === "Buy") &&
+        !isStep2Valid
+      ) {
         toast.error("Please fill all required financial fields");
         return;
       } else if (formik.values.purpose === "Rent" && !isStep2Valid) {
-        toast.error("Please fill at least one rental duration price and availability date");
+        toast.error(
+          "Please fill at least one rental duration price and availability date"
+        );
         return;
       }
-      
+
       setCurrentStep(3);
     }
   };
@@ -168,21 +194,25 @@ const AddUnitModal = ({
   // Handle checkbox changes for amenities
   const handleAmenityChange = (amenityName, isChecked) => {
     let updatedAmenities = [...(formik.values.amenities || [])];
-    
+
     if (isChecked) {
       // Add amenity if checked
       updatedAmenities.push({ [amenityName]: true });
     } else {
       // Remove amenity if unchecked
-      updatedAmenities = updatedAmenities.filter(item => !item.hasOwnProperty(amenityName));
+      updatedAmenities = updatedAmenities.filter(
+        (item) => !item.hasOwnProperty(amenityName)
+      );
     }
-    
+
     formik.setFieldValue("amenities", updatedAmenities);
   };
 
   // Check if an amenity is selected
   const isAmenitySelected = (amenityName) => {
-    return (formik.values.amenities || []).some(item => item.hasOwnProperty(amenityName));
+    return (formik.values.amenities || []).some((item) =>
+      item.hasOwnProperty(amenityName)
+    );
   };
 
   const handleSubmit = (e) => {
@@ -234,14 +264,18 @@ const AddUnitModal = ({
                   {step}
                 </div>
                 <span className="mt-2 text-sm font-medium text-gray-600">
-                  {step === 1 ? "Basic Details" : 
-                   step === 2 ? (isRentalProperty ? "Rental Details" : "Financial Details") : 
-                   "Images & Additional Info"}
+                  {step === 1
+                    ? "Basic Details"
+                    : step === 2
+                      ? isRentalProperty
+                        ? "Rental Details"
+                        : "Financial Details"
+                      : "Images & Additional Info"}
                 </span>
               </div>
             ))}
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-6">
             <div
               className="bg-primary h-2.5 rounded-full transition-all duration-300"
@@ -285,7 +319,9 @@ const AddUnitModal = ({
                           setIsCompoundDropdownOpen(!isCompoundDropdownOpen)
                         }
                       >
-                        <span>{formik.values.compound || "Select Compound"}</span>
+                        <span>
+                          {formik.values.compound || "Select Compound"}
+                        </span>
                         <span>{isCompoundDropdownOpen ? "▲" : "▼"}</span>
                       </div>
 
@@ -297,7 +333,10 @@ const AddUnitModal = ({
                                 key={index}
                                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                 onClick={() => {
-                                  formik.setFieldValue("compound", compound.name);
+                                  formik.setFieldValue(
+                                    "compound",
+                                    compound.name
+                                  );
                                   formik.setFieldTouched("compound", true);
                                   setTimeout(() => {
                                     formik.validateField("compound");
@@ -361,18 +400,15 @@ const AddUnitModal = ({
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         className={`w-full px-4 py-2 rounded-lg border appearance-none bg-white cursor-pointer ${
-                          formik.touched.buildingType && formik.errors.buildingType
+                          formik.touched.buildingType &&
+                          formik.errors.buildingType
                             ? "border-red-500 focus:ring-red-500"
                             : "border-gray-300 hover:border-gray-400 focus:ring-primary focus:border-primary"
                         } focus:outline-none focus:ring-2 focus:ring-opacity-50 shadow-sm transition-all duration-200`}
                       >
                         <option value="">Select Building Type</option>
                         {propertyEnums.EnumBuildingType.map((type, index) => (
-                          <option
-                            key={index}
-                            value={type}
-                            className="py-2"
-                          >
+                          <option key={index} value={type} className="py-2">
                             {type.charAt(0).toUpperCase() + type.slice(1)}
                           </option>
                         ))}
@@ -393,11 +429,12 @@ const AddUnitModal = ({
                         </svg>
                       </div>
                     </div>
-                    {formik.touched.buildingType && formik.errors.buildingType && (
-                      <p className="mt-1 text-sm text-red-500">
-                        {formik.errors.buildingType}
-                      </p>
-                    )}
+                    {formik.touched.buildingType &&
+                      formik.errors.buildingType && (
+                        <p className="mt-1 text-sm text-red-500">
+                          {formik.errors.buildingType}
+                        </p>
+                      )}
                   </div>
 
                   <div>
@@ -419,15 +456,19 @@ const AddUnitModal = ({
                         <option value="" disabled>
                           Select Purpose
                         </option>
-                        {propertyEnums.EnumPropertyIntent.map((intent, index) => (
-                          <option
-                            key={index}
-                            value={intent.charAt(0).toUpperCase() + intent.slice(1)}
-                            className="py-2"
-                          >
-                            {intent.charAt(0).toUpperCase() + intent.slice(1)}
-                          </option>
-                        ))}
+                        {propertyEnums.EnumPropertyIntent.map(
+                          (intent, index) => (
+                            <option
+                              key={index}
+                              value={
+                                intent.charAt(0).toUpperCase() + intent.slice(1)
+                              }
+                              className="py-2"
+                            >
+                              {intent.charAt(0).toUpperCase() + intent.slice(1)}
+                            </option>
+                          )
+                        )}
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                         <svg
@@ -474,10 +515,9 @@ const AddUnitModal = ({
                         <option value="Giza">Giza</option>
                         <option value="New Cairo">New Cairo</option>
                         <option value="6th of October">6th of October</option>
-                        <option value="Madinaty">Madinaty</option>
+
                         <option value="El Shorouk">El Shorouk</option>
                         <option value="Sheikh Zayed">Sheikh Zayed</option>
-                        <option value="El Rehab">El Rehab</option>
                       </select>
                       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
                         <svg
@@ -502,7 +542,29 @@ const AddUnitModal = ({
                     )}
                   </div>
 
-                 
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      District
+                    </label>
+                    <input
+                      type="text"
+                      name="district"
+                      value={formik.values.district || ""}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      placeholder="Enter district name"
+                      className={`w-full px-4 py-2 rounded-lg border ${
+                        formik.touched.district && formik.errors.district
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300 focus:ring-primary"
+                      } focus:border-transparent`}
+                    />
+                    {formik.touched.district && formik.errors.district && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {formik.errors.district}
+                      </p>
+                    )}
+                  </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -521,10 +583,7 @@ const AddUnitModal = ({
                     >
                       <option value="">Select View</option>
                       {propertyEnums.EnumViewType.map((view, index) => (
-                        <option
-                          key={index}
-                          value={view}
-                        >
+                        <option key={index} value={view}>
                           {view.charAt(0).toUpperCase() + view.slice(1)}
                         </option>
                       ))}
@@ -560,8 +619,8 @@ const AddUnitModal = ({
               </div>
 
               {/* Property Specifications Section */}
-              <PropertySpecificationsSection 
-                formik={formik} 
+              <PropertySpecificationsSection
+                formik={formik}
                 isRentalProperty={isRentalProperty}
                 isAmenitySelected={isAmenitySelected}
                 handleAmenityChange={handleAmenityChange}
@@ -572,7 +631,8 @@ const AddUnitModal = ({
           {/* Step 2: Financial/Rental Details based on purpose */}
           {currentStep === 2 && (
             <div>
-              {(formik.values.purpose === "Sell" || formik.values.purpose === "Buy") && (
+              {(formik.values.purpose === "Sell" ||
+                formik.values.purpose === "Buy") && (
                 <FinancialDetailsSection
                   formik={formik}
                   setIsPaymentPlanPopupOpen={setIsPaymentPlanPopupOpen}
@@ -594,7 +654,7 @@ const AddUnitModal = ({
                 setIsDevDropdownOpen={setIsDevDropdownOpen}
                 setIsAddDeveloperModalOpen={setIsAddDeveloperModalOpen}
               />
-              
+
               <ImageUploadSection
                 formik={formik}
                 selectedFiles={selectedFiles}
@@ -646,9 +706,9 @@ const AddUnitModal = ({
                 onClick={handleSubmit}
                 disabled={uploadingImages}
                 className={`px-6 py-3 ${
-                  uploadingImages 
-                  ? "bg-gray-400 cursor-not-allowed" 
-                  : "bg-primary hover:bg-primary/90"
+                  uploadingImages
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : "bg-primary hover:bg-primary/90"
                 } text-white font-medium rounded-lg transition-colors shadow-md flex items-center`}
               >
                 <SaveIcon className="w-5 h-5 mr-2" />
@@ -665,13 +725,13 @@ const AddUnitModal = ({
         onClose={() => setIsAddCompoundModalOpen(false)}
         onSave={handleCompoundSave}
       />
-      
+
       <PaymentPlanPopup
         isOpen={isPaymentPlanPopupOpen}
         onClose={() => setIsPaymentPlanPopupOpen(false)}
         onAdd={handleAddPaymentPlan}
       />
-      
+
       <AddDeveloperModal
         isOpen={isAddDeveloperModalOpen}
         onClose={() => setIsAddDeveloperModalOpen(false)}

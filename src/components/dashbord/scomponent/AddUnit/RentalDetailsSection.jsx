@@ -21,6 +21,20 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     formik.setFieldValue(`rentDurationType.${durationType}.${field}`, numValue);
   };
   
+  // Handle focus to clear initial "0" value
+  const handleFocus = (durationType, field) => {
+    if (formik.values.rentDurationType?.[durationType]?.[field] === 0) {
+      formik.setFieldValue(`rentDurationType.${durationType}.${field}`, "");
+    }
+  };
+  
+  // Handle blur to restore "0" if empty
+  const handleBlur = (durationType, field) => {
+    if (formik.values.rentDurationType?.[durationType]?.[field] === "") {
+      formik.setFieldValue(`rentDurationType.${durationType}.${field}`, 0);
+    }
+  };
+  
   // Initialize rentDurationType structure if not already set
   useEffect(() => {
     if (!formik.values.rentDurationType || typeof formik.values.rentDurationType !== 'object') {
@@ -105,6 +119,17 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     formik.setFieldValue("amenities", currentAmenities);
   };
 
+  const handleIsAvailableChange = (e) => {
+      const isChecked = e.target.checked;
+      formik.setFieldValue("isAvailable", isChecked);
+      
+      // Set today's date when isAvailable is checked
+      if (isChecked) {
+        const today = new Date().toISOString().split('T')[0];
+        formik.setFieldValue("availabilityDate", today);
+      }
+    };
+  
   return (
     <div className="mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -118,9 +143,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
               id="isAvailable"
               name="isAvailable"
               checked={formik.values.isAvailable || false}
-              onChange={(e) => {
-                formik.setFieldValue("isAvailable", e.target.checked);
-              }}
+              onChange={handleIsAvailableChange}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
             />
             <label htmlFor="isAvailable" className="ml-2 text-sm text-gray-700">
@@ -144,11 +167,12 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             value={formik.values.availabilityDate || ""}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
+            disabled={formik.values.isAvailable}
             className={`w-full px-4 py-2 rounded-lg border ${
               formik.touched.availabilityDate && formik.errors.availabilityDate
                 ? "border-red-500 focus:ring-red-500"
                 : "border-gray-300 focus:ring-primary"
-            } focus:border-transparent`}
+            } focus:border-transparent ${formik.values.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""}`}
           />
           {formik.touched.availabilityDate && formik.errors.availabilityDate && (
             <p className="mt-1 text-sm text-red-500">
@@ -180,7 +204,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
           ))}
         </div>
         
-        {/* Fields for the active duration type */}
+       
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -188,10 +212,13 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={formik.values.rentDurationType?.[activeDurationType]?.price || 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "price", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "price")}
+                onBlur={() => handleBlur(activeDurationType, "price")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -206,10 +233,13 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={formik.values.rentDurationType?.[activeDurationType]?.securityDeposit || 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "securityDeposit", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "securityDeposit")}
+                onBlur={() => handleBlur(activeDurationType, "securityDeposit")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -224,10 +254,13 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={formik.values.rentDurationType?.[activeDurationType]?.cleaningFee || 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "cleaningFee", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "cleaningFee")}
+                onBlur={() => handleBlur(activeDurationType, "cleaningFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -242,10 +275,13 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={formik.values.rentDurationType?.[activeDurationType]?.serviceFee || 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "serviceFee", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "serviceFee")}
+                onBlur={() => handleBlur(activeDurationType, "serviceFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -280,35 +316,7 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
         </div>
       </div>
 
-      {/* Custom Amenity Input */}
-      {/* <div className="mt-4 flex items-center">
-        <input
-          type="text"
-          value={newAmenity}
-          onChange={(e) => setNewAmenity(e.target.value)}
-          placeholder="Add custom amenity"
-          className="px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent mr-2"
-        />
-        <div className="flex items-center mr-2">
-          <input
-            type="checkbox"
-            id="amenity-availability"
-            checked={amenityAvailability}
-            onChange={(e) => setAmenityAvailability(e.target.checked)}
-            className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-          />
-          <label htmlFor="amenity-availability" className="ml-2 text-sm text-gray-700">
-            Available
-          </label>
-        </div>
-        <button
-          type="button"
-          onClick={handleAddAmenity}
-          className="p-2 bg-primary text-white rounded-lg hover:bg-primary/90"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
-      </div> */}
+    
 
       {/* Display Custom Amenities */}
       {formik.values.amenities && Object.entries(formik.values.amenities).filter(
@@ -343,10 +351,5 @@ const RentalDetailsSection = ({ formik, handleAmenityChange }) => {
     </div>
   );
 };
-
-
-
-
-// Handle rent duration type field changes
 
 export default RentalDetailsSection;

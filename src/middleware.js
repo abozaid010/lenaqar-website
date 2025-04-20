@@ -11,7 +11,7 @@ export async function middleware(request) {
   }
 
   // Protect dashboard routes
-  if (path.startsWith("/dashboard")) {
+  if (path.startsWith("/dashbord")) {
     // Check for client_id cookie
     const clientId = request.cookies.get("client_id")?.value;
 

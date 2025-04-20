@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import propertyEnums from "../../data/propertyEnums.json";
 
 // Convert the enum array to the format needed for the component
@@ -33,6 +33,62 @@ const RentalDetailsSectionUpdate = ({
     }));
   };
 
+  // Handle focus to clear initial "0" value
+  const handleFocus = (durationType, field) => {
+    if (formData.rentDurationType?.[durationType]?.[field] === 0) {
+      const updatedRentDurationType = {
+        ...(formData.rentDurationType || {}),
+        [durationType]: {
+          ...(formData.rentDurationType?.[durationType] || {}),
+          [field]: ""
+        }
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        rentDurationType: updatedRentDurationType
+      }));
+    }
+  };
+  
+  // Handle blur to restore "0" if empty
+  const handleBlur = (durationType, field) => {
+    if (formData.rentDurationType?.[durationType]?.[field] === "") {
+      const updatedRentDurationType = {
+        ...(formData.rentDurationType || {}),
+        [durationType]: {
+          ...(formData.rentDurationType?.[durationType] || {}),
+          [field]: 0
+        }
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        rentDurationType: updatedRentDurationType
+      }));
+    }
+  };
+
+  // Handle isAvailable checkbox change
+  const handleIsAvailableChange = (e) => {
+    const isChecked = e.target.checked;
+    
+    // Set today's date when isAvailable is checked
+    if (isChecked) {
+      const today = new Date().toISOString().split('T')[0];
+      setFormData((prev) => ({
+        ...prev,
+        isAvailable: isChecked,
+        availabilityDate: today
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        isAvailable: isChecked
+      }));
+    }
+  };
+
   return (
     <div className="mb-8">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -49,12 +105,7 @@ const RentalDetailsSectionUpdate = ({
               id="isAvailable"
               name="isAvailable"
               checked={formData.isAvailable || false}
-              onChange={(e) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  isAvailable: e.target.checked,
-                }));
-              }}
+              onChange={handleIsAvailableChange}
               className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
             />
             <label htmlFor="isAvailable" className="ml-2 text-sm text-gray-700">
@@ -76,7 +127,10 @@ const RentalDetailsSectionUpdate = ({
                 : ""
             }
             onChange={handleChange}
-            className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
+            disabled={formData.isAvailable}
+            className={`w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent ${
+              formData.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""
+            }`}
           />
         </div>
       </div>
@@ -111,10 +165,13 @@ const RentalDetailsSectionUpdate = ({
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                value={formData.rentDurationType?.[activeDurationType]?.price || 0}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.rentDurationType?.[activeDurationType]?.price ?? 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "price", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "price")}
+                onBlur={() => handleBlur(activeDurationType, "price")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -129,10 +186,13 @@ const RentalDetailsSectionUpdate = ({
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                value={formData.rentDurationType?.[activeDurationType]?.securityDeposit || 0}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.rentDurationType?.[activeDurationType]?.securityDeposit ?? 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "securityDeposit", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "securityDeposit")}
+                onBlur={() => handleBlur(activeDurationType, "securityDeposit")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -147,10 +207,13 @@ const RentalDetailsSectionUpdate = ({
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                value={formData.rentDurationType?.[activeDurationType]?.cleaningFee || 0}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.rentDurationType?.[activeDurationType]?.cleaningFee ?? 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "cleaningFee", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "cleaningFee")}
+                onBlur={() => handleBlur(activeDurationType, "cleaningFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -165,10 +228,13 @@ const RentalDetailsSectionUpdate = ({
             </label>
             <div className="relative">
               <input
-                type="number"
-                min="0"
-                value={formData.rentDurationType?.[activeDurationType]?.serviceFee || 0}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={formData.rentDurationType?.[activeDurationType]?.serviceFee ?? 0}
                 onChange={(e) => handleRentDurationChange(activeDurationType, "serviceFee", e.target.value)}
+                onFocus={() => handleFocus(activeDurationType, "serviceFee")}
+                onBlur={() => handleBlur(activeDurationType, "serviceFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">

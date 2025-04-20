@@ -284,10 +284,26 @@ const UpdateUnitForm = ({
   
       try {
         // For rental properties, check if availabilityDate is provided
-        if (formData.purpose === "Rent" && (!formData.availabilityDate || formData.availabilityDate.trim() === "")) {
-          toast.error("Please provide an availability date for rental properties");
-          setIsUpdating(false); // Reset updating state
-          return;
+        if (formData.purpose === "Rent") {
+          if (!formData.availabilityDate || formData.availabilityDate.trim() === "") {
+            toast.error("Please provide an availability date for rental properties");
+            setIsUpdating(false); // Reset updating state
+            return;
+          }
+          
+          // التحقق من وجود سعر على الأقل في أحد خيارات مدة الإيجار
+          const rentDurationType = formData.rentDurationType;
+          const hasValidPrice = rentDurationType && (
+            (rentDurationType.daily && rentDurationType.daily.price > 0) ||
+            (rentDurationType.weekly && rentDurationType.weekly.price > 0) ||
+            (rentDurationType.monthly && rentDurationType.monthly.price > 0)
+          );
+          
+          if (!hasValidPrice) {
+            toast.error("Please provide at least one price for rental duration options");
+            setIsUpdating(false);
+            return;
+          }
         }
 
         // For Buy properties, check if all required fields are filled
@@ -378,7 +394,7 @@ const UpdateUnitForm = ({
         await onSubmit(preparedFormData, formData.purpose);
 
         // Reload window after successful update
-        window.location.reload();
+        // window.location.reload();
       } catch (error) {
         console.error("Error updating unit:", error);
         setIsUpdating(false); // Reset updating state if there's an error
@@ -509,14 +525,18 @@ const UpdateUnitForm = ({
                     {formData?.purpose.charAt(0).toUpperCase() +
                       formData?.purpose.slice(1)}
                   </option>
-                  {propertyEnums.EnumPropertyIntent.map((intent, index) => (
-                    <option
-                      key={index}
-                      value={intent.charAt(0).toUpperCase() + intent.slice(1)}
-                    >
-                      {intent.charAt(0).toUpperCase() + intent.slice(1)}
-                    </option>
-                  ))}
+                  {propertyEnums.EnumPropertyIntent
+                    .filter(intent => 
+                      intent.charAt(0).toUpperCase() + intent.slice(1) !== formData?.purpose
+                    )
+                    .map((intent, index) => (
+                      <option
+                        key={index}
+                        value={intent.charAt(0).toUpperCase() + intent.slice(1)}
+                      >
+                        {intent.charAt(0).toUpperCase() + intent.slice(1)}
+                      </option>
+                    ))}
                 </select>
               </div>
 

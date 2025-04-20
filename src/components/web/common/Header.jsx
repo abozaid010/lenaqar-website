@@ -88,7 +88,7 @@ const Header = () => {
                 {t.header.home}
               </Link>
               <Link
-                href="/dashboard"
+                href="/dashbord"
                 className="hover:text-blue-200 transition-colors"
               >
                 {t.header.clientDashboard}
@@ -140,7 +140,7 @@ const Header = () => {
                   Home
                 </Link>
                 <Link
-                  href="/dashboard"
+                  href="/dashbord"
                   className="hover:text-blue-200 transition-colors py-2"
                 >
                   Client Dashboard

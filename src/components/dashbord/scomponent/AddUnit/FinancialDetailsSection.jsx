@@ -106,12 +106,11 @@ const FinancialDetailsSection = ({
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {!formik.values.paymentPlans ? (
-              <p className="text-sm text-gray-500 italic">
-                No payment plans added yet.
-              </p>
-            ) : (
+          {formik.values.paymentPlans && 
+           (formik.values.paymentPlans.years > 0 || 
+            formik.values.paymentPlans.price > 0 || 
+            formik.values.paymentPlans.maintenance > 0) && (
+            <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1 px-3 py-1 bg-gray-100 rounded-full text-sm">
                 <span>
                   {formik.values.paymentPlans.years} Years - 
@@ -126,8 +125,8 @@ const FinancialDetailsSection = ({
                   <X className="w-3 h-3" />
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
           {formik.touched.paymentPlans && formik.errors.paymentPlans && (
             <p className="mt-1 text-sm text-red-500">
               {formik.errors.paymentPlans}

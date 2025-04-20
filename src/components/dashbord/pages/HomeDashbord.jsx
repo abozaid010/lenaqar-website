@@ -655,11 +655,11 @@ const RealEstateDashboard = ({ users }) => {
                       return (
                         <tr
                           onClick={() =>
-                            router.push(`/dashboard/chat/${user.phoneNumber}`)
+                            router.push(`/dashbord/chat/${user.phoneNumber}`)
                           }
                           onKeyDown={(e) =>
                             e.key === "Enter" &&
-                            router.push(`/dashboard/chat/${user.phoneNumber}`)
+                            router.push(`/dashbord/chat/${user.phoneNumber}`)
                           }
                           role="button"
                           tabIndex={0}

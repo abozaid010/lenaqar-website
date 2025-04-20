@@ -304,13 +304,17 @@ const RealEstateListings = ({ initialData, comboundata, developersData }) => {
                         </div>
                       )}
 
-                      {estate.purpose === "Rent" || estate.purpose === "rent"   ? (
-                        estate.rentPrice && (
-                          <div className="text-sm text-gray-600 rtl:text-right">
-                            <span className="font-medium">Rent Price:</span>{" "}
-                            {estate.rentPrice} EGP
-                          </div>
-                        )
+                      {estate.purpose === "Rent" || estate.purpose === "rent" ? (
+                        <div className="text-sm text-gray-600 rtl:text-right">
+                          <span className="font-medium">Rent Price:</span>{" "}
+                          {estate.rentDurationType?.daily?.price ? 
+                            `${estate.rentDurationType.daily.price} EGP/day` : 
+                            estate.rentDurationType?.weekly?.price ? 
+                              `${estate.rentDurationType.weekly.price} EGP/week` : 
+                              estate.rentDurationType?.monthly?.price ? 
+                                `${estate.rentDurationType.monthly.price} EGP/month` : 
+                                estate.rentPrice ? `${estate.rentPrice} EGP` : "Price not specified"}
+                        </div>
                       ) : (
                         estate.totalPrice && (
                           <div className="text-sm text-gray-600 rtl:text-right">

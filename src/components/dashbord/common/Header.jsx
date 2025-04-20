@@ -1,37 +1,34 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  Bell,
-  User,
-  MessageSquare,
-  Menu,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { Search, Bell, User, MessageSquare, Menu, LogOut, Settings } from "lucide-react";
 import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
-export default function DashboardHeader({ clientName }) {
+const Header = () => {
+  const [clientName, setClientName] = useState("");
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const userMenuRef = useRef(null);
-
+  
   useEffect(() => {
+    // Only run on client-side
+    setClientName(Cookies.get("client_id"));
+    
     // Add click event listener to close menu when clicking outside
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
       }
     };
-
+    
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+  
 
   const handleMenuClick = () => {
     // Call the global toggleSidebar function
@@ -87,13 +84,17 @@ export default function DashboardHeader({ clientName }) {
         <LanguageSwitcher />
 
         <div className="relative hidden sm:block">
-          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
+          <button
+            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none"
+          >
             <MessageSquare className="h-6 w-6" />
           </button>
         </div>
 
         <div className="relative">
-          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
+          <button
+            className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none"
+          >
             <Bell className="h-6 w-6" />
             <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
           </button>
@@ -110,30 +111,29 @@ export default function DashboardHeader({ clientName }) {
 
             <span className="ml-2 text-sm cursor-pointer font-medium text-gray-700 hidden sm:inline">
               {clientName}
+
             </span>
           </button>
-
+          
           {/* User dropdown menu */}
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 relative">
-                <button
+                <button 
                   onClick={() => setIsUserMenuOpen(false)}
                   className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
                 >
                   ✕
                 </button>
-                <p className="text-sm font-medium text-gray-900">
-                  {clientName}
-                </p>
+                <p className="text-sm font-medium text-gray-900">{clientName}</p>
               </div>
-
+              
               <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                 <Settings className="h-4 w-4 mr-3" />
                 Settings
               </a>
-
-              <button
+              
+              <button 
                 onClick={handleLogout}
                 className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
               >
@@ -149,12 +149,8 @@ export default function DashboardHeader({ clientName }) {
       {showLogoutConfirm && (
         <div className="fixed inset-0  bg-black/50 backdrop-blur-sm   flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Confirm Logout
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to logout?
-            </p>
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Confirm Logout</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelLogout}
@@ -174,4 +170,6 @@ export default function DashboardHeader({ clientName }) {
       )}
     </header>
   );
-}
+};
+
+export default Header;
