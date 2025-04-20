@@ -98,34 +98,34 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   // Format date for display
   const formatDate = (dateString) => {
-    if (!dateString) return "Not specified";
+    if (!dateString) return "";
     return new Date(dateString).toLocaleDateString();
   };
 
   // Format currency with symbol
   const formatCurrency = (amount, currency = "EGP") => {
-    if (amount === undefined || amount === null) return "Not specified";
+    if (amount === undefined || amount === null) return "";
     return `${currency} ${amount.toLocaleString()}`;
   };
 
   // Format empty or zero values with appropriate labels
   const formatValue = (value, unit = "") => {
-    if (value === undefined || value === null || value === 0 || value === "") {
-      return "Not specified";
+    if (value === undefined || value === null || value === "") {
+      return "";
     }
     return `${value}${unit ? " " + unit : ""}`;
   };
 
-  // Check if a rent duration type has any values to display
+  // Check if a rent duration type has any non-zero values to display
   const hasDurationValues = (durationType) => {
     if (!updatedUnit?.rentDurationType?.[durationType]) return false;
 
     const typeDuration = updatedUnit.rentDurationType[durationType];
     return (
-      typeDuration.totalPrice ||
-      typeDuration.securityDeposit ||
-      typeDuration.serviceFee ||
-      typeDuration.cleaningFee
+      (typeDuration.totalPrice && typeDuration.totalPrice !== 0) ||
+      (typeDuration.securityDeposit && typeDuration.securityDeposit !== 0) ||
+      (typeDuration.serviceFee && typeDuration.serviceFee !== 0) ||
+      (typeDuration.cleaningFee && typeDuration.cleaningFee !== 0)
     );
   };
 
@@ -134,11 +134,11 @@ export default function UnitDetails({ unit, developers, comboundata }) {
       <div className="p-6 border-b flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">
-            {updatedUnit?.unitTitle || "Untitled Unit"}
+            {updatedUnit?.unitTitle || ""}
           </h1>
           <div className="flex flex-wrap gap-2 mt-2">
             <p className="text-gray-600">
-              {formatValue(updatedUnit?.buildingType)} in{" "}
+              {formatValue(updatedUnit?.buildingType)}{updatedUnit?.buildingType ? " in " : ""} 
               {formatValue(updatedUnit?.compound)}
             </p>
           </div>
@@ -268,14 +268,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           <div className="bg-gray-50 p-6 rounded-lg">
             {isRent ? (
               <>
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                <h2 className="text-2xl font-bold text-gray-800">
                   {formatCurrency(updatedUnit?.rentPrice)}
                 </h2>
 
                 {/* Rent duration types */}
                 {updatedUnit?.rentDurationType && (
                   <div className="mt-4 space-y-6">
-                    {/* Daily rate */}
+                    {/* Daily rate - only show if has non-zero values */}
                     {hasDurationValues("daily") && (
                       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <h3 className="font-semibold text-lg text-gray-800 flex items-center">
@@ -296,52 +296,55 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Daily Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          <div className="col-span-2">
-                            <p className="text-gray-500 text-sm">Total Price</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.daily?.totalPrice,
-                                updatedUnit.rentDurationType.daily?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Security Deposit
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.daily
-                                  ?.securityDeposit,
-                                updatedUnit.rentDurationType.daily?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">Service Fee</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.daily?.serviceFee,
-                                updatedUnit.rentDurationType.daily?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Cleaning Fee
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.daily?.cleaningFee,
-                                updatedUnit.rentDurationType.daily?.currency
-                              )}
-                            </p>
-                          </div>
+                          {updatedUnit.rentDurationType.daily?.totalPrice > 0 && (
+                            <div className="col-span-2">
+                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.daily?.totalPrice,
+                                  updatedUnit.rentDurationType.daily?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.daily?.securityDeposit > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.daily?.securityDeposit,
+                                  updatedUnit.rentDurationType.daily?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.daily?.serviceFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.daily?.serviceFee,
+                                  updatedUnit.rentDurationType.daily?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.daily?.cleaningFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.daily?.cleaningFee,
+                                  updatedUnit.rentDurationType.daily?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
 
-                    {/* Weekly rate */}
+                    {/* Weekly rate - only show if has non-zero values */}
                     {hasDurationValues("weekly") && (
                       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <h3 className="font-semibold text-lg text-gray-800 flex items-center">
@@ -362,53 +365,55 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Weekly Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          <div className="col-span-2">
-                            <p className="text-gray-500 text-sm">Total Price</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.weekly?.totalPrice,
-                                updatedUnit.rentDurationType.weekly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Security Deposit
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.weekly
-                                  ?.securityDeposit,
-                                updatedUnit.rentDurationType.weekly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">Service Fee</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.weekly?.serviceFee,
-                                updatedUnit.rentDurationType.weekly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Cleaning Fee
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.weekly
-                                  ?.cleaningFee,
-                                updatedUnit.rentDurationType.weekly?.currency
-                              )}
-                            </p>
-                          </div>
+                          {updatedUnit.rentDurationType.weekly?.totalPrice > 0 && (
+                            <div className="col-span-2">
+                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.weekly?.totalPrice,
+                                  updatedUnit.rentDurationType.weekly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.weekly?.securityDeposit > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.weekly?.securityDeposit,
+                                  updatedUnit.rentDurationType.weekly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.weekly?.serviceFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.weekly?.serviceFee,
+                                  updatedUnit.rentDurationType.weekly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.weekly?.cleaningFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.weekly?.cleaningFee,
+                                  updatedUnit.rentDurationType.weekly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
 
-                    {/* Monthly rate */}
+                    {/* Monthly rate - only show if has non-zero values */}
                     {hasDurationValues("monthly") && (
                       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                         <h3 className="font-semibold text-lg text-gray-800 flex items-center">
@@ -429,59 +434,62 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Monthly Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          <div className="col-span-2">
-                            <p className="text-gray-500 text-sm">Total Price</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.monthly
-                                  ?.totalPrice,
-                                updatedUnit.rentDurationType.monthly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Security Deposit
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.monthly
-                                  ?.securityDeposit,
-                                updatedUnit.rentDurationType.monthly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">Service Fee</p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.monthly
-                                  ?.serviceFee,
-                                updatedUnit.rentDurationType.monthly?.currency
-                              )}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-gray-500 text-sm">
-                              Cleaning Fee
-                            </p>
-                            <p className="font-medium text-gray-800">
-                              {formatCurrency(
-                                updatedUnit.rentDurationType.monthly
-                                  ?.cleaningFee,
-                                updatedUnit.rentDurationType.monthly?.currency
-                              )}
-                            </p>
-                          </div>
+                          {updatedUnit.rentDurationType.monthly?.totalPrice > 0 && (
+                            <div className="col-span-2">
+                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.monthly?.totalPrice,
+                                  updatedUnit.rentDurationType.monthly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.monthly?.securityDeposit > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.monthly?.securityDeposit,
+                                  updatedUnit.rentDurationType.monthly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.monthly?.serviceFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.monthly?.serviceFee,
+                                  updatedUnit.rentDurationType.monthly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
+                          {updatedUnit.rentDurationType.monthly?.cleaningFee > 0 && (
+                            <div>
+                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="font-medium text-gray-800">
+                                {formatCurrency(
+                                  updatedUnit.rentDurationType.monthly?.cleaningFee,
+                                  updatedUnit.rentDurationType.monthly?.currency
+                                )}
+                              </p>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
                   </div>
                 )}
 
-                <p className="text-gray-600 mt-4">
-                  Available from: {formatDate(updatedUnit?.availabilityDate)}
-                </p>
+                {updatedUnit?.availabilityDate && (
+                  <p className="text-gray-600 mt-4">
+                    Available from: {formatDate(updatedUnit?.availabilityDate)}
+                  </p>
+                )}
+                
                 {updatedUnit?.amenities && updatedUnit.amenities.length > 0 ? (
                   <div className="mt-3">
                     <p className="font-semibold text-gray-700 mb-2">
@@ -512,123 +520,151 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                 <h2 className="text-2xl font-bold text-gray-800">
                   {updatedUnit?.totalPrice
                     ? `EGP ${updatedUnit.totalPrice.toLocaleString()}`
-                    : "Price not specified"}
+                    : ""}
                 </h2>
                 <div className="mt-2 grid grid-cols-2 gap-2">
-                  <div>
-                    <p className="text-gray-600">Delivery Date:</p>
-                    <p className="font-semibold">
-                      {formatDate(updatedUnit?.deliveryDate)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Delivery Status:</p>
-                    <p className="font-semibold">
-                      {updatedUnit?.deliveryStatus || "Not specified"}
-                    </p>
-                  </div>
+                  {updatedUnit?.deliveryDate && (
+                    <div>
+                      <p className="text-gray-600">Delivery Date:</p>
+                      <p className="font-semibold">
+                        {formatDate(updatedUnit?.deliveryDate)}
+                      </p>
+                    </div>
+                  )}
+                  {updatedUnit?.deliveryStatus && (
+                    <div>
+                      <p className="text-gray-600">Delivery Status:</p>
+                      <p className="font-semibold">
+                        {updatedUnit?.deliveryStatus}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </>
             )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Rooms</p>
-              <p className="font-semibold">
-                {formatValue(updatedUnit.roomsCount)}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Bathrooms</p>
-              <p className="font-semibold">
-                {formatValue(updatedUnit.bathroomCount)}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Floor</p>
-              <p className="font-semibold">{formatValue(updatedUnit.floor)}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">View</p>
-              <p className="font-semibold">{formatValue(updatedUnit.view)}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">City</p>
-              <p className="font-semibold">{formatValue(updatedUnit.city)}</p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Country</p>
-              <p className="font-semibold">
-                {formatValue(updatedUnit.country)}
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Purpose</p>
-              <p className="font-semibold">
-                <span
-                  className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                    isRent
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-purple-100 text-purple-800"
-                  }`}
-                >
-                  {updatedUnit.purpose || "Not specified"}
-                </span>
-              </p>
-            </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-600">Building Type</p>
-              <p className="font-semibold">
-                {formatValue(updatedUnit.buildingType)}
-              </p>
-            </div>
+            {updatedUnit.roomsCount && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Rooms</p>
+                <p className="font-semibold">
+                  {formatValue(updatedUnit.roomsCount)}
+                </p>
+              </div>
+            )}
+            {updatedUnit.bathroomCount && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Bathrooms</p>
+                <p className="font-semibold">
+                  {formatValue(updatedUnit.bathroomCount)}
+                </p>
+              </div>
+            )}
+            {updatedUnit.floor && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Floor</p>
+                <p className="font-semibold">{formatValue(updatedUnit.floor)}</p>
+              </div>
+            )}
+            {updatedUnit.view && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">View</p>
+                <p className="font-semibold">{formatValue(updatedUnit.view)}</p>
+              </div>
+            )}
+            {updatedUnit.city && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">City</p>
+                <p className="font-semibold">{formatValue(updatedUnit.city)}</p>
+              </div>
+            )}
+            {updatedUnit.country && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Country</p>
+                <p className="font-semibold">
+                  {formatValue(updatedUnit.country)}
+                </p>
+              </div>
+            )}
+            {updatedUnit.purpose && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Purpose</p>
+                <p className="font-semibold">
+                  <span
+                    className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                      isRent
+                        ? "bg-blue-100 text-blue-800"
+                        : "bg-purple-100 text-purple-800"
+                    }`}
+                  >
+                    {updatedUnit.purpose}
+                  </span>
+                </p>
+              </div>
+            )}
+            {updatedUnit.buildingType && (
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <p className="text-gray-600">Building Type</p>
+                <p className="font-semibold">
+                  {formatValue(updatedUnit.buildingType)}
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Additional Details */}
+          {/* Additional Details - only show if values exist */}
           <div className="space-y-4">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Finishing</span>
-              <span className="font-semibold">
-                {formatValue(updatedUnit.finishing)}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Land Area</span>
-              <span className="font-semibold">
-                {formatValue(updatedUnit.landArea, "m²")}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">Garden Size</span>
-              <span className="font-semibold">
-                {formatValue(updatedUnit.gardenSize, "m²")}
-              </span>
-            </div>
+            {updatedUnit.finishing && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Finishing</span>
+                <span className="font-semibold">
+                  {formatValue(updatedUnit.finishing)}
+                </span>
+              </div>
+            )}
+            {updatedUnit.landArea > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Land Area</span>
+                <span className="font-semibold">
+                  {formatValue(updatedUnit.landArea, "m²")}
+                </span>
+              </div>
+            )}
+            {updatedUnit.gardenSize > 0 && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Garden Size</span>
+                <span className="font-semibold">
+                  {formatValue(updatedUnit.gardenSize, "m²")}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       <div className="bg-gray-100 p-6 border-t">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="font-semibold text-gray-800">Location</h3>
-            <p className="text-gray-600">
-              {updatedUnit.compound
-                ? updatedUnit.compound
-                : "Compound not specified"}
-              ,{updatedUnit.city ? updatedUnit.city : "City not specified"},
-              {updatedUnit.country
-                ? updatedUnit.country
-                : "Country not specified"}
-            </p>
-          </div>
-          <div>
-            <h3 className="font-semibold text-gray-800">Developer</h3>
-            <p className="text-gray-600">
-              {updatedUnit.developer || "Developer not specified"}
-            </p>
-          </div>
+          {(updatedUnit.compound || updatedUnit.city || updatedUnit.country) && (
+            <div>
+              <h3 className="font-semibold text-gray-800">Location</h3>
+              <p className="text-gray-600">
+                {updatedUnit.compound ? updatedUnit.compound : ""}
+                {updatedUnit.compound && updatedUnit.city ? ", " : ""}
+                {updatedUnit.city ? updatedUnit.city : ""}
+                {(updatedUnit.compound || updatedUnit.city) && updatedUnit.country ? ", " : ""}
+                {updatedUnit.country ? updatedUnit.country : ""}
+              </p>
+            </div>
+          )}
+          {updatedUnit.developer && (
+            <div>
+              <h3 className="font-semibold text-gray-800">Developer</h3>
+              <p className="text-gray-600">
+                {updatedUnit.developer}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

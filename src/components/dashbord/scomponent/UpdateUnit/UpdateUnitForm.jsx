@@ -315,9 +315,9 @@ const UpdateUnitForm = ({
             return;
           }
           
-          // Check if downPayment is greater than zero
-          if (!formData.downPayment || Number(formData.downPayment) <= 0) {
-            toast.error("Down Payment must be greater than zero");
+          // Modified: Allow downPayment to be zero
+          if (formData.downPayment === undefined || formData.downPayment === null) {
+            toast.error("Down Payment must be provided");
             setIsUpdating(false);
             return;
           }
@@ -394,7 +394,7 @@ const UpdateUnitForm = ({
         await onSubmit(preparedFormData, formData.purpose);
 
         // Reload window after successful update
-        // window.location.reload();
+        window.location.reload();
       } catch (error) {
         console.error("Error updating unit:", error);
         setIsUpdating(false); // Reset updating state if there's an error
