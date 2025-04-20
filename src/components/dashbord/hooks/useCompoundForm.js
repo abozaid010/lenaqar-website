@@ -10,7 +10,7 @@ import {
   addCompound,
 } from "@/components/services/serviceFetching";
 
-// Enhanced validation schema with rules for all inputs
+// Enhanced validation schema with rules for all input
 const validationSchema = Yup.object({
   name: Yup.string().required("Compound name is required"),
   description: Yup.string().min(
@@ -93,7 +93,6 @@ export const useCompoundForm = (onClose, onSave) => {
 
         // Use addCompound function from serviceFetching
         const response = await addCompound(submissionData);
-        console.log(response)
         router.refresh();
 
         // Call the onSave function provided by the parent component with the response data
