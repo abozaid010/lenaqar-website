@@ -6,8 +6,8 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 export const metadata = {
-  title: "Dashbord",
-  description: "Dashbord page",
+  title: "Dashboard",
+  description: "Dashboard page",
 };
 
 export default async function DashbordPage({ searchParams: rawSearchParams }) {

@@ -55,7 +55,6 @@ export async function deleteImage(imageId) {
 export async function fetchUnitById(id) {
   try {
     const response = await axiosInstance.get(`/units/details/${id}`);
-    console.log(response)
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch unit by id:", error.message);
@@ -85,7 +84,7 @@ export async function updateUnitRent(unit) {
 export async function deleteUnit(id) {
   try {
     const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`, {
-    
+
     });
     return response.data;
   } catch (error) {
