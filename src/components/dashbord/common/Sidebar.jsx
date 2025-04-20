@@ -40,10 +40,10 @@ const Sidebar = () => {
 
   // Function to check if a link is active
   const isLinkActive = (path) => {
-    if (path === "/dashbord" && pathname === "/dashbord") {
+    if (path === "/dashboard" && pathname === "/dashboard") {
       return true;
     }
-    return pathname.startsWith(path) && path !== "/dashbord";
+    return pathname.startsWith(path) && path !== "/dashboard";
   };
 
   if (typeof window !== "undefined") {
@@ -145,9 +145,9 @@ const Sidebar = () => {
         {/* Navigation Menu */}
         <div className="flex-1 mt-6">
           <Link
-            href="/dashbord"
+            href="/dashboard"
             className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
-              isLinkActive("/dashbord")
+              isLinkActive("/dashboard")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
@@ -157,9 +157,9 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/dashbord/analytics"
+            href="/dashboard/analytics"
             className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
-              isLinkActive("/dashbord/analytics")
+              isLinkActive("/dashboard/analytics")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
@@ -169,9 +169,9 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/dashbord/units"
+            href="/dashboard/units"
             className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
-              isLinkActive("/dashbord/units")
+              isLinkActive("/dashboard/units")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}

@@ -10,7 +10,6 @@ const Layout = async ({ children }) => {
     cookieStore.get("client_info").value
   ).client_name;
 
-  console.log("clientName", clientName);
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
       <Sidebar />

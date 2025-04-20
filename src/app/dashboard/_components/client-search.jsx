@@ -64,13 +64,6 @@ export default function SearchBar({ q }) {
             <X size={18} />
           </button>
         )}
-
-        <button
-          disabled={!searchTerm}
-          className="absolute right-1 top-[9%] h-[82%] flex items-center justify-center cursor-pointer rounded-md bg-blue-500 text-white px-4 py-2 text-sm font-semibold hover:bg-blue-600 focus:outline-none disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-        >
-          search
-        </button>
       </div>
     </form>
   );
