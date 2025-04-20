@@ -17,7 +17,7 @@ export async function fetchUnits() {
 
 export async function fetchcombounds() {
   try {
-    const response = await axiosInstance.get(`projects/`);
+    const response = await axiosInstance.get(`/projects/all`);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
