@@ -153,7 +153,7 @@ export async function addUnitRent(unitData) {
 
 export async function addCompound(compoundData) {
   try {
-    const response = await axiosInstance.post(`/projects/`, compoundData);
+    const response = await axiosInstance.post(`/projects/create`, compoundData);
     return response.data.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);

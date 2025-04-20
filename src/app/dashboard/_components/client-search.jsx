@@ -58,7 +58,7 @@ export default function SearchBar({ q }) {
           <button
             type="button"
             onClick={handleSearchClear}
-            className="absolute right-22 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-black"
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-black"
             aria-label="Clear search"
           >
             <X size={18} />
