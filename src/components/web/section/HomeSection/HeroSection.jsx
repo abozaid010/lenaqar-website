@@ -12,6 +12,8 @@ const HeroSection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [messageIndex, setMessageIndex] = useState(0);
   const messagesTimerRef = useRef(null);
+  const sectionRef = useRef(null);
+  const [windowHeight, setWindowHeight] = useState(0);
 
   // Messages that will appear as chat bubbles
   const aiMessages = [
@@ -20,6 +22,22 @@ const HeroSection = () => {
     { text: "24/7 reply and handle your clients needs", position: "left-[-180px] bottom-[5%] ", color: "from-[#3926A7] to-[#21EAF4]", rotate: "-20deg" },
     { text: "Close more deals.", position: "right-[-100px] bottom-[20%]", color: "from-[#3926A7] to-[#21EAF4]", rotate: "4deg" },
   ];
+
+  // Update window height on resize
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+    
+    // Set initial height
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Auto-rotate messages
   useEffect(() => {
@@ -46,7 +64,7 @@ const HeroSection = () => {
       content: (
         <div className="max-w-3xl relative">
           {/* AI Image with Animation - Moved further to the right */}
-          <div className="absolute right-0 md:right-[-280px]  lg:right-[-300px]  top-0 md:top-0 w-80 h-80 md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] translate-x-1/2">
+          <div className="absolute right-0 md:right-[-280px] lg:right-[-300px] top-0 md:top-0 w-80 h-80 md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] translate-x-1/2">
             <motion.div 
               className="relative w-full h-full"
               animate={{ rotate: [0, 2, 0, -2, 0] }}
@@ -256,12 +274,19 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative h-[900px] md:h-[1000px] lg:h-[1100px] xl:h-[1200px] 2xl:h-[1300px] w-full overflow-hidden">
+    <section 
+      ref={sectionRef}
+      className="relative w-full overflow-hidden"
+      style={{ 
+        minHeight: windowHeight ? `${windowHeight}px` : '100vh',
+        height: 'auto'
+      }}
+    >
       {/* Slides */}
       {slides.map((slide, index) => (
         <motion.div
           key={index}
-          className="absolute inset-0 "
+          className="absolute inset-0"
           initial={{ opacity: 0 }}
           animate={{ 
             opacity: currentSlide === index ? 1 : 0,
@@ -281,19 +306,17 @@ const HeroSection = () => {
             />
             {/* Deep blue overlay from Figma */}
             <div className="absolute inset-0 bg-[#030250] opacity-80"></div>
-            
-            {/* Removing the duplicated secondary image */}
           </div>
 
           {/* Content - Using flex for better alignment */}
           <div className="absolute inset-0 z-20">
-            <div className="w-[95%] mx-auto  gap-20 h-full px-6 md:px-12 flex items-center justify-between py-12 md:py-16">
+            <div className="w-[95%] mx-auto gap-20 h-full px-6 md:px-12 flex items-center justify-between py-12 md:py-16">
               <div className={`${slide.secondaryImage ? 'w-full md:w-3/5' : 'w-full'} flex flex-col justify-center text-white`}>
                 {slide.content}
               </div>
               
               {slide.secondaryImage && (
-                <div className="hidden md:flex md:w-2/5 h-full  items-center justify-end">
+                <div className="hidden md:flex md:w-2/5 h-full items-center justify-end">
                   <div className="relative h-4/5 w-4/5">
                     <Image
                       src={slide.secondaryImage}
