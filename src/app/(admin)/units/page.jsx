@@ -1,0 +1,44 @@
+import {
+  fetchcombounds,
+  fetchUnits,
+  fetchDevelopers,
+} from "@/components/services/serviceFetching";
+import UnitsGrid from "./components/units-grid";
+import UnitsFilter from "./components/units-filter";
+import UnitsSearch from "./components/units-search";
+
+export const metadata = {
+  title: "Units",
+  description: "Units page",
+};
+
+export default async function UnitsPage({ searchParams: rawSearchParams }) {
+  const searchParams = await rawSearchParams;
+
+  const [units, developers, compounds] = await Promise.all([
+    fetchUnits(),
+    fetchDevelopers(),
+    fetchcombounds(),
+  ]);
+  return (
+    <div className="container mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">
+          Real Estate Properties
+        </h1>
+        <p className="text-gray-600 mt-1">Explore our exclusive listings</p>
+      </div>
+
+      <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
+        <UnitsFilter
+          appliedFilters={searchParams}
+          developers={developers}
+          compounds={compounds}
+        />
+
+        <UnitsSearch />
+      </div>
+      <UnitsGrid units={units} />
+    </div>
+  );
+}

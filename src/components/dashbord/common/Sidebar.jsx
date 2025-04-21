@@ -169,7 +169,7 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/dashboard/units"
+            href="/units"
             className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
               isLinkActive("/dashboard/units")
                 ? "bg-primary text-white"
