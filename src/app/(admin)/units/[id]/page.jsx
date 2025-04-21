@@ -19,9 +19,11 @@ export async function generateMetadata({ params }) {
 const Page = async ({ params }) => {
   const { id } = await params;
   const unit = await fetchUnitById(id);
-  const comboundata = await fetchcombounds();
-  const developers = await fetchDevelopers();
-  console.log(unit);
+
+  const [comboundata, developers] = await Promise.all([
+    fetchcombounds(),
+    fetchDevelopers(),
+  ]);
 
   return (
     <UnitDetails
