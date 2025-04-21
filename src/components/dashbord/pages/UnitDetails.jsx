@@ -35,7 +35,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   // Handle back navigation with page parameter
   const handleBackToUnits = () => {
-    router.push(`/dashboard/units?page=${pageParam}`);
+    router.push(`/units`);
   };
 
   const handleDeleteUnit = async () => {
@@ -48,7 +48,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             onClick={() => {
               deleteUnit(unit.unitId);
               toast.dismiss();
-              router.push(`/dashboard/units?page=${pageParam}`);
+              router.push(`/units`);
             }}
           >
             Delete

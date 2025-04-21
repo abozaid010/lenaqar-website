@@ -32,11 +32,11 @@ const HeroSection = () => {
     };
   }, []);
 
-  // Auto-rotate slides - commented out as in your code
+  // Auto-rotate slides
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 14000); // Change slide every 5 seconds
+    }, 14000); // Change slide every 14 seconds
     return () => clearInterval(interval);
   }, []);
 
@@ -45,8 +45,8 @@ const HeroSection = () => {
       image: web2,
       content: (
         <div className="max-w-3xl relative">
-          {/* AI Image with Animation */}
-          <div className="absolute right-0 md:right-[-160px] top-0 md:top-0 w-80 h-80 md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] translate-x-1/2">
+          {/* AI Image with Animation - Moved further to the right */}
+          <div className="absolute right-0 md:right-[-280px]  lg:right-[-300px]  top-0 md:top-0 w-80 h-80 md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] translate-x-1/2">
             <motion.div 
               className="relative w-full h-full"
               animate={{ rotate: [0, 2, 0, -2, 0] }}
@@ -98,7 +98,7 @@ const HeroSection = () => {
                       </motion.span>
                     </div>
                     
-                    {/* Message Arrow/Pointer - Updated to look more realistic */}
+                    {/* Message Arrow/Pointer */}
                     <div 
                       className={`absolute ${
                         idx % 2 === 0 
@@ -119,8 +119,8 @@ const HeroSection = () => {
             </motion.div>
           </div>
           
-          {/* Main Content with AI Highlight */}
-          <div className="relative z-10">
+          {/* Main Content with increased spacing from AI image */}
+          <div className="relative z-10 pr-20">
             <motion.h1 
               className="text-5xl md:text-6xl lg:text-7xl font-bold mb-4"
               initial={{ opacity: 0, y: 20 }}
@@ -253,16 +253,15 @@ const HeroSection = () => {
       ),
       layout: "left",
     },
-  
   ];
 
   return (
-    <section className="relative h-[700px] md:h-[800px] lg:h-[900px] w-full overflow-hidden">
+    <section className="relative h-[900px] md:h-[1000px] lg:h-[1100px] xl:h-[1200px] 2xl:h-[1300px] w-full overflow-hidden">
       {/* Slides */}
       {slides.map((slide, index) => (
         <motion.div
           key={index}
-          className="absolute inset-0"
+          className="absolute inset-0 "
           initial={{ opacity: 0 }}
           animate={{ 
             opacity: currentSlide === index ? 1 : 0,
@@ -283,35 +282,36 @@ const HeroSection = () => {
             {/* Deep blue overlay from Figma */}
             <div className="absolute inset-0 bg-[#030250] opacity-80"></div>
             
-            {/* Secondary image (professional) if available */}
-            {slide.secondaryImage && (
-              <div className="absolute right-0 bottom-0 h-full w-2/5 z-10">
-                <div className="relative h-full w-full">
-                  <Image
-                    src={slide.secondaryImage}
-                    alt="Professional"
-                    fill
-                    sizes="40vw"
-                    className="object-contain object-bottom"
-                  />
-                </div>
-              </div>
-            )}
+            {/* Removing the duplicated secondary image */}
           </div>
 
-          {/* Content */}
+          {/* Content - Using flex for better alignment */}
           <div className="absolute inset-0 z-20">
-            <div className="container mx-auto h-full px-6 md:px-12 flex">
-              <div className={`${slide.secondaryImage ? 'w-full md:w-3/5' : 'w-full'} h-full flex flex-col justify-center text-white`}>
+            <div className="w-[95%] mx-auto  gap-20 h-full px-6 md:px-12 flex items-center justify-between py-12 md:py-16">
+              <div className={`${slide.secondaryImage ? 'w-full md:w-3/5' : 'w-full'} flex flex-col justify-center text-white`}>
                 {slide.content}
               </div>
+              
+              {slide.secondaryImage && (
+                <div className="hidden md:flex md:w-2/5 h-full  items-center justify-end">
+                  <div className="relative h-4/5 w-4/5">
+                    <Image
+                      src={slide.secondaryImage}
+                      alt="Professional"
+                      fill
+                      sizes="40vw"
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
       ))}
 
       {/* Slide indicators */}
-      <div className="absolute bottom-8 left-0 right-0 z-30 flex justify-center gap-3">
+      <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center gap-20">
         {slides.map((_, index) => (
           <motion.button
             key={index}
@@ -325,8 +325,6 @@ const HeroSection = () => {
           />
         ))}
       </div>
-
-     
     </section>
   );
 };
