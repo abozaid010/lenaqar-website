@@ -22,7 +22,18 @@ const PricingSection = ({
             type="number"
             name="totalPrice"
             value={formData.totalPrice}
-            onChange={handleChange}
+            onChange={(e) => {
+              // Clear the field if it's 0 and user starts typing
+              if (formData.totalPrice === 0 && e.target.value !== '') {
+                e.target.value = '';
+              }
+              handleChange(e);
+            }}
+            onClick={(e) => {
+              if (formData.totalPrice === 0) {
+                e.target.value = '';
+              }
+            }}
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
@@ -35,7 +46,18 @@ const PricingSection = ({
             type="number"
             name="downPayment"
             value={formData.downPayment}
-            onChange={handleChange}
+            onChange={(e) => {
+              // Clear the field if it's 0 and user starts typing
+              if (formData.downPayment === 0 && e.target.value !== '') {
+                e.target.value = '';
+              }
+              handleChange(e);
+            }}
+            onClick={(e) => {
+              if (formData.downPayment === 0) {
+                e.target.value = '';
+              }
+            }}
             className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
           />
         </div>
@@ -91,7 +113,10 @@ const PricingSection = ({
           {console.log(formData.paymentPlans)}
 
           <div className="flex flex-wrap gap-2">
-            {!formData.paymentPlans ? (
+            {!formData.paymentPlans || 
+             (formData.paymentPlans.years === 0 && 
+              formData.paymentPlans.price === 0 && 
+              formData.paymentPlans.maintenance === 0) ? (
               <p className="text-sm text-gray-500 italic">
                 No payment plans added yet.
               </p>

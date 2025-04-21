@@ -23,11 +23,27 @@ const FinancialDetailsSection = ({
             min="0"
             value={formik.values.downPayment}
             onChange={(e) => {
-              const value = parseFloat(e.target.value);
+              // Clear the field if it's 0 and user starts typing
+              if (formik.values.downPayment === 0 && e.target.value !== '') {
+                formik.setFieldValue('downPayment', '');
+                return;
+              }
+              
+              const value = e.target.value === '' ? 0 : parseFloat(e.target.value);
               if (value < 0) e.target.value = 0;
-              formik.handleChange(e);
+              formik.handleChange({
+                target: {
+                  name: 'downPayment',
+                  value: value
+                }
+              });
             }}
-            onBlur={formik.handleBlur}
+            onBlur={(e) => {
+              if (e.target.value === '') {
+                formik.setFieldValue('downPayment', 0);
+              }
+              formik.handleBlur(e);
+            }}
             className={`w-full px-4 py-2 rounded-lg border ${
               formik.touched.downPayment && formik.errors.downPayment
                 ? "border-red-500 focus:ring-red-500"

@@ -28,6 +28,19 @@ const PropertyDetailsSection = ({ formData, handleChange }) => {
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    
+    // If current value is 0 and user starts typing, clear the field
+    if (formData[name] === 0 && value !== '') {
+      e.target.value = '';
+      handleChange({
+        target: {
+          name,
+          value: ''
+        }
+      });
+      return;
+    }
+    
     const numValue = parseFloat(value);
     
     if (value === "" || isNaN(numValue)) {
@@ -46,6 +59,19 @@ const PropertyDetailsSection = ({ formData, handleChange }) => {
       // Keep the old value to prevent negative numbers
       e.preventDefault();
       e.target.value = formData[name];
+    }
+  };
+  
+  // Handle blur event to restore zero if field is empty
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    if (value === '') {
+      handleChange({
+        target: {
+          name,
+          value: 0
+        }
+      });
     }
   };
   
@@ -100,6 +126,7 @@ const PropertyDetailsSection = ({ formData, handleChange }) => {
               name={field.name}
               value={formData[field.name]}
               onChange={handleInputChange}
+              onBlur={handleBlur}
               min="0"
               className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent"
             />

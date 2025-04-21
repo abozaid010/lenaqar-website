@@ -57,7 +57,7 @@ export const useUnitForm = (onClose, onSave) => {
     }),
     downPayment: Yup.number().when('purpose', {
       is: (val) => val === "Sell" || val === "Buy",
-      then: (schema) => schema.min(0, "Down payment cannot be negative").required("Down payment is required"),
+      then: (schema) => schema.min(0, "Down payment cannot be negative"),
       otherwise: (schema) => schema.nullable()
     }),
     deliveryDate: Yup.string().when('purpose', {
@@ -158,7 +158,7 @@ export const useUnitForm = (onClose, onSave) => {
       gardenSize: "",
       finishing: "",
       dataSource: "website",
-      downPayment: "",
+      downPayment: 0,
       totalPrice: "",
       paymentPlans: {
         years: 0,
