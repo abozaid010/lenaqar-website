@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import img1 from "../../../../../public/images/hero_1.jpg";
-import img2 from "../../../../../public/images/careers2.png";
 import web1 from "../../../../../public/images/web1.png";
 import web2 from "../../../../../public/images/web2.jpg";
 import aiimage from "../../../../../public/images/AdobeStock_241732873_Preview.jpeg"
@@ -43,7 +42,7 @@ const HeroSection = () => {
 
   const slides = [
     {
-      image: img1,
+      image: web2,
       content: (
         <div className="max-w-3xl relative">
           {/* AI Image with Animation */}
@@ -258,7 +257,7 @@ const HeroSection = () => {
   ];
 
   return (
-    <section className="relative h-[600px] md:h-[650px] lg:h-[700px] w-full overflow-hidden">
+    <section className="relative h-[700px] md:h-[800px] lg:h-[900px] w-full overflow-hidden">
       {/* Slides */}
       {slides.map((slide, index) => (
         <motion.div
