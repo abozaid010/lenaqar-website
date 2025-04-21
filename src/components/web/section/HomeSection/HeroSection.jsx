@@ -1,355 +1,451 @@
-"use client";
-import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
-import img1 from "../../../../../public/images/hero_1.jpg";
-import web1 from "../../../../../public/images/web1.png";
-import web2 from "../../../../../public/images/web2.jpg";
-import aiimage from "../../../../../public/images/AdobeStock_241732873_Preview.jpeg"
-import { Brain, Sparkles, Bot, MessageSquare, Zap, Cpu, Home, DollarSign, Briefcase, HelpCircle } from "lucide-react";
+"use client"
+import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
+import { motion, AnimatePresence } from 'framer-motion'
+import im from "../../../../../public/images/web1.png"
+import backgrounImg from "../../../../../public/images/web2.jpg"
+import imageai from "../../../../../public/images/ai2.jpg"
 
 const HeroSection = () => {
+  // State for controlling slides
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [messageIndex, setMessageIndex] = useState(0);
-  const messagesTimerRef = useRef(null);
-  const sectionRef = useRef(null);
-  const [windowHeight, setWindowHeight] = useState(0);
-
-  // Messages that will appear as chat bubbles
-  const aiMessages = [
-    { text: "Filter leads", position: "left-[-80px] top-[20%]", color: "from-[#3926A7] to-[#21EAF4]", rotate: "-3deg" },
-    { text: "Follow up, scale with effortless", position: "right-[-180px] top-[30%]", color: "from-[#3926A7] to-[#21EAF4]", rotate: "2deg" },
-    { text: "24/7 reply and handle your clients needs", position: "left-[-180px] bottom-[5%] ", color: "from-[#3926A7] to-[#21EAF4]", rotate: "-20deg" },
-    { text: "Close more deals.", position: "right-[-100px] bottom-[20%]", color: "from-[#3926A7] to-[#21EAF4]", rotate: "4deg" },
+  
+  // Custom messages as requested - moved "I'm Lena AI" to be the first message
+  const messages = [
+    "I'm Lena AI, how can I help you?",
+    "Filter leads",
+    "24/7 reply and handle your clients needs",
+    "Close more deals",
+    "Follow up",
+    "Scale with effortless"
   ];
+  
+  // Auto-advance slides every 15 seconds
 
-  // Update window height on resize
   useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
+    const timer = setTimeout(() => {
+      setCurrentSlide((prev) => (prev + 1) % 2);
+    }, 15000);
     
-    // Set initial height
-    handleResize();
-    
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-    
-    // Clean up
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => clearTimeout(timer);
+  }, [currentSlide]);
 
-  // Auto-rotate messages
-  useEffect(() => {
-    messagesTimerRef.current = setInterval(() => {
-      setMessageIndex(prev => (prev + 1) % aiMessages.length);
-    }, 3000);
-
-    return () => {
-      if (messagesTimerRef.current) clearInterval(messagesTimerRef.current);
-    };
-  }, []);
-
-  // Auto-rotate slides
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1));
-    }, 14000); // Change slide every 14 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const slides = [
-    {
-      image: web2,
-      content: (
-        <div className="max-w-3xl relative">
-          {/* AI Image with Animation - Moved further to the right */}
-          <div className="absolute right-0 md:right-[-280px] lg:right-[-300px] top-0 md:top-0 w-80 h-80 md:w-[350px] md:h-[350px] lg:w-[400px] lg:h-[400px] translate-x-1/2">
-            <motion.div 
-              className="relative w-full h-full"
-              animate={{ rotate: [0, 2, 0, -2, 0] }}
-              transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
-            >
-              <div className="absolute inset-0 rounded-full overflow-hidden border-2 border-blue-400/50 shadow-lg shadow-blue-500/20">
-                <Image
-                  src={aiimage}
-                  alt="AI Technology"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 -gradient-to-br from-blue-900/30 to-purple-900/30"></div>
-              </div>
-              
-              {/* AI Message Bubbles */}
-              {aiMessages.map((message, idx) => (
-                <motion.div
-                  key={idx}
-                  className={`absolute ${message.position} z-20`}
-                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                  animate={{ 
-                    opacity: messageIndex === idx ? 1 : 0,
-                    scale: messageIndex === idx ? 1 : 0.8,
-                    y: messageIndex === idx ? 0 : 20,
-                    rotate: message.rotate || "0deg"
-                  }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <div className="relative">
-                    <div className={`bg-gradient-to-r ${message.color} px-4 py-3 rounded-xl text-white font-medium shadow-lg max-w-[240px] backdrop-blur-sm border border-white/10`}>
-                      <motion.span className="block">
-                        {Array.from(message.text).map((char, charIdx) => (
-                          <motion.span
-                            key={charIdx}
-                            initial={{ opacity: 0 }}
-                            animate={{ 
-                              opacity: messageIndex === idx ? 1 : 0 
-                            }}
-                            transition={{ 
-                              duration: 0.05, 
-                              delay: messageIndex === idx ? 0.5 + (0.03 * charIdx) : 0 
-                            }}
-                          >
-                            {char}
-                          </motion.span>
-                        ))}
-                      </motion.span>
-                    </div>
-                    
-                    {/* Message Arrow/Pointer */}
-                    <div 
-                      className={`absolute ${
-                        idx % 2 === 0 
-                          ? 'right-[-8px] top-1/2 -translate-y-1/2 bg-gradient-to-r from-[#3926A7] to-[#21EAF4]' 
-                          : 'left-[-8px] top-1/2 -translate-y-1/2 bg-gradient-to-l from-[#3926A7] to-[#21EAF4]'
-                      } h-4 w-4 transform rotate-45 rounded-sm shadow-md`}
-                    ></div>
-                  </div>
-                </motion.div>
-              ))}
-              
-              {/* Improved Glowing Effect */}
-              <motion.div 
-                className="absolute -inset-4 rounded-full bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-cyan-500/20 blur-xl"
-                animate={{ opacity: [0.4, 0.7, 0.4] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </motion.div>
-          </div>
-          
-          {/* Main Content with increased spacing from AI image */}
-          <div className="relative z-10 pr-20">
-            <motion.h1 
-              className="text-5xl md:text-6xl lg:text-7xl font-bold mb-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-            >
-              Sell Smarter,
-            </motion.h1>
-            
-            <motion.h2 
-              className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              Close More Deals.
-            </motion.h2>
-            
-            {/* AI Highlight Box */}
-            <motion.div 
-              className="relative my-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              <div className="absolute -left-12 top-1/2 -translate-y-1/2">
-                <div className="relative">
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Bot size={48} className="text-blue-400" />
-                  </motion.div>
-                  <div className="absolute top-1/2 left-full w-16 h-0.5 bg-gradient-to-r from-blue-400 to-transparent"></div>
-                </div>
-              </div>
-              
-              <div className="pl-10 py-4 bg-gradient-to-r from-blue-900/30 to-transparent rounded-lg border-l-2 border-blue-400">
-                <p className="text-xl md:text-2xl font-semibold text-blue-300">
-                  Lena AI: Your AI-powered real estate sales assistant.
-                </p>
-              </div>
-            </motion.div>
-            
-            <motion.p 
-              className="text-lg md:text-xl mb-8 opacity-90 relative"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.9 }}
-            >
-              <span className="relative">
-                Lena AI is built to qualify leads instantly, engage prospects 24/7, and 
-                boost conversions so you focus on closing, not chasing cold leads.
-                <motion.span 
-                  className="absolute -right-8 -top-4"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
-                >
-                  <MessageSquare size={20} className="text-blue-400" />
-                </motion.span>
-              </span>
-            </motion.p>
-            
-            <motion.button 
-              className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg flex items-center gap-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 1.2 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span>Try Lenaai Now  </span>
-              <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Zap size={20} />
-              </motion.div>
-            </motion.button>
-          </div>
-          
-          {/* Floating Elements */}
-          <div className="absolute -bottom-10 -right-10 text-blue-500">
-            <div className="relative">
-              <motion.div 
-                className="w-24 h-24 rounded-full border border-blue-400/30 absolute"
-                animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <motion.div 
-                className="w-16 h-16 rounded-full border border-blue-400/50 absolute top-4 left-4"
-                animate={{ scale: [1, 1.5, 1], opacity: [1, 0, 1] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-              />
-              <motion.div 
-                className="w-8 h-8 rounded-full bg-blue-400/20 absolute top-8 left-8"
-                animate={{ opacity: [0.2, 0.5, 0.2] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
-          </div>
-        </div>
-      ),
-      layout: "left",
-    },
-    {
-      image: web2,
-      secondaryImage: web1,
-      content: (
-        <div className="max-w-2xl">
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-4">
-            Sell Smarter,
-          </h1>
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Close More Deals.
-          </h2>
-          <p className="text-xl md:text-2xl font-semibold text-blue-300 mb-6">
-            Lena AI: Your AI-powered real estate sales assistant.
-          </p>
-          <p className="text-lg md:text-xl mb-8">
-            Lena AI is built to qualify leads instantly, engage prospects 24/7, and 
-            boost conversions so you focus on closing, not chasing cold leads.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <button className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-6 py-3 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg">
-            Try Lenaai Now
-            </button>
-          </div>
-        </div>
-      ),
-      layout: "left",
-    },
-  ];
 
   return (
-    <section 
-      ref={sectionRef}
-      className="relative w-full overflow-hidden"
+    <div className='relative h-[100vh] w-full flex items-center overflow-hidden'>
+      {/* Background Image with Overlay */}
+      <div className='absolute inset-0 z-0'>
+        <Image
+          src={backgrounImg}
+          alt="Background"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className='absolute inset-0 bg-[#030250] opacity-80'></div>
+        
+        {/* Animated particles in background */}
+        <Particles />
+      </div>
+      
+      <div className='w-[95%] mx-auto px-4 relative z-10'>
+        <AnimatePresence mode="wait">
+          {currentSlide === 0 ? (
+
+            <motion.div 
+              key="slide1"
+              className='grid grid-cols-1 md:grid-cols-3 gap-8 items-center'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div 
+                className='md:col-span-2 space-y-6'
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.h1 
+                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-white'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.8 }}
+                >
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-300">
+                    Sell Smarter,
+                  </span>
+                  <br />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-white">
+                    Close More Deals.
+                  </span>
+                </motion.h1>
+                
+                <motion.p 
+                  className='text-xl md:text-2xl font-semibold text-blue-300 my-6'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                >
+                  Lena AI: Your AI-powered real estate sales assistant.
+                </motion.p>
+                
+                <motion.p 
+                  className='text-lg md:text-xl text-white'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                >
+                  Lena AI is built to qualify leads instantly, engage prospects 24/7, and 
+                  boost conversions so you focus on closing, not chasing cold leads.
+                </motion.p>
+                
+                <motion.button 
+                  className='bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6'
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                >
+                  Try Lenaai Now
+                </motion.button>
+              </motion.div>
+              
+              <div className='md:col-span-1 flex justify-center md:justify-end'>
+                <motion.div 
+                  className='relative h-[400px] md:h-[450px] w-full max-w-[500px]'
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                >
+                  {/* Circular AI Image with motion effects */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-blue-400 shadow-lg shadow-blue-500/30"
+                    animate={{ 
+                      scale: [1, 1.03, 1],
+                      rotate: [0, 2, 0, -2, 0]
+                    }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <Image
+                      src={im}
+                      alt="AI Assistant"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                    {/* Pulsing overlay effect */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 to-blue-600/30"
+                      animate={{ 
+                        opacity: [0.3, 0.5, 0.3],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </motion.div>
+                  
+                  {/* Animated outer ring */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 rounded-full border-2 border-blue-400/50"
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      rotate: [0, 360]
+                    }}
+                    transition={{
+                      scale: {
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      },
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }
+                    }}
+                  />
+                  
+                  {/* No messages in first slide */}
+                  
+                  {/* Glowing circle effect */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-gradient-to-r from-blue-500/10 to-blue-600/10 blur-xl"
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="slide2"
+              className='grid grid-cols-1 md:grid-cols-3 gap-8 items-center'
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div 
+                className='md:col-span-2 space-y-6'
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.h1 
+                  className='text-4xl md:text-5xl lg:text-6xl font-bold text-white'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.2, duration: 0.8 }}
+                >
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-300">
+                    Sell Smarter,
+                  </span>
+                  <br />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-300 to-white">
+                    Close More Deals.
+                  </span>
+                </motion.h1>
+                
+                <motion.p 
+                  className='text-xl md:text-2xl font-semibold text-blue-300 my-6'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                >
+                  Lena AI: Your AI-powered real estate sales assistant.
+                </motion.p>
+                
+                <motion.p 
+                  className='text-lg md:text-xl text-white'
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.8 }}
+                >
+                  Lena AI is built to qualify leads instantly, engage prospects 24/7, and 
+                  boost conversions so you focus on closing, not chasing cold leads.
+                </motion.p>
+                
+                <motion.button 
+                  className='bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6'
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8, duration: 0.5 }}
+                >
+                  Try Lenaai Now
+                </motion.button>
+              </motion.div>
+              
+              <div className='md:col-span-1 flex justify-center md:justify-end'>
+                <motion.div 
+                  className='relative h-[400px] md:h-[450px] w-full max-w-[500px]'
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.8 }}
+                >
+                  {/* Circular AI Image with motion effects */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-72 md:h-72 rounded-full overflow-hidden border-4 border-blue-400 shadow-lg shadow-blue-500/30"
+                    animate={{ 
+                      scale: [1, 1.03, 1],
+                      rotate: [0, -2, 0, 2, 0]
+                    }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+
+                    <Image
+                      src={imageai}
+                      alt="AI Assistant"
+                      fill
+                      className="object-cover"
+                      priority
+                    />
+                    {/* Pulsing overlay effect */}
+                    <motion.div 
+                      className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 to-blue-600/30"
+                      animate={{ 
+                        opacity: [0.3, 0.5, 0.3],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    />
+                  </motion.div>
+                  
+                  {/* Animated outer ring */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 rounded-full border-2 border-blue-400/50"
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      rotate: [0, -360]
+                    }}
+                    transition={{
+                      scale: {
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      },
+                      rotate: {
+                        duration: 20,
+                        repeat: Infinity,
+                        ease: "linear"
+                      }
+                    }}
+                  />
+                  
+                  {/* Messages - only appear in second slide with the AI image */}
+                  {messages.map((message, index) => (
+                    <AiMessageBubble 
+                      key={index} 
+                      message={message} 
+                      index={index} 
+                      total={messages.length}
+                    />
+                  ))}
+                  
+                  {/* Glowing circle effect */}
+                  <motion.div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-gradient-to-r from-blue-500/10 to-blue-600/10 blur-xl"
+                    animate={{ 
+                      scale: [1, 1.1, 1],
+                    }}
+                    transition={{
+                      duration: 4,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+// Renamed and improved message component with better spacing
+const AiMessageBubble = ({ message, index, total }) => {
+  // Increased spacing between messages
+  const verticalOffset = index * 70 - (total * 35);
+  
+  // Horizontal position - all on left side
+  const horizontalOffset = -220;
+  
+  // Special styling for the "I'm Lena AI" message
+  const isLenaMessage = message.includes("I'm Lena AI");
+  let bubbleClass = "bg-white text-blue-800 px-4 py-2 rounded-lg shadow-lg font-medium text-sm relative";
+  
+  if (isLenaMessage) {
+    bubbleClass = "bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-3 rounded-lg shadow-lg font-medium text-sm relative";
+  }
+  
+  return (
+    <motion.div
+      className="absolute z-20"
       style={{ 
-        minHeight: windowHeight ? `${windowHeight}px` : '100vh',
-        height: 'auto'
+        top: '50%',
+        left: '50%',
+        y: verticalOffset,
+        x: horizontalOffset,
+      }}
+      initial={{ opacity: 0, x: horizontalOffset - 50 }}
+      animate={{ 
+        opacity: 1, 
+        x: horizontalOffset,
+      }}
+      transition={{
+        delay: isLenaMessage ? 0.5 : index * 0.8,
+        duration: 0.5
       }}
     >
-      {/* Slides */}
-      {slides.map((slide, index) => (
-        <motion.div
-          key={index}
-          className="absolute inset-0"
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: currentSlide === index ? 1 : 0,
-            zIndex: currentSlide === index ? 10 : 0
-          }}
-          transition={{ duration: 1 }}
-        >
-          {/* Image with overlay */}
-          <div className="relative w-full h-full">
-            <Image
-              src={slide.image}
-              alt="Hero background"
-              fill
-              className="object-cover w-full h-full"
-              sizes="100vw"
-              priority={index === 0}
-            />
-            {/* Deep blue overlay from Figma */}
-            <div className="absolute inset-0 bg-[#030250] opacity-80"></div>
-          </div>
-
-          {/* Content - Using flex for better alignment */}
-          <div className="absolute inset-0 z-20">
-            <div className="w-[95%] mx-auto gap-20 h-full px-6 md:px-12 flex items-center justify-between py-12 md:py-16">
-              <div className={`${slide.secondaryImage ? 'w-full md:w-3/5' : 'w-full'} flex flex-col justify-center text-white`}>
-                {slide.content}
-              </div>
-              
-              {slide.secondaryImage && (
-                <div className="hidden md:flex md:w-2/5 h-full items-center justify-end">
-                  <div className="relative h-4/5 w-4/5">
-                    <Image
-                      src={slide.secondaryImage}
-                      alt="Professional"
-                      fill
-                      sizes="40vw"
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </motion.div>
-      ))}
-
-      {/* Slide indicators */}
-      <div className="absolute bottom-10 left-0 right-0 z-30 flex justify-center gap-20">
-        {slides.map((_, index) => (
-          <motion.button
-            key={index}
-            onClick={() => setCurrentSlide(index)}
-            className={`h-3 rounded-full transition-all ${
-              currentSlide === index ? "bg-blue-500 w-12" : "bg-white/50 hover:bg-white/80 w-3"
-            }`}
-            whileHover={{ scale: 1.2 }}
-            whileTap={{ scale: 0.9 }}
-            aria-label={`Go to slide ${index + 1}`}
-          />
-        ))}
+      <div className={bubbleClass}>
+        {message}
+        {/* Arrow pointing to the AI */}
+        <div className="absolute top-1/2 right-0 w-3 h-3 bg-white transform translate-x-1/2 rotate-45 -translate-y-1/2" />
       </div>
-    </section>
+      
+      {/* Line connecting to center */}
+      <motion.div 
+        className="absolute top-1/2 left-full h-[2px] bg-gradient-to-r from-white to-transparent"
+        style={{ 
+          width: '70px',
+          transformOrigin: 'left',
+        }}
+        initial={{ scaleX: 0 }}
+        animate={{ scaleX: 1 }}
+        transition={{
+          delay: isLenaMessage ? 0.8 : index * 0.8 + 0.3,
+          duration: 0.3
+        }}
+      />
+    </motion.div>
   );
 };
 
-export default HeroSection;
+// Background particles effect
+const Particles = () => {
+  const particleCount = 20;
+  const particles = Array.from({ length: particleCount });
+
+  return (
+    <>
+      {particles.map((_, index) => {
+        const size = Math.random() * 6 + 2;
+        const initialX = Math.random() * 100;
+        const initialY = Math.random() * 100;
+        const duration = Math.random() * 15 + 10;
+        const delay = Math.random() * 5;
+        
+        return (
+          <motion.div
+            key={index}
+            className="absolute rounded-full bg-blue-300 opacity-20"
+            style={{
+              width: size,
+              height: size,
+              left: `${initialX}%`,
+              top: `${initialY}%`
+            }}
+            animate={{
+              y: [0, -100, 0],
+              x: [0, Math.random() * 50 - 25, 0],
+              opacity: [0.1, 0.4, 0.1]
+            }}
+            transition={{
+              duration,
+              delay,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        );
+      })}
+    </>
+  );
+};
+
+export default HeroSection
