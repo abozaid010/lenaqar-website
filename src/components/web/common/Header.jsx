@@ -7,12 +7,44 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import logo from "../../../../public/log.svg"
 
 const Header = () => {
   const { t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const ci = Cookies.get("client_id");
+
+  // Add scroll event listener
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // Determine if scrolled for background color
+      if (currentScrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+      
+      // Determine if header should be visible based on scroll direction
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        // Scrolling down & past header height - hide header
+        setIsVisible(false);
+      } else {
+        // Scrolling up or at top - show header
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   const initiateLogout = () => {
     setShowLogoutConfirm(true);
@@ -70,12 +102,15 @@ const Header = () => {
         </div>
       )}
 
-      <header className="bg-primary text-white shadow-md">
+      <header className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 ${
+        isScrolled ? ' backdrop-blur-md ' : 'bg-transparent'
+      } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
-            <Link href="/" className="text-xl font-bold flex items-center">
-              <span className="mr-2">AI Efficiency Hub</span>
+            <Link href="/" className="text-xl font-bold flex gap-2 items-center">
+              < img src={logo.src} className="mr-2"/>
+              <p>Lena</p>
             </Link>
 
             {/* Desktop Navigation */}
@@ -103,14 +138,14 @@ const Header = () => {
               {!ci ? (
                 <Link
                   href="/login"
-                  className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
+                  className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                 >
                   Sign In
                 </Link>
               ) : (
                 <button
                   onClick={initiateLogout}
-                  className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
+                  className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                 >
                   Logout
                 </button>
@@ -126,7 +161,7 @@ const Header = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-primary border-t border-blue-700">
+          <div className="md:hidden bg-[#030250]/95 backdrop-blur-md border-t border-blue-700/30">
             <div className="container mx-auto px-4 py-3">
               <nav className="flex flex-col space-y-3">
                 <Link
@@ -158,13 +193,13 @@ const Header = () => {
                     <>
                       <Link
                         href="/signup"
-                        className="text-white border border-blue-400 px-5 py-1.5 rounded-full hover:border-blue-200 hover:text-blue-200 transition-all duration-300"
+                        className="text-white border border-[#21EAF4] px-5 py-1.5 rounded-full hover:bg-[#21EAF4]/10 transition-all duration-300"
                       >
                         Sign Up
                       </Link>
                       <Link
                         href="/login"
-                        className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
+                        className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                       >
                         Sign In
                       </Link>
@@ -172,7 +207,7 @@ const Header = () => {
                   ) : (
                     <button
                       onClick={initiateLogout}
-                      className="text-yellow-400 border border-yellow-400 px-5 py-1.5 rounded-full hover:border-yellow-200 hover:text-yellow-200 transition-all duration-300"
+                      className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                     >
                       Logout
                     </button>
