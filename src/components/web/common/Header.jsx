@@ -4,13 +4,9 @@ import Link from "next/link";
 import { Menu, X, Globe, AlertTriangle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
-import {
-  getClientid,
-  removeClientId,
-} from "@/components/services/clientCookies";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { useI18n } from "@/app/context/translate-api";
+import { useI18n } from "@/context/translate-api";
 
 const Header = () => {
   const { t } = useI18n();

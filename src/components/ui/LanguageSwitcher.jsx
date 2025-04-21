@@ -1,6 +1,6 @@
 'use client";';
 
-import { useI18n } from "@/app/context/translate-api";
+import { useI18n } from "@/context/translate-api";
 import { Globe } from "lucide-react";
 
 export function LanguageSwitcher() {

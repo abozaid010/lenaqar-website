@@ -2,14 +2,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { I18nProvider } from "./context/translate-api";
+import { I18nProvider } from "@/context/translate-api";
 import { cookies, headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
-  subsets: ["latin"], 
+  subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({

@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useMemo, useCallback, useState, useEffect } from "react";
 
-import en from "../../../public/locales/en";
-import ar from "../../../public/locales/ar";
+import en from "../../public/locales/en";
+import ar from "../../public/locales/ar";
 import Cookies from "js-cookie";
 
 const context = {
