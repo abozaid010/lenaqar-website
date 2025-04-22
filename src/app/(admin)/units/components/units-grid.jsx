@@ -1,7 +1,36 @@
+"use client";
 import Link from "next/link";
-import { MapPin, Share2 } from "lucide-react";
+import { MapPin, Share2, X, Copy } from "lucide-react";
+import { useState, useEffect } from "react";
+import { getShareUnitData } from "@/components/services/serviceFetching";
+import ShareModal from "./units-share-modal";
 
 export default function UnitsGrid({ units }) {
+  const [showModal, setShowModal] = useState(false);
+  const [shareData, setShareData] = useState(null);
+  const [loadingShare, setLoadingShare] = useState(false);
+  const [activeUnitId, setActiveUnitId] = useState(null);
+
+  const handleShareClick = async (unitId, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    setShowModal(true);
+    setActiveUnitId(unitId);
+    setLoadingShare(true);
+  
+    try {
+      const data = await getShareUnitData(unitId);
+      console.log("Received share data:", data);
+      setShareData(data);
+    } catch (error) {
+      console.error("Error fetching share data:", error);
+      setShareData(null);
+    } finally {
+      setLoadingShare(false);
+    }
+  };
+  
   return (
     <>
       {units.length === 0 ? (
@@ -16,7 +45,7 @@ export default function UnitsGrid({ units }) {
               key={idx}
               className="flex flex-col"
             >
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300  flex flex-col cursor-pointer">
+              <div className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col cursor-pointer">
                 <div className="relative h-56">
                   {u.images && u.images.length > 0 ? (
                     <>
@@ -25,18 +54,24 @@ export default function UnitsGrid({ units }) {
                         alt={u.name || u.compound || "Property"}
                         className="w-full h-full object-cover"
                       />
-                      <button className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group">
+                      <button
+                        type="button"
+                        onClick={(e) => handleShareClick(u.unitId, e)}
+                        className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
+                      >
                         <Share2 className="w-4 h-4 text-gray-700 group-hover:text-white" />
                       </button>
                     </>
                   ) : (
                     <>
-                      <img
-                        src={u.images[0].url}
-                        alt={u.name || u.compound || "Property"}
-                        className="w-full h-full object-cover"
-                      />
-                      <button className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group">
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-gray-400">No image</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => handleShareClick(u.unitId, e)}
+                        className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/90 hover:bg-primary hover:text-white rounded-full shadow-lg transition-all duration-300 backdrop-blur-sm border border-gray-100 group"
+                      >
                         <Share2 className="w-4 h-4 text-gray-700 group-hover:text-white" />
                       </button>
                     </>
@@ -106,6 +141,14 @@ export default function UnitsGrid({ units }) {
           ))}
         </div>
       )}
+
+      {/* ShareModal component with the correct props */}
+      <ShareModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        shareData={shareData}
+        loadingShare={loadingShare}
+      />
     </>
   );
 }

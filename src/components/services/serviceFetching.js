@@ -219,6 +219,24 @@ export async function getClientRequirements(phoneNumber) {
   }
 }
 
+
+export async function getShareUnitData(unit_id) {
+  const clientId = await getClientid();
+
+  try {
+    const params = {
+      client_id: clientId,
+      unit_id: unit_id
+    };
+    
+    const response = await axiosInstance.get(`units/share`, { params });
+    return response.data.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    return { error: error.message };
+  }
+}
+
 export async function toggleAutoReply(phoneNumber, client_id, value) {
   const payload = {
     phone_number: phoneNumber,
@@ -242,3 +260,4 @@ export async function toggleAutoReply(phoneNumber, client_id, value) {
     };
   }
 }
+
