@@ -4,13 +4,15 @@ import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
 import AddUnitModal from "./add-new-unit";
+import  {EnumPropertyIntent}  from "../../../../components/dashbord/data/propertyEnums.json";
 
 export default function UnitsFilter({ appliedFilters, developers, compounds }) {
   const router = useRouter();
+  console.log(appliedFilters)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filters, setFilters] = useState(() => ({
-    developer: appliedFilters.developer || "",
-    compound: appliedFilters.compound || "",
+    developer_name: appliedFilters.developer || "",
+    project_name: appliedFilters.project_name || "",
     purpose: appliedFilters.purpose || "",
   }));
 
@@ -26,18 +28,26 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
     setFilters((prev) => ({ ...prev, [key]: value }));
 
     const newParams = new URLSearchParams(window.location.search);
-    newParams.set(key, value);
+    
+    // Only set the parameter if it's not "all"
+    if (value !== "all") {
+      newParams.set(key, value);
+    } else {
+      // Remove the parameter if it's "all"
+      newParams.delete(key);
+    }
+    
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
-
+  console.log(filters)
   return (
     <>
       <div className="flex items-center gap-2 justify-between">
         <div className="flex items-center gap-2">
           <select
             className="px-3 py-2 w-60 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            value={filters.developer}
-            onChange={(e) => handleFilterChange("developer", e.target.value)}
+            value={filters.developer_name}
+            onChange={(e) => handleFilterChange("developer_name", e.target.value)}
           >
             <option value="all">All Developers</option>
             {developersSet.map((d, idx) => (
@@ -49,8 +59,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
 
           <select
             className="w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            value={filters.compound}
-            onChange={(e) => handleFilterChange("compound", e.target.value)}
+            value={filters.project_name}
+            onChange={(e) => handleFilterChange("project_name", e.target.value)}
           >
             <option value="all">All Compounds</option>
             {compounds.map((c, idx) => (
@@ -60,18 +70,18 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
             ))}
           </select>
 
-          {/* <select
-        className="w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        value={filters.purpose}
-        onChange={(e) => handleFilterChange("purpose", e.target.value)}
-      >
-        <option value="all">All Purposes</option>
-        {compounds.map((c, idx) => (
-          <option key={idx} value={c.name}>
-            {c.name}
-          </option>
-        ))}
-      </select> */}
+          <select
+            className="w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            value={filters.purpose}
+            onChange={(e) => handleFilterChange("purpose", e.target.value)}
+          >
+            <option value="all">All Purposes</option>
+            {EnumPropertyIntent.map((purpose, idx) => (
+              <option key={idx} value={purpose}>
+                {purpose.charAt(0).toUpperCase() + purpose.slice(1)}
+              </option>
+            ))}
+          </select>
         </div>
 
         <button

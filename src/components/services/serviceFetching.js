@@ -110,6 +110,27 @@ export async function fetchUsersData(searchParams) {
     return { error: error.message };
   }
 }
+export async function fetchUnitsFilter(searchParams) {
+  const clientId = await getClientid();
+
+  try {
+    const params = {
+      ...JSON.parse(searchParams),
+      client_id: clientId, // include client_id in query params
+    
+    };
+    console.log("params",params)
+
+    const response = await axiosInstance.get('/units/all', { params });
+    console.log(response)
+    return response.data;
+
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+    return { error: error.message };
+  }
+}
+
 
 export async function fetchDevelopers() {
   try {

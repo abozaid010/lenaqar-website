@@ -1,6 +1,6 @@
 import {
   fetchcombounds,
-  fetchUnits,
+  fetchUnitsFilter,
   fetchDevelopers,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "./components/units-grid";
@@ -14,12 +14,15 @@ export const metadata = {
 
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
-
-  const [units, developers, compounds] = await Promise.all([
-    fetchUnits(),
+  
+  const [unitsResponse, developers, compounds] = await Promise.all([
+    fetchUnitsFilter(JSON.stringify(searchParams)),
     fetchDevelopers(),
     fetchcombounds(),
   ]);
+
+  const units = unitsResponse.data?.units || [];
+  
   return (
     <div className="container mx-auto">
       <div className="mb-8">
