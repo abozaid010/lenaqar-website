@@ -42,7 +42,7 @@ const Footer = () => {
               Connect With Us
             </h3>
             <Link
-              href="https://linkedin.com"
+              href="https://www.linkedin.com/company/lenaai-net/"
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors"
             >
               <Linkedin size={24} />

@@ -26,16 +26,11 @@ const Header = () => {
       // Determine if scrolled for background color
       if (currentScrollY > 10) {
         setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-      
-      // Determine if header should be visible based on scroll direction
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
-        // Scrolling down & past header height - hide header
+        // Hide header when scrolled regardless of direction
         setIsVisible(false);
       } else {
-        // Scrolling up or at top - show header
+        setIsScrolled(false);
+        // Only show header when at the top of the page
         setIsVisible(true);
       }
       
