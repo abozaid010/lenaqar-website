@@ -1,13 +1,5 @@
-import React from "react";
 import Link from "next/link";
-import {
-  Linkedin,
-  Phone,
-  MapPin,
-  Building,
-  Handshake,
-  User,
-} from "lucide-react";
+import { Linkedin, Phone, Building, Handshake, User } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -58,10 +50,7 @@ const Footer = () => {
             </Link>
             <div className="mt-6">
               <h4 className="font-semibold mb-2">Privacy Policy</h4>
-              <Link
-                href="/web/privacy"
-                className="text-blue-200 hover:underline"
-              >
+              <Link href="/privacy" className="text-blue-200 hover:underline">
                 Read our Privacy Policy
               </Link>
             </div>
@@ -69,7 +58,10 @@ const Footer = () => {
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/30 text-center">
-          <p>&copy; {new Date().getFullYear()} Lena AI. All rights reserved, Version 0.0.001 </p>
+          <p>
+            &copy; {new Date().getFullYear()} Lena AI. All rights reserved,
+            Version 0.0.001{" "}
+          </p>
         </div>
       </div>
     </footer>

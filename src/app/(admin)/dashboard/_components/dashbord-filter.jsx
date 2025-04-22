@@ -175,7 +175,7 @@ export default function DashbordFilter({ appliedFilters }) {
         {/* TODO: Whatsapp Modal should not rendered here - get modal code from `HomeDashbord` comp and render it in the tright place */}
         <button
           //  onClick={handleOpenModal}
-          className="w-full sm:w-auto bg-[#1e3a8a] hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2"
+          className="w-full sm:w-auto bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2"
         >
           <MessageSquare size={16} />
           WhatsApp Leads

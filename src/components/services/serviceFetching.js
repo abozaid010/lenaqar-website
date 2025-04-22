@@ -117,12 +117,12 @@ export async function fetchUnitsFilter(searchParams) {
     const params = {
       ...JSON.parse(searchParams),
       client_id: clientId, // include client_id in query params
-    
+
     };
-    console.log("params",params)
+    console.log("params", params);
 
     const response = await axiosInstance.get('/units/all', { params });
-    console.log(response)
+    console.log(response);
     return response.data;
 
   } catch (error) {
@@ -216,5 +216,29 @@ export async function getClientRequirements(phoneNumber) {
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
     return { error: error.message };
+  }
+}
+
+export async function toggleAutoReply(phoneNumber, client_id, value) {
+  const payload = {
+    phone_number: phoneNumber,
+    client_id: client_id,
+    toggle_ai_auto_reply: value,
+    username: "string", // TODO: Replace with actual username
+    platform: "website",
+  };
+
+  try {
+    await axiosInstance.post("/lenaai-auto-reply", payload);
+
+    return {
+      success: true,
+      message: "Auto-reply toggled successfully",
+    };
+  } catch (e) {
+    return {
+      success: false,
+      message: "Failed to toggle auto-reply",
+    };
   }
 }

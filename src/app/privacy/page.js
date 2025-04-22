@@ -1,6 +1,4 @@
-import React from "react";
-
-const Privacy = () => {
+export default function PrivacyPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold text-gray-800 mb-4">Privacy Policy</h1>
@@ -142,4 +140,3 @@ const Privacy = () => {
   );
 };
 
-export default Privacy;

@@ -5,11 +5,6 @@ export async function middleware(request) {
   // Get the pathname of the request
   const path = request.nextUrl.pathname;
 
-  // If the user is accessing the root path '/', redirect to '/web'
-  if (path === "/") {
-    return NextResponse.redirect(new URL("/web", request.url));
-  }
-
   // Protect dashboard routes
   if (path.startsWith("/dashboard")) {
     // Check for client_id cookie

@@ -1,6 +1,8 @@
 "use client";
+
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Moon,
@@ -105,45 +107,19 @@ const Sidebar = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-4 flex items-center gap-2">
-          <div className="bg-primary p-2 rounded-full">
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M12 2L2 7L12 12L22 7L12 2Z"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M2 17L12 22L22 17"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M2 12L12 17L22 12"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-          <Link href={"/web"} className="text-lg font-semibold text-primary">
-            AI Efficiency Hub
+        <div className="p-3 flex items-center gap-2">
+          <Link href="/">
+            <Image
+              src={"/images/logo.png"}
+              alt="logo_image"
+              width={120}
+              height={40}
+            />
           </Link>
         </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 mt-6">
+        <div className="flex-1 mt-1">
           <Link
             href="/dashboard"
             className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${

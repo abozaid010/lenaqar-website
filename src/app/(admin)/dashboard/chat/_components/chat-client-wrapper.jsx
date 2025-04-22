@@ -13,7 +13,7 @@ export default function ChatClientWrapper({ initialData, userId }) {
   };
 
   return (
-    <div className="relative container mx-auto flex flex-col h-full bg-gray-200 rounded-md pb-14">
+    <div className="relative container mx-auto flex flex-col h-full bg-gray-100 rounded-md pb-14">
       <ChatHistory data={chatHistory} />
 
       {/* Render the form and notify ChatHistory of new messages */}

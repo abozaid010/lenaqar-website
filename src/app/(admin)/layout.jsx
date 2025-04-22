@@ -11,7 +11,7 @@ const Layout = async ({ children }) => {
   ).client_name;
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-100">
+    <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
       <Sidebar />
 
       <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">

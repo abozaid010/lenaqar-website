@@ -239,7 +239,7 @@ export default function ClientsTable({
 
               {/* TODO: This button should open a modal to add action to the selected rows */}
               {rowSelection.length > 0 && (
-                <button className="bg-[#1e3a8a] hover:opacity-95 cursor-pointer text-white py-1.5 rounded-md px-5">
+                <button className="bg-primary hover:opacity-95 cursor-pointer text-white py-1.5 rounded-md px-5">
                   Add Action to {rowSelection.length} client(s)
                 </button>
               )}

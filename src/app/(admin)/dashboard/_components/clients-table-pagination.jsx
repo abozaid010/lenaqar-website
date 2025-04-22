@@ -25,14 +25,14 @@ export default function ClientsTablePagination({
       <button
         onClick={() => handlePageChange(nextCursor, "forward")}
         disabled={disableNext}
-        className="px-4 py-1 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
         Next
       </button>
       <button
         onClick={() => handlePageChange(previousCursor, "backward")}
         disabled={disablePrev}
-        className="px-4 py-1 bg-[#1e3a8a] text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
         Previous
       </button>
