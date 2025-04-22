@@ -177,6 +177,7 @@ const UpdateUnitForm = ({
         setFormData((prev) => ({
           ...prev,
           [name]: value,
+          developer: "", // Set developer to empty string for Rent
           amenities:
             prev.amenities && Object.keys(prev.amenities).length > 0
               ? prev.amenities
@@ -290,6 +291,9 @@ const UpdateUnitForm = ({
             setIsUpdating(false); // Reset updating state
             return;
           }
+          
+          // Ensure developer is empty for rental properties
+          formData.developer = "";
           
           // التحقق من وجود سعر على الأقل في أحد خيارات مدة الإيجار
           const rentDurationType = formData.rentDurationType;
@@ -587,50 +591,52 @@ const UpdateUnitForm = ({
                 )}
               </div>
 
-              {/* Developer Field */}
-              <div className="relative">
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Developer
-                  </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddDeveloperModalOpen(true)}
-                    className="text-xs text-primary hover:text-primary/80"
-                  >
-                    + Add New
-                  </button>
-                </div>
-
-                <div
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
-                  onClick={() => setIsDevDropdownOpen(!isDevDropdownOpen)}
-                >
-                  <span>{formData.developer || "Select Developer"}</span>
-                  <span>{isDevDropdownOpen ? "▲" : "▼"}</span>
-                </div>
-
-                {isDevDropdownOpen && (
-                  <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
-                    {developers &&
-                      developers.map((developer, index) => (
-                        <div
-                          key={index}
-                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                          onClick={() => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              developer: developer.name,
-                            }));
-                            setIsDevDropdownOpen(false);
-                          }}
-                        >
-                          {developer.name}
-                        </div>
-                      ))}
+              {/* Developer Field - Hide when purpose is Rent */}
+              {formData.purpose !== "Rent" && (
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Developer
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddDeveloperModalOpen(true)}
+                      className="text-xs text-primary hover:text-primary/80"
+                    >
+                      + Add New
+                    </button>
                   </div>
-                )}
-              </div>
+
+                  <div
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary cursor-pointer flex justify-between items-center"
+                    onClick={() => setIsDevDropdownOpen(!isDevDropdownOpen)}
+                  >
+                    <span>{formData.developer || "Select Developer"}</span>
+                    <span>{isDevDropdownOpen ? "▲" : "▼"}</span>
+                  </div>
+
+                  {isDevDropdownOpen && (
+                    <div className="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {developers &&
+                        developers.map((developer, index) => (
+                          <div
+                            key={index}
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                developer: developer.name,
+                              }));
+                              setIsDevDropdownOpen(false);
+                            }}
+                          >
+                            {developer.name}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
