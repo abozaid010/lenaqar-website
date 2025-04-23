@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { ArrowRight, X } from "lucide-react";
+import CalendarModal from "@/components/ui/calendar-modal";
 
 const DataInsights = () => {
   return (
@@ -62,10 +63,7 @@ const DataInsights = () => {
           <p className="text-lg text-gray-700 mb-2">
             Lena is here to solve these challenges.
           </p>
-          <button className=" bg-gradient-to-r py-4 cursor-pointer from-[#3926A7] to-[#21EAF4] text-white  px-8 rounded-md inline-flex items-center transition-all duration-300 mx-auto">
-            Let Lena Handle It
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </button>
+          <CalendarModal buttonText={" Let Lena Handle It"} />
         </div>
       </div>
     </section>

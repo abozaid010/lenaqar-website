@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import CalendarModal from "@/components/ui/calendar-modal";
 
 const HeroSection = () => {
   // State for tracking which messages have been shown
@@ -101,16 +102,9 @@ const HeroSection = () => {
               cold leads.
             </motion.p>
 
-            <motion.button
-              className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.8, duration: 0.5 }}
-            >
-              Get Started
-            </motion.button>
+         
+              <CalendarModal buttonText={"Get Started"} />
+         
           </motion.div>
 
           <div className="md:col-span-1 flex justify-center md:justify-end">
