@@ -1,6 +1,11 @@
 import Link from "next/link";
 import LoginForm from "../_components/login-form";
 
+export const metadata = {
+  title: "Login",
+  description: "Login page",
+};
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 p-4">

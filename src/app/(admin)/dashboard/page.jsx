@@ -5,10 +5,19 @@ import SearchBar from "./_components/client-search";
 import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
-export const metadata = {
-  title: "Dashboard",
-  description: "Dashboard page",
-};
+import { cookies } from "next/headers";
+
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const clientName = JSON.parse(
+    cookieStore.get("client_info").value
+  ).client_name;
+
+  return {
+    title: clientName ? `Dashboard | ${clientName}` : "LENAAI",
+    description: `LENAAI, your AI property consultant.`,
+  };
+}
 
 export default async function DashbordPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;

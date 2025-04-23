@@ -7,14 +7,23 @@ import UnitsGrid from "./components/units-grid";
 import UnitsFilter from "./components/units-filter";
 import UnitsSearch from "./components/units-search";
 
-export const metadata = {
-  title: "Units",
-  description: "Units page",
-};
+import { cookies } from "next/headers";
+
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const clientName = JSON.parse(
+    cookieStore.get("client_info").value
+  ).client_name;
+
+  return {
+    title: clientName ? `Units | ${clientName}` : "LENAAI",
+    description: `LENAAI, your AI property consultant.`,
+  };
+}
 
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
-  
+
   const [unitsResponse, developers, compounds] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams)),
     fetchDevelopers(),
@@ -22,7 +31,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   ]);
 
   const units = unitsResponse.data?.units || [];
-  
+
   return (
     <div className="container mx-auto">
       <div className="mb-8">
