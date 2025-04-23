@@ -67,7 +67,7 @@ const HeroSection = () => {
               transition={{ delay: 0.2, duration: 0.8 }}
             >
               <span className="bg-clip-text text-white bg-gradient-to-r from-white to-blue-300">
-                Sell Smarter,
+                Sell Smarter
               </span>
               <br />
               <span className="bg-clip-text text-white bg-gradient-to-r from-blue-300 to-white">
