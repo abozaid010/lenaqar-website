@@ -1,4 +1,3 @@
-"use client"
 import { Check } from "lucide-react";
 import dashborddesctop from "../../../../public/images/dasbordDesctop.png";
 import dashbordmobile from "../../../../public/images/dashbordmobile.png";
