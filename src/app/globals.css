@@ -27,6 +27,10 @@
   }
 }
 
+button {
+  cursor: pointer;
+}
+
 .timeline {
   list-style: none;
   position: relative;
