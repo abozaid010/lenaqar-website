@@ -51,7 +51,7 @@ const HeroSection = () => {
 
       
       <div className='max-w-[85%] w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
-
+        <motion.div
           key="slide2"
           className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center"
           initial={{ opacity: 0 }}
