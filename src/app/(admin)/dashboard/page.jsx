@@ -10,8 +10,8 @@ import { cookies } from "next/headers";
 export async function generateMetadata() {
   const cookieStore = await cookies();
   const clientName = JSON.parse(
-    cookieStore.get("client_info").value
-  ).client_name;
+    cookieStore.get("client_info")?.value
+  )?.client_name;
 
   return {
     title: clientName ? `Dashboard | ${clientName}` : "LENAAI",

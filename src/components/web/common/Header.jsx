@@ -8,7 +8,6 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
-// import logo from "../../../../public/images/logo-6.svg"
 
 const Header = () => {
   const { t } = useI18n();
@@ -23,7 +22,7 @@ const Header = () => {
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       // Determine if scrolled for background color
       // Only add background when scrolled past first section
       if (currentScrollY > 10) {
@@ -31,15 +30,15 @@ const Header = () => {
       } else {
         setIsScrolled(false);
       }
-      
+
       // Always keep header visible
       setIsVisible(true);
-      
+
       setLastScrollY(currentScrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
   const initiateLogout = () => {
@@ -98,9 +97,13 @@ const Header = () => {
         </div>
       )}
 
-      <header className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 ${
-        isScrolled ? 'bg-[#030250] bg-opacity-90 backdrop-blur-md' : 'bg-transparent'
-      } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header
+        className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 ${
+          isScrolled
+            ? "bg-[#030250] bg-opacity-90 backdrop-blur-md"
+            : "bg-transparent"
+        } ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}

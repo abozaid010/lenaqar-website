@@ -1,14 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import AddUnitModal from "./add-new-unit";
-import  {EnumPropertyIntent}  from "../../../../components/dashbord/data/propertyEnums.json";
+
+const EnumPropertyIntent = ["buy", "rent", "sell", "lease"];
 
 export default function UnitsFilter({ appliedFilters, developers, compounds }) {
   const router = useRouter();
-  console.log(appliedFilters)
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer || "",
@@ -28,7 +28,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
     setFilters((prev) => ({ ...prev, [key]: value }));
 
     const newParams = new URLSearchParams(window.location.search);
-    
+
     // Only set the parameter if it's not "all"
     if (value !== "all") {
       newParams.set(key, value);
@@ -36,10 +36,9 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
       // Remove the parameter if it's "all"
       newParams.delete(key);
     }
-    
+
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
-  console.log(filters)
   return (
     <>
       <div className="flex items-center gap-2 justify-between">
@@ -47,7 +46,9 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
           <select
             className="px-3 py-2 w-60 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             value={filters.developer_name}
-            onChange={(e) => handleFilterChange("developer_name", e.target.value)}
+            onChange={(e) =>
+              handleFilterChange("developer_name", e.target.value)
+            }
           >
             <option value="all">All Developers</option>
             {developersSet.map((d, idx) => (
