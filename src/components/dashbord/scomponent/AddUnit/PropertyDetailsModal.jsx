@@ -17,7 +17,7 @@ import {
 const PropertyDetailsModal = ({ onClose, property }) => {
   const reformatPropertyData = () => {
     const reformattedData = {};
-
+  console.log(property)
     for (const key in property) {
       const value = property[key];
       reformattedData[key] = Array.isArray(value)

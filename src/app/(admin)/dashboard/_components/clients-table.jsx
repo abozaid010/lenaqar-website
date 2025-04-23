@@ -31,7 +31,7 @@ export default function ClientsTable({
 }) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState([]);
-
+console.log(users)
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
   const [openActionModal, setOpenActionModal] = useState(false);
@@ -44,28 +44,28 @@ export default function ClientsTable({
     if (rowSelection.length === users.length) {
       setRowSelection([]);
     } else {
-      setRowSelection(users.map((user) => user.phoneNumber));
+      setRowSelection(users.map((user) => user.phone_number));
     }
   };
-  const toggleRowSelection = (phoneNumber) => {
-    if (rowSelection.includes(phoneNumber)) {
-      setRowSelection(rowSelection.filter((number) => number !== phoneNumber));
+  const toggleRowSelection = (phone_number) => {
+    if (rowSelection.includes(phone_number)) {
+      setRowSelection(rowSelection.filter((number) => number !== phone_number));
     } else {
-      setRowSelection([...rowSelection, phoneNumber]);
+      setRowSelection([...rowSelection, phone_number]);
     }
   };
-  const isRowSelected = (phoneNumber) => {
-    return rowSelection.includes(phoneNumber);
+  const isRowSelected = (phone_number) => {
+    return rowSelection.includes(phone_number);
   };
 
-  const handleclientAction = async (e, phoneNumber) => {
+  const handleclientAction = async (e, phone_number) => {
     e.stopPropagation();
 
     // Set loading state for the specific row
-    setLoadingClientActions(phoneNumber);
+    setLoadingClientActions(phone_number);
 
     try {
-      const actions = await getClientActions(phoneNumber);
+      const actions = await getClientActions(phone_number);
 
       setRowActions(actions);
       setOpenActionModal(true);
@@ -77,16 +77,16 @@ export default function ClientsTable({
 
   const handleClientRequirements = async (
     e,
-    phoneNumber,
+    phone_number,
     purchaseProbability
   ) => {
     e.stopPropagation();
 
     // Set loading state for the specific row
-    setLoadingRequirements(phoneNumber);
+    setLoadingRequirements(phone_number);
 
     try {
-      const requirements = await getClientRequirements(phoneNumber);
+      const requirements = await getClientRequirements(phone_number);
       setRowRequirements({ ...requirements, purchaseProbability });
       setOpenRequirementsModal(true);
     } catch (error) {
@@ -97,7 +97,7 @@ export default function ClientsTable({
 
   return (
     <>
-      {users.length === 0 ? (
+      {users?.length === 0 ? (
         <div>
           <div className="text-center font-medium text-xl mt-5 text-gray-400">
             No clients found.
@@ -112,7 +112,7 @@ export default function ClientsTable({
                   <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6">
                     <input
                       type="checkbox"
-                      checked={rowSelection.length === users.length}
+                      checked={rowSelection?.length === users?.length}
                       onChange={toggleSelectAll}
                       className="cursor-pointer"
                     />
@@ -133,43 +133,52 @@ export default function ClientsTable({
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => {
-                  const lastActivity = new Date(user.date)
-                    .toISOString()
-                    .split("T")[0];
+                {users?.map((user) => {
+                  // Add error handling for invalid date values
+                  let lastActivity = "N/A";
+                  try {
+                    if (user.updated_at) {
+                      const dateObj = new Date(user.updated_at);
+                      if (!isNaN(dateObj.getTime())) {
+                        lastActivity = dateObj.toISOString().split("T")[0];
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Invalid date format:", user.updated_at);
+                  }
 
                   return (
                     <tr
                       onClick={() =>
-                        router.push(`/dashboard/chat/${user.phoneNumber}`)
+                        router.push(`/dashboard/chat/${user.phone_number}`)
                       }
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.phoneNumber}`)
+                        router.push(`/dashboard/chat/${user.phone_number}`)
                       }
                       role="button"
                       tabIndex={0}
-                      key={user.phoneNumber}
+                      key={user.phone_number}
                       className={`hover:bg-gray-50 transition-colors text-xs sm:text-sm text-center ${
-                        isRowSelected(user.phoneNumber) && "bg-stone-100"
+                        isRowSelected(user.phone_number) && "bg-stone-100"
                       } ${loadingClientActions ? "pointer-events-none" : ""}`}
                     >
                       <td>
                         <input
                           type="checkbox"
-                          checked={rowSelection.includes(user.phoneNumber)}
-                          onChange={() => toggleRowSelection(user.phoneNumber)}
+                          checked={rowSelection.includes(user.phone_number)}
+                          onChange={() => toggleRowSelection(user.phone_number)}
                           onClick={(e) => e.stopPropagation()} // Prevent row navigation on click
                           className="cursor-pointer"
                         />
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 font-medium text-gray-900">
-                        {user.phoneNumber}
+                        {user.phone_number}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
-                        {user.phoneNumber}
+                        {user.phone_number}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600">
@@ -181,12 +190,12 @@ export default function ClientsTable({
                         onClick={(e) =>
                           handleClientRequirements(
                             e,
-                            user.phoneNumber,
+                            user.phone_number,
                             user.profile
                           )
                         }
                       >
-                        {loadingRequirements === user.phoneNumber &&
+                        {loadingRequirements === user.phone_number &&
                         !openRequirementsModal ? (
                           <div>
                             <Loader2
@@ -196,7 +205,7 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {user.requirements}
+                            {user.requirement_name}
                           </span>
                         )}
                       </td>
@@ -207,9 +216,9 @@ export default function ClientsTable({
 
                       <td
                         className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.actions]}`}
-                        onClick={(e) => handleclientAction(e, user.phoneNumber)}
+                        onClick={(e) => handleclientAction(e, user.phone_number)}
                       >
-                        {loadingClientActions === user.phoneNumber &&
+                        {loadingClientActions === user.phone_number &&
                         !openActionModal ? (
                           <div>
                             <Loader2
@@ -218,7 +227,7 @@ export default function ClientsTable({
                             />
                           </div>
                         ) : (
-                          <span className="line-clamp-1">{user.actions}</span>
+                          <span className="line-clamp-1">{user.last_action}</span>
                         )}
                       </td>
                     </tr>

@@ -206,12 +206,11 @@ export async function getClientActions(phoneNumber) {
 }
 
 export async function getClientRequirements(phoneNumber) {
-  const cookieClientId = await getClientid();
-
-  const requirementsId = `${phoneNumber}_${cookieClientId}`;
+  
 
   try {
-    const response = await axiosInstance.get(`requirements/${requirementsId}`);
+    const response = await axiosInstance.get(`requirements/${phoneNumber}`);
+    console.log(response)
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
