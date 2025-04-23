@@ -1,11 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import { motion, AnimatePresence } from "framer-motion";
-import im from "../../../../../public/images/web1.png";
-import backgrounImg from "../../../../../public/images/web2.jpg";
-import imageai from "../../../../../public/images/AdobeStock_241732873_Preview.jpeg";
-import CalendarModal from "@/components/ui/calendar-modal";
+import { motion } from "framer-motion";
 
 const HeroSection = () => {
   // State for tracking which messages have been shown
@@ -37,7 +34,7 @@ const HeroSection = () => {
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={backgrounImg}
+          src={"/images/web2.jpg"}
           alt="Background"
           fill
           className="object-cover"
@@ -49,8 +46,7 @@ const HeroSection = () => {
         <Particles />
       </div>
 
-      
-      <div className='max-w-[85%] w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
+      <div className="max-w-[85%] w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
           key="slide2"
           className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center"
@@ -99,9 +95,8 @@ const HeroSection = () => {
               cold leads.
             </motion.p>
 
-            
-            <motion.button 
-              className='bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6'
+            <motion.button
+              className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0 }}
@@ -110,7 +105,6 @@ const HeroSection = () => {
             >
               Get Started
             </motion.button>
-
           </motion.div>
 
           <div className="md:col-span-1 flex justify-center md:justify-end">
@@ -133,7 +127,7 @@ const HeroSection = () => {
                 }}
               >
                 <Image
-                  src={imageai}
+                  src={"/images/AdobeStock_241732873_Preview.jpeg"}
                   alt="AI Assistant"
                   fill
                   className="object-cover"
