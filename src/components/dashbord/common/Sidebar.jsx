@@ -107,7 +107,7 @@ const Sidebar = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-3 flex items-center gap-2">
+        <div className="p-3  flex items-center gap-2">
           <Link href="/">
             <Image
               src={"/images/logo.png"}

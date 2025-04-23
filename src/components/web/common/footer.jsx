@@ -17,10 +17,10 @@ const Footer = () => {
                 Capital, Cairo, Egypt
               </p>
             </div>
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <Handshake className="flex-shrink-0" />
               <p>Partnership with DREAM HOMES</p>
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-4">
@@ -31,10 +31,10 @@ const Footer = () => {
               <Phone className="flex-shrink-0" />
               <p>Contact info: 01016080323</p>
             </div>
-            <div className="flex items-center space-x-3">
+            {/* <div className="flex items-center space-x-3">
               <User className="flex-shrink-0" />
               <p>CTO: Aboazid Ibrahim</p>
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-4">
@@ -48,11 +48,11 @@ const Footer = () => {
               <Linkedin size={24} />
               <span>LinkedIn</span>
             </Link>
-            <div className="mt-6">
-              <h4 className="font-semibold mb-2">Privacy Policy</h4>
-              <Link href="/privacy" className="text-blue-200 hover:underline">
+            <div className="">
+            <Link href="/privacy" className="text-blue-200 hover:underline">
                 Read our Privacy Policy
               </Link>
+             
             </div>
           </div>
         </div>

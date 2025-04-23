@@ -4,7 +4,7 @@ import { ArrowRight, X } from "lucide-react";
 
 const SalesManagerSection = () => {
   return (
-    <section className="mt-16 max-w-7xl w-full mx-auto md:px-4 sm:px-6 ">
+    <section className="mt-16 max-w-[85%] w-full  mx-auto md:px-4 sm:px-6 font-montserrat">
         <section className="pt-10 my-4 ">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">

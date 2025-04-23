@@ -5,7 +5,7 @@ export default {
   header: {
     home: "الرئيسية",
     clientDashboard: "لوحة تحكم العميل",
-    jobOpportunities: "فرص العمل",
+    jobOpportunities: " طلب تجربة",
     allProperties: "جميع العقارات",
   },
   welcome: "مرحبا",

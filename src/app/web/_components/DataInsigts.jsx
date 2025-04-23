@@ -5,7 +5,7 @@ import { ArrowRight, X } from "lucide-react";
 
 const DataInsights = () => {
   return (
-    <section className=" max-w-7xl w-full mx-auto px-4 sm:px-6 ">
+    <section className=" max-w-[85%] w-full mx-auto  ">
        
       <div className="bg-white overflow-hidden mt-4">
         <div className="flex flex-col items-center lg:flex-row space-x-10">
@@ -60,7 +60,7 @@ const DataInsights = () => {
          
         </div>
         <div className="  py-8 px-6 rounded-b-2xl text-center">
-           <p className="text-xl font-medium text-gray-800 mb-2">Sound familiar?</p>
+           <p className="text-xl font-medium text-gray-800 mb-2 font-montserrat">Sounds familiar?</p>
            <p className="text-lg text-gray-700 mb-2">Lena is here to solve these challenges.</p>
            <button className=" bg-gradient-to-r py-4 cursor-pointer from-[#3926A7] to-[#21EAF4] text-white  px-8 rounded-md inline-flex items-center transition-all duration-300 mx-auto">
              Let Lena Handle It

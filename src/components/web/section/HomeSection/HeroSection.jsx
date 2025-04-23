@@ -49,8 +49,9 @@ const HeroSection = () => {
         <Particles />
       </div>
 
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
+      
+      <div className='max-w-[85%] w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
+
           key="slide2"
           className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center"
           initial={{ opacity: 0 }}
@@ -84,7 +85,7 @@ const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              Lena AI: Your AI-powered real estate sales assistant.
+              Your AI-powered real estate sales assistant.
             </motion.div>
 
             <motion.p
@@ -98,7 +99,18 @@ const HeroSection = () => {
               cold leads.
             </motion.p>
 
-            <CalendarModal />
+            
+            <motion.button 
+              className='bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-4 rounded-md text-white font-medium transition-all hover:scale-105 shadow-lg mt-6'
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+            >
+              Get Started
+            </motion.button>
+
           </motion.div>
 
           <div className="md:col-span-1 flex justify-center md:justify-end">

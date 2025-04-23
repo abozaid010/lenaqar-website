@@ -27,12 +27,17 @@ export default function HomePage() {
       {/* Hero Section with Title */}
       <HeroSection />
 
+     
+      <DashbordImage/>
+
       {/* Smart Automation Section */}
       <SalesManagerSection />
 
       {/* Data Insights Section */}
       <DataInsights />
-      <DashbordImage />
+
+     
+
 
       <Footer />
     </>

@@ -6,7 +6,7 @@ export default {
   header: {
     home: "Home",
     clientDashboard: "Client Dashboard",
-    jobOpportunities: "Job Opportunities",
+    jobOpportunities: "Request Demo ",
     allProperties: "All Properties",
   },
   welcome: "Welcome",

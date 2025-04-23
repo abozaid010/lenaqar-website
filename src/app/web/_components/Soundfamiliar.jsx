@@ -5,7 +5,7 @@ export default function LenaBanner() {
   const [isHovered, setIsHovered] = useState(false);
   
   return (
-    <div className="max-w-3xl mx-auto rounded-xl shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 ">
+    <div className="max-w-3xl mx-auto  rounded-xl shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 ">
       <div className="text-center ">
         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 tracking-tight">
           Sound familiar?

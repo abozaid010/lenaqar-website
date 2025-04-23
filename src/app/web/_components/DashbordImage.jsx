@@ -26,10 +26,10 @@ export default function DashbordImage() {
   
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <div className="max-w-[85%] w-full mx-auto py-12 md:py-20">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-3xl font-bold text-gray-800 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
             Lena is with you <span className="">all the time</span>
           </h1>
           <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
@@ -46,21 +46,16 @@ export default function DashbordImage() {
             </h2>
             
             {features.map(feature => (
-              <div key={feature.id} className="flex items-centerx gap-4 group  p-4 rounded-lg transition-all duration-300 ">
-               
-                  <div className="h-8 w-8 rounded-full  flex items-center justify-center  bg-green-500 text-white transition-colors">
-                    <Check size={18} />
-                  </div>
-               
-               
-                  <h3 className="font-semibold text-gray-800 mb-1 ">{feature.title}</h3>
-                
-                
+              <div key={feature.id} className="flex items-center gap-4 group p-4 rounded-lg transition-all duration-300">
+                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white transition-colors">
+                  <Check size={18} />
+                </div>
+                <h3 className="font-semibold text-gray-800 mb-1">{feature.title}</h3>
               </div>
             ))}
             
-            <div className="pt-4">
-              <button className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4]  text-white py-3 px-6 rounded-lg font-medium flex items-center gap-2 transition-all duration-300 hover:shadow-lg group">
+            <div className="pt-4 px-5">
+              <button className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white py-3 px-6 rounded-lg font-medium flex items-center gap-2 transition-all duration-300 hover:shadow-lg group">
                 Try Lena Now
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </button>
@@ -82,7 +77,7 @@ export default function DashbordImage() {
                 </div>
                 
                 {/* Mobile Mockup Image */}
-                <div className="hidden md:block absolute -bottom-6 -right-6 w-1/3 transform rotate-12">
+                <div className="hidden md:block absolute -bottom-6 -right-6 w-1/3 transform pb-2">
                   <img 
                     src={dashbordmobile.src} 
                     alt="Lena CRM Mobile View" 
@@ -90,9 +85,6 @@ export default function DashbordImage() {
                   />
                 </div>
               </div>
-              
-            
-            
             </div>
           </div>
         </div>

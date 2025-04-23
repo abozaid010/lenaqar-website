@@ -1,13 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image"; // إضافة استيراد مكون Image
 import { Menu, X, Globe, AlertTriangle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
-import logo from "../../../../public/log.svg"
+// import logo from "../../../../public/images/logo-6.svg"
 
 const Header = () => {
   const { t } = useI18n();
@@ -24,15 +25,15 @@ const Header = () => {
       const currentScrollY = window.scrollY;
       
       // Determine if scrolled for background color
+      // Only add background when scrolled past first section
       if (currentScrollY > 10) {
         setIsScrolled(true);
-        // Hide header when scrolled regardless of direction
-        setIsVisible(false);
       } else {
         setIsScrolled(false);
-        // Only show header when at the top of the page
-        setIsVisible(true);
       }
+      
+      // Always keep header visible
+      setIsVisible(true);
       
       setLastScrollY(currentScrollY);
     };
@@ -98,14 +99,18 @@ const Header = () => {
       )}
 
       <header className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 ${
-        isScrolled ? ' backdrop-blur-md ' : 'bg-transparent'
+        isScrolled ? 'bg-[#030250] bg-opacity-90 backdrop-blur-md' : 'bg-transparent'
       } ${isVisible ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
-            <Link href="/" className="text-xl font-bold flex gap-2 items-center">
-              < img src={logo.src} className="mr-2"/>
-              <p>Lena</p>
+            <Link href="/" className="text-xl font-bold flex items-center">
+              <Image
+                src="/images/logo-6.svg"
+                alt="logo_image"
+                width={120}
+                height={40}
+              />
             </Link>
 
             {/* Desktop Navigation */}

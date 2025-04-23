@@ -4,6 +4,12 @@ import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import { I18nProvider } from "@/context/translate-api";
 import { cookies, headers } from "next/headers";
+import { Montserrat } from 'next/font/google'
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'], // حسب ما تحتاج
+  variable: '--font-montserrat',
+})
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -50,7 +56,7 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <html lang={initialLocale} dir={initialLocale === "ar" ? "rtl" : "ltr"}>
+    <html lang={initialLocale} className={montserrat.variable} dir={initialLocale === "ar" ? "rtl" : "ltr"}>
       <body
         className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}
       >
