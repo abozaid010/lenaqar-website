@@ -4,7 +4,7 @@ import { ArrowRight, X } from "lucide-react";
 
 const SalesManagerSection = () => {
   return (
-    <section className="py-16 px-4 max-w-[95%] mx-auto">
+    <section className="mt-16 max-w-7xl w-full mx-auto md:px-4 sm:px-6 ">
         <section className="pt-10 my-4 ">
         <div className="max-w-4xl mx-auto text-center px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
@@ -16,9 +16,9 @@ const SalesManagerSection = () => {
         </div>
       </section>
       <div className="bg-white overflow-hidden mt-4">
-        <div className="flex flex-col items-center lg:flex-row">
+        <div className="flex flex-col items-center lg:flex-row   space-x-10">
            {/* Content Side (Right) */}
-           <div className="p-8 lg:p-12 lg:w-1/2 flex flex-col justify-center">
+           <div className="  lg:py-12 lg:w-1/2 flex flex-col justify-center">
             <h2 className="text-3xl md:text-2xl font-bold text-gray-800 mb-6">
             Meet Hani – The Overwhelmed Sales Manager
             </h2>
@@ -55,7 +55,7 @@ const SalesManagerSection = () => {
           
           </div>
           {/* Image Side (Left) */}
-          <div className="lg:w-1/2 relative min-h-[300px]">
+          <div className="lg:w-1/2 relative   min-h-[300px]">
             <Image
               src={"/images/careers2.png"}  // Replace with your actual image path
               alt="Hani - The Overwhelmed Sales Manager"

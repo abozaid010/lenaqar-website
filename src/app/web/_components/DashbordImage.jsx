@@ -26,7 +26,7 @@ export default function DashbordImage() {
   
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
-      <div className="container mx-auto px-4 py-12 md:py-20">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-3xl font-bold text-gray-800 mb-4">

@@ -32,7 +32,7 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className='relative h-[100vh] w-full flex items-center overflow-hidden'>
+    <div className='relative w-full h-screen flex items-center overflow-hidden'>
       {/* Background Image with Overlay */}
       <div className='absolute inset-0 z-0'>
         <Image
@@ -48,7 +48,7 @@ const HeroSection = () => {
         <Particles />
       </div>
       
-      <div className='w-[90%] mx-auto px-8 relative z-10'>
+      <div className='max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10'>
         <motion.div 
           key="slide2"
           className='grid grid-cols-1 md:grid-cols-3 gap-8 items-center'
@@ -110,7 +110,7 @@ const HeroSection = () => {
           
           <div className='md:col-span-1 flex justify-center md:justify-end'>
             <motion.div 
-              className='relative h-[400px] md:h-[450px] w-full max-w-[500px]'
+              className='relative h-80 md:h-96 w-full max-w-md'
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
@@ -300,7 +300,7 @@ const AiMessageBubble = ({ message, position }) => {
 
   return (
     <motion.div
-      className="absolute z-20"
+      className="absolute z-20 "
       style={{ ...posStyle }}
       initial={getEntryAnimation()}
       animate={{ x: 0, y: 0, opacity: 1 }}
