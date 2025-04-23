@@ -342,7 +342,7 @@ export const useUnitForm = (onClose, onSave) => {
   // Generate new UUID when modal opens
   useEffect(() => {
     formik.setFieldValue("unitId", uuidv4());
-  }, []);
+  }, [formik]);
 
   // Reset file input to allow reselecting the same file
   const resetFileInput = () => {

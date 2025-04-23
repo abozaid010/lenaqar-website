@@ -29,7 +29,7 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
         if (cookieLang && cookieLang !== locale) {
             setLocale(cookieLang);
         }
-    }, []);
+    }, [locale]);
 
     const changeLanguage = useCallback((lang) => {
         setLocale(lang);
