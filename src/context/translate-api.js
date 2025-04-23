@@ -29,7 +29,9 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
         if (cookieLang && cookieLang !== locale) {
             setLocale(cookieLang);
         }
-    }, [locale]);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const changeLanguage = useCallback((lang) => {
         setLocale(lang);

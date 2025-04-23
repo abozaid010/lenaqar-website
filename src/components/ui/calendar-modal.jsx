@@ -9,11 +9,6 @@ export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isBookingComplete, setIsBookingComplete] = useState(false);
   const [bookingData, setBookingData] = useState(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const openModal = () => {
     setIsOpen(true);
@@ -26,6 +21,8 @@ export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
   const handleBookingComplete = (data) => {
     setBookingData(data);
     setIsBookingComplete(true);
+
+    console.log("Booking Data:", data);
   };
 
   // Disable/enable scroll on modal open/close
@@ -103,13 +100,8 @@ export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
             </button>
           </div>
         ) : (
-          // Calendar selection screen
-          <div className="p-6">
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              Schedule a Demo
-            </h2>
-            <CalendarSelector onComplete={handleBookingComplete} />
-          </div>
+          // Calendar component
+          <CalendarSelector onBookingComplete={handleBookingComplete} />
         )}
       </div>
     </div>
@@ -117,13 +109,17 @@ export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
 
   return (
     <>
+      {/* Button to open the modal */}
       <button
         onClick={openModal}
-        className="px-6 py-3 mr-4   bg-[#3926A7] text-white font-medium rounded-md hover:bg-[#2a1d7a] transition-colors"
+        className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
       >
         {buttonText}
       </button>
-      {mounted && isOpen && createPortal(modalContent, document.body)}
+
+      {/* Render modal in a portal */}
+      {typeof window !== "undefined" &&
+        createPortal(modalContent, document.body)}
     </>
   );
 }
