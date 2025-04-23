@@ -6,6 +6,7 @@ import Image from "next/image";
 import CalendarModal from "@/components/ui/calendar-modal";
 
 export default function DashboardImage() {
+  
   const features = [
     {
       id: 1,
@@ -52,9 +53,9 @@ export default function DashboardImage() {
             {features.map((feature) => (
               <div
                 key={feature.id}
-                className="flex items-center gap-4 group p-4 rounded-lg transition-all duration-300 hover:bg-white hover:shadow-sm"
+                className="flex items-center gap-4 group p-4 rounded-lg transition-all duration-300"
               >
-                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white transition-colors group-hover:bg-[#3926A7]">
+                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white t]">
                   <Check size={18} />
                 </div>
                 <h3 className="font-semibold text-gray-800">{feature.title}</h3>

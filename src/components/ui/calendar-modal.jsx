@@ -119,7 +119,7 @@ export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
     <>
       <button
         onClick={openModal}
-        className="px-6 py-3 bg-[#3926A7] text-white font-medium rounded-md hover:bg-[#2a1d7a] transition-colors"
+        className="px-6 py-3 mr-4   bg-[#3926A7] text-white font-medium rounded-md hover:bg-[#2a1d7a] transition-colors"
       >
         {buttonText}
       </button>
