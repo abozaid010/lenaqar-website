@@ -8,6 +8,7 @@ const HeroSection = () => {
   // State for tracking which messages have been shown
   const [visibleMessages, setVisibleMessages] = useState([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
+  const [imageError, setImageError] = useState(false);
 
   // Custom messages
   const messages = [
@@ -33,13 +34,18 @@ const HeroSection = () => {
     <div className="relative w-full h-screen flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
-        <Image
-          src={"/images/web2.jpg"}
-          alt="Background"
-          fill
-          className="object-cover"
-          priority
-        />
+        {!imageError ? (
+          <Image
+            src={"/images/web2.jpg"}
+            alt="Background"
+            fill
+            className="object-cover"
+            priority
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-[#030250]" />
+        )}
         <div className="absolute inset-0 bg-[#030250] opacity-80"></div>
 
         {/* Enhanced animated particles in background */}
@@ -353,12 +359,13 @@ const Particles = () => {
   return (
     <>
       {particles.map((_, index) => {
-        const size = Math.random() * 6 + 2;
-        const initialX = Math.random() * 100;
-        const initialY = Math.random() * 100;
-        const duration = Math.random() * 15 + 10;
-        const delay = Math.random() * 5;
-        const opacity = Math.random() * 0.2 + 0.1;
+        // Use fixed values for initial positions to avoid hydration issues
+        const size = 4;
+        const initialX = (index * 4) % 100;
+        const initialY = (index * 3) % 100;
+        const duration = 15;
+        const delay = index * 0.2;
+        const opacity = 0.15;
 
         return (
           <motion.div
@@ -373,7 +380,7 @@ const Particles = () => {
             }}
             animate={{
               y: [0, -100, 0],
-              x: [0, Math.random() * 60 - 30, 0],
+              x: [0, 30, 0],
               opacity: [opacity, opacity * 2, opacity],
             }}
             transition={{

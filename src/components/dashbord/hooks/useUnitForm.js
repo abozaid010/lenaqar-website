@@ -342,7 +342,7 @@ export const useUnitForm = (onClose, onSave) => {
   // Generate new UUID when modal opens
   useEffect(() => {
     formik.setFieldValue("unitId", uuidv4());
-  }, [formik]);
+  }, [formik, uuidv4]);
 
   // Reset file input to allow reselecting the same file
   const resetFileInput = () => {
@@ -487,9 +487,7 @@ export const useUnitForm = (onClose, onSave) => {
       toast.success("Image deleted successfully");
     } catch (error) {
       console.error("Error deleting image:", error);
-      toast.error(
-        `Failed to delete image: ${error.message || "Unknown error"}`
-      );
+      toast.error(`Failed to delete image: ${error.message || "Unknown error"}`);
     }
   };
 
