@@ -6,15 +6,15 @@ export const metadata = {
 export default function PrivacyPage() {
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold text-gray-800 mb-4">Privacy Policy</h1>
+      <h1 className="text-3xl font-bold text-[#030250] mb-4">Privacy Policy</h1>
 
-      <p className="text-gray-600 mb-6">Effective Date: Fab 1, 2025</p>
+      <p className="text-[#3926A7] mb-6">Effective Date: Fab 1, 2025</p>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           1. Introduction
         </h2>
-        <p className="text-gray-600">
+        <p className="text-[#3926A7]">
           Welcome to Lena AI, a technology provider specializing in AI solutions
           and WhatsApp integration for client communication in Egypt. This
           Privacy Policy explains how we collect, use, and protect your
@@ -24,13 +24,13 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           2. Information We Collect
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="text-[#3926A7] mb-2">
           We may collect the following types of information:
         </p>
-        <ul className="list-disc pl-6 text-gray-600 mb-4">
+        <ul className="list-disc pl-6 text-[#3926A7] mb-4">
           <li className="mb-1">
             Client Contact Information (Name, Email, Phone Number, Business
             Details)
@@ -47,13 +47,13 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           3. How We Use Your Information
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="text-[#3926A7] mb-2">
           We use your information for the following purposes:
         </p>
-        <ul className="list-disc pl-6 text-gray-600 mb-4">
+        <ul className="list-disc pl-6 text-[#3926A7] mb-4">
           <li className="mb-1">
             To set up and manage WhatsApp AI integrations for clients.
           </li>
@@ -70,14 +70,14 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           4. Data Sharing & Third Parties
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="text-[#3926A7] mb-2">
           We do not sell or rent your data. However, we may share information
           with:
         </p>
-        <ul className="list-disc pl-6 text-gray-600 mb-4">
+        <ul className="list-disc pl-6 text-[#3926A7] mb-4">
           <li className="mb-1">
             WhatsApp (Meta) as part of the integration process.
           </li>
@@ -89,10 +89,10 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           5. Data Security
         </h2>
-        <p className="text-gray-600">
+        <p className="text-[#3926A7]">
           We implement industry-standard security measures to protect your data
           from unauthorized access, disclosure, or misuse. However, no system is
           100% secure, so we recommend best practices for clients handling user
@@ -101,13 +101,13 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           6. Your Rights & Choices
         </h2>
-        <p className="text-gray-600 mb-2">
+        <p className="text-[#3926A7] mb-2">
           As a client, you have the right to:
         </p>
-        <ul className="list-disc pl-6 text-gray-600 mb-4">
+        <ul className="list-disc pl-6 text-[#3926A7] mb-4">
           <li className="mb-1">
             Request access to the data we store about you.
           </li>
@@ -117,26 +117,45 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
           7. Changes to This Policy
         </h2>
-        <p className="text-gray-600">
+        <p className="text-[#3926A7]">
           We may update this Privacy Policy from time to time. Clients will be
           notified of significant changes via email or through our website.
         </p>
       </section>
 
       <section className="mb-6">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-3">
-          8. Contact Us
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
+          8. Account Deletion
         </h2>
-        <p className="text-gray-600 mb-1">
+        <div id="account-deletion">
+          <p className="text-[#3926A7] mb-2">
+            If you wish to delete your account and associated data, you can do so by:
+          </p>
+          <ul className="list-disc pl-6 text-[#3926A7] mb-4">
+            <li className="mb-1">
+              Sending an email directly to hr@lenaai.net requesting account deletion
+            </li>
+            <li className="mb-1">
+              LenaAI is committed to processing all account deletion requests and removing associated data within 24 hours of receiving the request
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section className="mb-6">
+        <h2 className="text-2xl font-semibold text-[#030250] mb-3">
+          9. Contact Us
+        </h2>
+        <p className="text-[#3926A7] mb-1">
           If you have any questions or concerns regarding this Privacy Policy,
           please contact us at:
         </p>
-        <p className="text-gray-600 mb-1">Email: abozaid@lenaai.net</p>
-        <p className="text-gray-600 mb-1">Phone: 01016080323</p>
-        <p className="text-gray-600">
+        <p className="text-[#3926A7] mb-1">Email: abozaid@lenaai.net</p>
+        <p className="text-[#3926A7] mb-1">Phone: 01016080323</p>
+        <p className="text-[#3926A7]">
           Company Address: 505 Siac Building, ARCHPLAN Square, New Capital,
           Cairo, Egypt
         </p>
