@@ -170,11 +170,11 @@ export default function ClientsTable({
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 font-medium text-gray-900">
-                        {user.phone_number}
+                        {user.name || "New Lead"}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
-                        {user.phone_number}
+                        {user.phone_number || ""}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600">
