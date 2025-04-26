@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from "react";
 import { X, ArrowRight, Save as SaveIcon } from "lucide-react";
 import AddCompoundModal from "@/components/dashbord/scomponent/AddCompoundModal";
@@ -184,30 +185,6 @@ const AddUnitModal = ({
     }
   };
 
-  // Handle checkbox changes for amenities
-  const handleAmenityChange = (amenityName, isChecked) => {
-    let updatedAmenities = [...(formik.values.amenities || [])];
-
-    if (isChecked) {
-      // Add amenity if checked
-      updatedAmenities.push({ [amenityName]: true });
-    } else {
-      // Remove amenity if unchecked
-      updatedAmenities = updatedAmenities.filter(
-        (item) => !item.hasOwnProperty(amenityName)
-      );
-    }
-
-    formik.setFieldValue("amenities", updatedAmenities);
-  };
-
-  // Check if an amenity is selected
-  const isAmenitySelected = (amenityName) => {
-    return (formik.values.amenities || []).some((item) =>
-      item.hasOwnProperty(amenityName)
-    );
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -216,7 +193,6 @@ const AddUnitModal = ({
       return;
     }
 
-    // No need to transform amenities here since we're already maintaining the correct format
     formik.handleSubmit();
   };
 
@@ -587,37 +563,11 @@ const AddUnitModal = ({
                       </p>
                     )}
                   </div>
-
-                  {/* <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Is Gated
-                    </label>
-                    <div className="flex items-center mt-2">
-                      <input
-                        type="checkbox"
-                        id="isGated"
-                        name="isGated"
-                        checked={formik.values.isGated || false}
-                        onChange={(e) => {
-                          formik.setFieldValue("isGated", e.target.checked);
-                        }}
-                        className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                      />
-                      <label htmlFor="isGated" className="ml-2 text-sm text-gray-700">
-                        Property is in a gated community
-                      </label>
-                    </div>
-                  </div> */}
                 </div>
               </div>
 
               {/* Property Specifications Section */}
-              <PropertySpecificationsSection
-                formik={formik}
-                isRentalProperty={isRentalProperty}
-                isAmenitySelected={isAmenitySelected}
-                handleAmenityChange={handleAmenityChange}
-              />
+              <PropertySpecificationsSection formik={formik} />
             </div>
           )}
 

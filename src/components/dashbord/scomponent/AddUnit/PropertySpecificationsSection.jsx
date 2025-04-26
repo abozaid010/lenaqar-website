@@ -1,5 +1,3 @@
-import React from "react";
-
 const PropertySpecificationsSection = ({ formik }) => {
   return (
     <div className="mb-8">
@@ -56,12 +54,11 @@ const PropertySpecificationsSection = ({ formik }) => {
                 : "border-gray-300 focus:ring-primary"
             } focus:border-transparent`}
           />
-          {formik.touched.bathroomCount &&
-            formik.errors.bathroomCount && (
-              <p className="mt-1 text-sm text-red-500">
-                {formik.errors.bathroomCount}
-              </p>
-            )}
+          {formik.touched.bathroomCount && formik.errors.bathroomCount && (
+            <p className="mt-1 text-sm text-red-500">
+              {formik.errors.bathroomCount}
+            </p>
+          )}
         </div>
 
         <div>
@@ -86,9 +83,7 @@ const PropertySpecificationsSection = ({ formik }) => {
             } focus:border-transparent`}
           />
           {formik.touched.floor && formik.errors.floor && (
-            <p className="mt-1 text-sm text-red-500">
-              {formik.errors.floor}
-            </p>
+            <p className="mt-1 text-sm text-red-500">{formik.errors.floor}</p>
           )}
         </div>
 

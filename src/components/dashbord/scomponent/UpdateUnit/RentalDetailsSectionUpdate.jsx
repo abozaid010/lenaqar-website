@@ -1,11 +1,23 @@
-import React, { useState, useEffect } from "react";
-import propertyEnums from "../../data/propertyEnums.json";
+import { useState } from "react";
 
 // Convert the enum array to the format needed for the component
-const AMENITIES_LIST = propertyEnums.RentalPropertyAmenityEnum?.map(amenity => ({
-  id: amenity.toLowerCase().replace(/\s+/g, '_'),
-  label: amenity
-}));
+const AMENITIES_LIST = [
+  "wifi",
+  "dryer",
+  "air_conditioning",
+  "heating",
+  "smart_tv",
+  "hair_dryer",
+  "pool",
+  "free_parking",
+  "ev_charger",
+  "bbq_grill",
+  "indoor_fireplace",
+  "smoking_allowed",
+  "beachfront",
+  "smoke_alarm",
+  "co_alarm",
+];
 
 const RentalDetailsSectionUpdate = ({
   formData,
@@ -13,23 +25,22 @@ const RentalDetailsSectionUpdate = ({
   handleChange,
 }) => {
   const [activeDurationType, setActiveDurationType] = useState("daily");
-
   // Handle rent duration type changes
   const handleRentDurationChange = (durationType, field, value) => {
     const numValue = value === "" ? 0 : Number(value);
-    
+
     // Create a deep copy of the current rentDurationType
     const updatedRentDurationType = {
       ...(formData.rentDurationType || {}),
       [durationType]: {
         ...(formData.rentDurationType?.[durationType] || {}),
-        [field]: numValue
-      }
+        [field]: numValue,
+      },
     };
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      rentDurationType: updatedRentDurationType
+      rentDurationType: updatedRentDurationType,
     }));
   };
 
@@ -40,17 +51,17 @@ const RentalDetailsSectionUpdate = ({
         ...(formData.rentDurationType || {}),
         [durationType]: {
           ...(formData.rentDurationType?.[durationType] || {}),
-          [field]: ""
-        }
+          [field]: "",
+        },
       };
-      
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
-        rentDurationType: updatedRentDurationType
+        rentDurationType: updatedRentDurationType,
       }));
     }
   };
-  
+
   // Handle blur to restore "0" if empty
   const handleBlur = (durationType, field) => {
     if (formData.rentDurationType?.[durationType]?.[field] === "") {
@@ -58,13 +69,13 @@ const RentalDetailsSectionUpdate = ({
         ...(formData.rentDurationType || {}),
         [durationType]: {
           ...(formData.rentDurationType?.[durationType] || {}),
-          [field]: 0
-        }
+          [field]: 0,
+        },
       };
-      
-      setFormData(prev => ({
+
+      setFormData((prev) => ({
         ...prev,
-        rentDurationType: updatedRentDurationType
+        rentDurationType: updatedRentDurationType,
       }));
     }
   };
@@ -72,23 +83,22 @@ const RentalDetailsSectionUpdate = ({
   // Handle isAvailable checkbox change
   const handleIsAvailableChange = (e) => {
     const isChecked = e.target.checked;
-    
+
     // Set today's date when isAvailable is checked
     if (isChecked) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       setFormData((prev) => ({
         ...prev,
         isAvailable: isChecked,
-        availabilityDate: today
+        availabilityDate: today,
       }));
     } else {
       setFormData((prev) => ({
         ...prev,
-        isAvailable: isChecked
+        isAvailable: isChecked,
       }));
     }
   };
-
   return (
     <div className="mb-8">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
@@ -137,8 +147,10 @@ const RentalDetailsSectionUpdate = ({
 
       {/* Rent Duration Types Section */}
       <div className="mt-6">
-        <h4 className="text-lg font-medium text-gray-700 mb-3">Rent Duration Options</h4>
-        
+        <h4 className="text-lg font-medium text-gray-700 mb-3">
+          Rent Duration Options
+        </h4>
+
         {/* Tabs for duration types */}
         <div className="flex border-b mb-4">
           {["daily", "weekly", "monthly"].map((type) => (
@@ -156,7 +168,7 @@ const RentalDetailsSectionUpdate = ({
             </button>
           ))}
         </div>
-        
+
         {/* Fields for the active duration type */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -168,8 +180,16 @@ const RentalDetailsSectionUpdate = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={formData.rentDurationType?.[activeDurationType]?.price ?? 0}
-                onChange={(e) => handleRentDurationChange(activeDurationType, "price", e.target.value)}
+                value={
+                  formData.rentDurationType?.[activeDurationType]?.price ?? 0
+                }
+                onChange={(e) =>
+                  handleRentDurationChange(
+                    activeDurationType,
+                    "price",
+                    e.target.value
+                  )
+                }
                 onFocus={() => handleFocus(activeDurationType, "price")}
                 onBlur={() => handleBlur(activeDurationType, "price")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
@@ -179,7 +199,7 @@ const RentalDetailsSectionUpdate = ({
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Security Deposit
@@ -189,9 +209,20 @@ const RentalDetailsSectionUpdate = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={formData.rentDurationType?.[activeDurationType]?.securityDeposit ?? 0}
-                onChange={(e) => handleRentDurationChange(activeDurationType, "securityDeposit", e.target.value)}
-                onFocus={() => handleFocus(activeDurationType, "securityDeposit")}
+                value={
+                  formData.rentDurationType?.[activeDurationType]
+                    ?.securityDeposit ?? 0
+                }
+                onChange={(e) =>
+                  handleRentDurationChange(
+                    activeDurationType,
+                    "securityDeposit",
+                    e.target.value
+                  )
+                }
+                onFocus={() =>
+                  handleFocus(activeDurationType, "securityDeposit")
+                }
                 onBlur={() => handleBlur(activeDurationType, "securityDeposit")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
               />
@@ -200,7 +231,7 @@ const RentalDetailsSectionUpdate = ({
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Cleaning Fee
@@ -210,8 +241,17 @@ const RentalDetailsSectionUpdate = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={formData.rentDurationType?.[activeDurationType]?.cleaningFee ?? 0}
-                onChange={(e) => handleRentDurationChange(activeDurationType, "cleaningFee", e.target.value)}
+                value={
+                  formData.rentDurationType?.[activeDurationType]
+                    ?.cleaningFee ?? 0
+                }
+                onChange={(e) =>
+                  handleRentDurationChange(
+                    activeDurationType,
+                    "cleaningFee",
+                    e.target.value
+                  )
+                }
                 onFocus={() => handleFocus(activeDurationType, "cleaningFee")}
                 onBlur={() => handleBlur(activeDurationType, "cleaningFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
@@ -221,7 +261,7 @@ const RentalDetailsSectionUpdate = ({
               </div>
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Service Fee
@@ -231,8 +271,17 @@ const RentalDetailsSectionUpdate = ({
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                value={formData.rentDurationType?.[activeDurationType]?.serviceFee ?? 0}
-                onChange={(e) => handleRentDurationChange(activeDurationType, "serviceFee", e.target.value)}
+                value={
+                  formData.rentDurationType?.[activeDurationType]?.serviceFee ??
+                  0
+                }
+                onChange={(e) =>
+                  handleRentDurationChange(
+                    activeDurationType,
+                    "serviceFee",
+                    e.target.value
+                  )
+                }
                 onFocus={() => handleFocus(activeDurationType, "serviceFee")}
                 onBlur={() => handleBlur(activeDurationType, "serviceFee")}
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-primary focus:border-transparent"
@@ -249,45 +298,29 @@ const RentalDetailsSectionUpdate = ({
       <div className="mt-6">
         <h4 className="text-lg font-medium text-gray-700 mb-3">Amenities</h4>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {AMENITIES_LIST?.map((amenity) => (
-            <div key={amenity.id} className="flex items-center">
+          {AMENITIES_LIST?.map((a) => (
+            <div key={a} className="flex items-center">
               <input
                 type="checkbox"
-                id={`amenity-${amenity.id}`}
-                checked={
-                  Array.isArray(formData.amenities)
-                    ? formData.amenities.includes(amenity.label)
-                    : formData.amenities?.[amenity.id] || false
-                }
+                id={`a-${a}`}
+                checked={formData.amenities?.includes(a) || false}
                 onChange={(e) => {
-                  if (Array.isArray(formData.amenities)) {
-                    // Handle array format
-                    const updatedAmenities = e.target.checked
-                      ? [...formData.amenities, amenity.label]
-                      : formData.amenities.filter(item => item !== amenity.label);
-                    
-                    setFormData(prev => ({
-                      ...prev,
-                      amenities: updatedAmenities
-                    }));
-                  } else {
-                    // Handle object format
-                    setFormData((prev) => ({
-                      ...prev,
-                      amenities: {
-                        ...prev.amenities,
-                        [amenity.id]: e.target.checked,
-                      },
-                    }));
-                  }
+                  const updatedAmenities = e.target.checked
+                    ? [...formData.amenities, a]
+                    : formData.amenities.filter((item) => item !== a);
+
+                  setFormData((prev) => ({
+                    ...prev,
+                    amenities: updatedAmenities,
+                  }));
                 }}
                 className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
               />
               <label
-                htmlFor={`amenity-${amenity.id}`}
+                htmlFor={`amenity-${a}`}
                 className="ml-2 text-sm text-gray-700"
               >
-                {amenity.label}
+                {a}
               </label>
             </div>
           ))}

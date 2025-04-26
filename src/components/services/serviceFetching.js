@@ -206,11 +206,11 @@ export async function getClientActions(phoneNumber) {
 }
 
 export async function getClientRequirements(phoneNumber) {
-  
+
 
   try {
     const response = await axiosInstance.get(`requirements/${phoneNumber}`);
-    console.log(response)
+    console.log(response);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
@@ -227,7 +227,7 @@ export async function getShareUnitData(unit_id) {
       client_id: clientId,
       unit_id: unit_id
     };
-    
+
     const response = await axiosInstance.get(`units/share`, { params });
     return response.data.data;
   } catch (error) {

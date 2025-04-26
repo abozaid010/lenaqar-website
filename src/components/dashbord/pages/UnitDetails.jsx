@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+
+import React, { useState, useRef } from "react";
 import Image from "next/image";
 import {
   updateUnit,
@@ -67,17 +68,15 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   };
 
   const handleUpdateUnit = async (updatedUnit, purpose) => {
-    let newUnit;
-
     if (purpose === "Sell" || purpose === "Buy") {
-      newUnit = await updateUnit(updatedUnit);
+      await updateUnit(updatedUnit);
     } else if (purpose === "Rent") {
-      newUnit = await updateUnitRent(updatedUnit);
+      await updateUnitRent(updatedUnit);
     }
 
     setIsUpdateModalOpen(false);
     toast.success("Unit updated successfully");
-    router.push(`/dashboard/units/${unit.unitId}?page=${pageParam}`);
+    router.push(`/units/${unit.unitId}`);
   };
 
   // Open fullscreen gallery when clicking on the main image
@@ -138,7 +137,8 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           </h1>
           <div className="flex flex-wrap gap-2 mt-2">
             <p className="text-gray-600">
-              {formatValue(updatedUnit?.buildingType)}{updatedUnit?.buildingType ? " in " : ""} 
+              {formatValue(updatedUnit?.buildingType)}
+              {updatedUnit?.buildingType ? " in " : ""}
               {formatValue(updatedUnit?.compound)}
             </p>
           </div>
@@ -296,45 +296,61 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Daily Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          {updatedUnit.rentDurationType.daily?.totalPrice > 0 && (
+                          {updatedUnit.rentDurationType.daily?.totalPrice >
+                            0 && (
                             <div className="col-span-2">
-                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="text-gray-500 text-sm">
+                                Total Price
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.daily?.totalPrice,
+                                  updatedUnit.rentDurationType.daily
+                                    ?.totalPrice,
                                   updatedUnit.rentDurationType.daily?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.daily?.securityDeposit > 0 && (
+                          {updatedUnit.rentDurationType.daily?.securityDeposit >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="text-gray-500 text-sm">
+                                Security Deposit
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.daily?.securityDeposit,
+                                  updatedUnit.rentDurationType.daily
+                                    ?.securityDeposit,
                                   updatedUnit.rentDurationType.daily?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.daily?.serviceFee > 0 && (
+                          {updatedUnit.rentDurationType.daily?.serviceFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Service Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.daily?.serviceFee,
+                                  updatedUnit.rentDurationType.daily
+                                    ?.serviceFee,
                                   updatedUnit.rentDurationType.daily?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.daily?.cleaningFee > 0 && (
+                          {updatedUnit.rentDurationType.daily?.cleaningFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Cleaning Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.daily?.cleaningFee,
+                                  updatedUnit.rentDurationType.daily
+                                    ?.cleaningFee,
                                   updatedUnit.rentDurationType.daily?.currency
                                 )}
                               </p>
@@ -365,45 +381,61 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Weekly Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          {updatedUnit.rentDurationType.weekly?.totalPrice > 0 && (
+                          {updatedUnit.rentDurationType.weekly?.totalPrice >
+                            0 && (
                             <div className="col-span-2">
-                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="text-gray-500 text-sm">
+                                Total Price
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.weekly?.totalPrice,
+                                  updatedUnit.rentDurationType.weekly
+                                    ?.totalPrice,
                                   updatedUnit.rentDurationType.weekly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.weekly?.securityDeposit > 0 && (
+                          {updatedUnit.rentDurationType.weekly
+                            ?.securityDeposit > 0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="text-gray-500 text-sm">
+                                Security Deposit
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.weekly?.securityDeposit,
+                                  updatedUnit.rentDurationType.weekly
+                                    ?.securityDeposit,
                                   updatedUnit.rentDurationType.weekly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.weekly?.serviceFee > 0 && (
+                          {updatedUnit.rentDurationType.weekly?.serviceFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Service Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.weekly?.serviceFee,
+                                  updatedUnit.rentDurationType.weekly
+                                    ?.serviceFee,
                                   updatedUnit.rentDurationType.weekly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.weekly?.cleaningFee > 0 && (
+                          {updatedUnit.rentDurationType.weekly?.cleaningFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Cleaning Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.weekly?.cleaningFee,
+                                  updatedUnit.rentDurationType.weekly
+                                    ?.cleaningFee,
                                   updatedUnit.rentDurationType.weekly?.currency
                                 )}
                               </p>
@@ -434,45 +466,61 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                           Monthly Rate
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
-                          {updatedUnit.rentDurationType.monthly?.totalPrice > 0 && (
+                          {updatedUnit.rentDurationType.monthly?.totalPrice >
+                            0 && (
                             <div className="col-span-2">
-                              <p className="text-gray-500 text-sm">Total Price</p>
+                              <p className="text-gray-500 text-sm">
+                                Total Price
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.monthly?.totalPrice,
+                                  updatedUnit.rentDurationType.monthly
+                                    ?.totalPrice,
                                   updatedUnit.rentDurationType.monthly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.monthly?.securityDeposit > 0 && (
+                          {updatedUnit.rentDurationType.monthly
+                            ?.securityDeposit > 0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Security Deposit</p>
+                              <p className="text-gray-500 text-sm">
+                                Security Deposit
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.monthly?.securityDeposit,
+                                  updatedUnit.rentDurationType.monthly
+                                    ?.securityDeposit,
                                   updatedUnit.rentDurationType.monthly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.monthly?.serviceFee > 0 && (
+                          {updatedUnit.rentDurationType.monthly?.serviceFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Service Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Service Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.monthly?.serviceFee,
+                                  updatedUnit.rentDurationType.monthly
+                                    ?.serviceFee,
                                   updatedUnit.rentDurationType.monthly?.currency
                                 )}
                               </p>
                             </div>
                           )}
-                          {updatedUnit.rentDurationType.monthly?.cleaningFee > 0 && (
+                          {updatedUnit.rentDurationType.monthly?.cleaningFee >
+                            0 && (
                             <div>
-                              <p className="text-gray-500 text-sm">Cleaning Fee</p>
+                              <p className="text-gray-500 text-sm">
+                                Cleaning Fee
+                              </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
-                                  updatedUnit.rentDurationType.monthly?.cleaningFee,
+                                  updatedUnit.rentDurationType.monthly
+                                    ?.cleaningFee,
                                   updatedUnit.rentDurationType.monthly?.currency
                                 )}
                               </p>
@@ -489,7 +537,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                     Available from: {formatDate(updatedUnit?.availabilityDate)}
                   </p>
                 )}
-                
+
                 {updatedUnit?.amenities && updatedUnit.amenities.length > 0 ? (
                   <div className="mt-3">
                     <p className="font-semibold text-gray-700 mb-2">
@@ -517,11 +565,26 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               </>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-gray-800">
-                  {updatedUnit?.totalPrice
-                    ? `EGP ${updatedUnit.totalPrice.toLocaleString()}`
-                    : ""}
-                </h2>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {updatedUnit?.totalPrice
+                      ? `EGP ${updatedUnit.totalPrice.toLocaleString()}`
+                      : ""}
+                  </h2>
+                  <div className="flex items-center gap-2 mt-2 bg-gray-200 px-4 rounded-xl text-sm font-semibold text-slate-700 w-fit">
+                    {updatedUnit?.paymentPlans?.years && (
+                      <span>{updatedUnit?.paymentPlans?.years} Years - </span>
+                    )}
+                    {updatedUnit?.paymentPlans?.price && (
+                      <span>{updatedUnit?.paymentPlans?.price} EGP </span>
+                    )}
+                    {updatedUnit?.paymentPlans?.maintenance > 0 && (
+                      <span>
+                        - {updatedUnit?.paymentPlans?.maintenance} Maintenance
+                      </span>
+                    )}
+                  </div>
+                </div>
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {updatedUnit?.deliveryDate && (
                     <div>
@@ -564,7 +627,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             {updatedUnit.floor && (
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-gray-600">Floor</p>
-                <p className="font-semibold">{formatValue(updatedUnit.floor)}</p>
+                <p className="font-semibold">
+                  {formatValue(updatedUnit.floor)}
+                </p>
               </div>
             )}
             {updatedUnit.view && (
@@ -645,14 +710,19 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
       <div className="bg-gray-100 p-6 border-t">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {(updatedUnit.compound || updatedUnit.city || updatedUnit.country) && (
+          {(updatedUnit.compound ||
+            updatedUnit.city ||
+            updatedUnit.country) && (
             <div>
               <h3 className="font-semibold text-gray-800">Location</h3>
               <p className="text-gray-600">
                 {updatedUnit.compound ? updatedUnit.compound : ""}
                 {updatedUnit.compound && updatedUnit.city ? ", " : ""}
                 {updatedUnit.city ? updatedUnit.city : ""}
-                {(updatedUnit.compound || updatedUnit.city) && updatedUnit.country ? ", " : ""}
+                {(updatedUnit.compound || updatedUnit.city) &&
+                updatedUnit.country
+                  ? ", "
+                  : ""}
                 {updatedUnit.country ? updatedUnit.country : ""}
               </p>
             </div>
@@ -660,9 +730,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           {updatedUnit.developer && (
             <div>
               <h3 className="font-semibold text-gray-800">Developer</h3>
-              <p className="text-gray-600">
-                {updatedUnit.developer}
-              </p>
+              <p className="text-gray-600">{updatedUnit.developer}</p>
             </div>
           )}
         </div>

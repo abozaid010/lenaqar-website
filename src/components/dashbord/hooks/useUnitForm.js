@@ -167,7 +167,7 @@ export const useUnitForm = (onClose, onSave) => {
       },
       garageArea: "",
       images: [],
-      amenities: {},
+      amenities: [],
       isAvailable: false,
       availabilityDate: "",
       rentDurationType: {
@@ -197,11 +197,7 @@ export const useUnitForm = (onClose, onSave) => {
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log("test", values);
       try {
-        console.log("Form submission started with values:", values);
-        console.log("Purpose:", values.purpose);
-
         // Check if images are uploaded
         if (values.images.length === 0) {
           toast.error("Please upload images before saving the unit");
@@ -266,32 +262,6 @@ export const useUnitForm = (onClose, onSave) => {
           delete preparedFormData.deliveryDate;
           delete preparedFormData.deliveryStatus;
           delete preparedFormData.totalPrice;
-
-          console.log("Amenities before processing:", values.amenities);
-
-          // Format amenities as an array of strings
-          if (values.amenities && typeof values.amenities === 'object') {
-            const amenitiesArray = [];
-
-            // Convert the amenities object to array of strings format
-            Object.entries(values.amenities).forEach(([key, value]) => {
-              // Only include amenities that are available (true)
-              if (value) {
-                // Capitalize the first letter of each amenity
-                const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
-                amenitiesArray.push(capitalizedKey);
-              }
-            });
-
-            preparedFormData.amenities = amenitiesArray;
-            console.log("Formatted amenities as array of strings:", preparedFormData.amenities);
-          } else {
-            preparedFormData.amenities = [];
-            console.log("No amenities found, using empty array");
-          }
-
-          // Remove any _amenitiesArray property
-          delete preparedFormData._amenitiesArray;
         }
 
         console.log("Final data to submit:", preparedFormData);
@@ -300,6 +270,7 @@ export const useUnitForm = (onClose, onSave) => {
         let response;
         if (values.purpose === "Rent") {
           // Use addUnitRent for rental properties
+          console.log("Adding rental unit:", preparedFormData);
           response = await addUnitRent(preparedFormData);
         } else {
           // Use addUnit for buy/sell properties

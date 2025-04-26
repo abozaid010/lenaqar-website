@@ -17,7 +17,6 @@ import {
 const PropertyDetailsModal = ({ onClose, property }) => {
   const reformatPropertyData = () => {
     const reformattedData = {};
-    console.log(property);
     for (const key in property) {
       const value = property[key];
       reformattedData[key] = Array.isArray(value)
@@ -228,7 +227,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                       <div
                         className="h-full rounded-full bg-blue-600"
                         style={{
-                          width: `${formattedProperty.purchaseProbability}%`,
+                          width: `${formattedProperty.score.score}%`,
                         }}
                       ></div>
                     </div>
