@@ -29,9 +29,13 @@ export default function ShareModal({ showModal, setShowModal, shareData, loading
     if (text) {
       let combinedText = "";
       
-      // Add the "Talk to Lena" with share link first
+      // Add the appropriate prompt based on language type
       if (shareData?.share_link) {
-        combinedText = `Talk to Lena: ${shareData.share_link}\n\n`;
+        if (type === 'arabic') {
+          combinedText = `تواصل مع لينا: ${shareData.share_link}\n\n`;
+        } else {
+          combinedText = `Chat with Lena Now: ${shareData.share_link}\n\n`;
+        }
       }
       
       // Add the text content
