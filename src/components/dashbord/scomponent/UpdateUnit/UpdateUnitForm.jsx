@@ -399,6 +399,7 @@ const UpdateUnitForm = ({
 
         // Reload window after successful update
         window.location.reload();
+        router.push(`/units/${formData.unitId}`)
       } catch (error) {
         console.error("Error updating unit:", error);
         setIsUpdating(false); // Reset updating state if there's an error

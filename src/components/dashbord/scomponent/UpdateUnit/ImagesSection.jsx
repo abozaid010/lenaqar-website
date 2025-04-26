@@ -1,5 +1,6 @@
 import React from "react";
-import { Trash2, Upload } from "lucide-react";
+import { Trash2, Upload, AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
 
 const ImagesSection = ({
   formData,
@@ -13,31 +14,65 @@ const ImagesSection = ({
   removeSelectedFile,
   removeUploadedImage
 }) => {
-    console.log(formData)
+  // Calculate total images (uploaded + selected)
+  const totalImages = (formData.images?.length || 0) + selectedFiles.length;
+  const isMaxImagesReached = totalImages >= 8;
+  
+  // Modified file selection handler to limit selection
+  const handleLimitedFileSelection = (files) => {
+    if (!files || files.length === 0) return;
+    
+    const remainingSlots = 8 - (formData.images?.length || 0) - selectedFiles.length;
+    
+    if (remainingSlots <= 0) {
+      toast.error("Maximum of 8 images allowed");
+      return;
+    }
+    
+    // Only take the number of files that fit within the limit
+    const filesToAdd = Array.from(files).slice(0, remainingSlots);
+    handleFileSelection(filesToAdd);
+    
+    if (files.length > remainingSlots) {
+      toast.error(`Only ${remainingSlots} image(s) were added. Maximum of 8 images allowed.`);
+    }
+  };
+  
   return (
     <div className="mb-8 ">
       <h3 className="text-xl font-semibold text-gray-700 mb-4">
-        Property Images
+        Property Images <span className="text-sm font-normal text-gray-500">(Maximum 8)</span>
       </h3>
 
       {/* Drag and drop area */}
       <div
-        className="border-2 border-dashed border-gray-300 rounded-lg p-6 mb-4 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-        onClick={() => fileInputRef.current?.click()}
+        className={`border-2 border-dashed ${isMaxImagesReached ? 'border-gray-200 bg-gray-50 cursor-not-allowed' : 'border-gray-300 hover:bg-gray-50 cursor-pointer'} rounded-lg p-6 mb-4 text-center transition-colors`}
+        onDragOver={isMaxImagesReached ? null : handleDragOver}
+        onDrop={isMaxImagesReached ? null : (e) => {
+          e.preventDefault();
+          const droppedFiles = e.dataTransfer.files;
+          handleLimitedFileSelection(droppedFiles);
+        }}
+        onClick={isMaxImagesReached ? null : () => fileInputRef.current?.click()}
       >
         <input
           type="file"
           ref={fileInputRef}
-          onChange={(e) => handleFileSelection(e.target.files)}
+          onChange={(e) => handleLimitedFileSelection(e.target.files)}
           className="hidden"
           multiple
           accept="image/*"
+          disabled={isMaxImagesReached}
         />
-        <Upload className="mx-auto h-12 w-12 text-gray-400" />
+        {isMaxImagesReached ? (
+          <AlertCircle className="mx-auto h-12 w-12 text-gray-400" />
+        ) : (
+          <Upload className="mx-auto h-12 w-12 text-gray-400" />
+        )}
         <p className="mt-2 text-sm text-gray-600">
-          Drag and drop images here, or click to select files
+          {isMaxImagesReached 
+            ? "Maximum number of images reached (8)" 
+            : "Drag and drop images here, or click to select files"}
         </p>
         <p className="text-xs text-gray-500 mt-1">
           Supports: JPG, PNG, GIF (Max 5MB each)
@@ -122,6 +157,11 @@ const ImagesSection = ({
           </div>
         </div>
       )}
+
+      {/* Image count indicator */}
+      <div className="mt-3 text-sm text-gray-600">
+        {totalImages}/8 images uploaded
+      </div>
 
       {/* Hidden fields */}
       <input
