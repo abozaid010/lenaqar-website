@@ -1,10 +1,8 @@
 import React from "react";
 import { Upload, Trash2, CheckCircle, XCircle, Loader, AlertCircle, Weight } from "lucide-react";
 import toast from "react-hot-toast";
-import {Montserrat} from "next/font/google"
-const MontserratFont = Montserrat({
-  weight:"400"
-})
+
+
 const ImageUploadSection = ({
   formik,
   selectedFiles,
