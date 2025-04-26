@@ -31,7 +31,7 @@ export default function ClientsTable({
 }) {
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState([]);
-console.log(users)
+  console.log(users);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
   const [openActionModal, setOpenActionModal] = useState(false);
@@ -75,11 +75,7 @@ console.log(users)
     }
   };
 
-  const handleClientRequirements = async (
-    e,
-    phone_number,
-    purchaseProbability
-  ) => {
+  const handleClientRequirements = async (e, phone_number) => {
     e.stopPropagation();
 
     // Set loading state for the specific row
@@ -87,7 +83,7 @@ console.log(users)
 
     try {
       const requirements = await getClientRequirements(phone_number);
-      setRowRequirements({ ...requirements, purchaseProbability });
+      setRowRequirements({ ...requirements });
       setOpenRequirementsModal(true);
     } catch (error) {
       console.error("Error fetching actions:", error); // Handle errors
@@ -186,13 +182,9 @@ console.log(users)
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${user.requirements !== "Not Specified" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
+                        className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${user.requirement_name !== "Not defined" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
                         onClick={(e) =>
-                          handleClientRequirements(
-                            e,
-                            user.phone_number,
-                            user.profile
-                          )
+                          handleClientRequirements(e, user.phone_number)
                         }
                       >
                         {loadingRequirements === user.phone_number &&
@@ -215,8 +207,10 @@ console.log(users)
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.actions]}`}
-                        onClick={(e) => handleclientAction(e, user.phone_number)}
+                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.last_action]}`}
+                        onClick={(e) =>
+                          handleclientAction(e, user.phone_number)
+                        }
                       >
                         {loadingClientActions === user.phone_number &&
                         !openActionModal ? (
@@ -227,7 +221,9 @@ console.log(users)
                             />
                           </div>
                         ) : (
-                          <span className="line-clamp-1">{user.last_action}</span>
+                          <span className="line-clamp-1">
+                            {user.last_action}
+                          </span>
                         )}
                       </td>
                     </tr>

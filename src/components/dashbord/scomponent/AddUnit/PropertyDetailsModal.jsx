@@ -17,7 +17,7 @@ import {
 const PropertyDetailsModal = ({ onClose, property }) => {
   const reformatPropertyData = () => {
     const reformattedData = {};
-  console.log(property)
+    console.log(property);
     for (const key in property) {
       const value = property[key];
       reformattedData[key] = Array.isArray(value)
@@ -30,6 +30,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
 
   const formattedProperty = reformatPropertyData();
 
+  console.log(formattedProperty, "##########");
   return (
     <div className="fixed inset-0  bg-opacity-20 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
@@ -216,7 +217,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   </p>
                   <div className="mt-2">
                     <p className="text-lg font-semibold text-blue-600">
-                      {formattedProperty.purchaseProbability || 0}%
+                      {formattedProperty.score.score || 0}%
                     </p>
                     <div
                       className="mt-2 h-2 rounded-full bg-blue-200"
