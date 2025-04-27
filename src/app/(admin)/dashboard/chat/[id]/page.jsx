@@ -9,6 +9,7 @@ export default async function ChatPage({ params }) {
 
   // Fetch initial chat history on the server
   const initialData = await getChatHistory(id);
+  console.log(initialData)
 
   return (
     <>

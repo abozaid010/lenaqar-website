@@ -148,11 +148,11 @@ export default function ClientsTable({
                   return (
                     <tr
                       onClick={() =>
-                        router.push(user.phone_number ? `/dashboard/chat/${user.phone_number}` : "")
+                        router.push( `/dashboard/chat/${user.user_id}`)
                       }
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(user.phone_number ? `/dashboard/chat/${user.phone_number}` : "")
+                        router.push(`/dashboard/chat/${user.user_id}` )
                       }
                       role="button"
                       tabIndex={0}
