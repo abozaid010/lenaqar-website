@@ -15,10 +15,12 @@ export async function addNewAction(prevState, formData) {
             comment: formData.get('comment'),
             created_at: new Date().toISOString(),
             client_id: clientId,
-           
+
+            user_id: formData.get('user_id') ,
             phone_number: "",
             meeting_time: formData.get('meeting_time') || null,
         };
+  console.log("payload ####", payload)
 
         await axiosInstance.post('action/create', payload);
       
