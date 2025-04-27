@@ -44,25 +44,25 @@ export default function ClientsTable({
     if (rowSelection.length === users.length) {
       setRowSelection([]);
     } else {
-      setRowSelection(users.map((user) => user.phone_number));
+      setRowSelection(users.map((user) => user.user_id));
     }
   };
-  const toggleRowSelection = (phone_number) => {
-    if (rowSelection.includes(phone_number)) {
-      setRowSelection(rowSelection.filter((number) => number !== phone_number));
+  const toggleRowSelection = (user_id) => {
+    if (rowSelection.includes(user_id)) {
+      setRowSelection(rowSelection.filter((id) => id !== user_id));
     } else {
-      setRowSelection([...rowSelection, phone_number]);
+      setRowSelection([...rowSelection, user_id]);
     }
   };
-  const isRowSelected = (phone_number) => {
-    return rowSelection.includes(phone_number);
+  const isRowSelected = (user_id) => {
+    return rowSelection.includes(user_id);
   };
 
-  const handleclientAction = async (e, phone_number) => {
+  const handleclientAction = async (e, phone_number, user_id) => {
     e.stopPropagation();
 
-    // Set loading state for the specific row
-    setLoadingClientActions(phone_number);
+    // Set loading state for the specific row using user_id
+    setLoadingClientActions(user_id);
 
     try {
       const actions = await getClientActions(phone_number);
@@ -75,21 +75,23 @@ export default function ClientsTable({
     }
   };
 
-  const handleClientRequirements = async (e, phone_number) => {
+  const handleClientRequirements = async (e, phone_number, user_id) => {
     e.stopPropagation();
 
-    // Set loading state for the specific row
-    setLoadingRequirements(phone_number);
+    // Set loading state for the specific row using user_id
+    setLoadingRequirements(user_id);
 
     try {
       const requirements = await getClientRequirements(phone_number);
       setRowRequirements({ ...requirements });
       setOpenRequirementsModal(true);
     } catch (error) {
-      console.error("Error fetching actions:", error); // Handle errors
-      setLoadingClientActions(null);
+      console.error("Error fetching requirements:", error);
+      setLoadingRequirements(null);
     }
   };
+
+  // In the requirements cell, update the condition to check for the specific phone number
 
   return (
     <>
@@ -146,24 +148,24 @@ export default function ClientsTable({
                   return (
                     <tr
                       onClick={() =>
-                        router.push(`/dashboard/chat/${user.phone_number}`)
+                        router.push(user.phone_number ? `/dashboard/chat/${user.phone_number}` : "")
                       }
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.phone_number}`)
+                        router.push(user.phone_number ? `/dashboard/chat/${user.phone_number}` : "")
                       }
                       role="button"
                       tabIndex={0}
-                      key={user.phone_number}
+                      key={user.user_id}
                       className={`hover:bg-gray-50 transition-colors text-xs sm:text-sm text-center ${
-                        isRowSelected(user.phone_number) && "bg-stone-100"
+                        isRowSelected(user.user_id) && "bg-stone-100"
                       } ${loadingClientActions ? "pointer-events-none" : ""}`}
                     >
                       <td>
                         <input
                           type="checkbox"
-                          checked={rowSelection.includes(user.phone_number)}
-                          onChange={() => toggleRowSelection(user.phone_number)}
+                          checked={rowSelection.includes(user.user_id)}
+                          onChange={() => toggleRowSelection(user.user_id)}
                           onClick={(e) => e.stopPropagation()} // Prevent row navigation on click
                           className="cursor-pointer"
                         />
@@ -183,12 +185,13 @@ export default function ClientsTable({
 
                       <td
                         className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${user.requirement_name !== "Not defined" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
-                        onClick={(e) =>
-                          handleClientRequirements(e, user.phone_number)
-                        }
+                        onClick={(e) => {
+                          if (user.requirement_name !== "Not defined" && user.phone_number) {
+                            handleClientRequirements(e, user.phone_number, user.user_id);
+                          }
+                        }}
                       >
-                        {loadingRequirements === user.phone_number &&
-                        !openRequirementsModal ? (
+                        {loadingRequirements === user.user_id ? (
                           <div>
                             <Loader2
                               size={16}
@@ -209,10 +212,10 @@ export default function ClientsTable({
                       <td
                         className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.last_action]}`}
                         onClick={(e) =>
-                          handleclientAction(e, user.phone_number)
+                          handleclientAction(e, user.phone_number, user.user_id)
                         }
                       >
-                        {loadingClientActions === user.phone_number &&
+                        {loadingClientActions === user.user_id &&
                         !openActionModal ? (
                           <div>
                             <Loader2
