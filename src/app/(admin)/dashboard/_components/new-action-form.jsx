@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { addNewAction } from "../_actions/actions";
 import { Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 const initialState = {
   success: false,
@@ -22,11 +23,16 @@ const ACTIONS = [
 
 export default function NewActionForm({ userId, onSuccess }) {
   const [state, action, pending] = useActionState(addNewAction, initialState);
+  const cliedId = Cookies.get("client_id")
+  console.log(cliedId) 
   const [formData, setFormData] = useState({
-    action_type: ACTIONS[0].value,
+    action: ACTIONS[0].value,
     comment: "",
     meeting_time: "",
+    created_at: new Date().toISOString(),
+    client_id: cliedId
   });
+  console.log(addNewAction)
 
   useEffect(() => {
     if (state.success) {
@@ -34,27 +40,38 @@ export default function NewActionForm({ userId, onSuccess }) {
         duration: 3000,
         position: "top-right",
       });
-      setFormData({ action_type: ACTIONS[0].value, comment: "" });
+      setFormData({ 
+        action: ACTIONS[0].value, 
+        comment: "",
+        meeting_time: "",
+        created_at: new Date().toISOString(),
+        client_id: cliedId
+      });
       onSuccess();
     } else if (state.message) {
+     
       toast.error(state.message, {
-        duration: 3000,
+        // duration: 3000,
         position: "top-right",
       });
     }
-  }, [state]);
+  }, [state, userId]); 
+   
 
   return (
     <form className="p-3" action={action}>
-      <input type="hidden" name="userId" value={userId} />
+      <input type="hidden" name="user_id" value={userId} />
+      <input type="hidden" name="phone_number" value={""} />
+      <input type="hidden" name="client_id" value={cliedId} />
+      <input type="hidden" name="created_at" value={formData.created_at} />
 
       <div className="flex items-end gap-2 mb-2">
         <select
-          name="action_type"
+          name="action"
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm"
-          value={formData.action_type}
+          value={formData.action}
           onChange={(e) =>
-            setFormData({ ...formData, action_type: e.target.value })
+            setFormData({ ...formData, action: e.target.value })
           }
           required
         >

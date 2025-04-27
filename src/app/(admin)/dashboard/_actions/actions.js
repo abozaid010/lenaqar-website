@@ -7,19 +7,21 @@ import { getClientid } from "@/components/services/clientCookies";
 export async function addNewAction(prevState, formData) {
     const clientId = await getClientid();
     const phoneNumber = formData.get('userId');
+    console.log(formData)
 
     try {
         const payload = {
-            action: formData.get('action_type'),
+            action: formData.get('action'),
             comment: formData.get('comment'),
             created_at: new Date().toISOString(),
-            user: clientId,
-            phone_number: phoneNumber,
+            client_id: clientId,
+           
+            phone_number: "",
             meeting_time: formData.get('meeting_time') || null,
         };
 
-        await axiosInstance.post('/action/create', payload);
-
+        await axiosInstance.post('action/create', payload);
+      
         revalidatePath('/dashboard');
 
         return {

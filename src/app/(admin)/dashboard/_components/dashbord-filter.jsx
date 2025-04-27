@@ -36,17 +36,12 @@ export default function DashbordFilter({ appliedFilters }) {
     return date;
   }, [tomorrow]);
 
-  /**
-   * Why use a function to initialize state, what is the issue with Direct Initialization?
-   *    - To avoid unnecessary calculations on every render => improve performance
-   *    - The function passed to useState is only executed once, during the initial render.
-   */
   const [filters, setFilters] = useState(() => {
     return {
       actions: appliedFilters.actions || "",
       start_date:
-        appliedFilters.start_date || tenDaysAgo.toISOString().split("T")[0],
-      end_date: appliedFilters.end_date || tomorrow.toISOString().split("T")[0],
+        appliedFilters.start_date || tenDaysAgo.toISOString(),
+      end_date: appliedFilters.end_date || tomorrow.toISOString(),
     };
   });
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -73,17 +68,38 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   const onFilterChange = (key, value) => {
+    // If the key is start_date or end_date, convert it to ISO format
+    let selectdDate = value;
+    if ((key === 'start_date' || key === 'end_date') && !value.includes('T')) {
+      // If the date is in YYYY-MM-DD format, convert it to ISO format
+      const dateObj = new Date(value);
+      // Add time to the date (00:00:00 for start date)
+      if (key === 'start_date') {
+        dateObj.setHours(0, 0, 0, 0);
+      }
+      // Add time to the date (23:59:59 for end date)
+      if (key === 'end_date') {
+        dateObj.setHours(23, 59, 59, 999);
+      }
+      selectdDate = dateObj.toISOString();
+    }
+    
     setFilters((prev) => ({
       ...prev,
-      [key]: value,
+      [key]: selectdDate,
     }));
 
-    router.push(
-      `${window.location.pathname}?${new URLSearchParams({
-        ...filters,
-        [key]: value,
-      })}`
-    );
+    const params = new URLSearchParams();
+    const updatedFilters = { ...filters, [key]: selectdDate };
+    
+    // Add parameters only if they are not empty
+    Object.entries(updatedFilters).forEach(([k, v]) => {
+      if (v) {
+        params.append(k, v);
+      }
+    });
+
+    router.push(`${window.location.pathname}?${params.toString()}`, { replace: true });
   };
 
   return (
@@ -126,13 +142,21 @@ export default function DashbordFilter({ appliedFilters }) {
                     </label>
                     <input
                       type="date"
-                      value={filters.start_date}
-                      onChange={(e) =>
+                      value={filters.start_date.split('T')[0]}
+                      onChange={(filter) => {
+                        // Create date object with the selected date
+                        // Use UTC to avoid timezone issues
+                        const selectedDate = filter.target.value;
+                        const dateObj = new Date(selectedDate + 'T00:00:00.000Z');
+                        
+                        // Ensure we're setting to midnight in the correct timezone
+                        const isoDate = dateObj.toISOString();
+                        
                         setFilters((prev) => ({
                           ...prev,
-                          start_date: e.target.value,
-                        }))
-                      }
+                          start_date: isoDate,
+                        }));
+                      }}
                       className="w-full border border-gray-300 rounded-md p-2 text-sm"
                     />
                   </div>
@@ -142,13 +166,21 @@ export default function DashbordFilter({ appliedFilters }) {
                     </label>
                     <input
                       type="date"
-                      value={filters.end_date}
-                      onChange={(e) =>
+                      value={filters.end_date.split('T')[0]}
+                      onChange={(filter) => {
+                        // Create date object with the selected date
+                        // Use UTC to avoid timezone issues
+                        const selectedDate = filter.target.value;
+                        const dateObj = new Date(selectedDate + 'T23:59:59.999Z');
+                        
+                        // Ensure we're setting to end of day in the correct timezone
+                        const isoDate = dateObj.toISOString();
+                        
                         setFilters((prev) => ({
                           ...prev,
-                          end_date: e.target.value,
-                        }))
-                      }
+                          end_date: isoDate,
+                        }));
+                      }}
                       className="w-full border border-gray-300 rounded-md p-2 text-sm"
                     />
                   </div>
