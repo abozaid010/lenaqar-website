@@ -216,7 +216,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   </p>
                   <div className="mt-2">
                     <p className="text-lg font-semibold text-blue-600">
-                      {formattedProperty.score.score || 0}%
+                      {formattedProperty?.score?.score || 0}%
                     </p>
                     <div
                       className="mt-2 h-2 rounded-full bg-blue-200"
@@ -227,7 +227,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                       <div
                         className="h-full rounded-full bg-blue-600"
                         style={{
-                          width: `${formattedProperty.score.score}%`,
+                          width: `${formattedProperty?.score?.score}%`,
                         }}
                       ></div>
                     </div>

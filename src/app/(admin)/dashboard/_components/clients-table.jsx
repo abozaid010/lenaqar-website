@@ -186,8 +186,8 @@ export default function ClientsTable({
                       <td
                         className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${user.requirement_name !== "Not defined" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
                         onClick={(e) => {
-                          if (user.requirement_name !== "Not defined" && user.phone_number) {
-                            handleClientRequirements(e, user.phone_number, user.user_id);
+                          if (user.requirement_name !== "Not defined") {
+                            handleClientRequirements(e, user.user_id, user.user_id);
                           }
                         }}
                       >
