@@ -12,8 +12,9 @@ export default function HomePage() {
 
       {/* Hero Section with Title */}
       <HeroSection />
-
+     <div className=" overflow-hidden">
       <DashbordImage />
+      </div>
 
       {/* Smart Automation Section */}
       <SalesManagerSection />

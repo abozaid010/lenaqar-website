@@ -105,11 +105,11 @@ const Header = () => {
         } ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
       >
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-2">
             {/* Logo */}
             <Link href="/" className="text-xl font-bold flex items-center">
               <Image
-                src="/images/logo-6.svg"
+                src="/images/logo-5.svg"
                 alt="logo_image"
                 width={120}
                 height={40}
@@ -117,7 +117,7 @@ const Header = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="hidden md:flex items-center gap-x-6">
               <Link href="/" className="hover:text-blue-200 transition-colors">
                 {t.header.home}
               </Link>

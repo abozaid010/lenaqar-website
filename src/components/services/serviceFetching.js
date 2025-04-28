@@ -103,6 +103,7 @@ export async function fetchUsersData(searchParams) {
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, { params });
+    
     return response.data;
 
   } catch (error) {

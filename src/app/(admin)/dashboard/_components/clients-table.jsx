@@ -65,7 +65,7 @@ export default function ClientsTable({
     setLoadingClientActions(user_id);
 
     try {
-      const actions = await getClientActions(phone_number);
+      const actions = await getClientActions(user_id);
 
       setRowActions(actions);
       setOpenActionModal(true);

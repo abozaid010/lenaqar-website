@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import CalendarSelector from "./calender-selector";
 
-export default function CalendarModal({ buttonText = "Try Lenaai Now" }) {
+export default function CalendarModal({ buttonText = "Try Lena Now" }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isBookingComplete, setIsBookingComplete] = useState(false);
   const [bookingData, setBookingData] = useState(null);

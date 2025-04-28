@@ -63,7 +63,7 @@ const DataInsights = () => {
           <p className="text-lg text-gray-700 mb-2">
             Lena is here to solve these challenges.
           </p>
-          <CalendarModal buttonText={" Let Lena Handle It"} />
+          <CalendarModal  />
         </div>
       </div>
     </section>

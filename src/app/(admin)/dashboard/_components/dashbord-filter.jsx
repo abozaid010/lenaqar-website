@@ -15,6 +15,17 @@ const ACTIONS = [
   { label: "Missing Requirement", value: "Missing requirement" },
 ];
 
+// Helper function to format date to the required format
+const formatDate = (date) => {
+  // Convert date to ISO format
+  const isoString = date.toISOString();
+  
+  // Extract up to the seconds (19 characters) and remove ".000Z"
+  const formattedDate = isoString.slice(0, 19);
+  
+  return formattedDate;
+};
+
 export default function DashbordFilter({ appliedFilters }) {
   const router = useRouter();
 
@@ -23,7 +34,7 @@ export default function DashbordFilter({ appliedFilters }) {
    * Why useMemo?
    * - To avoid unnecessary calculations on every render => improve performance
    * - The `start_date` and `end_date` are initialized with dynamic default values.
-       These values will automatically adjust when the component is MOUNTED.
+     These values will automatically adjust when the component is MOUNTED.
    */
   const tomorrow = useMemo(() => {
     const date = new Date();
@@ -38,10 +49,10 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const [filters, setFilters] = useState(() => {
     return {
-      actions: appliedFilters.actions || "",
+      action: appliedFilters.action || "",
       start_date:
-        appliedFilters.start_date || tenDaysAgo.toISOString(),
-      end_date: appliedFilters.end_date || tomorrow.toISOString(),
+        appliedFilters.start_date || formatDate(tenDaysAgo),
+      end_date: appliedFilters.end_date || formatDate(tomorrow),
     };
   });
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -52,17 +63,17 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   const onApplyDateFilter = () => {
-    // close the date picker
+    // Close the date picker
     setIsDatePickerOpen(false);
 
-    // update the filters state with the selected start and end dates
+    // Update the filters state with the selected start and end dates
     setFilters((prev) => ({
       ...prev,
       start_date: filters.start_date,
       end_date: filters.end_date,
     }));
 
-    // update the URL with the new filters
+    // Update the URL with the new filters
     onFilterChange("start_date", filters.start_date);
     onFilterChange("end_date", filters.end_date);
   };
@@ -81,7 +92,8 @@ export default function DashbordFilter({ appliedFilters }) {
       if (key === 'end_date') {
         dateObj.setHours(23, 59, 59, 999);
       }
-      selectdDate = dateObj.toISOString();
+      // Use the helper function to format the date
+      selectdDate = formatDate(dateObj);
     }
     
     setFilters((prev) => ({
@@ -110,8 +122,8 @@ export default function DashbordFilter({ appliedFilters }) {
           {/* Filter by action_type */}
           <select
             name="action_type"
-            onChange={(e) => onFilterChange("actions", e.target.value)}
-            value={filters.actions || "all"}
+            onChange={(e) => onFilterChange("action", e.target.value)}
+            value={filters.action || "all"}
             className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-56 text-gray-700 hover:bg-gray-100 text-sm"
           >
             {ACTIONS.map((action) => (
@@ -149,12 +161,12 @@ export default function DashbordFilter({ appliedFilters }) {
                         const selectedDate = filter.target.value;
                         const dateObj = new Date(selectedDate + 'T00:00:00.000Z');
                         
-                        // Ensure we're setting to midnight in the correct timezone
-                        const isoDate = dateObj.toISOString();
+                        // Use the helper function to format the date
+                        const formattedDate = formatDate(dateObj);
                         
                         setFilters((prev) => ({
                           ...prev,
-                          start_date: isoDate,
+                          start_date: formattedDate,
                         }));
                       }}
                       className="w-full border border-gray-300 rounded-md p-2 text-sm"
@@ -173,12 +185,12 @@ export default function DashbordFilter({ appliedFilters }) {
                         const selectedDate = filter.target.value;
                         const dateObj = new Date(selectedDate + 'T23:59:59.999Z');
                         
-                        // Ensure we're setting to end of day in the correct timezone
-                        const isoDate = dateObj.toISOString();
+                        // Use the helper function to format the date
+                        const formattedDate = formatDate(dateObj);
                         
                         setFilters((prev) => ({
                           ...prev,
-                          end_date: isoDate,
+                          end_date: formattedDate,
                         }));
                       }}
                       className="w-full border border-gray-300 rounded-md p-2 text-sm"
@@ -204,7 +216,7 @@ export default function DashbordFilter({ appliedFilters }) {
           </div>
         </div>
 
-        {/* TODO: Whatsapp Modal should not rendered here - get modal code from `HomeDashbord` comp and render it in the tright place */}
+        {/* TODO: Whatsapp Modal should not be rendered here - get modal code from `HomeDashbord` component and render it in the right place */}
         <button
           //  onClick={handleOpenModal}
           className="w-full sm:w-auto bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2"

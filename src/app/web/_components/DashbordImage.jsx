@@ -66,21 +66,21 @@ export default function DashboardImage() {
           </div>
 
           {/* App Preview Image */}
-          <div className="w-full lg:w-1/2">
-            <div className="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-200 p-4">
-              <div className="relative">
+          <div className="w-full lg:w-[520px]">
+            <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 relative">
+              <div className="relative w-full">
                 {/* Desktop Dashboard Image */}
                 <div className="relative rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                   <Image
                     src={dashborddesctop}
                     alt="Lena CRM Dashboard Desktop View"
-                    className="w-full h-auto object-cover"
+                    className="w-full h-auto object-contain"
                     priority
                   />
                 </div>
 
                 {/* Mobile Mockup Image */}
-                <div className="hidden md:block absolute -bottom-6 -right-6 w-1/3 transform pb-2">
+                <div className="hidden md:block absolute bottom-[-20%] right-[-25%] w-1/3 transform">
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image
                       src={dashbordmobile}
