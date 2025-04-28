@@ -28,12 +28,10 @@ export async function fetchcombounds() {
 export async function uploadImages(formData) {
   try {
     const response = await axiosInstance.post(`/images/`, formData, {
-
       headers: {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log("responseImage", response);
     return response.data;
 
   } catch (error) {

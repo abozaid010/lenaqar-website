@@ -1,12 +1,10 @@
 @import "tailwindcss";
 
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
   --primary: #030250;
   --primary-foreground: #ffffff;
-
 }
 
 @theme inline {
@@ -75,4 +73,15 @@ button{
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Remove the arrow for number inputs */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield; /* For Firefox */
 }

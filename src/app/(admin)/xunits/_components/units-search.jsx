@@ -1,0 +1,70 @@
+"use client";
+
+import { useState, useCallback, useEffect } from "react";
+import { Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { debounce } from "@/utils/debounce";
+
+export default function UnitsSearch({ q }) {
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState(q || "");
+
+  const debouncedSearch = useCallback(
+    debounce((term) => {
+      const params = new URLSearchParams(window.location.search);
+      if (term) {
+        params.set("query", term);
+      } else {
+        params.delete("query");
+      }
+      router.push(`${window.location.pathname}?${params.toString()}`);
+    }, 300),
+    [router]
+  );
+
+  useEffect(() => {
+    debouncedSearch(searchTerm);
+  }, [searchTerm, debouncedSearch]);
+
+  const handleSearchClear = () => {
+    setSearchTerm("");
+    const params = new URLSearchParams(window.location.search);
+    params.delete("query");
+
+    router.push(`${window.location.pathname}?${params.toString()}`);
+  };
+
+  return (
+    <form
+      className="flex items-center space-x-2 mb-2"
+      onSubmit={(e) => e.preventDefault()}
+    >
+      <div className="relative flex-1">
+        <Search
+          size={20}
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+        />
+        <input
+          type="text"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
+          placeholder="Search by name or location..."
+          className="border border-gray-300 rounded-md p-2 w-full pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 text-sm"
+        />
+
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={handleSearchClear}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-black"
+            aria-label="Clear search"
+          >
+            <X size={18} />
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
