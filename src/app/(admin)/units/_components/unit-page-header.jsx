@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import { deleteUnit } from "@/components/services/serviceFetching";
 import AddUnitButton from "./add-unit-button";
+import toast from "react-hot-toast";
 
 export default function UnitPageHeader({ unit, compounds, developers }) {
-  console.log("unit", unit);
   const router = useRouter();
 
   const handleBackToUnits = () => {

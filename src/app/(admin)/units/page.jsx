@@ -3,11 +3,12 @@ import {
   fetchUnitsFilter,
   fetchDevelopers,
 } from "@/components/services/serviceFetching";
-import UnitsGrid from "./components/units-grid";
-import UnitsFilter from "./components/units-filter";
-import UnitsSearch from "./components/units-search";
+import UnitsGrid from "./_components/units-grid";
+import UnitsFilter from "./_components/units-filter";
+import UnitsSearch from "./_components/units-search";
 
 import { cookies } from "next/headers";
+import AddUnitButton from "./_components/add-unit-button";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -24,6 +25,12 @@ export async function generateMetadata() {
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
+  const cookieStore = await cookies();
+  const clientId = cookieStore.get("client_id")?.value;
+  const clientName = JSON.parse(
+    cookieStore.get("client_info")?.value
+  )?.client_name;
+
   const [unitsResponse, developers, compounds] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams)),
     fetchDevelopers(),
@@ -34,11 +41,20 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   return (
     <div className="container mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">
-          Real Estate Properties
-        </h1>
-        <p className="text-gray-600 mt-1">Explore our exclusive listings</p>
+      <div className="mb-8 flex items-start justify-between gap-2">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800">
+            Real Estate Properties
+          </h1>
+          <p className="text-gray-600 mt-1">Explore our exclusive listings</p>
+        </div>
+
+        <AddUnitButton
+          clientId={clientId}
+          clientName={clientName}
+          compounds={compounds}
+          developers={developers}
+        />
       </div>
 
       <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">

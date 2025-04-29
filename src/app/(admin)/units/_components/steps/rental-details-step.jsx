@@ -67,25 +67,46 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
         Availability{" "}
-        <span className="text-sm text-gray-400 font-normal">
-          choose availability date <span className="text-red-500">*</span>
-        </span>
+        {!formData.isAvailable ? (
+          <span className="text-sm text-gray-400 font-normal">
+            choose availability date <span className="text-red-500">*</span>
+          </span>
+        ) : null}
       </h3>
 
-      {/* Availability Date */}
-      {formData.isAvailable && (
+      {/* Availability */}
+      <div className="flex items-center gap-8">
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="isAvailable"
+            name="isAvailable"
+            checked={formData.isAvailable}
+            onChange={handleChange}
+            className="h-4 w-4"
+          />
+          <label
+            htmlFor="isAvailable"
+            className="ml-2 block text-sm text-gray-700"
+          >
+            Available for rent
+          </label>
+        </div>
+
+        {/* Availability Date */}
         <div className="flex-1 max-w-60">
           <input
             type="date"
             name="availabilityDate"
             value={formData.availabilityDate}
+            disabled={formData.isAvailable}
             onChange={handleChange}
             className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              !formData.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""
+              formData.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""
             }`}
           />
         </div>
-      )}
+      </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-6 text-slate-800">
         Rent Duration Options

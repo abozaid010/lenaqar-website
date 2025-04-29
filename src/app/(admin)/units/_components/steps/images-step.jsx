@@ -9,7 +9,13 @@ import {
   uploadImages,
 } from "@/components/services/serviceFetching";
 
-export default function ImagesStep({ formData, updateFormData, developers }) {
+export default function ImagesStep({
+  formData,
+  updateFormData,
+  developers,
+  invalidFields = [],
+  setInvalidFields = () => {},
+}) {
   const fileInputRef = useRef(null);
 
   const [dragActive, setDragActive] = useState(false);
@@ -27,6 +33,10 @@ export default function ImagesStep({ formData, updateFormData, developers }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     updateFormData({ [name]: value });
+
+    if (invalidFields.includes(name)) {
+      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    }
   };
 
   const handleDrag = (e) => {
@@ -139,7 +149,7 @@ export default function ImagesStep({ formData, updateFormData, developers }) {
 
     // Update the form data with all uploaded images
     const allUploaded = [...uploadedImages, ...successfulUploads];
-    console.log("All uploaded images:", allUploaded);
+
     updateFormData({ images: allUploaded });
     setUploadedImages(allUploaded);
 
@@ -202,15 +212,25 @@ export default function ImagesStep({ formData, updateFormData, developers }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Finishing Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Finishing Type
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("finishing")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
+            Finishing Type <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
               name="finishing"
               value={formData.finishing}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("finishing")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select finishing type</option>
               <option value="fully finished">Fully Finished</option>
@@ -237,15 +257,25 @@ export default function ImagesStep({ formData, updateFormData, developers }) {
 
         {/* Developer */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Developer
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("developer")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
+            Developer <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
               name="developer"
               value={formData.developer}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("developer")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select developer</option>
               {developersSet.map((d, idx) => (

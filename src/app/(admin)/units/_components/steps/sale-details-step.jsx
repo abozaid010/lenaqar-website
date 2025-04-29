@@ -2,11 +2,25 @@
 
 import { Plus, Trash2Icon } from "lucide-react";
 
-export default function SaleDetailsStep({ formData, updateFormData }) {
+export default function SaleDetailsStep({
+  formData,
+  updateFormData,
+  invalidFields = [],
+  setInvalidFields = () => {},
+}) {
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     updateFormData({ [name]: value });
+    if (invalidFields.includes(name)) {
+      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    }
+
+    if (name === "deliveryDate") {
+      const today = new Date().toISOString().split("T")[0];
+      const deliveryStatus = value > today ? "off-plan" : "ready to move";
+      updateFormData({ deliveryStatus });
+    }
   };
 
   const addPaymentPlan = () => {
@@ -38,7 +52,13 @@ export default function SaleDetailsStep({ formData, updateFormData }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Total Price */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("totalPrice")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Total Price <span className="text-red-500">*</span>
           </label>
           <input
@@ -48,14 +68,24 @@ export default function SaleDetailsStep({ formData, updateFormData }) {
             onChange={handleChange}
             min="0"
             placeholder="5000000"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+              invalidFields.includes("totalPrice")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           />
           <span className="absolute bottom-1 right-1.5 text-gray-400">EGP</span>
         </div>
 
         {/* Delivery Date */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("deliveryDate")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Delivery Date <span className="text-red-500">*</span>
           </label>
           <input
@@ -63,14 +93,18 @@ export default function SaleDetailsStep({ formData, updateFormData }) {
             name="deliveryDate"
             value={formData.deliveryDate}
             onChange={handleChange}
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+              invalidFields.includes("deliveryDate")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           />
         </div>
 
         {/* Down Payment */}
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Down Payment <span className="text-red-500">*</span>
+            Down Payment
           </label>
           <input
             type="number"

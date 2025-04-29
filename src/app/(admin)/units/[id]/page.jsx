@@ -1,9 +1,10 @@
-import UnitDetails from "@/components/dashbord/pages/UnitDetails";
 import {
   fetchcombounds,
   fetchDevelopers,
   fetchUnitById,
 } from "@/components/services/serviceFetching";
+import UnitPageHeader from "../_components/unit-page-header";
+import UnitDetails from "../_components/unit-page-details";
 
 // Dynamic metadata
 export async function generateMetadata({ params }) {
@@ -26,11 +27,19 @@ const Page = async ({ params }) => {
   ]);
 
   return (
-    <UnitDetails
-      unit={unit}
-      comboundata={comboundata}
-      developers={developers}
-    />
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      <UnitPageHeader
+        unit={unit}
+        compounds={comboundata}
+        developers={developers}
+      />
+
+      <UnitDetails
+        unit={unit}
+        comboundata={comboundata}
+        developers={developers}
+      />
+    </div>
   );
 };
 

@@ -32,6 +32,7 @@ export default function AddUnitModal({
   const modalRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
@@ -49,14 +50,14 @@ export default function AddUnitModal({
     unitId: unitData?.unitId || uuidv4(),
     unitTitle: unitData?.unitTitle || "",
     deliveryDate: unitData?.deliveryDate || "",
-    deliveryStatus: unitData?.deliveryStatus || "ready to move",
-    bathroomCount: unitData?.bathroomCount || 0,
-    floor: unitData?.floor || 0,
-    roomsCount: unitData?.roomsCount || 0,
-    landArea: unitData?.landArea || 0,
-    gardenSize: unitData?.gardenSize || 0,
+    deliveryStatus: unitData?.deliveryStatus || "",
+    bathroomCount: unitData?.bathroomCount || "",
+    floor: unitData?.floor || "",
+    roomsCount: unitData?.roomsCount || "",
+    landArea: unitData?.landArea || "",
+    gardenSize: unitData?.gardenSize || "",
     finishing: unitData?.finishing || "",
-    garageArea: unitData?.garageArea || 0,
+    garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
   }));
 
@@ -75,27 +76,27 @@ export default function AddUnitModal({
     isAvailable: true,
     availabilityDate: unitData?.availabilityDate
       ? new Date(unitData.availabilityDate).toISOString().split("T")[0]
-      : "",
+      : new Date().toISOString().split("T")[0],
     rentDurationType: unitData?.rentDurationType || {
       daily: {
-        price: 0,
-        securityDeposit: 0,
-        cleaningFee: 0,
-        serviceFee: 0,
+        price: "",
+        securityDeposit: "",
+        cleaningFee: "",
+        serviceFee: "",
         currency: "EGP",
       },
       weekly: {
-        price: 0,
-        securityDeposit: 0,
-        cleaningFee: 0,
-        serviceFee: 0,
+        price: "",
+        securityDeposit: "",
+        cleaningFee: "",
+        serviceFee: "",
         currency: "EGP",
       },
       monthly: {
-        price: 0,
-        securityDeposit: 0,
-        cleaningFee: 0,
-        serviceFee: 0,
+        price: "",
+        securityDeposit: "",
+        cleaningFee: "",
+        serviceFee: "",
         currency: "EGP",
       },
     },
@@ -126,12 +127,22 @@ export default function AddUnitModal({
         "roomsCount",
         "bathroomCount",
       ];
+      const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
+      const sanitizedData = { ...formData };
+
+      // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+      zeroFields.forEach((field) => {
+        if (!sanitizedData[field] || sanitizedData[field] === "") {
+          sanitizedData[field] = 0;
+        }
+      });
+
+      setFormData(sanitizedData);
+
       const missingFields = requiredFields.filter((field) => !formData[field]);
 
       if (missingFields.length > 0) {
-        toast.error(
-          `Please fill in the following fields: ${missingFields.join(", ")}`
-        );
+        setInvalidFields(missingFields);
         return;
       }
     }
@@ -139,17 +150,37 @@ export default function AddUnitModal({
     // Validate required fields for step 2
     if (currentStep === 2) {
       if (formData.purpose === "sell") {
-        const requiredFields = ["totalPrice", "deliveryDate", "downPayment"];
+        const requiredFields = ["totalPrice", "deliveryDate"];
         const missingFields = requiredFields.filter(
           (field) => !SellFormData[field]
         );
 
         if (missingFields.length > 0) {
-          toast.error(
-            `Please fill in the following fields: ${missingFields.join(", ")}`
-          );
+          setInvalidFields(missingFields);
           return;
         }
+
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const zeroFields = ["downPayment"];
+        const sanitizedData = { ...SellFormData };
+        zeroFields.forEach((field) => {
+          if (!sanitizedData[field] || sanitizedData[field] === "") {
+            sanitizedData[field] = 0;
+          }
+        });
+        const sanitizedPaymentPlans = sanitizedData.paymentPlans.map((plan) => {
+          return {
+            years: plan.years === "" ? 0 : plan.years,
+            price: plan.price === "" ? 0 : plan.price,
+            maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
+          };
+        });
+
+        setSellFormData((prev) => ({
+          ...prev,
+          downPayment: sanitizedData.downPayment,
+          paymentPlans: sanitizedPaymentPlans,
+        }));
       } else if (formData.purpose === "rent") {
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
@@ -163,13 +194,24 @@ export default function AddUnitModal({
           return;
         }
 
-        if (rentFormData.isAvailable && !rentFormData.availabilityDate) {
-          toast.error("Please select an availability date");
-          return;
-        }
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
+        Object.keys(sanitizedRentDurationType).forEach((duration) => {
+          Object.keys(sanitizedRentDurationType[duration]).forEach((field) => {
+            if (sanitizedRentDurationType[duration][field] === "") {
+              sanitizedRentDurationType[duration][field] = 0;
+            }
+          });
+        });
+
+        setRentFormData((prev) => ({
+          ...prev,
+          rentDurationType: sanitizedRentDurationType,
+        }));
       }
     }
 
+    setInvalidFields([]);
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -192,15 +234,10 @@ export default function AddUnitModal({
         return;
       }
 
-      // Check if finishing type is selected
-      if (!formData.finishing) {
-        toast.error("Please select a finishing type.");
-        return;
-      }
-
-      // Check if developer is selected
-      if (!formData.developer) {
-        toast.error("Please select a developer.");
+      const requiredFields = ["finishing", "developer"];
+      const missingFields = requiredFields.filter((field) => !formData[field]);
+      if (missingFields.length > 0) {
+        setInvalidFields(missingFields);
         return;
       }
     }
@@ -237,6 +274,7 @@ export default function AddUnitModal({
         error.message
       );
     } finally {
+      setInvalidFields([]);
       setLoading(false);
     }
   };
@@ -288,6 +326,8 @@ export default function AddUnitModal({
               formData={formData}
               updateFormData={updateFormData}
               compounds={compounds}
+              invalidFields={invalidFields}
+              setInvalidFields={setInvalidFields}
             />
           )}
 
@@ -297,6 +337,8 @@ export default function AddUnitModal({
               updateFormData={(newData) =>
                 setSellFormData((prev) => ({ ...prev, ...newData }))
               }
+              invalidFields={invalidFields}
+              setInvalidFields={setInvalidFields}
             />
           )}
 
@@ -315,6 +357,8 @@ export default function AddUnitModal({
               formData={formData}
               updateFormData={updateFormData}
               developers={developers}
+              invalidFields={invalidFields}
+              setInvalidFields={setInvalidFields}
             />
           )}
 
@@ -365,7 +409,10 @@ export default function AddUnitModal({
                 </svg>
               </button>
             ) : (
-              <button className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors">
+              <button
+                disabled={loading}
+                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"

@@ -4,14 +4,25 @@ export default function BasicDetailsStep({
   formData,
   updateFormData,
   compounds,
+  invalidFields = [],
+  setInvalidFields = () => {},
 }) {
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
+    let updatedValue;
     if (type === "checkbox") {
-      updateFormData({ [name]: checked });
+      updatedValue = checked;
+    } else if (type === "number") {
+      updatedValue = Number(value);
     } else {
-      updateFormData({ [name]: value });
+      updatedValue = value;
+    }
+
+    updateFormData({ [name]: updatedValue });
+
+    if (invalidFields.includes(name) && updatedValue) {
+      setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
   };
 
@@ -24,7 +35,13 @@ export default function BasicDetailsStep({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Unit Title */}
         <div className="col-span-1 md:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("unitTitle")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Unit Title <span className="text-red-500">*</span>
           </label>
           <input
@@ -34,13 +51,23 @@ export default function BasicDetailsStep({
             value={formData.unitTitle}
             onChange={handleChange}
             placeholder="Enter unit title"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("unitTitle")
+                ? "border-red-500 ring-red-500 placeholder-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           />
         </div>
 
         {/* Compound */}
         <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("compound")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Compound <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -49,7 +76,11 @@ export default function BasicDetailsStep({
               required
               value={formData.compound}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("compound")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select compound</option>
               {compounds.map((compound) => (
@@ -58,31 +89,18 @@ export default function BasicDetailsStep({
                 </option>
               ))}
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
-          <button
-            type="button"
-            className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
-          >
-            + Add New
-          </button>
         </div>
 
         {/* Building Type */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("buildingType")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Building Type
           </label>
           <div className="relative">
@@ -90,7 +108,11 @@ export default function BasicDetailsStep({
               name="buildingType"
               value={formData.buildingType}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("buildingType")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="apartment">Apartment</option>
               <option value="villa">Villa</option>
@@ -104,25 +126,18 @@ export default function BasicDetailsStep({
               <option value="twinhouse">Twinhouse</option>
               <option value="house">House</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
         {/* Purpose */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("purpose")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Purpose <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -131,31 +146,26 @@ export default function BasicDetailsStep({
               required
               value={formData.purpose}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("purpose")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select purpose</option>
               <option value="sell">Sell</option>
               <option value="rent">Rent</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
         {/* City */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("city") ? "text-red-500" : "text-gray-700"
+            }`}
+          >
             City <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -164,7 +174,11 @@ export default function BasicDetailsStep({
               value={formData.city}
               required
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("city")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select city</option>
               <option value="Cairo">Cairo</option>
@@ -175,25 +189,16 @@ export default function BasicDetailsStep({
               <option value="El Shorouk">El Shorouk</option>
               <option value="Sheikh Zayed">Sheikh Zayed</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
         {/* View */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("view") ? "text-red-500" : "text-gray-700"
+            }`}
+          >
             View <span className="text-red-500">*</span>
           </label>
           <div className="relative">
@@ -202,7 +207,11 @@ export default function BasicDetailsStep({
               value={formData.view}
               required
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 appearance-none"
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("view")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
             >
               <option value="">Select view</option>
               <option value="park">Park</option>
@@ -217,19 +226,6 @@ export default function BasicDetailsStep({
               <option value="open area">Open Area</option>
               <option value="mountain">Mountain</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </div>
           </div>
         </div>
 
@@ -256,33 +252,55 @@ export default function BasicDetailsStep({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Rooms */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("roomsCount")
+                ? "text-red-500 "
+                : "text-gray-700"
+            }`}
+          >
             Rooms <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
             name="roomsCount"
-            value={+formData.roomsCount}
+            value={formData.roomsCount}
+            placeholder="0"
             onChange={handleChange}
-            min={0}
+            min="0"
             required
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("roomsCount")
+                ? "border-red-500 ring-red-500 placeholder-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           />
         </div>
 
         {/* Bathrooms */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("bathroomCount")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             Bathrooms <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
             name="bathroomCount"
-            value={+formData.bathroomCount}
+            placeholder="0"
+            value={formData.bathroomCount}
             onChange={handleChange}
             min={0}
             required
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("bathroomCount")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           />
         </div>
 
@@ -294,8 +312,9 @@ export default function BasicDetailsStep({
           <input
             type="number"
             name="floor"
-            value={+formData.floor}
-            onChange={(e) => updateFormData({ floor: e.target.value })}
+            value={formData.floor}
+            placeholder="0"
+            onChange={handleChange}
             min={0}
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
@@ -309,6 +328,7 @@ export default function BasicDetailsStep({
           <input
             type="number"
             name="landArea"
+            placeholder="0"
             value={formData.landArea}
             onChange={handleChange}
             min={0}
@@ -324,6 +344,7 @@ export default function BasicDetailsStep({
           <input
             type="number"
             name="gardenSize"
+            placeholder="0"
             value={formData.gardenSize}
             onChange={handleChange}
             min={0}
@@ -339,6 +360,7 @@ export default function BasicDetailsStep({
           <input
             type="number"
             name="garageArea"
+            placeholder="0"
             value={formData.garageArea}
             onChange={handleChange}
             min="0"
