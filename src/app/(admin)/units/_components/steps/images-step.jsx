@@ -13,6 +13,8 @@ export default function ImagesStep({
   formData,
   updateFormData,
   developers,
+  isUploading,
+  setIsUploading,
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
@@ -23,8 +25,6 @@ export default function ImagesStep({
   const [uploadedImages, setUploadedImages] = useState(formData.images || []);
   // Track upload status for each image
   const [uploadStatus, setUploadStatus] = useState({});
-  // Track over all upload state
-  const [isUploading, setIsUploading] = useState(false);
 
   const developersSet = Array.from(
     new Set(developers?.map((developer) => developer.name))
@@ -233,11 +233,20 @@ export default function ImagesStep({
               }`}
             >
               <option value="">Select finishing type</option>
-              <option value="fully finished">Fully Finished</option>
-              <option value="semi finished">Semi Finished</option>
-              <option value="core & shell">Core & Shell</option>
-              <option value="furnished">Furnished</option>
-              <option value="unfurnished">Unfurnished</option>
+              {formData.purpose === "rent" ? (
+                <>
+                  <option value="furnished">Furnished</option>
+                  <option value="unfurnished">Unfurnished</option>
+                </>
+              ) : (
+                <>
+                  <option value="fully finished">Fully Finished</option>
+                  <option value="semi finished">Semi Finished</option>
+                  <option value="core & shell">Core & Shell</option>
+                  <option value="furnished">Furnished</option>
+                  <option value="unfurnished">Unfurnished</option>
+                </>
+              )}
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg
@@ -483,7 +492,7 @@ export default function ImagesStep({
                   </div>
 
                   {/* Delete button - only show if not currently uploading */}
-                  {uploadStatus[image.id] !== "uploading" && (
+                  {uploadStatus[image.id] !== "uploading" && !isUploading && (
                     <button
                       type="button"
                       onClick={(e) => {

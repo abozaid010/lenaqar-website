@@ -32,6 +32,8 @@ export default function AddUnitModal({
   const modalRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  // Track over all upload state
+  const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
@@ -154,6 +156,15 @@ export default function AddUnitModal({
         const missingFields = requiredFields.filter(
           (field) => !SellFormData[field]
         );
+
+        // Validate paymentPlans
+        if (SellFormData.paymentPlans.length > 0) {
+          SellFormData.paymentPlans.forEach((plan, index) => {
+            if (!plan.price || plan.price === 0) {
+              missingFields.push(`price-${index}`);
+            }
+          });
+        }
 
         if (missingFields.length > 0) {
           setInvalidFields(missingFields);
@@ -359,6 +370,8 @@ export default function AddUnitModal({
               developers={developers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
             />
           )}
 
@@ -410,8 +423,8 @@ export default function AddUnitModal({
               </button>
             ) : (
               <button
-                disabled={loading}
-                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                disabled={loading && isUploading}
+                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${loading || isUploading ? "opacity-50 pointer-events-none" : ""}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

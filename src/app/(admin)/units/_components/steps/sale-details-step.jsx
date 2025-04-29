@@ -36,6 +36,14 @@ export default function SaleDetailsStep({
     const updatedPlans = [...formData.paymentPlans];
     updatedPlans[index] = { ...updatedPlans[index], [field]: value };
     updateFormData({ paymentPlans: updatedPlans });
+
+    setInvalidFields((prev) => {
+      if (field === "price" && value === "") {
+        return [...prev, `price-${index}`];
+      } else {
+        return prev.filter((f) => f !== `price-${index}`);
+      }
+    });
   };
 
   const removePaymentPlan = (index) => {
@@ -161,8 +169,14 @@ export default function SaleDetailsStep({
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Price
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        invalidFields.includes(`price-${index}`)
+                          ? "text-red-500"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Price <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -171,7 +185,11 @@ export default function SaleDetailsStep({
                       onChange={(e) =>
                         updatePaymentPlan(index, "price", e.target.value)
                       }
-                      className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                        invalidFields.includes(`price-${index}`)
+                          ? "border-red-500 ring-red-500"
+                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                      }`}
                     />
                   </div>
                   <div>
