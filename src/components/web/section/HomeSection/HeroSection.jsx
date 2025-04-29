@@ -103,7 +103,7 @@ const HeroSection = () => {
             </motion.p>
 
          
-              <CalendarModal buttonText={"Get Started"} />
+              <CalendarModal buttonText={"Get Started"} style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} />
          
           </motion.div>
 

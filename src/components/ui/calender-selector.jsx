@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ArrowRight, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Check, ArrowLeft } from "lucide-react";
 import {
   format,
   addMonths,
@@ -21,6 +21,7 @@ import {
 export default function CalendarSelector({
   onSelectDateTime,
   onBookingComplete,
+ 
   // TODO: retrevie available times from the server
   mockTimesByDay = {
     23: ["11:30am", "1:30pm", "2:00pm", "2:30pm", "3:00pm", "3:30pm", "4:00pm"],
@@ -36,6 +37,8 @@ export default function CalendarSelector({
   const [selectedTime, setSelectedTime] = useState(null);
   const [showTimeColumn, setShowTimeColumn] = useState(false);
   const [bookingStage, setBookingStage] = useState("calendar");
+  const [back,setback]=useState(false)
+
   // Form state
   const [formData, setFormData] = useState({
     name: "",
@@ -90,7 +93,13 @@ export default function CalendarSelector({
   // Handle confirm button click
   const handleConfirm = () => {
     setBookingStage("form");
+    setback(true)
   };
+
+  const handelBack = () =>{
+    setBookingStage("calendar")
+    setback(false)
+  }
 
   // Handle form input changes
   const handleInputChange = (e) => {
@@ -132,16 +141,32 @@ export default function CalendarSelector({
     <div className="flex flex-col md:flex-row border rounded-lg shadow-sm overflow-hidden max-w-5xl mx-auto bg-white">
       {/* Left panel - Company info */}
       <div className="border-r border-gray-200 w-full md:w-82 flex flex-col">
-        <div className="flex justify-center border-b border-gray-200 py-8">
-          <Image
-            src={"/images/logo.png"}
-            alt="logo_image"
-            width={120}
-            height={40}
-          />
-        </div>
+      <div className="flex items-center justify-between border-b border-gray-200 py-4 px-6">
+      <div className="w-10">
+        {back && (
+          <button 
+            onClick={handelBack}
+            className="flex items-center  border justify-center rounded-full p-2 font-bold  hover:bg-gray-100 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft  size={20} color="#030250" />
+          </button>
+        )}
+      </div>
+      <div className="flex-1 flex justify-center">
+        <Image
+          src="/images/logo.png"
+          alt="logo_image"
+          width={120}
+          height={40}
+          className="object-contain"
+        />
+      </div>
+     
+    </div>
+     
 
-        <div className="mt-4 p-6">
+        <div className="mt-4 p-6 ">
           <Image
             src={"/images/logo.png"}
             alt="logo_image"
@@ -245,7 +270,7 @@ export default function CalendarSelector({
               </div>
 
               {/* Calendar days */}
-              <div className="grid grid-cols-7 gap-1">
+              <div className="grid grid-cols-7 gap-1 ">
                 {/* Empty cells for days before the start of the month */}
                 {Array.from({ length: days[0].getDay() }).map((_, index) => (
                   <div key={`empty-start-${index}`} className="h-10 p-1" />
@@ -314,15 +339,15 @@ export default function CalendarSelector({
           </div>
 
           {/* Right panel - Time slots (only shown when a date is selected) */}
-          <div className="py-6 px-3">
+          <div className="py-6 px-3  ">
             {showTimeColumn && selectedDate ? (
-              <div className="w-full md:w-52 flex-shrink-0 flex flex-col gap-4 h-full">
+              <div className="w-full md:w-52 flex-shrink-0 flex flex-col gap-4 h-full ">
                 <div>
-                  <h3 className="text-lg font-medium text-slate-800 mb-4">
+                  <h3 className="text-lg font-medium text-slate-800 mb-4 ">
                     {formattedSelectedDate}
                   </h3>
 
-                  <div className="space-y-2 px-2 overflow-y-auto max-h-80">
+                  <div className="space-y-2 px-2 overflow-y-auto max-h-80 ">
                     {mockTimesByDay[format(selectedDate, "d")]?.map((time) => {
                       const isPastTime = isBefore(
                         parseISO(
@@ -331,7 +356,7 @@ export default function CalendarSelector({
                         new Date()
                       );
 
-                      const timeButtonClasses = `cursor-pointer w-full py-2 border rounded-md text-center font-medium ${
+                      const timeButtonClasses = `cursor-pointer w-full py-2 border border-primary rounded-md text-center font-medium ${
                         selectedTime === time
                           ? "border-primary text-priamry bg-primary/10 border-2"
                           : "border-gray-300 text-gray-700 hover:border-gray-400"

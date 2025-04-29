@@ -5,10 +5,11 @@ import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import CalendarSelector from "./calender-selector";
 
-export default function CalendarModal({ buttonText = "Try Lena Now" }) {
+export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isBookingComplete, setIsBookingComplete] = useState(false);
   const [bookingData, setBookingData] = useState(null);
+ 
 
   const openModal = () => {
     setIsOpen(true);
@@ -21,6 +22,7 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
   const handleBookingComplete = (data) => {
     setBookingData(data);
     setIsBookingComplete(true);
+    
 
     console.log("Booking Data:", data);
   };
@@ -39,14 +41,14 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
 
   const modalContent = (
     <div
-      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-300 ${
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-300  ${
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
       onClick={closeModal}
     >
       {/* Modal content */}
       <div
-        className={`bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto transition-all duration-300 ${
+        className={`bg-white  rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto transition-all  duration-300 ${
           isOpen ? "scale-100" : "scale-95"
         }`}
         onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
@@ -54,7 +56,7 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
         {/* Close button */}
         <button
           onClick={closeModal}
-          className="absolute top-3 right-3 p-2 rounded-full hover:bg-gray-100 text-gray-500 z-10"
+          className="absolute top-1 right-2 p-2 rounded-full text-gray-500 z-10 "
         >
           <X className="h-5 w-5" />
           <span className="sr-only">Close</span>
@@ -62,7 +64,7 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
 
         {isBookingComplete ? (
           // Booking confirmation screen
-          <div className="p-8 text-center">
+          <div className="p-8 text-center ">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-green-500"
@@ -101,7 +103,7 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
           </div>
         ) : (
           // Calendar component
-          <CalendarSelector onBookingComplete={handleBookingComplete} />
+          <CalendarSelector onBookingComplete={handleBookingComplete}  />
         )}
       </div>
     </div>
@@ -112,11 +114,11 @@ export default function CalendarModal({ buttonText = "Try Lena Now" }) {
       {/* Button to open the modal */}
       <button
         onClick={openModal}
-        className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
+        className={` ${style}  `}
       >
         {buttonText}
       </button>
-
+       
       {/* Render modal in a portal */}
       {typeof window !== "undefined" &&
         createPortal(modalContent, document.body)}

@@ -63,7 +63,7 @@ const DataInsights = () => {
           <p className="text-lg text-gray-700 mb-2">
             Lena is here to solve these challenges.
           </p>
-          <CalendarModal  />
+          <CalendarModal style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"}  />
         </div>
       </div>
     </section>

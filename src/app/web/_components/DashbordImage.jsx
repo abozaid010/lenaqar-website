@@ -62,7 +62,7 @@ export default function DashboardImage() {
               </div>
             ))}
 
-            <CalendarModal />
+            <CalendarModal style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} />
           </div>
 
           {/* App Preview Image */}

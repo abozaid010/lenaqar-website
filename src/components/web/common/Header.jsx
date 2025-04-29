@@ -8,6 +8,7 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import CalendarModal from "@/components/ui/calendar-modal";
 
 const Header = () => {
   const { t } = useI18n();
@@ -128,10 +129,11 @@ const Header = () => {
                 {t.header.clientDashboard}
               </Link>
               <Link href="" className="hover:text-blue-200 transition-colors">
-                {t.header.jobOpportunities}
+              <CalendarModal buttonText={"Request Demo"} />
               </Link>
               <Link href="" className="hover:text-blue-200 transition-colors">
                 {t.header.allProperties}
+               
               </Link>
             </nav>
 
