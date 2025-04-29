@@ -1,9 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { deleteUnit } from "@/components/services/serviceFetching";
 import AddUnitButton from "./add-unit-button";
-import toast from "react-hot-toast";
+import DeleteUnitBtn from "./delete-unit-btn";
 
 export default function UnitPageHeader({ unit, compounds, developers }) {
   const router = useRouter();
@@ -12,41 +11,13 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
     router.push(`/units`);
   };
 
-  const handleDeleteUnit = async () => {
-    toast(
-      <div className="flex flex-col gap-4 text-black rounded-md">
-        <p>Are you sure you want to delete this unit?</p>
-        <div className="flex gap-2">
-          <button
-            className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md"
-            onClick={() => {
-              deleteUnit(unit.unitId);
-              toast.dismiss();
-              router.push(`/units`);
-            }}
-          >
-            Delete
-          </button>
-          <button
-            className="bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md"
-            onClick={() => {
-              toast.dismiss();
-            }}
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    );
-  };
-
   return (
-    <div className="p-6 border-b flex justify-between items-center">
+    <div className="py-6 px-4 border-b flex justify-between items-center">
       <div>
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className="text-2xl font-bold text-gray-800">
           {unit?.unitTitle || ""}
         </h1>
-        <div className="flex flex-wrap gap-2 mt-2">
+        <div className="flex flex-wrap gap-2">
           <p className="text-gray-600">
             {unit.buildingType}
             {unit.buildingType ? " in " : ""}
@@ -54,8 +25,8 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
           </p>
         </div>
       </div>
-      <div className="flex gap-4">
-        {/* Back button that preserves pagination */}
+
+      <div className="flex gap-2">
         <button
           onClick={handleBackToUnits}
           className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-md flex items-center"
@@ -82,12 +53,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
           developers={developers}
         />
 
-        <button
-          onClick={handleDeleteUnit}
-          className="cursor-pointer bg-red-500 text-white px-4 py-2 rounded-md"
-        >
-          Delete Unit
-        </button>
+        <DeleteUnitBtn unitId={unit.unitId} />
       </div>
     </div>
   );

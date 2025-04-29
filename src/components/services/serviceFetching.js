@@ -81,9 +81,7 @@ export async function updateUnitRent(unit) {
 
 export async function deleteUnit(id) {
   try {
-    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`, {
-
-    });
+    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);
     return response.data;
   } catch (error) {
     console.error("Failed to delete unit:", error.message);
@@ -101,7 +99,7 @@ export async function fetchUsersData(searchParams) {
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, { params });
-    
+
     return response.data;
 
   } catch (error) {
