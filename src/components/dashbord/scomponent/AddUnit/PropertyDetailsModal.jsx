@@ -13,6 +13,7 @@ import {
   User,
   Phone,
 } from "lucide-react";
+import formatDateForDisplay from "@/utils/formateDate";
 
 const PropertyDetailsModal = ({ onClose, property }) => {
   const reformatPropertyData = () => {
@@ -172,9 +173,10 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                     <Calendar className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-xs text-gray-500">Delivery Year</p>
+                    <p className="text-xs text-gray-500">Delivery Date</p>
                     <p className="text-sm font-medium">
-                      {formattedProperty.deliveryDate || "-----"}
+                      {/* { new Date(formattedProperty.deliveryDate).toLocaleDateString() || "-----"} */}
+                      {formatDateForDisplay(formattedProperty.deliveryDate , true) || "-----"}
                     </p>
                   </div>
                 </div>

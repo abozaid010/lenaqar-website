@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import NewActionForm from "./new-action-form";
+import formatDateForDisplay from "@/utils/formateDate";
 
 const NOPREFRERED_TIME = [
   "Qualified lead",
@@ -42,25 +43,16 @@ export default function ActionsModal({ actions, onClose, userId }) {
                       </div>
                     </div>
 
-                    <small className="text-gray-500 font-medium">
-                      {new Date(a.created_at).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
+                    <small className="text-gray-500 font-medium ">
+                     
+                      {formatDateForDisplay(a.created_at,true)}
                     </small>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
-
-                  {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
+                    
+                  {!NOPREFRERED_TIME.includes(a.action) && a.created_at && (
                     <small className="underline text-xs text-green-600 font-medium">
-                      {new Date(a.meeting_time).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                       {formatDateForDisplay(a.created_at)}
                     </small>
                   )}
                 </div>
