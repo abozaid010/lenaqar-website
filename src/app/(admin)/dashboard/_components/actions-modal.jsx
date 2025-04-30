@@ -49,10 +49,10 @@ export default function ActionsModal({ actions, onClose, userId }) {
                     </small>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
-                    
-                  {!NOPREFRERED_TIME.includes(a.action) && a.created_at && (
+                    {console.log(a)}
+                  {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
                     <small className="underline text-xs text-green-600 font-medium">
-                       {formatDateForDisplay(a.created_at)}
+                       {formatDateForDisplay(a.meeting_time)}
                     </small>
                   )}
                 </div>

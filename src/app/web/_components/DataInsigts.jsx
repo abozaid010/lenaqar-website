@@ -10,14 +10,14 @@ const DataInsights = () => {
   return (
     <section className="max-w-[85%] w-full mx-auto">
       <div className="bg-white overflow-hidden mt-4">
-        <div className="flex flex-col items-center lg:flex-row space-x-10">
+        <div className="flex flex-col items-center lg:flex-row space-x-10 justify-between">
           {/* Image Side (Left) */}
-          <div className="lg:w-1/2 relative min-h-[300px] shadow-sm border border-gray-50">
+          <div className="lg:w-1/3 relative min-h-[300px] ">
             <Image
               src={"/images/sad  woman.png"}
               alt={t.dataInsights.imageAlt}
               fill
-              className=" rounded-2xl"
+              className=" w-full"
             />
           </div>
           

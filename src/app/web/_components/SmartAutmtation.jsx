@@ -19,9 +19,9 @@ const SalesManagerSection = () => {
         </div>
       </section>
       <div className="bg-white overflow-hidden mt-4">
-        <div className="flex flex-col items-center lg:flex-row space-x-10">
+        <div className="flex flex-col items-center lg:flex-row space-x-10 justify-between">
           {/* Content Side (Right) */}
-          <div className="lg:py-12 lg:w-1/2 flex flex-col justify-center">
+          <div className="lg:py-12 lg:w-1/2 flex flex-col justify-center ">
             <h2 className="text-3xl md:text-2xl font-bold text-gray-800 mb-6">
               {t.salesManager.haniTitle}
             </h2>
@@ -56,12 +56,12 @@ const SalesManagerSection = () => {
             </ul>
           </div>
           {/* Image Side (Left) */}
-          <div className="lg:w-1/2 relative min-h-[300px] shadow-sm">
+          <div className="lg:w-1/3 relative min-h-[300px] ">
             <Image
               src={"/images/sad man.png"}
               alt={t.salesManager.imageAlt}
               fill
-              className=" w-full rounded-2xl  border border-gray-50 "
+              className=" w-full  "
             />
           </div>
         </div>
