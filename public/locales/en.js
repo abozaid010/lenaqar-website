@@ -21,7 +21,8 @@ export default {
       "cancel": "Cancel",
       "confirm": "Logout"
     },
-    "logoutSuccess": "Logout Successful"
+    "logoutSuccess": "Logout Successful",
+    "sendMessage":"support",
   },
   welcome: "Welcome",
   dashboard: "Dashboard",
@@ -102,7 +103,9 @@ export default {
     },
     "contact": {
       "title": "Contact Details",
-      "phone": "Contact info: 01016080323"
+      "phone": "Contact info: ",
+      "sales":"Sales",
+      "support":"Support",
     },
     "connect": {
       "title": "Connect With Us",

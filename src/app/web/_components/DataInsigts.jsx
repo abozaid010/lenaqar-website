@@ -12,12 +12,12 @@ const DataInsights = () => {
       <div className="bg-white overflow-hidden mt-4">
         <div className="flex flex-col items-center lg:flex-row space-x-10">
           {/* Image Side (Left) */}
-          <div className="lg:w-1/2 relative min-h-[300px]">
+          <div className="lg:w-1/2 relative min-h-[300px] shadow-sm border border-gray-50">
             <Image
-              src={"/images/Image 85.png"}
+              src={"/images/sad  woman.png"}
               alt={t.dataInsights.imageAlt}
               fill
-              className="object-cover rounded-2xl"
+              className=" rounded-2xl"
             />
           </div>
           

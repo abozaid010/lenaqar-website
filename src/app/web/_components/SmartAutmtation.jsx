@@ -56,12 +56,12 @@ const SalesManagerSection = () => {
             </ul>
           </div>
           {/* Image Side (Left) */}
-          <div className="lg:w-1/2 relative min-h-[300px]">
+          <div className="lg:w-1/2 relative min-h-[300px] shadow-sm">
             <Image
-              src={"/images/careers2.png"}
+              src={"/images/sad man.png"}
               alt={t.salesManager.imageAlt}
               fill
-              className="object-cover rounded-2xl"
+              className=" w-full rounded-2xl  border border-gray-50 "
             />
           </div>
         </div>

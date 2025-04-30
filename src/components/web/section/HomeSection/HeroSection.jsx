@@ -132,7 +132,7 @@ const HeroSection = () => {
                 }}
               >
                 <Image
-                  src={"/images/AdobeStock_241732873_Preview.jpeg"}
+                  src={"/images/happy man.png"}
                   alt={t.heroSection.aiImageAlt}
                   fill
                   className="object-cover"

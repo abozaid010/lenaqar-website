@@ -20,7 +20,10 @@ export default {
       "cancel": "إلغاء",
       "confirm": "تسجيل الخروج"
     },
-    "logoutSuccess": "تم تسجيل الخروج بنجاح"
+    "logoutSuccess": "تم تسجيل الخروج بنجاح",
+    "sendMessage": "تحتاج مساعده"
+
+
   },
   welcome: "مرحبا",
   dashboard: "لوحة التحكم",
@@ -101,7 +104,9 @@ export default {
     },
     "contact": {
       "title": "بيانات الاتصال",
-      "phone": "معلومات الاتصال: 01016080323"
+      "phone": "معلومات الاتصال: ",
+      "sales":"مبيعات",
+      "support":"دعم",
     },
     "connect": {
       "title": "تواصل معنا",

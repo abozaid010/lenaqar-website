@@ -9,6 +9,8 @@ import {
   Menu,
   LogOut,
   Settings,
+  HelpCircle,
+  
 } from "lucide-react";
 import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
 import Cookies from "js-cookie";
@@ -45,6 +47,12 @@ const Header = ({ clientName }) => {
     setIsUserMenuOpen(false);
   };
 
+  const sendMessageWhatsApp = () => {
+    const phoneNumber = "201016080323"; // مصر: أضف 20 بدلًا من +20
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank");
+  };
+
   const cancelLogout = () => {
     setShowLogoutConfirm(false);
   };
@@ -57,8 +65,11 @@ const Header = ({ clientName }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm p-4 flex justify-between items-center mt-2 md:mt-0">
-      <div className="flex items-center gap-3">
+    <header className="bg-white shadow-sm  p-4 flex justify-between items-center  mt-2 md:mt-0">
+      <div className="flex justify-center px-6">
+      
+      </div>
+      <div className="flex items-center gap-3 ">
         <div className="block lg:hidden">
           <button
             className="p-1 rounded-md hover:bg-gray-100"
@@ -73,7 +84,14 @@ const Header = ({ clientName }) => {
         </div>
       </div>
 
-      <div className="flex items-center space-x-2 sm:space-x-4">
+      <div className="flex items-center space-x-2 sm:space-x-4  ">
+      <button
+          onClick={sendMessageWhatsApp}
+          className="flex items-center gap-2 bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
+        >
+          <HelpCircle  size={20} />
+          <span>{t.header.sendMessage}</span>
+        </button>
         <LanguageSwitcher />
 
         <div className="relative hidden sm:block">
@@ -89,7 +107,7 @@ const Header = ({ clientName }) => {
           </button>
         </div>
 
-        <div className="relative" ref={userMenuRef}>
+        <div className="relative " ref={userMenuRef}>
           <button
             className="flex items-center focus:outline-none"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -103,7 +121,7 @@ const Header = ({ clientName }) => {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200 overflow-hidden">
+            <div className="absolute  right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 relative">
                 <button
                   onClick={() => setIsUserMenuOpen(false)}
@@ -131,10 +149,11 @@ const Header = ({ clientName }) => {
             </div>
           )}
         </div>
+        
       </div>
 
       {showLogoutConfirm && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="fixed inset-0  bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               {t.header.logoutConfirm.title}
@@ -156,6 +175,7 @@ const Header = ({ clientName }) => {
                 {t.header.logoutConfirm.confirm}
               </button>
             </div>
+            
           </div>
         </div>
       )}
