@@ -9,6 +9,8 @@ import {
 } from "@/components/services/serviceFetching";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
+
 // Import Swiper components and styles
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Thumbs } from "swiper/modules";
@@ -27,7 +29,8 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page") || "1";
-
+  
+  const { t } = useI18n();
   // Check if the unit is for rent
   const isRent = updatedUnit?.purpose?.toLowerCase() === "rent";
 
@@ -42,7 +45,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   const handleDeleteUnit = async () => {
     toast(
       <div className="flex flex-col gap-4 text-black rounded-md">
-        <p>Are you sure you want to delete this unit?</p>
+        <p>{t("unitDetails.deleteConfirmation")}</p>
         <div className="flex gap-2">
           <button
             className="bg-red-500 cursor-pointer text-white px-4 py-2 rounded-md"
@@ -52,7 +55,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               router.push(`/units`);
             }}
           >
-            Delete
+            {t("unitDetails.delete")}
           </button>
           <button
             className="bg-gray-500 cursor-pointer text-white px-4 py-2 rounded-md"
@@ -60,7 +63,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               toast.dismiss();
             }}
           >
-            Cancel
+            {t("unitDetails.cancel")}
           </button>
         </div>
       </div>
@@ -75,7 +78,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
     }
 
     setIsUpdateModalOpen(false);
-    toast.success("Unit updated successfully");
+    toast.success(t("unitDetails.updateSuccess"));
     router.push(`/units/${unit.unitId}`);
   };
 
@@ -146,7 +149,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <p className="text-gray-500 text-lg">No images available</p>
+                <p className="text-gray-500 text-lg">{t("unitDetails.noImages")}</p>
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -165,7 +168,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                   />
                 </svg>
-                <span>Click to view in fullscreen</span>
+                <span>{t.unitDetails.viewFullscreen}</span>
               </div>
             </div>
           </div>
@@ -208,7 +211,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             </Swiper>
           ) : (
             <div className="text-center p-4 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No thumbnail images available</p>
+              <p className="text-gray-500">{t("unitDetails.noThumbnails")}</p>
             </div>
           )}
         </div>
@@ -243,14 +246,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                             />
                           </svg>
-                          Daily Rate
+                          {t.unitDetails.dailyRate}
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
                           {updatedUnit.rentDurationType.daily?.totalPrice >
                             0 && (
                             <div className="col-span-2">
                               <p className="text-gray-500 text-sm">
-                                Total Price
+                                {t.unitDetails.totalPrice}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -265,7 +268,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Security Deposit
+                                {t.unitDetails.securityDeposit}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -280,7 +283,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Service Fee
+                                {t("unitDetails.serviceFee")}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -295,7 +298,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Cleaning Fee
+                                {t("unitDetails.cleaningFee")}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -328,14 +331,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                               d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                             />
                           </svg>
-                          Weekly Rate
+                          {t.unitDetails.weeklyRate}
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
                           {updatedUnit.rentDurationType.weekly?.totalPrice >
                             0 && (
                             <div className="col-span-2">
                               <p className="text-gray-500 text-sm">
-                                Total Price
+                                {t.unitDetails.totalPrice}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -350,7 +353,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             ?.securityDeposit > 0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Security Deposit
+                                {t("unitDetails.securityDeposit")}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -365,7 +368,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Service Fee
+                                {t("unitDetails.serviceFee")}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -380,7 +383,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Cleaning Fee
+                                {t.unitDetails.cleaningFee}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -413,14 +416,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                             />
                           </svg>
-                          Monthly Rate
+                          {t.unitDetails.monthlyRate}
                         </h3>
                         <div className="mt-2 grid grid-cols-2 gap-2">
                           {updatedUnit.rentDurationType.monthly?.totalPrice >
                             0 && (
                             <div className="col-span-2">
                               <p className="text-gray-500 text-sm">
-                                Total Price
+                                {t.unitDetails.totalPrice}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -435,7 +438,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             ?.securityDeposit > 0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Security Deposit
+                                {t.unitDetails.securityDeposit}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -450,7 +453,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Service Fee
+                                {t("unitDetails.serviceFee")}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -465,7 +468,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                             0 && (
                             <div>
                               <p className="text-gray-500 text-sm">
-                                Cleaning Fee
+                                {t.unitDetails.cleaningFee}
                               </p>
                               <p className="font-medium text-gray-800">
                                 {formatCurrency(
@@ -484,14 +487,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
                 {updatedUnit?.availabilityDate && (
                   <p className="text-gray-600 mt-4">
-                    Available from: {formatDate(updatedUnit?.availabilityDate)}
+                    {t.unitDetails.availableFrom} {formatDate(updatedUnit?.availabilityDate)}
                   </p>
                 )}
 
                 {updatedUnit?.amenities && updatedUnit.amenities.length > 0 ? (
                   <div className="mt-3">
                     <p className="font-semibold text-gray-700 mb-2">
-                      Amenities:
+                      {t.unitDetails.amenities}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {updatedUnit.amenities.map((amenity, index) => (
@@ -507,9 +510,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                 ) : (
                   <div className="mt-3">
                     <p className="font-semibold text-gray-700 mb-2">
-                      Amenities:
+                      {t.unitDetails.amenities}
                     </p>
-                    <p className="text-gray-500">No amenities specified</p>
+                    <p className="text-gray-500">{t.unitDetails.noAmenities}</p>
                   </div>
                 )}
               </>
@@ -538,7 +541,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {updatedUnit?.deliveryDate && (
                     <div>
-                      <p className="text-gray-600">Delivery Date:</p>
+                      <p className="text-gray-600">{t.unitDetails.deliveryDate}</p>
                       <p className="font-semibold">
                         {formatDate(updatedUnit?.deliveryDate)}
                       </p>
@@ -546,7 +549,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                   )}
                   {updatedUnit?.deliveryStatus && (
                     <div>
-                      <p className="text-gray-600">Delivery Status:</p>
+                      <p className="text-gray-600">{t.unitDetails.deliveryStatus}</p>
                       <p className="font-semibold">
                         {updatedUnit?.deliveryStatus}
                       </p>
@@ -560,7 +563,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           <div className="grid grid-cols-2 gap-4">
             {updatedUnit.roomsCount && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Rooms</p>
+                <p className="text-gray-600">{t.unitDetails.rooms}</p>
                 <p className="font-semibold">
                   {formatValue(updatedUnit.roomsCount)}
                 </p>
@@ -568,7 +571,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.bathroomCount && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Bathrooms</p>
+                <p className="text-gray-600">{t.unitDetails.bathrooms}</p>
                 <p className="font-semibold">
                   {formatValue(updatedUnit.bathroomCount)}
                 </p>
@@ -576,7 +579,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.floor && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Floor</p>
+                <p className="text-gray-600">{t.unitDetails.floor}</p>
                 <p className="font-semibold">
                   {formatValue(updatedUnit.floor)}
                 </p>
@@ -584,19 +587,19 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.view && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">View</p>
+                <p className="text-gray-600">{t.unitDetails.view}</p>
                 <p className="font-semibold">{formatValue(updatedUnit.view)}</p>
               </div>
             )}
             {updatedUnit.city && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">City</p>
+                <p className="text-gray-600">{t.unitDetails.city}</p>
                 <p className="font-semibold">{formatValue(updatedUnit.city)}</p>
               </div>
             )}
             {updatedUnit.country && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Country</p>
+                <p className="text-gray-600">{t.unitDetails.country}</p>
                 <p className="font-semibold">
                   {formatValue(updatedUnit.country)}
                 </p>
@@ -604,7 +607,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.purpose && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Purpose</p>
+                <p className="text-gray-600">{t.unitDetails.purpose}</p>
                 <p className="font-semibold">
                   <span
                     className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
@@ -620,7 +623,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.buildingType && (
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-600">Building Type</p>
+                <p className="text-gray-600">{t.unitDetails.buildingType}</p>
                 <p className="font-semibold">
                   {formatValue(updatedUnit.buildingType)}
                 </p>
@@ -632,7 +635,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           <div className="space-y-4">
             {updatedUnit.finishing && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Finishing</span>
+                <span className="text-gray-600">{t.unitDetails.finishing}</span>
                 <span className="font-semibold">
                   {formatValue(updatedUnit.finishing)}
                 </span>
@@ -640,7 +643,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.landArea > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Land Area</span>
+                <span className="text-gray-600">{t.unitDetails.landArea}</span>
                 <span className="font-semibold">
                   {formatValue(updatedUnit.landArea, "m²")}
                 </span>
@@ -648,7 +651,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.gardenSize > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">Garden Size</span>
+                <span className="text-gray-600">{t.unitDetails.gardenSize}</span>
                 <span className="font-semibold">
                   {formatValue(updatedUnit.gardenSize, "m²")}
                 </span>
@@ -664,7 +667,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             updatedUnit.city ||
             updatedUnit.country) && (
             <div>
-              <h3 className="font-semibold text-gray-800">Location</h3>
+              <h3 className="font-semibold text-gray-800">{t.unitDetails.location}</h3>
               <p className="text-gray-600">
                 {updatedUnit.compound ? updatedUnit.compound : ""}
                 {updatedUnit.compound && updatedUnit.city ? ", " : ""}
@@ -679,7 +682,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           )}
           {updatedUnit.developer && (
             <div>
-              <h3 className="font-semibold text-gray-800">Developer</h3>
+              <h3 className="font-semibold text-gray-800">{t.unitDetails.developer}</h3>
               <p className="text-gray-600">{updatedUnit.developer}</p>
             </div>
           )}
@@ -702,7 +705,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
         <div className="fixed inset-0 bg-black z-50 flex flex-col">
           <div className="flex justify-between items-center p-4">
             <div className="text-white text-lg font-medium">
-              {updatedUnit.unitTitle || "Unit"} - Image Gallery
+              {updatedUnit.unitTitle || "Unit"} - {t("unitDetails.galleryTitle")}
             </div>
             <button
               onClick={closeFullscreenGallery}
@@ -756,7 +759,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               ) : (
                 <SwiperSlide className="flex items-center justify-center">
                   <div className="text-white text-center">
-                    <p className="text-xl">No images available</p>
+                    <p className="text-xl">{t.unitDetails.noImages}</p>
                   </div>
                 </SwiperSlide>
               )}
@@ -765,11 +768,14 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           <div className="p-4 flex justify-between items-center bg-black bg-opacity-50 backdrop-blur-sm">
             <div className="text-white">
               {updatedUnit.images && updatedUnit.images.length > 0
-                ? `Image ${mainImageIndex + 1} of ${updatedUnit.images.length}`
-                : "No images"}
+                ? t("unitDetails.imageCounter", {
+                    current: mainImageIndex + 1,
+                    total: updatedUnit.images.length
+                  })
+                : t("unitDetails.noImages")}
             </div>
             <div className="text-white text-sm">
-              Use arrow keys or swipe to navigate
+              {t.unitDetails.galleryNavigation}
             </div>
           </div>
         </div>

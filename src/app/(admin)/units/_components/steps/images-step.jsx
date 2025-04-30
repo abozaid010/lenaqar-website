@@ -3,6 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 import {
   deleteImage,
@@ -19,6 +20,7 @@ export default function ImagesStep({
   setInvalidFields = () => {},
 }) {
   const fileInputRef = useRef(null);
+  const { t } = useI18n();
 
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -68,9 +70,7 @@ export default function ImagesStep({
 
   const handleFiles = (files) => {
     if (selectedImages.length + uploadedImages.length + files.length > 8) {
-      toast.error(
-        "You can only upload a maximum of 8 images. Please remove some images before adding new ones."
-      );
+      toast.error(t.maxImagesError);
       return;
     }
 
@@ -83,15 +83,13 @@ export default function ImagesStep({
         !file.type.match("image/png") &&
         !file.type.match("image/webp")
       ) {
-        toast.error(
-          "Invalid file type. Please upload JPG, PNG, or WEBP images."
-        );
+        toast.error(t.invalidFileType);
         return;
       }
 
       // Check file size
       if (file.size > 5 * 1024 * 1024) {
-        toast.error("File size exceeds 5MB. Please upload smaller images.");
+        toast.error(t.fileSizeExceeds);
         return;
       }
 
@@ -141,7 +139,7 @@ export default function ImagesStep({
       } catch (error) {
         newUploadStatus[image.id] = "error";
         failedUploads.push(image.id);
-        toast.error(`Failed to upload image ${image.name}:`, error.message);
+        toast.error(`${t.failedToUploadImage} ${image.name}:`, error.message);
       }
 
       setUploadStatus({ ...newUploadStatus });
@@ -182,9 +180,9 @@ export default function ImagesStep({
       updateFormData({ images: newUploadedImages });
 
       await deleteImage(id);
-      toast.success("Image deleted successfully");
+      toast.success(t.imageDeletedSuccess);
     } catch (error) {
-      toast.error("Failed to delete image. Please try again.");
+      toast.error(t.failedToDeleteImage);
     }
   };
 
@@ -206,7 +204,7 @@ export default function ImagesStep({
   return (
     <div>
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
-        Additional Details
+        {t.additionalDetails}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -219,7 +217,7 @@ export default function ImagesStep({
                 : "text-gray-700"
             }`}
           >
-            Finishing Type <span className="text-red-500">*</span>
+            {t.finishingType} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -232,19 +230,19 @@ export default function ImagesStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select finishing type</option>
+              <option value="">{t.selectFinishingType}</option>
               {formData.purpose === "rent" ? (
                 <>
-                  <option value="furnished">Furnished</option>
-                  <option value="unfurnished">Unfurnished</option>
+                  <option value="furnished">{t.furnished}</option>
+                  <option value="unfurnished">{t.unfurnished}</option>
                 </>
               ) : (
                 <>
-                  <option value="fully finished">Fully Finished</option>
-                  <option value="semi finished">Semi Finished</option>
-                  <option value="core & shell">Core & Shell</option>
-                  <option value="furnished">Furnished</option>
-                  <option value="unfurnished">Unfurnished</option>
+                  <option value="fully finished">{t.fullyFinished}</option>
+                  <option value="semi finished">{t.semiFinished}</option>
+                  <option value="core & shell">{t.coreAndShell}</option>
+                  <option value="furnished">{t.furnished}</option>
+                  <option value="unfurnished">{t.unfurnished}</option>
                 </>
               )}
             </select>
@@ -273,7 +271,7 @@ export default function ImagesStep({
                 : "text-gray-700"
             }`}
           >
-            Developer <span className="text-red-500">*</span>
+            {t.developer} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -286,7 +284,7 @@ export default function ImagesStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select developer</option>
+              <option value="">{t.selectDeveloper}</option>
               {developersSet.map((d, idx) => (
                 <option key={idx} value={d}>
                   {d}
@@ -307,15 +305,12 @@ export default function ImagesStep({
               </svg>
             </div>
           </div>
-          {/* <button className="absolute right-0 top-0 text-blue-600 text-sm font-medium">
-            + Add New
-          </button> */}
         </div>
       </div>
 
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
-        Property Images{" "}
-        <span className="text-sm font-normal text-gray-500">(Maximum 8)</span>
+        {t.propertyImages}{" "}
+        <span className="text-sm font-normal text-gray-500">({t.maximum} 8)</span>
       </h3>
 
       {/* Image Upload Area - Entire area is clickable */}
@@ -354,10 +349,10 @@ export default function ImagesStep({
             />
           </svg>
           <p className="text-lg text-gray-700 mb-2">
-            Click or drag and drop images here
+            {t.clickOrDragAndDrop}
           </p>
           <p className="text-sm text-gray-500">
-            Supported formats: JPG, PNG, WEBP (Max 5MB each)
+            {t.supportedFormats}
           </p>
         </div>
 
@@ -380,12 +375,11 @@ export default function ImagesStep({
               {isUploading ? (
                 <>
                   <Loader2 size={24} className="animate-spin" />
-                  Uploading...
+                  {t.uploading}
                 </>
               ) : (
                 <>
-                  Upload {selectedImages.length} Selected Image
-                  {selectedImages.length > 1 ? "s" : ""}
+                  {t.upload} {selectedImages.length} {selectedImages.length > 1 ? t.selectedImages : t.selectedImage}
                 </>
               )}
             </button>
@@ -395,12 +389,12 @@ export default function ImagesStep({
 
       {/* Image Preview */}
       <div className="mt-4">
-        <p className="text-sm text-gray-500">{totalImagesCount}/8 images</p>
+        <p className="text-sm text-gray-500">{totalImagesCount}/8 {t.images}</p>
 
         {/* Selected Images (not yet uploaded) */}
         {selectedImages.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-lg font-medium mb-2">Selected Images:</h4>
+            <h4 className="text-lg font-medium mb-2">{t.selectedImagesTitle}</h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
               {selectedImages.map((image) => (
                 <div key={image.id} className="relative group">
@@ -483,7 +477,7 @@ export default function ImagesStep({
                               }}
                               className="bg-white text-red-500 text-xs font-medium py-1 px-2 rounded"
                             >
-                              Retry
+                              {t.retry}
                             </button>
                           </div>
                         )}
@@ -524,7 +518,7 @@ export default function ImagesStep({
         {/* Uploaded Images */}
         {uploadedImages.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-lg font-medium mb-2">Uploaded Images:</h4>
+            <h4 className="text-lg font-medium mb-2">{t.uploadedImagesTitle}</h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {uploadedImages.map((image) => (
                 <div key={image.fileId} className="relative group">

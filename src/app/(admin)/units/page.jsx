@@ -6,12 +6,15 @@ import {
 import UnitsGrid from "./_components/units-grid";
 import UnitsFilter from "./_components/units-filter";
 import UnitsSearch from "./_components/units-search";
-
+import { useI18n } from "@/context/translate-api";
 import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
+import IdentifierUnit from "./_components/IdentifierUnit";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
+ 
+  
   const clientName = JSON.parse(
     cookieStore.get("client_info")?.value
   )?.client_name;
@@ -30,7 +33,9 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const clientName = JSON.parse(
     cookieStore.get("client_info")?.value
   )?.client_name;
-
+  const lang =cookieStore.get("lang").value
+  console.log(useI18n)
+ 
   const [unitsResponse, developers, compounds] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams)),
     fetchDevelopers(),
@@ -42,12 +47,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   return (
     <div className="container mx-auto">
       <div className="mb-8 flex items-start justify-between gap-2">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            Real Estate Properties
-          </h1>
-          <p className="text-gray-600 mt-1">Explore our exclusive listings</p>
-        </div>
+       <IdentifierUnit />
 
         <AddUnitButton
           clientId={clientId}

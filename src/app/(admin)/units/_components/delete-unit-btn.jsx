@@ -6,10 +6,12 @@ import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/context/translate-api";
 
 export default function DeleteUnitBtn({ unitId }) {
   const modalRef = useRef(null);
   const router = useRouter();
+  const { t } = useI18n();
 
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,6 +21,7 @@ export default function DeleteUnitBtn({ unitId }) {
       setIsOpen(false);
     }
   };
+
   const handleDeleteUnit = async () => {
     setLoading(true);
     try {
@@ -26,11 +29,11 @@ export default function DeleteUnitBtn({ unitId }) {
       if (response.code === 200) {
         router.push("/units");
       } else {
-        toast.error("Failed to delete unit. Please try again.");
+        toast.error(t("unitPage.deleteFail"));
       }
       setIsOpen(false);
     } catch (error) {
-      toast.error("An error occurred while deleting the unit.");
+      toast.error(t("unitPage.deleteError"));
     } finally {
       setLoading(false);
     }
@@ -43,7 +46,7 @@ export default function DeleteUnitBtn({ unitId }) {
         className="cursor-pointer bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
       >
         <span className="flex items-center gap-2">
-          <Trash2Icon size={18} /> Delete Unit
+          <Trash2Icon size={18} /> {t.unitPage.deleteUnit}
         </span>
       </button>
 
@@ -57,14 +60,16 @@ export default function DeleteUnitBtn({ unitId }) {
               ref={modalRef}
               className="bg-white rounded-lg shadow-xl max-w-md w-full p-6"
             >
-              <h2 className="text-lg font-semibold mb-4">Delete Unit</h2>
-              <p>Are you sure you want to delete this unit?</p>
-              <div className="flex justify-end mt-4">
+              <h2 className="text-lg font-semibold mb-4">
+                {t.unitPage.deleteUnit}
+              </h2>
+              <p>{t.unitPage.confirmDeleteMsg}</p>
+              <div className="flex justify-end mt-4 gap-2">
                 <button
                   onClick={() => setIsOpen(false)}
                   className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-1 rounded-md mr-2"
                 >
-                  Cancel
+                  {t.unitPage.cancel}
                 </button>
                 <button
                   disabled={loading}
@@ -78,7 +83,7 @@ export default function DeleteUnitBtn({ unitId }) {
                   {loading ? (
                     <Loader2 size={22} className="animate-spin" />
                   ) : (
-                    "Delete"
+                    t.unitPage.delete
                   )}
                 </button>
               </div>

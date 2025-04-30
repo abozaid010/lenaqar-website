@@ -258,7 +258,319 @@ export default {
       "close": "إغلاق"
     },
     "notAvailable": "-----"
+  },
+  identifierUnit: {
+    "title": "الممتلكات العقارية",
+    "subtitle": "تصفح عقاراتنا الحصرية"
+  },
+  unitsFilter: {
+    "allDevelopers": "جميع المطورين",
+    "allCompounds": "جميع المجمعات",
+    "allPurposes": "جميع الأغراض",
+    "purposes": {
+      "buy": "شراء",
+      "rent": "إيجار",
+      "sell": "بيع",
+      "lease": "تأجير"
+    }
+  },
+  unitsSearch: {
+    "placeholder": "ابحث بالاسم أو الموقع...",
+    "clearAriaLabel": "مسح البحث"
+  },
+  units: {
+    "addButton": {
+      "addNew": "إضافة وحدة جديدة",
+      "edit": "تعديل الوحدة"
+    }
+  },
+  modal: {
+    "addNewUnit": "إضافة وحدة جديدة",
+    "editUnit": "تعديل الوحدة"
+  },
+  steps: {
+    "basicDetails": "التفاصيل الأساسية",
+    "financialDetails": "التفاصيل المالية",
+    "rentalDetails": "تفاصيل الإيجار",
+    "imagesInfo": "الصور ومعلومات إضافية"
+  },
+  buttons: {
+    "back": "رجوع",
+    "next": "التالي",
+    "saveUnit": "حفظ الوحدة"
+  },
+  toasts: {
+    "enterValidPrice": "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
+    "uploadImage": "يرجى تحميل صورة واحدة على الأقل.",
+    "selectPurpose": "يرجى تحديد غرض الوحدة (بيع/إيجار)",
+    "errorProcessing": "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
+  },
+  formLabels: {
+    "unitTitle": "عنوان الوحدة",
+    "buildingType": "نوع المبنى",
+    "purpose": "الغرض",
+    "compound": "المجمع",
+    "view": "الإطلالة",
+    "isGated": "مجتمع مغلق",
+    "city": "المدينة",
+    "district": "الحي",
+    "developer": "المطور",
+    "deliveryDate": "تاريخ التسليم",
+    "deliveryStatus": "حالة التسليم",
+    "bathroomCount": "الحمامات",
+    "floor": "الطابق",
+    "roomsCount": "الغرف",
+    "landArea": "مساحة الأرض (م²)",
+    "gardenSize": "مساحة الحديقة (م²)",
+    "finishing": "التشطيب",
+    "garageArea": "مساحة المرآب (م²)",
+    "images": "الصور"
+  },
+  buildingTypes: {
+    "apartment": "شقة",
+    "villa": "فيلا",
+    "townhouse": "تاون هاوس",
+    "duplex": "دوبلكس",
+    "penthouse": "بنتهاوس",
+    "studio": "استوديو",
+    "chalet": "شاليه",
+    "office": "مكتب",
+    "shop": "محل",
+    "land": "أرض"
+  },
+  purpose: {
+    "sell": "بيع",
+    "rent": "إيجار"
+  },
+  view: {
+    "garden": "حديقة",
+    "pool": "مسبح",
+    "sea": "بحر",
+    "landmark": "معلم",
+    "street": "شارع",
+    "other": "أخرى"
+  },
+  deliveryStatus: {
+    "ready": "جاهز",
+    "underConstruction": "تحت الإنشاء",
+    "offPlan": "على المخطط"
+  },
+  finishing: {
+    "finished": "مشطب",
+    "semiFinished": "نصف تشطيب",
+    "core": "هيكل",
+    "unfinished": "غير مشطب"
+  },
+  sale: {
+    "downPayment": "دفعة مقدمة",
+    "totalPrice": "السعر الإجمالي",
+    "deliveryDate": "تاريخ التسليم",
+    "paymentPlans": "خطط الدفع",
+    "addPaymentPlan": "إضافة خطة دفع",
+    "yearsLabel": "السنوات",
+    "priceLabel": "السعر",
+    "maintenanceLabel": "الصيانة"
+  },
+  rental: {
+    "isAvailable": "متاح للإيجار",
+    "availabilityDate": "تاريخ الإتاحة",
+    "rentDuration": "مدة الإيجار",
+    "daily": "يومي",
+    "weekly": "أسبوعي",
+    "monthly": "شهري",
+    "price": "السعر",
+    "securityDeposit": "تأمين",
+    "cleaningFee": "رسوم التنظيف",
+    "serviceFee": "رسوم الخدمة",
+    "amenities": "وسائل الراحة",
+    "currency": "العملة"
+  },
+  basicDetails: {
+    "propertyDetails": "تفاصيل العقار",
+    "propertySpecs": "مواصفات العقار",
+    "unitTitle": "عنوان الوحدة",
+    "compound": "كمبوند",
+    "buildingType": "نوع المبنى",
+    "purpose": "الغرض",
+    "city": "المدينة",
+    "view": "الإطلالة",
+    "district": "الحي",
+    "rooms": "غرف",
+    "bathrooms": "حمامات",
+    "floor": "الدور",
+    "landArea": "مساحة الأرض",
+    "gardenSize": "مساحة الحديقة",
+    "garageArea": "مساحة الجراج",
+    "selectCompound": "اختر كمبوند",
+    "selectPurpose": "اختر الغرض",
+    "selectCity": "اختر المدينة",
+    "selectView": "اختر الإطلالة",
+    "placeholders": {
+      "unitTitle": "أدخل عنوان الوحدة",
+      "district": "اسم الحي"
+    },
+    buildingTypes: {
+      "apartment": "شقة",
+      "villa": "فيلا",
+      "townhouse": "تاون هاوس",
+      "duplex": "دوبلكس",
+      "penthouse": "بنتهاوس",
+      "studio": "استوديو",
+      "chalet": "شاليه",
+      "office": "مكتب",
+      "shop": "محل",
+      "twinhouse": "توين هاوس",
+      "house": "منزل"
+    },
+    purposes: {
+      "sell": "بيع",
+      "rent": "إيجار"
+    },
+    cities: {
+      "cairo": "القاهرة",
+      "alexandria": "الإسكندرية",
+      "giza": "الجيزة",
+      "newCairo": "القاهرة الجديدة",
+      "october6": "السادس من أكتوبر",
+      "elShorouk": "الشروق",
+      "sheikhZayed": "الشيخ زايد"
+    },
+    views: {
+      "park": "حديقة",
+      "street": "شارع",
+      "lagoon": "بحيرة",
+      "sea": "بحر",
+      "city": "مدينة",
+      "river": "نهر",
+      "pool": "حمام سباحة",
+      "golf": "جولف",
+      "garden": "حديقة",
+      "openArea": "منطقة مفتوحة",
+      "mountain": "جبل"
+    }
+  },
+  saleDetails: {
+    "financialDetails": "التفاصيل المالية",
+    "totalPrice": "السعر الإجمالي",
+    "deliveryDate": "تاريخ التسليم",
+    "downPayment": "الدفعة المقدمة",
+    "paymentPlans": "خطط الدفع",
+    "addPlan": "إضافة خطة",
+    "noPlans": "لم يتم إضافة خطط دفع بعد.",
+    "years": "السنوات",
+    "price": "السعر",
+    "maintenance": "الصيانة"
+  },
+  rentalDetails: {
+    "availability": "التوفر",
+    "chooseAvailabilityDate": "اختر تاريخ التوفر",
+    "availableForRent": "متاح للإيجار",
+    "rentDurationOptions": "خيارات مدة الإيجار",
+    "daily": "يومي",
+    "weekly": "أسبوعي",
+    "monthly": "شهري",
+    "price": "السعر",
+    "securityDeposit": "تأمين",
+    "cleaningFee": "رسوم التنظيف",
+    "serviceFee": "رسوم الخدمة",
+    "amenities": "المرافق",
+    "amenities": {
+      "wifi": "واي فاي",
+      "dryer": "مجفف",
+      "air_conditioning": "تكييف هواء",
+      "heating": "تدفئة",
+      "smart_tv": "تلفزيون ذكي",
+      "hair_dryer": "مجفف شعر",
+      "pool": "مسبح",
+      "free_parking": "موقف سيارات مجاني",
+      "ev_charger": "شاحن سيارات كهربائية",
+      "bbq_grill": "شواية",
+      "indoor_fireplace": "موقد داخلي",
+      "smoking_allowed": "التدخين مسموح",
+      "beachfront": "على الشاطئ",
+      "smoke_alarm": "جهاز إنذار الدخان",
+      "co_alarm": "جهاز إنذار أول أكسيد الكربون"
+    }
+  },
+  
+    "additionalDetails": "تفاصيل إضافية",
+    "finishingType": "نوع التشطيب",
+    "developer": "المطور",
+    "selectFinishingType": "اختر نوع التشطيب",
+    "furnished": "مفروش",
+    "unfurnished": "غير مفروش",
+    "fullyFinished": "تشطيب كامل",
+    "semiFinished": "نصف تشطيب",
+    "coreAndShell": "هيكل وقشرة",
+    "selectDeveloper": "اختر المطور",
+    "propertyImages": "صور العقار",
+    "maximum": "الحد الأقصى",
+    "clickOrDragAndDrop": "انقر أو اسحب وأفلت الصور هنا",
+    "supportedFormats": "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل صورة)",
+    "uploading": "جارٍ التحميل...",
+    "upload": "تحميل",
+    "selectedImage": "صورة محددة",
+    "selectedImages": "صور محددة",
+    "images": "صور",
+    "selectedImagesTitle": "الصور المحددة:",
+    "uploadedImagesTitle": "الصور التي تم تحميلها:",
+    "retry": "إعادة المحاولة",
+    "imageDeletedSuccess": "تم حذف الصورة بنجاح",
+    "failedToDeleteImage": "فشل في حذف الصورة. يرجى المحاولة مرة أخرى.",
+    "maxImagesError": "يمكنك تحميل 8 صور كحد أقصى. يرجى إزالة بعض الصور قبل إضافة صور جديدة.",
+    "invalidFileType": "نوع ملف غير صالح. يرجى تحميل صور بصيغة JPG أو PNG أو WEBP.",
+    "fileSizeExceeds": "حجم الملف يتجاوز 5 ميجابايت. يرجى تحميل صور أصغر.",
+    "failedToUploadImage": "فشل في تحميل الصورة"
+  ,
+  unitPage: {
+    "backToUnits": "العودة إلى الوحدات",
+    "in": "في",
+    "deleteUnit": "حذف الوحدة",
+    "confirmDeleteMsg": "هل أنت متأكد أنك تريد حذف هذه الوحدة؟",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "deleteFail": "فشل حذف الوحدة. يرجى المحاولة مرة أخرى.",
+    "deleteError": "حدث خطأ أثناء حذف الوحدة."
+  },
+  unitDetails: {
+    "title": "تفاصيل الوحدة",
+    "noImages": "لا توجد صور متاحة",
+    "noThumbnails": "لا توجد صور مصغرة متاحة",
+    "viewFullscreen": "انقر لعرض الصورة بحجم كامل",
+    "deleteConfirmation": "هل أنت متأكد أنك تريد حذف هذه الوحدة؟",
+    "delete": "حذف",
+    "cancel": "إلغاء",
+    "updateSuccess": "تم تحديث الوحدة بنجاح",
+    "galleryTitle": "معرض الصور",
+    "galleryNavigation": "استخدم مفاتيح الأسهم أو السحب للتنقل",
+    "imageCounter": "الصورة {current} من {total}",
+    "amenities": "المرافق:",
+    "noAmenities": "لا توجد مرافق محددة",
+    "location": "الموقع",
+    "developer": "المطور",
+    "dailyRate": "سعر اليومي",
+    "weeklyRate": "سعر الأسبوعي",
+    "monthlyRate": "سعر الشهري",
+    "totalPrice": "السعر الإجمالي",
+    "securityDeposit": "وديعة الضمان",
+    "serviceFee": "رسوم الخدمة",
+    "cleaningFee": "رسوم التنظيف",
+    "availableFrom": "متاح من:",
+    "rooms": "الغرف",
+    "bathrooms": "الحمامات",
+    "floor": "الطابق",
+    "view": "الإطلالة",
+    "city": "المدينة",
+    "country": "الدولة",
+    "purpose": "الغرض",
+    "buildingType": "نوع المبنى",
+    "finishing": "التشطيب",
+    "landArea": "مساحة الأرض",
+    "gardenSize": "مساحة الحديقة",
+    "deliveryDate": "تاريخ التسليم:",
+    "deliveryStatus": "حالة التسليم:"
   }
+
 
 
 };

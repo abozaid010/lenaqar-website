@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Trash2Icon } from "lucide-react";
+import { useI18n } from "@/context/translate-api";
 
 export default function SaleDetailsStep({
   formData,
@@ -8,6 +9,9 @@ export default function SaleDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
+  const { t } = useI18n();
+  const isRTL = t.direction === 'rtl';
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -54,7 +58,7 @@ export default function SaleDetailsStep({
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
-        Financial Details
+        {t.saleDetails.financialDetails}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
@@ -67,7 +71,7 @@ export default function SaleDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Total Price <span className="text-red-500">*</span>
+            {t.saleDetails.totalPrice} <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -82,7 +86,7 @@ export default function SaleDetailsStep({
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
           />
-          <span className="absolute bottom-1 right-1.5 text-gray-400">EGP</span>
+          <span className={`absolute bottom-1 ${isRTL? "left-1.5": "right-1.5"} text-gray-400`}>EGP</span>
         </div>
 
         {/* Delivery Date */}
@@ -94,7 +98,7 @@ export default function SaleDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Delivery Date <span className="text-red-500">*</span>
+            {t.saleDetails.deliveryDate} <span className="text-red-500">*</span>
           </label>
           <input
             type="date"
@@ -112,7 +116,7 @@ export default function SaleDetailsStep({
         {/* Down Payment */}
         <div className="relative">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Down Payment
+            {t.saleDetails.downPayment}
           </label>
           <input
             type="number"
@@ -123,7 +127,7 @@ export default function SaleDetailsStep({
             placeholder="200000"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
-          <span className="absolute bottom-1 right-1.5 text-gray-400">EGP</span>
+          <span className={`absolute bottom-1 ${isRTL? "left-1.5": "right-1.5"} text-gray-400`}>EGP</span>
         </div>
       </div>
 
@@ -131,7 +135,7 @@ export default function SaleDetailsStep({
       <div className="mt-6">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xl font-semibold text-slate-800">
-            Payment Plans
+            {t.saleDetails.paymentPlans}
           </h3>
           <button
             type="button"
@@ -139,15 +143,15 @@ export default function SaleDetailsStep({
             className="flex items-center text-sm text-blue-600 hover:text-blue-800"
           >
             <Plus size={18} />
-            Add Plan
+            {t.saleDetails.addPlan}
           </button>
         </div>
 
         {formData.paymentPlans.length === 0 ? (
-          <p className="text-gray-500 italic">No payment plans added yet.</p>
+          <p className="text-gray-500 italic">{t.saleDetails.noPlans}</p>
         ) : (
           <div className="space-y-3">
-            {formData.paymentPlans.map((plan, index) => (
+            {formData?.paymentPlans?.map((plan, index) => (
               <div
                 key={index}
                 className="flex items-center gap-4 py-1 border-b border-gray-300 pb-4"
@@ -155,7 +159,7 @@ export default function SaleDetailsStep({
                 <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Years
+                      {t.saleDetails.years}
                     </label>
                     <input
                       type="number"
@@ -176,7 +180,7 @@ export default function SaleDetailsStep({
                           : "text-gray-700"
                       }`}
                     >
-                      Price <span className="text-red-500">*</span>
+                      {t.saleDetails.price} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="number"
@@ -194,7 +198,7 @@ export default function SaleDetailsStep({
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Maintenance
+                      {t.saleDetails.maintenance}
                     </label>
                     <input
                       type="number"

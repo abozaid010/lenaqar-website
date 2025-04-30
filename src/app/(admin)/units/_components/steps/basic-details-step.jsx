@@ -1,4 +1,5 @@
 "use client";
+import { useI18n } from "@/context/translate-api";
 
 export default function BasicDetailsStep({
   formData,
@@ -25,11 +26,13 @@ export default function BasicDetailsStep({
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
   };
+  
+  const { t } = useI18n();
 
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
-        Property Details
+        {t.basicDetails.propertyDetails}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
@@ -42,7 +45,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Unit Title <span className="text-red-500">*</span>
+            {t.basicDetails.unitTitle} <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
@@ -50,7 +53,7 @@ export default function BasicDetailsStep({
             required
             value={formData.unitTitle}
             onChange={handleChange}
-            placeholder="Enter unit title"
+            placeholder={t.basicDetails.placeholders.unitTitle}
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("unitTitle")
                 ? "border-red-500 ring-red-500 placeholder-red-500"
@@ -68,7 +71,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Compound <span className="text-red-500">*</span>
+            {t.basicDetails.compound} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -82,7 +85,7 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select compound</option>
+              <option value="">{t.basicDetails.selectCompound}</option>
               {compounds.map((compound) => (
                 <option key={compound.id} value={compound.name}>
                   {compound.name}
@@ -101,7 +104,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Building Type
+            {t.basicDetails.buildingType}
           </label>
           <div className="relative">
             <select
@@ -114,17 +117,17 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="apartment">Apartment</option>
-              <option value="villa">Villa</option>
-              <option value="townhouse">Townhouse</option>
-              <option value="duplex">Duplex</option>
-              <option value="penthouse">Penthouse</option>
-              <option value="studio">Studio</option>
-              <option value="chalet">Chalet</option>
-              <option value="office">Office</option>
-              <option value="shop">Shop</option>
-              <option value="twinhouse">Twinhouse</option>
-              <option value="house">House</option>
+              <option value="apartment">{t.basicDetails.buildingTypes.apartment}</option>
+              <option value="villa">{t.basicDetails.buildingTypes.villa}</option>
+              <option value="townhouse">{t.basicDetails.buildingTypes.townhouse}</option>
+              <option value="duplex">{t.basicDetails.buildingTypes.duplex}</option>
+              <option value="penthouse">{t.basicDetails.buildingTypes.penthouse}</option>
+              <option value="studio">{t.basicDetails.buildingTypes.studio}</option>
+              <option value="chalet">{t.basicDetails.buildingTypes.chalet}</option>
+              <option value="office">{t.basicDetails.buildingTypes.office}</option>
+              <option value="shop">{t.basicDetails.buildingTypes.shop}</option>
+              <option value="twinhouse">{t.basicDetails.buildingTypes.twinhouse}</option>
+              <option value="house">{t.basicDetails.buildingTypes.house}</option>
             </select>
           </div>
         </div>
@@ -138,7 +141,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Purpose <span className="text-red-500">*</span>
+            {t.basicDetails.purpose} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -152,9 +155,9 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select purpose</option>
-              <option value="sell">Sell</option>
-              <option value="rent">Rent</option>
+              <option value="">{t.basicDetails.selectPurpose}</option>
+              <option value="sell">{t.basicDetails.purposes.sell}</option>
+              <option value="rent">{t.basicDetails.purposes.rent}</option>
             </select>
           </div>
         </div>
@@ -166,7 +169,7 @@ export default function BasicDetailsStep({
               invalidFields.includes("city") ? "text-red-500" : "text-gray-700"
             }`}
           >
-            City <span className="text-red-500">*</span>
+            {t.basicDetails.city} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -180,14 +183,14 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select city</option>
-              <option value="Cairo">Cairo</option>
-              <option value="Alexandria">Alexandria</option>
-              <option value="Giza">Giza</option>
-              <option value="New Cairo">New Cairo</option>
-              <option value="6th of October">6th of October</option>
-              <option value="El Shorouk">El Shorouk</option>
-              <option value="Sheikh Zayed">Sheikh Zayed</option>
+              <option value="">{t.basicDetails.selectCity}</option>
+              <option value="Cairo">{t.basicDetails.cities.cairo}</option>
+              <option value="Alexandria">{t.basicDetails.cities.alexandria}</option>
+              <option value="Giza">{t.basicDetails.cities.giza}</option>
+              <option value="New Cairo">{t.basicDetails.cities.newCairo}</option>
+              <option value="6th of October">{t.basicDetails.cities.october6}</option>
+              <option value="El Shorouk">{t.basicDetails.cities.elShorouk}</option>
+              <option value="Sheikh Zayed">{t.basicDetails.cities.sheikhZayed}</option>
             </select>
           </div>
         </div>
@@ -199,7 +202,7 @@ export default function BasicDetailsStep({
               invalidFields.includes("view") ? "text-red-500" : "text-gray-700"
             }`}
           >
-            View <span className="text-red-500">*</span>
+            {t.basicDetails.view} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -213,18 +216,18 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select view</option>
-              <option value="park">Park</option>
-              <option value="street">Street</option>
-              <option value="lagoon">Lagoon</option>
-              <option value="sea">Sea</option>
-              <option value="city">City</option>
-              <option value="river">River</option>
-              <option value="pool">Pool</option>
-              <option value="golf">Golf</option>
-              <option value="garden">Garden</option>
-              <option value="open area">Open Area</option>
-              <option value="mountain">Mountain</option>
+              <option value="">{t.basicDetails.selectView}</option>
+              <option value="park">{t.basicDetails.views.park}</option>
+              <option value="street">{t.basicDetails.views.street}</option>
+              <option value="lagoon">{t.basicDetails.views.lagoon}</option>
+              <option value="sea">{t.basicDetails.views.sea}</option>
+              <option value="city">{t.basicDetails.views.city}</option>
+              <option value="river">{t.basicDetails.views.river}</option>
+              <option value="pool">{t.basicDetails.views.pool}</option>
+              <option value="golf">{t.basicDetails.views.golf}</option>
+              <option value="garden">{t.basicDetails.views.garden}</option>
+              <option value="open area">{t.basicDetails.views.openArea}</option>
+              <option value="mountain">{t.basicDetails.views.mountain}</option>
             </select>
           </div>
         </div>
@@ -232,21 +235,21 @@ export default function BasicDetailsStep({
         {/* District */}
         <div className="col-span-1 md:col-span-2">
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            District
+            {t.basicDetails.district}
           </label>
           <input
             type="text"
             name="district"
             value={formData.district}
             onChange={handleChange}
-            placeholder="district name"
+            placeholder={t.basicDetails.placeholders.district}
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-8 text-slate-800">
-        Property Specifications
+        {t.basicDetails.propertySpecs}
       </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
@@ -259,7 +262,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Rooms <span className="text-red-500">*</span>
+            {t.basicDetails.rooms} <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -286,7 +289,7 @@ export default function BasicDetailsStep({
                 : "text-gray-700"
             }`}
           >
-            Bathrooms <span className="text-red-500">*</span>
+            {t.basicDetails.bathrooms} <span className="text-red-500">*</span>
           </label>
           <input
             type="number"
@@ -307,7 +310,7 @@ export default function BasicDetailsStep({
         {/* Floor */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Floor
+            {t.basicDetails.floor}
           </label>
           <input
             type="number"
@@ -323,7 +326,7 @@ export default function BasicDetailsStep({
         {/* Land Area */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Land Area (m²)
+            {t.basicDetails.landArea} (m²)
           </label>
           <input
             type="number"
@@ -339,7 +342,7 @@ export default function BasicDetailsStep({
         {/* Garden Size */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Garden Size (m²)
+            {t.basicDetails.gardenSize} (m²)
           </label>
           <input
             type="number"
@@ -355,7 +358,7 @@ export default function BasicDetailsStep({
         {/* Garage Area */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Garage Area (m²)
+            {t.basicDetails.garageArea} (m²)
           </label>
           <input
             type="number"

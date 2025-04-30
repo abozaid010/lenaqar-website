@@ -12,6 +12,7 @@ import ImagesStep from "./steps/images-step";
 import { X } from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 import {
   addUnit,
@@ -30,6 +31,8 @@ export default function AddUnitModal({
   developers,
 }) {
   const modalRef = useRef(null);
+  const { t } = useI18n();
+  const isRTL = t.direction === 'rtl';
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload state
@@ -199,9 +202,7 @@ export default function AddUnitModal({
         );
 
         if (!hasValidPrice) {
-          toast.error(
-            "Please enter a price greater than 0 for at least one duration type"
-          );
+          toast.error(t.toasts.enterValidPrice);
           return;
         }
 
@@ -241,7 +242,7 @@ export default function AddUnitModal({
     if (currentStep === 3) {
       // Check if at least one image is uploaded
       if (formData.images.length === 0) {
-        toast.error("Please upload at least one image.");
+        toast.error(t.toasts.uploadImage);
         return;
       }
 
@@ -254,7 +255,7 @@ export default function AddUnitModal({
     }
 
     if (!formData.purpose) {
-      toast.error("Please select a purpose for the unit (sell/rent)");
+      toast.error(t("toasts.selectPurpose"));
       return;
     }
 
@@ -281,8 +282,7 @@ export default function AddUnitModal({
       window.location.reload();
     } catch (error) {
       toast.error(
-        "An error occurred while processing your request. Please try again: ",
-        error.message
+        `${t("toasts.errorProcessing")}: ${error.message}`
       );
     } finally {
       setInvalidFields([]);
@@ -290,6 +290,8 @@ export default function AddUnitModal({
     }
   };
 
+  const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
+  
   return createPortal(
     <div
       onClick={handleOutsideClick}
@@ -301,7 +303,7 @@ export default function AddUnitModal({
       >
         {/* Header */}
         <div className="bg-primary rounded-t-md text-white py-4 px-6 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">Add New Unit</h2>
+          <h2 className="text-xl font-semibold">{modalTitle}</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
             <X size={21} />
           </button>
@@ -312,26 +314,21 @@ export default function AddUnitModal({
           <StepIndicator
             currentStep={currentStep}
             steps={[
-              { number: 1, label: "Basic Details" },
+              { number: 1, label: t.steps.basicDetails },
               {
                 number: 2,
                 label:
                   formData.purpose === "sell"
-                    ? "Financial Details"
-                    : "Rental Details",
+                    ? t.steps.financialDetails
+                    : t.steps.rentalDetails,
               },
-              { number: 3, label: "Images & Additional Info" },
+              { number: 3, label: t.steps.imagesInfo },
             ]}
           />
         </div>
 
         {/* Step Content */}
         <form onSubmit={handleSubmit} className="mt-3 px-5 pb-5">
-          {/* <input type="hidden" name="clientId" value={clientId} />
-          <input type="hidden" name="clientName" value={clientName} />
-          <input type="hidden" name="country" value="Egypt" />
-          <input type="hidden" name="dataSource" value="website" /> */}
-
           {currentStep === 1 && (
             <BasicDetailsStep
               formData={formData}
@@ -383,6 +380,7 @@ export default function AddUnitModal({
                 onClick={handleBack}
                 className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors"
               >
+                {isRTL ? t.buttons.back : "" }
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -395,7 +393,7 @@ export default function AddUnitModal({
                     clipRule="evenodd"
                   />
                 </svg>
-                Back
+                {isRTL ? "": t.buttons.back}
               </button>
             ) : (
               <div></div>
@@ -407,7 +405,7 @@ export default function AddUnitModal({
                 onClick={handleNext}
                 className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors"
               >
-                Next
+                { isRTL? "": t.buttons.next}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -420,6 +418,7 @@ export default function AddUnitModal({
                     clipRule="evenodd"
                   />
                 </svg>
+                {isRTL ? t.buttons.next :""}
               </button>
             ) : (
               <button
@@ -438,7 +437,7 @@ export default function AddUnitModal({
                     clipRule="evenodd"
                   />
                 </svg>
-                Save Unit
+                {t.buttons.saveUnit}
               </button>
             )}
           </div>

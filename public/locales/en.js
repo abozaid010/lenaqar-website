@@ -262,5 +262,315 @@ export default {
       "close": "Close"
     },
     "notAvailable": "-----"
+  },
+  identifierUnit: {
+    "title": "Real Estate Properties",
+    "subtitle": "Explore our exclusive listings"
+  },
+  unitsFilter: {
+    "allDevelopers": "All Developers",
+    "allCompounds": "All Compounds",
+    "allPurposes": "All Purposes",
+    "purposes": {
+      "buy": "Buy",
+      "rent": "Rent",
+      "sell": "Sell",
+      "lease": "Lease"
+    }
+  },
+  unitsSearch: {
+    "placeholder": "Search by name or location...",
+    "clearAriaLabel": "Clear search"
+  },
+  units: {
+    "addButton": {
+      "addNew": "Add New Unit",
+      "edit": "Edit Unit"
+    }
+  },
+  modal: {
+    "addNewUnit": "Add New Unit",
+    "editUnit": "Edit Unit"
+  },
+  steps: {
+    "basicDetails": "Basic Details",
+    "financialDetails": "Financial Details",
+    "rentalDetails": "Rental Details",
+    "imagesInfo": "Images & Additional Info"
+  },
+  buttons: {
+    "back": "Back",
+    "next": "Next",
+    "saveUnit": "Save Unit"
+  },
+  toasts: {
+    "enterValidPrice": "Please enter a price greater than 0 for at least one duration type",
+    "uploadImage": "Please upload at least one image.",
+    "selectPurpose": "Please select a purpose for the unit (sell/rent)",
+    "errorProcessing": "An error occurred while processing your request. Please try again"
+  },
+  formLabels: {
+    "unitTitle": "Unit Title",
+    "buildingType": "Building Type",
+    "purpose": "Purpose",
+    "compound": "Compound",
+    "view": "View",
+    "isGated": "Gated Community",
+    "city": "City",
+    "district": "District",
+    "developer": "Developer",
+    "deliveryDate": "Delivery Date",
+    "deliveryStatus": "Delivery Status",
+    "bathroomCount": "Bathrooms",
+    "floor": "Floor",
+    "roomsCount": "Rooms",
+    "landArea": "Land Area (m²)",
+    "gardenSize": "Garden Size (m²)",
+    "finishing": "Finishing",
+    "garageArea": "Garage Area (m²)",
+    "images": "Images"
+  },
+  buildingTypes: {
+    "apartment": "Apartment",
+    "villa": "Villa",
+    "townhouse": "Townhouse",
+    "duplex": "Duplex",
+    "penthouse": "Penthouse",
+    "studio": "Studio",
+    "chalet": "Chalet",
+    "office": "Office",
+    "shop": "Shop",
+    "land": "Land"
+  },
+  purpose: {
+    "sell": "Sell",
+    "rent": "Rent"
+  },
+  view: {
+    "garden": "Garden",
+    "pool": "Pool",
+    "sea": "Sea",
+    "landmark": "Landmark",
+    "street": "Street",
+    "other": "Other"
+  },
+  deliveryStatus: {
+    "ready": "Ready",
+    "underConstruction": "Under Construction",
+    "offPlan": "Off Plan"
+  },
+  finishing: {
+    "finished": "Finished",
+    "semiFinished": "Semi-Finished",
+    "core": "Core & Shell",
+    "unfinished": "Unfinished"
+  },
+  sale: {
+    "downPayment": "Down Payment",
+    "totalPrice": "Total Price",
+    "deliveryDate": "Delivery Date",
+    "paymentPlans": "Payment Plans",
+    "addPaymentPlan": "Add Payment Plan",
+    "yearsLabel": "Years",
+    "priceLabel": "Price",
+    "maintenanceLabel": "Maintenance"
+  },
+  rental: {
+    "isAvailable": "Available for Rent",
+    "availabilityDate": "Availability Date",
+    "rentDuration": "Rent Duration",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "price": "Price",
+    "securityDeposit": "Security Deposit",
+    "cleaningFee": "Cleaning Fee",
+    "serviceFee": "Service Fee",
+    "amenities": "Amenities",
+    "currency": "Currency"
+  },
+  basicDetails: {
+    "propertyDetails": "Property Details",
+    "propertySpecs": "Property Specifications",
+    "unitTitle": "Unit Title",
+    "compound": "Compound",
+    "buildingType": "Building Type",
+    "purpose": "Purpose",
+    "city": "City",
+    "view": "View",
+    "district": "District",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "floor": "Floor",
+    "landArea": "Land Area",
+    "gardenSize": "Garden Size",
+    "garageArea": "Garage Area",
+    "selectCompound": "Select compound",
+    "selectPurpose": "Select purpose",
+    "selectCity": "Select city",
+    "selectView": "Select view",
+    "placeholders": {
+      "unitTitle": "Enter unit title",
+      "district": "district name"
+    },
+    buildingTypes: {
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "townhouse": "Townhouse",
+      "duplex": "Duplex",
+      "penthouse": "Penthouse",
+      "studio": "Studio",
+      "chalet": "Chalet",
+      "office": "Office",
+      "shop": "Shop",
+      "twinhouse": "Twinhouse",
+      "house": "House"
+    },
+    purposes: {
+      "sell": "Sell",
+      "rent": "Rent"
+    },
+    cities: {
+      "cairo": "Cairo",
+      "alexandria": "Alexandria",
+      "giza": "Giza",
+      "newCairo": "New Cairo",
+      "october6": "6th of October",
+      "elShorouk": "El Shorouk",
+      "sheikhZayed": "Sheikh Zayed"
+    },
+    views: {
+      "park": "Park",
+      "street": "Street",
+      "lagoon": "Lagoon",
+      "sea": "Sea",
+      "city": "City",
+      "river": "River",
+      "pool": "Pool",
+      "golf": "Golf",
+      "garden": "Garden",
+      "openArea": "Open Area",
+      "mountain": "Mountain"
+    }
+  },
+  saleDetails: {
+    "financialDetails": "Financial Details",
+    "totalPrice": "Total Price",
+    "deliveryDate": "Delivery Date",
+    "downPayment": "Down Payment",
+    "paymentPlans": "Payment Plans",
+    "addPlan": "Add Plan",
+    "noPlans": "No payment plans added yet.",
+    "years": "Years",
+    "price": "Price",
+    "maintenance": "Maintenance"
+  },
+  rentalDetails: {
+    "availability": "Availability",
+    "chooseAvailabilityDate": "choose availability date",
+    "availableForRent": "Available for rent",
+    "rentDurationOptions": "Rent Duration Options",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "price": "Price",
+    "securityDeposit": "Security Deposit",
+    "cleaningFee": "Cleaning Fee",
+    "serviceFee": "Service Fee",
+    "amenities": "Amenities",
+    "amenities": {
+      "wifi": "Wifi",
+      "dryer": "Dryer",
+      "air_conditioning": "Air Conditioning",
+      "heating": "Heating",
+      "smart_tv": "Smart TV",
+      "hair_dryer": "Hair Dryer",
+      "pool": "Pool",
+      "free_parking": "Free Parking",
+      "ev_charger": "EV Charger",
+      "bbq_grill": "BBQ Grill",
+      "indoor_fireplace": "Indoor Fireplace",
+      "smoking_allowed": "Smoking Allowed",
+      "beachfront": "Beachfront",
+      "smoke_alarm": "Smoke Alarm",
+      "co_alarm": "CO Alarm"
+    }},
+    "additionalDetails": "Additional Details",
+  "finishingType": "Finishing Type",
+  "developer": "Developer",
+  "selectFinishingType": "Select finishing type",
+  "furnished": "Furnished",
+  "unfurnished": "Unfurnished",
+  "fullyFinished": "Fully Finished",
+  "semiFinished": "Semi Finished",
+  "coreAndShell": "Core & Shell",
+  "selectDeveloper": "Select developer",
+  "propertyImages": "Property Images",
+  "maximum": "Maximum",
+  "clickOrDragAndDrop": "Click or drag and drop images here",
+  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 5MB each)",
+  "uploading": "Uploading...",
+  "upload": "Upload",
+  "selectedImage": "Selected Image",
+  "selectedImages": "Selected Images",
+  "images": "images",
+  "selectedImagesTitle": "Selected Images:",
+  "uploadedImagesTitle": "Uploaded Images:",
+  "retry": "Retry",
+  "imageDeletedSuccess": "Image deleted successfully",
+  "failedToDeleteImage": "Failed to delete image. Please try again.",
+  "maxImagesError": "You can only upload a maximum of 8 images. Please remove some images before adding new ones.",
+  "invalidFileType": "Invalid file type. Please upload JPG, PNG, or WEBP images.",
+  "fileSizeExceeds": "File size exceeds 5MB. Please upload smaller images.",
+  "failedToUploadImage": "Failed to upload image",
+
+  unitPage: {
+    "backToUnits": "Back to Units",
+    "in": "in",
+    "deleteUnit": "Delete Unit",
+    "confirmDeleteMsg": "Are you sure you want to delete this unit?",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deleteFail": "Failed to delete unit. Please try again.",
+    "deleteError": "An error occurred while deleting the unit."
+  },
+  unitDetails: {
+    "title": "Unit Details",
+    "noImages": "No images available",
+    "noThumbnails": "No thumbnail images available",
+    "viewFullscreen": "Click to view in fullscreen",
+    "deleteConfirmation": "Are you sure you want to delete this unit?",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "updateSuccess": "Unit updated successfully",
+    "galleryTitle": "Image Gallery",
+    "galleryNavigation": "Use arrow keys or swipe to navigate",
+    "imageCounter": "Image {current} of {total}",
+    "amenities": "Amenities:",
+    "noAmenities": "No amenities specified",
+    "location": "Location",
+    "developer": "Developer",
+    "dailyRate": "Daily Rate",
+    "weeklyRate": "Weekly Rate",
+    "monthlyRate": "Monthly Rate",
+    "totalPrice": "Total Price",
+    "securityDeposit": "Security Deposit",
+    "serviceFee": "Service Fee",
+    "cleaningFee": "Cleaning Fee",
+    "availableFrom": "Available from:",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "floor": "Floor",
+    "view": "View",
+    "city": "City",
+    "country": "Country",
+    "purpose": "Purpose",
+    "buildingType": "Building Type",
+    "finishing": "Finishing",
+    "landArea": "Land Area",
+    "gardenSize": "Garden Size",
+    "deliveryDate": "Delivery Date:",
+    "deliveryStatus": "Delivery Status:"
   }
-};
+}
+

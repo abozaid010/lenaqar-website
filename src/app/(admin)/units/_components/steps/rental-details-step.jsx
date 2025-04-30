@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/context/translate-api";
 
 const availableAmenities = [
   "wifi",
@@ -22,6 +23,7 @@ const availableAmenities = [
 
 export default function RentalDetailsStep({ formData, updateFormData }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
+  const { t } = useI18n();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -66,10 +68,10 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
-        Availability{" "}
+        {t.rentalDetails.availability}{" "}
         {!formData.isAvailable ? (
           <span className="text-sm text-gray-400 font-normal">
-            choose availability date <span className="text-red-500">*</span>
+            {t.rentalDetails.chooseAvailabilityDate} <span className="text-red-500">*</span>
           </span>
         ) : null}
       </h3>
@@ -89,7 +91,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
             htmlFor="isAvailable"
             className="ml-2 block text-sm text-gray-700"
           >
-            Available for rent
+            {t.rentalDetails.availableForRent}
           </label>
         </div>
 
@@ -109,7 +111,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-6 text-slate-800">
-        Rent Duration Options
+        {t.rentalDetails.rentDurationOptions}
       </h3>
 
       {/* Rent Duration Options */}
@@ -124,7 +126,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Daily
+            {t.rentalDetails.daily}
           </button>
           <button
             type="button"
@@ -135,7 +137,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Weekly
+            {t.rentalDetails.weekly}
           </button>
           <button
             type="button"
@@ -146,7 +148,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            Monthly
+            {t.rentalDetails.monthly}
           </button>
         </div>
       </div>
@@ -155,7 +157,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         {/* Price */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price <span className="text-red-500">*</span>
+            {t.rentalDetails.price} <span className="text-red-500">*</span>
           </label>
           <div className="flex">
             <input
@@ -178,7 +180,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         {/* Security Deposit */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Security Deposit
+            {t.rentalDetails.securityDeposit}
           </label>
           <div className="flex">
             <input
@@ -204,7 +206,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         {/* Cleaning Fee */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Cleaning Fee
+            {t.rentalDetails.cleaningFee}
           </label>
           <div className="flex">
             <input
@@ -226,7 +228,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         {/* Service Fee */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Service Fee
+            {t.rentalDetails.serviceFee}
           </label>
           <div className="flex">
             <input
@@ -248,7 +250,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
 
       {/* Amenities */}
       <div className="mt-6">
-        <h4 className="text-lg font-medium mb-3">Amenities</h4>
+        <h4 className="text-lg font-medium mb-3">{t.rentalDetails.amenitiesTitle || "Amenities"}</h4>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-y-2">
           {availableAmenities.map((amenity) => (
             <div key={amenity} className="flex items-center">
@@ -264,10 +266,9 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
                 htmlFor={`amenity-${amenity}`}
                 className="ml-2 block text-sm text-gray-700 cursor-pointer"
               >
-                {amenity
-                  .split("_")
-                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                  .join(" ")}
+                {typeof t.rentalDetails.amenities === 'object' && t.rentalDetails.amenities[amenity] 
+                  ? t.rentalDetails.amenities[amenity] 
+                  : amenity}
               </label>
             </div>
           ))}

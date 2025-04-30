@@ -3,10 +3,11 @@
 import { useRouter } from "next/navigation";
 import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
+import { useI18n } from "@/context/translate-api";
 
 export default function UnitPageHeader({ unit, compounds, developers }) {
   const router = useRouter();
-
+  const {t} = useI18n()
   const handleBackToUnits = () => {
     router.push(`/units`);
   };
@@ -20,7 +21,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
         <div className="flex flex-wrap gap-2">
           <p className="text-gray-600">
             {unit.buildingType}
-            {unit.buildingType ? " in " : ""}
+            {unit.buildingType ? t.unitPage.in : ""}
             {unit.compound}
           </p>
         </div>
@@ -43,7 +44,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
               clipRule="evenodd"
             />
           </svg>
-          Back to Units
+          {t.unitPage.backToUnits}
         </button>
 
         <AddUnitButton
