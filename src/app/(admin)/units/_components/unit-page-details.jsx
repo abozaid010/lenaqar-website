@@ -29,7 +29,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pageParam = searchParams.get("page") || "1";
-  
+
   const { t } = useI18n();
   // Check if the unit is for rent
   const isRent = updatedUnit?.purpose?.toLowerCase() === "rent";
@@ -133,7 +133,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-white my-6">
         <div className="space-y-4">
           {/* Main image with enhanced fullscreen indicator */}
           <div
@@ -149,7 +149,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <p className="text-gray-500 text-lg">{t("unitDetails.noImages")}</p>
+                <p className="text-gray-500 text-lg">
+                  {t("unitDetails.noImages")}
+                </p>
               </div>
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -487,7 +489,8 @@ export default function UnitDetails({ unit, developers, comboundata }) {
 
                 {updatedUnit?.availabilityDate && (
                   <p className="text-gray-600 mt-4">
-                    {t.unitDetails.availableFrom} {formatDate(updatedUnit?.availabilityDate)}
+                    {t.unitDetails.availableFrom}{" "}
+                    {formatDate(updatedUnit?.availabilityDate)}
                   </p>
                 )}
 
@@ -541,7 +544,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                 <div className="mt-2 grid grid-cols-2 gap-2">
                   {updatedUnit?.deliveryDate && (
                     <div>
-                      <p className="text-gray-600">{t.unitDetails.deliveryDate}</p>
+                      <p className="text-gray-600">
+                        {t.unitDetails.deliveryDate}
+                      </p>
                       <p className="font-semibold">
                         {formatDate(updatedUnit?.deliveryDate)}
                       </p>
@@ -549,7 +554,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
                   )}
                   {updatedUnit?.deliveryStatus && (
                     <div>
-                      <p className="text-gray-600">{t.unitDetails.deliveryStatus}</p>
+                      <p className="text-gray-600">
+                        {t.unitDetails.deliveryStatus}
+                      </p>
                       <p className="font-semibold">
                         {updatedUnit?.deliveryStatus}
                       </p>
@@ -651,7 +658,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             )}
             {updatedUnit.gardenSize > 0 && (
               <div className="flex justify-between">
-                <span className="text-gray-600">{t.unitDetails.gardenSize}</span>
+                <span className="text-gray-600">
+                  {t.unitDetails.gardenSize}
+                </span>
                 <span className="font-semibold">
                   {formatValue(updatedUnit.gardenSize, "m²")}
                 </span>
@@ -667,7 +676,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
             updatedUnit.city ||
             updatedUnit.country) && (
             <div>
-              <h3 className="font-semibold text-gray-800">{t.unitDetails.location}</h3>
+              <h3 className="font-semibold text-gray-800">
+                {t.unitDetails.location}
+              </h3>
               <p className="text-gray-600">
                 {updatedUnit.compound ? updatedUnit.compound : ""}
                 {updatedUnit.compound && updatedUnit.city ? ", " : ""}
@@ -682,7 +693,9 @@ export default function UnitDetails({ unit, developers, comboundata }) {
           )}
           {updatedUnit.developer && (
             <div>
-              <h3 className="font-semibold text-gray-800">{t.unitDetails.developer}</h3>
+              <h3 className="font-semibold text-gray-800">
+                {t.unitDetails.developer}
+              </h3>
               <p className="text-gray-600">{updatedUnit.developer}</p>
             </div>
           )}
@@ -705,7 +718,8 @@ export default function UnitDetails({ unit, developers, comboundata }) {
         <div className="fixed inset-0 bg-black z-50 flex flex-col">
           <div className="flex justify-between items-center p-4">
             <div className="text-white text-lg font-medium">
-              {updatedUnit.unitTitle || "Unit"} - {t("unitDetails.galleryTitle")}
+              {updatedUnit.unitTitle || "Unit"} -{" "}
+              {t("unitDetails.galleryTitle")}
             </div>
             <button
               onClick={closeFullscreenGallery}
@@ -770,7 +784,7 @@ export default function UnitDetails({ unit, developers, comboundata }) {
               {updatedUnit.images && updatedUnit.images.length > 0
                 ? t("unitDetails.imageCounter", {
                     current: mainImageIndex + 1,
-                    total: updatedUnit.images.length
+                    total: updatedUnit.images.length,
                   })
                 : t("unitDetails.noImages")}
             </div>

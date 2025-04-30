@@ -4,7 +4,8 @@ import {
   fetchUnitById,
 } from "@/components/services/serviceFetching";
 import UnitPageHeader from "../_components/unit-page-header";
-import UnitDetails from "../_components/unit-page-details";
+import ImageGallary from "../_components/unit-details/image-gallary";
+import UnitBasicInfo from "../_components/unit-details/unit-basic-info";
 
 // Dynamic metadata
 export async function generateMetadata({ params }) {
@@ -27,19 +28,21 @@ const Page = async ({ params }) => {
   ]);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+    <>
       <UnitPageHeader
         unit={unit}
         compounds={comboundata}
         developers={developers}
       />
 
-      <UnitDetails
-        unit={unit}
-        comboundata={comboundata}
-        developers={developers}
-      />
-    </div>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
+        <div className="flex flex-col md:flex-row gap-4 lg:gap-6 justify-center">
+          <ImageGallary images={unit.images} />
+
+          <UnitBasicInfo unit={unit} />
+        </div>
+      </div>
+    </>
   );
 };
 

@@ -5,8 +5,8 @@ export default {
   login: "Login",
   header: {
     home: "Home",
-    login:"signIn",
-    logOut:"Logout",
+    login: "signIn",
+    logOut: "Logout",
     clientDashboard: "Client Dashboard",
     jobOpportunities: "Request Demo ",
     allProperties: "All Properties",
@@ -164,14 +164,14 @@ export default {
     "passwordPlaceholder": "Enter your password",
     "signInButton": "Sign In",
     "successMessage": "Login successful",
-    "erroeMessage":"Login failed. Please check your credentials",
+    "erroeMessage": "Login failed. Please check your credentials",
     "footer": {
       "copyright": "Lena AI. All rights reserved",
       "version": "Version"
     }
   },
-  
- sidebar: {
+
+  sidebar: {
     "dashboard": "Dashboard",
     "analytics": "Analytics",
     "units": "Units",
@@ -185,7 +185,7 @@ export default {
     },
     "logoutSuccess": "Logout Successful"
   },
-  
+
   "dashboardFilter": {
     "actions": {
       "all": "All actions",
@@ -242,7 +242,7 @@ export default {
     "successMessage": "Action added successfully",
     "errorMessage": "Failed to add action"
   },
-  
+
   propertyDetails: {
     "title": "{id}_Requirements",
     "fields": {
@@ -497,8 +497,9 @@ export default {
       "beachfront": "Beachfront",
       "smoke_alarm": "Smoke Alarm",
       "co_alarm": "CO Alarm"
-    }},
-    "additionalDetails": "Additional Details",
+    }
+  },
+  "additionalDetails": "Additional Details",
   "finishingType": "Finishing Type",
   "developer": "Developer",
   "selectFinishingType": "Select finishing type",
@@ -511,7 +512,7 @@ export default {
   "propertyImages": "Property Images",
   "maximum": "Maximum",
   "clickOrDragAndDrop": "Click or drag and drop images here",
-  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 5MB each)",
+  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 3MB each)",
   "uploading": "Uploading...",
   "upload": "Upload",
   "selectedImage": "Selected Image",
@@ -524,7 +525,7 @@ export default {
   "failedToDeleteImage": "Failed to delete image. Please try again.",
   "maxImagesError": "You can only upload a maximum of 8 images. Please remove some images before adding new ones.",
   "invalidFileType": "Invalid file type. Please upload JPG, PNG, or WEBP images.",
-  "fileSizeExceeds": "File size exceeds 5MB. Please upload smaller images.",
+  "fileSizeExceeds": "File size exceeds 3MB. Please upload smaller images.",
   "failedToUploadImage": "Failed to upload image",
 
   unitPage: {

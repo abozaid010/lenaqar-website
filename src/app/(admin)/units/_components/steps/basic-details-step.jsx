@@ -33,7 +33,7 @@ export default function BasicDetailsStep({
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
   };
-  
+
   const { t } = useI18n();
 
   const handleAddCompound = (newCompound) => {
@@ -141,17 +141,37 @@ export default function BasicDetailsStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="apartment">{t.basicDetails.buildingTypes.apartment}</option>
-              <option value="villa">{t.basicDetails.buildingTypes.villa}</option>
-              <option value="townhouse">{t.basicDetails.buildingTypes.townhouse}</option>
-              <option value="duplex">{t.basicDetails.buildingTypes.duplex}</option>
-              <option value="penthouse">{t.basicDetails.buildingTypes.penthouse}</option>
-              <option value="studio">{t.basicDetails.buildingTypes.studio}</option>
-              <option value="chalet">{t.basicDetails.buildingTypes.chalet}</option>
-              <option value="office">{t.basicDetails.buildingTypes.office}</option>
+              <option value="apartment">
+                {t.basicDetails.buildingTypes.apartment}
+              </option>
+              <option value="villa">
+                {t.basicDetails.buildingTypes.villa}
+              </option>
+              <option value="townhouse">
+                {t.basicDetails.buildingTypes.townhouse}
+              </option>
+              <option value="duplex">
+                {t.basicDetails.buildingTypes.duplex}
+              </option>
+              <option value="penthouse">
+                {t.basicDetails.buildingTypes.penthouse}
+              </option>
+              <option value="studio">
+                {t.basicDetails.buildingTypes.studio}
+              </option>
+              <option value="chalet">
+                {t.basicDetails.buildingTypes.chalet}
+              </option>
+              <option value="office">
+                {t.basicDetails.buildingTypes.office}
+              </option>
               <option value="shop">{t.basicDetails.buildingTypes.shop}</option>
-              <option value="twinhouse">{t.basicDetails.buildingTypes.twinhouse}</option>
-              <option value="house">{t.basicDetails.buildingTypes.house}</option>
+              <option value="twinhouse">
+                {t.basicDetails.buildingTypes.twinhouse}
+              </option>
+              <option value="house">
+                {t.basicDetails.buildingTypes.house}
+              </option>
             </select>
           </div>
         </div>
@@ -209,12 +229,22 @@ export default function BasicDetailsStep({
             >
               <option value="">{t.basicDetails.selectCity}</option>
               <option value="Cairo">{t.basicDetails.cities.cairo}</option>
-              <option value="Alexandria">{t.basicDetails.cities.alexandria}</option>
+              <option value="Alexandria">
+                {t.basicDetails.cities.alexandria}
+              </option>
               <option value="Giza">{t.basicDetails.cities.giza}</option>
-              <option value="New Cairo">{t.basicDetails.cities.newCairo}</option>
-              <option value="6th of October">{t.basicDetails.cities.october6}</option>
-              <option value="El Shorouk">{t.basicDetails.cities.elShorouk}</option>
-              <option value="Sheikh Zayed">{t.basicDetails.cities.sheikhZayed}</option>
+              <option value="New Cairo">
+                {t.basicDetails.cities.newCairo}
+              </option>
+              <option value="6th of October">
+                {t.basicDetails.cities.october6}
+              </option>
+              <option value="El Shorouk">
+                {t.basicDetails.cities.elShorouk}
+              </option>
+              <option value="Sheikh Zayed">
+                {t.basicDetails.cities.sheikhZayed}
+              </option>
             </select>
           </div>
         </div>
@@ -398,7 +428,7 @@ export default function BasicDetailsStep({
 
       {/* Add Compound Dialog */}
       <AddCompoundDialog
-        developers={developers}
+        developersData={developers}
         isOpen={isAddCompoundDialogOpen}
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}

@@ -9,12 +9,13 @@ import {
   uploadImages,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
+import AddDeveloperDialog from "./add-developer-dialog";
 
 export default function AddCompoundDialog({
   isOpen,
   onClose,
   onAdd,
-  developers,
+  developersData,
 }) {
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -22,6 +23,10 @@ export default function AddCompoundDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [developers, setDevelopers] = useState(developersData || []);
+  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
+    useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -186,47 +191,31 @@ export default function AddCompoundDialog({
     }
   };
 
+  const handleAddDeveloper = (newDeveloper) => {
+    setDevelopers([...developers, newDeveloper]);
+
+    setFormData((prev) => {
+      return {
+        ...prev,
+        developer_name: newDeveloper,
+      };
+    });
+  };
+
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Add New Compound">
-      <div>
-        <div className="space-y-2">
-          {/* Basic Information */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Compound Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={2}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-
-          {/* Location */}
-          <div className="grid grid-cols-2 gap-4">
+    <>
+      <Dialog isOpen={isOpen} onClose={onClose} title="Add New Compound">
+        <div>
+          <div className="space-y-2">
+            {/* Basic Information */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                City <span className="text-red-500">*</span>
+                Compound Name <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                name="city"
-                value={formData.city}
+                name="name"
+                value={formData.name}
                 onChange={handleChange}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -234,246 +223,288 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Country <span className="text-red-500">*</span>
+                Description
               </label>
-              <input
-                type="text"
-                name="country"
-                value={formData.country}
+              <textarea
+                name="description"
+                value={formData.description}
                 onChange={handleChange}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Details */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Area (m²)
-              </label>
-              <input
-                type="number"
-                name="area"
-                value={formData.area}
-                placeholder="1000"
-                onChange={handleChange}
-                min="0"
+                rows={2}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-            <div className="flex items-center h-full pt-6">
-              <input
-                type="checkbox"
-                id="gated"
-                name="gated"
-                checked={formData.gated}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label
-                htmlFor="gated"
-                className="ml-2 block text-sm text-gray-700"
-              >
-                Gated Community
-              </label>
-            </div>
-          </div>
+            {/* Location */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  City <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
-          {/* Developer */}
-          <div className="relative">
-            <label className={`block text-sm font-medium mb-1`}>
-              Developer <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <select
-                name="developer_name"
-                value={formData.developer_name}
-                onChange={handleChange}
-                className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
-              >
-                <option value="">Select developer</option>
-                {developers.map((d, idx) => (
-                  <option key={idx} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Country <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleChange}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
               </div>
             </div>
-          </div>
 
-          {/* Links */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Video URL
-            </label>
-            <input
-              type="url"
-              name="video_url"
-              value={formData.video_url}
-              onChange={handleChange}
-              placeholder="https://example.com/video"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+            {/* Details */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Area (m²)
+                </label>
+                <input
+                  type="number"
+                  name="area"
+                  value={formData.area}
+                  placeholder="1000"
+                  onChange={handleChange}
+                  min="0"
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Google Maps Link
-            </label>
-            <input
-              type="url"
-              name="google_map_link"
-              value={formData.google_map_link}
-              onChange={handleChange}
-              placeholder="https://maps.google.com/..."
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+              <div className="flex items-center h-full pt-6">
+                <input
+                  type="checkbox"
+                  id="gated"
+                  name="gated"
+                  checked={formData.gated}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="gated"
+                  className="ml-2 block text-sm text-gray-700"
+                >
+                  Gated Community
+                </label>
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Master Plan Image
-            </label>
-            <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg, image/png, image/webp"
-                onChange={handleFileSelect}
-                className="hidden"
-                disabled={isUploading}
-              />
-              <div
-                onClick={() => fileInputRef.current.click()}
-                className="flex flex-col items-center justify-center"
-              >
-                {selectedImage || formData.master_plan ? (
-                  <div className="relative">
-                    <img
-                      src={
-                        selectedImage
-                          ? URL.createObjectURL(selectedImage)
-                          : formData.master_plan
-                      }
-                      alt="Selected"
-                      className="w-full h-full max-h-32 object-cover rounded-md"
+            {/* Developer */}
+            <div className="relative">
+              <label className={`block text-sm font-medium mb-1`}>
+                Developer <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  name="developer_name"
+                  value={formData.developer_name}
+                  onChange={handleChange}
+                  className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
+                >
+                  <option value="">Select developer</option>
+                  {developers.map((d, idx) => (
+                    <option key={idx} value={d}>
+                      {d}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                  <svg
+                    className="h-5 w-5 text-gray-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                      clipRule="evenodd"
                     />
-                    {!isUploading && (
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-4 w-4"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
+                  </svg>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddDeveloperDialogOpen(true)}
+                className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+              >
+                + Add New
+              </button>
+            </div>
+
+            {/* Links */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Video URL
+              </label>
+              <input
+                type="url"
+                name="video_url"
+                value={formData.video_url}
+                onChange={handleChange}
+                placeholder="https://example.com/video"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Google Maps Link
+              </label>
+              <input
+                type="url"
+                name="google_map_link"
+                value={formData.google_map_link}
+                onChange={handleChange}
+                placeholder="https://maps.google.com/..."
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Master Plan Image
+              </label>
+              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg, image/png, image/webp"
+                  onChange={handleFileSelect}
+                  className="hidden"
+                  disabled={isUploading}
+                />
+                <div
+                  onClick={() => fileInputRef.current.click()}
+                  className="flex flex-col items-center justify-center"
+                >
+                  {selectedImage || formData.master_plan ? (
+                    <div className="relative">
+                      <img
+                        src={
+                          selectedImage
+                            ? URL.createObjectURL(selectedImage)
+                            : formData.master_plan
+                        }
+                        alt="Selected"
+                        className="w-full h-full max-h-32 object-cover rounded-md"
+                      />
+                      {!isUploading && (
+                        <button
+                          type="button"
+                          onClick={handleRemoveImage}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-12 w-12 text-gray-400 mb-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      <p className="text-lg text-gray-700 mb-2">
+                        Click or drag and drop an image here
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Supported formats: JPG, PNG, WEBP (Max 5MB each)
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+              {selectedImage && (
+                <div className="mt-4 flex justify-center">
+                  <button
+                    onClick={handleUpload}
+                    disabled={isUploading}
+                    className={`flex items-center gap-2 font-medium py-1.5 px-6 rounded-md transition-colors ${
+                      isUploading
+                        ? "bg-gray-400 cursor-not-allowed"
+                        : "bg-primary hover:opacity-90 text-white"
+                    }`}
+                  >
+                    {isUploading ? (
+                      <>
+                        <Loader2 size={24} className="animate-spin" />
+                        Uploading...
+                      </>
+                    ) : (
+                      "Upload Image"
                     )}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                  isSubmitting || isUploading
+                    ? "pointer-events-none opacity-80"
+                    : "hover:bg-primary/90"
+                }`}
+              >
+                {isSubmitting ? (
+                  <div className="flex items-center justify-center">
+                    <Loader2 size={20} className="animate-spin mr-2" />
+                    Saving...
                   </div>
                 ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-12 w-12 text-gray-400 mb-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    <p className="text-lg text-gray-700 mb-2">
-                      Click or drag and drop an image here
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      Supported formats: JPG, PNG, WEBP (Max 5MB each)
-                    </p>
-                  </>
+                  "Save Compound"
                 )}
-              </div>
+              </button>
             </div>
-            {selectedImage && (
-              <div className="mt-4 flex justify-center">
-                <button
-                  onClick={handleUpload}
-                  disabled={isUploading}
-                  className={`flex items-center gap-2 font-medium py-1.5 px-6 rounded-md transition-colors ${
-                    isUploading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-primary hover:opacity-90 text-white"
-                  }`}
-                >
-                  {isUploading ? (
-                    <>
-                      <Loader2 size={24} className="animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    "Upload Image"
-                  )}
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                isSubmitting || isUploading
-                  ? "pointer-events-none opacity-80"
-                  : "hover:bg-primary/90"
-              }`}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center">
-                  <Loader2 size={20} className="animate-spin mr-2" />
-                  Saving...
-                </div>
-              ) : (
-                "Save Compound"
-              )}
-            </button>
           </div>
         </div>
-      </div>
-    </Dialog>
+      </Dialog>
+
+      <AddDeveloperDialog
+        isOpen={isAddDeveloperDialogOpen}
+        onClose={() => setIsAddDeveloperDialogOpen(false)}
+        onAdd={handleAddDeveloper}
+      />
+    </>
   );
 }
