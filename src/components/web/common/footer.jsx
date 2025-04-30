@@ -1,66 +1,58 @@
+"use client"
 import Link from "next/link";
 import { Linkedin, Phone, Building, Handshake, User } from "lucide-react";
+import { useI18n } from "@/context/translate-api";
 
 const Footer = () => {
+  const { t } = useI18n();
+
   return (
     <footer className="bg-primary text-white py-10">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              Company Information
+              {t.footer.companyInfo.title}
             </h3>
             <div className="flex items-start space-x-3">
               <Building className="mt-1 flex-shrink-0" />
-              <p>
-                Company Address: 505 Siac Building, ARCHPLAN Square, New
-                Capital, Cairo, Egypt
-              </p>
+              <p>{t.footer.companyInfo.address}</p>
             </div>
-            {/* <div className="flex items-center space-x-3">
-              <Handshake className="flex-shrink-0" />
-              <p>Partnership with DREAM HOMES</p>
-            </div> */}
           </div>
 
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              Contact Details
+              {t.footer.contact.title}
             </h3>
             <div className="flex items-center space-x-3">
               <Phone className="flex-shrink-0" />
-              <p>Contact info: 01016080323</p>
+              <p>{t.footer.contact.phone}</p>
             </div>
-            {/* <div className="flex items-center space-x-3">
-              <User className="flex-shrink-0" />
-              <p>CTO: Aboazid Ibrahim</p>
-            </div> */}
           </div>
 
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              Connect With Us
+              {t.footer.connect.title}
             </h3>
             <Link
               href="https://www.linkedin.com/company/lenaai-net/"
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors"
             >
               <Linkedin size={24} />
-              <span>LinkedIn</span>
+              <span>{t.footer.connect.linkedin}</span>
             </Link>
             <div className="">
-            <Link href="/privacy" className="text-blue-200 hover:underline">
-                Read our Privacy Policy
+              <Link href="/privacy" className="text-blue-200 hover:underline">
+                {t.footer.connect.privacyPolicy}
               </Link>
-             
             </div>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/30 text-center">
           <p>
-            &copy; {new Date().getFullYear()} Lena AI. All rights reserved,
-            Version 0.0.001{" "}
+            {t.footer.copyright} {new Date().getFullYear()} {t.footer.companyName}. {t.footer.rightsReserved}, 
+            {t.footer.version} 0.0.001
           </p>
         </div>
       </div>

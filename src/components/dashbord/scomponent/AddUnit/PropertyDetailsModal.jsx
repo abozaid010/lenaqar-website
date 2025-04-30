@@ -14,8 +14,11 @@ import {
   Phone,
 } from "lucide-react";
 import formatDateForDisplay from "@/utils/formateDate";
+import { useI18n } from "@/context/translate-api";
 
 const PropertyDetailsModal = ({ onClose, property }) => {
+  const { t } = useI18n();
+
   const reformatPropertyData = () => {
     const reformattedData = {};
     for (const key in property) {
@@ -24,20 +27,31 @@ const PropertyDetailsModal = ({ onClose, property }) => {
         ? value[value.length - 1]
         : value;
     }
-
     return reformattedData;
   };
 
   const formattedProperty = reformatPropertyData();
 
-  console.log(formattedProperty, "##########");
+  const DetailItem = ({ icon, label, value }) => (
+    <div className="flex items-center gap-2">
+      <div className="bg-blue-100 p-2 rounded-md">{icon}</div>
+      <div>
+        <p className="text-xs text-gray-500">{label}</p>
+        <p className="text-sm font-medium">
+          {value || t.propertyDetails.notAvailable}
+        </p>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0  bg-opacity-20 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-opacity-20 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
-            {formattedProperty.user_id}_Requirements
+            {formattedProperty.user_id}_
+            {t.propertyDetails.title.replace("{id}", "")}
           </h3>
           <button
             onClick={onClose}
@@ -53,179 +67,94 @@ const PropertyDetailsModal = ({ onClose, property }) => {
             {/* Left column - Property details */}
             <div className="flex-1">
               <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Building2 className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Building Type</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.buildingType || "-----"}
-                    </p>
-                  </div>
-                </div>
+                <DetailItem
+                  icon={<Building2 className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.buildingType}
+                  value={formattedProperty.buildingType}
+                />
 
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Square className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Land Area</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.land_area || "-----"}
-                    </p>
-                  </div>
-                </div>
+                <DetailItem
+                  icon={<Square className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.landArea}
+                  value={formattedProperty.land_area}
+                />
 
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Home className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Floor</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.floor || "-----"}
-                    </p>
-                  </div>
-                </div>
+                <DetailItem
+                  icon={<Home className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.floor}
+                  value={formattedProperty.floor}
+                />
 
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Bed className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Rooms Count</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.roomsCount || "----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Bath className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Bathroom Count</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.bathroomCount || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Eye className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">View</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.viewType || "-----"}
-                    </p>
-                  </div>
-                </div>
+                <DetailItem
+                  icon={<Bed className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.roomsCount}
+                  value={formattedProperty.roomsCount}
+                />
+
+                <DetailItem
+                  icon={<Bath className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.bathroomCount}
+                  value={formattedProperty.bathroomCount}
+                />
+
+                <DetailItem
+                  icon={<Eye className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.viewType}
+                  value={formattedProperty.viewType}
+                />
               </div>
+              
               <div className="grid grid-cols-2 gap-4 pt-2">
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Square className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Garden Size</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.garageSize || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Landmark className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Finishing</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.finishingType || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <User className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Developer</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.developer || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Down Payment</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.downPayment || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <Calendar className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Delivery Date</p>
-                    <p className="text-sm font-medium">
-                      {/* { new Date(formattedProperty.deliveryDate).toLocaleDateString() || "-----"} */}
-                      {formatDateForDisplay(formattedProperty.deliveryDate , true) || "-----"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="bg-blue-100 p-2 rounded-md">
-                    <DollarSign className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Total Price</p>
-                    <p className="text-sm font-medium">
-                      {formattedProperty.totalPrice || "N/A"}
-                    </p>
-                  </div>
-                </div>
+                <DetailItem
+                  icon={<Square className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.garageSize}
+                  value={formattedProperty.garageSize}
+                />
+
+                <DetailItem
+                  icon={<Landmark className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.finishingType}
+                  value={formattedProperty.finishingType}
+                />
+
+                <DetailItem
+                  icon={<User className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.developer}
+                  value={formattedProperty.developer}
+                />
+
+                <DetailItem
+                  icon={<DollarSign className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.downPayment}
+                  value={formattedProperty.downPayment}
+                />
+
+                <DetailItem
+                  icon={<Calendar className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.deliveryDate}
+                  value={formatDateForDisplay(formattedProperty.deliveryDate, true)}
+                />
+
+                <DetailItem
+                  icon={<DollarSign className="h-5 w-5 text-blue-600" />}
+                  label={t.propertyDetails.fields.totalPrice}
+                  value={formattedProperty.totalPrice || "N/A"}
+                />
               </div>
             </div>
 
             {/* Right column - Contact info */}
             <div className="md:w-64 space-y-2">
-              {/* <div className="bg-gray-50 p-3 rounded-lg">
-                <div className="flex flex-col items-center">
-                  <div className="h-16 w-16 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                    <User className="h-8 w-8 text-blue-600" />
-                  </div>
-                  <h4 className="font-medium text-gray-900">
-                    {formattedProperty.contactName}
-                  </h4>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {property.lastUpdate}
-                  </p>
-                </div>
-              </div> */}
-
-              {/* Added Purchase Probability Section */}
               <div className="bg-blue-50 p-3 rounded-lg">
                 <div className="text-center">
                   <p className="text-sm text-blue-800 font-medium">
-                    Purchase Probability
+                    {t.propertyDetails.purchaseProbability}
                   </p>
                   <div className="mt-2">
                     <p className="text-lg font-semibold text-blue-600">
                       {formattedProperty?.score?.score || 0}%
                     </p>
-                    <div
-                      className="mt-2 h-2 rounded-full bg-blue-200"
-                      style={{
-                        width: "100%",
-                      }}
-                    >
+                    <div className="mt-2 h-2 rounded-full bg-blue-200 w-full">
                       <div
                         className="h-full rounded-full bg-blue-600"
                         style={{
@@ -236,13 +165,17 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   </div>
                 </div>
               </div>
+
               <div className="bg-blue-50 p-3 rounded-lg">
                 <div className="text-center">
                   <div className="inline-block bg-blue-100 p-2 rounded-full mb-2">
                     <Phone className="h-6 w-6 text-blue-600" />
                   </div>
                   <p className="text-sm text-blue-800 font-medium">
-                    For {formattedProperty.propertyPurpose || "N/A"}
+                    {t.propertyDetails.fields.propertyPurpose.replace(
+                      "{purpose}",
+                      formattedProperty.propertyPurpose || "N/A"
+                    )}
                   </p>
                 </div>
               </div>
@@ -256,7 +189,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
             onClick={onClose}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-200 transition-colors"
           >
-            Close
+            {t.propertyDetails.buttons.close}
           </button>
         </div>
       </div>

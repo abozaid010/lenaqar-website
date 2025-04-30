@@ -129,7 +129,7 @@ const Header = () => {
                 {t.header.clientDashboard}
               </Link>
               <Link href="" className="hover:text-blue-200 transition-colors">
-              <CalendarModal buttonText={"Request Demo"} />
+              <CalendarModal buttonText={t.header.jobOpportunities} />
               </Link>
               <Link href="" className="hover:text-blue-200 transition-colors">
                 {t.header.allProperties}
@@ -145,14 +145,14 @@ const Header = () => {
                   href="/login"
                   className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                 >
-                  Sign In
+                  {t.header.login}
                 </Link>
               ) : (
                 <button
                   onClick={initiateLogout}
                   className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                 >
-                  Logout
+                  {t.header.logOut}
                 </button>
               )}
             </div>

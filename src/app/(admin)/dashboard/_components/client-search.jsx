@@ -4,8 +4,10 @@ import { useState, useCallback, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { debounce } from "@/utils/debounce";
+import { useI18n } from "@/context/translate-api";
 
 export default function SearchBar({ q }) {
+  const { t } = useI18n();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState(q || "");
 
@@ -30,7 +32,6 @@ export default function SearchBar({ q }) {
     setSearchTerm("");
     const params = new URLSearchParams(window.location.search);
     params.delete("query");
-
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
@@ -47,13 +48,10 @@ export default function SearchBar({ q }) {
         <input
           type="text"
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-          }}
-          placeholder="Search client by name or number..."
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder={t.search.placeholder}
           className="border border-gray-300 rounded-md p-2 w-full pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 text-sm"
         />
-
         {searchTerm && (
           <button
             type="button"

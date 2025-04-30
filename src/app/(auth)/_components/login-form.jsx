@@ -5,6 +5,7 @@ import { loginAction } from "../_actions/actions";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/context/translate-api";
 
 const initialState = {
   success: null,
@@ -12,6 +13,7 @@ const initialState = {
 };
 
 export default function LoginForm() {
+  const { t } = useI18n();
   const router = useRouter();
   const [state, action, pending] = useActionState(loginAction, initialState);
   const [formData, setFormData] = useState({
@@ -21,10 +23,10 @@ export default function LoginForm() {
 
   useEffect(() => {
     if (state.success) {
-      toast.success("Login successful");
-      router.replace("/dashboard"); // Use replace to prevent going back to the login page
+      toast.success(t.login.successMessage);
+      router.replace("/dashboard");
     } else if (state.success === false) {
-      toast.error(state.message);
+      toast.error(t.login.errorMessage);
     }
   }, [state]);
 
@@ -35,7 +37,7 @@ export default function LoginForm() {
           htmlFor="username"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Username
+          {t.login.usernameLabel}
         </label>
         <input
           id="username"
@@ -47,7 +49,7 @@ export default function LoginForm() {
           }
           required
           className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
-          placeholder="Enter your username"
+          placeholder={t.login.usernamePlaceholder}
         />
       </div>
 
@@ -56,7 +58,7 @@ export default function LoginForm() {
           htmlFor="password"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
-          Password
+          {t.login.passwordLabel}
         </label>
         <input
           id="password"
@@ -68,7 +70,7 @@ export default function LoginForm() {
           }
           required
           className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
-          placeholder="Enter your password"
+          placeholder={t.login.passwordPlaceholder}
         />
       </div>
 
@@ -76,7 +78,7 @@ export default function LoginForm() {
         disabled={pending}
         className="w-full flex cursor-pointer justify-center py-2 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
       >
-        {pending ? <Loader2 className="animate-spin" /> : "Sign in"}
+        {pending ? <Loader2 className="animate-spin" /> : t.login.signInButton}
       </button>
     </form>
   );

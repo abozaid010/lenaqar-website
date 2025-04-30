@@ -4,21 +4,26 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import CalendarModal from "@/components/ui/calendar-modal";
+import { useI18n } from "@/context/translate-api";
 
 const HeroSection = () => {
+  const { t } = useI18n();
   // State for tracking which messages have been shown
   const [visibleMessages, setVisibleMessages] = useState([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
   const [imageError, setImageError] = useState(false);
 
-  // Custom messages
+  // Custom messages from translations
   const messages = [
-    "24/7 reply and handle your clients needs",
-    "Filter leads",
-    "Close More Deals",
-    "follow up, scale with effortless",
+    t.heroSection.message1,
+    t.heroSection.message2,
+    t.heroSection.message3,
+    t.heroSection.message4,
   ];
-
+  useEffect(() => {
+    setVisibleMessages([]);
+    setCurrentMessageIndex(0);
+  }, [t]);
   // Add new message every 4 seconds until all messages are shown
   useEffect(() => {
     if (currentMessageIndex < messages.length) {
@@ -38,7 +43,7 @@ const HeroSection = () => {
         {!imageError ? (
           <Image
             src={"/images/web2.jpg"}
-            alt="Background"
+            alt={t.heroSection.backgroundAlt}
             fill
             className="object-cover"
             priority
@@ -68,17 +73,18 @@ const HeroSection = () => {
             transition={{ duration: 0.8 }}
           >
             <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl  font-bold text-white"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.8 }}
             >
               <span className="bg-clip-text text-white bg-gradient-to-r from-white to-blue-300">
-                Sell Smarter
+                {t.heroSection.title1}
               </span>
               <br />
-              <span className="bg-clip-text text-white bg-gradient-to-r from-blue-300 to-white">
-                Close More Deals.
+              
+              <span className="bg-clip-text inline-block mt-5   text-white bg-gradient-to-r from-blue-300 to-white">
+                {t.heroSection.title2}
               </span>
             </motion.h1>
 
@@ -88,7 +94,7 @@ const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.8 }}
             >
-              Your AI-powered real estate sales assistant.
+              {t.heroSection.subtitle}
             </motion.div>
 
             <motion.p
@@ -97,14 +103,13 @@ const HeroSection = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.6, duration: 0.8 }}
             >
-              Lena AI is built to qualify leads instantly, engage prospects
-              24/7, and boost conversions so you focus on closing, not chasing
-              cold leads.
+              {t.heroSection.description}
             </motion.p>
 
-         
-              <CalendarModal buttonText={"Get Started"} style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} />
-         
+            <CalendarModal 
+              buttonText={t.heroSection.ctaButton} 
+              style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} 
+            />
           </motion.div>
 
           <div className="md:col-span-1 flex justify-center md:justify-end">
@@ -128,7 +133,7 @@ const HeroSection = () => {
               >
                 <Image
                   src={"/images/AdobeStock_241732873_Preview.jpeg"}
-                  alt="AI Assistant"
+                  alt={t.heroSection.aiImageAlt}
                   fill
                   className="object-cover"
                   priority

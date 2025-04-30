@@ -13,14 +13,15 @@ import {
 import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 const Header = ({ clientName }) => {
+  const { t } = useI18n();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const userMenuRef = useRef(null);
 
   useEffect(() => {
-    // Add click event listener to close menu when clicking outside
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setIsUserMenuOpen(false);
@@ -34,7 +35,6 @@ const Header = ({ clientName }) => {
   }, []);
 
   const handleMenuClick = () => {
-    // Call the global toggleSidebar function
     if (typeof window !== "undefined" && window.toggleSidebar) {
       window.toggleSidebar();
     }
@@ -52,7 +52,7 @@ const Header = ({ clientName }) => {
   const confirmLogout = () => {
     Cookies.remove("client_id");
     setShowLogoutConfirm(false);
-    toast.success("Logout Successful");
+    toast.success(t.header.logoutSuccess);
     window.location.reload();
   };
 
@@ -68,16 +68,6 @@ const Header = ({ clientName }) => {
           </button>
         </div>
 
-        {/* <div className="relative hidden sm:block">
-          <input
-            type="text"
-            placeholder="Search"
-            className="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
-          />
-          <div className="absolute left-3 top-2.5">
-            <Search className="h-5 w-5 text-gray-400" />
-          </div>
-        </div> */}
         <div className="sm:hidden">
           <Search className="h-5 w-5 text-gray-400" />
         </div>
@@ -107,13 +97,11 @@ const Header = ({ clientName }) => {
             <div className="h-8 w-8 cursor-pointer bg-blue-100 rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-blue-600" />
             </div>
-
             <span className="ml-2 text-sm cursor-pointer font-medium text-gray-700 hidden sm:inline">
               {clientName}
             </span>
           </button>
 
-          {/* User dropdown menu */}
           {isUserMenuOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200 overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-100 relative">
@@ -130,7 +118,7 @@ const Header = ({ clientName }) => {
 
               <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
                 <Settings className="h-4 w-4 mr-3" />
-                Settings
+                {t.header.userMenu.settings}
               </a>
 
               <button
@@ -138,35 +126,34 @@ const Header = ({ clientName }) => {
                 className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
               >
                 <LogOut className="h-4 w-4 mr-3" />
-                Logout
+                {t.header.userMenu.logout}
               </button>
             </div>
           )}
         </div>
       </div>
 
-      {/* Logout confirmation modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0  bg-black/50 backdrop-blur-sm   flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-sm w-full">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Confirm Logout
+              {t.header.logoutConfirm.title}
             </h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to logout?
+              {t.header.logoutConfirm.message}
             </p>
             <div className="flex justify-end space-x-3">
               <button
                 onClick={cancelLogout}
                 className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
               >
-                Cancel
+                {t.header.logoutConfirm.cancel}
               </button>
               <button
                 onClick={confirmLogout}
                 className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
               >
-                Logout
+                {t.header.logoutConfirm.confirm}
               </button>
             </div>
           </div>

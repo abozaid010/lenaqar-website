@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import CalendarSelector from "./calender-selector";
+import { useI18n } from "@/context/translate-api";
 
-export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
+export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [isBookingComplete, setIsBookingComplete] = useState(false);
   const [bookingData, setBookingData] = useState(null);
- 
 
   const openModal = () => {
     setIsOpen(true);
@@ -18,16 +19,12 @@ export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
 
   const closeModal = () => setIsOpen(false);
 
-  // Handle booking completion
   const handleBookingComplete = (data) => {
     setBookingData(data);
     setIsBookingComplete(true);
-    
-
     console.log("Booking Data:", data);
   };
 
-  // Disable/enable scroll on modal open/close
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -41,30 +38,27 @@ export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
 
   const modalContent = (
     <div
-      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-300  ${
+      className={`fixed inset-0 bg-black/50 flex items-center justify-center z-50 transition-opacity duration-300 ${
         isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       }`}
       onClick={closeModal}
     >
-      {/* Modal content */}
       <div
-        className={`bg-white  rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto transition-all  duration-300 ${
+        className={`bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-auto transition-all duration-300 ${
           isOpen ? "scale-100" : "scale-95"
         }`}
-        onClick={(e) => e.stopPropagation()} // Prevent clicks inside from closing
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Close button */}
         <button
           onClick={closeModal}
-          className="absolute top-1 right-2 p-2 rounded-full text-gray-500 z-10 "
+          className="absolute top-1 right-2 p-2 rounded-full text-gray-500 z-10"
         >
           <X className="h-5 w-5" />
-          <span className="sr-only">Close</span>
+          <span className="sr-only">{t.calendarModal.closeButton}</span>
         </button>
 
         {isBookingComplete ? (
-          // Booking confirmation screen
-          <div className="p-8 text-center ">
+          <div className="p-8 text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <svg
                 className="w-8 h-8 text-green-500"
@@ -81,29 +75,27 @@ export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
               </svg>
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">
-              Booking Confirmed!
+              {t.calendarModal.confirmationTitle}
             </h2>
             <p className="text-gray-600 mb-6">
-              Thank you, <span className="font-bold">{bookingData?.name}</span>!
-              Your meeting has been scheduled for{" "}
+              {t.calendarModal.thankYou} <span className="font-bold">{bookingData?.name}</span>!
+              {t.calendarModal.meetingScheduled} {" "}
               {bookingData?.date &&
                 new Date(bookingData.date).toLocaleDateString()}{" "}
-              at {bookingData?.time}.
+              {t.calendarModal.at} {bookingData?.time}.
             </p>
             <p className="text-gray-600 mb-6">
-              We've sent a confirmation email to {bookingData?.email} with all
-              the details.
+              {t.calendarModal.confirmationSent} {bookingData?.email} {t.calendarModal.withDetails}.
             </p>
             <button
               onClick={closeModal}
               className="px-6 cursor-pointer py-2 bg-primary hover:bg-primary text-white font-medium rounded-md"
             >
-              Close
+              {t.calendarModal.closeButton}
             </button>
           </div>
         ) : (
-          // Calendar component
-          <CalendarSelector onBookingComplete={handleBookingComplete}  />
+          <CalendarSelector onBookingComplete={handleBookingComplete} />
         )}
       </div>
     </div>
@@ -111,15 +103,13 @@ export default function CalendarModal({ buttonText = "Try Lena Now" ,style }) {
 
   return (
     <>
-      {/* Button to open the modal */}
       <button
         onClick={openModal}
-        className={` ${style}  `}
+        className={`${style}`}
       >
         {buttonText}
       </button>
        
-      {/* Render modal in a portal */}
       {typeof window !== "undefined" &&
         createPortal(modalContent, document.body)}
     </>

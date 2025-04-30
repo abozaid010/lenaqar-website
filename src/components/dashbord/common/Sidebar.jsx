@@ -14,37 +14,27 @@ import {
 } from "lucide-react";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 const Sidebar = () => {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const pathname = usePathname();
 
-  // This function can be called from the Header component
-  const toggleSidebar = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const initiateLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
-  const cancelLogout = () => {
-    setShowLogoutConfirm(false);
-  };
+  const toggleSidebar = () => setIsOpen(!isOpen);
+  const initiateLogout = () => setShowLogoutConfirm(true);
+  const cancelLogout = () => setShowLogoutConfirm(false);
 
   const confirmLogout = () => {
     Cookies.remove("client_id");
     setShowLogoutConfirm(false);
-    toast.success("Logout Successful");
+    toast.success(t.sidebar.logoutSuccess);
     window.location.reload();
   };
 
-  // Function to check if a link is active
   const isLinkActive = (path) => {
-    if (path === "/dashboard" && pathname === "/dashboard") {
-      return true;
-    }
+    if (path === "/dashboard" && pathname === "/dashboard") return true;
     return pathname.startsWith(path) && path !== "/dashboard";
   };
 
@@ -64,40 +54,36 @@ const Sidebar = () => {
 
       {/* Logout Confirmation Popup */}
       {showLogoutConfirm && (
-        <>
-          {/* Overlay for popup */}
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm   z-50 flex items-center justify-center">
-            {/* Popup container */}
-            <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
-              <div className="flex flex-col items-center text-center mb-4">
-                <div className="bg-red-100 p-3 rounded-full mb-4">
-                  <AlertTriangle className="h-6 w-6 text-red-500" />
-                </div>
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Are you sure?
-                </h3>
-                <p className="text-gray-600 mt-2">
-                  You will be logged out of your account
-                </p>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="bg-red-100 p-3 rounded-full mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-500" />
               </div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {t.sidebar.logoutConfirm.title}
+              </h3>
+              <p className="text-gray-600 mt-2">
+                {t.sidebar.logoutConfirm.message}
+              </p>
+            </div>
 
-              <div className="flex gap-3 mt-6">
-                <button
-                  onClick={cancelLogout}
-                  className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={confirmLogout}
-                  className="flex-1 py-2 px-4 bg-red-500  text-white rounded-md font-medium transition-colors"
-                >
-                  Log Out
-                </button>
-              </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={cancelLogout}
+                className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
+              >
+                {t.sidebar.logoutConfirm.cancel}
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
+              >
+                {t.sidebar.logoutConfirm.confirm}
+              </button>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {/* Sidebar content */}
@@ -107,7 +93,7 @@ const Sidebar = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-3  flex items-center gap-2">
+        <div className="p-3 flex items-center gap-2">
           <Link href="/">
             <Image
               src={"/images/logo.png"}
@@ -129,7 +115,7 @@ const Sidebar = () => {
             }`}
           >
             <LayoutDashboard className="h-5 w-5 mr-3" />
-            <span>Dashboard</span>
+            <span>{t.sidebar.dashboard}</span>
           </Link>
 
           <Link
@@ -141,7 +127,7 @@ const Sidebar = () => {
             }`}
           >
             <BarChart2 className="h-5 w-5 mr-3" />
-            <span>Analytics</span>
+            <span>{t.sidebar.analytics}</span>
           </Link>
 
           <Link
@@ -153,7 +139,7 @@ const Sidebar = () => {
             }`}
           >
             <Home className="h-5 w-5 mr-3" />
-            <span>Units</span>
+            <span>{t.sidebar.units}</span>
           </Link>
         </div>
 
@@ -161,7 +147,7 @@ const Sidebar = () => {
         <div className="mt-auto border-t border-gray-200 pt-2 pb-4">
           <button className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md mx-2 mb-1 transition-colors">
             <Moon className="h-5 w-5 mr-3" />
-            <span>Dark Mode</span>
+            <span>{t.sidebar.darkMode}</span>
           </button>
 
           <div className="mx-2 border-t border-gray-200 my-2"></div>
@@ -171,7 +157,7 @@ const Sidebar = () => {
             className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md mx-2 transition-colors"
           >
             <LogOut className="h-5 w-5 mr-3" />
-            <span>Log Out</span>
+            <span>{t.sidebar.logout}</span>
           </button>
         </div>
       </div>

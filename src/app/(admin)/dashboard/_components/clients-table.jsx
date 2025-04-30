@@ -10,6 +10,7 @@ import {
   getClientRequirements,
 } from "@/components/services/serviceFetching";
 import ActionsModal from "./actions-modal";
+import { useI18n } from "@/context/translate-api";
 
 const ACTIONS_COLORS = {
   "Make a call": "text-blue-800",
@@ -29,13 +30,12 @@ export default function ClientsTable({
   disablePrev,
   previousCursor,
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const [rowSelection, setRowSelection] = useState([]);
-  console.log(users);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
   const [openActionModal, setOpenActionModal] = useState(false);
-
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
@@ -47,6 +47,7 @@ export default function ClientsTable({
       setRowSelection(users.map((user) => user.user_id));
     }
   };
+
   const toggleRowSelection = (user_id) => {
     if (rowSelection.includes(user_id)) {
       setRowSelection(rowSelection.filter((id) => id !== user_id));
@@ -54,19 +55,16 @@ export default function ClientsTable({
       setRowSelection([...rowSelection, user_id]);
     }
   };
+
   const isRowSelected = (user_id) => {
     return rowSelection.includes(user_id);
   };
 
   const handleclientAction = async (e, phone_number, user_id) => {
     e.stopPropagation();
-
-    // Set loading state for the specific row using user_id
     setLoadingClientActions(user_id);
-
     try {
       const actions = await getClientActions(user_id);
-
       setRowActions(actions);
       setOpenActionModal(true);
     } catch (error) {
@@ -77,10 +75,7 @@ export default function ClientsTable({
 
   const handleClientRequirements = async (e, phone_number, user_id) => {
     e.stopPropagation();
-
-    // Set loading state for the specific row using user_id
     setLoadingRequirements(user_id);
-
     try {
       const requirements = await getClientRequirements(phone_number);
       setRowRequirements({ ...requirements });
@@ -91,19 +86,17 @@ export default function ClientsTable({
     }
   };
 
-  // In the requirements cell, update the condition to check for the specific phone number
-
   return (
     <>
       {users?.length === 0 ? (
         <div>
           <div className="text-center font-medium text-xl mt-5 text-gray-400">
-            No clients found.
+            {t.clientsTable.noClients}
           </div>
         </div>
       ) : (
         <>
-          <div className=" overflow-x-auto border border-gray-200 sm:rounded-lg">
+          <div className="overflow-x-auto border border-gray-200 sm:rounded-lg">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
@@ -115,25 +108,30 @@ export default function ClientsTable({
                       className="cursor-pointer"
                     />
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">Name</th>
-                  <th className="px-2 sm:px-4 py-2 text-center hidden sm:table-cell">
-                    User Number
+                  <th className="px-2 sm:px-4 py-2 text-center">
+                    {t.clientsTable.headers.name}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">Date</th>
-                  <th className="px-2 sm:px-4 py-2 text-center hidden md:table-cell">
-                    Requirements
+                  <th className="px-2 sm:px-4 py-2 text-center hidden sm:table-cell">
+                    {t.clientsTable.headers.userNumber}
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center">
-                    Message Count
+                    {t.clientsTable.headers.date}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">Action</th>
+                  <th className="px-2 sm:px-4 py-2 text-center hidden md:table-cell">
+                    {t.clientsTable.headers.requirements}
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center">
+                    {t.clientsTable.headers.messageCount}
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center">
+                    {t.clientsTable.headers.action}
+                  </th>
                 </tr>
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
                 {users?.map((user) => {
-                  // Add error handling for invalid date values
-                  let lastActivity = "N/A";
+                  let lastActivity = t.clientsTable.lastActivity.na;
                   try {
                     if (user.updated_at) {
                       const dateObj = new Date(user.updated_at);
@@ -147,12 +145,10 @@ export default function ClientsTable({
 
                   return (
                     <tr
-                      onClick={() =>
-                        router.push( `/dashboard/chat/${user.user_id}`)
-                      }
+                      onClick={() => router.push(`/dashboard/chat/${user.user_id}`)}
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.user_id}` )
+                        router.push(`/dashboard/chat/${user.user_id}`)
                       }
                       role="button"
                       tabIndex={0}
@@ -166,13 +162,13 @@ export default function ClientsTable({
                           type="checkbox"
                           checked={rowSelection.includes(user.user_id)}
                           onChange={() => toggleRowSelection(user.user_id)}
-                          onClick={(e) => e.stopPropagation()} // Prevent row navigation on click
+                          onClick={(e) => e.stopPropagation()}
                           className="cursor-pointer"
                         />
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 font-medium text-gray-900">
-                        {user.name || "New Lead"}
+                        {user.name || t.clientsTable.newLead}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
@@ -184,9 +180,13 @@ export default function ClientsTable({
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${user.requirement_name !== "Not defined" ? "text-blue-600 cursor-pointer hover:underline" : "pointer-events-none text-gray-500"}`}
+                        className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${
+                          user.requirement_name !== t.clientsTable.notDefined
+                            ? "text-blue-600 cursor-pointer hover:underline"
+                            : "pointer-events-none text-gray-500"
+                        }`}
                         onClick={(e) => {
-                          if (user.requirement_name !== "Not defined") {
+                          if (user.requirement_name !== t.clientsTable.notDefined) {
                             handleClientRequirements(e, user.user_id, user.user_id);
                           }
                         }}
@@ -210,7 +210,9 @@ export default function ClientsTable({
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${ACTIONS_COLORS[user.last_action]}`}
+                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${
+                          ACTIONS_COLORS[user.last_action]
+                        }`}
                         onClick={(e) =>
                           handleclientAction(e, user.phone_number, user.user_id)
                         }
@@ -245,10 +247,12 @@ export default function ClientsTable({
                 disablePrev={disablePrev}
               />
 
-              {/* TODO: This button should open a modal to add action to the selected rows */}
               {rowSelection.length > 0 && (
                 <button className="bg-primary hover:opacity-95 cursor-pointer text-white py-1.5 rounded-md px-5">
-                  Add Action to {rowSelection.length} client(s)
+                  {t.clientsTable.actions.addAction.replace(
+                    "{count}",
+                    rowSelection.length
+                  )}
                 </button>
               )}
             </div>
@@ -256,7 +260,6 @@ export default function ClientsTable({
         </>
       )}
 
-      {/* Actions Modal  */}
       {openActionModal && (
         <ActionsModal
           actions={rowActions}
@@ -267,7 +270,7 @@ export default function ClientsTable({
           }}
         />
       )}
-      {/* Property Details Modal */}
+
       {openRequirementsModal && (
         <PropertyDetailsModal
           onClose={() => {

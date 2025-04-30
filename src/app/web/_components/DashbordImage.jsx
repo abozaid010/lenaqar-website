@@ -1,30 +1,33 @@
+"use client"
 import { Check } from "lucide-react";
 import dashborddesctop from "../../../../public/images/dasbordDesctop.png";
 import dashbordmobile from "../../../../public/images/dashbordmobile.png";
 import Image from "next/image";
-
+import { useI18n } from "@/context/translate-api";
 import CalendarModal from "@/components/ui/calendar-modal";
 
 export default function DashboardImage() {
-  
+  const { t } = useI18n();
+  // تحديد اتجاه اللغة (عربي أم إنجليزي)
+  const isRTL = t.direction === 'rtl';
+  console.log(t)
+
   const features = [
     {
       id: 1,
-      title: "Manage leads on the go with a user-friendly mobile app",
+      title: t.dashboard?.features?.feature1,
     },
     {
       id: 2,
-      title: "Instantly qualify & contact leads from anywhere.",
+      title: t.dashboard.features.feature2,
     },
     {
       id: 3,
-      title:
-        "AI-Powered Data Insights – Focus on the right leads and close deals faster.",
+      title: t.dashboard.features.feature3,
     },
     {
       id: 4,
-      title:
-        "Smart CRM – Track interactions, insights, and lead progress in one place.",
+      title: t.dashboard.features.feature4,
     },
   ];
 
@@ -34,11 +37,11 @@ export default function DashboardImage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
-            Lena is with you{" "}
-            <span className="text-[#3926A7]">all the time</span>
+            {t.dashboard.title.part1}{" "}
+            <span className="text-[#3926A7]">{t.dashboard.title.part2}</span>
           </h1>
           <p className="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
-            Available on Web & Mobile – Access anytime, anywhere.
+            {t.dashboard.subtitle}
           </p>
         </div>
 
@@ -47,7 +50,7 @@ export default function DashboardImage() {
           {/* Features List */}
           <div className="w-full lg:w-1/2 space-y-6">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
-              With Lena's seamless Web and Mobile integration, you can:
+              {t.dashboard.featuresTitle}
             </h2>
 
             {features.map((feature) => (
@@ -55,14 +58,17 @@ export default function DashboardImage() {
                 key={feature.id}
                 className="flex items-center gap-4 group p-4 rounded-lg transition-all duration-300"
               >
-                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white t]">
+                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white">
                   <Check size={18} />
                 </div>
                 <h3 className="font-semibold text-gray-800">{feature.title}</h3>
               </div>
             ))}
 
-            <CalendarModal style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} />
+            <CalendarModal 
+              buttonText={t.dashboard.ctaButton}
+              style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} 
+            />
           </div>
 
           {/* App Preview Image */}
@@ -73,18 +79,18 @@ export default function DashboardImage() {
                 <div className="relative rounded-lg overflow-hidden border border-gray-200 shadow-sm">
                   <Image
                     src={dashborddesctop}
-                    alt="Lena CRM Dashboard Desktop View"
+                    alt={t.dashboard.images.desktopAlt}
                     className="w-full h-auto object-contain"
                     priority
                   />
                 </div>
 
                 {/* Mobile Mockup Image */}
-                <div className="hidden md:block absolute bottom-[-20%] right-[-25%] w-1/3 transform">
+                <div className={`hidden md:block absolute bottom-[-20%] ${isRTL ? 'left-[-25%]' : 'right-[-25%]'} w-1/3 transform`}>
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image
                       src={dashbordmobile}
-                      alt="Lena CRM Mobile View"
+                      alt={t.dashboard.images.mobileAlt}
                       className="w-full h-auto"
                       priority
                     />
