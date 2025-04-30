@@ -9,11 +9,12 @@ import {
   deleteImage,
   uploadImages,
 } from "@/components/services/serviceFetching";
+import AddDeveloperDialog from "../add-developer-dialog";
 
 export default function ImagesStep({
   formData,
   updateFormData,
-  developers,
+  developersSet,
   isUploading,
   setIsUploading,
   invalidFields = [],
@@ -28,9 +29,9 @@ export default function ImagesStep({
   // Track upload status for each image
   const [uploadStatus, setUploadStatus] = useState({});
 
-  const developersSet = Array.from(
-    new Set(developers?.map((developer) => developer.name))
-  );
+  const [developers, setDevelopers] = useState(Array.from(developersSet) || []);
+  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
+    useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -199,6 +200,11 @@ export default function ImagesStep({
     fileInputRef.current.click();
   };
 
+  const handleAddDeveloper = (newDeveloper) => {
+    setDevelopers([...developers, newDeveloper]);
+    updateFormData({ developer: newDeveloper });
+  };
+
   const totalImagesCount = selectedImages.length + uploadedImages.length;
 
   return (
@@ -284,8 +290,8 @@ export default function ImagesStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">{t.selectDeveloper}</option>
-              {developersSet.map((d, idx) => (
+              <option value="">Select developer</option>
+              {developers.map((d, idx) => (
                 <option key={idx} value={d}>
                   {d}
                 </option>
@@ -305,12 +311,21 @@ export default function ImagesStep({
               </svg>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsAddDeveloperDialogOpen(true)}
+            className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+          >
+            + Add New
+          </button>
         </div>
       </div>
 
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
         {t.propertyImages}{" "}
-        <span className="text-sm font-normal text-gray-500">({t.maximum} 8)</span>
+        <span className="text-sm font-normal text-gray-500">
+          ({t.maximum} 8)
+        </span>
       </h3>
 
       {/* Image Upload Area - Entire area is clickable */}
@@ -348,12 +363,8 @@ export default function ImagesStep({
               d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
             />
           </svg>
-          <p className="text-lg text-gray-700 mb-2">
-            {t.clickOrDragAndDrop}
-          </p>
-          <p className="text-sm text-gray-500">
-            {t.supportedFormats}
-          </p>
+          <p className="text-lg text-gray-700 mb-2">{t.clickOrDragAndDrop}</p>
+          <p className="text-sm text-gray-500">{t.supportedFormats}</p>
         </div>
 
         {/* Upload button - Only shows when there are selected images */}
@@ -379,7 +390,10 @@ export default function ImagesStep({
                 </>
               ) : (
                 <>
-                  {t.upload} {selectedImages.length} {selectedImages.length > 1 ? t.selectedImages : t.selectedImage}
+                  {t.upload} {selectedImages.length}{" "}
+                  {selectedImages.length > 1
+                    ? t.selectedImages
+                    : t.selectedImage}
                 </>
               )}
             </button>
@@ -389,12 +403,16 @@ export default function ImagesStep({
 
       {/* Image Preview */}
       <div className="mt-4">
-        <p className="text-sm text-gray-500">{totalImagesCount}/8 {t.images}</p>
+        <p className="text-sm text-gray-500">
+          {totalImagesCount}/8 {t.images}
+        </p>
 
         {/* Selected Images (not yet uploaded) */}
         {selectedImages.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-lg font-medium mb-2">{t.selectedImagesTitle}</h4>
+            <h4 className="text-lg font-medium mb-2">
+              {t.selectedImagesTitle}
+            </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
               {selectedImages.map((image) => (
                 <div key={image.id} className="relative group">
@@ -518,7 +536,9 @@ export default function ImagesStep({
         {/* Uploaded Images */}
         {uploadedImages.length > 0 && (
           <div className="mt-4">
-            <h4 className="text-lg font-medium mb-2">{t.uploadedImagesTitle}</h4>
+            <h4 className="text-lg font-medium mb-2">
+              {t.uploadedImagesTitle}
+            </h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
               {uploadedImages.map((image) => (
                 <div key={image.fileId} className="relative group">
@@ -579,6 +599,12 @@ export default function ImagesStep({
           </div>
         )}
       </div>
+
+      <AddDeveloperDialog
+        isOpen={isAddDeveloperDialogOpen}
+        onClose={() => setIsAddDeveloperDialogOpen(false)}
+        onAdd={handleAddDeveloper}
+      />
     </div>
   );
 }

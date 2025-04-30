@@ -108,6 +108,10 @@ export default function AddUnitModal({
     amenities: unitData?.amenities || [],
   }));
 
+  const developersSet = Array.from(
+    new Set(developers?.map((developer) => developer.name))
+  );
+
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
   };
@@ -333,7 +337,8 @@ export default function AddUnitModal({
             <BasicDetailsStep
               formData={formData}
               updateFormData={updateFormData}
-              compounds={compounds}
+              compoundsData={compounds}
+              developers={developersSet}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
             />
@@ -356,7 +361,6 @@ export default function AddUnitModal({
               updateFormData={(newData) =>
                 setRentFormData((prev) => ({ ...prev, ...newData }))
               }
-              developers={developers}
             />
           )}
 
@@ -364,7 +368,7 @@ export default function AddUnitModal({
             <ImagesStep
               formData={formData}
               updateFormData={updateFormData}
-              developers={developers}
+              developersSet={developersSet}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               isUploading={isUploading}

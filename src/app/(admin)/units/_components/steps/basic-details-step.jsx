@@ -1,13 +1,20 @@
 "use client";
 import { useI18n } from "@/context/translate-api";
 
+import AddCompoundDialog from "../add-compound-dialog";
+import { useState } from "react";
+
 export default function BasicDetailsStep({
   formData,
   updateFormData,
-  compounds,
+  compoundsData,
+  developers,
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
+  const [compounds, setCompounds] = useState(compoundsData || []);
+  const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -28,6 +35,13 @@ export default function BasicDetailsStep({
   };
   
   const { t } = useI18n();
+
+  const handleAddCompound = (newCompound) => {
+    // Add the new compound to the list
+    setCompounds([...compounds, newCompound]);
+
+    updateFormData({ compound: newCompound.name });
+  };
 
   return (
     <div>
@@ -87,12 +101,22 @@ export default function BasicDetailsStep({
             >
               <option value="">{t.basicDetails.selectCompound}</option>
               {compounds.map((compound) => (
-                <option key={compound.id} value={compound.name}>
+                <option
+                  key={`${compound.id}-${compound.name}`}
+                  value={compound.name}
+                >
                   {compound.name}
                 </option>
               ))}
             </select>
           </div>
+          <button
+            type="button"
+            onClick={() => setIsAddCompoundDialogOpen(true)}
+            className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+          >
+            + Add New
+          </button>
         </div>
 
         {/* Building Type */}
@@ -371,6 +395,14 @@ export default function BasicDetailsStep({
           />
         </div>
       </div>
+
+      {/* Add Compound Dialog */}
+      <AddCompoundDialog
+        developers={developers}
+        isOpen={isAddCompoundDialogOpen}
+        onClose={() => setIsAddCompoundDialogOpen(false)}
+        onAdd={handleAddCompound}
+      />
     </div>
   );
 }

@@ -69,6 +69,7 @@ export async function updateUnit(unit) {
     return { error: error.message };
   }
 }
+
 export async function updateUnitRent(unit) {
   try {
     const response = await axiosInstance.post(`/units/update-rent`, unit);
@@ -107,6 +108,7 @@ export async function fetchUsersData(searchParams) {
     return { error: error.message };
   }
 }
+
 export async function fetchUnitsFilter(searchParams) {
   const clientId = await getClientid();
 
@@ -127,7 +129,6 @@ export async function fetchUnitsFilter(searchParams) {
     return { error: error.message };
   }
 }
-
 
 export async function fetchDevelopers() {
   try {
@@ -172,7 +173,7 @@ export async function addUnitRent(unitData) {
 export async function addCompound(compoundData) {
   try {
     const response = await axiosInstance.post(`/projects/create`, compoundData);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
     throw { message: error.response?.data?.message || error.message };
