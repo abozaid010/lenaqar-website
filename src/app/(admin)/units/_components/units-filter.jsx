@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useI18n } from "@/context/translate-api";
 
-const EnumPropertyIntent = ["buy", "rent", "sell", "lease"];
+const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({ appliedFilters, developers, compounds }) {
   const { t } = useI18n();
@@ -37,7 +37,9 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
       >
         <option value="all">{t.unitsFilter.allDevelopers}</option>
         {developersSet.map((d, idx) => (
-          <option key={idx} value={d}>{d}</option>
+          <option key={idx} value={d}>
+            {d}
+          </option>
         ))}
       </select>
 
@@ -49,7 +51,9 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
       >
         <option value="all">{t.unitsFilter.allCompounds}</option>
         {compounds.map((c, idx) => (
-          <option key={idx} value={c.name}>{c.name}</option>
+          <option key={idx} value={c.name}>
+            {c.name}
+          </option>
         ))}
       </select>
 

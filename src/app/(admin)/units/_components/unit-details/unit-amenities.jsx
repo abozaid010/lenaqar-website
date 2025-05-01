@@ -252,7 +252,7 @@ export default function UnitAmenities({ amenities }) {
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 my-4">
       {amenities.map((amenity) => (
         <div key={amenity} className="flex items-center">
-          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-950">
+          <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#e2dbff] flex items-center justify-center text-blue-950">
             {amenityIcons[amenity] || (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -271,7 +271,7 @@ export default function UnitAmenities({ amenities }) {
             )}
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium text-gray-900">
+            <p className="text-sm font-medium text-primary">
               {amenity
                 .split("_")
                 .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

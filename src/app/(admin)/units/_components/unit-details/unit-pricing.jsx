@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 export default function UnitPricing({ unit }) {
-  const [activeDuration, setActiveDuration] = useState("monthly"); // Default to monthly
+  const [activeDuration, setActiveDuration] = useState("monthly");
   const isSale = unit.purpose === "sell";
 
   return (
@@ -39,7 +39,7 @@ export default function UnitPricing({ unit }) {
           )}
         </div>
       ) : (
-        <div>
+        <div className="max-w-sm">
           {/* Rental Duration Tabs */}
           <div className="flex border-b border-gray-200 mb-4">
             {Object.keys(unit.rentDurationType).map((duration) => (
@@ -49,8 +49,9 @@ export default function UnitPricing({ unit }) {
                   activeDuration === duration
                     ? "text-primary border-b-2 border-primary"
                     : "text-gray-500 hover:text-gray-700"
-                }`}
+                } disabled:opacity-50`}
                 onClick={() => setActiveDuration(duration)}
+                disabled={unit.rentDurationType[duration]?.price <= 0}
               >
                 {duration.charAt(0).toUpperCase() + duration.slice(1)}
               </button>

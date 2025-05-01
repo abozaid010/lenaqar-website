@@ -25,15 +25,22 @@
   }
 }
 body {
-  font-family: 'Montserrat', 'Cairo', sans-serif;
+  font-family: "Montserrat", "Cairo", sans-serif;
 }
 
-
-button, h1, p, li, span, h3, h2, ul, div {
-  font-family: 'Montserrat', 'Cairo', sans-serif;
+button,
+h1,
+p,
+li,
+span,
+h3,
+h2,
+ul,
+div {
+  font-family: "Montserrat", "Cairo", sans-serif;
 }
 
-button{
+button {
   cursor: pointer;
 }
 
@@ -85,4 +92,9 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield; /* For Firefox */
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  color: var(--primary) !important;
 }

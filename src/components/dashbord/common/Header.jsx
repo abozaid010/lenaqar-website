@@ -5,12 +5,10 @@ import {
   Search,
   Bell,
   User,
-  MessageSquare,
   Menu,
   LogOut,
   Settings,
   HelpCircle,
-  
 } from "lucide-react";
 import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
 import Cookies from "js-cookie";
@@ -48,7 +46,7 @@ const Header = ({ clientName }) => {
   };
 
   const sendMessageWhatsApp = () => {
-    const phoneNumber = "201016080323"; // مصر: أضف 20 بدلًا من +20
+    const phoneNumber = "201016080323";
     const url = `https://wa.me/${phoneNumber}`;
     window.open(url, "_blank");
   };
@@ -66,10 +64,7 @@ const Header = ({ clientName }) => {
 
   return (
     <header className="bg-white shadow-sm  p-4 flex justify-between items-center  mt-2 md:mt-0">
-      <div className="flex justify-center px-6">
-      
-      </div>
-      <div className="flex items-center gap-3 ">
+      <div className="flex items-center gap-3">
         <div className="block lg:hidden">
           <button
             className="p-1 rounded-md hover:bg-gray-100"
@@ -85,20 +80,14 @@ const Header = ({ clientName }) => {
       </div>
 
       <div className="flex items-center space-x-2 sm:space-x-4  ">
-      <button
+        <button
           onClick={sendMessageWhatsApp}
           className="flex items-center gap-2 bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
         >
-          <HelpCircle  size={20} />
+          <HelpCircle size={20} />
           <span>{t.header.sendMessage}</span>
         </button>
         <LanguageSwitcher />
-
-        <div className="relative hidden sm:block">
-          <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
-            <MessageSquare className="h-6 w-6" />
-          </button>
-        </div>
 
         <div className="relative">
           <button className="p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none">
@@ -149,7 +138,6 @@ const Header = ({ clientName }) => {
             </div>
           )}
         </div>
-        
       </div>
 
       {showLogoutConfirm && (
@@ -175,7 +163,6 @@ const Header = ({ clientName }) => {
                 {t.header.logoutConfirm.confirm}
               </button>
             </div>
-            
           </div>
         </div>
       )}

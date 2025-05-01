@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -42,11 +42,17 @@ const Sidebar = () => {
     window.toggleSidebar = toggleSidebar;
   }
 
+  useEffect(() => {
+    if (isOpen) {
+      setIsOpen(false);
+    }
+  }, [pathname]);
+
   return (
     <>
       {/* Overlay for mobile */}
       <div
-        className={`lg:hidden fixed inset-0 bg-gray-800 bg-opacity-75 z-10 transition-opacity duration-300 ${
+        className={`lg:hidden fixed inset-0 bg-black/60 z-10 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggleSidebar}
@@ -88,7 +94,7 @@ const Sidebar = () => {
 
       {/* Sidebar content */}
       <div
-        className={`w-56 bg-white text-gray-700 flex flex-col fixed lg:static z-10 transition-all duration-300 shadow-md ${
+        className={`w-62 h-full bg-white text-gray-700 flex flex-col fixed lg:static z-10 transition-all duration-300 shadow-md ${
           isOpen ? "left-0" : "-left-64 lg:left-0"
         }`}
       >
@@ -108,7 +114,7 @@ const Sidebar = () => {
         <div className="flex-1 mt-1">
           <Link
             href="/dashboard"
-            className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
               isLinkActive("/dashboard")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
@@ -119,9 +125,9 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            href="/dashboard/analytics"
-            className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
-              isLinkActive("/dashboard/analytics")
+            href="/analytics"
+            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+              isLinkActive("/analytics")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
@@ -132,8 +138,8 @@ const Sidebar = () => {
 
           <Link
             href="/units"
-            className={`flex items-center px-4 py-3 rounded-md mx-2 mb-1 transition-colors ${
-              isLinkActive("/dashboard/units")
+            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+              isLinkActive("/units")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
             }`}
@@ -145,16 +151,16 @@ const Sidebar = () => {
 
         {/* Bottom Section */}
         <div className="mt-auto border-t border-gray-200 pt-2 pb-4">
-          <button className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md mx-2 mb-1 transition-colors">
+          <button className="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 mb-1 transition-colors">
             <Moon className="h-5 w-5 mr-3" />
             <span>{t.sidebar.darkMode}</span>
           </button>
 
-          <div className="mx-2 border-t border-gray-200 my-2"></div>
+          <div className=" border-t border-gray-200 my-2"></div>
 
           <button
             onClick={initiateLogout}
-            className="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-md mx-2 transition-colors"
+            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <LogOut className="h-5 w-5 mr-3" />
             <span>{t.sidebar.logout}</span>

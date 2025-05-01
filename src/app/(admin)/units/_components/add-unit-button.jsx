@@ -23,8 +23,8 @@ export default function AddUnitButton({
     <>
       <button
         onClick={openModal}
-        className={`flex-shrink-0 w-full sm:w-auto px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center transition duration-300 ${
-          t.dir === 'rtl' ? 'flex-row-reverse' : ''
+        className={`flex-shrink-0 w-full sm:w-auto px-4 py-2 bg-primary hover:opacity-90 text-white rounded-md flex items-center justify-center transition duration-300 ${
+          t.dir === "rtl" ? "flex-row-reverse" : ""
         }`}
       >
         {isEdit ? (

@@ -115,10 +115,8 @@ export async function fetchUnitsFilter(searchParams) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      client_id: clientId, // include client_id in query params
-
+      client_id: clientId,
     };
-    console.log("params", params);
 
     const response = await axiosInstance.get('/units/all', { params });
     console.log(response);

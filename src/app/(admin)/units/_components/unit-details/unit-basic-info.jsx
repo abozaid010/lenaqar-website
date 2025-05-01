@@ -3,7 +3,7 @@ import UnitPricing from "./unit-pricing";
 
 export default function UnitBasicInfo({ unit }) {
   return (
-    <div>
+    <div className="w-full md:w-1/2 xl:w-2/5">
       <div className="flex items-center">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
           {unit.purpose}
