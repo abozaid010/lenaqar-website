@@ -119,7 +119,7 @@ export async function fetchUnitsFilter(searchParams, use) {
       
     };
 
-    const response = await axiosInstance.get('/units/all', { params });
+    const response = await axiosInstance.get('/units/filter', { params });
     console.log(response);
     return response.data;
 

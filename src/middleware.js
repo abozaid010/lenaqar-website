@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 // Define protected routes that require authentication
-const adminProtectedRoutes = ["/dashboard", "/units","/allProberties"];
+const adminProtectedRoutes = ["/dashboard", "/units"];
 
 export async function middleware(request) {
   // Get the pathname of the request

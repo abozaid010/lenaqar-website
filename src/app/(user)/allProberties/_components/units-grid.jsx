@@ -5,9 +5,9 @@ import { MapPin, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "./units-share-modal";
-import ClientsTablePagination from "../../dashboard/_components/clients-table-pagination";
+// import ClientsTablePagination from "../../dashboard/_components/clients-table-pagination";
 
-export default function UnitsGrid({ units, nextCursor, disableNext }) {
+export default function UnitsGrid({ units}) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);

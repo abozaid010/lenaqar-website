@@ -27,14 +27,14 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
   const cookieStore = await cookies();
-  const clientId = cookieStore.get("client_id")?.value;
-  const clientName = JSON.parse(
-    cookieStore.get("client_info")?.value
+  const clientId = cookieStore?.get("client_id")?.value;
+  const clientName = JSON?.parse(
+    cookieStore?.get("client_info")?.value
   )?.client_name;
  const  useclient = false
 
-  const [unitsResponse, developers, compounds] = await Promise.all([
-    fetchUnitsFilter(JSON.stringify(searchParams),useclient),
+  const [unitsResponse, developers, compounds] = await Promise?.all([
+    fetchUnitsFilter(JSON?.stringify(searchParams),useclient),
     fetchDevelopers(),
     fetchcombounds(),
   ]);
@@ -42,10 +42,10 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const units = unitsResponse.data?.units || [];
  
 
-  const hasMoreNext = unitsResponse?.data?.has_more;
+  // const hasMoreNext = unitsResponse?.data?.has_more;
   // const hasMorePrev = initialData?.pagination?.has_more_prev;
 
-  const nextCursor = unitsResponse.data.next_cursor;
+  // const nextCursor = unitsResponse.data.next_cursor;
   // const previousCursor = initialData?.pagination?.prev_cursor;
 
   return (
@@ -72,8 +72,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       </div>
       <UnitsGrid
         units={units}
-        disablePrev={!hasMoreNext}
-        nextCursor={nextCursor}
+        // disablePrev={!hasMoreNext}
+        // nextCursor={nextCursor}
       />
     </div>
   );
