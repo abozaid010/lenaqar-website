@@ -239,7 +239,8 @@ export default {
     "commentPlaceholder": "أدخل تعليقك هنا...",
     "submitButton": "إرسال",
     "successMessage": "تم إضافة الإجراء بنجاح",
-    "errorMessage": "فشل إضافة الإجراء"
+    "errorMessage": "فشل إضافة الإجراء",
+    "aiAction": "إجراءات الذكاء الاصطناعي"
   },
   propertyDetails: {
     "title": "{id}_المتطلبات",

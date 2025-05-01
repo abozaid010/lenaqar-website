@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import NewActionForm from "./new-action-form";
 import formatDateForDisplay from "@/utils/formateDate";
-
+import { useI18n } from "@/context/translate-api";
 const NOPREFRERED_TIME = [
   "Qualified lead",
   "Not interested",
@@ -11,12 +11,13 @@ const NOPREFRERED_TIME = [
 ];
 export default function ActionsModal({ actions, onClose, userId }) {
   console.log(actions)
+  const{t}=useI18n()
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50">
       <div className="relative w-full max-w-xl max-h-full bg-white rounded-lg shadow-lg">
         <div className="flex justify-between items-center p-3">
           <h3 className="text-lg font-semibold text-gray-800 text-center flex-1">
-            AI Actions
+          {t.actionForm.aiAction}
           </h3>
           <button
             onClick={onClose}

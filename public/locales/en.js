@@ -240,7 +240,8 @@ export default {
     "commentPlaceholder": "Enter your comment here...",
     "submitButton": "Send",
     "successMessage": "Action added successfully",
-    "errorMessage": "Failed to add action"
+    "errorMessage": "Failed to add action",
+    "aiAction":"AI Actions",
   },
 
   propertyDetails: {
