@@ -31,16 +31,22 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const clientName = JSON.parse(
     cookieStore.get("client_info")?.value
   )?.client_name;
-  const  use = true
-  
+ const  useclient = false
 
   const [unitsResponse, developers, compounds] = await Promise.all([
-    fetchUnitsFilter(JSON.stringify(searchParams),use),
+    fetchUnitsFilter(JSON.stringify(searchParams),useclient),
     fetchDevelopers(),
     fetchcombounds(),
   ]);
 
   const units = unitsResponse.data?.units || [];
+ 
+
+  const hasMoreNext = unitsResponse?.data?.has_more;
+  // const hasMorePrev = initialData?.pagination?.has_more_prev;
+
+  const nextCursor = unitsResponse.data.next_cursor;
+  // const previousCursor = initialData?.pagination?.prev_cursor;
 
   return (
     <div className="container mx-auto">
@@ -64,7 +70,11 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
         <UnitsSearch />
       </div>
-      <UnitsGrid units={units} />
+      <UnitsGrid
+        units={units}
+        disablePrev={!hasMoreNext}
+        nextCursor={nextCursor}
+      />
     </div>
   );
 }

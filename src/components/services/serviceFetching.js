@@ -109,13 +109,14 @@ export async function fetchUsersData(searchParams) {
   }
 }
 
-export async function fetchUnitsFilter(searchParams) {
+export async function fetchUnitsFilter(searchParams, use) {
   const clientId = await getClientid();
 
   try {
     const params = {
       ...JSON.parse(searchParams),
-      client_id: clientId,
+      ...(use ? { client_id: clientId } : {}),
+      
     };
 
     const response = await axiosInstance.get('/units/all', { params });
@@ -127,6 +128,7 @@ export async function fetchUnitsFilter(searchParams) {
     return { error: error.message };
   }
 }
+
 
 export async function fetchDevelopers() {
   try {

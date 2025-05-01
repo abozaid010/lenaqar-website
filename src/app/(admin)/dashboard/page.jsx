@@ -48,7 +48,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 
 async function ClientsList({ searchParams }) {
   const res = await fetchUsersData(JSON.stringify(searchParams));
-  const initialData = res.data.users;
+  const initialData = res?.data?.users;
   const hasMoreNext = initialData?.pagination?.has_more_next;
   const hasMorePrev = initialData?.pagination?.has_more_prev;
 

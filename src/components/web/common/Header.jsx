@@ -131,7 +131,7 @@ const Header = () => {
               <Link href="" className="hover:text-blue-200 transition-colors">
               <CalendarModal buttonText={t.header.jobOpportunities} />
               </Link>
-              <Link href="" className="hover:text-blue-200 transition-colors">
+              <Link href="/allProberties" className="hover:text-blue-200 transition-colors">
                 {t.header.allProperties}
                
               </Link>
