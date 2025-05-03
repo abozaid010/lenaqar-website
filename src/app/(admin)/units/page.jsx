@@ -31,16 +31,17 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const clientName = JSON.parse(
     cookieStore.get("client_info")?.value
   )?.client_name;
-  const  use = true
-  
+  const use = true;
 
   const [unitsResponse, developers, compounds] = await Promise.all([
-    fetchUnitsFilter(JSON.stringify(searchParams),use),
+    fetchUnitsFilter(JSON.stringify(searchParams), use),
     fetchDevelopers(),
     fetchcombounds(),
   ]);
 
   const units = unitsResponse.data?.units || [];
+
+  console.log(units);
 
   return (
     <div className="container mx-auto">

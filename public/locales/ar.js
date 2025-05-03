@@ -105,8 +105,8 @@ export default {
     "contact": {
       "title": "بيانات الاتصال",
       "phone": "معلومات الاتصال: ",
-      "sales":"مبيعات",
-      "support":"دعم",
+      "sales": "مبيعات",
+      "support": "دعم",
     },
     "connect": {
       "title": "تواصل معنا",
@@ -288,7 +288,7 @@ export default {
     "addButton": {
       "addNew": "إضافة وحدة جديدة",
       "edit": "تعديل الوحدة",
-      "back":"للخلف",
+      "back": "للخلف",
     }
   },
   modal: {
@@ -513,7 +513,7 @@ export default {
   "propertyImages": "صور العقار",
   "maximum": "الحد الأقصى",
   "clickOrDragAndDrop": "انقر أو اسحب وأفلت الصور هنا",
-  "supportedFormats": "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 3 ميجابايت لكل صورة)",
+  "supportedFormats": "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 1 ميجابايت لكل صورة)",
   "uploading": "جارٍ التحميل...",
   "upload": "تحميل",
   "selectedImage": "صورة محددة",
@@ -526,7 +526,7 @@ export default {
   "failedToDeleteImage": "فشل في حذف الصورة. يرجى المحاولة مرة أخرى.",
   "maxImagesError": "يمكنك تحميل 8 صور كحد أقصى. يرجى إزالة بعض الصور قبل إضافة صور جديدة.",
   "invalidFileType": "نوع ملف غير صالح. يرجى تحميل صور بصيغة JPG أو PNG أو WEBP.",
-  "fileSizeExceeds": "حجم الملف يتجاوز 3 ميجابايت. يرجى تحميل صور أصغر.",
+  "fileSizeExceeds": "تجاوز 3 ميجابايت. يرجى تحميل صور أصغر.",
   "failedToUploadImage": "فشل في تحميل الصورة"
   ,
   unitPage: {

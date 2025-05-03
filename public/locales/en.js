@@ -22,7 +22,7 @@ export default {
       "confirm": "Logout"
     },
     "logoutSuccess": "Logout Successful",
-    "sendMessage":"support",
+    "sendMessage": "support",
   },
   welcome: "Welcome",
   dashboard: "Dashboard",
@@ -104,8 +104,8 @@ export default {
     "contact": {
       "title": "Contact Details",
       "phone": "Contact info: ",
-      "sales":"Sales",
-      "support":"Support",
+      "sales": "Sales",
+      "support": "Support",
     },
     "connect": {
       "title": "Connect With Us",
@@ -241,7 +241,7 @@ export default {
     "submitButton": "Send",
     "successMessage": "Action added successfully",
     "errorMessage": "Failed to add action",
-    "aiAction":"AI Actions",
+    "aiAction": "AI Actions",
   },
 
   propertyDetails: {
@@ -290,7 +290,7 @@ export default {
     "addButton": {
       "addNew": "Add New Unit",
       "edit": "Edit Unit",
-      "back":"back",
+      "back": "back",
     }
   },
   modal: {
@@ -514,7 +514,7 @@ export default {
   "propertyImages": "Property Images",
   "maximum": "Maximum",
   "clickOrDragAndDrop": "Click or drag and drop images here",
-  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 3MB each)",
+  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 1MB each)",
   "uploading": "Uploading...",
   "upload": "Upload",
   "selectedImage": "Selected Image",
@@ -527,7 +527,7 @@ export default {
   "failedToDeleteImage": "Failed to delete image. Please try again.",
   "maxImagesError": "You can only upload a maximum of 8 images. Please remove some images before adding new ones.",
   "invalidFileType": "Invalid file type. Please upload JPG, PNG, or WEBP images.",
-  "fileSizeExceeds": "File size exceeds 3MB. Please upload smaller images.",
+  "fileSizeExceeds": "exceeds 3MB. Please upload smaller images.",
   "failedToUploadImage": "Failed to upload image",
 
   unitPage: {

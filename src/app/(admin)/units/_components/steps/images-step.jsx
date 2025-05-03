@@ -69,15 +69,17 @@ export default function ImagesStep({
     }
   };
 
-  const handleFiles = (files) => {
+  const handleFiles = async (files) => {
     if (selectedImages.length + uploadedImages.length + files.length > 8) {
       toast.error(t.maxImagesError);
       return;
     }
 
-    const newSelectedImages = [...selectedImages];
+    const newSelectedImages = [];
+    const newUploadStatus = { ...uploadStatus };
 
-    Array.from(files).forEach((file) => {
+    // First, create preview and add to selected images
+    for (const file of Array.from(files)) {
       // Check file type
       if (
         !file.type.match("image/jpeg") &&
@@ -85,28 +87,93 @@ export default function ImagesStep({
         !file.type.match("image/webp")
       ) {
         toast.error(t.invalidFileType);
-        return;
+        continue;
       }
 
       // Check file size
-      if (file.size > 3 * 1024 * 1024) {
-        toast.error(t.fileSizeExceeds);
-        return;
+      if (file.size > 1 * 1024 * 1024) {
+        toast.error(`${file.name}_${t.fileSizeExceeds}`);
+        continue;
       }
 
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const imageId = `image_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-        newSelectedImages.push({
-          id: imageId,
-          file,
-          preview: e.target.result,
-          name: file.name,
+      const imageId = `image_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+      // INFO: Create a promise for reading the file, WHY?
+      // Ensures that each file is processed (read and preview generated) before moving to the next file.
+      const readFilePromise = new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const imageData = {
+            id: imageId,
+            file,
+            preview: e.target.result,
+            name: file.name,
+          };
+          newSelectedImages.push(imageData);
+          resolve(imageData);
+        };
+        reader.readAsDataURL(file);
+      });
+
+      await readFilePromise;
+
+      // Set status to uploading immediately
+      newUploadStatus[imageId] = "uploading";
+    }
+    // Update state with new images and upload status
+    setSelectedImages((prev) => [...prev, ...newSelectedImages]);
+    setUploadStatus(newUploadStatus);
+
+    // Start uploading each image
+    setIsUploading(true);
+
+    const successfulUploads = [];
+    const failedUploads = [];
+
+    // Process each selected image
+    for (const image of newSelectedImages) {
+      try {
+        const formDataToUpload = new FormData();
+        formDataToUpload.append("file", image.file);
+
+        const res = await uploadImages(formDataToUpload);
+
+        // Update status to success
+        const updatedStatus = { ...uploadStatus };
+        updatedStatus[image.id] = "success";
+        setUploadStatus(updatedStatus);
+
+        // Add to successful uploads
+        successfulUploads.push({
+          url: res.url,
+          fileId: res.fileId,
         });
-        setSelectedImages([...newSelectedImages]);
-      };
-      reader.readAsDataURL(file);
-    });
+      } catch (error) {
+        // Update status to error
+        const updatedStatus = { ...uploadStatus };
+        updatedStatus[image.id] = "error";
+        setUploadStatus(updatedStatus);
+
+        failedUploads.push(image.id);
+        console.error(`Failed to upload image ${image.name}:`, error);
+      }
+    }
+
+    // Update the form data with all uploaded images
+    const allUploaded = [...uploadedImages, ...successfulUploads];
+    updateFormData({ images: allUploaded });
+    setUploadedImages(allUploaded);
+
+    // Remove successfully uploaded images from selectedImages
+    const remainingSelected = selectedImages.filter(
+      (img) => !successfulUploads.some((upload) => upload.id === img.id)
+    );
+    const newSelected = newSelectedImages.filter((img) =>
+      failedUploads.includes(img.id)
+    );
+    setSelectedImages([...remainingSelected, ...newSelected]);
+
+    setIsUploading(false);
   };
 
   const uploadImagesToServer = async () => {
