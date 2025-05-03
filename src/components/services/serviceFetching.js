@@ -26,8 +26,9 @@ export async function fetchcombounds() {
 }
 
 export async function uploadImages(formData) {
+  const clientId = await getClientid();
   try {
-    const response = await axiosInstance.post(`/images/`, formData, {
+    const response = await axiosInstance.post(`/gcs/upload?client_id=${clientId}`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
