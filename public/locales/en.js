@@ -164,7 +164,7 @@ export default {
     "passwordPlaceholder": "Enter your password",
     "signInButton": "Sign In",
     "successMessage": "Login successful",
-    "erroeMessage": "Login failed. Please check your credentials",
+    "errorMessage": "Login failed. Please check your credentials",
     "footer": {
       "copyright": "Lena AI. All rights reserved",
       "version": "Version"
@@ -289,7 +289,8 @@ export default {
   units: {
     "addButton": {
       "addNew": "Add New Unit",
-      "edit": "Edit Unit"
+      "edit": "Edit Unit",
+      "back":"back",
     }
   },
   modal: {

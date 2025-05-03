@@ -54,7 +54,7 @@ export default function AddUnitButton({
           className="flex items-center gap-2 mt-4 px-4 py-2 text-white bg-gradient-to-r from-[#3926A7] to-[#21EAF4] rounded-lg font-medium shadow-md hover:shadow-lg transform hover:-translate-y-1 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50"
         >
           <ArrowLeft size={18} />
-          <span>Back</span>
+          <span>{t.units.addButton.back}</span>
         </button>
       )}
 

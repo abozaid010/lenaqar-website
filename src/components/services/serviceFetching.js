@@ -116,10 +116,9 @@ export async function fetchUnitsFilter(searchParams, use) {
     const params = {
       ...JSON.parse(searchParams),
       ...(use ? { client_id: clientId } : {}),
-      
     };
 
-    const response = await axiosInstance.get('/units/filter', { params });
+    const response = await axiosInstance.get(`${use ?'/units/all'  :   '/public_units'}`, { params });
     console.log(response);
     return response.data;
 
@@ -128,6 +127,7 @@ export async function fetchUnitsFilter(searchParams, use) {
     return { error: error.message };
   }
 }
+
 
 
 export async function fetchDevelopers() {
