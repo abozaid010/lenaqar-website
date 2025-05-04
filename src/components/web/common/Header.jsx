@@ -110,7 +110,7 @@ const Header = () => {
             {/* Logo */}
             <Link href="/" className="text-xl font-bold flex items-center">
               <Image
-                src="/images/logo-5.svg"
+                src="/images/logo-5.png"
                 alt="logo_image"
                 width={120}
                 height={40}

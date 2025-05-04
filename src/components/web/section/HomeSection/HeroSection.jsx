@@ -16,9 +16,10 @@ const HeroSection = () => {
   // Custom messages from translations
   const messages = [
     t.heroSection.message1,
-    t.heroSection.message2,
-    t.heroSection.message3,
     t.heroSection.message4,
+    t.heroSection.message3,
+   
+    t.heroSection.message2,
   ];
   useEffect(() => {
     setVisibleMessages([]);
@@ -119,9 +120,22 @@ const HeroSection = () => {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5, duration: 0.8 }}
             >
-              {/* Square AI Image without rotating animations */}
+              {/* Large blue circle background */}
               <motion.div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 md:w-72 md:h-72 rounded-lg overflow-hidden border-4 border-blue-400 shadow-lg shadow-blue-500/30"
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40"
+                animate={{
+                  scale: [1, 1.05, 1],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+
+              {/* Square AI Image without rotating animations - larger and without border */}
+              <motion.div
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 overflow-hidden shadow-lg shadow-blue-500/30"
                 animate={{
                   scale: [1, 1.03, 1],
                 }}
@@ -135,14 +149,14 @@ const HeroSection = () => {
                   src={"/images/happy man.png"}
                   alt={t.heroSection.aiImageAlt}
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
                 {/* Enhanced overlay effect */}
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-tr from-blue-500/30 to-blue-600/30"
+                  className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-blue-600/10"
                   animate={{
-                    opacity: [0.3, 0.5, 0.3],
+                    opacity: [0.2, 0.3, 0.2],
                   }}
                   transition={{
                     duration: 3,
@@ -176,10 +190,10 @@ const AiMessageBubble = ({ message, position }) => {
   // Style variations with improved appearance
   const getBubbleStyle = () => {
     const colorSchemes = [
-      "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] border border-blue-300/30",
-      "bg-gradient-to-r from-[#4736B7] to-[#31FAF4] border border-blue-300/30",
-      "bg-gradient-to-r from-[#2916A7] to-[#11DAF4] border border-blue-300/30",
-      "bg-gradient-to-r from-[#4A36C7] to-[#41FAF4] border border-blue-300/30",
+      "bg-gradient-to-r from-[#3926A7]/40 to-[#21EAF4]/40 border border-blue-300/30",
+      "bg-gradient-to-r from-[#4736B7]/40 to-[#31FAF4]/40 border border-blue-300/30",
+      "bg-gradient-to-r from-[#2916A7]/40 to-[#11DAF4]/40 border border-blue-300/30",
+      "bg-gradient-to-r from-[#4A36C7]/40 to-[#41FAF4]/40 border border-blue-300/30",
     ];
     return colorSchemes[position % colorSchemes.length];
   };
@@ -190,29 +204,29 @@ const AiMessageBubble = ({ message, position }) => {
     switch (position) {
       case 0: // Top
         return {
-          top: "-5px",
-          left: "20%",
+          top: "100px",
+          left: "60%",
           transform: "translateX(-50%) ",
           arrow: "bottom",
         };
       case 1: // Right
         return {
-          top: "40%",
+          top: "55%",
           right: "-90px",
           transform: "translateY(-50%)",
           arrow: "left",
         };
       case 2: // Bottom
         return {
-          bottom: "10px",
-          left: "50%",
+          bottom: "50px",
+          right: "66%",
           transform: "translateX(-50%)",
           arrow: "top",
         };
       case 3: // Left
         return {
-          top: "70%",
-          left: "-140px",
+          top: "40%",
+          left: "-60px",
           transform: "translateY(-50%)",
           arrow: "right",
         };
@@ -228,23 +242,6 @@ const AiMessageBubble = ({ message, position }) => {
 
   const posStyle = getPositionStyle();
 
-  // Arrow styles based on position
-  const getArrowStyle = () => {
-    const baseClass = "absolute w-4 h-4 bg-blue-500 ";
-
-    switch (posStyle.arrow) {
-      case "bottom":
-        return `${baseClass} -bottom-2 left-1/2 transform -translate-x-1/2 rotate-45`;
-      case "top":
-        return `${baseClass} -top-2 left-1/2 transform -translate-x-1/2 rotate-45`;
-      case "left":
-        return `${baseClass} top-1/2 -left-2 transform -translate-y-1/2 rotate-45`;
-      case "right":
-        return `${baseClass} top-1/2 -right-2 transform -translate-y-1/2 rotate-45`;
-      default:
-        return `${baseClass} -bottom-2 left-1/2 transform -translate-x-1/2 rotate-45`;
-    }
-  };
 
   // Enhanced entry animation
   const getEntryAnimation = () => {
@@ -268,36 +265,36 @@ const AiMessageBubble = ({ message, position }) => {
       case "bottom":
         return {
           className:
-            "absolute top-full left-1/2 bg-gradient-to-b from-white to-transparent",
-          style: { transformOrigin: "top" },
+            "",
+          style: { transformOrigin: "" },
           animate: { scaleY: 1 },
           initial: { scaleY: 0 },
         };
       case "top":
         return {
-          className: "absolute bottom-full left-1/2 ",
-          style: { transformOrigin: "bottom" },
+          className: "",
+          style: { transformOrigin: "" },
           animate: { scaleY: 1 },
           initial: { scaleY: 0 },
         };
       case "left":
         return {
-          className: "absolute right-full ",
-          style: { transformOrigin: "right" },
+          className: " ",
+          style: { transformOrigin: "" },
           animate: { scaleX: 1 },
           initial: { scaleX: 0 },
         };
       case "right":
         return {
-          className: "absolute left-full ",
-          style: { transformOrigin: "left" },
+          className: "",
+          style: { transformOrigin: "" },
           animate: { scaleX: 1 },
           initial: { scaleX: 0 },
         };
       default:
         return {
-          className: "absolute top-full left-1/2 ",
-          style: { transformOrigin: "top" },
+          className: "",
+          style: { transformOrigin: "" },
           animate: { scaleY: 1 },
           initial: { scaleY: 0 },
         };
@@ -306,7 +303,7 @@ const AiMessageBubble = ({ message, position }) => {
 
   const connector = getConnectorStyle();
   const bubbleStyle = getBubbleStyle();
-  const arrowStyle = getArrowStyle();
+  // const arrowStyle = getArrowStyle();
 
   return (
     <motion.div
@@ -320,11 +317,11 @@ const AiMessageBubble = ({ message, position }) => {
       }}
     >
       <div
-        className={`px-5 py-4 border rounded-lg shadow-lg font-medium text-sm md:text-base relative min-w-[200px] max-w-[450px] ${bubbleStyle} text-white`}
+        className={`px-2 py-2 border  rounded-lg shadow-lg font-medium text-sm md:text-base relative min-w-[200px]  ${bubbleStyle} text-white`}
       >
         {message}
         {/* Arrow pointing to the AI */}
-        <div className={arrowStyle} />
+        {/* <div className={arrowStyle} /> */}
       </div>
 
       {/* Line connecting to center */}

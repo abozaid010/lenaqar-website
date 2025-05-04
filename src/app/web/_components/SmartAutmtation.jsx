@@ -72,7 +72,7 @@ const SalesManagerSection = () => {
                 </div>
               </div>
               {/* Decorative circles */}
-              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-500 rounded-full opacity-20"></div>
+              <div className="absolute -bottom-4 -right-4 w-16 h-16 bg-blue-500 rounded-full opacity-20 "></div>
               <div className="absolute -top-4 -left-4 w-12 h-12 bg-indigo-500 rounded-full opacity-20"></div>
             </div>
           </div>
