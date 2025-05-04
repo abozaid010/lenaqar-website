@@ -15,9 +15,9 @@ export async function fetchUnits() {
   }
 }
 
-export async function fetchcombounds() {
+export async function fetchcombounds(use) {
   try {
-    const response = await axiosInstance.get(`/projects/all`);
+    const response = await axiosInstance.get(`${use ? `/projects/all` : '/public/projects'}`);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
@@ -119,7 +119,7 @@ export async function fetchUnitsFilter(searchParams, use) {
       ...(use ? { client_id: clientId } : {}),
     };
 
-    const response = await axiosInstance.get(`${use ? '/units/all' : '/public_units'}`, { params });
+    const response = await axiosInstance.get(`${use ? '/units/all' : '/public/units'}`, { params });
     console.log(response);
     return response.data;
 
@@ -131,9 +131,9 @@ export async function fetchUnitsFilter(searchParams, use) {
 
 
 
-export async function fetchDevelopers() {
+export async function fetchDevelopers(use) {
   try {
-    const response = await axiosInstance.get(`/developers/`);
+    const response = await axiosInstance.get(`${use ? `/developers/` : '/public/developers'}`);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);

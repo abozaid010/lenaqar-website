@@ -35,8 +35,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   const [unitsResponse, developers, compounds] = await Promise?.all([
     fetchUnitsFilter(JSON?.stringify(searchParams),useclient),
-    // fetchDevelopers(),
-    // fetchcombounds(),
+    fetchDevelopers(useclient),
+    fetchcombounds(useclient),
   ]);
 
   const units = unitsResponse.data?.units || [];
@@ -61,7 +61,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         />
       </div>
 
-      {/* <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
+      <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
@@ -69,7 +69,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         />
 
         <UnitsSearch />
-      </div> */}
+      </div>
       <UnitsGrid
         units={units}
         // disablePrev={!hasMoreNext}
