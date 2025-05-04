@@ -513,7 +513,7 @@ export default {
   "propertyImages": "صور العقار",
   "maximum": "الحد الأقصى",
   "clickOrDragAndDrop": "انقر أو اسحب وأفلت الصور هنا",
-  "supportedFormats": "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 1 ميجابايت لكل صورة)",
+  "supportedFormats": "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل صورة)",
   "uploading": "جارٍ التحميل...",
   "upload": "تحميل",
   "selectedImage": "صورة محددة",

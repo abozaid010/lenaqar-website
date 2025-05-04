@@ -63,7 +63,7 @@ export async function fetchUnitById(id) {
 
 export async function updateUnit(unit) {
   try {
-    const response = await axiosInstance.post(`/units/update-sale`, unit);
+    const response = await axiosInstance.post(`/units/v1/update-sale`, unit);
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
@@ -73,7 +73,7 @@ export async function updateUnit(unit) {
 
 export async function updateUnitRent(unit) {
   try {
-    const response = await axiosInstance.post(`/units/update-rent`, unit);
+    const response = await axiosInstance.post(`/units/v1/update-rent`, unit);
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
@@ -119,7 +119,7 @@ export async function fetchUnitsFilter(searchParams, use) {
       ...(use ? { client_id: clientId } : {}),
     };
 
-    const response = await axiosInstance.get(`${use ?'/units/all'  :   '/public_units'}`, { params });
+    const response = await axiosInstance.get(`${use ? '/units/all' : '/public_units'}`, { params });
     console.log(response);
     return response.data;
 
@@ -154,7 +154,7 @@ export async function addDeveloper(developerData) {
 // Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {
-    const response = await axiosInstance.post(`/units/add-sale`, unitData);
+    const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
@@ -163,7 +163,7 @@ export async function addUnit(unitData) {
 }
 export async function addUnitRent(unitData) {
   try {
-    const response = await axiosInstance.post(`/units/add-rent`, unitData);
+    const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);

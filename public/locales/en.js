@@ -514,7 +514,7 @@ export default {
   "propertyImages": "Property Images",
   "maximum": "Maximum",
   "clickOrDragAndDrop": "Click or drag and drop images here",
-  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 1MB each)",
+  "supportedFormats": "Supported formats: JPG, PNG, WEBP (Max 5MB each)",
   "uploading": "Uploading...",
   "upload": "Upload",
   "selectedImage": "Selected Image",
