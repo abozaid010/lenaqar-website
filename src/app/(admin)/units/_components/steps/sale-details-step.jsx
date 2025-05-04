@@ -2,6 +2,7 @@
 
 import { Plus, Trash2Icon } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
+import { formatPrice } from "@/utils/formatters";
 
 export default function SaleDetailsStep({
   formData,
@@ -10,12 +11,18 @@ export default function SaleDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t } = useI18n();
-  const isRTL = t.direction === 'rtl';
+  const isRTL = t.direction === "rtl";
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, dataset } = e.target;
 
-    updateFormData({ [name]: value });
+    if (dataset.formatPrice === "true") {
+      const rawValue = value.replace(/\D/g, "");
+      updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
+    } else {
+      updateFormData({ [name]: value });
+    }
+
     if (invalidFields.includes(name)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
@@ -37,8 +44,12 @@ export default function SaleDetailsStep({
   };
 
   const updatePaymentPlan = (index, field, value) => {
+    const rawValue = value.replace(/\D/g, "");
     const updatedPlans = [...formData.paymentPlans];
-    updatedPlans[index] = { ...updatedPlans[index], [field]: value };
+    updatedPlans[index] = {
+      ...updatedPlans[index],
+      [field]: rawValue === "" ? "" : Number(rawValue),
+    };
     updateFormData({ paymentPlans: updatedPlans });
 
     setInvalidFields((prev) => {
@@ -74,9 +85,10 @@ export default function SaleDetailsStep({
             {t.saleDetails.totalPrice} <span className="text-red-500">*</span>
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-price
             name="totalPrice"
-            value={formData.totalPrice}
+            value={formatPrice(formData.totalPrice)}
             onChange={handleChange}
             min="0"
             placeholder="5000000"
@@ -86,7 +98,11 @@ export default function SaleDetailsStep({
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
           />
-          <span className={`absolute bottom-1 ${isRTL? "left-1.5": "right-1.5"} text-gray-400`}>EGP</span>
+          <span
+            className={`absolute bottom-1 ${isRTL ? "left-1.5" : "right-1.5"} text-gray-400`}
+          >
+            EGP
+          </span>
         </div>
 
         {/* Delivery Date */}
@@ -119,15 +135,20 @@ export default function SaleDetailsStep({
             {t.saleDetails.downPayment}
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-price
             name="downPayment"
-            value={formData.downPayment}
+            value={formatPrice(formData.downPayment)}
             onChange={handleChange}
             min="0"
             placeholder="200000"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
-          <span className={`absolute bottom-1 ${isRTL? "left-1.5": "right-1.5"} text-gray-400`}>EGP</span>
+          <span
+            className={`absolute bottom-1 ${isRTL ? "left-1.5" : "right-1.5"} text-gray-400`}
+          >
+            EGP
+          </span>
         </div>
       </div>
 
@@ -180,12 +201,14 @@ export default function SaleDetailsStep({
                           : "text-gray-700"
                       }`}
                     >
-                      {t.saleDetails.price} <span className="text-red-500">*</span>
+                      {t.saleDetails.price}{" "}
+                      <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="number"
+                      type="text"
+                      data-format-price
                       placeholder="20000"
-                      value={plan.price}
+                      value={formatPrice(plan.price)}
                       onChange={(e) =>
                         updatePaymentPlan(index, "price", e.target.value)
                       }
@@ -201,9 +224,10 @@ export default function SaleDetailsStep({
                       {t.saleDetails.maintenance}
                     </label>
                     <input
-                      type="number"
+                      type="text"
+                      data-format-price
                       placeholder="2000"
-                      value={plan.maintenance}
+                      value={formatPrice(plan.maintenance)}
                       onChange={(e) =>
                         updatePaymentPlan(index, "maintenance", e.target.value)
                       }

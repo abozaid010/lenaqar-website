@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useI18n } from "@/context/translate-api";
-
+import { formatPrice } from "@/utils/formatters";
 const availableAmenities = [
   "wifi",
   "dryer",
@@ -26,7 +26,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
   const { t } = useI18n();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, dataset } = e.target;
 
     if (type === "checkbox") {
       if (name.startsWith("amenity-")) {
@@ -48,18 +48,22 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
       } else {
         updateFormData({ [name]: checked });
       }
+    } else if (dataset.formatPrice === "true") {
+      const rawValue = value.replace(/\D/g, "");
+      updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
     } else {
       updateFormData({ [name]: value });
     }
   };
 
   const handlePriceChange = (durationType, field, value) => {
+    const rawValue = value.replace(/\D/g, "");
     updateFormData({
       rentDurationType: {
         ...formData.rentDurationType,
         [durationType]: {
           ...formData.rentDurationType[durationType],
-          [field]: value,
+          [field]: rawValue === "" ? "" : Number(rawValue),
         },
       },
     });
@@ -71,7 +75,8 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         {t.rentalDetails.availability}{" "}
         {!formData.isAvailable ? (
           <span className="text-sm text-gray-400 font-normal">
-            {t.rentalDetails.chooseAvailabilityDate} <span className="text-red-500">*</span>
+            {t.rentalDetails.chooseAvailabilityDate}{" "}
+            <span className="text-red-500">*</span>
           </span>
         ) : null}
       </h3>
@@ -161,8 +166,11 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
           </label>
           <div className="flex">
             <input
-              type="number"
-              value={formData.rentDurationType[activeDuration].price}
+              type="text"
+              data-format-price
+              value={formatPrice(
+                formData.rentDurationType[activeDuration].price
+              )}
               onChange={(e) =>
                 handlePriceChange(activeDuration, "price", e.target.value)
               }
@@ -184,8 +192,11 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
           </label>
           <div className="flex">
             <input
-              type="number"
-              value={formData.rentDurationType[activeDuration].securityDeposit}
+              type="text"
+              data-format-price
+              value={formatPrice(
+                formData.rentDurationType[activeDuration].securityDeposit
+              )}
               onChange={(e) =>
                 handlePriceChange(
                   activeDuration,
@@ -210,8 +221,11 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
           </label>
           <div className="flex">
             <input
-              type="number"
-              value={formData.rentDurationType[activeDuration].cleaningFee}
+              type="text"
+              data-format-price
+              value={formatPrice(
+                formData.rentDurationType[activeDuration].cleaningFee
+              )}
               onChange={(e) =>
                 handlePriceChange(activeDuration, "cleaningFee", e.target.value)
               }
@@ -232,8 +246,11 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
           </label>
           <div className="flex">
             <input
-              type="number"
-              value={formData.rentDurationType[activeDuration].serviceFee}
+              type="text"
+              data-format-price
+              value={formatPrice(
+                formData.rentDurationType[activeDuration].serviceFee
+              )}
               onChange={(e) =>
                 handlePriceChange(activeDuration, "serviceFee", e.target.value)
               }
@@ -250,7 +267,9 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
 
       {/* Amenities */}
       <div className="mt-6">
-        <h4 className="text-lg font-medium mb-3">{t.rentalDetails.amenitiesTitle || "Amenities"}</h4>
+        <h4 className="text-lg font-medium mb-3">
+          {t.rentalDetails.amenitiesTitle || "Amenities"}
+        </h4>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-y-2">
           {availableAmenities.map((amenity) => (
             <div key={amenity} className="flex items-center">
@@ -266,8 +285,9 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
                 htmlFor={`amenity-${amenity}`}
                 className="ml-2 block text-sm text-gray-700 cursor-pointer"
               >
-                {typeof t.rentalDetails.amenities === 'object' && t.rentalDetails.amenities[amenity] 
-                  ? t.rentalDetails.amenities[amenity] 
+                {typeof t.rentalDetails.amenities === "object" &&
+                t.rentalDetails.amenities[amenity]
+                  ? t.rentalDetails.amenities[amenity]
                   : amenity}
               </label>
             </div>

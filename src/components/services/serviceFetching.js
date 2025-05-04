@@ -43,7 +43,7 @@ export async function uploadImages(formData) {
 
 export async function deleteImage(imageId) {
   try {
-    const response = await axiosInstance.delete(`/images/${imageId}`);
+    const response = await axiosInstance.delete(`/gcs/${imageId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to delete image:", error.message);
