@@ -34,6 +34,7 @@ export default function DashbordFilter({ appliedFilters }) {
         label: t.dashboardFilter.actions.missingRequirement,
         value: "Missing requirement",
       },
+      { label: "Blocked", value: "Blocked" },
     ],
     [t]
   );
@@ -212,7 +213,7 @@ export default function DashbordFilter({ appliedFilters }) {
               <Crown size={12} />
             </span>
             <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
-            {t.dashboardFilter.premuim}
+              {t.dashboardFilter.premuim}
             </div>
           </button>
 
@@ -226,7 +227,7 @@ export default function DashbordFilter({ appliedFilters }) {
               <Crown size={12} />
             </span>
             <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
-            {t.dashboardFilter.premuim}
+              {t.dashboardFilter.premuim}
             </div>
           </button>
         </div>

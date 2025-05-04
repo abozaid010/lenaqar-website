@@ -139,9 +139,10 @@ export default function ImagesStep({
         const res = await uploadImages(formDataToUpload);
 
         // Update status to success
-        const updatedStatus = { ...uploadStatus };
-        updatedStatus[image.id] = "success";
-        setUploadStatus(updatedStatus);
+
+        setUploadStatus((prev) => {
+          return { ...prev, [image.id]: "success" };
+        });
 
         // Add to successful uploads
         successfulUploads.push({
@@ -149,10 +150,9 @@ export default function ImagesStep({
           fileId: res.fileId,
         });
       } catch (error) {
-        // Update status to error
-        const updatedStatus = { ...uploadStatus };
-        updatedStatus[image.id] = "error";
-        setUploadStatus(updatedStatus);
+        setUploadStatus((prev) => {
+          return { ...prev, [image.id]: "error" };
+        });
 
         failedUploads.push(image.id);
         console.error(`Failed to upload image ${image.name}:`, error);
@@ -172,58 +172,6 @@ export default function ImagesStep({
       failedUploads.includes(img.id)
     );
     setSelectedImages([...remainingSelected, ...newSelected]);
-
-    setIsUploading(false);
-  };
-
-  const uploadImagesToServer = async () => {
-    if (selectedImages.length === 0 || isUploading) return;
-
-    setIsUploading(true);
-
-    // Create a copy of the current status
-    const newUploadStatus = { ...uploadStatus };
-    const successfulUploads = [];
-    const failedUploads = [];
-
-    // Process each selected image
-    for (const image of selectedImages) {
-      newUploadStatus[image.id] = "uploading";
-      setUploadStatus({ ...newUploadStatus });
-
-      const formDataToUpload = new FormData();
-      formDataToUpload.append("file", image.file);
-
-      try {
-        const res = await uploadImages(formDataToUpload);
-
-        newUploadStatus[image.id] = "success";
-
-        // Add to successful uploads
-        successfulUploads.push({
-          url: res.url,
-          fileId: res.fileId,
-        });
-      } catch (error) {
-        newUploadStatus[image.id] = "error";
-        failedUploads.push(image.id);
-        toast.error(`${t.failedToUploadImage} ${image.name}:`, error.message);
-      }
-
-      setUploadStatus({ ...newUploadStatus });
-    }
-
-    // Update the form data with all uploaded images
-    const allUploaded = [...uploadedImages, ...successfulUploads];
-
-    updateFormData({ images: allUploaded });
-    setUploadedImages(allUploaded);
-
-    // Remove successfully uploaded images from selectedImages
-    const remainingSelected = selectedImages.filter((img) =>
-      failedUploads.includes(img.id)
-    );
-    setSelectedImages(remainingSelected);
 
     setIsUploading(false);
   };
@@ -464,39 +412,6 @@ export default function ImagesStep({
           <p className="text-lg text-gray-700 mb-2">{t.clickOrDragAndDrop}</p>
           <p className="text-sm text-gray-500">{t.supportedFormats}</p>
         </div>
-
-        {/* Upload button - Only shows when there are selected images */}
-        {selectedImages.length > 0 && (
-          <div className="mt-4 flex justify-center">
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                uploadImagesToServer();
-              }}
-              disabled={isUploading}
-              className={`flex items-center gap-2 font-medium py-2 px-6 rounded-md transition-colors ${
-                isUploading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-primary hover:opacity-90 text-white"
-              }`}
-            >
-              {isUploading ? (
-                <>
-                  <Loader2 size={24} className="animate-spin" />
-                  {t.uploading}
-                </>
-              ) : (
-                <>
-                  {t.upload} {selectedImages.length}{" "}
-                  {selectedImages.length > 1
-                    ? t.selectedImages
-                    : t.selectedImage}
-                </>
-              )}
-            </button>
-          </div>
-        )}
       </div>
 
       {/* Image Preview */}
@@ -533,26 +448,28 @@ export default function ImagesStep({
                         }`}
                       >
                         {uploadStatus[image.id] === "uploading" && (
-                          <svg
-                            className="animate-spin h-8 w-8 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            ></circle>
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            ></path>
-                          </svg>
+                          <>
+                            <svg
+                              className="animate-spin h-8 w-8 text-white"
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                              ></circle>
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              ></path>
+                            </svg>
+                          </>
                         )}
                         {uploadStatus[image.id] === "success" && (
                           <svg

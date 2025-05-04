@@ -12,10 +12,12 @@ import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
 
 export default function AddCompoundDialog({
+  clientId,
   isOpen,
   onClose,
   onAdd,
-  developersData,
+  developers = [],
+  setDevelopers,
 }) {
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -23,7 +25,6 @@ export default function AddCompoundDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-  const [developers, setDevelopers] = useState(developersData || []);
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
@@ -38,6 +39,7 @@ export default function AddCompoundDialog({
     video_url: "",
     google_map_link: "",
     master_plan: "",
+    client_id: clientId || "",
   });
 
   const handleChange = (e) => {
@@ -90,7 +92,7 @@ export default function AddCompoundDialog({
 
     if (uploadedImageId) {
       try {
-        const res = await deleteImage(uploadedImageId);
+        await deleteImage(uploadedImageId);
         toast.success("Image removed successfully from the server!");
         setUploadedImageId(null);
       } catch (error) {
@@ -160,7 +162,6 @@ export default function AddCompoundDialog({
       };
 
       const res = await addCompound(submissionData);
-      console.log(res.data);
       if (res.code === 200) {
         toast.success("Compound added successfully!");
         onAdd({
@@ -501,6 +502,7 @@ export default function AddCompoundDialog({
       </Dialog>
 
       <AddDeveloperDialog
+        client_id={clientId}
         isOpen={isAddDeveloperDialogOpen}
         onClose={() => setIsAddDeveloperDialogOpen(false)}
         onAdd={handleAddDeveloper}

@@ -142,8 +142,10 @@ export async function fetchDevelopers(use) {
 }
 
 export async function addDeveloper(developerData) {
+  const clientId = await getClientid();
+
   try {
-    const response = await axiosInstance.post(`/developers/create`, developerData);
+    const response = await axiosInstance.post(`/developers/create?client_id=${clientId}`, developerData);
     return response.data;
   } catch (error) {
     console.error("Failed to add developer:", error.message);
@@ -172,8 +174,10 @@ export async function addUnitRent(unitData) {
 }
 
 export async function addCompound(compoundData) {
+  const clientId = await getClientid();
+
   try {
-    const response = await axiosInstance.post(`/projects/create`, compoundData);
+    const response = await axiosInstance.post(`/projects/create?client_id=${clientId}`, compoundData);
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);

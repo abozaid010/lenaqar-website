@@ -41,7 +41,9 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   const units = unitsResponse.data?.units || [];
 
-  console.log(units);
+  const developersSet = Array.from(
+    new Set(developers?.map((developer) => developer.name))
+  );
 
   return (
     <div className="container mx-auto">
@@ -52,7 +54,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           clientId={clientId}
           clientName={clientName}
           compounds={compounds}
-          developers={developers}
+          developers={developersSet}
         />
       </div>
 

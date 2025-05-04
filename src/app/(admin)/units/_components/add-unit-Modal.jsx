@@ -28,7 +28,7 @@ export default function AddUnitModal({
   clientId,
   clientName,
   compounds,
-  developers,
+  developersData,
 }) {
   const modalRef = useRef(null);
   const { t } = useI18n();
@@ -38,6 +38,7 @@ export default function AddUnitModal({
   // Track over all upload state
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
+  const [developers, setDevelopers] = useState(developersData || []);
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
@@ -108,10 +109,6 @@ export default function AddUnitModal({
     },
     amenities: unitData?.amenities || [],
   }));
-
-  const developersSet = Array.from(
-    new Set(developers?.map((developer) => developer.name))
-  );
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
@@ -334,10 +331,12 @@ export default function AddUnitModal({
         <form onSubmit={handleSubmit} className="mt-3 px-5 pb-5">
           {currentStep === 1 && (
             <BasicDetailsStep
+              clientId={clientId}
               formData={formData}
               updateFormData={updateFormData}
               compoundsData={compounds}
-              developers={developersSet}
+              developers={developers}
+              setDevelopers={setDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
             />
@@ -367,7 +366,7 @@ export default function AddUnitModal({
             <ImagesStep
               formData={formData}
               updateFormData={updateFormData}
-              developersSet={developersSet}
+              developersSet={developers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               isUploading={isUploading}

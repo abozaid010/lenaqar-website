@@ -65,13 +65,13 @@ export default function UnitsGrid({ units }) {
               </div>
 
               {/* Text Overlay Section */}
-              <div className="absolute bottom-4 left-[5%] w-[90%] bg-white/30 backdrop-blur-md py-2 px-3 rounded-md">
-                <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
+              <div className="absolute bottom-4 left-[5%] w-[90%] bg-black/35 py-2 px-3 rounded-md">
+                <h3 className="text-lg font-bold text-white line-clamp-1">
                   {u?.unitTitle || "Unnamed Property"}
                 </h3>
-                <div className="flex items-center text-gray-700 mb-1">
-                  <MapPin className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
-                  <span className="line-clamp-1">
+                <div className="flex items-center text-white/90 mb-1">
+                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="line-clamp-1 text-sm">
                     {u.city || "Location not specified"}
                   </span>
                 </div>
@@ -91,7 +91,7 @@ export default function UnitsGrid({ units }) {
                 </div>
 
                 {/* Pricing Information */}
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-white/90">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <span>
                       <span className="font-medium">Rent Price:</span>{" "}

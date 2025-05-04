@@ -4,15 +4,21 @@ import { useState } from "react";
 import Dialog from "../_components/dialog";
 import { Loader2 } from "lucide-react";
 import { addDeveloper } from "@/components/services/serviceFetching";
-import { v4 as uuidv4 } from "uuid"; // Import UUID library
+import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
 
-export default function AddDeveloperDialog({ isOpen, onClose, onAdd }) {
+export default function AddDeveloperDialog({
+  isOpen,
+  onClose,
+  onAdd,
+  client_id,
+}) {
   const [formData, setFormData] = useState({
     id: uuidv4(),
     name: "",
     description: "",
     logo: "",
+    client_id: client_id || "",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +53,7 @@ export default function AddDeveloperDialog({ isOpen, onClose, onAdd }) {
           name: "",
           description: "",
           logo: "",
+          client_id: client_id || "",
         });
         onAdd(res.data?.name);
         onClose();

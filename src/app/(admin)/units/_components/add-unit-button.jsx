@@ -46,7 +46,7 @@ export default function AddUnitButton({
           clientId={clientId}
           clientName={clientName}
           compounds={compounds}
-          developers={developers}
+          developersData={developers}
         />
       )}
     </>

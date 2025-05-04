@@ -5,10 +5,12 @@ import AddCompoundDialog from "../add-compound-dialog";
 import { useState } from "react";
 
 export default function BasicDetailsStep({
+  clientId,
   formData,
   updateFormData,
   compoundsData,
   developers,
+  setDevelopers = () => {},
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
@@ -428,7 +430,9 @@ export default function BasicDetailsStep({
 
       {/* Add Compound Dialog */}
       <AddCompoundDialog
-        developersData={developers}
+        clientId={clientId}
+        developers={developers}
+        setDevelopers={setDevelopers}
         isOpen={isAddCompoundDialogOpen}
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}
