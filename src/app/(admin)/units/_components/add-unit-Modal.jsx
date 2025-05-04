@@ -32,7 +32,7 @@ export default function AddUnitModal({
 }) {
   const modalRef = useRef(null);
   const { t } = useI18n();
-  const isRTL = t.direction === 'rtl';
+  const isRTL = t.direction === "rtl";
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload state
@@ -62,6 +62,7 @@ export default function AddUnitModal({
     landArea: unitData?.landArea || "",
     gardenSize: unitData?.gardenSize || "",
     finishing: unitData?.finishing || "",
+    furnishing: unitData?.furnishing || "",
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
   }));
@@ -250,7 +251,7 @@ export default function AddUnitModal({
         return;
       }
 
-      const requiredFields = ["finishing", "developer"];
+      const requiredFields = ["finishing", "developer", "furnishing"];
       const missingFields = requiredFields.filter((field) => !formData[field]);
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);
@@ -285,9 +286,7 @@ export default function AddUnitModal({
       onClose();
       window.location.reload();
     } catch (error) {
-      toast.error(
-        `${t("toasts.errorProcessing")}: ${error.message}`
-      );
+      toast.error(`${t("toasts.errorProcessing")}: ${error.message}`);
     } finally {
       setInvalidFields([]);
       setLoading(false);
@@ -295,7 +294,7 @@ export default function AddUnitModal({
   };
 
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
-  
+
   return createPortal(
     <div
       onClick={handleOutsideClick}
@@ -384,7 +383,7 @@ export default function AddUnitModal({
                 onClick={handleBack}
                 className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors"
               >
-                {isRTL ? t.buttons.back : "" }
+                {isRTL ? t.buttons.back : ""}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -397,7 +396,7 @@ export default function AddUnitModal({
                     clipRule="evenodd"
                   />
                 </svg>
-                {isRTL ? "": t.buttons.back}
+                {isRTL ? "" : t.buttons.back}
               </button>
             ) : (
               <div></div>
@@ -409,7 +408,7 @@ export default function AddUnitModal({
                 onClick={handleNext}
                 className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors"
               >
-                { isRTL? "": t.buttons.next}
+                {isRTL ? "" : t.buttons.next}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-5 w-5"
@@ -422,7 +421,7 @@ export default function AddUnitModal({
                     clipRule="evenodd"
                   />
                 </svg>
-                {isRTL ? t.buttons.next :""}
+                {isRTL ? t.buttons.next : ""}
               </button>
             ) : (
               <button

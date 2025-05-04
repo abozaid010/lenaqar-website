@@ -280,7 +280,7 @@ export default function ImagesStep({
         {t.additionalDetails}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
         {/* Finishing Type */}
         <div>
           <label
@@ -304,20 +304,51 @@ export default function ImagesStep({
               }`}
             >
               <option value="">{t.selectFinishingType}</option>
-              {formData.purpose === "rent" ? (
-                <>
-                  <option value="furnished">{t.furnished}</option>
-                  <option value="unfurnished">{t.unfurnished}</option>
-                </>
-              ) : (
-                <>
-                  <option value="fully finished">{t.fullyFinished}</option>
-                  <option value="semi finished">{t.semiFinished}</option>
-                  <option value="core & shell">{t.coreAndShell}</option>
-                  <option value="furnished">{t.furnished}</option>
-                  <option value="unfurnished">{t.unfurnished}</option>
-                </>
-              )}
+              <option value="fully finished">{t.fullyFinished}</option>
+              <option value="semi finished">{t.semiFinished}</option>
+              <option value="core & shell">{t.coreAndShell}</option>
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <svg
+                className="h-5 w-5 text-gray-400"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Furnishing Type */}
+        <div>
+          <label
+            className={`block text-sm font-medium mb-1 ${
+              invalidFields.includes("furnishing")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
+            Furnishing Type <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <select
+              name="furnishing"
+              value={formData.furnishing}
+              onChange={handleChange}
+              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                invalidFields.includes("furnishing")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
+            >
+              <option value="">Select Furnishing Type</option>
+              <option value="furnished">{t.furnished}</option>
+              <option value="unfurnished">{t.unfurnished}</option>
             </select>
             <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
               <svg

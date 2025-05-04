@@ -23,7 +23,7 @@ export default function UnitBasicInfo({ unit }) {
       <UnitPricing unit={unit} />
 
       {/* Additional Features */}
-      <div className="mt-5 grid grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-2 max-w-lg">
+      <div className="mt-5 grid grid-cols-3 lg:grid-cols-3 gap-x-8 gap-y-2 max-w-lg">
         <div className="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -109,6 +109,27 @@ export default function UnitBasicInfo({ unit }) {
           <div>
             <span className="text-sm text-gray-500">Finishing</span>
             <p className="font-medium">{unit.finishing || "N/A"}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 text-primary mr-2"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7m-6 0H9m6 0l-3-3m3 3l3-3m-3 3l-3-3m0 0L9 4"
+            />
+          </svg>
+          <div>
+            <span className="text-sm text-gray-500">Furnishing</span>
+            <p className="font-medium">{unit.furnishing || "N/A"}</p>
           </div>
         </div>
       </div>
