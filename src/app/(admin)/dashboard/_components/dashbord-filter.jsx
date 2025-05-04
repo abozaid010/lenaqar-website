@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, ChevronDown } from "lucide-react";
+import { MessageSquare, ChevronDown, Crown, Lock } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 
 const formatDate = (date) => {
@@ -15,16 +15,28 @@ export default function DashbordFilter({ appliedFilters }) {
   const { t } = useI18n();
   const router = useRouter();
 
-  const ACTIONS = useMemo(() => [
-    { label: t.dashboardFilter.actions.all, value: "" },
-    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
-    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
-    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-    { label: t.dashboardFilter.actions.notInterested, value: "Not interested" },
-    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
-    { label: t.dashboardFilter.actions.followUpLater, value: "Follow up later" },
-    { label: t.dashboardFilter.actions.missingRequirement, value: "Missing requirement" },
-  ], [t]);
+  const ACTIONS = useMemo(
+    () => [
+      { label: t.dashboardFilter.actions.all, value: "" },
+      { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
+      { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
+      { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
+      {
+        label: t.dashboardFilter.actions.notInterested,
+        value: "Not interested",
+      },
+      { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
+      {
+        label: t.dashboardFilter.actions.followUpLater,
+        value: "Follow up later",
+      },
+      {
+        label: t.dashboardFilter.actions.missingRequirement,
+        value: "Missing requirement",
+      },
+    ],
+    [t]
+  );
 
   const tomorrow = useMemo(() => {
     const date = new Date();
@@ -66,17 +78,17 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const onFilterChange = (key, value) => {
     let selectdDate = value;
-    if ((key === 'start_date' || key === 'end_date') && !value.includes('T')) {
+    if ((key === "start_date" || key === "end_date") && !value.includes("T")) {
       const dateObj = new Date(value);
-      if (key === 'start_date') {
+      if (key === "start_date") {
         dateObj.setHours(0, 0, 0, 0);
       }
-      if (key === 'end_date') {
+      if (key === "end_date") {
         dateObj.setHours(23, 59, 59, 999);
       }
       selectdDate = formatDate(dateObj);
     }
-    
+
     setFilters((prev) => ({
       ...prev,
       [key]: selectdDate,
@@ -84,14 +96,16 @@ export default function DashbordFilter({ appliedFilters }) {
 
     const params = new URLSearchParams();
     const updatedFilters = { ...filters, [key]: selectdDate };
-    
+
     Object.entries(updatedFilters).forEach(([k, v]) => {
       if (v) {
         params.append(k, v);
       }
     });
 
-    router.push(`${window.location.pathname}?${params.toString()}`, { replace: true });
+    router.push(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
   };
 
   return (
@@ -131,10 +145,12 @@ export default function DashbordFilter({ appliedFilters }) {
                     </label>
                     <input
                       type="date"
-                      value={filters.start_date.split('T')[0]}
+                      value={filters.start_date.split("T")[0]}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        const dateObj = new Date(selectedDate + 'T00:00:00.000Z');
+                        const dateObj = new Date(
+                          selectedDate + "T00:00:00.000Z"
+                        );
                         const formattedDate = formatDate(dateObj);
                         setFilters((prev) => ({
                           ...prev,
@@ -150,10 +166,12 @@ export default function DashbordFilter({ appliedFilters }) {
                     </label>
                     <input
                       type="date"
-                      value={filters.end_date.split('T')[0]}
+                      value={filters.end_date.split("T")[0]}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        const dateObj = new Date(selectedDate + 'T23:59:59.999Z');
+                        const dateObj = new Date(
+                          selectedDate + "T23:59:59.999Z"
+                        );
                         const formattedDate = formatDate(dateObj);
                         setFilters((prev) => ({
                           ...prev,
@@ -183,12 +201,35 @@ export default function DashbordFilter({ appliedFilters }) {
           </div>
         </div>
 
-        <button
-          className="w-full sm:w-auto bg-primary hover:bg-blue-800 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2"
-        >
-          <MessageSquare size={16} />
-          {t.dashboardFilter.whatsappButton}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            className="w-full sm:w-auto bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-not-allowed relative group"
+            disabled
+          >
+            <MessageSquare size={16} />
+            {t.dashboardFilter.whatsappButton}
+            <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white p-1 rounded-full">
+              <Crown size={12} />
+            </span>
+            <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
+            {t.dashboardFilter.premuim}
+            </div>
+          </button>
+
+          <button
+            className="w-full sm:w-auto bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-not-allowed relative group"
+            disabled
+          >
+            <Lock size={16} />
+            {t.dashboardFilter.ADD}
+            <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white p-1 rounded-full">
+              <Crown size={12} />
+            </span>
+            <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
+            {t.dashboardFilter.premuim}
+            </div>
+          </button>
+        </div>
       </div>
     </>
   );

@@ -110,7 +110,9 @@ export default {
     "connect": {
       "title": "Connect With Us",
       "linkedin": "LinkedIn",
-      "privacyPolicy": "Read our Privacy Policy"
+       "chat":"chat with Us",
+      "privacyPolicy": "Read our Privacy Policy",
+       "dowenload":"Download our App"
     },
     "copyright": "©",
     "companyName": "Lena AI",
@@ -203,7 +205,10 @@ export default {
       "cancel": "Cancel",
       "apply": "Apply"
     },
-    "whatsappButton": "WhatsApp Leads"
+    "whatsappButton": "WhatsApp Leads",
+    "premuim":" Premium Feature",
+    "ADD":"Add New Lead"
+
   },
   search: {
     "placeholder": "Search client by name or number..."

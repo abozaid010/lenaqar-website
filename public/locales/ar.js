@@ -111,7 +111,10 @@ export default {
     "connect": {
       "title": "تواصل معنا",
       "linkedin": "لينكد إن",
-      "privacyPolicy": "اقرأ سياسة الخصوصية الخاصة بنا"
+      "privacyPolicy": "اقرأ سياسة الخصوصية الخاصة بنا",
+      "chat":"تحدث معنا",
+     "dowenload": "قم بتحميل تطبيقنا"
+
     },
     "copyright": "©",
     "companyName": "لينا AI",
@@ -202,7 +205,9 @@ export default {
       "cancel": "إلغاء",
       "apply": "تطبيق"
     },
-    "whatsappButton": "ليادات واتساب"
+    "whatsappButton": "ليادات واتساب",
+    "premuim":"ميزة مدفوعة",
+    "ADD":"اضافة عميل محتمل جديد"
   },
   search: {
     "placeholder": "ابحث عن العميل بالاسم أو الرقم..."
