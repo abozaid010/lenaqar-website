@@ -64,11 +64,12 @@ export default function ImageGallary({ images, unitName, unitId }) {
         className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
         onClick={openFullscreenGallery}
       >
-        <img
+        <Image
           src={images[mainImageIndex].url}
           alt={`${unitName}`}
           loading="eager"
-          className="object-cover h-full w-full rounded-md transition-transform duration-300 group-hover:scale-105"
+          fill
+          className="rounded-md transition-transform duration-300 group-hover:scale-105"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -120,7 +121,12 @@ export default function ImageGallary({ images, unitName, unitId }) {
               }`}
               onClick={() => setMainImageIndex(index)}
             >
-              <img src={image.url} alt={`Unit - ${index + 1}`} loading="lazy" />
+              <Image
+                fill
+                src={image.url}
+                alt={`Unit - ${index + 1}`}
+                loading="lazy"
+              />
               {mainImageIndex === index && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
                   <div className="w-4 h-4 rounded-full bg-primary/80"></div>
@@ -179,9 +185,9 @@ export default function ImageGallary({ images, unitName, unitId }) {
                         src={image.url}
                         alt={`Unit - ${index + 1}`}
                         fill
+                        priority={true}
                         objectFit="contain"
                         loading="eager"
-                        quality={60}
                       />
                     </div>
                   </SwiperSlide>

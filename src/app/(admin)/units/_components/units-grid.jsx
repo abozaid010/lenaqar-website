@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
@@ -43,7 +44,8 @@ export default function UnitsGrid({ units }) {
               {/* Image Section */}
               <div className="relative w-full h-92 overflow-hidden rounded-lg shadow-lg">
                 {u.images && u.images.length > 0 ? (
-                  <img
+                  <Image
+                    fill
                     src={u.images[0].url}
                     alt={u.name || u.compound || "Property"}
                     loading="eager"
