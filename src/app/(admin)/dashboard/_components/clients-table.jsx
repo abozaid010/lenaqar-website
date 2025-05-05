@@ -73,12 +73,12 @@ export default function ClientsTable({
     }
   };
 
-  const handleClientRequirements = async (e, phone_number, user_id) => {
+  const handleClientRequirements = async (e, phone_number, user_id,name,phone) => {
     e.stopPropagation();
     setLoadingRequirements(user_id);
     try {
       const requirements = await getClientRequirements(phone_number);
-      setRowRequirements({ ...requirements });
+      setRowRequirements({ ...requirements ,name:name,phone:phone });
       setOpenRequirementsModal(true);
     } catch (error) {
       console.error("Error fetching requirements:", error);
@@ -145,10 +145,10 @@ export default function ClientsTable({
 
                   return (
                     <tr
-                      onClick={() => router.push(`/dashboard/chat/${user.user_id}`)}
+                      onClick={() => router.push(`/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`)}
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.user_id}`)
+                        router.push(`/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`)
                       }
                       role="button"
                       tabIndex={0}
@@ -172,7 +172,7 @@ export default function ClientsTable({
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
-                        {user.phone_number || ""}
+                        {user.phone_number || t.clientsTable.newLead}
                       </td>
 
                       <td className="px-2 py-1 sm:py-2 text-gray-600">
@@ -187,7 +187,7 @@ export default function ClientsTable({
                         }`}
                         onClick={(e) => {
                           if (user.requirement_name !== t.clientsTable.notDefined) {
-                            handleClientRequirements(e, user.user_id, user.user_id);
+                            handleClientRequirements(e, user.user_id, user.user_id,user.name,user.phone_number);
                           }
                         }}
                       >
@@ -278,6 +278,7 @@ export default function ClientsTable({
             setLoadingRequirements(null);
           }}
           property={rowRequirements}
+        
         />
       )}
     </>

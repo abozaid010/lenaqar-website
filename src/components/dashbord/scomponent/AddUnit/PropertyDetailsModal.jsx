@@ -56,7 +56,8 @@ const PropertyDetailsModal = ({ onClose, property }) => {
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
-            {formattedProperty.user_id}_
+            {console.log(formattedProperty)}
+            {formattedProperty.name || formattedProperty.phone || t.clientsTable.newLead }_
             {t.propertyDetails.title.replace("{id}", "")}
           </h3>
           <button
