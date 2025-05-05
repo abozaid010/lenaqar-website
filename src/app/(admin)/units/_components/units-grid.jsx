@@ -46,6 +46,7 @@ export default function UnitsGrid({ units }) {
                   <img
                     src={u.images[0].url}
                     alt={u.name || u.compound || "Property"}
+                    loading="eager"
                     className="w-full h-full object-cover"
                   />
                 ) : (
