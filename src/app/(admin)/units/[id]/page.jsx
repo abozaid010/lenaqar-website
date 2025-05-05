@@ -27,12 +27,15 @@ const Page = async ({ params }) => {
     fetchDevelopers(),
   ]);
 
+  const developersSet = Array.from(
+    new Set(developers?.map((developer) => developer.name))
+  );
   return (
     <>
       <UnitPageHeader
         unit={unit}
         compounds={comboundata}
-        developers={developers}
+        developers={developersSet}
       />
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">

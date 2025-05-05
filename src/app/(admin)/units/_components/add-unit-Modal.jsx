@@ -293,10 +293,7 @@ export default function AddUnitModal({
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
 
   return createPortal(
-    <div
-      onClick={handleOutsideClick}
-      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-    >
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div
         ref={modalRef}
         className="rounded-md bg-white shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"

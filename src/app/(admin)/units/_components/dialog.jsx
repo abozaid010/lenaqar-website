@@ -33,10 +33,7 @@ export default function Dialog({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
-      onClick={handleOutsideClick}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div
         ref={dialogRef}
         className="rounded-lg shadow-xl w-full max-w-md overflow-hidden"
