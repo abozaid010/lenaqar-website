@@ -2,6 +2,9 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import { Share2 } from "lucide-react";
+import ShareModal from "../units-share-modal";
+import { getShareUnitData } from "@/components/services/serviceFetching";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Thumbs } from "swiper/modules";
@@ -9,8 +12,13 @@ import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
+import toast from "react-hot-toast";
 
-export default function ImageGallary({ images, unitName }) {
+export default function ImageGallary({ images, unitName, unitId }) {
+  const [showModal, setShowModal] = useState(false);
+  const [shareData, setShareData] = useState(null);
+  const [loadingShare, setLoadingShare] = useState(false);
+
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -25,6 +33,27 @@ export default function ImageGallary({ images, unitName }) {
     }
   };
 
+  const handleShareClick = async (e) => {
+    if (!unitId) {
+      toast.error("Unit ID is not available.");
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    setShowModal(true);
+    setLoadingShare(true);
+
+    try {
+      const data = await getShareUnitData(unitId);
+      setShareData(data);
+    } catch (error) {
+      console.error("Error fetching share data:", error);
+      setShareData(null);
+    } finally {
+      setLoadingShare(false);
+    }
+  };
+
   const closeFullscreenGallery = () => {
     setIsFullscreen(false);
   };
@@ -35,11 +64,11 @@ export default function ImageGallary({ images, unitName }) {
         className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
         onClick={openFullscreenGallery}
       >
-        <Image
+        <img
           src={images[mainImageIndex].url}
           alt={`${unitName}`}
-          fill
-          className="object-cover border h-[480px] rounded-md transition-transform duration-300 group-hover:scale-105"
+          loading="eager"
+          className="object-cover h-full w-full rounded-md transition-transform duration-300 group-hover:scale-105"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -61,10 +90,18 @@ export default function ImageGallary({ images, unitName }) {
             <span>Click to view in fullscreen</span>
           </div>
         </div>
+
+        {/* Share Button */}
+        <button
+          type="button"
+          onClick={handleShareClick}
+          className="absolute top-4 left-4 cursor-pointer p-2.5 bg-white/90 rounded-full shadow-lg border border-gray-200"
+        >
+          <Share2 className="w-4 h-4 text-primary hover:text" />
+        </button>
       </div>
 
       {/* Thumbnail swiper */}
-
       <Swiper
         modules={[Navigation, Thumbs]}
         spaceBetween={10}
@@ -83,12 +120,7 @@ export default function ImageGallary({ images, unitName }) {
               }`}
               onClick={() => setMainImageIndex(index)}
             >
-              <Image
-                src={image.url}
-                alt={`Unit - ${index + 1}`}
-                fill
-                className="object-cover"
-              />
+              <img src={image.url} alt={`Unit - ${index + 1}`} loading="lazy" />
               {mainImageIndex === index && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
                   <div className="w-4 h-4 rounded-full bg-primary/80"></div>
@@ -147,8 +179,9 @@ export default function ImageGallary({ images, unitName }) {
                         src={image.url}
                         alt={`Unit - ${index + 1}`}
                         fill
-                        className="object-contain"
-                        priority
+                        objectFit="contain"
+                        loading="eager"
+                        quality={60}
                       />
                     </div>
                   </SwiperSlide>
@@ -174,6 +207,14 @@ export default function ImageGallary({ images, unitName }) {
           </div>
         </div>
       )}
+
+      {/* ShareModal component with the correct props */}
+      <ShareModal
+        showModal={showModal}
+        setShowModal={setShowModal}
+        shareData={shareData}
+        loadingShare={loadingShare}
+      />
     </div>
   );
 }

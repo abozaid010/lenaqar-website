@@ -129,8 +129,6 @@ export async function fetchUnitsFilter(searchParams, use) {
   }
 }
 
-
-
 export async function fetchDevelopers(use) {
   try {
     const response = await axiosInstance.get(`${use ? `/developers/` : '/public/developers'}`);
@@ -209,8 +207,6 @@ export async function getClientActions(phoneNumber) {
 }
 
 export async function getClientRequirements(phoneNumber) {
-
-
   try {
     const response = await axiosInstance.get(`requirements/${phoneNumber}`);
     console.log(response);
@@ -221,7 +217,6 @@ export async function getClientRequirements(phoneNumber) {
   }
 }
 
-
 export async function getShareUnitData(unit_id) {
   const clientId = await getClientid();
 
@@ -231,7 +226,7 @@ export async function getShareUnitData(unit_id) {
       unit_id: unit_id
     };
 
-    const response = await axiosInstance.get(`units/share`, { params });
+    const response = await axiosInstance.get("/shared-links/share", { params });
     return response.data.data;
   } catch (error) {
     console.error("API Error:", error);

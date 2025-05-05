@@ -40,7 +40,11 @@ const Page = async ({ params }) => {
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
         <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">
-          <ImageGallary images={unit.images} unitName={unit.unitTitle} />
+          <ImageGallary
+            images={unit.images}
+            unitName={unit.unitTitle}
+            unitId={unit.unitId}
+          />
 
           <UnitBasicInfo unit={unit} />
         </div>
