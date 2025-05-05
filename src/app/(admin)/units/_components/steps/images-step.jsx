@@ -1,15 +1,15 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
 import { useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 
+import AddDeveloperDialog from "../add-developer-dialog";
+import imageCompression from "browser-image-compression";
 import {
   deleteImage,
   uploadImages,
 } from "@/components/services/serviceFetching";
-import AddDeveloperDialog from "../add-developer-dialog";
 
 export default function ImagesStep({
   formData,
@@ -66,6 +66,25 @@ export default function ImagesStep({
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFiles(e.target.files);
+    }
+  };
+
+  // Compression function
+  const compressImage = async (file) => {
+    const options = {
+      maxSizeMB: 0.5,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+      fileType: file.type,
+      initialQuality: 0.7,
+    };
+
+    try {
+      return await imageCompression(file, options);
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      // If compression fails, return the original file
+      return file;
     }
   };
 
@@ -133,13 +152,15 @@ export default function ImagesStep({
     // Process each selected image
     for (const image of newSelectedImages) {
       try {
+        // Compress the image before uploading
+        const compressedFile = await compressImage(image.file);
+
         const formDataToUpload = new FormData();
-        formDataToUpload.append("file", image.file);
+        formDataToUpload.append("file", compressedFile);
 
         const res = await uploadImages(formDataToUpload);
 
         // Update status to success
-
         setUploadStatus((prev) => {
           return { ...prev, [image.id]: "success" };
         });
