@@ -1,16 +1,15 @@
 import {
   fetchcombounds,
   fetchDevelopers,
-  fetchUnitById,
+  fetchUnitByIdpublic,
 } from "@/components/services/serviceFetching";
-import UnitPageHeader from "../_components/unit-page-header";
-import ImageGallary from "../_components/unit-details/image-gallary";
-import UnitBasicInfo from "../_components/unit-details/unit-basic-info";
+import ImageGallary from "@/app/(admin)/units/_components/unit-details/image-gallary";
+import UnitBasicInfo from "@/app/(admin)/units/_components/unit-details/unit-basic-info";
 
 // Dynamic metadata
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const unit = await fetchUnitById(id);
+  const unit = await fetchUnitByIdpublic(id);
 
   return {
     title: "unit - " + unit?.unitTitle,
@@ -20,7 +19,7 @@ export async function generateMetadata({ params }) {
 
 const Page = async ({ params }) => {
   const { id } = await params;
-  const unit = await fetchUnitById(id);
+  const unit = await fetchUnitByIdpublic(id);
 
   const [comboundata, developers] = await Promise.all([
     fetchcombounds(),
