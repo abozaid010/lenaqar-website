@@ -46,7 +46,7 @@ export default function UnitsGrid({ units }) {
                 {u.images && u.images.length > 0 ? (
                   <Image
                     fill
-                    src={u.images[0].url}
+                    src={u.images[0].url ||"/images/defaultImage.jpg"}
                     alt={u.name || u.compound || "Property"}
                     loading="eager"
                     className="w-full h-full object-cover"

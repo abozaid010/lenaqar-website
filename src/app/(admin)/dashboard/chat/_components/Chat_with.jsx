@@ -4,7 +4,7 @@ const Chat_with = ({name}) => {
   return (
     <div>
        <h1 className="text-xl text-gray-700">
-          Chat with_<span className="text-primary font-bold">{name}</span>
+         <span className="text-primary font-bold">{name}</span>
         </h1>
     </div>
   )
