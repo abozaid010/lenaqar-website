@@ -51,15 +51,29 @@ export async function deleteImage(imageId) {
   }
 }
 
-export async function fetchUnitById(id) {
+// export async function fetchUnitById(id) {
+//   try {
+//     const response = await axiosInstance.get(`/units/details/${id}`);
+//     return response.data.data;
+//   } catch (error) {
+//     console.error("Failed to fetch unit by id:", error.message);
+//     return { error: error.message };
+//   }
+// }
+export async function fetchUnitById(id, token) {
   try {
-    const response = await axiosInstance.get(`/units/details/${id}`);
+    const response = await axiosInstance.get(`/units/details/${id}`, {
+      headers: {
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXZAbGVuYS5uZXQiLCJleHAiOjE3NDcxMzc0MDZ9.DRWjvT2ZWWvgpZsGWxNwUszEXKmH3G-zblH3IPM7s8g`,
+      },
+    });
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch unit by id:", error.message);
     return { error: error.message };
   }
 }
+
 
 export async function updateUnit(unit) {
   try {
@@ -120,7 +134,7 @@ export async function fetchUnitsFilter(searchParams, use) {
     };
 
     const response = await axiosInstance.get(`${use ? '/units/all' : '/public/units'}`, { params });
-    console.log(response);
+    console.log(response.data);
     return response.data;
 
   } catch (error) {

@@ -29,14 +29,14 @@ const Page = async ({ params }) => {
 
   return (
     <>
-      <UnitPageHeader
+      {/* <UnitPageHeader
         unit={unit}
         compounds={comboundata}
         developers={developers}
-      />
+      /> */}
 
       <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
-        <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">
+        <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center mt-12">
           <ImageGallary images={unit.images} unitName={unit.unitTitle} />
 
           <UnitBasicInfo unit={unit} />

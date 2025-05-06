@@ -9,6 +9,7 @@ import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
 import IdentifierUnit from "./_components/IdentifierUnit";
 import UnitsGrid from "@/app/(admin)/units/_components/units-grid";
+import Header from "./_components/Header";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -49,7 +50,9 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   // const previousCursor = initialData?.pagination?.prev_cursor;
 
   return (
-    <div className="container mx-auto">
+    <div>
+    <div className="container mx-auto ">
+      
       <div className="mb-8 flex items-start justify-between gap-2">
         <IdentifierUnit />
 
@@ -72,9 +75,11 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       </div>
       <UnitsGrid
         units={units}
+        readonly={true}
         // disablePrev={!hasMoreNext}
         // nextCursor={nextCursor}
       />
+    </div>
     </div>
   );
 }

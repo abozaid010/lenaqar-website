@@ -7,10 +7,11 @@ import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "./units-share-modal";
 
-export default function UnitsGrid({ units }) {
+export default function UnitsGrid({ units , readonly=false }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
+
 
   const handleShareClick = async (unitId, e) => {
     e.preventDefault();
@@ -40,7 +41,7 @@ export default function UnitsGrid({ units }) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
           {units.map((u, idx) => (
-            <Link href={`/units/${u.unitId}`} key={idx} className="relative">
+            <Link href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`} key={idx} className="relative">
               {/* Image Section */}
               <div className="relative w-full h-92 overflow-hidden rounded-lg shadow-lg">
                 {u.images && u.images.length > 0 ? (
