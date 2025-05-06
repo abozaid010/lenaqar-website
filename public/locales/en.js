@@ -47,10 +47,13 @@ export default {
     "ctaButton": "Get Started",
     "backgroundAlt": "Background",
     "aiImageAlt": "AI Assistant",
-    "message1": "24/7 reply and handle your clients needs",
-    "message2": "Filter leads",
-    "message3": "Close More Deals",
-    "message4": "follow up, scale with effortless"
+    "message1": "⁠Filter Leads",
+    "message2": "24/7 ⁠Instant replies to customers",
+    "message3": "⁠Data Analytics",
+    "message4": "⁠Check today's to-do list",
+    "message5": "⁠Upselling",
+    "message6": "⁠AI Property Consultant",
+    "message7": "follow up, and scale with effortless"
   },
   dashboard: {
     "title": {
