@@ -1,8 +1,9 @@
 "use client";
-import React, { useState, useEffect } from "react";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image"; // إضافة استيراد مكون Image
-import { Menu, X, Globe, AlertTriangle } from "lucide-react";
+import Image from "next/image";
+import { Menu, X, AlertTriangle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 import Cookies from "js-cookie";
@@ -129,11 +130,13 @@ const Header = () => {
                 {t.header.clientDashboard}
               </Link>
               <Link href="" className="hover:text-blue-200 transition-colors">
-              <CalendarModal buttonText={t.header.jobOpportunities} />
+                <CalendarModal buttonText={t.header.jobOpportunities} />
               </Link>
-              <Link href="/allProberties" className="hover:text-blue-200 transition-colors">
+              <Link
+                href="/allProberties"
+                className="hover:text-blue-200 transition-colors"
+              >
                 {t.header.allProperties}
-               
               </Link>
             </nav>
 

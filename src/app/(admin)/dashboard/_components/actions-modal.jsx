@@ -1,3 +1,5 @@
+"use client";
+
 import { X } from "lucide-react";
 import NewActionForm from "./new-action-form";
 import formatDateForDisplay from "@/utils/formateDate";
@@ -10,14 +12,14 @@ const NOPREFRERED_TIME = [
   "Missing requirement",
 ];
 export default function ActionsModal({ actions, onClose, userId }) {
-  console.log(actions)
-  const{t}=useI18n()
+  const { t } = useI18n();
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-50 p-4">
       <div className="relative w-full max-w-xl max-h-full bg-white rounded-lg shadow-lg">
         <div className="flex justify-between items-center p-3">
           <h3 className="text-lg font-semibold text-gray-800 text-center flex-1">
-          {t.actionForm.aiAction}
+            {t.actionForm.aiAction}
           </h3>
           <button
             onClick={onClose}
@@ -45,15 +47,14 @@ export default function ActionsModal({ actions, onClose, userId }) {
                     </div>
 
                     <small className="text-gray-500 font-medium ">
-                     
-                      {formatDateForDisplay(a.created_at,true)}
+                      {formatDateForDisplay(a.created_at, true)}
                     </small>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
-                    {console.log(a)}
+                  {console.log(a)}
                   {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
                     <small className="underline text-xs text-green-600 font-medium">
-                       {formatDateForDisplay(a.meeting_time)}
+                      {formatDateForDisplay(a.meeting_time)}
                     </small>
                   )}
                 </div>

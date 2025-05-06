@@ -1,4 +1,5 @@
-"use client"
+"use client";
+
 import { Check } from "lucide-react";
 import dashborddesctop from "../../../../public/images/dasbordDesctop.png";
 import dashbordmobile from "../../../../public/images/dashbordmobile.png";
@@ -8,9 +9,9 @@ import CalendarModal from "@/components/ui/calendar-modal";
 
 export default function DashboardImage() {
   const { t } = useI18n();
-  // تحديد اتجاه اللغة (عربي أم إنجليزي)
-  const isRTL = t.direction === 'rtl';
-  console.log(t)
+
+  const isRTL = t.direction === "rtl";
+  console.log(t);
 
   const features = [
     {
@@ -65,9 +66,11 @@ export default function DashboardImage() {
               </div>
             ))}
 
-            <CalendarModal 
+            <CalendarModal
               buttonText={t.dashboard.ctaButton}
-              style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} 
+              style={
+                "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
+              }
             />
           </div>
 
@@ -86,7 +89,9 @@ export default function DashboardImage() {
                 </div>
 
                 {/* Mobile Mockup Image */}
-                <div className={`hidden md:block absolute bottom-[-20%] ${isRTL ? 'left-[-25%]' : 'right-[-25%]'} w-1/3 transform`}>
+                <div
+                  className={`hidden md:block absolute bottom-[-20%] ${isRTL ? "left-[-25%]" : "right-[-25%]"} w-1/3 transform`}
+                >
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image
                       src={dashbordmobile}

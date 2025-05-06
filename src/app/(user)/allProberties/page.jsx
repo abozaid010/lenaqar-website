@@ -3,65 +3,26 @@ import {
   fetchUnitsFilter,
   fetchDevelopers,
 } from "@/components/services/serviceFetching";
-import UnitsFilter from "./_components/units-filter";
-import UnitsSearch from "./_components/units-search";
-import { cookies } from "next/headers";
-import AddUnitButton from "./_components/add-unit-button";
-import IdentifierUnit from "./_components/IdentifierUnit";
-import UnitsGrid from "@/app/(admin)/units/_components/units-grid";
-import Header from "./_components/Header";
-
-export async function generateMetadata() {
-  const cookieStore = await cookies();
-
-  // const clientName = JSON.parse(
-  //   cookieStore.get("client_info")?.value
-  // )?.client_name;
-
-  // return {
-  //   title: clientName ? `Units | ${clientName}` : "LENAAI",
-  //   description: `LENAAI, your AI property consultant.`,
-  // };
-}
+import UnitsFilter from "@/components/ui/units-filter";
+import UnitsSearch from "@/components/ui/units-search";
+import IdentifierUnit from "@/components/ui/IdentifierUnit";
+import UnitsGrid from "@/components/ui/units-grid";
 
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
-  const cookieStore = await cookies();
-  // const clientId = cookieStore?.get("client_id")?.value;
-  // const clientName = JSON?.parse(
-  //   cookieStore?.get("client_info")?.value
-  // )?.client_name;
- const  useclient = false
-
   const [unitsResponse, developers, compounds] = await Promise?.all([
-    fetchUnitsFilter(JSON?.stringify(searchParams),useclient),
-    fetchDevelopers(useclient),
-    fetchcombounds(useclient),
+    fetchUnitsFilter(JSON?.stringify(searchParams), false),
+    fetchDevelopers(false),
+    fetchcombounds(false),
   ]);
 
   const units = unitsResponse.data?.units || [];
- 
-
-  // const hasMoreNext = unitsResponse?.data?.has_more;
-  // const hasMorePrev = initialData?.pagination?.has_more_prev;
-
-  // const nextCursor = unitsResponse.data.next_cursor;
-  // const previousCursor = initialData?.pagination?.prev_cursor;
 
   return (
-    <div>
-    <div className="container mx-auto ">
-      
-      <div className="mb-8 flex items-start justify-between gap-2">
+    <div className="container mx-auto">
+      <div className="mb-4">
         <IdentifierUnit />
-
-        <AddUnitButton
-          // clientId={clientId}
-          // clientName={clientName}
-          compounds={compounds}
-          developers={developers}
-        />
       </div>
 
       <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
@@ -73,13 +34,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
         <UnitsSearch />
       </div>
-      <UnitsGrid
-        units={units}
-        readonly={true}
-        // disablePrev={!hasMoreNext}
-        // nextCursor={nextCursor}
-      />
-    </div>
+
+      <UnitsGrid units={units} readonly={true} />
     </div>
   );
 }

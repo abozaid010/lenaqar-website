@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+
 import {
   X,
   Home,
@@ -38,7 +39,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
     if (!value || value === "" || value === "N/A") {
       return null;
     }
-    
+
     return (
       <div className="flex items-center gap-2">
         <div className="bg-blue-100 p-2 rounded-md">{icon}</div>
@@ -51,14 +52,16 @@ const PropertyDetailsModal = ({ onClose, property }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-opacity-20 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
             {console.log(formattedProperty)}
-            {formattedProperty.name || formattedProperty.phone || t.clientsTable.newLead }_
-            {t.propertyDetails.title.replace("{id}", "")}
+            {formattedProperty.name ||
+              formattedProperty.phone ||
+              t.clientsTable.newLead}
+            _{t.propertyDetails.title.replace("{id}", "")}
           </h3>
           <button
             onClick={onClose}
@@ -70,9 +73,9 @@ const PropertyDetailsModal = ({ onClose, property }) => {
 
         {/* Content */}
         <div className="p-4">
-          <div className="flex flex-col md:flex-row gap-4 items-start">
+          <div className="flex flex-col sm:flex-row gap-4 items-start">
             {/* Left column - Property details */}
-            <div className="flex-1">
+            <div className="md:w-1/2 w-full">
               <div className="grid grid-cols-2 gap-4">
                 <DetailItem
                   icon={<Building2 className="h-5 w-5 text-primary" />}
@@ -110,7 +113,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   value={formattedProperty.viewType}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <DetailItem
                   icon={<Square className="h-5 w-5 text-primary" />}
@@ -140,7 +143,10 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   <DetailItem
                     icon={<Calendar className="h-5 w-5 text-primary" />}
                     label={t.propertyDetails.fields.deliveryDate}
-                    value={formatDateForDisplay(formattedProperty.deliveryDate, true)}
+                    value={formatDateForDisplay(
+                      formattedProperty.deliveryDate,
+                      true
+                    )}
                   />
                 )}
 
@@ -153,30 +159,31 @@ const PropertyDetailsModal = ({ onClose, property }) => {
             </div>
 
             {/* Right column - Contact info */}
-            <div className="md:w-64 space-y-2">
+            <div className="md:w-1/2 w-full space-y-2">
               {/* Only show score section if score exists */}
-              {formattedProperty?.score?.score !== undefined && formattedProperty?.score?.score !== null && (
-                <div className="bg-blue-50 p-3 rounded-lg">
-                  <div className="text-center">
-                    <p className="text-sm text-primary font-medium">
-                      {t.propertyDetails.purchaseProbability}
-                    </p>
-                    <div className="mt-2">
-                      <p className="text-lg font-semibold text-primary">
-                        {formattedProperty.score.score}%
+              {formattedProperty?.score?.score !== undefined &&
+                formattedProperty?.score?.score !== null && (
+                  <div className="bg-blue-50 p-3 rounded-lg">
+                    <div className="text-center">
+                      <p className="text-sm text-primary font-medium">
+                        {t.propertyDetails.purchaseProbability}
                       </p>
-                      <div className="mt-2 h-2 rounded-full bg-blue-200 w-full">
-                        <div
-                          className="h-full rounded-full bg-primary"
-                          style={{
-                            width: `${formattedProperty.score.score}%`,
-                          }}
-                        ></div>
+                      <div className="mt-2">
+                        <p className="text-lg font-semibold text-primary">
+                          {formattedProperty.score.score}%
+                        </p>
+                        <div className="mt-2 h-2 rounded-full bg-blue-200 w-full">
+                          <div
+                            className="h-full rounded-full bg-primary"
+                            style={{
+                              width: `${formattedProperty.score.score}%`,
+                            }}
+                          ></div>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
               {/* Only show property purpose section if it exists */}
               {formattedProperty.propertyPurpose && (
@@ -199,7 +206,6 @@ const PropertyDetailsModal = ({ onClose, property }) => {
         </div>
 
         {/* Footer */}
-      
       </div>
     </div>
   );

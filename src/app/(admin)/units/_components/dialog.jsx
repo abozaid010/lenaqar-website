@@ -33,10 +33,10 @@ export default function Dialog({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl w-full max-w-md overflow-hidden"
+        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[90%]"
       >
         <div className="flex justify-between items-center p-3 bg-primary">
           <h3 className="text-lg font-medium text-white">{title}</h3>
@@ -47,7 +47,7 @@ export default function Dialog({ isOpen, onClose, title, children }) {
             <X size={22} />
           </button>
         </div>
-        <div className="p-4 overflow-y-auto bg-white max-h-[90vh]">
+        <div className="p-4 overflow-y-auto bg-white max-h-[85vh]">
           {children}
         </div>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { MessageSquare, ChevronDown, Crown, Lock } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 
 const formatDate = (date) => {
@@ -110,128 +110,95 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   return (
-    <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 gap-3">
-        <div className="flex items-center gap-2">
-          <select
-            name="action_type"
-            onChange={(e) => onFilterChange("action", e.target.value)}
-            value={filters.action || "all"}
-            className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-56 text-gray-700 hover:bg-gray-100 text-sm"
-          >
-            {ACTIONS.map((action) => (
-              <option key={action.value} value={action.value}>
-                {action.label}
-              </option>
-            ))}
-          </select>
-
-          <div className="relative inline-block">
-            <button
-              onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
-            >
-              {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
-                filters.end_date
-              )}`}
-              <ChevronDown size={16} />
-            </button>
-
-            {isDatePickerOpen && (
-              <div className="absolute mt-2 w-72 bg-white border border-gray-200 rounded-md shadow-lg p-4 z-10">
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t.dashboardFilter.datePicker.startDate}
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.start_date.split("T")[0]}
-                      onChange={(filter) => {
-                        const selectedDate = filter.target.value;
-                        const dateObj = new Date(
-                          selectedDate + "T00:00:00.000Z"
-                        );
-                        const formattedDate = formatDate(dateObj);
-                        setFilters((prev) => ({
-                          ...prev,
-                          start_date: formattedDate,
-                        }));
-                      }}
-                      className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t.dashboardFilter.datePicker.endDate}
-                    </label>
-                    <input
-                      type="date"
-                      value={filters.end_date.split("T")[0]}
-                      onChange={(filter) => {
-                        const selectedDate = filter.target.value;
-                        const dateObj = new Date(
-                          selectedDate + "T23:59:59.999Z"
-                        );
-                        const formattedDate = formatDate(dateObj);
-                        setFilters((prev) => ({
-                          ...prev,
-                          end_date: formattedDate,
-                        }));
-                      }}
-                      className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                    />
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setIsDatePickerOpen(false)}
-                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      {t.dashboardFilter.datePicker.cancel}
-                    </button>
-                    <button
-                      onClick={onApplyDateFilter}
-                      className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      {t.dashboardFilter.datePicker.apply}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            className="w-full sm:w-auto bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-not-allowed relative group"
-            disabled
-          >
-            <MessageSquare size={16} />
-            {t.dashboardFilter.whatsappButton}
-            <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white p-1 rounded-full">
-              <Crown size={12} />
-            </span>
-            <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
-              {t.dashboardFilter.premuim}
-            </div>
-          </button>
-
-          <button
-            className="w-full sm:w-auto bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 cursor-not-allowed relative group"
-            disabled
-          >
-            <Lock size={16} />
-            {t.dashboardFilter.ADD}
-            <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs text-white p-1 rounded-full">
-              <Crown size={12} />
-            </span>
-            <div className="hidden group-hover:block absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs py-1 px-2 rounded whitespace-nowrap">
-              {t.dashboardFilter.premuim}
-            </div>
-          </button>
+    <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap">
+      <div className="relative inline-block w-full sm:w-52">
+        <select
+          name="action_type"
+          onChange={(e) => onFilterChange("action", e.target.value)}
+          value={filters.action || "all"}
+          className="border w-full border-gray-300 rounded-md p-2 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm appearance-none"
+        >
+          {ACTIONS.map((action) => (
+            <option key={action.value} value={action.value}>
+              {action.label}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+          <ChevronDown size={16} />
         </div>
       </div>
-    </>
+
+      <div className="relative inline-block w-full">
+        <button
+          onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+          className="flex justify-between w-full whitespace-nowrap items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
+        >
+          {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
+            filters.end_date
+          )}`}
+          <ChevronDown size={16} />
+        </button>
+
+        {isDatePickerOpen && (
+          <div className="absolute mt-2 w-full sm:w-66 bg-white border border-gray-200 rounded-md shadow-lg p-3 z-10 left-0">
+            <div className="space-y-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.dashboardFilter.datePicker.startDate}
+                </label>
+                <input
+                  type="date"
+                  value={filters.start_date.split("T")[0]}
+                  onChange={(filter) => {
+                    const selectedDate = filter.target.value;
+                    const dateObj = new Date(selectedDate + "T00:00:00.000Z");
+                    const formattedDate = formatDate(dateObj);
+                    setFilters((prev) => ({
+                      ...prev,
+                      start_date: formattedDate,
+                    }));
+                  }}
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.dashboardFilter.datePicker.endDate}
+                </label>
+                <input
+                  type="date"
+                  value={filters.end_date.split("T")[0]}
+                  onChange={(filter) => {
+                    const selectedDate = filter.target.value;
+                    const dateObj = new Date(selectedDate + "T23:59:59.999Z");
+                    const formattedDate = formatDate(dateObj);
+                    setFilters((prev) => ({
+                      ...prev,
+                      end_date: formattedDate,
+                    }));
+                  }}
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
+                />
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => setIsDatePickerOpen(false)}
+                  className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                >
+                  {t.dashboardFilter.datePicker.cancel}
+                </button>
+                <button
+                  onClick={onApplyDateFilter}
+                  className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm"
+                >
+                  {t.dashboardFilter.datePicker.apply}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

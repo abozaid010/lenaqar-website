@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import {
   X,
@@ -34,14 +36,6 @@ export default function ShareModal({
       setImages([]);
     }
   }, [shareData]);
-
-  const copyToClipboard = (text, type) => {
-    if (text) {
-      navigator.clipboard.writeText(text);
-      setCopied((prev) => ({ ...prev, [type]: true }));
-      setTimeout(() => setCopied((prev) => ({ ...prev, [type]: false })), 2000);
-    }
-  };
 
   const copyWithLink = (text, type) => {
     if (text) {

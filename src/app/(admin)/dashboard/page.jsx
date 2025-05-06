@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Loader2 } from "lucide-react";
 
 import { cookies } from "next/headers";
+import PremiumFeatures from "./_components/premuim-features";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -22,8 +23,12 @@ export async function generateMetadata() {
 export default async function DashbordPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
   return (
-    <div className="bg-gray-50 min-h-screen p-2 sm:p-4">
-      <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6">
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto my-3">
+        <PremiumFeatures />
+      </div>
+
+      <div className="max-w-7xl mx-auto bg-white rounded-md shadow-sm p-3 sm:p-4 md:p-6">
         <DashbordFilter appliedFilters={searchParams} />
 
         <SearchBar q={searchParams.query} />
@@ -34,7 +39,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
             <div className="flex items-center justify-center h-full">
               <Loader2
                 size={70}
-                className="text-center animate-spin text-[#1e3a8a]"
+                className="text-center animate-spin text-primary"
               />
             </div>
           }

@@ -4,8 +4,8 @@ import {
   fetchUnitById,
 } from "@/components/services/serviceFetching";
 import UnitPageHeader from "../_components/unit-page-header";
-import ImageGallary from "../_components/unit-details/image-gallary";
-import UnitBasicInfo from "../_components/unit-details/unit-basic-info";
+import ImageGallary from "@/components/ui/unit-details/image-gallary";
+import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
 
 // Dynamic metadata
 export async function generateMetadata({ params }) {
@@ -31,7 +31,7 @@ const Page = async ({ params }) => {
     new Set(developers?.map((developer) => developer.name))
   );
   return (
-    <>
+    <div className="container mx-auto">
       <UnitPageHeader
         unit={unit}
         compounds={comboundata}
@@ -49,7 +49,7 @@ const Page = async ({ params }) => {
           <UnitBasicInfo unit={unit} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

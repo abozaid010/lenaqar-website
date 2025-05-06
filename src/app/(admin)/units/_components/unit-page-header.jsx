@@ -13,7 +13,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
   };
 
   return (
-    <div className="py-6 px-4 flex justify-between items-center">
+    <div className="py-4 flex justify-between items-between overflow-hidden">
       <button
         onClick={handleBackToUnits}
         className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-md flex items-center"
@@ -40,6 +40,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
           compounds={compounds}
           developers={developers}
         />
+
         <DeleteUnitBtn unitId={unit.unitId} />
       </div>
     </div>

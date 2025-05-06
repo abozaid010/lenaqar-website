@@ -113,9 +113,9 @@ export default {
     "connect": {
       "title": "Connect With Us",
       "linkedin": "LinkedIn",
-       "chat":"chat with Us",
+      "chat": "chat with Us",
       "privacyPolicy": "Read our Privacy Policy",
-       "dowenload":"Download our App"
+      "dowenload": "Download our App"
     },
     "copyright": "©",
     "companyName": "Lena AI",
@@ -209,8 +209,8 @@ export default {
       "apply": "Apply"
     },
     "whatsappButton": "WhatsApp Leads",
-    "premuim":" Premium Feature",
-    "ADD":"Add New Lead"
+    "premuim": " Premium Feature",
+    "ADD": "Add New Lead"
 
   },
   search: {
@@ -220,10 +220,10 @@ export default {
     "noClients": "No clients found",
     "headers": {
       "name": "Name",
-      "userNumber": "User Number",
+      "userNumber": "Number",
       "date": "Date",
       "requirements": "Requirements",
-      "messageCount": "Message Count",
+      "messageCount": "Messages Count",
       "action": "Action"
     },
     "newLead": "New Lead",

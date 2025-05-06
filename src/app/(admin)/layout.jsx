@@ -17,7 +17,7 @@ const Layout = async ({ children }) => {
       <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
         <Header clientName={clientName} />
 
-        <main className="overflow-y-auto p-4">{children}</main>
+        <main className="overflow-y-auto p-3">{children}</main>
       </div>
     </div>
   );

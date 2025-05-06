@@ -293,10 +293,10 @@ export default function AddUnitModal({
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
       <div
         ref={modalRef}
-        className="rounded-md bg-white shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+        className="rounded-md bg-white shadow-xl w-full max-w-4xl"
       >
         {/* Header */}
         <div className="bg-primary rounded-t-md text-white py-4 px-6 flex justify-between items-center">
@@ -307,7 +307,7 @@ export default function AddUnitModal({
         </div>
 
         {/* Step Indicator */}
-        <div className="p-5">
+        <div className="p-3 md:p-5">
           <StepIndicator
             currentStep={currentStep}
             steps={[
@@ -325,7 +325,10 @@ export default function AddUnitModal({
         </div>
 
         {/* Step Content */}
-        <form onSubmit={handleSubmit} className="mt-3 px-5 pb-5">
+        <form
+          onSubmit={handleSubmit}
+          className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[85vh]"
+        >
           {currentStep === 1 && (
             <BasicDetailsStep
               clientId={clientId}

@@ -63,30 +63,25 @@ const Header = ({ clientName }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm  p-4 flex justify-between items-center  mt-2 md:mt-0">
-      <div className="flex items-center gap-3">
-        <div className="block lg:hidden">
-          <button
-            className="p-1 rounded-md hover:bg-gray-100"
-            onClick={handleMenuClick}
-          >
-            <Menu className="h-6 w-6 text-gray-700" />
-          </button>
-        </div>
-
-        <div className="sm:hidden">
-          <Search className="h-5 w-5 text-gray-400" />
-        </div>
+    <header className="bg-white shadow-sm p-4 flex justify-between lg:justify-end items-center">
+      <div className="block lg:hidden">
+        <button
+          className="p-1 rounded-md hover:bg-gray-100"
+          onClick={handleMenuClick}
+        >
+          <Menu className="h-6 w-6 text-gray-700" />
+        </button>
       </div>
 
-      <div className="flex items-center space-x-2 sm:space-x-4  ">
+      <div className="flex items-center space-x-2 sm:space-x-4">
         <button
           onClick={sendMessageWhatsApp}
-          className="flex items-center gap-2 bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
+          className="flex items-center gap-2 bg-primary text-white font-medium py-1 px-4 sm:px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
         >
           <HelpCircle size={20} />
           <span>{t.header.sendMessage}</span>
         </button>
+
         <LanguageSwitcher />
 
         <div className="relative">

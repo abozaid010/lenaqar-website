@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
-import ShareModal from "./units-share-modal";
-// import ClientsTablePagination from "../../dashboard/_components/clients-table-pagination";
+import ShareModal from "@/components/ui/units-share-modal";
 
-export default function UnitsGrid({ units}) {
+export default function UnitsGrid({ units, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
@@ -30,7 +30,6 @@ export default function UnitsGrid({ units}) {
       setLoadingShare(false);
     }
   };
-
   return (
     <>
       {units.length === 0 ? (
@@ -40,14 +39,25 @@ export default function UnitsGrid({ units}) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
           {units.map((u, idx) => (
-            <Link href={`/units/${u.unitId}`} key={idx} className="relative">
+            <Link
+              href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
+              key={idx}
+              className="relative"
+            >
               {/* Image Section */}
-              <div className="relative w-full h-92 overflow-hidden rounded-lg shadow-lg">
+              <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg">
                 {u.images && u.images.length > 0 ? (
-                  <img
-                    src={u.images[0].url}
+                  <Image
+                    fill
+                    src={u.images[0].url || "/images/defaultImage.jpg"}
                     alt={u.name || u.compound || "Property"}
+                    loading="eager"
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/defaultImage.jpg";
+                      e.currentTarget.onerror = null;
+                    }}
+                    priority={true}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
@@ -59,20 +69,20 @@ export default function UnitsGrid({ units}) {
                 <button
                   type="button"
                   onClick={(e) => handleShareClick(u.unitId, e)}
-                  className="absolute top-2 left-2 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
+                  className="absolute top-5 left-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
                 >
-                  <Share2 className="w-4 h-4 text-primary group-hover:text-white" />
+                  <Share2 className="w-4 h-4 text-primary hover:opacity-90" />
                 </button>
               </div>
 
               {/* Text Overlay Section */}
-              <div className="absolute bottom-4 left-[5%] w-[90%] bg-white/30 backdrop-blur-md py-2 px-3 rounded-md">
-                <h3 className="text-lg font-bold text-gray-800 line-clamp-1">
+              <div className="absolute bottom-0 left-0 w-full bg-black/40 py-2 px-3 rounded-b-lg">
+                <h3 className="text-lg font-bold text-white line-clamp-1">
                   {u?.unitTitle || "Unnamed Property"}
                 </h3>
-                <div className="flex items-center text-gray-700 mb-1">
-                  <MapPin className="w-4 h-4 mr-2 text-gray-500 flex-shrink-0" />
-                  <span className="line-clamp-1">
+                <div className="flex items-center text-white/90 mb-1">
+                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="line-clamp-1 text-sm">
                     {u.city || "Location not specified"}
                   </span>
                 </div>
@@ -92,7 +102,7 @@ export default function UnitsGrid({ units}) {
                 </div>
 
                 {/* Pricing Information */}
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-white/90">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <span>
                       <span className="font-medium">Rent Price:</span>{" "}
@@ -120,23 +130,7 @@ export default function UnitsGrid({ units}) {
           ))}
         </div>
       )}
-      <div className="flex flex-col mt-4 gap-3">
-        <div className="flex justify-between items-center flex-row-reverse">
-          {/* <ClientsTablePagination
-            nextCursor={nextCursor}
-            disableNext={disableNext}
-          /> */}
 
-          {/* {rowSelection.length > 0 && (
-            <button className="bg-primary hover:opacity-95 cursor-pointer text-white py-1.5 rounded-md px-5">
-              {t.clientsTable.actions.addAction.replace(
-                "{count}",
-                rowSelection.length
-              )}
-            </button>
-          )} */}
-        </div>
-      </div>
       {/* ShareModal component with the correct props */}
       <ShareModal
         showModal={showModal}

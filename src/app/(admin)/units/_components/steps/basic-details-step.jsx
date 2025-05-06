@@ -308,7 +308,7 @@ export default function BasicDetailsStep({
         {t.basicDetails.propertySpecs}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
+      <div className="grid grid-cols-2 gap-x-2 md:grid-cols-3 gap-y-3 md:gap-x-4">
         {/* Rooms */}
         <div>
           <label

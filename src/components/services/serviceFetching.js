@@ -51,16 +51,17 @@ export async function deleteImage(imageId) {
   }
 }
 
-// export async function fetchUnitById(id) {
-//   try {
-//     const response = await axiosInstance.get(`/units/details/${id}`);
-//     return response.data.data;
-//   } catch (error) {
-//     console.error("Failed to fetch unit by id:", error.message);
-//     return { error: error.message };
-//   }
-// }
-export async function fetchUnitById(id, token) {
+export async function fetchUnitById(id) {
+  try {
+    const response = await axiosInstance.get(`/units/details/${id}`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch unit by id:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function fetchUnitByIdpublic(id, token) {
   try {
     const response = await axiosInstance.get(`/units/details/${id}`, {
       headers: {
@@ -130,11 +131,10 @@ export async function fetchUnitsFilter(searchParams, use) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      ...(use ? { client_id: clientId } : {}),
     };
 
+    use && (params.client_id = clientId);
     const response = await axiosInstance.get(`${use ? '/units/all' : '/public/units'}`, { params });
-    console.log(response.data);
     return response.data;
 
   } catch (error) {

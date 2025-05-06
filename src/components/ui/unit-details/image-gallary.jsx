@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Share2 } from "lucide-react";
-import ShareModal from "../units-share-modal";
+import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -65,10 +65,16 @@ export default function ImageGallary({ images, unitName, unitId }) {
         onClick={openFullscreenGallery}
       >
         <Image
-          src={images[mainImageIndex].url}
+          src={images[mainImageIndex].url || "/images/defaultImage.jpg"}
+          onError={(e) => {
+            e.currentTarget.src = "/images/defaultImage.jpg";
+            e.currentTarget.onerror = null;
+          }}
+          priority={true}
           alt={`${unitName}`}
           loading="eager"
           fill
+          objectFit="cover"
           className="rounded-md transition-transform duration-300 group-hover:scale-105"
         />
 
@@ -123,9 +129,14 @@ export default function ImageGallary({ images, unitName, unitId }) {
             >
               <Image
                 fill
-                src={image.url}
+                src={image.url || "/images/defaultImage.jpg"}
+                onError={(e) => {
+                  e.currentTarget.src = "/images/defaultImage.jpg";
+                  e.currentTarget.onerror = null;
+                }}
                 alt={`Unit - ${index + 1}`}
                 loading="lazy"
+                objectFit="cover"
               />
               {mainImageIndex === index && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
@@ -182,7 +193,11 @@ export default function ImageGallary({ images, unitName, unitId }) {
                   >
                     <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto">
                       <Image
-                        src={image.url}
+                        src={image.url || "/images/defaultImage.jpg"}
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/defaultImage.jpg";
+                          e.currentTarget.onerror = null;
+                        }}
                         alt={`Unit - ${index + 1}`}
                         fill
                         priority={true}

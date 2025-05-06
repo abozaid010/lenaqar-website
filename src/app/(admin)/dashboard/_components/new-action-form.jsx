@@ -357,7 +357,7 @@ export default function NewActionForm({ userId, onSuccess }) {
         </div>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-2">
         <select
           name="action"
           className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm mb-3"
@@ -373,7 +373,7 @@ export default function NewActionForm({ userId, onSuccess }) {
         </select>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-2">
         <textarea
           name="comment"
           className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full text-gray-700 hover:bg-gray-100 text-sm"
@@ -388,7 +388,7 @@ export default function NewActionForm({ userId, onSuccess }) {
 
       <button
         disabled={pending}
-        className="w-full flex justify-center items-center bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 cursor-pointer disabled:opacity-60 disabled:cursor-auto disabled:hover:bg-blue-500 transition-colors"
+        className="w-full flex justify-center items-center text-white px-4 py-2 rounded-md bg-primary hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-auto disabled:hover:bg-blue-500 transition-colors"
       >
         {pending ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
         {pending ? t.actionForm.submittingButton : t.actionForm.submitButton}

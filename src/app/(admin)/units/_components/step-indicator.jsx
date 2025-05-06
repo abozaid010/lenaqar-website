@@ -5,7 +5,7 @@ export default function StepIndicator({ steps, currentStep }) {
         <div key={step.number} className="flex items-center">
           {/* Step Circle */}
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full ${
+            className={`flex items-center justify-center w-8 h-8 md:w-10 md:h-10 shrink-0 rounded-full text-sm md:text-lg ${
               currentStep === step.number
                 ? "bg-primary text-white"
                 : currentStep > step.number
@@ -17,11 +17,11 @@ export default function StepIndicator({ steps, currentStep }) {
           </div>
 
           {/* Step Label */}
-          <div className="ml-2 mr-4">
+          <div className="ml-2 mr-4 hidden md:block">
             <p
               className={`text-sm ${currentStep === step.number ? "font-medium" : "text-gray-500"}`}
             >
-              {step.label}
+              <span>{step.label}</span>
             </p>
           </div>
 
@@ -29,7 +29,7 @@ export default function StepIndicator({ steps, currentStep }) {
           {index < steps.length - 1 && (
             <div className="flex-grow mx-2">
               <div
-                className={`h-1 w-24 ${currentStep > step.number ? "bg-primary" : "bg-gray-200"}`}
+                className={`h-1 w-22 ${currentStep > step.number ? "bg-primary" : "bg-gray-200"}`}
               ></div>
             </div>
           )}

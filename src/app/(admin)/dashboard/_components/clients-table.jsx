@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import PropertyDetailsModal from "@/components/dashbord/scomponent/AddUnit/PropertyDetailsModal";
+import PropertyDetailsModal from "./property-requirements-modal";
 import ClientsTablePagination from "./clients-table-pagination";
 import {
   getClientActions,
@@ -73,12 +73,18 @@ export default function ClientsTable({
     }
   };
 
-  const handleClientRequirements = async (e, phone_number, user_id,name,phone) => {
+  const handleClientRequirements = async (
+    e,
+    phone_number,
+    user_id,
+    name,
+    phone
+  ) => {
     e.stopPropagation();
     setLoadingRequirements(user_id);
     try {
       const requirements = await getClientRequirements(phone_number);
-      setRowRequirements({ ...requirements ,name:name,phone:phone });
+      setRowRequirements({ ...requirements, name: name, phone: phone });
       setOpenRequirementsModal(true);
     } catch (error) {
       console.error("Error fetching requirements:", error);
@@ -96,7 +102,7 @@ export default function ClientsTable({
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto border border-gray-200 sm:rounded-lg">
+          <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
@@ -108,22 +114,22 @@ export default function ClientsTable({
                       className="cursor-pointer"
                     />
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.name}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center hidden sm:table-cell">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.userNumber}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.date}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center hidden md:table-cell">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.requirements}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap hidden md:table-cell">
                     {t.clientsTable.headers.messageCount}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.action}
                   </th>
                 </tr>
@@ -145,10 +151,16 @@ export default function ClientsTable({
 
                   return (
                     <tr
-                      onClick={() => router.push(`/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`)}
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`
+                        )
+                      }
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`)
+                        router.push(
+                          `/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`
+                        )
                       }
                       role="button"
                       tabIndex={0}
@@ -167,27 +179,35 @@ export default function ClientsTable({
                         />
                       </td>
 
-                      <td className="px-2 py-1 sm:py-2 font-medium text-gray-900">
+                      <td className="px-2 py-2 font-medium text-gray-900 whitespace-nowrap">
                         {user.name || t.clientsTable.newLead}
                       </td>
 
-                      <td className="px-2 py-1 sm:py-2 text-gray-600 hidden sm:table-cell">
+                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
                         {user.phone_number || t.clientsTable.newLead}
                       </td>
 
-                      <td className="px-2 py-1 sm:py-2 text-gray-600">
+                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
                         {lastActivity}
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 hidden md:flex justify-center items-center ${
+                        className={`px-2 py-2 flex justify-center items-center whitespace-nowrap ${
                           user.requirement_name !== t.clientsTable.notDefined
-                            ? "text-blue-600 cursor-pointer hover:underline"
+                            ? "text-primary/90 cursor-pointer hover:underline font-semibold"
                             : "pointer-events-none text-gray-500"
                         }`}
                         onClick={(e) => {
-                          if (user.requirement_name !== t.clientsTable.notDefined) {
-                            handleClientRequirements(e, user.user_id, user.user_id,user.name,user.phone_number);
+                          if (
+                            user.requirement_name !== t.clientsTable.notDefined
+                          ) {
+                            handleClientRequirements(
+                              e,
+                              user.user_id,
+                              user.user_id,
+                              user.name,
+                              user.phone_number
+                            );
                           }
                         }}
                       >
@@ -205,12 +225,12 @@ export default function ClientsTable({
                         )}
                       </td>
 
-                      <td className="px-2 py-1 sm:py-2 text-center font-medium">
+                      <td className="px-2 py-2 text-center font-medium whitespace-nowrap hidden md:table-cell">
                         {user.messages_count || 0}
                       </td>
 
                       <td
-                        className={`px-2 py-1 sm:py-2 text-center font-bold underline cursor-pointer flex items-center justify-center ${
+                        className={`px-2 py-2 text-center font-bold underline cursor-pointer flex items-center justify-center whitespace-nowrap ${
                           ACTIONS_COLORS[user.last_action]
                         }`}
                         onClick={(e) =>
@@ -278,7 +298,6 @@ export default function ClientsTable({
             setLoadingRequirements(null);
           }}
           property={rowRequirements}
-        
         />
       )}
     </>

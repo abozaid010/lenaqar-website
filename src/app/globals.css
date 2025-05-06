@@ -26,6 +26,7 @@
 }
 body {
   font-family: "Montserrat", "Cairo", sans-serif;
+  overflow-x: hidden;
 }
 
 button,
@@ -97,4 +98,19 @@ input[type="number"] {
 .swiper-button-prev,
 .swiper-button-next {
   color: var(--primary) !important;
+}
+
+.scroll-snap-x-mandatory {
+  scroll-snap-type: x mandatory;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-snap-x-mandatory::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 8px;
+}
+.scroll-snap-x-mandatory::-webkit-scrollbar {
+  height: 6px;
+  background-color: #ddd;
+  border-radius: 8px;
 }

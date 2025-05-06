@@ -28,10 +28,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center flex-wrap md:flex-nowrap gap-2">
       {/* Developers Dropdown */}
       <select
-        className="px-3 py-2 w-60 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+        className="px-3 py-2 w-full sm:w-60 rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-indigo-500"
         value={filters.developer_name}
         onChange={(e) => handleFilterChange("developer_name", e.target.value)}
       >
@@ -45,7 +45,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
 
       {/* Compounds Dropdown */}
       <select
-        className="w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full sm:w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={filters.project_name}
         onChange={(e) => handleFilterChange("project_name", e.target.value)}
       >
@@ -59,7 +59,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds }) {
 
       {/* Purpose Dropdown */}
       <select
-        className="w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full sm:w-60 px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={filters.purpose}
         onChange={(e) => handleFilterChange("purpose", e.target.value)}
       >

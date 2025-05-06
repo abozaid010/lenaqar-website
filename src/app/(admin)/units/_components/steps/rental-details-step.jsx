@@ -270,7 +270,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         <h4 className="text-lg font-medium mb-3">
           {t.rentalDetails.amenitiesTitle || "Amenities"}
         </h4>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-y-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-2">
           {availableAmenities.map((amenity) => (
             <div key={amenity} className="flex items-center">
               <input

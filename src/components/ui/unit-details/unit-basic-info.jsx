@@ -23,7 +23,7 @@ export default function UnitBasicInfo({ unit }) {
       <UnitPricing unit={unit} />
 
       {/* Additional Features */}
-      <div className="mt-5 grid grid-cols-3 lg:grid-cols-3 gap-x-8 gap-y-2 max-w-lg">
+      <div className="mt-5 grid grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-2 max-w-lg">
         <div className="flex items-center">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -40,8 +40,8 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-sm text-gray-500">Developer</span>
-            <p className="font-medium">{unit.developer || "N/A"}</p>
+            <span className="text-xs text-gray-500">Developer</span>
+            <p className="font-medium text-xs">{unit.developer || "N/A"}</p>
           </div>
         </div>
 
@@ -62,8 +62,10 @@ export default function UnitBasicInfo({ unit }) {
               />
             </svg>
             <div>
-              <span className="text-sm text-gray-500">Delivery Date</span>
-              <p className="font-medium">
+              <span className="text-gray-500 text-xs line-clamp-1">
+                Delivery Date
+              </span>
+              <p className="font-medium text-xs whitespace-nowrap">
                 {formatDate(unit.deliveryDate) || "N/A"}
               </p>
             </div>
@@ -86,8 +88,8 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-sm text-gray-500">Floor</span>
-            <p className="font-medium">{getFloorLabel(unit.floor)}</p>
+            <span className="text-xs line-clamp-1 text-gray-500">Floor</span>
+            <p className="font-medium text-xs">{getFloorLabel(unit.floor)}</p>
           </div>
         </div>
 
@@ -107,8 +109,10 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-sm text-gray-500">Finishing</span>
-            <p className="font-medium">{unit.finishing || "N/A"}</p>
+            <span className="text-xs line-clamp-1 text-gray-500">
+              Finishing
+            </span>
+            <p className="font-medium text-xs">{unit.finishing || "N/A"}</p>
           </div>
         </div>
 
@@ -128,8 +132,12 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-sm text-gray-500">Furnishing</span>
-            <p className="font-medium">{unit.furnishing || "N/A"}</p>
+            <span className="text-xs line-clamp-1 text-gray-500">
+              Furnishing
+            </span>
+            <p className="font-medium text-xs whitespace-nowrap">
+              {unit.furnishing || "N/A"}
+            </p>
           </div>
         </div>
       </div>
