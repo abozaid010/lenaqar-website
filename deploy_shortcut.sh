@@ -2,6 +2,7 @@
 
 cd /Users/abozaid/workspace/lenaAI-website
 git pull
+
 FILE="./trigger_deploy.txt"
 
 # Add a static line
