@@ -1,12 +1,11 @@
 "use client";
 import Link from "next/link";
-import { Linkedin, Phone, Building, Facebook, MessageCircle, ShoppingBag, X, Bot } from "lucide-react";
+import { Linkedin, Phone, Building, Facebook, MessageCircle, ShoppingBag, Bot } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
-import { useState } from "react";
+import ChatBot from "@/components/ui/ChatBot";
 
 const Footer = () => {
   const { t } = useI18n();
-  const [isChatOpen, setIsChatOpen] = useState(false);
   
   // App Store link - fixed without the leading 'L'
   const appStoreLink = "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
@@ -14,55 +13,10 @@ const Footer = () => {
   // Facebook link
   const facebookLink = "https://www.facebook.com/profile.php?id=61575040225107";
   
-  // LenaAI Chat URL
-  const chatUrl = "https://chat.lenaai.net";
-
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-  };
-
   return (
     <footer className="bg-primary text-white py-10 relative">
-      {/* Floating Chatbot Button */}
-      <button
-        onClick={toggleChat}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center z-40"
-        aria-label="Toggle Chat"
-      >
-        <Bot size={28} />
-      </button>
-      
-      {/* Chat Popup with iFrame - removed scrollbars */}
-      <div className={`fixed bottom-4 right-4 w-80 lg:w-96 h-96 lg:h-5/6 bg-white rounded-lg shadow-2xl z-50 transition-all duration-300 transform ${isChatOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'} flex flex-col`}>
-        {/* Chat Header */}
-        <div className="bg-primary p-3 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Bot size={20} className="text-white" />
-            <h3 className="text-lg font-medium text-white">LenaAI Chat</h3>
-          </div>
-          <button 
-            onClick={toggleChat}
-            className="text-white hover:bg-blue-700 p-1 rounded-full transition-colors"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        
-        {/* Chat iFrame - removed all scrolling */}
-        <div className="flex-grow">
-          {isChatOpen && (
-            <iframe
-              src={chatUrl}
-              title="LenaAI Chat"
-              className="w-full h-full border-0"
-              allow="microphone; camera; geolocation"
-              loading="lazy"
-              scrolling="no"
-              style={{ overflow: 'hidden' }}
-            ></iframe>
-          )}
-        </div>
-      </div>
+      {/* ChatBot Component */}
+      <ChatBot />
       
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -155,17 +109,20 @@ const Footer = () => {
               <span>{t.footer.connect.dowenload}</span>
             </Link>
             
-            {/* Chatbot Link (additional in-footer link) */}
-            <button
-              onClick={toggleChat}
+            {/* Chatbot Link in footer */}
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                document.querySelector('[aria-label="Toggle Chat"]').click();
+              }}
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors group cursor-pointer"
             >
               <div className="p-2 bg-white/10 rounded-full transition-colors">
-                {/* <MessageCircle size={20} /> */}
                 <Bot size={20} />
               </div>
-              <span> {t.footer.connect.chat}</span>
-            </button>
+              <span>{t.footer.connect.chat}</span>
+            </Link>
             
             <div className="mt-2">
               <Link href="/privacy" className="text-blue-200 hover:underline">

@@ -255,7 +255,7 @@ export default function NewActionForm({ userId, onSuccess }) {
         value={getFullMeetingDateTime()}
       />
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t.actionForm.dateLabel}
@@ -275,20 +275,20 @@ export default function NewActionForm({ userId, onSuccess }) {
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t.actionForm.timeLabel}
           </label>
-          <div className="relative flex items-center border border-gray-300 rounded-md overflow-hidden">
-            <div className="relative flex items-center">
+          <div className="relative flex justify-around  items-center gap-1 border border-gray-300 rounded-md overflow-hidden">
+            <div className="relative flex items-center justify-center   ">
               <input
                 type="text"
                 value={timeState.hours}
                 onChange={handleTimeChange("hours")}
                 onKeyDown={handleTimeArrowKeys("hours")}
                 onBlur={handleTimeBlur("hours")}
-                className="w-12 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
+                className="w-10 sm:w-12 p-2 text-sm  focus:outline-none focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
                 placeholder="HH"
                 maxLength={2}
                 inputMode="numeric"
               />
-              <div className="absolute right-1 flex flex-col space-y-0.5">
+              <div className="absolute right-1 flex flex-col gap-0.5">
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("hours", "up")}
@@ -299,39 +299,39 @@ export default function NewActionForm({ userId, onSuccess }) {
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("hours", "down")}
-                  className="h-3 w-3 flex items-center justify-center p-0.5 rounded hover:bg-gray-200"
+                  className="h-3 w-3 flex items-center justify-center  gap-1 p-0.5 rounded hover:bg-gray-200"
                 >
                   <ChevronDown className="h-2.5 w-2.5 text-gray-500" />
                 </button>
               </div>
             </div>
 
-            <span className="px-1 text-gray-700">:</span>
+            {/* <span className="px-1 text-gray-700">:</span> */}
 
-            <div className="relative flex items-center gap-2  space-x-0.5">
+            <div className="relative flex  items-center justify-around text-center gap-1">
               <input
                 type="text"
                 value={timeState.minutes}
                 onChange={handleTimeChange("minutes")}
                 onKeyDown={handleTimeArrowKeys("minutes")}
                 onBlur={handleTimeBlur("minutes")}
-                className="w-12 p-2 text-sm focus:outline-none  focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
+                className="w-10 sm:w-12 p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
                 placeholder="MM"
                 maxLength={2}
                 inputMode="numeric"
               />
-              <div className="absolute right-1 flex flex-col   space-y-0.5">
+              <div className="absolute right-1 flex flex-col gap-0.5 ">
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("minutes", "up")}
-                  className="h-3 w-3 flex items-center justify-center p-0.5 rounded hover:bg-gray-200"
+                  className="h-3 w-3 flex items-center justify-center p-0.5 rounded gap-1 hover:bg-gray-200"
                 >
                   <ChevronUp className="h-2.5 w-2.5 text-gray-500" />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("minutes", "down")}
-                  className="h-3 w-3 flex items-center justify-center p-0.5 rounded hover:bg-gray-200"
+                  className="h-3 w-3 flex items-center justify-center p-0.5  gap-1 rounded hover:bg-gray-200"
                 >
                   <ChevronDown className="h-2.5 w-2.5 text-gray-500" />
                 </button>
@@ -342,17 +342,19 @@ export default function NewActionForm({ userId, onSuccess }) {
               type="button"
               onClick={handleAmPmToggle}
               onKeyDown={handleTimeArrowKeys("ampm")}
-              className="ml-1 px-2 py-2 text-sm text-center text-gray-600 hover:text-blue-600 bg-gray-100 flex-grow focus:outline-none focus:ring-1 focus:ring-blue-500 relative"
+              className="px-2 py-2 text-sm  flex items-center justify-between gap-2  text-center border-l text-gray-600 hover:text-blue-600 bg-gray-100 w-12 sm:w-14 focus:outline-none focus:ring-1 focus:ring-blue-500 relative"
             >
               {timeState.ampm}
-              <div className="absolute right-6 top-[8px] flex items-center flex-col gap-y-0.5">
+              <div className="absolute right-1 top-1/2 transform -translate-y-1/2 flex flex-col gap-y-0.5">
                 <ChevronUp className="h-2.5 w-2.5 text-gray-500" />
                 <ChevronDown className="h-2.5 w-2.5 text-gray-500" />
               </div>
+              
             </button>
-            <span className="px-2 flex items-center">
+            <span className="px-2 flex items-center justify-center h-full border-l border-gray-300 bg-gray-50">
               <Clock className="h-4 w-4 text-gray-500 pointer-events-none" />
             </span>
+          
           </div>
         </div>
       </div>

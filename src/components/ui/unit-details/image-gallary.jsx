@@ -14,7 +14,7 @@ import "swiper/css/pagination";
 import "swiper/css/thumbs";
 import toast from "react-hot-toast";
 
-export default function ImageGallary({ images, unitName, unitId }) {
+export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
@@ -99,13 +99,13 @@ export default function ImageGallary({ images, unitName, unitId }) {
         </div>
 
         {/* Share Button */}
-        <button
+     { !readOnly ?  <button
           type="button"
           onClick={handleShareClick}
           className="absolute top-4 left-4 cursor-pointer p-2.5 bg-white/90 rounded-full shadow-lg border border-gray-200"
         >
           <Share2 className="w-4 h-4 text-primary hover:text" />
-        </button>
+        </button> : ""}
       </div>
 
       {/* Thumbnail swiper */}

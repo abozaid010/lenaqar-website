@@ -28,6 +28,7 @@ const Sidebar = () => {
 
   const confirmLogout = () => {
     Cookies.remove("client_id");
+    Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success(t.sidebar.logoutSuccess);
     window.location.reload();

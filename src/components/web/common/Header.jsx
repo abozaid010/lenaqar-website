@@ -53,6 +53,7 @@ const Header = () => {
 
   const confirmLogout = () => {
     Cookies.remove("client_id");
+    Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success("Logout Successful");
     window.location.reload();

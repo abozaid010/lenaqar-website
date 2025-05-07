@@ -20,10 +20,10 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const units = unitsResponse.data?.units || [];
 
   return (
-    <div className="container mx-auto">
-      <div className="mb-4">
+    <div className="container mx-auto mb-4">
+      {/* <div className="mb-4">
         <IdentifierUnit />
-      </div>
+      </div> */}
 
       <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
         <UnitsFilter
