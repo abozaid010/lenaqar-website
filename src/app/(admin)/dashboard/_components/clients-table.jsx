@@ -152,15 +152,11 @@ export default function ClientsTable({
                   return (
                     <tr
                       onClick={() =>
-                        router.push(
-                          `/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`
-                        )
+                        router.push(`/dashboard/chat/${user.user_id}`)
                       }
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(
-                          `/dashboard/chat/${user.user_id}?name=${user.name || user.phone_number || t.clientsTable.newLead}`
-                        )
+                        router.push(`/dashboard/chat/${user.user_id}`)
                       }
                       role="button"
                       tabIndex={0}
@@ -192,7 +188,7 @@ export default function ClientsTable({
                       </td>
 
                       <td
-                        className={`px-2 py-2 flex justify-center items-center whitespace-nowrap ${
+                        className={`px-2 py-2 whitespace-nowrap ${
                           user.requirement_name !== t.clientsTable.notDefined
                             ? "text-primary/90 cursor-pointer hover:underline font-semibold"
                             : "pointer-events-none text-gray-500"
@@ -212,7 +208,7 @@ export default function ClientsTable({
                         }}
                       >
                         {loadingRequirements === user.user_id ? (
-                          <div>
+                          <div className="flex items-center justify-center">
                             <Loader2
                               size={16}
                               className="animate-spin text-center"
@@ -230,7 +226,7 @@ export default function ClientsTable({
                       </td>
 
                       <td
-                        className={`px-2 py-2 text-center font-bold underline cursor-pointer flex items-center justify-center whitespace-nowrap ${
+                        className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap ${
                           ACTIONS_COLORS[user.last_action]
                         }`}
                         onClick={(e) =>
@@ -239,7 +235,7 @@ export default function ClientsTable({
                       >
                         {loadingClientActions === user.user_id &&
                         !openActionModal ? (
-                          <div>
+                          <div className="flex items-center justify-center">
                             <Loader2
                               size={16}
                               className="animate-spin text-center"

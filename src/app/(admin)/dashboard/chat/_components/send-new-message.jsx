@@ -32,10 +32,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   }, [state]);
 
   return (
-    <form
-      // action={action}
-      className="absolute bottom-0 left-0 right-0 bg-white h-14 px-2 flex gap-2 items-center justify-center shadow-xl rounded-b-md"
-    >
+    <form className="bg-white h-14 px-2 flex gap-2 items-center justify-center shadow-xl rounded-b-md">
       <input type="hidden" name="userId" value={userId} />
 
       <input

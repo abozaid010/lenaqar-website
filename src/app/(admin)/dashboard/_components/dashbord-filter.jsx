@@ -129,7 +129,7 @@ export default function DashbordFilter({ appliedFilters }) {
         </div>
       </div>
 
-      <div className="relative inline-block w-full">
+      <div className="relative inline-block w-full sm:max-w-[210px]">
         <button
           onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
           className="flex justify-between w-full whitespace-nowrap items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"

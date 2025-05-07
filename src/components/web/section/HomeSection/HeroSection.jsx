@@ -7,21 +7,13 @@ import CalendarModal from "@/components/ui/calendar-modal";
 import { useI18n } from "@/context/translate-api";
 
 const HeroSection = () => {
+  console.log("infinite Re-render hero section");
   const { t } = useI18n();
-  // State for tracking which messages have been shown
+
   const [visibleMessages, setVisibleMessages] = useState([]);
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [imageError, setImageError] = useState(false);
 
-  // Using only existing messages
   const messages = [
-    // "⁠Filter Leads",
-    // "24/7 ⁠Instant replies to customers",
-    // "⁠Data Analytics",
-    // "⁠Check today's to-do list",
-    // "⁠Upselling",
-    // "⁠AI Property Consultant",
-    // "follow up, and scale with effortless"
     t.heroSection.message1,
     t.heroSection.message2,
     t.heroSection.message3,
@@ -29,7 +21,6 @@ const HeroSection = () => {
     t.heroSection.message5,
     t.heroSection.message6,
     t.heroSection.message7,
-    // t.heroSection.message1,
   ];
 
   useEffect(() => {
@@ -50,150 +41,136 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className="relative w-full h-screen flex items-center overflow-hidden">
+    <div className="relative w-full h-[60vh] md:h-[70vh] xl:h-screen flex items-center overflow-hidden px-4">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
-        {!imageError ? (
-          <Image
-            src={"/images/web2.jpg"}
-            alt={t.heroSection.backgroundAlt}
-            fill
-            className="object-cover"
-            priority
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div className="absolute inset-0 bg-[#030250]" />
-        )}
-        <div className="absolute inset-0 bg-[#030250] opacity-80"></div>
+        <Image
+          src={"/images/web2.jpg"}
+          alt={t.heroSection.backgroundAlt}
+          fill
+          objectFit="cover"
+          priority={true}
+        />
 
-        {/* Enhanced animated particles in background */}
-        <Particles />
+        <div className="absolute inset-0 bg-primary/80"></div>
       </div>
 
-      <div className="max-w-[85%] w-full mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="mx-auto relative z-10 container grid grid-cols-1 xl:grid-cols-2 gap-6 p-0 sm:px-6"
+      >
         <motion.div
-          key="slide2"
-          className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
+          className="md:col-span-1 space-y-4"
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="md:col-span-2 space-y-6"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            className="text-sm md:text-base font-semibold text-blue-300 my-4 py-1.5 px-2 sm:px-8 bg-primary/50 rounded-lg border border-blue-400/20 w-fit"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.8 }}
           >
-            <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold text-white"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.8 }}
-            >
-              <span className="bg-clip-text text-white bg-gradient-to-r from-white to-blue-300">
-                {t.heroSection.title1}
-              </span>
-              <br />
-              
-              <span className="bg-clip-text inline-block mt-5 text-white bg-gradient-to-r from-blue-300 to-white">
-                {t.heroSection.title2}
-              </span>
-            </motion.h1>
-
-            <motion.div
-              className="text-xl md:text-3xl font-semibold text-blue-300 my-8 p-4 bg-blue-900/30 rounded-lg border border-blue-400/20 w-fit"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.8 }}
-            >
-              {t.heroSection.subtitle}
-            </motion.div>
-
-            <motion.p
-              className="text-lg md:text-xl text-white"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
-            >
-              {t.heroSection.description}
-            </motion.p>
-
-            <CalendarModal 
-              buttonText={t.heroSection.ctaButton} 
-              style={"bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"} 
-            />
+            {t.heroSection.subtitle}
           </motion.div>
 
-          <div className="md:col-span-1 flex justify-center md:justify-end">
-            <motion.div
-              className="relative h-80 md:h-96 w-full max-w-md"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-            >
-              {/* Large blue circle background */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40"
-                animate={{
-                  scale: [1, 1.05, 1],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
+          <motion.h1
+            className="text-3xl lg:text-5xl font-bold text-white leading-10 md:leading-16"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+          >
+            {t.heroSection.title1}
 
-              {/* Square AI Image */}
-              <motion.div
-                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 overflow-hidden shadow-lg shadow-blue-500/30"
-                animate={{
-                  scale: [1, 1.03, 1],
-                }}
-                transition={{
-                  duration: 6,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                <Image
-                  src={"/images/happy man.png"}
-                  alt={t.heroSection.aiImageAlt}
-                  fill
-                  className="object-contain"
-                  priority
-                />
-                {/* Enhanced overlay effect */}
-                <motion.div
-                  className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-blue-600/10"
-                  animate={{
-                    opacity: [0.2, 0.3, 0.2],
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                  }}
-                />
-              </motion.div>
+            <br />
 
-              {/* Display messages with improved layout */}
-              <div className="absolute top-0 left-0 w-full h-full z-10">
-                {visibleMessages.map((message, index) => (
-                  <AiMessageBubble
-                    key={index}
-                    message={message}
-                    position={index % 8}
-                    total={visibleMessages.length}
-                    index={index}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          </div>
+            {t.heroSection.title2}
+          </motion.h1>
+
+          <motion.p
+            className="text-sm md:text-base text-white max-w-xl"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.8 }}
+          >
+            {t.heroSection.description}
+          </motion.p>
+
+          <CalendarModal
+            buttonText={t.heroSection.ctaButton}
+            style={
+              "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
+            }
+          />
         </motion.div>
-      </div>
+
+        <motion.div
+          className="hidden xl:col-span-1 xl:flex justify-center md:justify-end relative"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
+        >
+          {/* Large blue circle background */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40"
+            animate={{
+              scale: [1, 1.05, 1],
+            }}
+            transition={{
+              duration: 8,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+
+          {/* Square AI Image */}
+          <motion.div
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96"
+            animate={{
+              scale: [1, 1.03, 1],
+            }}
+            transition={{
+              duration: 6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <Image
+              src={"/images/happy man.png"}
+              alt={t.heroSection.aiImageAlt}
+              fill
+              className="object-contain"
+              priority
+            />
+            {/* Enhanced overlay effect */}
+            <motion.div
+              className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-blue-600/10"
+              animate={{
+                opacity: [0.2, 0.3, 0.2],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+            {/* Display messages with improved layout */}
+            <div className="absolute top-0 left-[5%] w-[90%] h-full z-10">
+              {visibleMessages.map((message, index) => (
+                <AiMessageBubble
+                  key={index}
+                  message={message}
+                  position={index % 8}
+                  total={visibleMessages.length}
+                  index={index}
+                />
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
@@ -220,17 +197,17 @@ const AiMessageBubble = ({ message, position, total, index }) => {
     // Fixed positions: 3 on right, 3 on left, 1 at bottom
     const positions = [
       // Right Side (3 positions)
-      { top: "20%", right: "-100px", transform: "translateY(-50%)" },    // Top Right
-      { top: "50%", right: "-100px", transform: "translateY(-50%)" },    // Middle Right
-      { top: "80%", right: "-100px", transform: "translateY(-50%)" },    // Bottom Right
-      
+      { top: "20%", right: "-100px", transform: "translateY(-50%)" }, // Top Right
+      { top: "50%", right: "-100px", transform: "translateY(-50%)" }, // Middle Right
+      { top: "80%", right: "-100px", transform: "translateY(-50%)" }, // Bottom Right
+
       // Left Side (3 positions)
-      { top: "20%", left: "-100px", transform: "translateY(-50%)" },     // Top Left
-      { top: "50%", left: "-100px", transform: "translateY(-50%)" },     // Middle Left
-      { top: "80%", left: "-100px", transform: "translateY(-50%)" },     // Bottom Left
-      
+      { top: "20%", left: "-100px", transform: "translateY(-50%)" }, // Top Left
+      { top: "50%", left: "-100px", transform: "translateY(-50%)" }, // Middle Left
+      { top: "80%", left: "-100px", transform: "translateY(-50%)" }, // Bottom Left
+
       // Bottom (1 position)
-      { bottom: "-10px", left: "31%", transform: "translateX(-50%)" },   // Bottom Center
+      { bottom: "-50px", left: "31%", transform: "translateX(-50%)" }, // Bottom Center
     ];
 
     return positions[position % positions.length];
@@ -242,19 +219,19 @@ const AiMessageBubble = ({ message, position, total, index }) => {
   const getEntryAnimation = () => {
     const animations = [
       // Right side animations (3)
-      { x: 30, opacity: 0 },  // Top Right
-      { x: 30, opacity: 0 },  // Middle Right
-      { x: 30, opacity: 0 },  // Bottom Right
-      
+      { x: 30, opacity: 0 }, // Top Right
+      { x: 30, opacity: 0 }, // Middle Right
+      { x: 30, opacity: 0 }, // Bottom Right
+
       // Left side animations (3)
-      { x: -30, opacity: 0 },  // Top Left
-      { x: -30, opacity: 0 },  // Middle Left
-      { x: -30, opacity: 0 },  // Bottom Left
-      
+      { x: -30, opacity: 0 }, // Top Left
+      { x: -30, opacity: 0 }, // Middle Left
+      { x: -30, opacity: 0 }, // Bottom Left
+
       // Bottom animation (1)
-      { y: 30, opacity: 0 },  // Bottom Center
+      { y: 30, opacity: 0 }, // Bottom Center
     ];
-    
+
     return animations[position % animations.length];
   };
 
@@ -267,7 +244,7 @@ const AiMessageBubble = ({ message, position, total, index }) => {
       transition={{
         duration: 0.6,
         ease: "easeOut",
-        delay: index * 0.1,  // Staggered animation
+        delay: index * 0.1, // Staggered animation
       }}
     >
       <div
@@ -276,51 +253,6 @@ const AiMessageBubble = ({ message, position, total, index }) => {
         {message}
       </div>
     </motion.div>
-  );
-};
-
-// Enhanced background particles effect
-const Particles = () => {
-  const particleCount = 35; // Increased particle count
-  const particles = Array.from({ length: particleCount });
-
-  return (
-    <>
-      {particles.map((_, index) => {
-        // Use fixed values for initial positions to avoid hydration issues
-        const size = Math.floor((index % 3) + 2); // Varied sizes
-        const initialX = (index * 4) % 100;
-        const initialY = (index * 3) % 100;
-        const duration = 15 + (index % 5);
-        const delay = index * 0.2;
-        const opacity = 0.15;
-
-        return (
-          <motion.div
-            key={index}
-            className="absolute rounded-full bg-blue-300"
-            style={{
-              width: size,
-              height: size,
-              left: `${initialX}%`,
-              top: `${initialY}%`,
-              opacity: opacity,
-            }}
-            animate={{
-              y: [0, -100, 0],
-              x: [0, 30, 0],
-              opacity: [opacity, opacity * 2, opacity],
-            }}
-            transition={{
-              duration,
-              delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        );
-      })}
-    </>
   );
 };
 

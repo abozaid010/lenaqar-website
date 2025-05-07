@@ -204,8 +204,7 @@ export async function getChatHistory(userId) {
     const response = await axiosInstance.get(`/messages/messages/${cookieClientId}/${userId}`);
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch data:", error.message);
-    return { error: error.message };
+    return error;
   }
 }
 

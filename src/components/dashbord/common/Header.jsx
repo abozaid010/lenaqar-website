@@ -1,21 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  Bell,
-  User,
-  Menu,
-  LogOut,
-  Settings,
-  HelpCircle,
-} from "lucide-react";
-import { LanguageSwitcher } from "../../ui/LanguageSwitcher";
+import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { Bell, User, Menu, LogOut, Settings, HelpCircle } from "lucide-react";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 
 const Header = ({ clientName }) => {
+  const router = useRouter();
   const { t } = useI18n();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -60,7 +54,7 @@ const Header = ({ clientName }) => {
     Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success(t.header.logoutSuccess);
-    window.location.reload();
+    router.push("/");
   };
 
   return (

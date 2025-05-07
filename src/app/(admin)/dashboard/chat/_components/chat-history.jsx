@@ -16,13 +16,13 @@ export default function ChatHistory({ data }) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500">No messages yet.</p>
+        <p className="text-gray-500 text-2xl font-meduim">No messages yet.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg px-4 pt-4 overflow-y-auto h-full">
+    <>
       {data.map((message, index) => (
         <div key={index} className="w-full flex flex-col">
           {message.user_message && (
@@ -39,6 +39,6 @@ export default function ChatHistory({ data }) {
 
       {/* Invisible div to scroll to */}
       <div ref={chatEndRef} />
-    </div>
+    </>
   );
 }

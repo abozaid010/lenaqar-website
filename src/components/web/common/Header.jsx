@@ -15,33 +15,7 @@ const Header = () => {
   const { t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
   const ci = Cookies.get("client_id");
-
-  // Add scroll event listener
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Determine if scrolled for background color
-      // Only add background when scrolled past first section
-      if (currentScrollY > 10) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-
-      // Always keep header visible
-      setIsVisible(true);
-
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [lastScrollY]);
 
   const initiateLogout = () => {
     setShowLogoutConfirm(true);
@@ -101,11 +75,7 @@ const Header = () => {
       )}
 
       <header
-        className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 ${
-          isScrolled
-            ? "bg-[#030250] bg-opacity-90 backdrop-blur-md"
-            : "bg-transparent"
-        } ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
+        className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 bg-primary`}
       >
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between py-2">
@@ -120,16 +90,19 @@ const Header = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-x-6">
+            <nav className="hidden md:flex items-center gap-x-4">
               <Link href="/" className="hover:text-blue-200 transition-colors">
                 {t.header.home}
               </Link>
-              <Link
-                href="/dashboard"
-                className="hover:text-blue-200 transition-colors"
-              >
-                {t.header.clientDashboard}
-              </Link>
+              {ci && (
+                <Link
+                  href="/dashboard"
+                  className="hover:text-blue-200 transition-colors"
+                >
+                  {t.header.clientDashboard}
+                </Link>
+              )}
+
               <Link href="" className="hover:text-blue-200 transition-colors">
                 <CalendarModal buttonText={t.header.jobOpportunities} />
               </Link>
@@ -179,12 +152,15 @@ const Header = () => {
                 >
                   Home
                 </Link>
-                <Link
-                  href="/dashboard"
-                  className="hover:text-blue-200 transition-colors py-2"
-                >
-                  Client Dashboard
-                </Link>
+                {ci && (
+                  <Link
+                    href="/dashboard"
+                    className="hover:text-blue-200 transition-colors py-2"
+                  >
+                    Client Dashboard
+                  </Link>
+                )}
+
                 <Link
                   href=""
                   className="hover:text-blue-200 transition-colors py-2"

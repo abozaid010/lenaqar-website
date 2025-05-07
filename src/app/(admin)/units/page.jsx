@@ -46,8 +46,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   return (
     <div className="container mx-auto">
-      <div className="mb-8 flex flex-col sm:flex-row items-start justify-between gap-2">
-        <IdentifierUnit />
+      <div className="mb-4 flex flex-col sm:flex-row items-start justify-between gap-2">
+        {/* <IdentifierUnit /> */}
 
         <AddUnitButton
           clientId={clientId}
