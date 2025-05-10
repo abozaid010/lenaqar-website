@@ -11,11 +11,10 @@ import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 import CalendarModal from "@/components/ui/calendar-modal";
 
-const Header = () => {
+const Header = ({ ci }) => {
   const { t } = useI18n();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const ci = Cookies.get("client_id");
 
   const initiateLogout = () => {
     setShowLogoutConfirm(true);
@@ -103,9 +102,8 @@ const Header = () => {
                 </Link>
               )}
 
-              <Link href="" className="hover:text-blue-200 transition-colors">
-                <CalendarModal buttonText={t.header.jobOpportunities} />
-              </Link>
+              <CalendarModal buttonText={t.header.jobOpportunities} />
+
               <Link
                 href="/allProberties"
                 className="hover:text-blue-200 transition-colors"

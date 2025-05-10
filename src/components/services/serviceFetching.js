@@ -202,7 +202,7 @@ export async function getChatHistory(userId) {
 
   try {
     const response = await axiosInstance.get(`/messages/messages/${cookieClientId}/${userId}`);
-    return response.data.data;
+    return response.data;
   } catch (error) {
     return error;
   }

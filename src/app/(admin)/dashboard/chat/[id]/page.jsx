@@ -8,15 +8,14 @@ import Link from "next/link";
 export default async function ChatPage({ params }) {
   const { id } = await params;
   const clientID = await getClientid();
-  // Fetch initial chat history on the server
   const initialData = await getChatHistory(id);
 
   let hasAccess = true;
-  if (initialData?.status === 401) {
+  if (!initialData?.status) {
     hasAccess = false;
   }
 
-  const name = initialData?.name || "New Lead";
+  const name = initialData.data?.name || "New Lead";
 
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
@@ -30,7 +29,7 @@ export default async function ChatPage({ params }) {
 
           <div className="flex-1 h-[90%]">
             <ChatClientWrapper
-              initialData={initialData?.messages}
+              initialData={initialData.data?.messages}
               userId={id}
             />
           </div>

@@ -5,15 +5,20 @@ import SalesManagerSection from "./web/_components/SmartAutmtation";
 import HeroSection from "@/components/web/section/HomeSection/HeroSection";
 import DashbordImage from "./web/_components/DashbordImage";
 
-export default function HomePage() {
+import { cookies } from "next/headers";
+
+export default async function HomePage() {
+  const cookieStore = await cookies();
+  const client_id = cookieStore.get("client_id")?.value;
+
   return (
     <>
-      <Header />
+      <Header ci={client_id} />
 
       {/* Hero Section with Title */}
       <HeroSection />
-     <div className=" overflow-hidden">
-      <DashbordImage />
+      <div className=" overflow-hidden">
+        <DashbordImage />
       </div>
 
       {/* Smart Automation Section */}

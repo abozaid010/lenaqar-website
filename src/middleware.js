@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
-// تحمي فقط /dashboard و /units (بدون أي شيء بعدها)
-const exactProtectedRoutes = ["/dashboard", "/units"];
+const protectedRoutes = ["/dashboard", "/units"];
 
 export async function middleware(request) {
   const path = request.nextUrl.pathname;
 
-  // تحقق من التطابق التام مع المسارات المحمية فقط
-  const isProtectedRoute = exactProtectedRoutes.includes(path);
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    path.startsWith(route)
+  );
 
   if (isProtectedRoute) {
     const clientId = request.cookies.get("client_id")?.value;

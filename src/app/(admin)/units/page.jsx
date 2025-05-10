@@ -8,7 +8,6 @@ import UnitsFilter from "@/components/ui/units-filter";
 import UnitsSearch from "@/components/ui/units-search";
 import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
-import IdentifierUnit from "@/components/ui/IdentifierUnit";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -47,8 +46,6 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   return (
     <div className="container mx-auto">
       <div className="mb-4 flex flex-col sm:flex-row items-start justify-between gap-2">
-        {/* <IdentifierUnit /> */}
-
         <AddUnitButton
           clientId={clientId}
           clientName={clientName}

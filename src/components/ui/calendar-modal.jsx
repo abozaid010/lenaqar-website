@@ -78,14 +78,16 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
               {t.calendarModal.confirmationTitle}
             </h2>
             <p className="text-gray-600 mb-6">
-              {t.calendarModal.thankYou} <span className="font-bold">{bookingData?.name}</span>!
-              {t.calendarModal.meetingScheduled} {" "}
+              {t.calendarModal.thankYou}{" "}
+              <span className="font-bold">{bookingData?.name}</span>!
+              {t.calendarModal.meetingScheduled}{" "}
               {bookingData?.date &&
                 new Date(bookingData.date).toLocaleDateString()}{" "}
               {t.calendarModal.at} {bookingData?.time}.
             </p>
             <p className="text-gray-600 mb-6">
-              {t.calendarModal.confirmationSent} {bookingData?.email} {t.calendarModal.withDetails}.
+              {t.calendarModal.confirmationSent} {bookingData?.email}{" "}
+              {t.calendarModal.withDetails}.
             </p>
             <button
               onClick={closeModal}
@@ -103,15 +105,11 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
 
   return (
     <>
-      <button
-        onClick={openModal}
-        className={`${style}`}
-      >
+      <button onClick={openModal} className={`${style}`}>
         {buttonText}
       </button>
-       
-      {typeof window !== "undefined" &&
-        createPortal(modalContent, document.body)}
+
+      {isOpen && createPortal(modalContent, document.body)}
     </>
   );
 }
