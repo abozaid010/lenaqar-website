@@ -54,7 +54,7 @@ const Header = ({ clientName }) => {
     Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success(t.header.logoutSuccess);
-    router.push("/");
+    router.replace("/");
   };
 
   return (

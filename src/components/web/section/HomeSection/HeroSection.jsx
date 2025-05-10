@@ -41,7 +41,7 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className="relative w-full h-[60vh] md:h-[70vh] xl:h-screen flex items-center overflow-hidden px-4">
+    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center overflow-hidden px-4">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image

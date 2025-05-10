@@ -33,11 +33,11 @@ export default function DashboardImage() {
   ];
 
   return (
-    <div className="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen font-sans">
-      <div className="max-w-[85%] w-full mx-auto py-12 md:py-20">
+    <div className="bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="max-w-[90%] w-full mx-auto py-12 md:py-20">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-priamry mb-4">
             {t.dashboard.title.part1}{" "}
             <span className="text-[#3926A7]">{t.dashboard.title.part2}</span>
           </h1>
@@ -47,22 +47,24 @@ export default function DashboardImage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-8 items-center">
+        <div className="flex flex-col lg:flex-row gap-6 items-center">
           {/* Features List */}
-          <div className="w-full lg:w-1/2 space-y-6">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+          <div className="w-full lg:w-1/2 space-y-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-primary mb-5">
               {t.dashboard.featuresTitle}
             </h2>
 
             {features.map((feature) => (
               <div
                 key={feature.id}
-                className="flex items-center gap-4 group p-4 rounded-lg transition-all duration-300"
+                className="flex items-center gap-4 group px-3 rounded-lg transition-all duration-300"
               >
-                <div className="h-8 w-8 rounded-full flex items-center justify-center bg-green-500 text-white">
+                <div className=" w-6 h-6 shrink-0 rounded-full flex items-center justify-center bg-green-500 text-white">
                   <Check size={18} />
                 </div>
-                <h3 className="font-semibold text-gray-800">{feature.title}</h3>
+                <h3 className="font-semibold text-sm md:text- text-gray-800">
+                  {feature.title}
+                </h3>
               </div>
             ))}
 
@@ -90,7 +92,7 @@ export default function DashboardImage() {
 
                 {/* Mobile Mockup Image */}
                 <div
-                  className={`hidden md:block absolute bottom-[-20%] ${isRTL ? "left-[-25%]" : "right-[-25%]"} w-1/3 transform`}
+                  className={`hidden lg:block absolute bottom-[-20%] ${isRTL ? "-left-12" : "-right-12"} w-1/3 transform`}
                 >
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image

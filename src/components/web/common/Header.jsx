@@ -89,7 +89,7 @@ const Header = ({ ci }) => {
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-x-4">
+            <nav className="hidden lg:flex items-center gap-x-4">
               <Link href="/" className="hover:text-blue-200 transition-colors">
                 {t.header.home}
               </Link>
@@ -113,7 +113,7 @@ const Header = ({ ci }) => {
             </nav>
 
             {/* Action Buttons */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="hidden lg:flex items-center space-x-4">
               <LanguageSwitcher />
               {!ci ? (
                 <Link
@@ -133,7 +133,7 @@ const Header = ({ ci }) => {
             </div>
 
             {/* Mobile Menu Button */}
-            <button className="md:hidden text-white" onClick={toggleMenu}>
+            <button className="lg:hidden text-white" onClick={toggleMenu}>
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -141,7 +141,7 @@ const Header = ({ ci }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-[#030250]/95 backdrop-blur-md border-t border-blue-700/30">
+          <div className="lg:hidden bg-[#030250]/95 backdrop-blur-md border-t border-blue-700/30">
             <div className="container mx-auto px-4 py-3">
               <nav className="flex flex-col space-y-3">
                 <Link
