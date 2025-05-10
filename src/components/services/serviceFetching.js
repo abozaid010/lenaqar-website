@@ -61,12 +61,10 @@ export async function fetchUnitById(id) {
   }
 }
 
-export async function fetchUnitByIdpublic(id, token) {
+export async function fetchUnitByIdpublic(id) {
   try {
-    const response = await axiosInstance.get(`/units/details/${id}`, {
-      headers: {
-        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXZAbGVuYS5uZXQiLCJleHAiOjE3NDcxMzc0MDZ9.DRWjvT2ZWWvgpZsGWxNwUszEXKmH3G-zblH3IPM7s8g`,
-      },
+    const response = await axiosInstance.get(`/public/unit-details/${id}`, {
+   
     });
     return response.data.data;
   } catch (error) {
