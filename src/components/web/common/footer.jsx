@@ -1,14 +1,15 @@
 "use client";
 import Link from "next/link";
-import { Linkedin, Phone, Building, Facebook, MessageCircle, ShoppingBag, Bot } from "lucide-react";
+import { Linkedin, Phone, Building, Facebook, MessageCircle, Bot, Apple, ShoppingBag } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import ChatBot from "@/components/ui/ChatBot";
 
 const Footer = () => {
   const { t } = useI18n();
   
-  // App Store link - fixed without the leading 'L'
+  // App Store links
   const appStoreLink = "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
+  const playStoreLink = "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
   
   // Facebook link
   const facebookLink = "https://www.facebook.com/profile.php?id=61575040225107";
@@ -28,6 +29,41 @@ const Footer = () => {
               <Building className="mt-1 flex-shrink-0" />
               <p>{t.footer.companyInfo.address}</p>
             </div>
+            
+            {/* Privacy Policy Link */}
+            <div className="mt-2">
+              <Link href="/privacy" className="flex items-center space-x-3 hover:text-blue-200 transition-colors group">
+                <div className="p-2 bg-white/10 rounded-full transition-colors">
+                  <MessageCircle size={20} />
+                </div>
+                <span>{t.footer.connect.privacyPolicy}</span>
+              </Link>
+            </div>
+            {/* iOS App Store Link - MOVED HERE */}
+            <Link
+              href={appStoreLink}
+              className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="p-2 bg-white/10 rounded-full transition-colors">
+                <Apple size={20} />
+              </div>
+              <span>{t.footer.connect.dowenload} iOS</span>
+            </Link>
+            
+            {/* Google Play Store Link - MOVED HERE */}
+            <Link
+              href={playStoreLink}
+              className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <div className="p-2 bg-white/10 rounded-full transition-colors">
+                <ShoppingBag size={20} />
+              </div>
+              <span>{t.footer.connect.dowenload} Android</span>
+            </Link>
           </div>
 
           <div className="space-y-4">
@@ -63,6 +99,8 @@ const Footer = () => {
                 </div>
               </div>
             </div>
+            
+            
           </div>
 
           <div className="space-y-4">
@@ -96,19 +134,6 @@ const Footer = () => {
               <span>Facebook</span>
             </Link>
             
-            {/* Mobile App Link */}
-            <Link
-              href={appStoreLink}
-              className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <div className="p-2 bg-white/10 rounded-full transition-colors">
-                <ShoppingBag size={20} />
-              </div>
-              <span>{t.footer.connect.dowenload}</span>
-            </Link>
-            
             {/* Chatbot Link in footer */}
             <Link
               href="#"
@@ -123,12 +148,6 @@ const Footer = () => {
               </div>
               <span>{t.footer.connect.chat}</span>
             </Link>
-            
-            <div className="mt-2">
-              <Link href="/privacy" className="text-blue-200 hover:underline">
-                {t.footer.connect.privacyPolicy}
-              </Link>
-            </div>
           </div>
         </div>
 

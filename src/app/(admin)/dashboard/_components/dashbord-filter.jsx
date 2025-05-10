@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Printer } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 
 const formatDate = (date) => {
@@ -109,8 +109,14 @@ export default function DashbordFilter({ appliedFilters }) {
     });
   };
 
+  // Function to handle print button click - triggers browser print dialog
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap">
+      
       <div className="relative inline-block w-full sm:w-52">
         <select
           name="action_type"
@@ -199,6 +205,15 @@ export default function DashbordFilter({ appliedFilters }) {
           </div>
         )}
       </div>
+      
+      {/* Improved print button with icon and better styling */}
+      <button 
+        onClick={handlePrint}
+        className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+      >
+        <Printer size={16} />
+        Print
+      </button>
     </div>
   );
 }
