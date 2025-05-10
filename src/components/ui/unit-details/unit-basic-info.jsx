@@ -17,7 +17,7 @@ export default function UnitBasicInfo({ unit }) {
       <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
 
       <p className="text-lg text-gray-600">
-        {unit.compound}, {unit.city}
+        {unit.project}, {unit.city}
       </p>
 
       <UnitPricing unit={unit} />

@@ -281,7 +281,7 @@ export default {
   },
   unitsFilter: {
     "allDevelopers": "All Developers",
-    "allCompounds": "All Compounds",
+    "allCompounds": "All Projects",
     "allPurposes": "All Purposes",
     "purposes": {
       "buy": "Buy",
@@ -406,7 +406,7 @@ export default {
     "propertyDetails": "Property Details",
     "propertySpecs": "Property Specifications",
     "unitTitle": "Unit Title",
-    "compound": "Compound",
+    "compound": "project",
     "buildingType": "Building Type",
     "purpose": "Purpose",
     "city": "City",
@@ -418,7 +418,7 @@ export default {
     "landArea": "Land Area",
     "gardenSize": "Garden Size",
     "garageArea": "Garage Area",
-    "selectCompound": "Select compound",
+    "selectCompound": "Select project",
     "selectPurpose": "Select purpose",
     "selectCity": "Select city",
     "selectView": "Select view",

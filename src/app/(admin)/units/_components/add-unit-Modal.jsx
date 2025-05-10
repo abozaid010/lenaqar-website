@@ -35,7 +35,8 @@ export default function AddUnitModal({
   const isRTL = t.direction === "rtl";
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  // Track over all upload state
+  // Track over all upload statecl
+  console.log(unitData)
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   const [developers, setDevelopers] = useState(developersData || []);
@@ -47,7 +48,7 @@ export default function AddUnitModal({
     dataSource: unitData?.dataSource || "website",
     buildingType: unitData?.buildingType || "apartment",
     purpose: unitData?.purpose || "",
-    compound: unitData?.compound || "",
+    project: unitData?.project || "",
     view: unitData?.view || "",
     isGated: unitData?.isGated || false,
     city: unitData?.city || "",
@@ -67,7 +68,7 @@ export default function AddUnitModal({
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
   }));
-
+   console.log(formData)
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
     downPayment: unitData?.downPayment || "",
@@ -126,7 +127,7 @@ export default function AddUnitModal({
     if (currentStep === 1) {
       const requiredFields = [
         "unitTitle",
-        "compound",
+        "project",
         "buildingType",
         "purpose",
         "city",
@@ -283,7 +284,7 @@ export default function AddUnitModal({
       onClose();
       window.location.reload();
     } catch (error) {
-      toast.error(`${t("toasts.errorProcessing")}: ${error.message}`);
+      toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
       setInvalidFields([]);
       setLoading(false);
