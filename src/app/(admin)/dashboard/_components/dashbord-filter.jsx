@@ -115,7 +115,9 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   return (
-    <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap">
+
+    <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap no-print">
+
       
       <div className="relative inline-block w-full sm:w-52">
         <select

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PropertyDetailsModal from "./property-requirements-modal";
@@ -21,6 +21,7 @@ const ACTIONS_COLORS = {
   "Follow up later": "text-orange-800",
   "Missing Requirement": "text-purple-800",
   "No Action": "text-gray-400",
+  "Blocked": "text-red-600",
 };
 
 export default function ClientsTable({
@@ -39,6 +40,36 @@ export default function ClientsTable({
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
+
+  const ACTIONS = useMemo(
+    () => [
+      // { label: t.dashboardFilter.actions.all, value: "" },
+      { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
+      { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
+      { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
+      {
+        label: t.dashboardFilter.actions.notInterested,
+        value: "Not interested",
+      },
+      { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
+      {
+        label: t.dashboardFilter.actions.followUpLater,
+        value: "Follow up later",
+      },
+      {
+        label: t.dashboardFilter.actions.missingRequirement,
+        value: "Missing Requirement",
+      },
+      { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
+      { label: t.dashboardFilter.actions.noAction, value: "No Action" },
+    ],
+    [t]
+  );
+
+  const getActionLabel = (actionValue) => {
+    const action = ACTIONS.find((a) => a.value === actionValue);
+    return action ? action.label : actionValue;
+  };
 
   const toggleSelectAll = () => {
     if (rowSelection.length === users.length) {
@@ -102,7 +133,7 @@ export default function ClientsTable({
         </div>
       ) : (
         <>
-          <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory">
+          <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory ">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
@@ -227,7 +258,7 @@ export default function ClientsTable({
 
                       <td
                         className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap ${
-                          ACTIONS_COLORS[user.last_action]
+                          ACTIONS_COLORS[user.last_action] || "text-gray-400"
                         }`}
                         onClick={(e) =>
                           handleclientAction(e, user.phone_number, user.user_id)
@@ -243,7 +274,7 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {user.last_action}
+                            {getActionLabel(user.last_action)}
                           </span>
                         )}
                       </td>

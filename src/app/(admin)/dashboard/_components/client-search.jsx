@@ -37,7 +37,7 @@ export default function SearchBar({ q }) {
 
   return (
     <form
-      className="flex items-center space-x-2 mb-2"
+      className="flex items-center space-x-2 mb-2 no-print"
       onSubmit={(e) => e.preventDefault()}
     >
       <div className="relative flex-1">

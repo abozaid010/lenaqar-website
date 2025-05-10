@@ -115,7 +115,8 @@ export default {
       "linkedin": "LinkedIn",
       "chat": "chat with Us",
       "privacyPolicy": "Read our Privacy Policy",
-      "dowenload": "Download our App"
+      "dowenloadios": "Download our iOS App",
+      "dowenloadAndroid": "Download our Android App"
     },
     "copyright": "©",
     "companyName": "Lena AI",
@@ -341,7 +342,10 @@ export default {
     "gardenSize": "Garden Size (m²)",
     "finishing": "Finishing",
     "garageArea": "Garage Area (m²)",
-    "images": "Images"
+    "images": "Images",
+    "districtFirst":" select district first",
+    "cityFirst":"  select city first",
+    "selectDistrict":"select district"
   },
   buildingTypes: {
     "apartment": "Apartment",

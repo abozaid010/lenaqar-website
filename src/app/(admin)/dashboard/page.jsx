@@ -23,8 +23,8 @@ export async function generateMetadata() {
 export default async function DashbordPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto my-3">
+    <div className="bg-gray-50 min-h-screen ">
+      <div className="max-w-7xl mx-auto my-3 no-print">
         <PremiumFeatures />
       </div>
 

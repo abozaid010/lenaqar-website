@@ -116,7 +116,10 @@ export default {
       "linkedin": "لينكد إن",
       "privacyPolicy": "اقرأ سياسة الخصوصية الخاصة بنا",
       "chat":"تحدث معنا",
-     "dowenload": "قم بتحميل تطبيقنا"
+    "dowenloadios": "حمّل تطبيقنا على iOS",
+    "dowenloadAndroid": "حمّل تطبيقنا على Android"
+
+
 
     },
     "copyright": "©",
@@ -339,7 +342,10 @@ export default {
     "gardenSize": "مساحة الحديقة (م²)",
     "finishing": "التشطيب",
     "garageArea": "مساحة المرآب (م²)",
-    "images": "الصور"
+    "images": "الصور",
+    "districtFirst":"اختر الحي اولا",
+    "cityFirst":"اختر المدينه اولا",
+    "selectDistrict" :"اختر الحي "
   },
   buildingTypes: {
     "apartment": "شقة",

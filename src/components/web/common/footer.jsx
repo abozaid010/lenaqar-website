@@ -49,7 +49,9 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Apple size={20} />
               </div>
-              <span>{t.footer.connect.dowenload} iOS</span>
+
+              <span>{t.footer.connect.dowenloadios} </span>
+
             </Link>
             
             {/* Google Play Store Link - MOVED HERE */}
@@ -62,7 +64,9 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <ShoppingBag size={20} />
               </div>
-              <span>{t.footer.connect.dowenload} Android</span>
+
+              <span>{t.footer.connect.dowenloadAndroid} </span>
+
             </Link>
           </div>
 

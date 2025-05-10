@@ -58,7 +58,7 @@ const Header = ({ clientName }) => {
   };
 
   return (
-    <header className="bg-white shadow-sm p-4 flex justify-between lg:justify-end items-center">
+    <header className="bg-white shadow-sm p-4 flex justify-between lg:justify-end items-center no-print">
       <div className="block lg:hidden">
         <button
           className="p-1 rounded-md hover:bg-gray-100"

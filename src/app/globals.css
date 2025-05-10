@@ -114,3 +114,18 @@ input[type="number"] {
   background-color: #ddd;
   border-radius: 8px;
 }
+@media print {
+  body {
+    font-size: 12pt;
+    color: black;
+    background: white;
+  }
+
+  nav, footer, .no-print {
+    display: none; /* Hide elements not needed in print */
+  }
+
+  .print-only {
+    display: block; /* Only show in print */
+  }
+}
