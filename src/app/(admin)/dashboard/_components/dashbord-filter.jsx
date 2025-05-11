@@ -34,7 +34,7 @@ export default function DashbordFilter({ appliedFilters }) {
         label: t.dashboardFilter.actions.missingRequirement,
         value: "Missing requirement",
       },
-      { label: "Blocked", value: "Blocked" },
+      { label: t.dashboardFilter.actions.blocked , value: "Blocked" },
     ],
     [t]
   );
@@ -214,7 +214,7 @@ export default function DashbordFilter({ appliedFilters }) {
         className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
       >
         <Printer size={16} />
-        Print
+        {t.dashboardFilter.actions.print}
       </button>
     </div>
   );

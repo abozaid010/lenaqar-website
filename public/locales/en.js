@@ -200,7 +200,9 @@ export default {
       "notInterested": "Not interested",
       "notQualified": "Not qualified",
       "followUpLater": "Follow up later",
-      "missingRequirement": "Missing Requirement"
+      "missingRequirement": "Missing Requirement",
+      "blocked":"blocked",
+      "print":"print"
     },
     "datePicker": {
       "startDate": "Start Date",

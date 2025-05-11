@@ -29,6 +29,7 @@ export default function AddUnitModal({
   clientName,
   compounds,
   developersData,
+  projectsData
 }) {
   const modalRef = useRef(null);
   const { t } = useI18n();
@@ -338,6 +339,7 @@ export default function AddUnitModal({
               setDevelopers={setDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
+              projectsData={projectsData}
             />
           )}
 

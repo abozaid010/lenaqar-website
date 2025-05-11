@@ -2,6 +2,7 @@ import {
   fetchcombounds,
   fetchUnitsFilter,
   fetchDevelopers,
+  fetchProjects,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "@/components/ui/units-grid";
 import UnitsFilter from "@/components/ui/units-filter";
@@ -31,13 +32,15 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     cookieStore.get("client_info")?.value
   )?.client_name;
 
-  const [unitsResponse, developers, compounds] = await Promise.all([
+  const [unitsResponse, developers, compounds,projectsData] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams), true),
     fetchDevelopers(),
     fetchcombounds(),
+    fetchProjects()
   ]);
 
   const units = unitsResponse.data?.units || [];
+  console.log(projectsData)
 
   const developersSet = Array.from(
     new Set(developers?.map((developer) => developer.name))
@@ -51,6 +54,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           clientName={clientName}
           compounds={compounds}
           developers={developersSet}
+          projectsData={projectsData}
         />
       </div>
 
@@ -63,7 +67,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
         <UnitsSearch />
       </div>
-      <UnitsGrid units={units} />
+      <UnitsGrid units={units}   />
     </div>
   );
 }

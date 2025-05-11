@@ -12,10 +12,11 @@ export default function AddUnitButton({
   clientName,
   compounds,
   developers,
+  projectsData
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
-
+console.log(projectsData)
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
 
@@ -51,6 +52,7 @@ export default function AddUnitButton({
           clientName={clientName}
           compounds={compounds}
           developersData={developers}
+          projectsData={projectsData}
         />
       )}
     </>

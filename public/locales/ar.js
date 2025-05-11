@@ -198,11 +198,13 @@ export default {
       "all": "كل الإجراءات",
       "makeCall": "إجراء مكالمة",
       "officeVisit": "زيارة مكتب",
-      "propertyView": "عرض عقار",
+      "propertyView": "معاينه",
       "notInterested": "غير مهتم",
       "notQualified": "غير مؤهل",
       "followUpLater": "متابعة لاحقاً",
-      "missingRequirement": "متطلب مفقود"
+      "missingRequirement": "متطلب مفقود",
+      "blocked":"محظور",
+      "print":"طباعه"
     },
     "datePicker": {
       "startDate": "تاريخ البداية",

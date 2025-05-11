@@ -13,90 +13,26 @@ export default function BasicDetailsStep({
   setDevelopers = () => {},
   invalidFields = [],
   setInvalidFields = () => {},
+  projectsData
 }) {
   const [compounds, setCompounds] = useState(compoundsData || []);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
 
-  const data = [
-    {
-      "governorate": "Cairo",
-      "areas": [
-        { "area": "Heliopolis", "compounds": ["Korba Heights", "Heliopolis Gardens", "El Shams Compound", "Al Masa Residence"] },
-        { "area": "Nasr City", "compounds": ["Nasr Gardens", "Nasr City Towers", "El Waha Compound"] },
-        { "area": "Maadi", "compounds": ["Maadi Gardens", "Sarayat Maadi Residences", "Degla Palms"] },
-        { "area": "Zamalek", "compounds": ["Zamalek Tower", "Nile View Residence", "Gezira Heights"] },
-        { "area": "Downtown Cairo", "compounds": ["The Nile Ritz-Carlton Residences", "Downtown Heights", "Cairo Downtown Residences"] },
-        { "area": "Fifth Settlement", "compounds": ["Katameya Heights", "Lake View Residence", "The Waterway", "Eastown", "Galleria Moon Valley", "El Patio 1", "La Mirada", "Zizinia Gardens", "Stone Residence", "Mountain View II"] },
-        { "area": "New Cairo City", "compounds": ["Mivida", "Villette", "Hyde Park", "Swan Lake Residence", "Mountain View I", "Palm Hills New Cairo", "Lake View", "Katameya Dunes", "Sarai", "La Vista City", "El Patio 7", "Layan", "Azad", "Zed East", "Taj City", "Fifth Square", "District 5", "City Gate", "Azzar New Cairo", "Mountain View Hyde Park", "Mountain View iCity"] },
-        { "area": "Al Rehab City", "compounds": ["Al Rehab 1", "Al Rehab 2"] },
-        { "area": "Madinaty", "compounds": ["Madinaty"] },
-        { "area": "New Administrative Capital", "compounds": ["Vinci", "The Loft", "De Joya", "Capital Heights", "Oblisco Capitale", "Jnoub", "Bleu Vert", "Rhodes", "Rivan", "Oia", "Atika", "Talah", "Il Bosco", "Midtown Sky", "Midtown Condo", "Midtown Solo", "Midtown Villa", "Midtown Capital", "La Verde", "Scenario", "Entrada", "Castle Landmark", "Capital Gardens", "Pukka", "Anakaji", "The City", "Catalan", "Green Avenue", "Botanica", "Zed New Capital"] }
-      ]
-    },
-    {
-      "governorate": "Giza",
-      "areas": [
-        { "area": "Sheikh Zayed", "compounds": ["Beverly Hills", "Allegria", "Zed Towers", "Etapa", "Karma Residence", "Casa", "The Courtyards", "Greens Compound", "El Rabwa"] },
-        { "area": "Dokki", "compounds": ["Dokki Gardens", "El Nile Compound"] },
-        { "area": "Mohandessin", "compounds": ["Mohandessin Heights", "El Mohandessin Towers"] }
-      ]
-    },
-    {
-      "governorate": "6th of October",
-      "areas": [
-        { "area": "6th of October City", "compounds": ["Palm Hills October", "Mountain View Chillout Park", "Mountain View iCity October", "New Giza", "The Crown", "Beta Greens", "El Patio 6", "Joulz", "O West", "Grand Heights", "Brix", "Badya"] }
-      ]
-    },
-    {
-      "governorate": "Alexandria",
-      "areas": [
-        { "area": "Smouha", "compounds": ["Terrace Smouha", "Green Smouha Compound", "Skyline Smouha"] },
-        { "area": "San Stefano", "compounds": ["San Stefano Grand Plaza", "San Stefano Towers"] },
-        { "area": "Gleem", "compounds": ["Gleem Bay", "Gleem Residence"] },
-        { "area": "Sawary", "compounds": ["Sawary Compound", "Vee Sawary"] },
-        { "area": "Miami", "compounds": ["Miami Grand Plaza", "Miami Heights"] },
-        { "area": "Sidi Gaber", "compounds": ["Sidi Gaber Towers", "Sidi Gaber Residence"] },
-        { "area": "Other Areas", "compounds": ["Palm Hills Alexandria", "Cleopatra Plaza", "Antoniadis Compound", "Royal Plaza Compound", "Karma Compound", "Safwa Towers Compound"] }
-      ]
-    },
-    {
-      "governorate": "Red Sea",
-      "areas": [
-        { "area": "Hurghada", "compounds": ["Ocean Breeze", "Magawish Resort", "Turtles Beach Resort", "Azzurra Sahl Hasheesh", "Veranda Sahl Hasheesh", "La Quinta Resort", "Aqua Blue Bay", "Makadi Heights", "Soma Bay", "El Gouna"] }
-      ]
-    },
-    {
-      "governorate": "Matrouh",
-      "areas": [
-        { "area": "North Coast", "compounds": ["Marassi", "Hacienda Bay", "La Vista Bay", "Fouka Bay", "Mountain View Ras El Hikma", "Jefaira", "Amwaj", "Bo Islands", "Telal", "Malaaz", "Seashell", "Diplomats 3", "Zahra", "SouthMED", "Blue Park", "Caesar Bay", "Sidi Abdel Rahman", "Ras El Hekma", "Silver Sands", "Salt", "Q North Coast", "June by SODIC", "Hacienda West", "The Med", "Mar Bay", "Zoya", "Cecilia Lagoons", "Marsa Baghush", "Ajar Resort", "Katameya Coast", "Marseilia Beach", "Golf Porto Marina", "White Bay", "White Sand", "La Vista Ras El Hekma", "North Edge Towers", "City Stars Al Sahel", "La Vista Cascada", "Mountain View Diplomats", "Bianchi", "Gaia", "Kai Sahel", "Sea View", "Blue Blue Ras El Hekma", "Ein Hills", "La Vista Gardens", "Mountain View North Coast", "Marina Wadi Degla", "Marina El Alamein"] },
-        { "area": "El Alamein", "compounds": ["Palm Hills New Alamein", "Il Latini", "North Edge Towers", "Mazarine", "Downtown New Alamein", "Bo Sands", "Alma New Alamein", "Glee North Coast", "North Towers", "Latin District", "Winter New Alamein", "El Alamein Capital", "La Capital New Alamein", "Alamein Towers", "Alma Village", "City Edge Towers", "The Gate Towers", "New Alamein Gardens", "Alamein Hills", "Alamein Heights", "Alamein Residences", "Alamein View", "Alamein Plaza", "Alamein Park", "Alamein Bay", "Alamein Lagoon", "Alamein Marina", "Alamein Beach", "Alamein Coast", "Alamein Pearl", "Alamein Star", "Alamein Sky", "Alamein Horizon", "Alamein Breeze", "Alamein Oasis", "Alamein Valley", "Alamein Creek", "Alamein Forest", "Alamein Summit", "Alamein Vista", "Alamein Zenith", "Alamein Nova", "Alamein Aura", "Alamein Lumina", "Alamein Solis", "Alamein Terra", "Alamein Vibe", "Alamein Wave"] }
-      ]
-    },
-    {
-      "governorate": "New Administrative Capital",
-      "areas": [
-        { "area": "R7", "compounds": ["Midtown Sky", "The City", "Capital Heights", "La Vista City", "Anakaji", "Oia Compound"] },
-        { "area": "R8", "compounds": ["Sky Capital", "The Curve", "Residence Eight", "Scenario", "De Joya"] }
-      ]
-    }
-  ];
-
-  // Update available compounds when district changes
-  useEffect(() => {
-    if (formData.city && formData.district) {
-      const selectedCity = data.find(item => item.governorate === formData.city);
-      if (selectedCity) {
-        const selectedArea = selectedCity.areas.find(area => area.area === formData.district);
-        if (selectedArea) {
-          setAvailableCompounds(selectedArea.compounds);
-          
-          // If the current project is not in the list of available compounds, clear it
-          if (formData.project && !selectedArea.compounds.includes(formData.project)) {
-            updateFormData({ project: "" });
-          }
-        } else {
-          setAvailableCompounds([]);
+useEffect(() => {
+  if (formData.city && formData.district) {
+    const selectedCountry = projectsData[0]; // Assuming Egypt is the only country currently
+    const selectedGovernorate = selectedCountry.governorates.find(gov => gov.governorate === formData.city);
+    
+    if (selectedGovernorate) {
+      const selectedDistrict = selectedGovernorate.districts.find(dist => dist.district === formData.district);
+      
+      if (selectedDistrict) {
+        setAvailableCompounds(selectedDistrict.projects);
+        
+        // If the current project is not in the available projects list, clear it
+        if (formData.project && !selectedDistrict.projects.includes(formData.project)) {
+          updateFormData({ project: "" });
         }
       } else {
         setAvailableCompounds([]);
@@ -104,7 +40,10 @@ export default function BasicDetailsStep({
     } else {
       setAvailableCompounds([]);
     }
-  }, [formData.city, formData.district]);
+  } else {
+    setAvailableCompounds([]);
+  }
+}, [formData.city, formData.district]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -227,58 +166,61 @@ export default function BasicDetailsStep({
         </div>
 
         {/* City */}
-        <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("city") ? "text-red-500" : "text-gray-700"
-            }`}
-          >
-            {t.basicDetails.city} <span className="text-red-500">*</span>
-          </label>
-          <div className="relative">
-            <select
-              name="city"
-              value={formData.city}
-              required
-              onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
-                invalidFields.includes("city")
-                  ? "border-red-500 ring-red-500"
-                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              }`}
-            >
-              <option value="">{t.basicDetails.selectCity}</option>
-              {data.map((item) => (
-                <option key={item.governorate} value={item.governorate}>
-                  {item.governorate}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+      {/* City */}
+<div>
+  <label
+    className={`block text-sm font-medium mb-1 ${
+      invalidFields.includes("city") ? "text-red-500" : "text-gray-700"
+    }`}
+  >
+    {t.basicDetails.city} <span className="text-red-500">*</span>
+  </label>
+  <div className="relative">
+    <select
+      name="city"
+      value={formData.city}
+      required
+      onChange={handleChange}
+      className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+        invalidFields.includes("city")
+          ? "border-red-500 ring-red-500"
+          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+      }`}
+    >
+      <option value="">{t.basicDetails.selectCity}</option>
+      {projectsData[0].governorates.map((gov) => (
+        <option key={gov.governorate} value={gov.governorate}>
+          {gov.governorate}
+        </option>
+      ))}
+    </select>
+  </div>
+</div>
 
-        {/* District */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.district}
-          </label>
-          <select
-            name="district"
-            value={formData.district}
-            onChange={handleChange}
-            disabled={!formData.city}
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">
-              {formData.city ? t.formLabels.selectDistrict : t.formLabels.cityFirst}
-            </option>
-            {formData.city && data.find(item => item.governorate === formData.city)?.areas.map(area => (
-              <option key={area.area} value={area.area}>
-                {area.area}
-              </option>
-            ))}
-          </select>
-        </div>
+{/* District */}
+<div>
+  <label className="block text-sm font-medium text-gray-700 mb-1">
+    {t.basicDetails.district}
+  </label>
+  <select
+    name="district"
+    value={formData.district}
+    onChange={handleChange}
+    disabled={!formData.city}
+    className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+  >
+    <option value="">
+      {formData.city ? t.formLabels.selectDistrict : t.formLabels.cityFirst}
+    </option>
+    {formData.city && 
+      projectsData[0].governorates.find(gov => gov.governorate === formData.city)?.districts.map(dist => (
+        <option key={dist.district} value={dist.district}>
+          {dist.district}
+        </option>
+      ))
+    }
+  </select>
+</div>
 
         {/* Compound */}
         <div>

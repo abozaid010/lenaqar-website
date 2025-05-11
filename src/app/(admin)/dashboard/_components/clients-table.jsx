@@ -137,12 +137,12 @@ export default function ClientsTable({
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
-                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6">
+                  <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6 ">
                     <input
                       type="checkbox"
                       checked={rowSelection?.length === users?.length}
                       onChange={toggleSelectAll}
-                      className="cursor-pointer"
+                      className="cursor-pointer no-print"
                     />
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
@@ -202,7 +202,7 @@ export default function ClientsTable({
                           checked={rowSelection.includes(user.user_id)}
                           onChange={() => toggleRowSelection(user.user_id)}
                           onClick={(e) => e.stopPropagation()}
-                          className="cursor-pointer"
+                          className="cursor-pointer no-print"
                         />
                       </td>
 
@@ -285,7 +285,7 @@ export default function ClientsTable({
             </table>
           </div>
 
-          <div className="flex flex-col mt-4 gap-3">
+          <div className="flex flex-col mt-4 gap-3  no-print">
             <div className="flex justify-between items-center flex-row-reverse">
               <ClientsTablePagination
                 nextCursor={nextCursor}
