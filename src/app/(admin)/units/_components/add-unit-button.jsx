@@ -52,7 +52,7 @@ console.log(projectsData)
           clientName={clientName}
           compounds={compounds}
           developersData={developers}
-          projectsData={projectsData}
+         
         />
       )}
     </>
