@@ -34,6 +34,7 @@ export default function AddCompoundDialog({
     developer_name: "",
     city: "",
     country: "Egypt",
+    district: "",
     area: "",
     gated: false,
     video_url: "",
@@ -71,6 +72,10 @@ export default function AddCompoundDialog({
 
     if (!formData.country.trim()) {
       newErrors.country = "Country is required";
+    }
+
+    if (!formData.district.trim()) {
+      newErrors.district = "District is required";
     }
 
     if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
@@ -175,6 +180,7 @@ export default function AddCompoundDialog({
           developer_name: "",
           city: "",
           country: "Egypt",
+          district: "",
           area: "",
           gated: false,
           video_url: "",
@@ -205,7 +211,7 @@ export default function AddCompoundDialog({
 
   return (
     <>
-      <Dialog isOpen={isOpen} onClose={onClose} title="Add New Compound">
+      <Dialog isOpen={isOpen} onClose={onClose} title="Add New Project">
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
@@ -262,6 +268,19 @@ export default function AddCompoundDialog({
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                District <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="district"
+                value={formData.district}
+                onChange={handleChange}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
             </div>
 
             {/* Details */}
@@ -493,7 +512,7 @@ export default function AddCompoundDialog({
                     Saving...
                   </div>
                 ) : (
-                  "Save Compound"
+                  "Save Project"
                 )}
               </button>
             </div>

@@ -27,9 +27,8 @@ export default function AddUnitModal({
   onClose,
   clientId,
   clientName,
-  compounds,
   developersData,
- 
+  projectsData,
 }) {
   const modalRef = useRef(null);
   const { t } = useI18n();
@@ -334,12 +333,11 @@ export default function AddUnitModal({
               clientId={clientId}
               formData={formData}
               updateFormData={updateFormData}
-              compoundsData={compounds}
               developers={developers}
               setDevelopers={setDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
-             
+              projectsData={projectsData}
             />
           )}
 

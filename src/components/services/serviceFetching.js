@@ -150,7 +150,16 @@ export async function fetchDevelopers(use) {
     return { error: error.message };
   }
 }
-
+export async function fetchProjects() {
+  try {
+    const response = await axiosInstance.get(`/projects/tree`);
+    console.log(response.data)
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch developers data:", error.message);
+    return { error: error.message };
+  }
+}
 
 export async function addDeveloper(developerData) {
   const clientId = await getClientid();

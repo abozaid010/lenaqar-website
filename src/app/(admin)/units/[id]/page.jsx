@@ -14,8 +14,8 @@ export async function generateMetadata({ params }) {
   const unit = await fetchUnitById(id);
 
   return {
-    title: "unit - " + unit?.unitTitle,
-    description: `${unit.purpose} a ${unit.buildingType} in ${unit.city}, developed by ${unit.developer}. Delivery status: ${unit.deliveryStatus}.`,
+    title: "unit - " + unit.data?.unitTitle,
+    description: `${unit.data.purpose} a ${unit.data.buildingType} in ${unit.data.city}, developed by ${unit.data.developer}. Delivery status: ${unit.data.deliveryStatus}.`,
   };
 }
 

@@ -8,13 +8,12 @@ export default function BasicDetailsStep({
   clientId,
   formData,
   updateFormData,
-  compoundsData,
   developers,
   setDevelopers = () => {},
   invalidFields = [],
   setInvalidFields = () => {},
+  projectsData,
 }) {
-  const [compounds, setCompounds] = useState(compoundsData || []);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
 
@@ -388,7 +387,6 @@ export default function BasicDetailsStep({
         );
         if (selectedArea) {
           setAvailableCompounds(selectedArea.compounds);
-
           // If the current project is not in the list of available compounds, clear it
           if (
             formData.project &&
@@ -432,10 +430,10 @@ export default function BasicDetailsStep({
   };
 
   const { t } = useI18n();
-
   const handleAddCompound = (newCompound) => {
     // Add the new compound to the list
-    setCompounds([...compounds, newCompound]);
+    setAvailableCompounds([...availableCompounds, newCompound.name]);
+
     updateFormData({ project: newCompound.name });
   };
 
@@ -471,6 +469,8 @@ export default function BasicDetailsStep({
             }`}
           />
         </div>
+
+        {/* Building Type */}
         <div>
           <label
             className={`block text-sm font-medium mb-1 ${
@@ -528,7 +528,6 @@ export default function BasicDetailsStep({
         </div>
 
         {/* City */}
-        {/* City */}
         <div>
           <label
             className={`block text-sm font-medium mb-1 ${
@@ -550,9 +549,9 @@ export default function BasicDetailsStep({
               }`}
             >
               <option value="">{t.basicDetails.selectCity}</option>
-              {data.map((item) => (
-                <option key={item.governorate} value={item.governorate}>
-                  {item.governorate}
+              {projectsData[0].governorates.map((gov) => (
+                <option key={gov.governorate} value={gov.governorate}>
+                  {gov.governorate}
                 </option>
               ))}
             </select>
@@ -587,17 +586,17 @@ export default function BasicDetailsStep({
           </select>
         </div>
 
-        {/* Compound */}
+        {/* Project */}
         <div>
           <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
             {t.basicDetails.compound}
             <button
               type="button"
-              onClick={() => setIsAddCompoundDialogOpen(true)}
-              className={`text-blue-600 text-sm font-medium ${!formData.district ? 'opacity-50 cursor-not-allowed' : ''}`}
               disabled={!formData.district}
+              onClick={() => setIsAddCompoundDialogOpen(true)}
+              className="text-blue-600 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
             >
-              + Add New project
+              + Add New
             </button>
           </label>
           <select
@@ -632,8 +631,6 @@ export default function BasicDetailsStep({
             </div>
           )}
         </div>
-
-        {/* Building Type */}
 
         {/* Purpose */}
         <div>
