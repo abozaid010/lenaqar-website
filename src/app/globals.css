@@ -142,8 +142,5 @@ input[type="number"] {
     page-break-inside: avoid !important;
   }
 
-  body {
-    transform: scale(0.9); /* تصغير المحتوى إذا لزم الأمر */
-    transform-origin: top left;
-  }
+
 }
