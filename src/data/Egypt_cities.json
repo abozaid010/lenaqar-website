@@ -1,0 +1,364 @@
+{
+  "countries": [
+    {
+      "country": "Egypt",
+      "governorates": [
+        {
+          "governorate": "Cairo",
+          "districts": [
+            {
+              "district": "Heliopolis",
+              "projects": [
+                "Korba Heights",
+                "Heliopolis Gardens",
+                "El Shams Compound",
+                "Al Masa Residence"
+              ]
+            },
+            {
+              "district": "Nasr City",
+              "projects": ["Nasr Gardens", "Nasr City Towers", "El Waha Compound"]
+            },
+            {
+              "district": "Maadi",
+              "projects": [
+                "Maadi Gardens",
+                "Sarayat Maadi Residences",
+                "Degla Palms"
+              ]
+            },
+            {
+              "district": "Zamalek",
+              "projects": ["Zamalek Tower", "Nile View Residence", "Gezira Heights"]
+            },
+            {
+              "district": "Downtown Cairo",
+              "projects": [
+                "The Nile Ritz-Carlton Residences",
+                "Downtown Heights",
+                "Cairo Downtown Residences"
+              ]
+            },
+            {
+              "district": "Fifth Settlement",
+              "projects": [
+                "Katameya Heights",
+                "Lake View Residence",
+                "The Waterway",
+                "Eastown",
+                "Galleria Moon Valley",
+                "El Patio 1",
+                "La Mirada",
+                "Zizinia Gardens",
+                "Stone Residence",
+                "Mountain View II"
+              ]
+            },
+            {
+              "district": "New Cairo City",
+              "projects": [
+                "Mivida",
+                "Villette",
+                "Hyde Park",
+                "Swan Lake Residence",
+                "Mountain View I",
+                "Palm Hills New Cairo",
+                "Lake View",
+                "Katameya Dunes",
+                "Sarai",
+                "La Vista City",
+                "El Patio 7",
+                "Layan",
+                "Azad",
+                "Zed East",
+                "Taj City",
+                "Fifth Square",
+                "District 5",
+                "City Gate",
+                "Azzar New Cairo",
+                "Mountain View Hyde Park",
+                "Mountain View iCity"
+              ]
+            },
+            { "district": "Al Rehab City", "projects": ["Al Rehab 1", "Al Rehab 2"] },
+            { "district": "Madinaty", "projects": ["Madinaty"] },
+            {
+              "district": "New Administrative Capital",
+              "projects": [
+                "Vinci",
+                "The Loft",
+                "De Joya",
+                "Capital Heights",
+                "Oblisco Capitale",
+                "Jnoub",
+                "Bleu Vert",
+                "Rhodes",
+                "Rivan",
+                "Oia",
+                "Atika",
+                "Talah",
+                "Il Bosco",
+                "Midtown Sky",
+                "Midtown Condo",
+                "Midtown Solo",
+                "Midtown Villa",
+                "Midtown Capital",
+                "La Verde",
+                "Scenario",
+                "Entrada",
+                "Castle Landmark",
+                "Capital Gardens",
+                "Pukka",
+                "Anakaji",
+                "The City",
+                "Catalan",
+                "Green Avenue",
+                "Botanica",
+                "Zed New Capital"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Giza",
+          "districts": [
+            {
+              "district": "Sheikh Zayed",
+              "projects": [
+                "Beverly Hills",
+                "Allegria",
+                "Zed Towers",
+                "Etapa",
+                "Karma Residence",
+                "Casa",
+                "The Courtyards",
+                "Greens Compound",
+                "El Rabwa"
+              ]
+            },
+            { "district": "Dokki", "projects": ["Dokki Gardens", "El Nile Compound"] },
+            {
+              "district": "Mohandessin",
+              "projects": ["Mohandessin Heights", "El Mohandessin Towers"]
+            }
+          ]
+        },
+        {
+          "governorate": "6th of October",
+          "districts": [
+            {
+              "district": "6th of October City",
+              "projects": [
+                "Palm Hills October",
+                "Mountain View Chillout Park",
+                "Mountain View iCity October",
+                "New Giza",
+                "The Crown",
+                "Beta Greens",
+                "El Patio 6",
+                "Joulz",
+                "O West",
+                "Grand Heights",
+                "Brix",
+                "Badya"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Alexandria",
+          "districts": [
+            {
+              "district": "Smouha",
+              "projects": [
+                "Terrace Smouha",
+                "Green Smouha Compound",
+                "Skyline Smouha"
+              ]
+            },
+            {
+              "district": "San Stefano",
+              "projects": ["San Stefano Grand Plaza", "San Stefano Towers"]
+            },
+            { "district": "Gleem", "projects": ["Gleem Bay", "Gleem Residence"] },
+            { "district": "Sawary", "projects": ["Sawary Compound", "Vee Sawary"] },
+            { "district": "Miami", "projects": ["Miami Grand Plaza", "Miami Heights"] },
+            {
+              "district": "Sidi Gaber",
+              "projects": ["Sidi Gaber Towers", "Sidi Gaber Residence"]
+            },
+            {
+              "district": "Other Areas",
+              "projects": [
+                "Palm Hills Alexandria",
+                "Cleopatra Plaza",
+                "Antoniadis Compound",
+                "Royal Plaza Compound",
+                "Karma Compound",
+                "Safwa Towers Compound"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Red Sea",
+          "districts": [
+            {
+              "district": "Hurghada",
+              "projects": [
+                "Ocean Breeze",
+                "Magawish Resort",
+                "Turtles Beach Resort",
+                "Azzurra Sahl Hasheesh",
+                "Veranda Sahl Hasheesh",
+                "La Quinta Resort",
+                "Aqua Blue Bay",
+                "Makadi Heights",
+                "Soma Bay",
+                "El Gouna"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Matrouh",
+          "districts": [
+            {
+              "district": "North Coast",
+              "projects": [
+                "Marassi",
+                "Hacienda Bay",
+                "La Vista Bay",
+                "Fouka Bay",
+                "Mountain View Ras El Hikma",
+                "Jefaira",
+                "Amwaj",
+                "Bo Islands",
+                "Telal",
+                "Malaaz",
+                "Seashell",
+                "Diplomats 3",
+                "Zahra",
+                "SouthMED",
+                "Blue Park",
+                "Caesar Bay",
+                "Sidi Abdel Rahman",
+                "Ras El Hekma",
+                "Silver Sands",
+                "Salt",
+                "Q North Coast",
+                "June by SODIC",
+                "Hacienda West",
+                "The Med",
+                "Mar Bay",
+                "Zoya",
+                "Cecilia Lagoons",
+                "Marsa Baghush",
+                "Ajar Resort",
+                "Katameya Coast",
+                "Marseilia Beach",
+                "Golf Porto Marina",
+                "White Bay",
+                "White Sand",
+                "La Vista Ras El Hekma",
+                "North Edge Towers",
+                "City Stars Al Sahel",
+                "La Vista Cascada",
+                "Mountain View Diplomats",
+                "Bianchi",
+                "Gaia",
+                "Kai Sahel",
+                "Sea View",
+                "Blue Blue Ras El Hekma",
+                "Ein Hills",
+                "La Vista Gardens",
+                "Mountain View North Coast",
+                "Marina Wadi Degla",
+                "Marina El Alamein"
+              ]
+            },
+            {
+              "district": "El Alamein",
+              "projects": [
+                "Palm Hills New Alamein",
+                "Il Latini",
+                "North Edge Towers",
+                "Mazarine",
+                "Downtown New Alamein",
+                "Bo Sands",
+                "Alma New Alamein",
+                "Glee North Coast",
+                "North Towers",
+                "Latin District",
+                "Winter New Alamein",
+                "El Alamein Capital",
+                "La Capital New Alamein",
+                "Alamein Towers",
+                "Alma Village",
+                "City Edge Towers",
+                "The Gate Towers",
+                "New Alamein Gardens",
+                "Alamein Hills",
+                "Alamein Heights",
+                "Alamein Residences",
+                "Alamein View",
+                "Alamein Plaza",
+                "Alamein Park",
+                "Alamein Bay",
+                "Alamein Lagoon",
+                "Alamein Marina",
+                "Alamein Beach",
+                "Alamein Coast",
+                "Alamein Pearl",
+                "Alamein Star",
+                "Alamein Sky",
+                "Alamein Horizon",
+                "Alamein Breeze",
+                "Alamein Oasis",
+                "Alamein Valley",
+                "Alamein Creek",
+                "Alamein Forest",
+                "Alamein Summit",
+                "Alamein Vista",
+                "Alamein Zenith",
+                "Alamein Nova",
+                "Alamein Aura",
+                "Alamein Lumina",
+                "Alamein Solis",
+                "Alamein Terra",
+                "Alamein Vibe",
+                "Alamein Wave"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "New Administrative Capital",
+          "districts": [
+            {
+              "district": "R7",
+              "projects": [
+                "Midtown Sky",
+                "The City",
+                "Capital Heights",
+                "La Vista City",
+                "Anakaji",
+                "Oia Compound"
+              ]
+            },
+            {
+              "district": "R8",
+              "projects": [
+                "Sky Capital",
+                "The Curve",
+                "Residence Eight",
+                "Scenario",
+                "De Joya"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
