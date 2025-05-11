@@ -226,6 +226,16 @@ export async function getClientActions(phoneNumber) {
     return { error: error.message };
   }
 }
+export async function getprojects(city,district) {
+  try {
+    const response = await axiosInstance.get(`/projects/get/${city}/${district}`);
+     console.log(response.data)
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
+    return { error: error.message };
+  }
+}
 
 export async function getClientRequirements(phoneNumber) {
   try {

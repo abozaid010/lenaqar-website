@@ -3,6 +3,7 @@ import { useI18n } from "@/context/translate-api";
 import Egypt_cities from "../../../../../data/Egypt_cities.json";
 import AddCompoundDialog from "../add-compound-dialog";
 import { useState, useEffect } from "react";
+import { getprojects } from "@/components/services/serviceFetching";
 
 export default function BasicDetailsStep({
   clientId,
@@ -13,16 +14,34 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
+  console.log(formData)
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
-  console.log(Egypt_cities.countries[0])
-  // Remove the inline data definition
-  // const data = [ ... ]; 
+  const [dataProject, setDataProject] = useState([]);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  
+  // Function to print selected city and district
+  const printLocationDetails = async (city, district) => {
+    if (city && district) {
+      console.log(`Selected City: ${city}, Selected District: ${district}`);
+      try {
+        setIsLoadingProjects(true);
+        const data = await getprojects(city, district);
+        setDataProject(data);
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+        setDataProject([]);
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    }
+  };
 
   // Update available compounds when district changes
   useEffect(() => {
     if (formData.city && formData.district) {
-      const selectedCountry = Egypt_cities.countries[0]; // Assuming Egypt is the only country currently
+      const selectedCountry = Egypt_cities.countries[0]; // Assuming Egypt is the only country for now
       const selectedGovernorate = selectedCountry.governorates.find(
         (gov) => gov.governorate === formData.city
       );
@@ -35,7 +54,7 @@ export default function BasicDetailsStep({
         if (selectedDistrict) {
           setAvailableCompounds(selectedDistrict.projects);
           
-          // If the current project is not in the list of available projects, clear it
+          // If current project is not in the available projects list, clear it
           if (
             formData.project &&
             !selectedDistrict.projects.includes(formData.project)
@@ -48,6 +67,9 @@ export default function BasicDetailsStep({
       } else {
         setAvailableCompounds([]);
       }
+      
+      // Call the function to print location details when district changes
+      printLocationDetails(formData.city, formData.district);
     } else {
       setAvailableCompounds([]);
     }
@@ -65,11 +87,21 @@ export default function BasicDetailsStep({
       updatedValue = value;
     }
 
-    updateFormData({ [name]: updatedValue });
-
-    // If changing city or district, clear the project selection
+    // If city or district changes, clear project selection
     if (name === "city" || name === "district") {
-      updateFormData({ project: "" });
+      updateFormData({ [name]: updatedValue, project: "" });
+      
+      // If district is changing, call the function to print location details
+      if (name === "district" && formData.city && updatedValue) {
+        // Use updated values directly
+        setTimeout(() => printLocationDetails(formData.city, updatedValue), 0);
+      } else if (name === "city" && updatedValue) {
+       
+        updateFormData({ district: "" });
+        setTimeout(() => console.log(`Selected City: ${updatedValue}, District: Not selected yet`), 0);
+      }
+    } else {
+      updateFormData({ [name]: updatedValue });
     }
 
     if (invalidFields.includes(name) && updatedValue) {
@@ -81,8 +113,14 @@ export default function BasicDetailsStep({
   const handleAddCompound = (newCompound) => {
     // Add the new compound to the list
     setAvailableCompounds([...availableCompounds, newCompound.name]);
-
+    
+    // Update selected project in the form
     updateFormData({ project: newCompound.name });
+    
+    // Reload projects list from server
+    if (formData.city && formData.district) {
+      printLocationDetails(formData.city, formData.district);
+    }
   };
 
   return (
@@ -247,27 +285,55 @@ export default function BasicDetailsStep({
               + Add New
             </button>
           </label>
-          <select
-            name="project"
-            value={formData.project}
-            onChange={handleChange}
-            disabled={!formData.district}
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="">
-              {!formData.city
-                ? t.formLabels.cityFirst
-                : !formData.district
-                  ? t.formLabels.districtFirst
-                  : t.basicDetails.selectCompound}
-            </option>
-            {availableCompounds.map((compound) => (
-              <option key={compound} value={compound}>
-                {compound}
+          <div className="relative">
+            <select
+              name="project"
+              value={formData.project}
+              onChange={handleChange}
+              disabled={!formData.district || isLoadingProjects}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              onFocus={() => {
+                if (formData.city && formData.district && !isLoadingProjects && dataProject.length === 0) {
+                  printLocationDetails(formData.city, formData.district);
+                }
+              }}
+            >
+              <option value="">
+                {!formData.city
+                  ? t.formLabels.cityFirst
+                  : !formData.district
+                    ? t.formLabels.districtFirst
+                    : t.basicDetails.selectCompound}
               </option>
-            ))}
-          </select>
-          {formData.district && (
+              {dataProject && dataProject.length > 0 ? (
+                dataProject.map((project) => (
+                  <option key={project.id || project.name || project} value={project.name || project}>
+                    {project.name || project}
+                  </option>
+                ))
+              ) : (
+                !isLoadingProjects && formData.city && formData.district && (
+                  <option disabled value="">
+                    no projects available
+                  </option>
+                )
+              )}
+              {isLoadingProjects && (
+                <option disabled value="">
+                  Loading projects...
+                </option>
+              )}
+            </select>
+            {isLoadingProjects && (
+              <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
+                <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+            )}
+          </div>
+          {formData.district && !isLoadingProjects && (
             <div className="mt-1">
               <button
                 type="button"
@@ -475,12 +541,20 @@ export default function BasicDetailsStep({
       {/* Add Compound Dialog */}
       <AddCompoundDialog
         clientId={clientId}
-        developers={developers}
-        setDevelopers={setDevelopers}
         isOpen={isAddCompoundDialogOpen}
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}
+        developers={developers}
+        setDevelopers={setDevelopers}
+        Egypt_cities={Egypt_cities}
+        defaultCity={formData.city}
+        defaultDistrict={formData.district}
+        onProjectsLoaded={(projects) => {
+          if (projects && projects.length > 0) {
+            setDataProject(projects);
+          }
+        }}
       />
     </div>
-  );
+  )
 }

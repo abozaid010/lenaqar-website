@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Dialog from "../_components/dialog";
 import { Loader2 } from "lucide-react";
 import {
   addCompound,
   deleteImage,
   uploadImages,
+  getprojects,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
+import { useRouter } from "next/navigation";
 
 export default function AddCompoundDialog({
   clientId,
@@ -18,23 +20,45 @@ export default function AddCompoundDialog({
   onAdd,
   developers = [],
   setDevelopers,
+  Egypt_cities,
+  defaultCity,
+  defaultDistrict 
 }) {
+  const router = useRouter();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
-    useState(false);
+  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] = useState(false);
+  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [dataProject, setDataProject] = useState([]);
+  
+  const getProjectByCityAndDistrict = async (city, district) => {
+    if (city && district) {
+      console.log(`Selected City: ${city}, Selected District: ${district}`);
+      try {
+        setIsLoadingProjects(true);
+        const data = await getprojects(city, district);
+        setDataProject(data);
+        console.log(data);
+      } catch (error) {
+        console.log(error);
+        setDataProject([]);
+      } finally {
+        setIsLoadingProjects(false);
+      }
+    }
+  };
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     developer_name: "",
-    city: "",
+    city: defaultCity || "",
     country: "Egypt",
-    district: "",
+    district: defaultDistrict || "",
     area: "",
     gated: false,
     video_url: "",
@@ -42,7 +66,7 @@ export default function AddCompoundDialog({
     master_plan: "",
     client_id: clientId || "",
   });
-
+  
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -56,6 +80,11 @@ export default function AddCompoundDialog({
         ...errors,
         [name]: null,
       });
+    }
+    
+    // If district changes and city is available, fetch projects
+    if (name === "district" && formData.city && value) {
+      getProjectByCityAndDistrict(formData.city, value);
     }
   };
 
@@ -169,11 +198,22 @@ export default function AddCompoundDialog({
       const res = await addCompound(submissionData);
       if (res.code === 200) {
         toast.success("Compound added successfully!");
+        
+        // إضافة المشروع الجديد وإغلاق النافذة
         onAdd({
           name: res.data?.name,
           id: res.data?.id,
         });
+        
+        // إعادة تحميل قائمة المشاريع من الخادم
+        if (formData.city && formData.district) {
+          await getProjectByCityAndDistrict(formData.city, formData.district);
+        }
+        
+        router.refresh();
         onClose();
+        
+        // إعادة تعيين النموذج
         setFormData({
           name: "",
           description: "",
@@ -208,6 +248,20 @@ export default function AddCompoundDialog({
       };
     });
   };
+
+  // Add this useEffect to update the form data when defaultCity or defaultDistrict change
+  useEffect(() => {
+    setFormData(prevData => ({
+      ...prevData,
+      city: defaultCity || "",
+      district: defaultDistrict || ""
+    }));
+    
+    // Fetch projects when component loads if city and district are available
+    if (defaultCity && defaultDistrict) {
+      getProjectByCityAndDistrict(defaultCity, defaultDistrict);
+    }
+  }, [defaultCity, defaultDistrict]);
 
   return (
     <>
@@ -247,13 +301,19 @@ export default function AddCompoundDialog({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   City <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="text"
+                <select
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
+                >
+                  <option value="">Select City</option>
+                  {Egypt_cities.countries[0].governorates?.map((gov) => (
+                    <option key={gov?.governorate} value={gov?.governorate}>
+                      {gov?.governorate}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -274,13 +334,25 @@ export default function AddCompoundDialog({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 District <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
+              <select
                 name="district"
                 value={formData.district}
                 onChange={handleChange}
+                disabled={!formData.city}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+              >
+                <option value="">
+                  {formData.city ? "Select District" : "Select City First"}
+                </option>
+                {formData.city &&
+                  Egypt_cities.countries[0].governorates
+                    .find((gov) => gov.governorate === formData.city)
+                    ?.districts.map((dist) => (
+                      <option key={dist.district} value={dist.district}>
+                        {dist.district}
+                      </option>
+                    ))}
+              </select>
             </div>
 
             {/* Details */}

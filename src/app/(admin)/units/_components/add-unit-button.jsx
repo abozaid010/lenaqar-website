@@ -18,7 +18,7 @@ export default function AddUnitButton({
   const [isOpen, setIsOpen] = useState(false);
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
-
+console.log(unitData)
   return (
     <>
       <button
