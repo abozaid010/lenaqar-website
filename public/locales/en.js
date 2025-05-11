@@ -38,6 +38,7 @@ export default {
   buttons: {
     tryChat: "Try our Chatbot",
     requestDemo: "Request Demo",
+    addNew: "Add New",
   },
   heroSection: {
     "title1": "Sell Smarter",
@@ -176,7 +177,6 @@ export default {
       "version": "Version"
     }
   },
-
   sidebar: {
     "dashboard": "Dashboard",
     "analytics": "Analytics",
@@ -191,8 +191,7 @@ export default {
     },
     "logoutSuccess": "Logout Successful"
   },
-
-  "dashboardFilter": {
+  dashboardFilter: {
     "actions": {
       "all": "All actions",
       "makeCall": "Make a call",
@@ -343,9 +342,9 @@ export default {
     "finishing": "Finishing",
     "garageArea": "Garage Area (m²)",
     "images": "Images",
-    "districtFirst":" select district first",
-    "cityFirst":"  select city first",
-    "selectDistrict":"select district"
+    "districtFirst": "select district first",
+    "cityFirst": "select city first",
+    "selectDistrict": "select district"
   },
   buildingTypes: {
     "apartment": "Apartment",
@@ -589,6 +588,10 @@ export default {
     "gardenSize": "Garden Size",
     "deliveryDate": "Delivery Date:",
     "deliveryStatus": "Delivery Status:"
+  },
+  common: {
+    "ProcessingImages": "Processing images...",
+    "addImage": "Add Image",
   }
 }
 

@@ -13,8 +13,6 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(async (config) => {
   const cookieStore = await cookies();
-   const clientId = await getClientid();
-   console.log("dssddddssss", clientId)
   const token = cookieStore.get('access_token')?.value;
 
   if (token) {

@@ -22,8 +22,6 @@ export default {
     },
     "logoutSuccess": "تم تسجيل الخروج بنجاح",
     "sendMessage": "تحتاج مساعده"
-
-
   },
   welcome: "مرحبا",
   dashboard: "لوحة التحكم",
@@ -39,6 +37,7 @@ export default {
   buttons: {
     tryChat: "جرب روبوت الدردشة",
     requestDemo: "طلب عرض توضيحي",
+    addNew: "إضافة جديد",
   },
   heroSection: {
     "title1": "بيع بذكاء",
@@ -115,9 +114,9 @@ export default {
       "title": "تواصل معنا",
       "linkedin": "لينكد إن",
       "privacyPolicy": "اقرأ سياسة الخصوصية الخاصة بنا",
-      "chat":"تحدث معنا",
-    "dowenloadios": "حمّل تطبيقنا على iOS",
-    "dowenloadAndroid": "حمّل تطبيقنا على Android"
+      "chat": "تحدث معنا",
+      "dowenloadios": "حمّل تطبيقنا على iOS",
+      "dowenloadAndroid": "حمّل تطبيقنا على Android"
 
 
 
@@ -212,8 +211,8 @@ export default {
       "apply": "تطبيق"
     },
     "whatsappButton": "ليادات واتساب",
-    "premuim":"ميزة مدفوعة",
-    "ADD":"اضافة عميل محتمل جديد"
+    "premuim": "ميزة مدفوعة",
+    "ADD": "اضافة عميل محتمل جديد"
   },
   search: {
     "placeholder": "ابحث عن العميل بالاسم أو الرقم..."
@@ -343,9 +342,9 @@ export default {
     "finishing": "التشطيب",
     "garageArea": "مساحة المرآب (م²)",
     "images": "الصور",
-    "districtFirst":"اختر الحي اولا",
-    "cityFirst":"اختر المدينه اولا",
-    "selectDistrict" :"اختر الحي "
+    "districtFirst": "اختر الحي اولا",
+    "cityFirst": "اختر المدينه اولا",
+    "selectDistrict": "اختر الحي "
   },
   buildingTypes: {
     "apartment": "شقة",
@@ -590,8 +589,9 @@ export default {
     "gardenSize": "مساحة الحديقة",
     "deliveryDate": "تاريخ التسليم:",
     "deliveryStatus": "حالة التسليم:"
+  },
+  common: {
+    "ProcessingImages": "جارٍ معالجة الصور...",
+    "addImage": "إضافة صورة",
   }
-
-
-
 };

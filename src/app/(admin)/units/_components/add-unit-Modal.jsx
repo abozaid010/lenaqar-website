@@ -36,7 +36,6 @@ export default function AddUnitModal({
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload statecl
-  console.log(unitData)
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   const [developers, setDevelopers] = useState(developersData || []);
@@ -68,7 +67,6 @@ export default function AddUnitModal({
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
   }));
-   console.log(formData)
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
     downPayment: unitData?.downPayment || "",
