@@ -202,7 +202,9 @@ export default {
       "followUpLater": "Follow up later",
       "missingRequirement": "Missing Requirement",
       "blocked":"blocked",
-      "print":"print"
+      "print":"print",
+      "onGoingConversion": "On Going Conversion",
+      
     },
     "datePicker": {
       "startDate": "Start Date",

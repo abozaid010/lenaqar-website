@@ -30,7 +30,7 @@ export default function ActionsModal({ actions, onClose, userId }) {
           </button>
         </div>
 
-        {actions.length > 0 && (
+        {actions?.length > 0 && (
           <ul className="timeline px-3 max-h-[280px] overflow-y-auto">
             {actions.map((a, idx) => (
               <li className="timeline-item" key={idx}>

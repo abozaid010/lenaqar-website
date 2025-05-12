@@ -43,7 +43,8 @@ export default function ClientsTable({
 
   const ACTIONS = useMemo(
     () => [
-      // { label: t.dashboardFilter.actions.all, value: "" },
+      { label: t.dashboardFilter.actions.onGoingConversion , value: null },
+      { label: t.dashboardFilter.actions.onGoingConversion , value: "" },
       { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
       { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
       { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
@@ -58,7 +59,7 @@ export default function ClientsTable({
       },
       {
         label: t.dashboardFilter.actions.missingRequirement,
-        value: "Missing Requirement",
+        value: "Missing requirement",
       },
       { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
       { label: t.dashboardFilter.actions.noAction, value: "No Action" },

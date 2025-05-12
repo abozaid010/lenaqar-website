@@ -204,7 +204,8 @@ export default {
       "followUpLater": "متابعة لاحقاً",
       "missingRequirement": "متطلب مفقود",
       "blocked":"محظور",
-      "print":"طباعه"
+      "print":"طباعه",
+      "onGoingConversion":"محادثه جاريه"
     },
     "datePicker": {
       "startDate": "تاريخ البداية",

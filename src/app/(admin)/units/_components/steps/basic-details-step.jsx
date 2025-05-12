@@ -23,14 +23,11 @@ export default function BasicDetailsStep({
   // Function to print selected city and district
   const printLocationDetails = async (city, district) => {
     if (city && district) {
-      console.log(`Selected City: ${city}, Selected District: ${district}`);
       try {
         setIsLoadingProjects(true);
         const data = await getprojects(city, district);
         setDataProject(data);
-        console.log(data);
       } catch (error) {
-        console.log(error);
         setDataProject([]);
       } finally {
         setIsLoadingProjects(false);
@@ -95,16 +92,11 @@ export default function BasicDetailsStep({
       // If district is changing, call the function to print location details
       if (name === "district" && formData.city && updatedValue) {
         // Use updated values directly
-        setTimeout(() => printLocationDetails(formData.city, updatedValue), 0);
+        printLocationDetails(formData.city, updatedValue);
       } else if (name === "city" && updatedValue) {
         updateFormData({ district: "" });
-        setTimeout(
-          () =>
-            console.log(
-              `Selected City: ${updatedValue}, District: Not selected yet`
-            ),
-          0
-        );
+
+       
       }
     } else {
       updateFormData({ [name]: updatedValue });
@@ -251,16 +243,24 @@ export default function BasicDetailsStep({
         </div>
 
         {/* District */}
+        {console.log(invalidFields.includes("district"))}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.district}
+          <label className={`block text-sm font-medium mb-1 ${
+            invalidFields.includes("district") ? "text-red-500 border border-red-500" : "text-gray-700"
+          }`}>
+            {t.basicDetails.district} <span className="text-red-500">*</span>
           </label>
           <select
             name="district"
             value={formData.district}
             onChange={handleChange}
             disabled={!formData.city}
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            required
+            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("district")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           >
             <option value="">
               {formData.city
@@ -280,8 +280,10 @@ export default function BasicDetailsStep({
 
         {/* Project */}
         <div>
-          <label className=" text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
-            {t.basicDetails.compound}
+          <label className={`text-sm font-medium mb-1 flex items-center justify-between ${
+            invalidFields.includes("project") ? "text-red-500" : "text-gray-700"
+          }`}>
+            {t.basicDetails.compound} <span className="text-red-500">*</span>
             <button
               type="button"
               disabled={!formData.district}
@@ -296,18 +298,15 @@ export default function BasicDetailsStep({
               name="project"
               value={formData.project}
               onChange={handleChange}
-              disabled={!formData.district || isLoadingProjects}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              onFocus={() => {
-                if (
-                  formData.city &&
-                  formData.district &&
-                  !isLoadingProjects &&
-                  dataProject.length === 0
-                ) {
-                  printLocationDetails(formData.city, formData.district);
-                }
-              }}
+
+              disabled={!formData.district}
+              required
+              className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+                invalidFields.includes("project")
+                  ? "border-red-500 ring-red-500"
+                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              }`}
+
             >
               <option value="">
                 {!formData.city
@@ -316,64 +315,27 @@ export default function BasicDetailsStep({
                     ? t.formLabels.districtFirst
                     : t.basicDetails.selectCompound}
               </option>
-              {dataProject && dataProject.length > 0
-                ? dataProject.map((project) => (
-                    <option
-                      key={project.id || project.name || project}
-                      value={project.name || project}
-                    >
-                      {project.name || project}
-                    </option>
-                  ))
-                : !isLoadingProjects &&
-                  formData.city &&
-                  formData.district && (
+
+              {isLoadingProjects ? (
+              ""
+              ) : (
+                formData.city && formData.district ? (
+                  dataProject && dataProject.length > 0 ? (
+                    dataProject.map((project) => (
+                      <option key={project.id} value={project.name}>
+                        {project.name}
+                      </option>
+                    ))
+                  ) : (
                     <option disabled value="">
-                      no projects available
+                      No data available 
                     </option>
-                  )}
-              {isLoadingProjects && (
-                <option disabled value="">
-                  Loading projects...
-                </option>
+                  )
+                ) : null
               )}
             </select>
-            {isLoadingProjects && (
-              <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-                <svg
-                  className="animate-spin h-4 w-4 text-blue-500"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-              </div>
-            )}
+
           </div>
-          {formData.district && !isLoadingProjects && (
-            <div className="mt-1">
-              <button
-                type="button"
-                onClick={() => setIsAddCompoundDialogOpen(true)}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                {t.basicDetails.addNewCompound}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Purpose */}
