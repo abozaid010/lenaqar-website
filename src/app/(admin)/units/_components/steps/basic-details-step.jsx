@@ -35,6 +35,13 @@ export default function BasicDetailsStep({
     }
   };
 
+  // Load projects when component mounts or when returning from step 2
+  useEffect(() => {
+    if (formData.city && formData.district) {
+      printLocationDetails(formData.city, formData.district);
+    }
+  }, []);
+
   // Update available compounds when district changes
   useEffect(() => {
     if (formData.city && formData.district) {
@@ -50,14 +57,6 @@ export default function BasicDetailsStep({
 
         if (selectedDistrict) {
           setAvailableCompounds(selectedDistrict.projects);
-
-          // If current project is not in the available projects list, clear it
-          if (
-            formData.project &&
-            !selectedDistrict.projects.includes(formData.project)
-          ) {
-            updateFormData({ project: "" });
-          }
         } else {
           setAvailableCompounds([]);
         }
@@ -85,18 +84,24 @@ export default function BasicDetailsStep({
       updatedValue = value;
     }
 
-    // If city or district changes, clear project selection
+    // If city or district changed, only clear project if the new value is different
     if (name === "city" || name === "district") {
-      updateFormData({ [name]: updatedValue, project: "" });
+      if (formData[name] !== updatedValue) {
+        if (name === "city") {
+          // If city changed, clear district and project
+          updateFormData({ [name]: updatedValue, district: "", project: "" });
+        } else {
+          // If district changed, only clear project
+          updateFormData({ [name]: updatedValue, project: "" });
+        }
 
-      // If district is changing, call the function to print location details
-      if (name === "district" && formData.city && updatedValue) {
-        // Use updated values directly
-        printLocationDetails(formData.city, updatedValue);
-      } else if (name === "city" && updatedValue) {
-        updateFormData({ district: "" });
-
-       
+        // If district changed, call the function to print location details
+        if (name === "district" && formData.city && updatedValue) {
+          printLocationDetails(formData.city, updatedValue);
+        }
+      } else {
+        // If value didn't change, keep current values
+        updateFormData({ [name]: updatedValue });
       }
     } else {
       updateFormData({ [name]: updatedValue });
@@ -143,7 +148,7 @@ export default function BasicDetailsStep({
             type="text"
             name="unitTitle"
             required
-            value={formData.unitTitle}
+            value={formData.unitTitle || ""}
             onChange={handleChange}
             placeholder={t.basicDetails.placeholders.unitTitle}
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
@@ -168,7 +173,7 @@ export default function BasicDetailsStep({
           <div className="relative">
             <select
               name="buildingType"
-              value={formData.buildingType}
+              value={formData.buildingType || ""}
               onChange={handleChange}
               className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
                 invalidFields.includes("buildingType")
@@ -223,7 +228,7 @@ export default function BasicDetailsStep({
           <div className="relative">
             <select
               name="city"
-              value={formData.city}
+              value={formData.city || ""}
               required
               onChange={handleChange}
               className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
@@ -243,16 +248,19 @@ export default function BasicDetailsStep({
         </div>
 
         {/* District */}
-        {console.log(invalidFields.includes("district"))}
         <div>
-          <label className={`block text-sm font-medium mb-1 ${
-            invalidFields.includes("district") ? "text-red-500 border border-red-500" : "text-gray-700"
-          }`}>
+          <label
+            className={`flex  text-sm font-medium mb-1 ${
+              invalidFields.includes("district")
+                ? "text-red-500"
+                : "text-gray-700"
+            }`}
+          >
             {t.basicDetails.district} <span className="text-red-500">*</span>
           </label>
           <select
             name="district"
-            value={formData.district}
+            value={formData.district || ""}
             onChange={handleChange}
             disabled={!formData.city}
             required
@@ -280,25 +288,31 @@ export default function BasicDetailsStep({
 
         {/* Project */}
         <div>
-          <label className={`text-sm font-medium mb-1 flex items-center justify-between ${
-            invalidFields.includes("project") ? "text-red-500" : "text-gray-700"
-          }`}>
-            {t.basicDetails.compound} <span className="text-red-500">*</span>
-            <button
-              type="button"
-              disabled={!formData.district}
-              onClick={() => setIsAddCompoundDialogOpen(true)}
-              className="text-blue-600 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
+          <div>
+            <label
+              className={`text-sm  font-medium mb-1 flex items-center ${
+                invalidFields.includes("project")
+                  ? "text-red-500"
+                  : "text-gray-700"
+              }`}
             >
-              + Add New
-            </button>
-          </label>
+              {t.basicDetails.compound}
+              <span className="text-red-500 mr-1">*</span>
+              <button
+                type="button"
+                disabled={!formData.district}
+                onClick={() => setIsAddCompoundDialogOpen(true)}
+                className="ml-auto text-blue-600 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
+              >
+                + Add New
+              </button>
+            </label>
+          </div>
           <div className="relative">
             <select
               name="project"
-              value={formData.project}
+              value={formData.project || ""}
               onChange={handleChange}
-
               disabled={!formData.district}
               required
               className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
@@ -306,7 +320,6 @@ export default function BasicDetailsStep({
                   ? "border-red-500 ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
-
             >
               <option value="">
                 {!formData.city
@@ -317,24 +330,31 @@ export default function BasicDetailsStep({
               </option>
 
               {isLoadingProjects ? (
-              ""
-              ) : (
-                formData.city && formData.district ? (
-                  dataProject && dataProject.length > 0 ? (
-                    dataProject.map((project) => (
-                      <option key={project.id} value={project.name}>
-                        {project.name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled value="">
-                      No data available 
+                <option disabled value="">
+                  Loading projects...
+                </option>
+              ) : formData.city && formData.district ? (
+                dataProject && dataProject.length > 0 ? (
+                  dataProject.map((project) => (
+                    <option key={project.id} value={project.name}>
+                      {project.name}
                     </option>
-                  )
-                ) : null
-              )}
+                  ))
+                ) : (
+                  <option disabled value="">
+                    No data available
+                  </option>
+                )
+              ) : null}
+              
+              {/* If we have a selected project but it's not in the loaded list, add it separately */}
+              {formData.project && formData.city && formData.district && 
+               dataProject && !dataProject.some(p => p.name === formData.project) ? (
+                <option key="preserved-selection" value={formData.project}>
+                  {formData.project}
+                </option>
+              ) : null}
             </select>
-
           </div>
         </div>
 
@@ -353,7 +373,7 @@ export default function BasicDetailsStep({
             <select
               name="purpose"
               required
-              value={formData.purpose}
+              value={formData.purpose || ""}
               onChange={handleChange}
               className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
                 invalidFields.includes("purpose")
@@ -380,7 +400,7 @@ export default function BasicDetailsStep({
           <div className="relative">
             <select
               name="view"
-              value={formData.view}
+              value={formData.view || ""}
               required
               onChange={handleChange}
               className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
@@ -425,7 +445,6 @@ export default function BasicDetailsStep({
           <input
             type="text"
             name="roomsCount"
-            data-format-number
             value={formData.roomsCount || ""}
             placeholder="0"
             onChange={handleChange}
