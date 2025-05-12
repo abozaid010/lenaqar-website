@@ -167,7 +167,7 @@ export default function ImagesStep({
 
         // Add to successful uploads
         successfulUploads.push({
-          url: res.url,
+          url: image.preview,
           fileId: res.fileId,
         });
       } catch (error) {
@@ -246,7 +246,6 @@ export default function ImagesStep({
     const imageId = isSelected ? image.id : image.fileId;
     const isProcessing = isSelected && uploadStatus[imageId] === "uploading";
 
-    console.log("Image ID:", imageId);
     return (
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
