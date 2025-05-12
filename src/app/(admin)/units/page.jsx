@@ -2,13 +2,13 @@ import {
   fetchcombounds,
   fetchUnitsFilter,
   fetchDevelopers,
-  fetchProjects,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "@/components/ui/units-grid";
-import UnitsFilter from "@/components/ui/units-filter";
-import UnitsSearch from "@/components/ui/units-search";
+
 import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
+import ClearAllFilters from "./_components/filters/clear-all-filters";
+import SideUnitFilters from "@/components/ui/side-units-filter";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -32,20 +32,24 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     cookieStore.get("client_info")?.value
   )?.client_name;
 
-  const [unitsResponse, developers, compounds, projectsData] =
-    await Promise.all([
-      fetchUnitsFilter(JSON.stringify(searchParams), true),
-      fetchDevelopers(),
-      fetchcombounds(),
-      fetchProjects(),
-    ]);
+  const [unitsResponse, developers, compounds] = await Promise.all([
+    fetchUnitsFilter(JSON.stringify(searchParams), true),
+    fetchDevelopers(),
+    fetchcombounds(),
+  ]);
 
   const units = unitsResponse.data?.units || [];
-  console.log(projectsData);
 
   const developersSet = Array.from(
     new Set(developers?.map((developer) => developer.name))
   );
+
+  const maxPrice =
+    units.length > 0 &&
+    units
+      .filter((unit) => unit.purpose === "sell" && unit.totalPrice)
+      .map((unit) => Number.parseInt(unit.totalPrice, 10))
+      .reduce((max, price) => (price > max ? price : max), 65000);
 
   return (
     <div className="container mx-auto">
@@ -55,11 +59,10 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           clientName={clientName}
           compounds={compounds}
           developers={developersSet}
-          projectsData={projectsData}
         />
       </div>
 
-      <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
+      {/* <div className="mb-4 p-3 bg-white rounded-md flex flex-col gap-3">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
@@ -67,8 +70,31 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         />
 
         <UnitsSearch />
+      </div> */}
+
+      <div className="flex gap-4">
+        <div className="hidden lg:block">
+          <SideUnitFilters
+            appliedFilters={searchParams}
+            developers={developersSet}
+            projects={compounds}
+            minPrice={0}
+            maxPrice={maxPrice}
+          />
+        </div>
+        <div className="flex-1 flex flex-col">
+          {/* Results Count */}
+          <div className="bg-white p-4 rounded-md flex justify-between items-center">
+            <p className="text-sm text-gray-600">
+              {units.length} {units.length === 1 ? "property" : "properties"}{" "}
+              found
+            </p>
+
+            {Object.keys(searchParams).length > 0 && <ClearAllFilters />}
+          </div>
+          <UnitsGrid units={units} />
+        </div>
       </div>
-      <UnitsGrid units={units} />
     </div>
   );
 }

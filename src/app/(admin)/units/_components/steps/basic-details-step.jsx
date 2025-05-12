@@ -1,4 +1,5 @@
 "use client";
+
 import { useI18n } from "@/context/translate-api";
 import Egypt_cities from "../../../../../data/Egypt_cities.json";
 import AddCompoundDialog from "../add-compound-dialog";
@@ -14,12 +15,11 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  console.log(formData)
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  
+
   // Function to print selected city and district
   const printLocationDetails = async (city, district) => {
     if (city && district) {
@@ -45,15 +45,15 @@ export default function BasicDetailsStep({
       const selectedGovernorate = selectedCountry.governorates.find(
         (gov) => gov.governorate === formData.city
       );
-      
+
       if (selectedGovernorate) {
         const selectedDistrict = selectedGovernorate.districts.find(
           (dist) => dist.district === formData.district
         );
-        
+
         if (selectedDistrict) {
           setAvailableCompounds(selectedDistrict.projects);
-          
+
           // If current project is not in the available projects list, clear it
           if (
             formData.project &&
@@ -67,7 +67,7 @@ export default function BasicDetailsStep({
       } else {
         setAvailableCompounds([]);
       }
-      
+
       // Call the function to print location details when district changes
       printLocationDetails(formData.city, formData.district);
     } else {
@@ -76,13 +76,14 @@ export default function BasicDetailsStep({
   }, [formData.city, formData.district]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, type, checked, dataset } = e.target;
 
     let updatedValue;
     if (type === "checkbox") {
       updatedValue = checked;
-    } else if (type === "number") {
-      updatedValue = Number(value);
+    } else if (dataset.formatNumber === "true") {
+      const rawValue = value.replace(/\D/g, "");
+      updatedValue = Number(rawValue);
     } else {
       updatedValue = value;
     }
@@ -90,15 +91,20 @@ export default function BasicDetailsStep({
     // If city or district changes, clear project selection
     if (name === "city" || name === "district") {
       updateFormData({ [name]: updatedValue, project: "" });
-      
+
       // If district is changing, call the function to print location details
       if (name === "district" && formData.city && updatedValue) {
         // Use updated values directly
         setTimeout(() => printLocationDetails(formData.city, updatedValue), 0);
       } else if (name === "city" && updatedValue) {
-       
         updateFormData({ district: "" });
-        setTimeout(() => console.log(`Selected City: ${updatedValue}, District: Not selected yet`), 0);
+        setTimeout(
+          () =>
+            console.log(
+              `Selected City: ${updatedValue}, District: Not selected yet`
+            ),
+          0
+        );
       }
     } else {
       updateFormData({ [name]: updatedValue });
@@ -113,10 +119,10 @@ export default function BasicDetailsStep({
   const handleAddCompound = (newCompound) => {
     // Add the new compound to the list
     setAvailableCompounds([...availableCompounds, newCompound.name]);
-    
+
     // Update selected project in the form
     updateFormData({ project: newCompound.name });
-    
+
     // Reload projects list from server
     if (formData.city && formData.district) {
       printLocationDetails(formData.city, formData.district);
@@ -293,7 +299,12 @@ export default function BasicDetailsStep({
               disabled={!formData.district || isLoadingProjects}
               className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               onFocus={() => {
-                if (formData.city && formData.district && !isLoadingProjects && dataProject.length === 0) {
+                if (
+                  formData.city &&
+                  formData.district &&
+                  !isLoadingProjects &&
+                  dataProject.length === 0
+                ) {
                   printLocationDetails(formData.city, formData.district);
                 }
               }}
@@ -305,19 +316,22 @@ export default function BasicDetailsStep({
                     ? t.formLabels.districtFirst
                     : t.basicDetails.selectCompound}
               </option>
-              {dataProject && dataProject.length > 0 ? (
-                dataProject.map((project) => (
-                  <option key={project.id || project.name || project} value={project.name || project}>
-                    {project.name || project}
-                  </option>
-                ))
-              ) : (
-                !isLoadingProjects && formData.city && formData.district && (
-                  <option disabled value="">
-                    no projects available
-                  </option>
-                )
-              )}
+              {dataProject && dataProject.length > 0
+                ? dataProject.map((project) => (
+                    <option
+                      key={project.id || project.name || project}
+                      value={project.name || project}
+                    >
+                      {project.name || project}
+                    </option>
+                  ))
+                : !isLoadingProjects &&
+                  formData.city &&
+                  formData.district && (
+                    <option disabled value="">
+                      no projects available
+                    </option>
+                  )}
               {isLoadingProjects && (
                 <option disabled value="">
                   Loading projects...
@@ -326,9 +340,25 @@ export default function BasicDetailsStep({
             </select>
             {isLoadingProjects && (
               <div className="absolute right-8 top-1/2 transform -translate-y-1/2">
-                <svg className="animate-spin h-4 w-4 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <svg
+                  className="animate-spin h-4 w-4 text-blue-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
                 </svg>
               </div>
             )}
@@ -431,12 +461,12 @@ export default function BasicDetailsStep({
             {t.basicDetails.rooms} <span className="text-red-500">*</span>
           </label>
           <input
-            type="number"
+            type="text"
             name="roomsCount"
-            value={formData.roomsCount}
+            data-format-number
+            value={formData.roomsCount || ""}
             placeholder="0"
             onChange={handleChange}
-            min="0"
             required
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("roomsCount")
@@ -458,12 +488,12 @@ export default function BasicDetailsStep({
             {t.basicDetails.bathrooms} <span className="text-red-500">*</span>
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-number
             name="bathroomCount"
             placeholder="0"
-            value={formData.bathroomCount}
+            value={formData.bathroomCount || ""}
             onChange={handleChange}
-            min={0}
             required
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("bathroomCount")
@@ -479,12 +509,12 @@ export default function BasicDetailsStep({
             {t.basicDetails.floor}
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-number
             name="floor"
-            value={formData.floor}
+            value={formData.floor || ""}
             placeholder="0"
             onChange={handleChange}
-            min={0}
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -495,12 +525,12 @@ export default function BasicDetailsStep({
             {t.basicDetails.landArea} (m²)
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-number
             name="landArea"
             placeholder="0"
-            value={formData.landArea}
+            value={formData.landArea || ""}
             onChange={handleChange}
-            min={0}
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -511,12 +541,12 @@ export default function BasicDetailsStep({
             {t.basicDetails.gardenSize} (m²)
           </label>
           <input
-            type="number"
+            type="text"
+            data-format-number
             name="gardenSize"
             placeholder="0"
-            value={formData.gardenSize}
+            value={formData.gardenSize || ""}
             onChange={handleChange}
-            min={0}
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -527,12 +557,11 @@ export default function BasicDetailsStep({
             {t.basicDetails.garageArea} (m²)
           </label>
           <input
-            type="number"
+            type="text"
             name="garageArea"
             placeholder="0"
-            value={formData.garageArea}
+            value={formData.garageArea || ""}
             onChange={handleChange}
-            min="0"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -556,5 +585,5 @@ export default function BasicDetailsStep({
         }}
       />
     </div>
-  )
+  );
 }

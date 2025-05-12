@@ -37,7 +37,7 @@ export default function UnitsGrid({ units, readonly = false }) {
           No units found.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mt-5">
           {units.map((u, idx) => (
             <Link
               href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
@@ -66,13 +66,17 @@ export default function UnitsGrid({ units, readonly = false }) {
                 )}
 
                 {/* Share Button */}
-             { !readonly ?   <button
-                  type="button"
-                  onClick={(e) => handleShareClick(u.unitId, e)}
-                  className="absolute  top-5 left-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
-                >
-                  <Share2 className="w-4 h-4 text-primary hover:opacity-90" />
-                </button> :""}
+                {!readonly ? (
+                  <button
+                    type="button"
+                    onClick={(e) => handleShareClick(u.unitId, e)}
+                    className="absolute  top-5 left-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
+                  >
+                    <Share2 className="w-4 h-4 text-primary hover:opacity-90" />
+                  </button>
+                ) : (
+                  ""
+                )}
               </div>
 
               {/* Text Overlay Section */}

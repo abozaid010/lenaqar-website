@@ -90,7 +90,6 @@ export default function SaleDetailsStep({
             name="totalPrice"
             value={formatPrice(formData.totalPrice)}
             onChange={handleChange}
-            min="0"
             placeholder="5000000"
             className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
               invalidFields.includes("totalPrice")

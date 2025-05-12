@@ -114,8 +114,21 @@ input[type="number"] {
   background-color: #ddd;
   border-radius: 8px;
 }
+
+.inner-scroll-bar::-webkit-scrollbar-thumb {
+  background-color: var(--primary);
+  border-radius: 8px;
+}
+.inner-scroll-bar::-webkit-scrollbar {
+  height: 2px;
+  background-color: #ddd;
+  border-radius: 2px;
+  width: 4px;
+}
+
 @media print {
-  html, body {
+  html,
+  body {
     width: 100%;
     height: 100%;
     margin: 0;
@@ -126,7 +139,9 @@ input[type="number"] {
     overflow: hidden !important; /* إزالة السكرول */
   }
 
-  nav, footer, .no-print {
+  nav,
+  footer,
+  .no-print {
     display: none !important;
   }
 
@@ -141,6 +156,4 @@ input[type="number"] {
     page-break-after: avoid !important;
     page-break-inside: avoid !important;
   }
-
-
 }

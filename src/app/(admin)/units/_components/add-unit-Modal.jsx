@@ -28,7 +28,6 @@ export default function AddUnitModal({
   clientId,
   clientName,
   developersData,
-  projectsData,
 }) {
   const modalRef = useRef(null);
   const { t } = useI18n();
@@ -290,17 +289,17 @@ export default function AddUnitModal({
   };
 
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
-console.log(formData,unitData?.project)
-useEffect(() => {
-  if (unitData && isEdit) {
-    setFormData(prevData => ({
-      ...prevData,
-      project: unitData.project || "",
-      // يمكنك إضافة المزيد من الحقول هنا إذا كانت هناك حقول أخرى لا يتم تحديثها بشكل صحيح
-    }));
-    console.log("تم تحديث formData مع unitData.project:", unitData.project);
-  }
-}, [unitData, isEdit]);
+  console.log(formData, unitData?.project);
+  useEffect(() => {
+    if (unitData && isEdit) {
+      setFormData((prevData) => ({
+        ...prevData,
+        project: unitData.project || "",
+        // يمكنك إضافة المزيد من الحقول هنا إذا كانت هناك حقول أخرى لا يتم تحديثها بشكل صحيح
+      }));
+      console.log("تم تحديث formData مع unitData.project:", unitData.project);
+    }
+  }, [unitData, isEdit]);
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
       <div
@@ -338,7 +337,6 @@ useEffect(() => {
           onSubmit={handleSubmit}
           className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[85vh]"
         >
-
           {currentStep === 1 && (
             <BasicDetailsStep
               clientId={clientId}
@@ -348,7 +346,6 @@ useEffect(() => {
               setDevelopers={setDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
-              projectsData={projectsData}
             />
           )}
 
@@ -461,4 +458,3 @@ useEffect(() => {
 }
 
 // Add this useEffect to update formData when unitData changes
-
