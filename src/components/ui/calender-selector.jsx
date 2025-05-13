@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   ChevronLeft,
@@ -20,25 +20,23 @@ import {
   isBefore,
   isSameDay,
   parseISO,
-  getYear,
-  getDate,
 } from "date-fns";
 import { useI18n } from "@/context/translate-api";
+import { Loader2, Globe } from "lucide-react";
+import { createBooking, getAvailableSlots } from "../services/serviceFetching";
+import toast from "react-hot-toast";
 
 export default function CalendarSelector({
   onSelectDateTime,
   onBookingComplete,
-  mockTimesByDay = {
-    23: ["11:30am", "1:30pm", "2:00pm", "2:30pm", "3:00pm", "3:30pm", "4:00pm"],
-    24: ["11:00am", "2:00pm", "3:00pm"],
-    27: ["10:00am", "1:00pm"],
-    28: ["9:30am", "12:30pm"],
-    29: ["4:00pm"],
-    30: ["11:00am", "1:00pm", "2:30pm"],
-  },
 }) {
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
+  // for fetch available slots
+  const [loading, setLoading] = useState(false);
+  // for booking
+  const [isLoading, setIsLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedTime, setSelectedTime] = useState(null);
@@ -47,22 +45,51 @@ export default function CalendarSelector({
   const [back, setback] = useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
+    client_name: "",
+    client_email: "",
     company: "",
-    phone: "",
+    phone_number: "",
     notes: "",
   });
 
-  const isDateUnavailable = (date) => {
-    const currentYear = getYear(today);
-    const dateDay = getDate(date);
+  // Fetch available slots when the month changes
+  useEffect(() => {
+    const fetchAvailableSlots = async () => {
+      try {
+        setLoading(true);
 
-    if (!isSameMonth(date, today) || getYear(date) !== currentYear) {
-      return true;
-    }
+        const monthString = format(currentDate, "yyyy-MM");
+        const data = await getAvailableSlots(monthString);
 
-    return !Object.keys(mockTimesByDay).includes(dateDay.toString());
+        if (data.status && data.code === 200) {
+          setAvailableSlots(data.data);
+        } else {
+          toast.error("Failed to fetch available slots");
+        }
+      } catch (error) {
+        console.error("Error fetching available slots:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAvailableSlots();
+  }, [currentDate]);
+
+  // Check if a day is available based on API response
+  const isDayAvailable = (day) => {
+    if (!availableSlots || !availableSlots.days) return false;
+
+    const dayNumber = format(day, "dd");
+    return !Object.keys(availableSlots.days).includes(dayNumber);
+  };
+
+  // Get available times for a selected day
+  const getAvailableTimesForDay = (day) => {
+    if (!availableSlots || !availableSlots.days) return [];
+
+    const dayNumber = format(day, "dd");
+    return availableSlots.days[dayNumber] || [];
   };
 
   const getDaysInMonth = () => {
@@ -74,8 +101,20 @@ export default function CalendarSelector({
   const days = getDaysInMonth();
   const today = new Date();
 
-  const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
+  // Handle month navigation
+  const prevMonth = () => {
+    const prevMonthDate = subMonths(currentDate, 1);
+    if (!isBefore(startOfMonth(prevMonthDate), startOfMonth(today))) {
+      setCurrentDate(prevMonthDate);
+    }
+  };
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+
+  // Check if previous month button should be disabled
+  const isPrevMonthDisabled = () => {
+    const prevMonthDate = subMonths(currentDate, 1);
+    return isBefore(startOfMonth(prevMonthDate), startOfMonth(today));
+  };
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
@@ -111,13 +150,34 @@ export default function CalendarSelector({
   const handleSubmit = async (e) => {
     e.preventDefault();
     const bookingData = {
-      date: selectedDate,
-      time: selectedTime,
+      selected_date: format(selectedDate, "yyyy-MM-dd"),
+      selected_time: selectedTime,
       ...formData,
     };
 
-    if (onBookingComplete) {
-      onBookingComplete(bookingData);
+    try {
+      setIsLoading(true);
+
+      const res = await createBooking(bookingData);
+      if (res.status && res.code === 200) {
+        setFormData({
+          client_name: "",
+          client_email: "",
+          company: "",
+          phone_number: "",
+          notes: "",
+        });
+        setSelectedDate(null);
+        setSelectedTime(null);
+        if (onBookingComplete) {
+          onBookingComplete(bookingData);
+        }
+      }
+    } catch (error) {
+      toast.error("Failed to create booking");
+      console.error("Error creating booking:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -222,120 +282,153 @@ export default function CalendarSelector({
         <>
           {/* Middle panel - Calendar */}
           <div className="p-6 border-r  border-gray-200 w-full md:w-96 flex-shrink-0">
-            <h2 className="text-xl font-medium text-slate-800 mb-6">
-              {t.calendar.selectDateTime}
-            </h2>
+            <div className="flex flex-col h-full gap-6">
+              <h2 className="text-xl font-medium text-slate-800">
+                {t.calendar.selectDateTime}
+              </h2>
 
-            {/* Month navigation */}
-            <div className="flex justify-between items-center mb-6">
-              <button
-                onClick={isRTL ? nextMonth : prevMonth}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
-                aria-label={
-                  isRTL ? t.calendar.nextMonth : t.calendar.previousMonth
-                }
-              >
-                {isRTL ? (
-                  <ChevronRight className="h-5 w-5" />
-                ) : (
-                  <ChevronLeft className="h-5 w-5" />
-                )}
-              </button>
+              {/* Month navigation */}
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={prevMonth}
+                  disabled={isPrevMonthDisabled()}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-600 disabled:pointer-events-none disabled:opacity-50"
+                  aria-label={
+                    isRTL ? t.calendar.nextMonth : t.calendar.previousMonth
+                  }
+                >
+                  {isRTL ? (
+                    <ChevronRight className="h-5 w-5" />
+                  ) : (
+                    <ChevronLeft className="h-5 w-5" />
+                  )}
+                </button>
 
-              <h3 className="text-lg font-medium">
-                {format(currentDate, "MMMM yyyy")}
-              </h3>
+                <h3 className="text-lg font-medium">
+                  {format(currentDate, "MMMM yyyy")}
+                </h3>
 
-              <button
-                onClick={isRTL ? prevMonth : nextMonth}
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
-                aria-label={
-                  isRTL ? t.calendar.previousMonth : t.calendar.nextMonth
-                }
-              >
-                {isRTL ? (
-                  <ChevronLeft className="h-5 w-5" />
-                ) : (
-                  <ChevronRight className="h-5 w-5" />
-                )}
-              </button>
-            </div>
-
-            {/* Calendar grid */}
-            <div className="mb-6">
-              {/* Day headers */}
-              <div className="grid grid-cols-7 mb-2">
-                {t.calendar.dayHeaders.map((day) => (
-                  <div
-                    key={day}
-                    className="text-center text-sm font-medium text-gray-600 py-2"
-                  >
-                    {day}
-                  </div>
-                ))}
+                <button
+                  onClick={nextMonth}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-600"
+                  aria-label={
+                    isRTL ? t.calendar.previousMonth : t.calendar.nextMonth
+                  }
+                >
+                  {isRTL ? (
+                    <ChevronLeft className="h-5 w-5" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" />
+                  )}
+                </button>
               </div>
 
-              {/* Calendar days */}
-              <div className="grid grid-cols-7 gap-1">
-                {Array.from({ length: days[0].getDay() }).map((_, index) => (
-                  <div key={`empty-start-${index}`} className="h-10 p-1" />
-                ))}
-
-                {days.map((day) => {
-                  const isPast = isDateInPast(day);
-                  const isUnavailable = isDateUnavailable(day);
-                  const isDisabled = isPast || isUnavailable;
-                  const isSelected =
-                    selectedDate && isSameDay(day, selectedDate);
-                  const isCurrentMonth = isSameMonth(day, currentDate);
-                  const dayNumber = format(day, "d");
-
-                  const isHighlighted =
-                    ["23", "24", "27", "28", "29", "30"].includes(dayNumber) &&
-                    !isDisabled;
-
-                  let dayClasses =
-                    "h-10 w-10 relative flex items-center justify-center rounded-full text-sm font-medium";
-
-                  if (isDisabled) {
-                    dayClasses += " text-gray-300 !cursor-default";
-                  } else {
-                    dayClasses += " hover:bg-gray-100";
-                  }
-
-                  if (isSelected) {
-                    dayClasses += " bg-primary text-white hover:bg-primary/90";
-                  }
-
-                  if (!isSelected && isHighlighted) {
-                    dayClasses += " text-primary";
-                  }
-
-                  if (!isCurrentMonth) {
-                    dayClasses += " opacity-50";
-                  }
-
-                  return (
-                    <button
-                      key={day.toString()}
-                      onClick={() => !isDisabled && handleDateSelect(day)}
-                      disabled={isDisabled}
-                      className={dayClasses}
-                      aria-label={`${dayNumber} ${format(day, "MMMM")}`}
-                    >
-                      {dayNumber}
-                      {isSelected && (
-                        <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full" />
-                      )}
-                    </button>
-                  );
-                })}
-
-                {Array.from({ length: 6 - days[days.length - 1].getDay() }).map(
-                  (_, index) => (
-                    <div key={`empty-end-${index}`} className="h-12 p-1" />
-                  )
+              <div className="flex-1 flex items-center justify-center">
+                {/* Loading indicator */}
+                {loading && (
+                  <div className="flex justify-center items-center">
+                    <Loader2 className="h-6 w-6 text-primary animate-spin" />
+                    <span className="ml-2 text-gray-600">
+                      Loading available slots...
+                    </span>
+                  </div>
                 )}
+
+                {/* Calendar grid */}
+                {!loading && (
+                  <div>
+                    {/* Day headers */}
+                    <div className="grid grid-cols-7 mb-2">
+                      {t.calendar.dayHeaders.map((day) => (
+                        <div
+                          key={day}
+                          className="text-center text-sm font-medium text-gray-600 py-2"
+                        >
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Calendar days */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {Array.from({ length: days[0].getDay() }).map(
+                        (_, index) => (
+                          <div
+                            key={`empty-start-${index}`}
+                            className="h-10 p-1"
+                          />
+                        )
+                      )}
+
+                      {days.map((day) => {
+                        const isPast = isDateInPast(day);
+                        const isUnavailable = isDayAvailable(day);
+                        const isDisabled = isPast || isUnavailable;
+                        const isSelected =
+                          selectedDate && isSameDay(day, selectedDate);
+                        const isCurrentMonth = isSameMonth(day, currentDate);
+                        const dayNumber = format(day, "d");
+
+                        const isHighlighted =
+                          ["23", "24", "27", "28", "29", "30"].includes(
+                            dayNumber
+                          ) && !isDisabled;
+
+                        let dayClasses =
+                          "h-10 w-10 relative flex items-center justify-center rounded-full text-sm font-medium";
+
+                        if (isDisabled) {
+                          dayClasses += " text-gray-300 !cursor-default";
+                        } else {
+                          dayClasses += " hover:bg-gray-100";
+                        }
+
+                        if (isSelected) {
+                          dayClasses +=
+                            " bg-primary text-white hover:bg-primary/90";
+                        }
+
+                        if (!isSelected && isHighlighted) {
+                          dayClasses += " text-primary";
+                        }
+
+                        if (!isCurrentMonth) {
+                          dayClasses += " opacity-50";
+                        }
+
+                        return (
+                          <button
+                            key={day.toString()}
+                            onClick={() => !isDisabled && handleDateSelect(day)}
+                            disabled={isDisabled}
+                            className={dayClasses}
+                            aria-label={`${dayNumber} ${format(day, "MMMM")}`}
+                          >
+                            {dayNumber}
+                            {isSelected && (
+                              <div className="absolute bottom-1.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full" />
+                            )}
+                          </button>
+                        );
+                      })}
+
+                      {Array.from({
+                        length: 6 - days[days.length - 1].getDay(),
+                      }).map((_, index) => (
+                        <div key={`empty-end-${index}`} className="h-12 p-1" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Timezone selector */}
+              <div>
+                <div className="text-gray-700 mb-1 text-sm">Time zone</div>
+                <div className="flex items-center text-xs text-gray-800">
+                  <Globe className="h-4 w-4 mr-2 text-gray-500" />
+                  <span>Africa/Cairo</span>
+                </div>
               </div>
             </div>
           </div>
@@ -344,13 +437,13 @@ export default function CalendarSelector({
           <div className="py-6 px-3">
             {showTimeColumn && selectedDate ? (
               <div className="w-full md:w-52 flex-shrink-0 flex flex-col gap-4 h-full">
-                <div>
+                <div className="flex-1 flex flex-col">
                   <h3 className="text-lg font-medium text-slate-800 mb-4">
                     {formattedSelectedDate}
                   </h3>
 
-                  <div className="space-y-2 px-2 overflow-y-auto max-h-80">
-                    {mockTimesByDay[format(selectedDate, "d")]?.map((time) => {
+                  <div className="space-y-2 px-2 overflow-y-auto inner-scroll-bar flex-1 max-h-90">
+                    {getAvailableTimesForDay(selectedDate).map((time) => {
                       const isPastTime = isBefore(
                         parseISO(
                           `${format(selectedDate, "yyyy-MM-dd")}T${time}`
@@ -379,15 +472,13 @@ export default function CalendarSelector({
                 </div>
 
                 {selectedDate && selectedTime && (
-                  <div className="flex-1 flex items-end">
-                    <button
-                      onClick={handleConfirm}
-                      className="mt-2 w-full py-2 px-4 bg-primary hover:opacity-95 cursor-pointer text-white font-medium rounded-md flex items-center justify-center"
-                    >
-                      <span>{t.calendar.confirmButton}</span>
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleConfirm}
+                    className="mt-2 w-full py-2 px-4 bg-primary hover:opacity-95 cursor-pointer text-white font-medium rounded-md flex items-center justify-center"
+                  >
+                    <span>{t.calendar.confirmButton}</span>
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </button>
                 )}
               </div>
             ) : (
@@ -429,8 +520,8 @@ export default function CalendarSelector({
               <input
                 type="text"
                 id="firstName"
-                name="name"
-                value={formData.name}
+                name="client_name"
+                value={formData.client_name}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -447,8 +538,8 @@ export default function CalendarSelector({
               <input
                 type="email"
                 id="email"
-                name="email"
-                value={formData.email}
+                name="client_email"
+                value={formData.client_email}
                 onChange={handleInputChange}
                 required
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
@@ -465,10 +556,10 @@ export default function CalendarSelector({
               <input
                 type="tel"
                 id="phone"
-                name="phone"
+                name="phone_number"
                 placeholder={t.calendar.phonePlaceholder}
                 required
-                value={formData.phone}
+                value={formData.phone_number}
                 onChange={handleInputChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
@@ -509,9 +600,21 @@ export default function CalendarSelector({
               ></textarea>
             </div>
 
-            <button className="w-full cursor-pointer py-2 px-4 bg-primary hover:opacity-95 text-white font-medium rounded-md flex items-center justify-center">
-              <span>{t.calendar.completeBooking}</span>
-              <Check className="ml-2" />
+            <button
+              disabled={isLoading}
+              className="w-full cursor-pointer py-2 px-4 bg-primary hover:opacity-95 text-white font-medium rounded-md flex items-center justify-center disabled:pointer-events-none disabled:opacity-75"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  <span>{t.calendar.bookingInProgress}</span>
+                </>
+              ) : (
+                <>
+                  <span>{t.calendar.completeBooking}</span>
+                  <Check className="ml-2" />
+                </>
+              )}
             </button>
           </form>
         </div>

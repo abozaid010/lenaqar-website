@@ -22,7 +22,6 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
   const handleBookingComplete = (data) => {
     setBookingData(data);
     setIsBookingComplete(true);
-    console.log("Booking Data:", data);
   };
 
   useEffect(() => {
@@ -35,6 +34,14 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
       document.body.style.overflow = "";
     };
   }, [isOpen]);
+
+  const formatTime = (time) => {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":").map(Number);
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${period}`;
+  };
 
   const modalContent = (
     <div
@@ -79,14 +86,14 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
             </h2>
             <p className="text-gray-600 mb-6">
               {t.calendarModal.thankYou}{" "}
-              <span className="font-bold">{bookingData?.name}</span>!
+              <span className="font-bold"> {bookingData?.client_name}</span>!{" "}
               {t.calendarModal.meetingScheduled}{" "}
-              {bookingData?.date &&
-                new Date(bookingData.date).toLocaleDateString()}{" "}
-              {t.calendarModal.at} {bookingData?.time}.
+              {bookingData?.date && bookingData.selected_date}{" "}
+              {t.calendarModal.at} {formatTime(bookingData?.selected_time)}.
             </p>
             <p className="text-gray-600 mb-6">
-              {t.calendarModal.confirmationSent} {bookingData?.email}{" "}
+              {t.calendarModal.confirmationSent}{" "}
+              <span className="underline">{bookingData?.client_email}</span>{" "}
               {t.calendarModal.withDetails}.
             </p>
             <button

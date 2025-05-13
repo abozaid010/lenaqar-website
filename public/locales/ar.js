@@ -157,11 +157,12 @@ export default {
     "nameLabel": "الاسم",
     "emailLabel": "عنوان البريد الإلكتروني",
     "phoneLabel": "رقم الهاتف",
-    "phonePlaceholder": "+20 123 456 7890",
+    "phonePlaceholder": "0 123 456 7890",
     "companyLabel": "الشركة",
     "notesLabel": "يرجى مشاركة أي شيء قد يساعد في التحضير لاجتماعنا.",
     "notesPlaceholder": "أخبرنا كيف يمكننا مساعدتك...",
-    "completeBooking": "إكمال الحجز"
+    "completeBooking": "إكمال الحجز",
+    "bookingInProgress": "جارى حجز الاجتماع",
   },
   login: {
     "title": "لينا الذكاء الاصطناعي",
@@ -203,9 +204,9 @@ export default {
       "notQualified": "غير مؤهل",
       "followUpLater": "متابعة لاحقاً",
       "missingRequirement": "متطلب مفقود",
-      "blocked":"محظور",
-      "print":"طباعه",
-      "onGoingConversion":"محادثه جاريه"
+      "blocked": "محظور",
+      "print": "طباعه",
+      "onGoingConversion": "محادثه جاريه"
     },
     "datePicker": {
       "startDate": "تاريخ البداية",

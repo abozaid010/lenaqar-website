@@ -279,3 +279,24 @@ export async function toggleAutoReply(phoneNumber, client_id, value) {
   }
 }
 
+// #### BOOKING API ####
+export async function getAvailableSlots(selectedData) {
+  try {
+    const response = await axiosInstance.get(`/booking/available_slots?selected_date=${selectedData}`);
+    return response.data;
+
+  } catch (error) {
+    console.error("Failed to fetch available slots:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function createBooking(bookingData) {
+  try {
+    const response = await axiosInstance.post(`/booking/create-meeting`, bookingData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create booking:", error.message);
+    return { error: error.message };
+  }
+}

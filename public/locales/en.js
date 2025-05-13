@@ -155,11 +155,12 @@ export default {
     "nameLabel": "Name",
     "emailLabel": "Email Address",
     "phoneLabel": "Phone Number",
-    "phonePlaceholder": "+20 123 456 7890",
+    "phonePlaceholder": "0 123 456 7890",
     "companyLabel": "Company",
     "notesLabel": "Please share anything that will help prepare for our meeting.",
     "notesPlaceholder": "Let us know how we can help you...",
-    "completeBooking": "Complete Booking"
+    "completeBooking": "Complete Booking",
+    "bookingInProgress": "Booking in progress...",
   },
   login: {
     "title": "Lena AI",
@@ -201,10 +202,10 @@ export default {
       "notQualified": "Not qualified",
       "followUpLater": "Follow up later",
       "missingRequirement": "Missing Requirement",
-      "blocked":"blocked",
-      "print":"print",
+      "blocked": "blocked",
+      "print": "print",
       "onGoingConversion": "On Going Conversion",
-      
+
     },
     "datePicker": {
       "startDate": "Start Date",
