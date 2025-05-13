@@ -4,6 +4,8 @@ import {
   fetchDevelopers,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "@/components/ui/units-grid";
+import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
 
 import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
@@ -46,12 +48,12 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     new Set(developers?.map((developer) => developer.name))
   );
 
-  const maxPrice =
-    units.length > 0 &&
-    units
-      .filter((unit) => unit.purpose === "sell" && unit.totalPrice)
-      .map((unit) => Number.parseInt(unit.totalPrice, 10))
-      .reduce((max, price) => (price > max ? price : max), 65000);
+  // const maxPrice =
+  //   units.length > 0 &&
+  //   units
+  //     .filter((unit) => unit.purpose === "sell" && unit.totalPrice)
+  //     .map((unit) => Number.parseInt(unit.totalPrice, 10))
+  //     .reduce((max, price) => (price > max ? price : max), 65000);
 
   return (
     <div className="w-[98%] mx-auto">
@@ -69,7 +71,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           appliedFilters={searchParams}
           developers={developers}
           compounds={compounds}
-           clientId={clientId}
+          clientId={clientId}
           clientName={clientName}
         />
 
@@ -96,9 +98,29 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
             {Object.keys(searchParams).length > 0 && <ClearAllFilters />}
           </div> */}
-          <UnitsGrid units={units} />
+
+          <Suspense
+            key={JSON.stringify(searchParams)}
+            fallback={
+              <div className="flex items-center justify-center h-full mt-12">
+                <Loader2
+                  size={70}
+                  className="text-center animate-spin text-primary"
+                />
+              </div>
+            }
+          >
+            <UnitsList searchParams={searchParams} />
+          </Suspense>
         </div>
       </div>
     </div>
   );
+}
+
+async function UnitsList({ searchParams }) {
+  const res = await fetchUnitsFilter(JSON.stringify(searchParams), true);
+  const units = res.data?.units || [];
+
+  return <UnitsGrid units={units} />;
 }
