@@ -6,6 +6,7 @@ import { Forward, ForwardIcon, MapPin, Share, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "@/components/ui/units-share-modal";
+import shareButton from "../../../public/share.svg";
 
 export default function UnitsGrid({ units, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
@@ -71,25 +72,13 @@ export default function UnitsGrid({ units, readonly = false }) {
                     <button
                       type="button"
                       onClick={(e) => handleShareClick(u.unitId, e)}
-                      className="absolute  top-5 right-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
+                      className="absolute  top-2 right-5 cursor-pointer   group"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-4 h-4"
-                      >
-                        <path
-                          d="M21 12l-7-7v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7z"
-                          fill="#888888"
-                          stroke="#888888"
-                          // stroke-width="1"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                      {/* <Share2 className="w-4 h-4 text-primary hover:opacity-90" /> */}
-                      {/* < ForwardIcon  className="w-4 h-4 text-primary hover:opacity-90" /> */}
+                    
+                      <img src={shareButton.src} alt="share" />
+                     
                     </button>
-                    {/* <p className="absolute  top-5 left-5 cursor-pointer bg-primary text-white px-2"> {u.purpose}</p> */}
+                    <p className="absolute  top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"> For {u.purpose}</p>
                   </div>
                 ) : (
                   ""
@@ -101,48 +90,50 @@ export default function UnitsGrid({ units, readonly = false }) {
                 <h3 className="text-lg font-bold text-white line-clamp-1">
                   {u?.unitTitle || "Unnamed Property"}
                 </h3>
-                <div className="flex items-center text-white/90 mb-1">
-                  <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
+                  {/* <MapPin className="w-4 h-4 mr-2 flex-shrink-0" /> */}
+                  <p className=" text-white font-normal"> City </p>
                   <span className="line-clamp-1 text-sm">
                     {u.city || "Location not specified"}
                   </span>
                 </div>
 
                 {/* Compound and Purpose Display */}
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex flex-wrap justify-between gap-2 mb-2">
+                  <p className=" text-white font-normal">Project</p>
+                  <div>
                   {u.compound && (
-                    <span className="px-2 py-1 bg-blue-100 text-primary rounded-full text-xs font-medium">
+                    <span className=" py-1 text-white text-[12.5px]  rounded-full text-xs font-semibold">
                       {u.compound}
                     </span>
                   )}
-                  {u.purpose && (
-                    <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                      {u.purpose}
-                    </span>
-                  )}
+                  </div>
+               
                 </div>
 
                 {/* Pricing Information */}
-                <div className="text-sm text-white/90">
+                <div className="text-sm flex items-center justify-between text-white">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
-                    <span>
-                      <span className="font-medium">Rent Price:</span>{" "}
-                      {u.rentDurationType?.daily?.price
-                        ? `${u.rentDurationType.daily.price} EGP/day`
-                        : u.rentDurationType?.weekly?.price
-                          ? `${u.rentDurationType.weekly.price} EGP/week`
-                          : u.rentDurationType?.monthly?.price
-                            ? `${u.rentDurationType.monthly.price} EGP/month`
-                            : u.rentPrice
-                              ? `${u.rentPrice} EGP`
-                              : "Price not specified"}
-                    </span>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="font-medium">Rent Price</div>
+                      <div>
+                        {u.rentDurationType?.daily?.price
+                          ? `${u.rentDurationType.daily.price} EGP/day`
+                          : u.rentDurationType?.weekly?.price
+                            ? `${u.rentDurationType.weekly.price} EGP/week`
+                            : u.rentDurationType?.monthly?.price
+                              ? `${u.rentDurationType.monthly.price} EGP/month`
+                              : u.rentPrice
+                                ? `${u.rentPrice} EGP`
+                                : "Price not specified"}
+                      </div>
+                    </div>
                   ) : (
                     u.totalPrice && (
-                      <span>
-                        <span className="font-medium">Total Price:</span>{" "}
-                        {u.totalPrice} EGP
-                      </span>
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium">Total Price</span>
+                        <span>{u.totalPrice} EGP</span>
+                      </div>
                     )
                   )}
                 </div>

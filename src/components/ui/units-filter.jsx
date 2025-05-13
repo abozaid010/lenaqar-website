@@ -21,12 +21,25 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   }));
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
+  const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
+  const [isPropertyTypeDropdownOpen, setIsPropertyTypeDropdownOpen] = useState(false);
+  const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
+  const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [tempMinPrice, setTempMinPrice] = useState(filters.min_price || "");
   const [tempMaxPrice, setTempMaxPrice] = useState(filters.max_price || "");
+  
   const priceDropdownRef = useRef(null);
+  const developerDropdownRef = useRef(null);
+  const propertyTypeDropdownRef = useRef(null);
+  const purposeDropdownRef = useRef(null);
+  const projectDropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
+  useOnClickOutside(developerDropdownRef, () => setIsDeveloperDropdownOpen(false));
+  useOnClickOutside(propertyTypeDropdownRef, () => setIsPropertyTypeDropdownOpen(false));
+  useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
+  useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
 
   const buildingTypes = [
     { value: "apartment", label: t.basicDetails.buildingTypes.apartment },
@@ -177,72 +190,247 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     return activeFilters;
   };
 
+  const getSelectedPropertyType = () => {
+    if (!filters.property_type || filters.property_type === "all") {
+      return t.unitsFilter.allPropertyTypes || "All Property Types";
+    }
+    const type = buildingTypes.find(t => t.value === filters.property_type);
+    return type ? type.label : t.unitsFilter.allPropertyTypes || "All Property Types";
+  };
+
+  const getSelectedPurpose = () => {
+    if (!filters.purpose || filters.purpose === "all") {
+      return t.unitsFilter.allPurposes || "All Purposes";
+    }
+    return t.unitsFilter.purposes[filters.purpose] || filters.purpose;
+  };
+
+  const getSelectedDeveloper = () => {
+    if (!filters.developer_name || filters.developer_name === "all") {
+      return t.unitsFilter.allDevelopers || "All Developers";
+    }
+    return filters.developer_name;
+  };
+
+  const getSelectedProject = () => {
+    if (!filters.project_name || filters.project_name === "all") {
+      return t.unitsFilter.allCompounds || "All Projects";
+    }
+    return filters.project_name;
+  };
+
   return (
     <div className="w-full mx-auto ">
-      <div className="flex items-center pl-3  flex-wrap md:flex-nowrap gap-2 ">
+      <div className="flex items-center pl-3 flex-wrap md:flex-nowrap gap-2">
         {/* Developers Dropdown */}
-        <select
-          className="px-2 py-1.5 w-full sm:w-48 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary"
-          value={filters.developer_name}
-          onChange={(e) => handleFilterChange("developer_name", e.target.value)}
-        >
-          <option value="all">{t.unitsFilter.allDevelopers}</option>
-          {developersSet.map((d, idx) => (
-            <option key={idx} value={d}>
-              {d}
-            </option>
-          ))}
-        </select>
-
-        {/* Compounds Dropdown */}
-        <select
-          className="w-full sm:w-48 px-2 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary"
-          value={filters.project_name}
-          onChange={(e) => handleFilterChange("project_name", e.target.value)}
-        >
-          <option value="all">{t.unitsFilter.allCompounds}</option>
-          {compounds.map((c, idx) => (
-            <option key={idx} value={c.name}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-
-        {/* Purpose Dropdown */}
-        <select
-          className="w-full sm:w-48 px-2 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary"
-          value={filters.purpose}
-          onChange={(e) => handleFilterChange("purpose", e.target.value)}
-        >
-          <option value="all">{t.unitsFilter.allPurposes}</option>
-          {EnumPropertyIntent.map((purpose) => (
-            <option key={purpose} value={purpose}>
-              {t.unitsFilter.purposes[purpose]}
-            </option>
-          ))}
-        </select>
-
-        {/* Property Type Dropdown */}
-        <select
-          className="w-full sm:w-48 px-2 py-1.5 text-sm rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary"
-          value={filters.property_type}
-          onChange={(e) => handleFilterChange("property_type", e.target.value)}
-        >
-          <option value="all">
-            {t.unitsFilter.allPropertyTypes || "All Property Types"}
-          </option>
-          {buildingTypes.map((type) => (
-            <option key={type.value} value={type.value}>
-              {type.label}
-            </option>
-          ))}
-        </select>
-
-        {/* Price Filter Dropdown */}
-        <div className="relative" ref={priceDropdownRef}>
+        <div className="relative w-full sm:w-48" ref={developerDropdownRef}>
           <button
             type="button"
-            className="w-full sm:w-48 px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
+          >
+            <span>{getSelectedDeveloper()}</span>
+            <svg
+              className={`w-3 h-3 transition-transform ${isDeveloperDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isDeveloperDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+              <div 
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("developer_name", "all");
+                  setIsDeveloperDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allDevelopers}
+              </div>
+              {developersSet.map((d, idx) => (
+                <div 
+                  key={idx} 
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("developer_name", d);
+                    setIsDeveloperDropdownOpen(false);
+                  }}
+                >
+                  {d}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Compounds Dropdown */}
+        <div className="relative w-full sm:w-48" ref={projectDropdownRef}>
+          <button
+            type="button"
+            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
+          >
+            <span>{getSelectedProject()}</span>
+            <svg
+              className={`w-3 h-3 transition-transform ${isProjectDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isProjectDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+              <div 
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("project_name", "all");
+                  setIsProjectDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allCompounds}
+              </div>
+              {compounds.map((c, idx) => (
+                <div 
+                  key={idx} 
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("project_name", c.name);
+                    setIsProjectDropdownOpen(false);
+                  }}
+                >
+                  {c.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Purpose Dropdown */}
+        <div className="relative w-full sm:w-48" ref={purposeDropdownRef}>
+          <button
+            type="button"
+            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            onClick={() => setIsPurposeDropdownOpen(!isPurposeDropdownOpen)}
+          >
+            <span>{getSelectedPurpose()}</span>
+            <svg
+              className={`w-3 h-3 transition-transform ${isPurposeDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isPurposeDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+              <div 
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("purpose", "all");
+                  setIsPurposeDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allPurposes}
+              </div>
+              {EnumPropertyIntent.map((purpose) => (
+                <div 
+                  key={purpose} 
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("purpose", purpose);
+                    setIsPurposeDropdownOpen(false);
+                  }}
+                >
+                  {t.unitsFilter.purposes[purpose]}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Property Type Dropdown */}
+        <div className="relative w-full sm:w-48" ref={propertyTypeDropdownRef}>
+          <button
+            type="button"
+            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            onClick={() => setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)}
+          >
+            <span>{getSelectedPropertyType()}</span>
+            <svg
+              className={`w-3 h-3 transition-transform ${isPropertyTypeDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isPropertyTypeDropdownOpen && (
+            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+              <div 
+                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("property_type", "all");
+                  setIsPropertyTypeDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allPropertyTypes || "All Property Types"}
+              </div>
+              {buildingTypes.map((type) => (
+                <div 
+                  key={type.value} 
+                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("property_type", type.value);
+                    setIsPropertyTypeDropdownOpen(false);
+                  }}
+                >
+                  {type.label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Price Filter Dropdown */}
+        <div className="relative w-full sm:w-48" ref={priceDropdownRef}>
+          <button
+            type="button"
+            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
             onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
           >
             <span>{getPriceDisplayText()}</span>
