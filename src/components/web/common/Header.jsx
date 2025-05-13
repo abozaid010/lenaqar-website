@@ -90,9 +90,6 @@ const Header = ({ ci }) => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-x-4">
-              <Link href="/" className="hover:text-blue-200 transition-colors">
-                {t.header.home}
-              </Link>
               {ci && (
                 <Link
                   href="/dashboard"
@@ -144,32 +141,24 @@ const Header = ({ ci }) => {
           <div className="lg:hidden bg-[#030250]/95 backdrop-blur-md border-t border-blue-700/30">
             <div className="container mx-auto px-4 py-3">
               <nav className="flex flex-col space-y-3">
-                <Link
-                  href="/"
-                  className="hover:text-blue-200 transition-colors py-2"
-                >
-                  Home
-                </Link>
                 {ci && (
                   <Link
                     href="/dashboard"
                     className="hover:text-blue-200 transition-colors py-2"
                   >
-                    Client Dashboard
+                    {t.header.clientDashboard}
                   </Link>
                 )}
 
+                <div>
+                  <CalendarModal buttonText={t.header.jobOpportunities} />
+                </div>
+
                 <Link
-                  href=""
+                  href="/allProberties"
                   className="hover:text-blue-200 transition-colors py-2"
                 >
-                  Job Opportunities
-                </Link>
-                <Link
-                  href=""
-                  className="hover:text-blue-200 transition-colors py-2"
-                >
-                  All Properties
+                  {t.header.allProperties}
                 </Link>
                 <div className="flex items-center space-x-3 pt-2">
                   {!ci ? (
@@ -192,7 +181,7 @@ const Header = ({ ci }) => {
                       onClick={initiateLogout}
                       className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                     >
-                      Logout
+                      {t.header.logOut}
                     </button>
                   )}
                 </div>
