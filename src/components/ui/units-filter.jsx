@@ -220,8 +220,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   };
 
   return (
-    <div className="w-full mx-auto ">
-      <div className="flex items-center pl-3 flex-wrap md:flex-nowrap gap-2">
+    <div className="w-full mx-auto">
+      <div className="flex items-center justify-center flex-wrap md:flex-nowrap gap-2">
         {/* Developers Dropdown */}
         <div className="relative w-full sm:w-48" ref={developerDropdownRef}>
           <button
