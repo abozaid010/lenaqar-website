@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 
@@ -249,7 +250,9 @@ export default function ImagesStep({
     return (
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
-          <img
+          <Image
+            fill
+            priority={true}
             src={image.url || image.preview || "/placeholder.svg"}
             alt={`Image ${image.name}`}
             className="w-full h-full object-cover rounded-md"

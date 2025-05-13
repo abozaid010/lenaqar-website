@@ -119,11 +119,6 @@ export default function BasicDetailsStep({
 
     // Update selected project in the form
     updateFormData({ project: newCompound.name });
-
-    // Reload projects list from server
-    if (formData.city && formData.district) {
-      printLocationDetails(formData.city, formData.district);
-    }
   };
 
   return (
@@ -346,10 +341,13 @@ export default function BasicDetailsStep({
                   </option>
                 )
               ) : null}
-              
+
               {/* If we have a selected project but it's not in the loaded list, add it separately */}
-              {formData.project && formData.city && formData.district && 
-               dataProject && !dataProject.some(p => p.name === formData.project) ? (
+              {formData.project &&
+              formData.city &&
+              formData.district &&
+              dataProject &&
+              !dataProject.some((p) => p.name === formData.project) ? (
                 <option key="preserved-selection" value={formData.project}>
                   {formData.project}
                 </option>
