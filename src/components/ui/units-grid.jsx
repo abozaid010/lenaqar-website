@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Share2 } from "lucide-react";
+import { Forward, ForwardIcon, MapPin, Share, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "@/components/ui/units-share-modal";
@@ -67,13 +67,30 @@ export default function UnitsGrid({ units, readonly = false }) {
 
                 {/* Share Button */}
                 {!readonly ? (
-                  <button
-                    type="button"
-                    onClick={(e) => handleShareClick(u.unitId, e)}
-                    className="absolute  top-5 left-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
-                  >
-                    <Share2 className="w-4 h-4 text-primary hover:opacity-90" />
-                  </button>
+                  <div className="  ">
+                    <button
+                      type="button"
+                      onClick={(e) => handleShareClick(u.unitId, e)}
+                      className="absolute  top-5 right-5 cursor-pointer p-2.5 bg-white/80 rounded-full shadow-lg border border-gray-100 group"
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-4 h-4"
+                      >
+                        <path
+                          d="M21 12l-7-7v4C7 10 4 15 3 20c2.5-3.5 6-5.1 11-5.1V19l7-7z"
+                          fill="#888888"
+                          stroke="#888888"
+                          // stroke-width="1"
+                          stroke-linejoin="round"
+                        />
+                      </svg>
+                      {/* <Share2 className="w-4 h-4 text-primary hover:opacity-90" /> */}
+                      {/* < ForwardIcon  className="w-4 h-4 text-primary hover:opacity-90" /> */}
+                    </button>
+                    {/* <p className="absolute  top-5 left-5 cursor-pointer bg-primary text-white px-2"> {u.purpose}</p> */}
+                  </div>
                 ) : (
                   ""
                 )}

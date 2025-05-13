@@ -9,6 +9,8 @@ import { cookies } from "next/headers";
 import AddUnitButton from "./_components/add-unit-button";
 import ClearAllFilters from "./_components/filters/clear-all-filters";
 import SideUnitFilters from "@/components/ui/side-units-filter";
+import UnitsFilter from "@/components/ui/units-filter";
+import UnitsSearch from "@/components/ui/units-search";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -52,28 +54,30 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       .reduce((max, price) => (price > max ? price : max), 65000);
 
   return (
-    <div className="container mx-auto">
-      <div className="mb-4 flex flex-col sm:flex-row items-start justify-between gap-2">
+    <div className="w-[98%] mx-auto">
+      {/* <div className="mb-4 flex flex-col sm:flex-row items-start justify-between gap-2">
         <AddUnitButton
           clientId={clientId}
           clientName={clientName}
           compounds={compounds}
           developers={developersSet}
         />
-      </div>
+      </div> */}
 
-      {/* <div className="mb-4 p-3 bg-white rounded-md flex flex-col gap-3">
+      <div className="   p-2 bg-white rounded-md flex flex-col ">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
           compounds={compounds}
+           clientId={clientId}
+          clientName={clientName}
         />
 
-        <UnitsSearch />
-      </div> */}
+        {/* <UnitsSearch /> */}
+      </div>
 
-      <div className="flex gap-4">
-        <div className="hidden lg:block">
+      <div className="flex gap-2">
+        {/* <div className="hidden lg:block">
           <SideUnitFilters
             appliedFilters={searchParams}
             developers={developersSet}
@@ -81,17 +85,17 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
             minPrice={0}
             maxPrice={maxPrice}
           />
-        </div>
+        </div> */}
         <div className="flex-1 flex flex-col">
           {/* Results Count */}
-          <div className="bg-white p-4 rounded-md flex justify-between items-center">
+          {/* <div className="bg-white p-4 rounded-md flex justify-between items-center">
             <p className="text-sm text-gray-600">
               {units.length} {units.length === 1 ? "property" : "properties"}{" "}
               found
             </p>
 
             {Object.keys(searchParams).length > 0 && <ClearAllFilters />}
-          </div>
+          </div> */}
           <UnitsGrid units={units} />
         </div>
       </div>

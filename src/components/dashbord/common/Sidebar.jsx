@@ -23,16 +23,16 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const initiateLogout = () => setShowLogoutConfirm(true);
+  // const initiateLogout = () => setShowLogoutConfirm(true);
   const cancelLogout = () => setShowLogoutConfirm(false);
 
-  const confirmLogout = () => {
-    Cookies.remove("client_id");
-    Cookies.remove("access_token");
-    setShowLogoutConfirm(false);
-    toast.success(t.sidebar.logoutSuccess);
-    window.location.reload();
-  };
+  // const confirmLogout = () => {
+  //   Cookies.remove("client_id");
+  //   Cookies.remove("access_token");
+  //   setShowLogoutConfirm(false);
+  //   toast.success(t.sidebar.logoutSuccess);
+  //   window.location.reload();
+  // };
 
   const isLinkActive = (path) => {
     if (path === "/dashboard" && pathname === "/dashboard") return true;
@@ -159,13 +159,13 @@ const Sidebar = () => {
 
           <div className=" border-t border-gray-200 my-2"></div>
 
-          <button
+          {/* <button
             onClick={initiateLogout}
             className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <LogOut className="h-5 w-5 mr-3" />
             <span>{t.sidebar.logout}</span>
-          </button>
+          </button> */}
         </div>
       </div>
     </>

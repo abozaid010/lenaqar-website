@@ -21,7 +21,7 @@ export default function AddUnitButton({
     <>
       <button
         onClick={openModal}
-        className={`flex-shrink-0 sm:w-auto px-4 py-2 bg-primary hover:opacity-90 text-white rounded-md flex items-center justify-center transition duration-300 ${
+        className={`flex-shrink-0 sm:w-auto px-4 py-[4px] bg-primary hover:opacity-90 text-white rounded-md flex items-center justify-center transition duration-300 ${
           t.dir === "rtl" ? "flex-row-reverse" : ""
         }`}
       >
