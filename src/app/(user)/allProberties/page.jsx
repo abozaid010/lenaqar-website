@@ -25,14 +25,14 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         <IdentifierUnit />
       </div> */}
 
-      <div className="mb-4 p-3 bg-white rounded-md shadow-2xl flex flex-col gap-3">
+      <div className="mb-4  bg-white ">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
           compounds={compounds}
         />
 
-        <UnitsSearch />
+        {/* <UnitsSearch /> */}
       </div>
 
       <UnitsGrid units={units} readonly={true} />

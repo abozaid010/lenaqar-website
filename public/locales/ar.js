@@ -298,7 +298,7 @@ export default {
   },
   units: {
     "addButton": {
-      "addNew": "إضافة وحدة جديدة",
+      "addNew": " وحدة جديدة",
       "edit": "تعديل الوحدة",
       "back": "للخلف",
     }

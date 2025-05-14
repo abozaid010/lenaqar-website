@@ -13,6 +13,12 @@ export default function UnitsGrid({ units, readonly = false }) {
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
 
+  // Add a formatter function for prices
+  const formatPrice = (price) => {
+    if (!price) return "Price not specified";
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
+
   const handleShareClick = async (unitId, e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -38,7 +44,7 @@ export default function UnitsGrid({ units, readonly = false }) {
           No units found.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-5">
           {units.map((u, idx) => (
             <Link
               href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
@@ -74,11 +80,17 @@ export default function UnitsGrid({ units, readonly = false }) {
                       onClick={(e) => handleShareClick(u.unitId, e)}
                       className="absolute  top-2 right-5 cursor-pointer   group"
                     >
-                    
                       <img src={shareButton.src} alt="share" />
-                     
                     </button>
-                    <p className="absolute  top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"> For {u.purpose}</p>
+                    <p
+                      style={{
+                        fontWeight: "500",
+                      }}
+                      className="absolute  text-[14px]  top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"
+                    >
+                      {" "}
+                      For {u.purpose}
+                    </p>
                   </div>
                 ) : (
                   ""
@@ -87,52 +99,55 @@ export default function UnitsGrid({ units, readonly = false }) {
 
               {/* Text Overlay Section */}
               <div className="absolute bottom-0 left-0 w-full bg-black/40 py-2 px-3 rounded-b-lg">
-                <h3 className="text-lg font-bold text-white line-clamp-1">
+                <h3 className="text-[20px] font-bold text-white line-clamp-1">
                   {u?.unitTitle || "Unnamed Property"}
                 </h3>
                 <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
                   {/* <MapPin className="w-4 h-4 mr-2 flex-shrink-0" /> */}
-                  <p className=" text-white font-normal"> City </p>
-                  <span className="line-clamp-1 text-sm">
+                  <p className=" text-white font-normal text-[16px]"> City </p>
+                  <span className="line-clamp-1 text-[14px] font-bold">
                     {u.city || "Location not specified"}
                   </span>
                 </div>
 
                 {/* Compound and Purpose Display */}
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
-                  <p className=" text-white font-normal">Project</p>
+                  <p className=" text-white text-[16px] font-normal">Project</p>
                   <div>
-                  {u.compound && (
-                    <span className=" py-1 text-white text-[12.5px]  rounded-full text-xs font-semibold">
-                      {u.compound}
-                    </span>
-                  )}
+                    {u.compound && (
+                      <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
+                        {u.compound}
+                      </span>
+                    )}
                   </div>
-               
                 </div>
 
                 {/* Pricing Information */}
                 <div className="text-sm flex items-center justify-between text-white">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="font-medium">Rent Price</div>
-                      <div>
+                      <div className="font-normal text-[16px]">Rent Price</div>
+                      <div className=" font-semibold text-[14px]">
                         {u.rentDurationType?.daily?.price
-                          ? `${u.rentDurationType.daily.price} EGP/day`
+                          ? `${formatPrice(u.rentDurationType.daily.price)} EGP/day`
                           : u.rentDurationType?.weekly?.price
-                            ? `${u.rentDurationType.weekly.price} EGP/week`
+                            ? `${formatPrice(u.rentDurationType.weekly.price)} EGP/week`
                             : u.rentDurationType?.monthly?.price
-                              ? `${u.rentDurationType.monthly.price} EGP/month`
+                              ? `${formatPrice(u.rentDurationType.monthly.price)} EGP/month`
                               : u.rentPrice
-                                ? `${u.rentPrice} EGP`
+                                ? `${formatPrice(u.rentPrice)} EGP`
                                 : "Price not specified"}
                       </div>
                     </div>
                   ) : (
                     u.totalPrice && (
                       <div className="flex items-center justify-between w-full">
-                        <span className="font-medium">Total Price</span>
-                        <span>{u.totalPrice} EGP</span>
+                        <span className="font-normal text-[16px]">
+                          Total Price
+                        </span>
+                        <span className=" font-semibold text-[14px]">
+                          {formatPrice(u.totalPrice)} EGP
+                        </span>
                       </div>
                     )
                   )}

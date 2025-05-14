@@ -220,18 +220,18 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   };
 
   return (
-    <div className="w-full mx-auto">
-      <div className="flex items-center flex-wrap md:flex-nowrap gap-2">
+    <div className=" ">
+      <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
         {/* Developers Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1" ref={developerDropdownRef}>
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={developerDropdownRef}>
           <button
             type="button"
-            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-[16px] py-[10px] h-[40px]  bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
           >
             <span className="truncate">{getSelectedDeveloper()}</span>
             <svg
-              className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isDeveloperDropdownOpen ? "rotate-180" : ""}`}
+              className={`w-[24px] h-[24px]  text-[#000000] ml-1 flex-shrink-0 transition-transform ${isDeveloperDropdownOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -240,16 +240,16 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth="1"
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
           </button>
           
           {isDeveloperDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
               <div 
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("developer_name", "all");
                   setIsDeveloperDropdownOpen(false);
@@ -260,7 +260,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               {developersSet.map((d, idx) => (
                 <div 
                   key={idx} 
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer truncate"
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                   onClick={() => {
                     handleFilterChange("developer_name", d);
                     setIsDeveloperDropdownOpen(false);
@@ -274,15 +274,15 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Compounds Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1" ref={projectDropdownRef}>
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={projectDropdownRef}>
           <button
             type="button"
-            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
           >
             <span className="truncate">{getSelectedProject()}</span>
             <svg
-              className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isProjectDropdownOpen ? "rotate-180" : ""}`}
+              className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isProjectDropdownOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -291,16 +291,16 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth="1"
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
           </button>
           
           {isProjectDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+            <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
               <div 
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("project_name", "all");
                   setIsProjectDropdownOpen(false);
@@ -311,7 +311,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               {compounds.map((c, idx) => (
                 <div 
                   key={idx} 
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer truncate"
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                   onClick={() => {
                     handleFilterChange("project_name", c.name);
                     setIsProjectDropdownOpen(false);
@@ -325,15 +325,15 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Purpose Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1" ref={purposeDropdownRef}>
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={purposeDropdownRef}>
           <button
             type="button"
-            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsPurposeDropdownOpen(!isPurposeDropdownOpen)}
           >
             <span className="truncate">{getSelectedPurpose()}</span>
             <svg
-              className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isPurposeDropdownOpen ? "rotate-180" : ""}`}
+              className={`w-[24px] h-[24px] text-[#000000]  ml-1 flex-shrink-0 transition-transform ${isPurposeDropdownOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -342,16 +342,16 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth="1"
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
           </button>
           
           {isPurposeDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+            <div className="absolute z-48 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-56 overflow-y-auto">
               <div 
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("purpose", "all");
                   setIsPurposeDropdownOpen(false);
@@ -362,7 +362,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               {EnumPropertyIntent.map((purpose) => (
                 <div 
                   key={purpose} 
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                   onClick={() => {
                     handleFilterChange("purpose", purpose);
                     setIsPurposeDropdownOpen(false);
@@ -376,15 +376,15 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Property Type Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1" ref={propertyTypeDropdownRef}>
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={propertyTypeDropdownRef}>
           <button
             type="button"
-            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)}
           >
             <span className="truncate">{getSelectedPropertyType()}</span>
             <svg
-              className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isPropertyTypeDropdownOpen ? "rotate-180" : ""}`}
+              className={`w-[24px] h-[24px] text-[#000000]  ml-1 flex-shrink-0 transition-transform ${isPropertyTypeDropdownOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -393,16 +393,16 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth="1"
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
           </button>
           
           {isPropertyTypeDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg py-1 max-h-56 overflow-y-auto">
+            <div className="absolute z-47 mt-1 w-full md:min-w-[200px] bg-[#FFFFFF] rounded-[5px] shadow-2xl py-1 max-h-72 overflow-y-auto">
               <div 
-                className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("property_type", "all");
                   setIsPropertyTypeDropdownOpen(false);
@@ -413,7 +413,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               {buildingTypes.map((type) => (
                 <div 
                   key={type.value} 
-                  className="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                   onClick={() => {
                     handleFilterChange("property_type", type.value);
                     setIsPropertyTypeDropdownOpen(false);
@@ -427,15 +427,15 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Price Filter Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1" ref={priceDropdownRef}>
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={priceDropdownRef}>
           <button
             type="button"
-            className="w-full px-2 py-1.5 text-sm text-left rounded-md border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary bg-white flex justify-between items-center"
+            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
           >
             <span className="truncate">{getPriceDisplayText()}</span>
             <svg
-              className={`w-3 h-3 ml-1 flex-shrink-0 transition-transform ${isPriceDropdownOpen ? "rotate-180" : ""}`}
+              className={`w-[24px] h-[24px] ml-1  text-[#000000] flex-shrink-0 transition-transform ${isPriceDropdownOpen ? "rotate-180" : ""}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -444,14 +444,14 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="2"
+                strokeWidth="1"
                 d="M19 9l-7 7-7-7"
               ></path>
             </svg>
           </button>
 
           {isPriceDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white border rounded-md shadow-lg p-3">
+            <div className="absolute z-46 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-2xl p-3">
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
@@ -499,13 +499,13 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
           )}
         </div>
         
-        <div className="w-full md:w-auto">
+        <div className="w-full md:w-auto flex-shrink-0">
           <AddUnitButton
             clientId={clientId}
             clientName={clientName}
             compounds={compounds}
             developers={developersSet}
-            className="w-full md:w-auto py-1.5 px-3 text-sm bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+            className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
           />
         </div>
       </div>

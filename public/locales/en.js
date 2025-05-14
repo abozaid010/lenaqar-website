@@ -302,7 +302,7 @@ export default {
   },
   units: {
     "addButton": {
-      "addNew": "Add New Unit",
+      "addNew": "New Unit",
       "edit": "Edit Unit",
       "back": "back",
     }

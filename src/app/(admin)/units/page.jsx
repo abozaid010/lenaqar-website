@@ -66,7 +66,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         />
       </div> */}
 
-      <div className="   p-2 bg-white rounded-md flex flex-col ">
+      <div className="   bg-white  ">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}

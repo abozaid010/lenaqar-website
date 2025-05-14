@@ -21,7 +21,7 @@ export default function AddUnitButton({
     <>
       <button
         onClick={openModal}
-        className={`flex-shrink-0 sm:w-auto px-4 py-[4px] bg-primary hover:opacity-90 text-white rounded-md flex items-center justify-center transition duration-300 ${
+        className={`flex-shrink-0 sm:w-auto  px-[16px] py-[10px] h-[40px] bg-primary hover:opacity-90 text-white rounded-[5px]  flex items-center justify-center transition duration-300 ${
           t.dir === "rtl" ? "flex-row-reverse" : ""
         }`}
       >
@@ -32,7 +32,7 @@ export default function AddUnitButton({
           </span>
         ) : (
           <span className="flex items-center gap-2">
-            <Plus size={18} />{" "}
+            <Plus  width={24} height={24} />{" "}
             <span className={`${isEdit ? "hidden sm:block" : "block"}`}>
               {t.units.addButton.addNew}
             </span>
