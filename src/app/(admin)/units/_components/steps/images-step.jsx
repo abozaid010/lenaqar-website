@@ -170,6 +170,7 @@ export default function ImagesStep({
         successfulUploads.push({
           url: res.url,
           fileId: res.fileId,
+          preview: image.preview,
         });
       } catch (error) {
         setUploadStatus((prev) => {
@@ -182,8 +183,12 @@ export default function ImagesStep({
     }
 
     // Update the form data with all uploaded images
+    const sanitizedUploads = successfulUploads.map(
+      ({ preview, ...rest }) => rest
+    );
+
     const allUploaded = [...uploadedImages, ...successfulUploads];
-    updateFormData({ images: allUploaded });
+    updateFormData({ images: [...uploadedImages, ...sanitizedUploads] });
     setUploadedImages(allUploaded);
 
     // Remove successfully uploaded images from selectedImages
@@ -253,7 +258,7 @@ export default function ImagesStep({
           <Image
             fill
             priority={true}
-            src={image.url || image.preview || "/placeholder.svg"}
+            src={image.preview || image.url || "/placeholder.svg"}
             alt={`Image ${image.name}`}
             className="w-full h-full object-cover rounded-md"
           />

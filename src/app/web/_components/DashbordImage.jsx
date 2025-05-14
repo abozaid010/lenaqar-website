@@ -11,8 +11,6 @@ export default function DashboardImage() {
   const { t } = useI18n();
 
   const isRTL = t.direction === "rtl";
-  console.log(t);
-
   const features = [
     {
       id: 1,

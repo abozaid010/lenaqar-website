@@ -34,9 +34,9 @@ const validationSchema = Yup.object({
       'Must be a valid Google Maps URL',
       (value) => {
         if (!value) return true; // Allow empty values
-        return value.includes('google.com/maps') || 
-               value.includes('goo.gl/maps') || 
-               value.includes('maps.app.goo.gl');
+        return value.includes('google.com/maps') ||
+          value.includes('goo.gl/maps') ||
+          value.includes('maps.app.goo.gl');
       }
     )
     .nullable()
@@ -93,7 +93,6 @@ export const useCompoundForm = (onClose, onSave) => {
 
         // Use addCompound function from serviceFetching
         const response = await addCompound(submissionData);
-        console.log(response)
         router.refresh();
 
         // Call the onSave function provided by the parent component with the response data
@@ -104,7 +103,7 @@ export const useCompoundForm = (onClose, onSave) => {
         // Reset the form to clear all data
         resetForm();
         setSelectedFile(null);
-        
+
         // Show success message
         toast.success("Compound added successfully");
 
@@ -142,7 +141,7 @@ export const useCompoundForm = (onClose, onSave) => {
 
     setUploadingImage(true);
     setUploadStatus(null);
-    
+
     try {
       const imageFormData = new FormData();
       imageFormData.append("file", selectedFile);
