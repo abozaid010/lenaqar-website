@@ -22,7 +22,7 @@ export default function AddCompoundDialog({
   setDevelopers,
   Egypt_cities,
   defaultCity,
-  defaultDistrict 
+  defaultDistrict,
 }) {
   const router = useRouter();
   const fileInputRef = useRef(null);
@@ -31,10 +31,11 @@ export default function AddCompoundDialog({
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
-  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] = useState(false);
+  const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
+    useState(false);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [dataProject, setDataProject] = useState([]);
-  
+
   const getProjectByCityAndDistrict = async (city, district) => {
     if (city && district) {
       console.log(`Selected City: ${city}, Selected District: ${district}`);
@@ -42,7 +43,6 @@ export default function AddCompoundDialog({
         setIsLoadingProjects(true);
         const data = await getprojects(city, district);
         setDataProject(data);
-        console.log(data);
       } catch (error) {
         console.log(error);
         setDataProject([]);
@@ -66,7 +66,7 @@ export default function AddCompoundDialog({
     master_plan: "",
     client_id: clientId || "",
   });
-  
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -81,7 +81,7 @@ export default function AddCompoundDialog({
         [name]: null,
       });
     }
-    
+
     // If district changes and city is available, fetch projects
     if (name === "district" && formData.city && value) {
       getProjectByCityAndDistrict(formData.city, value);
@@ -198,21 +198,21 @@ export default function AddCompoundDialog({
       const res = await addCompound(submissionData);
       if (res.code === 200) {
         toast.success("Compound added successfully!");
-        
+
         // إضافة المشروع الجديد وإغلاق النافذة
         onAdd({
           name: res.data?.name,
           id: res.data?.id,
         });
-        
+
         // إعادة تحميل قائمة المشاريع من الخادم
         if (formData.city && formData.district) {
           await getProjectByCityAndDistrict(formData.city, formData.district);
         }
-        
+
         router.refresh();
         onClose();
-        
+
         // إعادة تعيين النموذج
         setFormData({
           name: "",
@@ -251,12 +251,12 @@ export default function AddCompoundDialog({
 
   // Add this useEffect to update the form data when defaultCity or defaultDistrict change
   useEffect(() => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
       city: defaultCity || "",
-      district: defaultDistrict || ""
+      district: defaultDistrict || "",
     }));
-    
+
     // Fetch projects when component loads if city and district are available
     if (defaultCity && defaultDistrict) {
       getProjectByCityAndDistrict(defaultCity, defaultDistrict);

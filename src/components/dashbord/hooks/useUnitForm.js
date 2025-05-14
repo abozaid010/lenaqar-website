@@ -248,7 +248,6 @@ export const useUnitForm = (onClose, onSave) => {
           delete preparedFormData.availabilityDate;
         }
         else if (values.purpose === "Rent") {
-          console.log("Processing rental property");
 
           // Handle the rent structure
           preparedFormData.rentPrice = values.rentPrice ? Number(values.rentPrice) : 0;
@@ -263,14 +262,10 @@ export const useUnitForm = (onClose, onSave) => {
           delete preparedFormData.deliveryStatus;
           delete preparedFormData.totalPrice;
         }
-
-        console.log("Final data to submit:", preparedFormData);
-
         // Call the API to add the unit
         let response;
         if (values.purpose === "Rent") {
           // Use addUnitRent for rental properties
-          console.log("Adding rental unit:", preparedFormData);
           response = await addUnitRent(preparedFormData);
         } else {
           // Use addUnit for buy/sell properties
