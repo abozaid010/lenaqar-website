@@ -51,7 +51,7 @@ export default {
     "message1": "⁠Filter Leads",
     "message2": "24/7 ⁠Instant replies to customers",
     "message3": "⁠Data Analytics",
-    "message4": "⁠Check today's to-do list",
+    "message4": "Property and Clients CRM",
     "message5": "⁠Upselling",
     "message6": "⁠AI Property Consultant",
     "message7": "follow up, and scale with effortless"
@@ -117,7 +117,8 @@ export default {
       "chat": "chat with Us",
       "privacyPolicy": "Read our Privacy Policy",
       "dowenloadios": "Download our iOS App",
-      "dowenloadAndroid": "Download our Android App"
+      "dowenloadAndroid": "Download our Android App",
+      "Facebook": "Facebook",
     },
     "copyright": "©",
     "companyName": "Lena AI",

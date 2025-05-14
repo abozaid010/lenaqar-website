@@ -95,7 +95,7 @@ const Sidebar = () => {
         <div className="flex-1 mt-1">
           <Link
             href="/dashboard"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
               isLinkActive("/dashboard")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
@@ -107,7 +107,7 @@ const Sidebar = () => {
 
           <Link
             href="/analytics"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
               isLinkActive("/analytics")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
@@ -119,7 +119,7 @@ const Sidebar = () => {
 
           <Link
             href="/units"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
               isLinkActive("/units")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
