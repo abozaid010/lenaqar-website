@@ -57,7 +57,6 @@ const PropertyDetailsModal = ({ onClose, property }) => {
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b">
           <h3 className="text-lg font-semibold text-gray-900">
-            {console.log(formattedProperty)}
             {formattedProperty.name ||
               formattedProperty.phone ||
               t.clientsTable.newLead}

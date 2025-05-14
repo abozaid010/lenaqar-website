@@ -168,7 +168,7 @@ export default function ImagesStep({
 
         // Add to successful uploads
         successfulUploads.push({
-          url: image.preview,
+          url: res.url,
           fileId: res.fileId,
         });
       } catch (error) {
