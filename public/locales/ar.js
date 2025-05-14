@@ -47,10 +47,10 @@ export default {
     "ctaButton": "ابدأ الآن",
     "backgroundAlt": "خلفية",
     "aiImageAlt": "مساعد الذكاء الاصطناعي",
-    "message1": "تصفية العملاء",
+    "message1": "فلترة العملاء المحتملين",
     "message2": "ردود فورية للعملاء على مدار الساعة",
     "message3": "تحليلات البيانات",
-    "message4": "تحقق من قائمة المهام اليوم",
+    "message4": "توقعات دقيقة",
     "message5": "البيع الإضافي",
     "message6": "مستشار عقاري ذكي",
     "message7": "تابع ووسّع نشاطك بسهولة"
@@ -116,10 +116,8 @@ export default {
       "privacyPolicy": "اقرأ سياسة الخصوصية الخاصة بنا",
       "chat": "تحدث معنا",
       "dowenloadios": "حمّل تطبيقنا على iOS",
-      "dowenloadAndroid": "حمّل تطبيقنا على Android"
-
-
-
+      "dowenloadAndroid": "حمّل تطبيقنا على Android",
+      "Facebook": "فيسبوك",
     },
     "copyright": "©",
     "companyName": "لينا AI",

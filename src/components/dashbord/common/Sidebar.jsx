@@ -2,18 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Moon,
   LayoutDashboard,
   BarChart2,
   Home,
-  LogOut,
   AlertTriangle,
 } from "lucide-react";
-import Cookies from "js-cookie";
-import toast from "react-hot-toast";
+
 import { useI18n } from "@/context/translate-api";
 
 const Sidebar = () => {
@@ -25,14 +22,6 @@ const Sidebar = () => {
   const toggleSidebar = () => setIsOpen(!isOpen);
   // const initiateLogout = () => setShowLogoutConfirm(true);
   const cancelLogout = () => setShowLogoutConfirm(false);
-
-  // const confirmLogout = () => {
-  //   Cookies.remove("client_id");
-  //   Cookies.remove("access_token");
-  //   setShowLogoutConfirm(false);
-  //   toast.success(t.sidebar.logoutSuccess);
-  //   window.location.reload();
-  // };
 
   const isLinkActive = (path) => {
     if (path === "/dashboard" && pathname === "/dashboard") return true;
@@ -100,22 +89,13 @@ const Sidebar = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-3 flex items-center gap-2">
-          <Link href="/">
-            <Image
-              src={"/images/logo.png"}
-              alt="logo_image"
-              width={120}
-              height={40}
-            />
-          </Link>
-        </div>
+        <div className="p-3 flex items-center gap-2"></div>
 
         {/* Navigation Menu */}
         <div className="flex-1 mt-1">
           <Link
             href="/dashboard"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
               isLinkActive("/dashboard")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
@@ -127,7 +107,7 @@ const Sidebar = () => {
 
           <Link
             href="/analytics"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
               isLinkActive("/analytics")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
@@ -139,7 +119,7 @@ const Sidebar = () => {
 
           <Link
             href="/units"
-            className={`flex items-center px-4 py-2  mb-1 transition-colors ${
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
               isLinkActive("/units")
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"

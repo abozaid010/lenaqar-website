@@ -1,24 +1,35 @@
 "use client";
 import Link from "next/link";
-import { Linkedin, Phone, Building, Facebook, MessageCircle, Bot, Apple, ShoppingBag } from "lucide-react";
+import {
+  Linkedin,
+  Phone,
+  Building,
+  Facebook,
+  MessageCircle,
+  Bot,
+  Apple,
+  ShoppingBag,
+} from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import ChatBot from "@/components/ui/ChatBot";
 
 const Footer = () => {
   const { t } = useI18n();
-  
+
   // App Store links
-  const appStoreLink = "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
-  const playStoreLink = "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
-  
+  const appStoreLink =
+    "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
+  const playStoreLink =
+    "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
+
   // Facebook link
   const facebookLink = "https://www.facebook.com/profile.php?id=61575040225107";
-  
+
   return (
     <footer className="bg-primary text-white py-10 relative">
       {/* ChatBot Component */}
       <ChatBot />
-      
+
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="space-y-4">
@@ -29,10 +40,13 @@ const Footer = () => {
               <Building className="mt-1 flex-shrink-0" />
               <p>{t.footer.companyInfo.address}</p>
             </div>
-            
+
             {/* Privacy Policy Link */}
             <div className="mt-2">
-              <Link href="/privacy" className="flex items-center space-x-3 hover:text-blue-200 transition-colors group">
+              <Link
+                href="/privacy"
+                className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
+              >
                 <div className="p-2 bg-white/10 rounded-full transition-colors">
                   <MessageCircle size={20} />
                 </div>
@@ -51,9 +65,8 @@ const Footer = () => {
               </div>
 
               <span>{t.footer.connect.dowenloadios} </span>
-
             </Link>
-            
+
             {/* Google Play Store Link - MOVED HERE */}
             <Link
               href={playStoreLink}
@@ -66,7 +79,6 @@ const Footer = () => {
               </div>
 
               <span>{t.footer.connect.dowenloadAndroid} </span>
-
             </Link>
           </div>
 
@@ -82,7 +94,9 @@ const Footer = () => {
                 <div className="flex flex-col">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">{t.footer.contact.sales} :</span>
+                      <span className="text-white font-medium">
+                        {t.footer.contact.sales} :
+                      </span>
                       <a
                         href="tel:01016080323"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
@@ -91,7 +105,9 @@ const Footer = () => {
                       </a>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-white font-medium">{t.footer.contact.support} :</span>
+                      <span className="text-white font-medium">
+                        {t.footer.contact.support} :
+                      </span>
                       <a
                         href="tel:01002891933"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
@@ -103,15 +119,13 @@ const Footer = () => {
                 </div>
               </div>
             </div>
-            
-            
           </div>
 
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
               {t.footer.connect.title}
             </h3>
-            
+
             {/* LinkedIn Link */}
             <Link
               href="https://www.linkedin.com/company/lenaai-net/"
@@ -124,7 +138,7 @@ const Footer = () => {
               </div>
               <span>{t.footer.connect.linkedin}</span>
             </Link>
-            
+
             {/* Facebook Link */}
             <Link
               href={facebookLink}
@@ -135,9 +149,9 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Facebook size={20} />
               </div>
-              <span>Facebook</span>
+              <span>{t.footer.connect.Facebook}</span>
             </Link>
-            
+
             {/* Chatbot Link in footer */}
             <Link
               href="#"
@@ -158,8 +172,8 @@ const Footer = () => {
         <div className="mt-10 pt-6 border-t border-white/30 text-center">
           <p>
             {t.footer.copyright} {new Date().getFullYear()}{" "}
-            {t.footer.companyName}. {t.footer.rightsReserved}, {t.footer.version}{" "}
-            0.0.001
+            {t.footer.companyName}. {t.footer.rightsReserved},{" "}
+            {t.footer.version} 0.0.001
           </p>
         </div>
       </div>
