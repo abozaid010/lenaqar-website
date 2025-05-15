@@ -8,7 +8,7 @@ const SalesManagerSection = () => {
   const isRTL = t.direction === "rtl";
 
   return (
-    <section className="mt-6 max-w-[90%] w-full mx-auto">
+    <section className="mt-6 container mx-auto">
       <div className="mx-auto text-center py-5">
         <h1 className="text-2xl md:text-3xl font-extrabold text-primary mb-4 bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
           {t.salesManager.title}
