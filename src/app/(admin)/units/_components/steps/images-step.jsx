@@ -4,9 +4,9 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import { compressImage } from "@/utils/imageCompression";
 
 import AddDeveloperDialog from "../add-developer-dialog";
-import imageCompression from "browser-image-compression";
 import {
   deleteImage,
   uploadImages,
@@ -67,25 +67,6 @@ export default function ImagesStep({
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       handleFiles(e.target.files);
-    }
-  };
-
-  // Compression function
-  const compressImage = async (file) => {
-    const options = {
-      maxSizeMB: 0.5,
-      maxWidthOrHeight: 1920,
-      useWebWorker: true,
-      fileType: file.type,
-      initialQuality: 0.7,
-    };
-
-    try {
-      return await imageCompression(file, options);
-    } catch (error) {
-      console.error("Error compressing image:", error);
-      // If compression fails, return the original file
-      return file;
     }
   };
 
