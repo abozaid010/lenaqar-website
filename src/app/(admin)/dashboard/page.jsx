@@ -24,11 +24,11 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
   return (
     <div className="bg-gray-50 min-h-screen ">
-      <div className="max-w-7xl mx-auto my-3 no-print">
+      <div className="container mx-auto my-3 no-print !px-0">
         <PremiumFeatures />
       </div>
 
-      <div className="max-w-7xl mx-auto bg-white rounded-md shadow-sm p-3 sm:p-4 md:p-6">
+      <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
         <DashbordFilter appliedFilters={searchParams} />
 
         <SearchBar q={searchParams.query} />
