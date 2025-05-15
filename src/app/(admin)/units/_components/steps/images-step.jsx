@@ -182,14 +182,12 @@ export default function ImagesStep({
       }
     }
 
-    // Update the form data with all uploaded images
-    const sanitizedUploads = successfulUploads.map(
+    const sanitizedUploads = [...uploadedImages, ...successfulUploads].map(
       ({ preview, ...rest }) => rest
     );
 
-    const allUploaded = [...uploadedImages, ...successfulUploads];
-    updateFormData({ images: [...uploadedImages, ...sanitizedUploads] });
-    setUploadedImages(allUploaded);
+    setUploadedImages([...uploadedImages, ...successfulUploads]);
+    updateFormData({ images: sanitizedUploads });
 
     // Remove successfully uploaded images from selectedImages
     const remainingSelected = selectedImages.filter(
