@@ -16,7 +16,7 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
     <div className="py-4 flex justify-between items-between overflow-hidden">
       <button
         onClick={handleBackToUnits}
-        className="cursor-pointer bg-gray-500 text-white px-4 py-2 rounded-md flex items-center"
+        className="cursor-pointer bg-gray-500 text-white px-[16px] py-[10px] h-[40px]  rounded-md flex items-center"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

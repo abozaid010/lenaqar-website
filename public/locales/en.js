@@ -289,12 +289,29 @@ export default {
     "allDevelopers": "All Developers",
     "allCompounds": "All Projects",
     "allPurposes": "All Purposes",
+    "allPropertyTypes":"All Property Types",
+    "price":"price",
+    "applay":"Apply",
+    "min":" Min Price",
+    "max":"Max Price",
+    "activeFilter":" Active Filters:",
+    "clearall":" Clear All",
     "purposes": {
       "buy": "Buy",
       "rent": "Rent",
       "sell": "Sell",
       "lease": "Lease"
     }
+  },
+  shareModel:{
+   "Content":"Share Unit Content",
+   "post":" Post Content",
+   "images":"Images",
+   "loading":"Loading share data...",
+   "copy":" Copied!",
+   "copyLink":"Copy with Link",
+   "noData":"No data available to share.",
+   "noImage":"No images available to share."
   },
   unitsSearch: {
     "placeholder": "Search by name or location...",

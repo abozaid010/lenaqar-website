@@ -104,7 +104,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         : "5,000,000,000";
       return `${min} - ${max} EGP`;
     }
-    return "Price";
+    return t.unitsFilter.price;
   };
 
   // Function to remove all filters
@@ -408,7 +408,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                   setIsPropertyTypeDropdownOpen(false);
                 }}
               >
-                {t.unitsFilter.allPropertyTypes || "All Property Types"}
+                {t.unitsFilter.allPropertyTypes}
               </div>
               {buildingTypes.map((type) => (
                 <div 
@@ -455,7 +455,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               <div className="space-y-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Min Price EGP
+                    {t.unitsFilter.min} EGP
                   </label>
                   <input
                     type="text"
@@ -472,7 +472,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    Max Price EGP
+                    {t.unitsFilter.max}  EGP
                   </label>
                   <input
                     type="text"
@@ -492,7 +492,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                   className="w-full py-1.5 text-sm bg-primary text-white rounded-md"
                   onClick={handlePriceApply}
                 >
-                  Apply
+                  {t.unitsFilter.applay}
                 </button>
               </div>
             </div>
@@ -514,7 +514,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 mt-3">
           <span className="text-xs font-medium text-gray-700">
-            Active Filters:
+             {t.unitsFilter.activeFilter}
           </span>
 
           {getActiveFilters().map((filter, index) => (
@@ -558,7 +558,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
             className="ml-1 text-primary hover:text-primary-dark text-xs font-medium"
             onClick={handleRemoveAllFilters}
           >
-            Clear All
+           {t.unitsFilter.clearall}
           </button>
         </div>
       )}
