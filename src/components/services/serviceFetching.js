@@ -301,6 +301,7 @@ export async function createBooking(bookingData) {
   }
 }
 
+
 export async function userAnalytics(days) {
   const clientId = await getClientid();
   try {
@@ -330,6 +331,34 @@ console.log(response.data.data)
 
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
+
+// #### Sales API ####
+export async function getSalesData(searchParams) {
+  try {
+    const response = await axiosInstance.get("sales-employees/list-all-employees");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function createNewEmployee(paylod) {
+  try {
+    await axiosInstance.post("sales-employees/create-employee", paylod);
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function deleteEmployee(id) {
+  try {
+    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+
     return { error: error.message };
   }
 }
