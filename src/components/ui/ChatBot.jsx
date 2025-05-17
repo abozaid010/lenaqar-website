@@ -6,7 +6,7 @@ const ChatBot = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   
   // LenaAI Chat URL
-  const chatUrl = "https://chat.lenaai.net";
+  const chatUrl = "https://chat.lenaai.net/demo";
 
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
