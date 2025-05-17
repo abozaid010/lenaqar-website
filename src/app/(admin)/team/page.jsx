@@ -11,7 +11,7 @@ export default async function TeamPage() {
     <div className="container mx-auto">
       <AddNewMember clientId={clientId} />
 
-      <TeamTable data={data} />
+      <TeamTable data={data.data} />
     </div>
   );
 }
