@@ -17,6 +17,13 @@ export async function middleware(request) {
     }
   }
 
+  if (path === "/") {
+    const clientId = request.cookies.get("client_id")?.value;
+    if (clientId) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+  }
+
   return NextResponse.next();
 }
 
