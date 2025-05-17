@@ -247,7 +247,12 @@ export default function AddUnitModal({
         return;
       }
 
-      const requiredFields = ["finishing", "developer", "furnishing"];
+      let requiredFields;
+      if (formData.purpose === "sell") {
+        requiredFields = ["finishing", "developer", "furnishing"];
+      } else {
+        requiredFields = ["finishing", "furnishing"];
+      }
       const missingFields = requiredFields.filter((field) => !formData[field]);
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);

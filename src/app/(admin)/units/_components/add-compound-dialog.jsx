@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import { compressImage } from "@/utils/imageCompression";
 import Dialog from "../_components/dialog";
 import { Loader2 } from "lucide-react";
 import {
@@ -11,7 +13,6 @@ import {
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
-import { useRouter } from "next/navigation";
 
 export default function AddCompoundDialog({
   clientId,
@@ -24,7 +25,6 @@ export default function AddCompoundDialog({
   defaultCity,
   defaultDistrict,
 }) {
-  const router = useRouter();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -38,7 +38,6 @@ export default function AddCompoundDialog({
 
   const getProjectByCityAndDistrict = async (city, district) => {
     if (city && district) {
-      console.log(`Selected City: ${city}, Selected District: ${district}`);
       try {
         setIsLoadingProjects(true);
         const data = await getprojects(city, district);
@@ -93,38 +92,84 @@ export default function AddCompoundDialog({
 
     if (!formData.name.trim()) {
       newErrors.name = "Compound name is required";
+      toast.error("Compound name is required");
     }
 
     if (!formData.city.trim()) {
       newErrors.city = "City is required";
+      toast.error("City is required");
     }
 
     if (!formData.country.trim()) {
       newErrors.country = "Country is required";
+      toast.error("Country is required");
     }
 
     if (!formData.district.trim()) {
       newErrors.district = "District is required";
+      toast.error("District is required");
     }
 
     if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
       newErrors.area = "Area must be a positive number";
+      toast.error("Area must be a positive number");
     }
 
     return newErrors;
   };
 
-  const handleFileSelect = (e) => {
+  const handleFileSelect = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
+
+    if (file && file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB. Please select a smaller file.");
+      return;
+    }
+    if (
+      file &&
+      !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    ) {
+      toast.error(
+        "Invalid file type. Please select a JPEG, PNG, or WEBP image."
+      );
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setSelectedImage({
+        name: file.name,
+        preview: reader.result,
+      });
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      setIsUploading(true);
+
+      const compressedFile = await compressImage(file);
+
+      const formDataToUpload = new FormData();
+      formDataToUpload.append("file", compressedFile);
+
+      const res = await uploadImages(formDataToUpload);
+
+      setFormData((prev) => ({
+        ...prev,
+        master_plan: res.url,
+      }));
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      toast.error("Failed to compress image. Please try again.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
   const handleRemoveImage = async (e) => {
     e.stopPropagation();
 
-    if (uploadedImageId) {
+    if (selectedImage.imageId) {
       try {
         await deleteImage(uploadedImageId);
         toast.success("Image removed successfully from the server!");
@@ -150,40 +195,11 @@ export default function AddCompoundDialog({
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedImage) {
-      toast.error("Please select an image to upload.");
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedImage);
-
-      const res = await uploadImages(formData);
-      setUploadedImageId(res.fileId);
-      setFormData((prev) => ({
-        ...prev,
-        master_plan: res.url,
-      }));
-
-      toast.success("Image uploaded successfully!");
-      setSelectedImage(null);
-    } catch (error) {
-      toast.error("Failed to upload image. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
-      setErrors(formErrors);
       return;
     }
 
@@ -199,34 +215,30 @@ export default function AddCompoundDialog({
       if (res.code === 200) {
         toast.success("Compound added successfully!");
 
-        // إضافة المشروع الجديد وإغلاق النافذة
         onAdd({
           name: res.data?.name,
           id: res.data?.id,
         });
-
-        // إعادة تحميل قائمة المشاريع من الخادم
-        if (formData.city && formData.district) {
-          await getProjectByCityAndDistrict(formData.city, formData.district);
-        }
-
-        router.refresh();
-        onClose();
-
-        // إعادة تعيين النموذج
         setFormData({
           name: "",
           description: "",
           developer_name: "",
-          city: "",
+          city: defaultCity || "",
           country: "Egypt",
-          district: "",
+          district: defaultDistrict || "",
           area: "",
           gated: false,
           video_url: "",
           google_map_link: "",
           master_plan: "",
+          client_id: clientId || "",
         });
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = null;
+        }
+        setSelectedImage(null);
+        onClose();
       } else {
         toast.error("Failed to add compound. Please try again.");
       }
@@ -266,234 +278,280 @@ export default function AddCompoundDialog({
   return (
     <>
       <Dialog isOpen={isOpen} onClose={onClose} title="Add New Project">
-        <div>
-          <div className="space-y-2">
-            {/* Basic Information */}
+        <div className="space-y-2">
+          {/* Basic Information */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Compound Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={2}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          {/* Location */}
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Compound Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={2}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Location */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select City</option>
-                  {Egypt_cities.countries[0].governorates?.map((gov) => (
-                    <option key={gov?.governorate} value={gov?.governorate}>
-                      {gov?.governorate}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Country <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                District <span className="text-red-500">*</span>
+                City <span className="text-red-500">*</span>
               </label>
               <select
-                name="district"
-                value={formData.district}
+                name="city"
+                value={formData.city}
                 onChange={handleChange}
-                disabled={!formData.city}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">
-                  {formData.city ? "Select District" : "Select City First"}
-                </option>
-                {formData.city &&
-                  Egypt_cities.countries[0].governorates
-                    .find((gov) => gov.governorate === formData.city)
-                    ?.districts.map((dist) => (
-                      <option key={dist.district} value={dist.district}>
-                        {dist.district}
-                      </option>
-                    ))}
+                <option value="">Select City</option>
+                {Egypt_cities.countries[0].governorates?.map((gov) => (
+                  <option key={gov?.governorate} value={gov?.governorate}>
+                    {gov?.governorate}
+                  </option>
+                ))}
               </select>
             </div>
 
-            {/* Details */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Area (m²)
-                </label>
-                <input
-                  type="number"
-                  name="area"
-                  value={formData.area}
-                  placeholder="1000"
-                  onChange={handleChange}
-                  min="0"
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="flex items-center h-full pt-6">
-                <input
-                  type="checkbox"
-                  id="gated"
-                  name="gated"
-                  checked={formData.gated}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="gated"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  Gated Community
-                </label>
-              </div>
-            </div>
-
-            {/* Developer */}
-            <div className="relative">
-              <label className={`block text-sm font-medium mb-1`}>
-                Developer <span className="text-red-500">*</span>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Country <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <select
-                  name="developer_name"
-                  value={formData.developer_name}
-                  onChange={handleChange}
-                  className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
-                >
-                  <option value="">Select developer</option>
-                  {developers.map((d, idx) => (
-                    <option key={idx} value={d}>
-                      {d}
+              <input
+                type="text"
+                name="country"
+                value={formData.country}
+                onChange={handleChange}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              District <span className="text-red-500">*</span>
+            </label>
+            <select
+              name="district"
+              value={formData.district}
+              onChange={handleChange}
+              disabled={!formData.city}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">
+                {formData.city ? "Select District" : "Select City First"}
+              </option>
+              {formData.city &&
+                Egypt_cities.countries[0].governorates
+                  .find((gov) => gov.governorate === formData.city)
+                  ?.districts.map((dist) => (
+                    <option key={dist.district} value={dist.district}>
+                      {dist.district}
                     </option>
                   ))}
-                </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsAddDeveloperDialogOpen(true)}
-                className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+            </select>
+          </div>
+
+          {/* Details */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Area (m²)
+              </label>
+              <input
+                type="number"
+                name="area"
+                value={formData.area}
+                placeholder="1000"
+                onChange={handleChange}
+                min="0"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="flex items-center h-full pt-6">
+              <input
+                type="checkbox"
+                id="gated"
+                name="gated"
+                checked={formData.gated}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label
+                htmlFor="gated"
+                className="ml-2 block text-sm text-gray-700"
               >
-                + Add New
-              </button>
-            </div>
-
-            {/* Links */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Video URL
+                Gated Community
               </label>
-              <input
-                type="url"
-                name="video_url"
-                value={formData.video_url}
+            </div>
+          </div>
+
+          {/* Developer */}
+          <div className="relative">
+            <label className={`block text-sm font-medium mb-1`}>
+              Developer <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                name="developer_name"
+                value={formData.developer_name}
                 onChange={handleChange}
-                placeholder="https://example.com/video"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Google Maps Link
-              </label>
-              <input
-                type="url"
-                name="google_map_link"
-                value={formData.google_map_link}
-                onChange={handleChange}
-                placeholder="https://maps.google.com/..."
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Master Plan Image
-              </label>
-              <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg, image/png, image/webp"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  disabled={isUploading}
-                />
-                <div
-                  onClick={() => fileInputRef.current.click()}
-                  className="flex flex-col items-center justify-center"
+                className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
+              >
+                <option value="">Select developer</option>
+                {developers.map((d, idx) => (
+                  <option key={idx} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
                 >
-                  {selectedImage || formData.master_plan ? (
-                    <div className="relative">
-                      <img
-                        src={
-                          selectedImage
-                            ? URL.createObjectURL(selectedImage)
-                            : formData.master_plan
-                        }
-                        alt="Selected"
-                        className="w-full h-full max-h-32 object-cover rounded-md"
+                  <path
+                    fillRule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAddDeveloperDialogOpen(true)}
+              className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+            >
+              + Add New
+            </button>
+          </div>
+
+          {/* Links */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Video URL
+            </label>
+            <input
+              type="url"
+              name="video_url"
+              value={formData.video_url}
+              onChange={handleChange}
+              placeholder="https://example.com/video"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Google Maps Link
+            </label>
+            <input
+              type="url"
+              name="google_map_link"
+              value={formData.google_map_link}
+              onChange={handleChange}
+              placeholder="https://maps.google.com/..."
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Master Plan Image
+            </label>
+            <div className="border-2 border-dashed rounded-lg p-5 text-center cursor-pointer">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg, image/png, image/webp"
+                onChange={handleFileSelect}
+                className="hidden"
+                disabled={isUploading}
+              />
+              <div
+                onClick={() => fileInputRef.current.click()}
+                className="flex flex-col items-center justify-center"
+              >
+                {selectedImage || formData.master_plan ? (
+                  <div className="relative group min-h-[200px] aspect-square flex flex-col gap-1 items-center justify-center">
+                    <div className="relative flex-1 w-full h-full">
+                      <Image
+                        fill
+                        priority={true}
+                        src={formData.master_plan || selectedImage?.preview}
+                        alt={`Image ${selectedImage.name}`}
+                        className="w-full h-full object-cover rounded-md"
                       />
+
+                      {/* Status Overlay */}
+                      {isUploading && (
+                        <div
+                          className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
+                        >
+                          <svg
+                            className="animate-spin h-8 w-8 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Success indicator for uploaded images */}
+                      {!isUploading && (
+                        <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                      )}
+
+                      {/* Delete button - only show if not currently processing */}
                       {!isUploading && (
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -510,84 +568,67 @@ export default function AddCompoundDialog({
                         </button>
                       )}
                     </div>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-gray-400 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <p className="text-lg text-gray-700 mb-2">
-                        Click or drag and drop an image here
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        Supported formats: JPG, PNG, WEBP (Max 5MB each)
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-              {selectedImage && (
-                <div className="mt-4 flex justify-center">
-                  <button
-                    onClick={handleUpload}
-                    disabled={isUploading}
-                    className={`flex items-center gap-2 font-medium py-1.5 px-6 rounded-md transition-colors ${
-                      isUploading
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-primary hover:opacity-90 text-white"
-                    }`}
-                  >
-                    {isUploading ? (
-                      <>
-                        <Loader2 size={24} className="animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      "Upload Image"
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  isSubmitting || isUploading
-                    ? "pointer-events-none opacity-80"
-                    : "hover:bg-primary/90"
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 size={20} className="animate-spin mr-2" />
-                    Saving...
+                    {/* Image label */}
+                    <div className="mt-1 text-xs text-gray-500 truncate">
+                      {selectedImage.name}
+                    </div>
                   </div>
                 ) : (
-                  "Save Project"
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 text-gray-400 mb-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                      />
+                    </svg>
+                    <p className="text-base text-gray-700 mb-2">
+                      Click or drag and drop an image here
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      Supported formats: JPG, PNG, WEBP (Max 5MB each)
+                    </p>
+                  </>
                 )}
-              </button>
+              </div>
             </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                isSubmitting || isUploading
+                  ? "pointer-events-none opacity-80"
+                  : "hover:bg-primary/90"
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 size={20} className="animate-spin mr-2" />
+                  Saving...
+                </div>
+              ) : (
+                "Save Project"
+              )}
+            </button>
           </div>
         </div>
       </Dialog>
