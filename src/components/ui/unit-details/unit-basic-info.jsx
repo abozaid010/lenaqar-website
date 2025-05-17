@@ -16,6 +16,12 @@ export default function UnitBasicInfo({ unit }) {
 
       <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
 
+      {unit.code && (
+        <p className="text-lg text-gray-600">
+          unit code: <span className="font-semibold">{unit.code}</span>
+        </p>
+      )}
+
       <p className="text-lg text-gray-600">
         {unit.project}, {unit.city}
       </p>
