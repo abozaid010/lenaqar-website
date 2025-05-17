@@ -300,3 +300,14 @@ export async function createBooking(bookingData) {
     return { error: error.message };
   }
 }
+
+// #### Sales API ####
+export async function getSalesData(searchParams) {
+  try {
+    const response = await axiosInstance.get("sales-employees/list-all-employees");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}
