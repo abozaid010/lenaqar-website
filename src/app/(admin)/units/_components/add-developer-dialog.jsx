@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Dialog from "@/components/ui/dialog";
+import Dialog from "@/components/ui/Dialog";
 import { Loader2 } from "lucide-react";
 import { addDeveloper } from "@/components/services/serviceFetching";
 import { v4 as uuidv4 } from "uuid";
