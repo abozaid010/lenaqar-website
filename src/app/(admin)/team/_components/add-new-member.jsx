@@ -1,6 +1,6 @@
 "use client";
 
-import Dialog from "@/components/ui/dialog";
+import Dialog from "@/components/ui/Dialog";
 import { PlusIcon, Loader2 } from "lucide-react";
 import { useState, useActionState, useEffect } from "react";
 import { addNewSales } from "../_actions/actions";
