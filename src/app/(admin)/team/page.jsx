@@ -1,11 +1,9 @@
 import { getSalesData } from "@/components/services/serviceFetching";
 import AddNewMember from "./_components/add-new-member";
-import { getClientid } from "@/components/services/clientCookies";
 import TeamTable from "./_components/team-table";
 import Link from "next/link";
 
 export default async function TeamPage() {
-  const clientId = await getClientid();
   const data = await getSalesData();
 
   let hasAccess = true;
@@ -17,7 +15,7 @@ export default async function TeamPage() {
     <div className="container mx-auto">
       {hasAccess ? (
         <>
-          <AddNewMember clientId={clientId} />
+          <AddNewMember />
 
           <TeamTable data={data.data} />
         </>
