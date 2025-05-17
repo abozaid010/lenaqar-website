@@ -341,12 +341,30 @@ export async function getProfileData() {
     return { error: "Client email not found" };
   }
 
-  console.log("Client Email:", clientEmail);
   try {
     const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function updateProfileData(formData) {
+  console.log("Form data:", formData);
+  const clientEmail = getClientEmail();
+
+  if (!clientEmail) {
+    console.error("Client email not found");
+    return { error: "Client email not found" };
+  }
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // const response = axiosInstance.patch("/client/update-profile", formData);
+    // return response.data;
+  } catch (error) {
+    console.error("Failed to update profile data:", error.message);
     return { error: error.message };
   }
 }
