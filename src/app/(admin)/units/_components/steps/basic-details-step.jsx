@@ -5,6 +5,7 @@ import Egypt_cities from "../../../../../data/Egypt_cities.json";
 import AddCompoundDialog from "../add-compound-dialog";
 import { useState, useEffect } from "react";
 import { getprojects } from "@/components/services/serviceFetching";
+import Cookies from "js-cookie";
 
 export default function BasicDetailsStep({
   clientId,
@@ -19,7 +20,7 @@ export default function BasicDetailsStep({
   const [availableCompounds, setAvailableCompounds] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-
+  const ar = Cookies.get("lang")
   // Function to print selected city and district
   const printLocationDetails = async (city, district) => {
     if (city && district) {
@@ -285,7 +286,7 @@ export default function BasicDetailsStep({
         <div>
           <div>
             <label
-              className={`text-sm  font-medium mb-1 flex items-center ${
+              className={`text-sm relative  font-medium mb-1 flex items-center ${
                 invalidFields.includes("project")
                   ? "text-red-500"
                   : "text-gray-700"
@@ -297,9 +298,9 @@ export default function BasicDetailsStep({
                 type="button"
                 disabled={!formData.district}
                 onClick={() => setIsAddCompoundDialogOpen(true)}
-                className="ml-auto text-blue-600 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
+                className={` text-blue-600 absolute ${ar === "ar" ? "left-0" : "right-0"} text-sm font-medium disabled:opacity-70 disabled:pointer-events-none`}
               >
-                + Add New
+                + {t.addNew}
               </button>
             </label>
           </div>

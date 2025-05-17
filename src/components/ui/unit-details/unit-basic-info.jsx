@@ -1,7 +1,11 @@
+"use client"
+import { useI18n } from "@/context/translate-api";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
+// import { useI18n } from "@/context/translate-api";
 
-export default function UnitBasicInfo({ unit }) {
+export default function Uni({ unit}) {
+  const { t } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
       <div className="flex items-center">
@@ -40,8 +44,10 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-xs text-gray-500">Developer</span>
-            <p className="font-medium text-xs">{unit.developer || "N/A"}</p>
+            <span className="text-xs text-gray-500">{t.unitDetails?.developer}</span>
+            <p className="font-medium text-xs">
+              {unit.developer || t.unitDetails.notAvailable}
+            </p>
           </div>
         </div>
 
@@ -63,10 +69,10 @@ export default function UnitBasicInfo({ unit }) {
             </svg>
             <div>
               <span className="text-gray-500 text-xs line-clamp-1">
-                Delivery Date
+                {t.unitDetails?.deliveryDate}
               </span>
               <p className="font-medium text-xs whitespace-nowrap">
-                {formatDate(unit.deliveryDate) || "N/A"}
+               {formatDate(unit.deliveryDate) || t.unitDetails.notAvailable}
               </p>
             </div>
           </div>
@@ -88,8 +94,10 @@ export default function UnitBasicInfo({ unit }) {
             />
           </svg>
           <div>
-            <span className="text-xs line-clamp-1 text-gray-500">Floor</span>
-            <p className="font-medium text-xs">{getFloorLabel(unit.floor)}</p>
+            <span className="text-xs line-clamp-1 text-gray-500">{t.unitDetails.floor}</span>
+            <p className="font-medium text-xs">
+              <span className="font-bold">{t.unitDetails.floor}:</span> {getFloorLabel(unit.floor, t)}
+            </p>
           </div>
         </div>
 
@@ -110,9 +118,11 @@ export default function UnitBasicInfo({ unit }) {
           </svg>
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
-              Finishing
+              {t.unitDetails?.finishing}
             </span>
-            <p className="font-medium text-xs">{unit.finishing || "N/A"}</p>
+            <p className="font-medium text-xs">
+              {unit.finishing || t.unitDetails?.notAvailable}
+            </p>
           </div>
         </div>
 
@@ -133,12 +143,13 @@ export default function UnitBasicInfo({ unit }) {
           </svg>
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
-              Furnishing
+              {t.unitDetails.finishing}
             </span>
-            <p className="font-medium text-xs whitespace-nowrap">
-              {unit.furnishing || "N/A"}
+            <p className="font-medium text-xs whitespace-nowrap ">
+              {unit.furnishing || t.unitDetails?.notAvailable}
             </p>
           </div>
+          {/* <p>{t.unitDetails.deliveryDate}</p> */}
         </div>
       </div>
 
@@ -160,8 +171,10 @@ export default function UnitBasicInfo({ unit }) {
                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
               />
             </svg>
-            <span className="mt-1 text-sm text-gray-500">Area</span>
-            <span className="font-medium">{unit.landArea} m²</span>
+            <span className="mt-1 text-sm text-gray-500">{t.unitDetails.area}</span>
+            <span className="font-medium">
+              {unit.landArea} m²
+            </span>
           </div>
         )}
 
@@ -186,8 +199,10 @@ export default function UnitBasicInfo({ unit }) {
               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">View</span>
-          <span className="font-medium">{unit.view || "N/A"}</span>
+          <span className="mt-1 text-sm text-gray-500">{t.unitDetails.view}</span>
+          <span className="font-medium">
+          {unit.view || t.unitDetails?.notAvailable}
+          </span>
         </div>
 
         <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
@@ -205,8 +220,10 @@ export default function UnitBasicInfo({ unit }) {
               d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">Rooms</span>
-          <span className="font-medium">{unit.roomsCount}</span>
+          <span className="mt-1 text-sm text-gray-500">{t.unitDetails.rooms}</span>
+          <span className="font-medium">
+            {unit.roomsCount}
+          </span>
         </div>
 
         <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
@@ -224,13 +241,15 @@ export default function UnitBasicInfo({ unit }) {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">Bathrooms</span>
-          <span className="font-medium">{unit.bathroomCount}</span>
+          <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
+          <span className="font-medium">
+            {unit.bathroomCount}
+          </span>
         </div>
       </div>
 
       {unit.purpose === "rent" && unit?.amenities.length > 0 && (
-        <UnitAmenities amenities={unit.amenities} />
+        <UnitAmenities amenities={unit.amenities} t={t} />
       )}
     </div>
   );
@@ -247,12 +266,12 @@ function formatDate(dateString) {
   });
 }
 
-function getFloorLabel(floor) {
-  if (!floor) return "Ground";
+function getFloorLabel(floor, t) {
+  if (!floor) return t.unitDetails?.ground;
   const floorNum = Number.parseInt(floor);
-  if (floorNum === 0) return "Ground";
-  if (floorNum === 1) return "1st";
-  if (floorNum === 2) return "2nd";
-  if (floorNum === 3) return "3rd";
-  return `${floorNum}th`;
+  if (floorNum === 0) return t.unitDetails.ground;
+  if (floorNum === 1) return t.unitDetails.first;
+  if (floorNum === 2) return t.unitDetails.second;
+  if (floorNum === 3) return t.unitDetails.third;
+  return `${floorNum}${t.unitDetails.th}`;
 }

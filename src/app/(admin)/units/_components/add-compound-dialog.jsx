@@ -12,6 +12,8 @@ import {
 import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
 
 export default function AddCompoundDialog({
   clientId,
@@ -25,6 +27,8 @@ export default function AddCompoundDialog({
   defaultDistrict,
 }) {
   const router = useRouter();
+  const { t } = useI18n();
+  const ar = Cookies.get("lang");
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -92,23 +96,23 @@ export default function AddCompoundDialog({
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Compound name is required";
+      newErrors.name = t.formValidation?.compoundNameRequired || "Compound name is required";
     }
 
     if (!formData.city.trim()) {
-      newErrors.city = "City is required";
+      newErrors.city = t.formValidation?.cityRequired || "City is required";
     }
 
     if (!formData.country.trim()) {
-      newErrors.country = "Country is required";
+      newErrors.country = t.formValidation?.countryRequired || "Country is required";
     }
 
     if (!formData.district.trim()) {
-      newErrors.district = "District is required";
+      newErrors.district = t.formValidation?.districtRequired || "District is required";
     }
 
     if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
-      newErrors.area = "Area must be a positive number";
+      newErrors.area = t.formValidation?.areaPositive || "Area must be a positive number";
     }
 
     return newErrors;
@@ -127,11 +131,11 @@ export default function AddCompoundDialog({
     if (uploadedImageId) {
       try {
         await deleteImage(uploadedImageId);
-        toast.success("Image removed successfully from the server!");
+        toast.success(t.toasts?.imageRemoved || "Image removed successfully from the server!");
         setUploadedImageId(null);
       } catch (error) {
         toast.error(
-          "Failed to remove image from the server. Please try again."
+          t.toasts?.imageRemoveFailed || "Failed to remove image from the server. Please try again."
         );
         return;
       }
@@ -152,7 +156,7 @@ export default function AddCompoundDialog({
 
   const handleUpload = async () => {
     if (!selectedImage) {
-      toast.error("Please select an image to upload.");
+      toast.error(t.toasts?.selectImage || "Please select an image to upload.");
       return;
     }
 
@@ -169,10 +173,10 @@ export default function AddCompoundDialog({
         master_plan: res.url,
       }));
 
-      toast.success("Image uploaded successfully!");
+      toast.success(t.toasts?.imageUploaded || "Image uploaded successfully!");
       setSelectedImage(null);
     } catch (error) {
-      toast.error("Failed to upload image. Please try again.");
+      toast.error(t.toasts?.imageUploadFailed || "Failed to upload image. Please try again.");
     } finally {
       setIsUploading(false);
     }
@@ -197,7 +201,7 @@ export default function AddCompoundDialog({
 
       const res = await addCompound(submissionData);
       if (res.code === 200) {
-        toast.success("Compound added successfully!");
+        toast.success(t.toasts?.compoundAdded || "Compound added successfully!");
 
         // إضافة المشروع الجديد وإغلاق النافذة
         onAdd({
@@ -228,11 +232,11 @@ export default function AddCompoundDialog({
           master_plan: "",
         });
       } else {
-        toast.error("Failed to add compound. Please try again.");
+        toast.error(t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.");
       }
     } catch (error) {
-      toast.error("Failed to add compound. Please try again.");
-      setErrors({ submit: "Failed to add compound. Please try again." });
+      toast.error(t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.");
+      setErrors({ submit: t.toasts?.compoundAddFailed || "Failed to add compound. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
@@ -265,13 +269,13 @@ export default function AddCompoundDialog({
 
   return (
     <>
-      <Dialog isOpen={isOpen} onClose={onClose} title="Add New Project">
+      <Dialog isOpen={isOpen} onClose={onClose} title={t.modal?.addNewProject || "Add New Project"}>
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Compound Name <span className="text-red-500">*</span>
+                {t.formLabels?.compoundName || "Compound Name"} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -284,7 +288,7 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                {t.formLabels?.description || "Description"}
               </label>
               <textarea
                 name="description"
@@ -299,7 +303,7 @@ export default function AddCompoundDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  City <span className="text-red-500">*</span>
+                  {t.formLabels?.city || "City"} <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="city"
@@ -307,7 +311,7 @@ export default function AddCompoundDialog({
                   onChange={handleChange}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">Select City</option>
+                  <option value="">{t.formLabels?.selectCity || "Select City"}</option>
                   {Egypt_cities.countries[0].governorates?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
                       {gov?.governorate}
@@ -318,7 +322,7 @@ export default function AddCompoundDialog({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Country <span className="text-red-500">*</span>
+                  {t.formLabels?.country || "Country"} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -332,7 +336,7 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                District <span className="text-red-500">*</span>
+                {t.formLabels?.district || "District"} <span className="text-red-500">*</span>
               </label>
               <select
                 name="district"
@@ -342,7 +346,7 @@ export default function AddCompoundDialog({
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
-                  {formData.city ? "Select District" : "Select City First"}
+                  {formData.city ? (t.formLabels?.selectDistrict || "Select District") : (t.formLabels?.cityFirst || "Select City First")}
                 </option>
                 {formData.city &&
                   Egypt_cities.countries[0].governorates
@@ -359,7 +363,7 @@ export default function AddCompoundDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Area (m²)
+                  {t.formLabels?.area || "Area (m²)"}
                 </label>
                 <input
                   type="number"
@@ -385,7 +389,7 @@ export default function AddCompoundDialog({
                   htmlFor="gated"
                   className="ml-2 block text-sm text-gray-700"
                 >
-                  Gated Community
+                  {t.formLabels?.gatedCommunity || "Gated Community"}
                 </label>
               </div>
             </div>
@@ -393,7 +397,7 @@ export default function AddCompoundDialog({
             {/* Developer */}
             <div className="relative">
               <label className={`block text-sm font-medium mb-1`}>
-                Developer <span className="text-red-500">*</span>
+                {t.formLabels?.developer || "Developer"} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -402,7 +406,7 @@ export default function AddCompoundDialog({
                   onChange={handleChange}
                   className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
                 >
-                  <option value="">Select developer</option>
+                  <option value="">{t.formLabels?.selectDeveloper || "Select developer"}</option>
                   {developers.map((d, idx) => (
                     <option key={idx} value={d}>
                       {d}
@@ -426,16 +430,16 @@ export default function AddCompoundDialog({
               <button
                 type="button"
                 onClick={() => setIsAddDeveloperDialogOpen(true)}
-                className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+                className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
               >
-                + Add New
+                + {t.buttons?.addNew || "Add New"}
               </button>
             </div>
 
             {/* Links */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Video URL
+                {t.formLabels?.videoURL || "Video URL"}
               </label>
               <input
                 type="url"
@@ -449,7 +453,7 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Google Maps Link
+                {t.formLabels?.googleMapsLink || "Google Maps Link"}
               </label>
               <input
                 type="url"
@@ -463,7 +467,7 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Master Plan Image
+                {t.formLabels?.masterPlanImage || "Master Plan Image"}
               </label>
               <div className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer">
                 <input
@@ -486,7 +490,7 @@ export default function AddCompoundDialog({
                             ? URL.createObjectURL(selectedImage)
                             : formData.master_plan
                         }
-                        alt="Selected"
+                        alt={t.formLabels?.selectedImage || "Selected"}
                         className="w-full h-full max-h-32 object-cover rounded-md"
                       />
                       {!isUploading && (
@@ -527,10 +531,10 @@ export default function AddCompoundDialog({
                         />
                       </svg>
                       <p className="text-lg text-gray-700 mb-2">
-                        Click or drag and drop an image here
+                        {t.formLabels?.dragDropImage || "Click or drag and drop an image here"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        Supported formats: JPG, PNG, WEBP (Max 5MB each)
+                        {t.formLabels?.supportedFormats || "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
                       </p>
                     </>
                   )}
@@ -550,10 +554,10 @@ export default function AddCompoundDialog({
                     {isUploading ? (
                       <>
                         <Loader2 size={24} className="animate-spin" />
-                        Uploading...
+                        {t.buttons?.uploading || "Uploading..."}
                       </>
                     ) : (
-                      "Upload Image"
+                      t.buttons?.uploadImage || "Upload Image"
                     )}
                   </button>
                 </div>
@@ -566,7 +570,7 @@ export default function AddCompoundDialog({
                 onClick={onClose}
                 className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
-                Cancel
+                {t.buttons?.cancel || "Cancel"}
               </button>
               <button
                 type="submit"
@@ -581,10 +585,10 @@ export default function AddCompoundDialog({
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 size={20} className="animate-spin mr-2" />
-                    Saving...
+                    {t.buttons?.saving || "Saving..."}
                   </div>
                 ) : (
-                  "Save Project"
+                  t.buttons?.saveProject || "Save Project"
                 )}
               </button>
             </div>
