@@ -49,7 +49,7 @@ const FilterMonth = ({appliedFilters}) => {
                     onChange={(e) => handleFilterChange("months", e.target.value)}
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 >
-                    <option value="12">Last 12 Months</option>
+                    {/* <option value="12">Last 12 Months</option> */}
                     {months.map((month) => (
                         <option key={month.value} value={month.value}>
                             {month.value === "1" ? "Last Month" : `Last ${month.value} Months`}
