@@ -11,6 +11,7 @@ import {
   deleteImage,
   uploadImages,
 } from "@/components/services/serviceFetching";
+import Cookies from "js-cookie";
 
 export default function ImagesStep({
   formData,
@@ -23,6 +24,7 @@ export default function ImagesStep({
 }) {
   const fileInputRef = useRef(null);
   const { t } = useI18n();
+  const ar = Cookies.get("lang") 
 
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -413,7 +415,7 @@ export default function ImagesStep({
               <option value="semi finished">{t.semiFinished}</option>
               <option value="core & shell">{t.coreAndShell}</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
               <svg
                 className="h-5 w-5 text-gray-400"
                 viewBox="0 0 20 20"
@@ -438,7 +440,7 @@ export default function ImagesStep({
                 : "text-gray-700"
             }`}
           >
-            Furnishing Type <span className="text-red-500">*</span>
+           {t.furnishingType}<span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -451,11 +453,11 @@ export default function ImagesStep({
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               }`}
             >
-              <option value="">Select Furnishing Type</option>
+              <option value="">{t.furnishingType}</option>
               <option value="furnished">{t.furnished}</option>
               <option value="unfurnished">{t.unfurnished}</option>
             </select>
-            <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+            <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
               <svg
                 className="h-5 w-5 text-gray-400"
                 viewBox="0 0 20 20"
@@ -483,7 +485,6 @@ export default function ImagesStep({
             >
               {t.developer} <span className="text-red-500">*</span>
             </label>
-
             <div className="relative">
               <select
                 name="developer"
@@ -495,14 +496,14 @@ export default function ImagesStep({
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
                 }`}
               >
-                <option value="">Select developer</option>
+                <option value="">{t.selectDeveloper}</option>
                 {developers.map((d, idx) => (
                   <option key={idx} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
                 <svg
                   className="h-5 w-5 text-gray-400"
                   viewBox="0 0 20 20"
@@ -519,12 +520,13 @@ export default function ImagesStep({
             <button
               type="button"
               onClick={() => setIsAddDeveloperDialogOpen(true)}
-              className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+              className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
             >
-              + Add New
+              + {t.addNew}
             </button>
           </div>
         )}
+
       </div>
 
       <h3 className="text-xl font-semibold mb-4 text-slate-800">

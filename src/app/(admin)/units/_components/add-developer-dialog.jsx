@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { addDeveloper } from "@/components/services/serviceFetching";
 import { v4 as uuidv4 } from "uuid";
 import toast from "react-hot-toast";
-
+import { useI18n } from "@/context/translate-api";
 export default function AddDeveloperDialog({
   isOpen,
   onClose,
@@ -20,7 +20,7 @@ export default function AddDeveloperDialog({
     logo: "",
     client_id: client_id || "",
   });
-
+  const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
@@ -74,7 +74,7 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Developer Name <span className="text-red-500">*</span>
+              {t.DeveloperName} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -91,7 +91,7 @@ export default function AddDeveloperDialog({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              {t.formLabels?.description}
             </label>
             <textarea
               name="description"
@@ -108,7 +108,7 @@ export default function AddDeveloperDialog({
               onClick={onClose}
               className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Cancel
+              {t.cancel}
             </button>
             <button
               type="submit"
@@ -123,10 +123,10 @@ export default function AddDeveloperDialog({
               {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <Loader2 size={20} className="animate-spin" />
-                  Saving...
+                  {t.saving}
                 </div>
               ) : (
-                "Save Developer"
+                t.saveDeveloper
               )}
             </button>
           </div>

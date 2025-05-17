@@ -21,7 +21,7 @@ export default {
       "confirm": "تسجيل الخروج"
     },
     "logoutSuccess": "تم تسجيل الخروج بنجاح",
-    "sendMessage": "تحتاج مساعده"
+    "sendMessage": " خدمة العملاء"
   },
   welcome: "مرحبا",
   dashboard: "لوحة التحكم",
@@ -55,6 +55,25 @@ export default {
     "message6": "مستشار عقاري ذكي",
     "message7": "تابع ووسّع نشاطك بسهولة"
   },
+  unitDetails: {
+    "developer": "المطوّر",
+    "deliveryDate": "تاريخ التسليم",
+    "deliveryDatee": "Delivery Date",
+    "floor": "الطابق",
+    "finishing": "التشطيب",
+    "furnishd": "التأثيث",
+    "area": "المساحة",
+    "view": "الإطلالة",
+    "rooms": "الغرف",
+    "bathrooms": "دورات المياه ",
+    "notAvailable": "غير متوفر",
+    "ground": "أرضي",
+    "first": "الأول",
+    "second": "الثاني",
+    "third": "الثالث",
+    "th": "ـ"
+  }
+,  
   dashboard: {
     "title": {
       "part1": "لينا معك",
@@ -179,7 +198,7 @@ export default {
     }
   },
   sidebar: {
-    "dashboard": "لوحة التحكم",
+    "dashboard": " المحادثات",
     "analytics": "التحليلات",
     "units": "الوحدات",
     "darkMode": "الوضع المظلم",
@@ -214,7 +233,7 @@ export default {
     },
     "whatsappButton": "ليادات واتساب",
     "premuim": "ميزة مدفوعة",
-    "ADD": "اضافة عميل محتمل جديد"
+    "ADD": "اضافة عميل  جديد"
   },
   search: {
     "placeholder": "ابحث عن العميل بالاسم أو الرقم..."
@@ -398,7 +417,7 @@ export default {
   finishing: {
     "finished": "مشطب",
     "semiFinished": "نصف تشطيب",
-    "core": "هيكل",
+    "core": "دون تشطيب",
     "unfinished": "غير مشطب"
   },
   sale: {
@@ -534,7 +553,19 @@ export default {
       "co_alarm": "جهاز إنذار أول أكسيد الكربون"
     }
   },
-
+  "saveDeveloper": "حفظ المطور",
+  "saving": "جاري الحفظ...",
+  "cancel": "إلغاء",
+  "DeveloperName": "اسم المطور",
+  "bathrooms": "دورات المياه",
+  "for": "لل",
+  "sell": "بيع",
+  "rent": "إيجار",
+  "addNew": "إضافة جديد",
+  "city": "المدينة",
+  "project": "المشروع",
+  "rentPrice": "سعر الإيجار",
+  "totalPrice": "السعر الإجمالي",
   "additionalDetails": "تفاصيل إضافية",
   "finishingType": "نوع التشطيب",
   "developer": "المطور",
@@ -543,7 +574,9 @@ export default {
   "unfurnished": "غير مفروش",
   "fullyFinished": "تشطيب كامل",
   "semiFinished": "نصف تشطيب",
-  "coreAndShell": "هيكل وقشرة",
+  "coreAndShell": "دون تشطيب",
+  "selectDeveloper": "اختر المطور ",
+  "furnishingType": "نوع التأثيث",
   "selectDeveloper": "اختر المطور",
   "propertyImages": "صور العقار",
   "maximum": "الحد الأقصى",
@@ -615,5 +648,81 @@ export default {
   common: {
     "ProcessingImages": "جارٍ معالجة الصور...",
     "addImage": "إضافة صورة",
-  }
+  },
+  formValidation: {
+    compoundNameRequired: "اسم المشروع مطلوب",
+    cityRequired: "المدينة مطلوبة",
+    countryRequired: "الدولة مطلوبة",
+    districtRequired: "المنطقة مطلوبة",
+    areaPositive: "يجب أن تكون المساحة رقمًا موجبًا"
+  },
+  toasts: {
+    imageRemoved: "تمت إزالة الصورة بنجاح من الخادم!",
+    imageRemoveFailed: "فشل في إزالة الصورة من الخادم. يرجى المحاولة مرة أخرى.",
+    selectImage: "يرجى اختيار صورة للتحميل.",
+    imageUploaded: "تم تحميل الصورة بنجاح!",
+    imageUploadFailed: "فشل في تحميل الصورة. يرجى المحاولة مرة أخرى.",
+    compoundAdded: "تمت إضافة المشروع بنجاح!",
+    compoundAddFailed: "فشل في إضافة المشروع. يرجى المحاولة مرة أخرى.",
+    enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
+    uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
+    selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
+    errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
+  },
+  formLabels: {
+    compoundName: "اسم المشروع",
+    description: "الوصف",
+    city: "المدينة",
+    selectCity: "اختر المدينة",
+    country: "الدولة",
+    district: "المنطقة",
+    selectDistrict: "اختر المنطقة",
+    cityFirst: "اختر المدينة أولاً",
+    area: "المساحة (م²)",
+    gatedCommunity: "مجتمع مغلق",
+    developer: "المطور",
+    selectDeveloper: "اختر المطور",
+    videoURL: "رابط الفيديو",
+    googleMapsLink: "رابط خرائط جوجل",
+    masterPlanImage: "صورة المخطط الرئيسي",
+    selectedImage: "الصورة المختارة",
+    dragDropImage: "انقر أو اسحب وأفلت صورة هنا",
+    supportedFormats: "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل منها)",
+    unitTitle: "عنوان الوحدة",
+    buildingType: "نوع المبنى",
+    purpose: "الغرض",
+    compound: "المجمع",
+    view: "الإطلالة",
+    isGated: "مجتمع مغلق",
+    deliveryDate: "تاريخ التسليم",
+    deliveryStatus: "حالة التسليم",
+    bathroomCount: "الحمامات",
+    floor: "الطابق",
+    roomsCount: "الغرف",
+    landArea: "مساحة الأرض (م²)",
+    gardenSize: "حجم الحديقة (م²)",
+    finishing: "التشطيب",
+    garageArea: "مساحة الجراج (م²)",
+    images: "الصور",
+    districtFirst: "اختر المنطقة أولاً",
+    selectDistrict: "اختر المنطقة"
+  },
+  buttons: {
+    addNew: "إضافة جديد",
+    cancel: "إلغاء",
+    uploading: "جاري التحميل...",
+    uploadImage: "تحميل الصورة",
+    saving: "جاري الحفظ...",
+    saveProject: "حفظ المشروع",
+    tryChat: "جرب روبوت الدردشة",
+    requestDemo: "طلب عرض توضيحي",
+    back: "رجوع",
+    next: "التالي",
+    saveUnit: "حفظ الوحدة"
+  },
+  modal: {
+    addNewProject: "إضافة مشروع جديد",
+    addNewUnit: "إضافة وحدة جديدة",
+    editUnit: "تعديل الوحدة"
+  },
 };
