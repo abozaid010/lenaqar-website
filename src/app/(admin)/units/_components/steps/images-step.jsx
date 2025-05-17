@@ -483,29 +483,27 @@ export default function ImagesStep({
                   : "text-gray-700"
               }`}
             >
-
-              <option value="">{t.selectDeveloper} </option>
-              {developers.map((d, idx) => (
-                <option key={idx} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
-            <div className={`absolute  inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
-              <svg
-                className="h-5 w-5 text-gray-400"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-
+              {t.developer} <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                name="developer"
+                value={formData.developer}
+                onChange={handleChange}
+                className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                  invalidFields.includes("developer")
+                    ? "border-red-500 ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                }`}
               >
-                <option value="">Select developer</option>
+                <option value="">{t.selectDeveloper}</option>
                 {developers.map((d, idx) => (
                   <option key={idx} value={d}>
                     {d}
                   </option>
                 ))}
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+              <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
                 <svg
                   className="h-5 w-5 text-gray-400"
                   viewBox="0 0 20 20"
@@ -522,19 +520,12 @@ export default function ImagesStep({
             <button
               type="button"
               onClick={() => setIsAddDeveloperDialogOpen(true)}
-              className="absolute right-0 top-0 text-blue-600 text-sm font-medium"
+              className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
             >
-              + Add New
+              + {t.addNew}
             </button>
           </div>
-          <button
-            type="button"
-            onClick={() => setIsAddDeveloperDialogOpen(true)}
-            className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
-          >
-            + {t.addNew}
-          </button>
-        </div>
+        )}
 
       </div>
 
