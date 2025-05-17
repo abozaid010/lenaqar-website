@@ -2,8 +2,9 @@
 
 import Dialog from "@/components/ui/dialog";
 import { PlusIcon, Loader2 } from "lucide-react";
-import { useState, useActionState } from "react";
+import { useState, useActionState, useEffect } from "react";
 import { addNewSales } from "../_actions/actions";
+import toast from "react-hot-toast";
 
 const initialFormData = {
   name: "",
@@ -25,6 +26,16 @@ export default function AddNewMember() {
     initialState
   );
 
+  useEffect(() => {
+    if (state.success) {
+      setFormData(initialFormData);
+      setIsOpen(false);
+    }
+    if (state.error) {
+      toast.error(state.error);
+    }
+  }, [state]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -32,6 +43,7 @@ export default function AddNewMember() {
       [name]: value,
     });
   };
+
   return (
     <>
       <button

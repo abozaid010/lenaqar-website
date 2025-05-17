@@ -311,3 +311,12 @@ export async function getSalesData(searchParams) {
     return { error: error.message };
   }
 }
+
+export async function createNewEmployee(paylod) {
+  try {
+    await axiosInstance.post("sales-employees/create-employee", paylod);
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}

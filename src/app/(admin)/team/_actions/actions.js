@@ -1,6 +1,7 @@
 'use server';
 
 import { getClientid } from "@/components/services/clientCookies";
+import { createNewEmployee } from "@/components/services/serviceFetching";
 import { revalidatePath } from "next/cache";
 
 export async function addNewSales(prevState, formData) {
@@ -9,13 +10,13 @@ export async function addNewSales(prevState, formData) {
 
         const payload = Object.fromEntries(formData.entries());
 
-        console.log("clientId", Object.fromEntries(formData.entries()));
         const newSales = {
             ...payload,
+            "position": "sales",
             client_id: clientId,
         };
 
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await createNewEmployee(newSales);
 
         revalidatePath("/team");
 
