@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Dialog from "@/components/ui/dialog";
+import Dialog from "@/components/ui/Dialog";
 import { Loader2 } from "lucide-react";
 import {
   addCompound,
