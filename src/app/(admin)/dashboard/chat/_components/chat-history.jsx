@@ -27,7 +27,10 @@ export default function ChatHistory({ data }) {
         <div key={index} className="w-full flex flex-col">
           {message.user_message && (
             <div className="flex justify-end mb-3">
-              <UserMessageCard message={message.user_message} />
+              <UserMessageCard
+                message={message.user_message}
+                timestamp={message.timestamp}
+              />
             </div>
           )}
 
