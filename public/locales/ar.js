@@ -471,6 +471,7 @@ export default {
       "code": "كود الوحدة (اختياري)",
     },
     "code": "كود الوحدة",
+    "model": "نموذج الوحدة",
     buildingTypes: {
       "apartment": "شقة",
       "villa": "فيلا",

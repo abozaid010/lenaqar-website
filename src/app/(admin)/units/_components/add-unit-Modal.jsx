@@ -66,6 +66,7 @@ export default function AddUnitModal({
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
     code: unitData?.code || "",
+    model: unitData?.model || "",
   }));
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
