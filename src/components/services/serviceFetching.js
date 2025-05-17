@@ -301,37 +301,6 @@ export async function createBooking(bookingData) {
   }
 }
 
-
-export async function userAnalytics(days) {
-  const clientId = await getClientid();
-  try {
-    const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}?days=${days}`);
-    console.log(response.data.data);
-    return response.data.data;
-
-  } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
-  }
-}
-export async function fetchMonthData(searchParams) {
-  // const clientId = await getClientid();
-  const clientId = await getClientid();
-
-  try {
-    const params = {
-      ...JSON.parse(searchParams),
-     
-    };
-
-    const response = await axiosInstance.get(`/analysis/v1/dashboard-action-analysis/${clientId}?days=7`, { params });
-
-console.log(response.data.data)
-    return response.data.data.monthly;
-
-  } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-
 // #### Sales API ####
 export async function getSalesData(searchParams) {
   try {
@@ -358,7 +327,6 @@ export async function deleteEmployee(id) {
     return true;
   } catch (error) {
     console.error("Failed to fetch sales data:", error.message);
-
     return { error: error.message };
   }
 }
@@ -383,7 +351,6 @@ export async function getProfileData() {
 }
 
 export async function updateProfileData(formData) {
-  console.log("Form data:", formData);
   const clientEmail = getClientEmail();
 
   if (!clientEmail) {
@@ -392,11 +359,40 @@ export async function updateProfileData(formData) {
   }
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    // const response = axiosInstance.patch("/client/update-profile", formData);
-    // return response.data;
+    const response = axiosInstance.patch("/client/update-profile", formData);
+    return response.data;
   } catch (error) {
     console.error("Failed to update profile data:", error.message);
+    return { error: error.message };
+  }
+}
+
+// #### Analytics API ####
+export async function userAnalytics(days) {
+  const clientId = await getClientid();
+  try {
+    const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}?days=${days}`);
+    console.log(response.data.data);
+    return response.data.data;
+
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+    return { error: error.message };
+  }
+}
+export async function fetchMonthData(searchParams) {
+  const clientId = await getClientid();
+
+  try {
+    const params = {
+      ...JSON.parse(searchParams),
+
+    };
+    const response = await axiosInstance.get(`/analysis/v1/dashboard-action-analysis/${clientId}?days=7`, { params });
+
+    return response.data.data.monthly;
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
     return { error: error.message };
   }
 }
