@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useI18n } from "@/context/translate-api";
+
 import { Forward, ForwardIcon, MapPin, Share, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
@@ -12,8 +14,9 @@ export default function UnitsGrid({ units, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
+  const { t } = useI18n();
 
-  // Add a formatter function for prices
+  // Add a formattcer function for prices
   const formatPrice = (price) => {
     if (!price) return "Price not specified";
     return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -40,11 +43,11 @@ export default function UnitsGrid({ units, readonly = false }) {
   return (
     <>
       {units.length === 0 ? (
-        <div className="text-center font-medium text-xl mt-5 text-gray-400">
+        <div className="text-center font-medium text-xl mt-5 text-gray-400 ">
           No units found.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
           {units.map((u, idx) => (
             <Link
               href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
@@ -89,7 +92,8 @@ export default function UnitsGrid({ units, readonly = false }) {
                       className="absolute  text-[14px]  top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"
                     >
                       {" "}
-                      For {u.purpose}
+                  {t.for}{u.purpose === "rent" ? t.rent: t.sell}
+                     
                     </p>
                   </div>
                 ) : (
@@ -104,7 +108,7 @@ export default function UnitsGrid({ units, readonly = false }) {
                 </h3>
                 <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
                   {/* <MapPin className="w-4 h-4 mr-2 flex-shrink-0" /> */}
-                  <p className=" text-white font-normal text-[16px]"> City </p>
+                  <p className=" text-white font-normal text-[16px]"> {t.city} </p>
                   <span className="line-clamp-1 text-[14px] font-bold">
                     {u.city || "Location not specified"}
                   </span>
@@ -112,7 +116,7 @@ export default function UnitsGrid({ units, readonly = false }) {
 
                 {/* Compound and Purpose Display */}
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
-                  <p className=" text-white text-[16px] font-normal">Project</p>
+                  <p className=" text-white text-[16px] font-normal">{t.project}</p>
                   <div>
                     {u.compound && (
                       <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
@@ -126,7 +130,7 @@ export default function UnitsGrid({ units, readonly = false }) {
                 <div className="text-sm flex items-center justify-between text-white">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="font-normal text-[16px]">Rent Price</div>
+                      <div className="font-normal text-[16px]">{t.rentPrice}</div>
                       <div className=" font-semibold text-[14px]">
                         {u.rentDurationType?.daily?.price
                           ? `${formatPrice(u.rentDurationType.daily.price)} EGP/day`
@@ -143,7 +147,7 @@ export default function UnitsGrid({ units, readonly = false }) {
                     u.totalPrice && (
                       <div className="flex items-center justify-between w-full">
                         <span className="font-normal text-[16px]">
-                          Total Price
+                          {t.totalPrice}
                         </span>
                         <span className=" font-semibold text-[14px]">
                           {formatPrice(u.totalPrice)} EGP
