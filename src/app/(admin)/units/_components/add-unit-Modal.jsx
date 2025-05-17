@@ -65,6 +65,7 @@ export default function AddUnitModal({
     furnishing: unitData?.furnishing || "",
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
+    code: unitData?.code || "",
   }));
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
@@ -110,12 +111,6 @@ export default function AddUnitModal({
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
-  };
-
-  const handleOutsideClick = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      onClose();
-    }
   };
 
   const handleNext = (e) => {
