@@ -4,117 +4,773 @@
       "country": "Egypt",
       "governorates": [
         {
+          "governorate": "Alexandria",
+          "districts": [
+            {
+              "district": "Agami",
+              "projects": [
+                "Agami Bay",
+                "Agami Beach Resort",
+                "Agami Heights",
+                "Agami Marina",
+                "Bianchi Beach",
+                "Blue Beach Compound",
+                "Hannoville"
+              ]
+            },
+            {
+              "district": "Anfoushi",
+              "projects": [
+                "Bahari",
+                "El Anfushi Bay",
+                "El Anfushi Square",
+                "El Gomrok",
+                "Ras El Tin"
+              ]
+            },
+            {
+              "district": "Cleopatra",
+              "projects": [
+                "Cleopatra Beach",
+                "Cleopatra Hammamat",
+                "Cleopatra Palace",
+                "Cleopatra Square"
+              ]
+            },
+            {
+              "district": "Gleem",
+              "projects": [
+                "Gleem Bay",
+                "Gleem Residence",
+                "Glim Bay",
+                "Glim Gardens",
+                "Glim Residence",
+                "Glim Square",
+                "Glim Station"
+              ]
+            },
+            {
+              "district": "Ibrahimiyya",
+              "projects": [
+                "Ibrahimiyya Beach",
+                "Ibrahimiyya Gardens",
+                "Ibrahimiyya Square",
+                "Ibrahimiyya Station"
+              ]
+            },
+            {
+              "district": "Mandara",
+              "projects": [
+                "Mandara Beach",
+                "Mandara Gardens",
+                "Mandara Square",
+                "Mandara Station"
+              ]
+            },
+            {
+              "district": "Miami",
+              "projects": [
+                "Miami Beach",
+                "Miami Corniche",
+                "Miami Gardens",
+                "Miami Grand Plaza",
+                "Miami Heights",
+                "Miami Square"
+              ]
+            },
+            {
+              "district": "Montazah",
+              "projects": [
+                "Montazah Beach",
+                "Montazah Beach Towers",
+                "Montazah Gardens",
+                "Montazah Palace",
+                "Montazah Palace View",
+                "Montazah Royal Gardens",
+                "Montazah Square"
+              ]
+            },
+            {
+              "district": "Other Areas",
+              "projects": [
+                "Antoniadis Compound",
+                "Cleopatra Plaza",
+                "Karma Compound",
+                "Palm Hills Alexandria",
+                "Royal Plaza Compound",
+                "Safwa Towers Compound"
+              ]
+            },
+            {
+              "district": "San Stefano",
+              "projects": [
+                "San Stefano Beach",
+                "San Stefano Grand Plaza",
+                "San Stefano Mall",
+                "San Stefano Square",
+                "San Stefano Towers"
+              ]
+            },
+            {
+              "district": "Sawary",
+              "projects": [
+                "Sawary Compound",
+                "Vee Sawary"
+              ]
+            },
+            {
+              "district": "Sidi Bishr",
+              "projects": [
+                "Sidi Bishr Beach",
+                "Sidi Bishr Gardens",
+                "Sidi Bishr Square",
+                "Sidi Bishr Street"
+              ]
+            },
+            {
+              "district": "Sidi Gaber",
+              "projects": [
+                "Sidi Gaber Gardens",
+                "Sidi Gaber Residence",
+                "Sidi Gaber Square",
+                "Sidi Gaber Station",
+                "Sidi Gaber Street",
+                "Sidi Gaber Towers"
+              ]
+            },
+            {
+              "district": "Smouha",
+              "projects": [
+                "Green Smouha Compound",
+                "Skyline Smouha",
+                "Smouha Club",
+                "Smouha Gardens",
+                "Smouha Medical Center",
+                "Smouha Square",
+                "Terrace Smouha"
+              ]
+            },
+            {
+              "district": "Sporting",
+              "projects": [
+                "Sporting Beach",
+                "Sporting Club",
+                "Sporting Gardens",
+                "Sporting Square"
+              ]
+            },
+            {
+              "district": "Stanley",
+              "projects": [
+                "Stanley Beach",
+                "Stanley Bridge",
+                "Stanley Residences",
+                "Stanley Square"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Aswan",
+          "districts": [
+            {
+              "district": "Aswan City",
+              "projects": [
+                "Aswan Center",
+                "Aswan Corniche Apartments",
+                "Aswan High Dam Area",
+                "Elephantine Island",
+                "Helnan Aswan Hotel Residences",
+                "Nile Valley Residences",
+                "Nubian Village Resort",
+                "Philae Temple Area"
+              ]
+            },
+            {
+              "district": "Daraw",
+              "projects": [
+                "Camel Market Area",
+                "Daraw Center",
+                "Daraw Heights",
+                "Daraw Palm Residences",
+                "Nile Breeze Apartments"
+              ]
+            },
+            {
+              "district": "Edfu",
+              "projects": [
+                "Edfu Center",
+                "Edfu Gardens",
+                "Edfu Residential Compound",
+                "Edfu Temple Area",
+                "Horus View Apartments"
+              ]
+            },
+            {
+              "district": "Kom Ombo",
+              "projects": [
+                "Kom Ombo Center",
+                "Kom Ombo Housing Project",
+                "Kom Ombo Temple Area",
+                "Nile View Residences",
+                "Temple View Apartments"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Asyut",
+          "districts": [
+            {
+              "district": "Abnub",
+              "projects": [
+                "Abnub Center",
+                "Abnub Residential Project",
+                "Green Valley Compound",
+                "New Abnub Housing"
+              ]
+            },
+            {
+              "district": "Asyut City",
+              "projects": [
+                "Al Qusiya Residences",
+                "Asyut Center",
+                "Asyut Gardens",
+                "Asyut University Area",
+                "Nile View Towers",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "Dairut",
+              "projects": [
+                "Dairut Center",
+                "Dairut Plaza",
+                "Dairut Residential Complex",
+                "Palm Gardens"
+              ]
+            },
+            {
+              "district": "Manfalut",
+              "projects": [
+                "Manfalut Center",
+                "Manfalut Gardens",
+                "Manfalut Heights",
+                "Nile Terrace Apartments"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Beheira",
+          "districts": [
+            {
+              "district": "Damanhur",
+              "projects": [
+                "Damanhur Center",
+                "Damanhur Gardens",
+                "Damanhur University Area",
+                "El Nozha Residences",
+                "Green Valley Compound"
+              ]
+            },
+            {
+              "district": "Edku",
+              "projects": [
+                "Edku Beach Residences",
+                "Edku Center",
+                "Edku Lake Area",
+                "Edku Lake View",
+                "Fishermen's Village"
+              ]
+            },
+            {
+              "district": "Itay El Baroud",
+              "projects": [
+                "Baroud Heights",
+                "Green Oasis Compound",
+                "Itay El Baroud Center",
+                "Itay El Baroud Housing Project"
+              ]
+            },
+            {
+              "district": "Kafr El Dawwar",
+              "projects": [
+                "Green Heights",
+                "Industrial Zone",
+                "Kafr El Dawwar Center",
+                "Kafr El Dawwar Industrial Housing",
+                "Nile View Apartments"
+              ]
+            },
+            {
+              "district": "Rashid",
+              "projects": [
+                "Mediterranean View Residences",
+                "Rashid Center",
+                "Rashid Gardens",
+                "Rashid Heritage Houses",
+                "Rosetta Stone Area"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Beni Suef",
+          "districts": [
+            {
+              "district": "Beni Suef City",
+              "projects": [
+                "Beni Suef Center",
+                "Beni Suef Gardens",
+                "Beni Suef University Area",
+                "Nile Valley Residences",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "El Wasta",
+              "projects": [
+                "El Wasta Center",
+                "El Wasta Residential Project",
+                "Green Valley Compound",
+                "Nile View Apartments"
+              ]
+            },
+            {
+              "district": "Ihnasia",
+              "projects": [
+                "Green Oasis Compound",
+                "Ihnasia Center",
+                "Ihnasia Plaza",
+                "Ihnasia Residential Complex"
+              ]
+            },
+            {
+              "district": "Nasser",
+              "projects": [
+                "Nasser Center",
+                "Nasser City Housing",
+                "Nasser Heights",
+                "Palm Gardens"
+              ]
+            }
+          ]
+        },
+        {
           "governorate": "Cairo",
           "districts": [
             {
-              "district": "Heliopolis",
+              "district": "Abbassia",
               "projects": [
-                "Korba Heights",
-                "Heliopolis Gardens",
-                "El Shams Compound",
-                "Al Masa Residence"
+                "Abbassia Square",
+                "Ain Shams University Campus",
+                "El Demerdash",
+                "El Waili",
+                "Military Academy Area"
               ]
             },
             {
-              "district": "Nasr City",
-              "projects": ["Nasr Gardens", "Nasr City Towers", "El Waha Compound"]
-            },
-            {
-              "district": "Maadi",
+              "district": "Ain Shams",
               "projects": [
-                "Maadi Gardens",
-                "Sarayat Maadi Residences",
-                "Degla Palms"
+                "Arab El Gsr",
+                "El Matariya",
+                "El Zahraa",
+                "Ezbet El Nakhl",
+                "Gesr El Suez"
               ]
             },
             {
-              "district": "Zamalek",
-              "projects": ["Zamalek Tower", "Nile View Residence", "Gezira Heights"]
+              "district": "Al Rehab City",
+              "projects": [
+                "Al Rehab 1",
+                "Al Rehab 2",
+                "Al Rehab Center",
+                "Al Rehab Gardens",
+                "Al Rehab Heights"
+              ]
+            },
+            {
+              "district": "Al-Daher",
+              "projects": [
+                "Bab El Shaariya",
+                "El Sakakini",
+                "El Zahir Palace",
+                "Ramses Square"
+              ]
+            },
+            {
+              "district": "Azbakeya",
+              "projects": [
+                "Ahmed Helmy",
+                "Attaba",
+                "Clot Bey",
+                "Opera Square"
+              ]
             },
             {
               "district": "Downtown Cairo",
               "projects": [
-                "The Nile Ritz-Carlton Residences",
+                "Abdeen",
+                "Bab El Louk",
+                "Cairo Downtown Residences",
                 "Downtown Heights",
-                "Cairo Downtown Residences"
+                "Qasr El Nil",
+                "Tahrir Square",
+                "Talaat Harb Square",
+                "The Nile Ritz-Carlton Residences"
               ]
             },
             {
               "district": "Fifth Settlement",
               "projects": [
-                "Katameya Heights",
-                "Lake View Residence",
-                "The Waterway",
-                "Eastown",
-                "Galleria Moon Valley",
-                "El Patio 1",
-                "La Mirada",
-                "Zizinia Gardens",
-                "Stone Residence",
-                "Mountain View II"
-              ]
-            },
-            {
-              "district": "New Cairo",
-              "projects": [
-                "Mivida",
-                "Villette",
-                "Hyde Park",
-                "Swan Lake Residence",
-                "Mountain View I",
-                "Palm Hills New Cairo",
-                "Lake View",
-                "Katameya Dunes",
-                "Sarai",
-                "La Vista City",
-                "El Patio 7",
-                "Layan",
+                "American University Area",
                 "Azad",
-                "Zed East",
-                "Taj City",
-                "Fifth Square",
-                "District 5",
-                "City Gate",
                 "Azzar New Cairo",
+                "Cairo Festival City",
+                "City Gate",
+                "Diplomatic Quarter",
+                "District 5",
+                "Eastown",
+                "El Patio 1",
+                "El Patio 7",
+                "Fifth Settlement",
+                "Fifth Square",
+                "Galleria Moon Valley",
+                "Hyde Park",
+                "Katameya Dunes",
+                "Katameya Heights",
+                "La Mirada",
+                "La Vista City",
+                "Lake View",
+                "Lake View Residence",
+                "Layan",
+                "Mirage City",
+                "Mivida",
                 "Mountain View Hyde Park",
-                "Mountain View iCity"
+                "Mountain View I",
+                "Mountain View II",
+                "Mountain View iCity",
+                "Palm Hills New Cairo",
+                "Sarai",
+                "Stone Residence",
+                "Swan Lake Residence",
+                "Taj City",
+                "The Waterway",
+                "Villette",
+                "West Golf",
+                "Zed East",
+                "Zizinia Gardens"
               ]
             },
-            { "district": "Al Rehab City", "projects": ["Al Rehab 1", "Al Rehab 2"] },
-            { "district": "Madinaty", "projects": ["Madinaty"] },
             {
-              "district": "New Administrative Capital",
+              "district": "First Settlement",
               "projects": [
-                "Vinci",
-                "The Loft",
-                "De Joya",
-                "Capital Heights",
-                "Oblisco Capitale",
-                "Jnoub",
-                "Bleu Vert",
-                "Rhodes",
-                "Rivan",
-                "Oia",
-                "Atika",
-                "Talah",
-                "Il Bosco",
-                "Midtown Sky",
-                "Midtown Condo",
-                "Midtown Solo",
-                "Midtown Villa",
-                "Midtown Capital",
-                "La Verde",
-                "Scenario",
-                "Entrada",
-                "Castle Landmark",
-                "Capital Gardens",
-                "Pukka",
-                "Anakaji",
-                "The City",
-                "Catalan",
-                "Green Avenue",
-                "Botanica",
-                "Zed New Capital"
+                "First Settlement"
+              ]
+            },
+            {
+              "district": "Fourth Settlement",
+              "projects": [
+                "Fourth Settlement"
+              ]
+            },
+            {
+              "district": "Heliopolis",
+              "projects": [
+                "Al Masa Residence",
+                "Almaza",
+                "Baron Palace Area",
+                "Cleopatra",
+                "El Shams Compound",
+                "Gesr El Suez",
+                "Heliopolis Club",
+                "Heliopolis Gardens",
+                "Heliopolis Sporting Club",
+                "Korba",
+                "Korba Heights",
+                "Merryland",
+                "Nozha",
+                "Sheraton",
+                "Triumph Square"
+              ]
+            },
+            {
+              "district": "Maadi",
+              "projects": [
+                "Autostrad",
+                "Corniche El Maadi",
+                "Degla",
+                "Degla Palms",
+                "Hadayek El Maadi",
+                "Maadi Gardens",
+                "Maadi Zahraa",
+                "New Maadi",
+                "Old Maadi",
+                "Sarayat El Maadi",
+                "Sarayat Maadi Residences"
+              ]
+            },
+            {
+              "district": "Madinaty",
+              "projects": [
+                "B1",
+                "B10",
+                "B11",
+                "B12",
+                "B14",
+                "B15",
+                "B2",
+                "B3",
+                "B6",
+                "B7",
+                "B8",
+                "East Hub",
+                "Four Seasons",
+                "Golf Area",
+                "Golf Club",
+                "Madinaty",
+                "Open Air Mall",
+                "Privado",
+                "South Park",
+                "Strip Mall",
+                "Villa"
+              ]
+            },
+            {
+              "district": "Nasr City",
+              "projects": [
+                "Abbas El Akkad",
+                "Eighth Zone",
+                "El Manhal",
+                "El Nasr Road",
+                "El Sefarat",
+                "El Waha",
+                "El Waha Compound",
+                "Fifth Zone",
+                "First Zone",
+                "Fourth Zone",
+                "Makram Ebeid",
+                "Mostafa El Nahas",
+                "Nasr City Towers",
+                "Nasr Gardens",
+                "Ninth Zone",
+                "Second Zone",
+                "Seventh Zone",
+                "Sixth Zone",
+                "Tenth Zone",
+                "Third Zone"
+              ]
+            },
+            {
+              "district": "Third Settlement",
+              "projects": [
+                "Third Settlement"
+              ]
+            },
+            {
+              "district": "Zamalek",
+              "projects": [
+                "26th of July Corridor",
+                "Cairo Tower",
+                "Embassy District",
+                "Gezira Club",
+                "Gezira Heights",
+                "Gezira Island",
+                "Marriott Hotel Area",
+                "Nile View Residence",
+                "Opera House",
+                "Sports Club Area",
+                "Zamalek Tower"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Dakahlia",
+          "districts": [
+            {
+              "district": "Aga",
+              "projects": [
+                "Aga Center",
+                "Aga Heights",
+                "Aga Housing Project",
+                "Green Oasis Compound"
+              ]
+            },
+            {
+              "district": "Bilqas",
+              "projects": [
+                "Bilqas Center",
+                "Bilqas Plaza",
+                "Bilqas Residential Complex",
+                "Palm Gardens"
+              ]
+            },
+            {
+              "district": "Mansoura",
+              "projects": [
+                "El Nozha Residences",
+                "Geish Street",
+                "Gezira Towers",
+                "Mansoura Center",
+                "Mansoura Gardens",
+                "Mansoura University Area",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "Manzala",
+              "projects": [
+                "Fishermen's Village",
+                "Manzala Beach Residences",
+                "Manzala Center",
+                "Manzala Lake Area",
+                "Manzala Lake View"
+              ]
+            },
+            {
+              "district": "Mit Ghamr",
+              "projects": [
+                "Green Valley Compound",
+                "Mit Ghamr Center",
+                "Mit Ghamr Residential Project",
+                "Nile View Apartments"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Damietta",
+          "districts": [
+            {
+              "district": "Damietta City",
+              "projects": [
+                "Damietta Center",
+                "Damietta Gardens",
+                "Damietta Port Area",
+                "El Nozha Residences",
+                "Furniture City Housing",
+                "Furniture Manufacturing District",
+                "Mediterranean Towers"
+              ]
+            },
+            {
+              "district": "Faraskur",
+              "projects": [
+                "Faraskur Center",
+                "Faraskur Residential Project",
+                "Green Valley Compound",
+                "Nile View Apartments"
+              ]
+            },
+            {
+              "district": "Kafr Saad",
+              "projects": [
+                "Green Oasis Compound",
+                "Kafr Saad Center",
+                "Kafr Saad Heights",
+                "Kafr Saad Housing Project"
+              ]
+            },
+            {
+              "district": "Ras El Bar",
+              "projects": [
+                "Mediterranean View Residences",
+                "Ras El Bar Beach",
+                "Ras El Bar Beach Resort",
+                "Ras El Bar Center",
+                "Ras El Bar Chalets"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Faiyum",
+          "districts": [
+            {
+              "district": "Faiyum City",
+              "projects": [
+                "El Nozha Residences",
+                "Faiyum Center",
+                "Faiyum Gardens",
+                "Faiyum University Area",
+                "Lake View Towers",
+                "Qaroun Lake View",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "Ibsheway",
+              "projects": [
+                "Ibsheway Center",
+                "Ibsheway Gardens",
+                "Ibsheway Residential Project",
+                "Lake View Residences"
+              ]
+            },
+            {
+              "district": "Sinnuris",
+              "projects": [
+                "Green Oasis Compound",
+                "Sinnuris Center",
+                "Sinnuris Heights",
+                "Sinnuris Housing Project"
+              ]
+            },
+            {
+              "district": "Tamiya",
+              "projects": [
+                "Palm Gardens",
+                "Tamiya Center",
+                "Tamiya Plaza",
+                "Tamiya Residential Complex"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Gharbia",
+          "districts": [
+            {
+              "district": "Kafr El Zayat",
+              "projects": [
+                "Green Valley Compound",
+                "Industrial Area",
+                "Industrial Zone Residences",
+                "Kafr El Zayat Center",
+                "Kafr El Zayat Housing Project"
+              ]
+            },
+            {
+              "district": "Mahalla El Kubra",
+              "projects": [
+                "Mahalla Center",
+                "Mahalla Heights",
+                "Mahalla Residential Project",
+                "Textile City Housing",
+                "Textile Manufacturing District"
+              ]
+            },
+            {
+              "district": "Samannoud",
+              "projects": [
+                "Nile View Apartments",
+                "Samannoud Center",
+                "Samannoud Plaza",
+                "Samannoud Residential Complex"
+              ]
+            },
+            {
+              "district": "Tanta",
+              "projects": [
+                "El Geish Street",
+                "El Nozha Residences",
+                "Medical Complex Housing",
+                "Tanta Center",
+                "Tanta Gardens",
+                "Tanta University Area",
+                "University Towers"
               ]
             }
           ]
@@ -123,99 +779,299 @@
           "governorate": "Giza",
           "districts": [
             {
-              "district": "Sheikh Zayed",
+              "district": "6th of October city",
               "projects": [
-                "Beverly Hills",
-                "Allegria",
-                "Zed Towers",
-                "Etapa",
-                "Karma Residence",
-                "Casa",
-                "The Courtyards",
-                "Greens Compound",
-                "El Rabwa"
-              ]
-            },
-            { "district": "Dokki", "projects": ["Dokki Gardens", "El Nile Compound"] },
-            {
-              "district": "Mohandessin",
-              "projects": ["Mohandessin Heights", "El Mohandessin Towers"]
-            }
-          ]
-        },
-        {
-          "governorate": "6th of October",
-          "districts": [
-            {
-              "district": "6th of October City",
-              "projects": [
-                "Palm Hills October",
+                "Ashgar City",
+                "Badya",
+                "Beta Greens",
+                "Brix",
+                "Central Axis",
+                "Dreamland",
+                "El Hosary Square",
+                "El Patio 6",
+                "Grand Heights",
+                "Hayy El Motamayez",
+                "Industrial Zone",
+                "Joulz",
+                "Mall of Arabia Area",
+                "Mall of Egypt Area",
+                "Media Production City",
                 "Mountain View Chillout Park",
                 "Mountain View iCity October",
                 "New Giza",
-                "The Crown",
-                "Beta Greens",
-                "El Patio 6",
-                "Joulz",
                 "O West",
-                "Grand Heights",
-                "Brix",
-                "Badya"
+                "October Plaza",
+                "Palm Hills October",
+                "Smart Village",
+                "Solaimaneyah",
+                "The Crown"
+              ]
+            },
+            {
+              "district": "Agouza",
+              "projects": [
+                "Agouza Hospital Area",
+                "Agouza Plaza",
+                "Ahmed Orabi Street",
+                "Galaa Street",
+                "Kit Kat Square",
+                "Nile Corniche",
+                "Nile Towers",
+                "River View Apartments",
+                "Sporting Club Area"
+              ]
+            },
+            {
+              "district": "Dokki",
+              "projects": [
+                "Dokki Gardens",
+                "Dokki Street",
+                "El Nile Compound",
+                "El Tahrir Area",
+                "Galaa Street",
+                "Giza Square",
+                "Mesaha Square",
+                "National Research Center Area",
+                "Shooting Club Area",
+                "Tahrir Street"
+              ]
+            },
+            {
+              "district": "Giza District",
+              "projects": [
+                "Cairo University Area",
+                "Giza Sporting Club",
+                "Giza Square",
+                "Giza Zoo Area",
+                "Nile Corniche",
+                "Orman Gardens",
+                "Pyramids Street"
+              ]
+            },
+            {
+              "district": "Hadayek October",
+              "projects": [
+                "Green Valley Compound",
+                "October Gardens",
+                "October Park"
+              ]
+            },
+            {
+              "district": "Haram",
+              "projects": [
+                "El Haram Street",
+                "Faisal Street",
+                "Hadayek El Ahram",
+                "Haram Residences",
+                "Kafr Nassar",
+                "Kafr Tohormos",
+                "King Faisal District",
+                "Marioutiya",
+                "Nazlet El Semman",
+                "Pyramids Gardens",
+                "Pyramids Heights",
+                "Pyramids Plateau Area",
+                "Tersa"
+              ]
+            },
+            {
+              "district": "Imbaba",
+              "projects": [
+                "Ahmed Orabi Street",
+                "El Munira",
+                "El Waraq",
+                "El Wehda",
+                "Imbaba Airport Area",
+                "Matar Imbaba",
+                "Sudan Street",
+                "Talaat Harb Street"
+              ]
+            },
+            {
+              "district": "Mohandessin",
+              "projects": [
+                "Ahmed Orabi Street",
+                "El Batal Ahmed Abd El Aziz Street",
+                "El Mohandessin Towers",
+                "Gameat El Dowal Street",
+                "Geziret El Arab Street",
+                "Lebanon Square",
+                "Mohandessin Heights",
+                "Sphinx Square",
+                "Sudan Street",
+                "Syria Street"
+              ]
+            },
+            {
+              "district": "New Giza",
+              "projects": [
+                "New Giza",
+                "New Giza Gardens",
+                "New Giza Golf",
+                "New Giza Heights",
+                "New Giza Hills",
+                "New Giza Plateau",
+                "New Giza Sports Club",
+                "New Giza University"
+              ]
+            },
+            {
+              "district": "Sheikh Zayed",
+              "projects": [
+                "Allegria",
+                "Americana Plaza Area",
+                "Arkan Plaza Area",
+                "Beverly Hills",
+                "Casa",
+                "El Rabwa",
+                "Etapa",
+                "Greens Compound",
+                "Hyper One Area",
+                "Karma Residence",
+                "Sheikh Zayed Central District",
+                "The Courtyards",
+                "Zayed Dunes",
+                "Zayed Regency",
+                "Zed Towers"
               ]
             }
           ]
         },
         {
-          "governorate": "Alexandria",
+          "governorate": "Ismailia",
           "districts": [
             {
-              "district": "Smouha",
+              "district": "Abu Suweir",
               "projects": [
-                "Terrace Smouha",
-                "Green Smouha Compound",
-                "Skyline Smouha"
+                "Abu Suweir Center",
+                "Abu Suweir Housing Project",
+                "Abu Suweir Plaza",
+                "Green Oasis Compound"
               ]
             },
             {
-              "district": "San Stefano",
-              "projects": ["San Stefano Grand Plaza", "San Stefano Towers"]
-            },
-            { "district": "Gleem", "projects": ["Gleem Bay", "Gleem Residence"] },
-            { "district": "Sawary", "projects": ["Sawary Compound", "Vee Sawary"] },
-            { "district": "Miami", "projects": ["Miami Grand Plaza", "Miami Heights"] },
-            {
-              "district": "Sidi Gaber",
-              "projects": ["Sidi Gaber Towers", "Sidi Gaber Residence"]
-            },
-            {
-              "district": "Other Areas",
+              "district": "Fayed",
               "projects": [
-                "Palm Hills Alexandria",
-                "Cleopatra Plaza",
-                "Antoniadis Compound",
-                "Royal Plaza Compound",
-                "Karma Compound",
-                "Safwa Towers Compound"
+                "Bitter Lakes Area",
+                "Fayed Beach Resort",
+                "Fayed Center",
+                "Fayed Chalets",
+                "Lake View Residences"
+              ]
+            },
+            {
+              "district": "Ismailia City",
+              "projects": [
+                "Canal View",
+                "Canal View Residences",
+                "Ismailia Center",
+                "Ismailia Gardens",
+                "Lake View Towers",
+                "Suez Canal University Area",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "Qantara",
+              "projects": [
+                "Canal Zone Housing",
+                "Qantara Bridge Area",
+                "Qantara Center",
+                "Qantara Heights",
+                "Qantara Residential Project"
               ]
             }
           ]
         },
         {
-          "governorate": "Red Sea",
+          "governorate": "Kafr El Sheikh",
           "districts": [
             {
-              "district": "Hurghada",
+              "district": "Baltim",
               "projects": [
-                "Ocean Breeze",
-                "Magawish Resort",
-                "Turtles Beach Resort",
-                "Azzurra Sahl Hasheesh",
-                "Veranda Sahl Hasheesh",
-                "La Quinta Resort",
-                "Aqua Blue Bay",
-                "Makadi Heights",
-                "Soma Bay",
-                "El Gouna"
+                "Baltim Beach",
+                "Baltim Beach Resort",
+                "Baltim Center",
+                "Baltim Chalets",
+                "Mediterranean View Residences"
+              ]
+            },
+            {
+              "district": "Desouk",
+              "projects": [
+                "Desouk Center",
+                "Desouk Heights",
+                "Desouk Residential Project",
+                "Nile View Residences"
+              ]
+            },
+            {
+              "district": "Kafr El Sheikh City",
+              "projects": [
+                "Agricultural Complex Housing",
+                "El Nozha Residences",
+                "Kafr El Sheikh Center",
+                "Kafr El Sheikh Gardens",
+                "Kafr El Sheikh University Area",
+                "University Towers"
+              ]
+            },
+            {
+              "district": "Sidi Salem",
+              "projects": [
+                "Burullus Lake Area",
+                "Lake View Compound",
+                "Sidi Salem Center",
+                "Sidi Salem Housing Project",
+                "Sidi Salem Plaza"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Luxor",
+          "districts": [
+            {
+              "district": "Armant",
+              "projects": [
+                "Armant Center",
+                "Armant Gardens",
+                "Armant Residential Complex",
+                "Valley View Apartments"
+              ]
+            },
+            {
+              "district": "Esna",
+              "projects": [
+                "Esna Center",
+                "Esna Housing Project",
+                "Esna Plaza",
+                "Esna Temple Area",
+                "Nile View Compound"
+              ]
+            },
+            {
+              "district": "Karnak",
+              "projects": [
+                "Karnak Center",
+                "Karnak Heights",
+                "Karnak Residential Project",
+                "Karnak Temple Complex",
+                "Temple View Residences"
+              ]
+            },
+            {
+              "district": "Luxor City",
+              "projects": [
+                "East Bank",
+                "Karnak Temple Area",
+                "Luxor Center",
+                "Luxor Gardens",
+                "Luxor Temple Area",
+                "Nile Valley Residences",
+                "Temple View Towers",
+                "Tourism Housing Complex",
+                "West Bank"
               ]
             }
           ]
@@ -224,110 +1080,266 @@
           "governorate": "Matrouh",
           "districts": [
             {
-              "district": "North Coast",
+              "district": "El Alamein",
               "projects": [
-                "Marassi",
-                "Hacienda Bay",
-                "La Vista Bay",
-                "Fouka Bay",
-                "Mountain View Ras El Hikma",
-                "Jefaira",
-                "Amwaj",
-                "Bo Islands",
-                "Telal",
-                "Malaaz",
-                "Seashell",
-                "Diplomats 3",
-                "Zahra",
-                "SouthMED",
-                "Blue Park",
-                "Caesar Bay",
-                "Sidi Abdel Rahman",
-                "Ras El Hekma",
-                "Silver Sands",
-                "Salt",
-                "Q North Coast",
-                "June by SODIC",
-                "Hacienda West",
-                "The Med",
-                "Mar Bay",
-                "Zoya",
-                "Cecilia Lagoons",
-                "Marsa Baghush",
-                "Ajar Resort",
-                "Katameya Coast",
-                "Marseilia Beach",
-                "Golf Porto Marina",
-                "White Bay",
-                "White Sand",
-                "La Vista Ras El Hekma",
+                "Alamein Aura",
+                "Alamein Bay",
+                "Alamein Beach",
+                "Alamein Breeze",
+                "Alamein Coast",
+                "Alamein Creek",
+                "Alamein Forest",
+                "Alamein Heights",
+                "Alamein Hills",
+                "Alamein Horizon",
+                "Alamein Lagoon",
+                "Alamein Lumina",
+                "Alamein Marina",
+                "Alamein Nova",
+                "Alamein Oasis",
+                "Alamein Park",
+                "Alamein Pearl",
+                "Alamein Plaza",
+                "Alamein Residences",
+                "Alamein Sky",
+                "Alamein Solis",
+                "Alamein Star",
+                "Alamein Summit",
+                "Alamein Terra",
+                "Alamein Towers",
+                "Alamein Valley",
+                "Alamein Vibe",
+                "Alamein View",
+                "Alamein Vista",
+                "Alamein Wave",
+                "Alamein Zenith",
+                "Alma New Alamein",
+                "Alma Village",
+                "Bo Sands",
+                "City Edge Towers",
+                "Downtown New Alamein",
+                "El Alamein Capital",
+                "Glee North Coast",
+                "Il Latini",
+                "La Capital New Alamein",
+                "Latin District",
+                "Mazarine",
+                "New Alamein Gardens",
                 "North Edge Towers",
-                "City Stars Al Sahel",
-                "La Vista Cascada",
-                "Mountain View Diplomats",
-                "Bianchi",
-                "Gaia",
-                "Kai Sahel",
-                "Sea View",
-                "Blue Blue Ras El Hekma",
-                "Ein Hills",
-                "La Vista Gardens",
-                "Mountain View North Coast",
-                "Marina Wadi Degla",
-                "Marina El Alamein"
+                "North Towers",
+                "Palm Hills New Alamein",
+                "The Gate Towers",
+                "Winter New Alamein"
               ]
             },
             {
-              "district": "El Alamein",
+              "district": "Marina",
               "projects": [
-                "Palm Hills New Alamein",
-                "Il Latini",
+                "Marina 1",
+                "Marina 2",
+                "Marina 3",
+                "Marina 4",
+                "Marina 5",
+                "Marina 6",
+                "Marina 7",
+                "Marina Beach",
+                "Marina El Alamein",
+                "Marina Golf"
+              ]
+            },
+            {
+              "district": "Marsa Matrouh",
+              "projects": [
+                "Agiba Beach",
+                "Al Gharam Beach",
+                "Alam El Rom",
+                "Caesar Bay Matrouh",
+                "Cleopatra Beach",
+                "El Fayrouz",
+                "El Nageh",
+                "El Obayed",
+                "Jaz Crystal Resort",
+                "Matrouh Beach Resort",
+                "Matrouh City Center",
+                "Matrouh Corniche Apartments",
+                "Rommel Beach"
+              ]
+            },
+            {
+              "district": "North Coast",
+              "projects": [
+                "Ajar Resort",
+                "Amwaj",
+                "Bianchi",
+                "Blue Blue Ras El Hekma",
+                "Blue Park",
+                "Bo Islands",
+                "Caesar Bay",
+                "Cecilia Lagoons",
+                "City Stars Al Sahel",
+                "Diplomats 3",
+                "Ein Hills",
+                "Fouka Bay",
+                "Gaia",
+                "Golf Porto Marina",
+                "Hacienda Bay",
+                "Hacienda West",
+                "Jefaira",
+                "June by SODIC",
+                "Kai Sahel",
+                "Katameya Coast",
+                "La Vista Bay",
+                "La Vista Cascada",
+                "La Vista Gardens",
+                "La Vista Ras El Hekma",
+                "Malaaz",
+                "Mar Bay",
+                "Marassi",
+                "Marina El Alamein",
+                "Marina Wadi Degla",
+                "Marsa Baghush",
+                "Marseilia Beach",
+                "Mountain View Diplomats",
+                "Mountain View North Coast",
+                "Mountain View Ras El Hikma",
                 "North Edge Towers",
-                "Mazarine",
-                "Downtown New Alamein",
-                "Bo Sands",
-                "Alma New Alamein",
-                "Glee North Coast",
-                "North Towers",
-                "Latin District",
-                "Winter New Alamein",
-                "El Alamein Capital",
-                "La Capital New Alamein",
-                "Alamein Towers",
-                "Alma Village",
-                "City Edge Towers",
-                "The Gate Towers",
-                "New Alamein Gardens",
-                "Alamein Hills",
-                "Alamein Heights",
-                "Alamein Residences",
-                "Alamein View",
-                "Alamein Plaza",
-                "Alamein Park",
-                "Alamein Bay",
-                "Alamein Lagoon",
-                "Alamein Marina",
-                "Alamein Beach",
-                "Alamein Coast",
-                "Alamein Pearl",
-                "Alamein Star",
-                "Alamein Sky",
-                "Alamein Horizon",
-                "Alamein Breeze",
-                "Alamein Oasis",
-                "Alamein Valley",
-                "Alamein Creek",
-                "Alamein Forest",
-                "Alamein Summit",
-                "Alamein Vista",
-                "Alamein Zenith",
-                "Alamein Nova",
-                "Alamein Aura",
-                "Alamein Lumina",
-                "Alamein Solis",
-                "Alamein Terra",
-                "Alamein Vibe",
-                "Alamein Wave"
+                "Q North Coast",
+                "Ras El Hekma",
+                "Salt",
+                "Sea View",
+                "Seashell",
+                "Sidi Abdel Rahman",
+                "Silver Sands",
+                "SouthMED",
+                "Telal",
+                "The Med",
+                "White Bay",
+                "White Sand",
+                "Zahra",
+                "Zoya"
+              ]
+            },
+            {
+              "district": "Ras El Hekma",
+              "projects": [
+                "Ras El Hekma Bay",
+                "Ras El Hekma Beach",
+                "Ras El Hekma Resort",
+                "Ras El Hekma Village"
+              ]
+            },
+            {
+              "district": "Sidi Abdel Rahman",
+              "projects": [
+                "Sidi Abdel Rahman Bay",
+                "Sidi Abdel Rahman Beach",
+                "Sidi Abdel Rahman Resort",
+                "Sidi Abdel Rahman Village"
+              ]
+            },
+            {
+              "district": "Siwa",
+              "projects": [
+                "Adrere Amellal",
+                "Cleopatra Spring",
+                "Dakrour Mountain",
+                "Fatnas Island",
+                "Shali Fortress",
+                "Siwa City Center",
+                "Siwa Lake",
+                "Siwa Oasis Eco-Lodge",
+                "Siwa Paradise Resort",
+                "Taziry Ecolodge"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Minya",
+          "districts": [
+            {
+              "district": "Abu Qurqas",
+              "projects": [
+                "Abu Qurqas Center",
+                "Abu Qurqas Gardens",
+                "Abu Qurqas Residential Complex",
+                "Tel El Amarna Area",
+                "Valley View Apartments"
+              ]
+            },
+            {
+              "district": "Mallawi",
+              "projects": [
+                "Mallawi Center",
+                "Mallawi Heights",
+                "Mallawi Museum Area",
+                "Mallawi Residential Project",
+                "Valley View Residences"
+              ]
+            },
+            {
+              "district": "Minya City",
+              "projects": [
+                "Corniche El Nil",
+                "El Nozha Residences",
+                "Minya Center",
+                "Minya Gardens",
+                "Minya University Area",
+                "Nile View Towers",
+                "University Housing Complex"
+              ]
+            },
+            {
+              "district": "Samalut",
+              "projects": [
+                "Limestone Valley Compound",
+                "Samalut Center",
+                "Samalut Housing Project",
+                "Samalut Plaza"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Monufia",
+          "districts": [
+            {
+              "district": "Ashmoun",
+              "projects": [
+                "Ashmoun Center",
+                "Ashmoun Heights",
+                "Ashmoun Residential Project",
+                "Valley View Residences"
+              ]
+            },
+            {
+              "district": "Menouf",
+              "projects": [
+                "Green Valley Compound",
+                "Menouf Center",
+                "Menouf Housing Project",
+                "Menouf Plaza"
+              ]
+            },
+            {
+              "district": "Quesna",
+              "projects": [
+                "Industrial Area",
+                "Industrial Zone Housing",
+                "Quesna Center",
+                "Quesna Gardens",
+                "Quesna Residential Complex"
+              ]
+            },
+            {
+              "district": "Shibin El Kom",
+              "projects": [
+                "Administrative Complex Housing",
+                "El Nozha Residences",
+                "Menoufia University Area",
+                "Shibin El Kom Center",
+                "Shibin Gardens",
+                "University Towers"
               ]
             }
           ]
@@ -336,24 +1348,871 @@
           "governorate": "New Administrative Capital",
           "districts": [
             {
+              "district": "Cultural District",
+              "projects": [
+                "Arts Center",
+                "Cultural Plaza",
+                "Exhibition Halls",
+                "National Museum",
+                "Opera House",
+                "Theaters Complex"
+              ]
+            },
+            {
+              "district": "Diplomatic District",
+              "projects": [
+                "Diplomatic Club",
+                "Diplomatic Gardens",
+                "Diplomatic Residences",
+                "Embassy Area",
+                "International Organizations Area"
+              ]
+            },
+            {
+              "district": "Downtown",
+              "projects": [
+                "Al Maqsad",
+                "Armonia",
+                "Central Park",
+                "Downtown Boulevard",
+                "Downtown Mall",
+                "Downtown Plaza",
+                "Downtown Residences",
+                "Downtown Towers",
+                "Ivory Tower",
+                "Paragon",
+                "The Loft"
+              ]
+            },
+            {
+              "district": "Financial District",
+              "projects": [
+                "Banking Zone",
+                "Business Hub",
+                "Central Business District",
+                "Financial Regulatory Authority",
+                "Financial Towers",
+                "Iconic Tower",
+                "Stock Exchange Building"
+              ]
+            },
+            {
+              "district": "Government District",
+              "projects": [
+                "Administrative Buildings",
+                "Cabinet Building",
+                "Government Square",
+                "Ministries Complex",
+                "Parliament Building",
+                "Presidential Palace"
+              ]
+            },
+            {
+              "district": "Green River",
+              "projects": [
+                "Botanical Gardens",
+                "Fawry Residence",
+                "Green Avenue",
+                "Green River Park",
+                "La Verde",
+                "Recreational Areas",
+                "River Walk",
+                "Riverside Cafes",
+                "Sun Capital",
+                "Water Features",
+                "Zed East"
+              ]
+            },
+            {
+              "district": "Knowledge City",
+              "projects": [
+                "Educational Institutions",
+                "Innovation Hub",
+                "Research Centers",
+                "Technology Parks",
+                "Universities Complex"
+              ]
+            },
+            {
+              "district": "Medical City",
+              "projects": [
+                "International Medical Center",
+                "Medical Research Centers",
+                "Medical University",
+                "Pharmaceutical Zone",
+                "Specialized Hospitals Complex"
+              ]
+            },
+            {
+              "district": "R1 District",
+              "projects": [
+                "Capital Heights",
+                "Capital Residence",
+                "De Joya",
+                "Entrada",
+                "La Verde",
+                "The Loft",
+                "Vinci"
+              ]
+            },
+            {
+              "district": "R2 District",
+              "projects": [
+                "Il Bosco",
+                "Il Bosco City",
+                "Midtown",
+                "Midtown Capital",
+                "Midtown Condo",
+                "Midtown Sky",
+                "Midtown Solo",
+                "Midtown Villa"
+              ]
+            },
+            {
+              "district": "R3",
+              "projects": [
+                "Atika",
+                "Entrada",
+                "Sodic East",
+                "Vinci",
+                "Zavani"
+              ]
+            },
+            {
+              "district": "R3 District",
+              "projects": [
+                "Al Maqsad Residences",
+                "Anakaji",
+                "Atika",
+                "Botanica",
+                "Catalan",
+                "Green Avenue",
+                "Mamsha Gardens",
+                "Pukka",
+                "The City"
+              ]
+            },
+            {
               "district": "R7",
               "projects": [
-                "Midtown Sky",
-                "The City",
+                "Anakaji",
                 "Capital Heights",
                 "La Vista City",
-                "Anakaji",
-                "Oia Compound"
+                "Midtown Sky",
+                "Oia Compound",
+                "The City"
+              ]
+            },
+            {
+              "district": "R7 District",
+              "projects": [
+                "Zed East",
+                "Zed Gardens",
+                "Zed New Capital",
+                "Zed Park",
+                "Zed Towers"
               ]
             },
             {
               "district": "R8",
               "projects": [
-                "Sky Capital",
-                "The Curve",
+                "De Joya",
                 "Residence Eight",
                 "Scenario",
-                "De Joya"
+                "Sky Capital",
+                "The Curve"
+              ]
+            },
+            {
+              "district": "Residential Districts",
+              "projects": [
+                "R1 District",
+                "R2 District",
+                "R3 District",
+                "R4 District",
+                "R5 District",
+                "R6 District",
+                "R7 District",
+                "R8 District"
+              ]
+            },
+            {
+              "district": "Sports City",
+              "projects": [
+                "Aquatic Center",
+                "Olympic Stadium",
+                "Sports Academy",
+                "Sports Arena",
+                "Sports Medicine Center",
+                "Tennis Complex"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "New Valley",
+          "districts": [
+            {
+              "district": "Baris",
+              "projects": [
+                "Baris Center",
+                "Baris Gardens",
+                "Baris Oasis",
+                "Baris Residential Complex",
+                "Oasis View Apartments"
+              ]
+            },
+            {
+              "district": "Dakhla",
+              "projects": [
+                "Dakhla Center",
+                "Dakhla Heights",
+                "Dakhla Oasis",
+                "Dakhla Oasis Resort",
+                "Desert Palm Residences"
+              ]
+            },
+            {
+              "district": "Farafra",
+              "projects": [
+                "Farafra Center",
+                "Farafra Housing Project",
+                "Farafra Oasis",
+                "Farafra Plaza",
+                "White Desert Area",
+                "White Desert View Compound"
+              ]
+            },
+            {
+              "district": "Kharga",
+              "projects": [
+                "Desert View Apartments",
+                "Kharga Center",
+                "Kharga Gardens",
+                "Kharga Oasis",
+                "Kharga Oasis Residences",
+                "New Kharga Housing Complex"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "North Sinai",
+          "districts": [
+            {
+              "district": "Arish",
+              "projects": [
+                "Administrative Complex Housing",
+                "Arish Beach",
+                "Arish Beach Residences",
+                "Arish Center",
+                "Arish Gardens",
+                "Arish Port Area",
+                "Mediterranean View Towers"
+              ]
+            },
+            {
+              "district": "Bir al-Abd",
+              "projects": [
+                "Bir al-Abd Heights",
+                "Bir al-Abd Residential Project",
+                "Coastal View Residences"
+              ]
+            },
+            {
+              "district": "Bir al-Abed",
+              "projects": [
+                "Bir al-Abed Center",
+                "Bir al-Abed Housing Project",
+                "Bir al-Abed Plaza",
+                "Coastal View Residences"
+              ]
+            },
+            {
+              "district": "Rafah",
+              "projects": [
+                "Border Area",
+                "Border View Apartments",
+                "Rafah Center",
+                "Rafah Gardens",
+                "Rafah Residential Complex"
+              ]
+            },
+            {
+              "district": "Sheikh Zuweid",
+              "projects": [
+                "Border Zone Compound",
+                "Coastal Compound",
+                "Sheikh Zuweid Center",
+                "Sheikh Zuweid Heights",
+                "Sheikh Zuweid Housing Project",
+                "Sheikh Zuweid Plaza"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Port Said",
+          "districts": [
+            {
+              "district": "El Arab",
+              "projects": [
+                "El Arab Gardens",
+                "El Arab Housing Project",
+                "Industrial Zone Residences"
+              ]
+            },
+            {
+              "district": "El Manakh",
+              "projects": [
+                "El Manakh Center",
+                "El Manakh Housing Project",
+                "El Manakh Plaza",
+                "Green Valley Compound"
+              ]
+            },
+            {
+              "district": "El Zohor",
+              "projects": [
+                "El Zohor Center",
+                "El Zohor Heights",
+                "El Zohor Plaza",
+                "El Zohor Residential Project",
+                "Garden City Compound"
+              ]
+            },
+            {
+              "district": "Port Fouad",
+              "projects": [
+                "Canal View Residences",
+                "Mediterranean View Residences",
+                "Port Fouad Beach",
+                "Port Fouad Beach Resort",
+                "Port Fouad Center",
+                "Port Fouad Chalets",
+                "Port Fouad Heights"
+              ]
+            },
+            {
+              "district": "Port Said City",
+              "projects": [
+                "Canal Towers",
+                "Canal View Residences",
+                "Free Zone",
+                "Free Zone Housing Complex",
+                "Mediterranean Towers",
+                "Mediterranean View Residences",
+                "Port Area",
+                "Port Housing Complex",
+                "Port Said Center",
+                "Port Said Gardens",
+                "Port Said University Area"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Qalyubia",
+          "districts": [
+            {
+              "district": "Banha",
+              "projects": [
+                "Administrative Complex Housing",
+                "Banha Center",
+                "Banha Gardens",
+                "Banha University Area",
+                "El Nozha Residences",
+                "Railway Complex Housing",
+                "University Towers"
+              ]
+            },
+            {
+              "district": "Khanka",
+              "projects": [
+                "Industrial Area",
+                "Industrial Zone Housing",
+                "Khanka Center",
+                "Khanka Gardens",
+                "Khanka Residential Complex"
+              ]
+            },
+            {
+              "district": "Obour City",
+              "projects": [
+                "Industrial Zone Residences",
+                "New Obour Villas",
+                "Obour Gardens",
+                "Obour Heights"
+              ]
+            },
+            {
+              "district": "Qalyub",
+              "projects": [
+                "Green Valley Compound",
+                "Qalyub Center",
+                "Qalyub Housing Project",
+                "Qalyub Plaza"
+              ]
+            },
+            {
+              "district": "Shubra El Kheima",
+              "projects": [
+                "Industrial City Housing",
+                "Industrial Zone",
+                "Shubra El Kheima Center",
+                "Shubra El Kheima Residential Project",
+                "Shubra Heights",
+                "Shubra Residential Project"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Qena",
+          "districts": [
+            {
+              "district": "Dishna",
+              "projects": [
+                "Dishna Gardens",
+                "Dishna Residential Complex",
+                "Nile View Apartments"
+              ]
+            },
+            {
+              "district": "Farshout",
+              "projects": [
+                "Farshout Center",
+                "Farshout Gardens",
+                "Farshout Residential Complex",
+                "Nile View Apartments",
+                "Sugar Factory Area"
+              ]
+            },
+            {
+              "district": "Nag Hammadi",
+              "projects": [
+                "Aluminum Complex Area",
+                "Industrial City Housing",
+                "Nag Hammadi Center",
+                "Nag Hammadi Heights",
+                "Nag Hammadi Residential Project"
+              ]
+            },
+            {
+              "district": "Qena City",
+              "projects": [
+                "Administrative Complex Housing",
+                "Dendera Temple Area",
+                "Nile Valley Residences",
+                "Qena Center",
+                "Qena Gardens",
+                "South Valley University Area",
+                "University Towers"
+              ]
+            },
+            {
+              "district": "Qift",
+              "projects": [
+                "Qift Housing Project",
+                "Qift Plaza",
+                "Valley View Compound"
+              ]
+            },
+            {
+              "district": "Qus",
+              "projects": [
+                "Qus Center",
+                "Qus Housing Project",
+                "Qus Plaza",
+                "Valley View Compound"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Red Sea",
+          "districts": [
+            {
+              "district": "El Gouna",
+              "projects": [
+                "Abu Tig Marina",
+                "Ancient Sands",
+                "Downtown",
+                "Italian Quarter",
+                "Kafr El Gouna",
+                "Marina",
+                "North Golf",
+                "Nubian Area",
+                "South Marina",
+                "West Golf",
+                "White Villas"
+              ]
+            },
+            {
+              "district": "Hurghada",
+              "projects": [
+                "Al Ahyaa",
+                "Al Sakkala",
+                "Aqua Blue Bay",
+                "Azzurra Sahl Hasheesh",
+                "El Dahar",
+                "El Gouna",
+                "El Hadaba",
+                "El Kawther",
+                "El Mamsha",
+                "La Quinta Resort",
+                "Magawish",
+                "Magawish Resort",
+                "Makadi Heights",
+                "Ocean Breeze",
+                "Sheraton Road",
+                "Soma Bay",
+                "Turtles Beach Resort",
+                "Veranda Sahl Hasheesh",
+                "Village Road"
+              ]
+            },
+            {
+              "district": "Makadi Bay",
+              "projects": [
+                "Makadi Center",
+                "Makadi Golf",
+                "Makadi Heights",
+                "Makadi Mall",
+                "Makadi Marina",
+                "Makadi Palace",
+                "Makadi Spa"
+              ]
+            },
+            {
+              "district": "Marsa Alam",
+              "projects": [
+                "Blue Reef Resort",
+                "El Quseir Road",
+                "Madinat Coraya",
+                "Marsa Alam Airport Area",
+                "Marsa Alam Beach Resort",
+                "Marsa Alam City Center",
+                "Port Ghalib",
+                "Wadi El Gemal"
+              ]
+            },
+            {
+              "district": "Quseir",
+              "projects": [
+                "Mangrove Bay Resort",
+                "Quseir Corniche",
+                "Quseir Marina",
+                "Quseir Old Town",
+                "Quseir Port",
+                "Quseir Village",
+                "Radisson Blu El Quseir"
+              ]
+            },
+            {
+              "district": "Ras Gharib",
+              "projects": [
+                "Gulf View Residences",
+                "Ras Gharib Beach Compound",
+                "Ras Gharib City Center",
+                "Ras Gharib Industrial Zone",
+                "Ras Gharib Petroleum Housing",
+                "Ras Gharib Port"
+              ]
+            },
+            {
+              "district": "Safaga",
+              "projects": [
+                "Caribbean World Resort",
+                "Menaville Safaga",
+                "Safaga Bay Resort",
+                "Safaga City Center",
+                "Safaga Corniche",
+                "Safaga Industrial Zone",
+                "Safaga Port"
+              ]
+            },
+            {
+              "district": "Sahl Hasheesh",
+              "projects": [
+                "Azzurra",
+                "Baron Palace",
+                "Old Town",
+                "Palm Beach Piazza",
+                "Premier Le Reve",
+                "Pyramisa",
+                "Tropitel",
+                "Veranda"
+              ]
+            },
+            {
+              "district": "Soma Bay",
+              "projects": [
+                "Soma Bay Center",
+                "Soma Beach",
+                "Soma Breeze",
+                "Soma Golf",
+                "Soma Heights",
+                "Soma Marina",
+                "Soma Palm"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Sharqia",
+          "districts": [
+            {
+              "district": "10th of Ramadan City",
+              "projects": [
+                "10th of Ramadan Gardens",
+                "10th of Ramadan Heights",
+                "Industrial Zone Residences",
+                "New 10th of Ramadan Villas"
+              ]
+            },
+            {
+              "district": "Abu Hammad",
+              "projects": [
+                "Abu Hammad Gardens",
+                "Abu Hammad Residential Complex",
+                "Agricultural Zone Housing"
+              ]
+            },
+            {
+              "district": "Bilbeis",
+              "projects": [
+                "Bilbeis Center",
+                "Bilbeis Heights",
+                "Bilbeis Residential Project",
+                "Green Valley Compound",
+                "Industrial City Housing",
+                "Industrial Zone"
+              ]
+            },
+            {
+              "district": "Hehia",
+              "projects": [
+                "Hehia Center",
+                "Hehia Gardens",
+                "Hehia Residential Complex",
+                "Valley View Apartments"
+              ]
+            },
+            {
+              "district": "Minya El Qamh",
+              "projects": [
+                "Agricultural Compound",
+                "Green Valley Compound",
+                "Minya El Qamh Center",
+                "Minya El Qamh Housing Project",
+                "Minya El Qamh Plaza"
+              ]
+            },
+            {
+              "district": "Zagazig",
+              "projects": [
+                "Administrative Complex Housing",
+                "El Nozha Residences",
+                "University Towers",
+                "Zagazig Center",
+                "Zagazig Gardens",
+                "Zagazig University Area"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Sohag",
+          "districts": [
+            {
+              "district": "Akhmim",
+              "projects": [
+                "Akhmim Center",
+                "Akhmim Heights",
+                "Akhmim Residential Project",
+                "Ancient Akhmim Area",
+                "Heritage City Housing",
+                "Valley View Compound"
+              ]
+            },
+            {
+              "district": "Girga",
+              "projects": [
+                "Girga Center",
+                "Girga Housing Project",
+                "Girga Plaza",
+                "Nile View Residences",
+                "Valley View Compound"
+              ]
+            },
+            {
+              "district": "Sohag City",
+              "projects": [
+                "Administrative Complex Housing",
+                "Corniche El Nil",
+                "Nile Valley Residences",
+                "Sohag Center",
+                "Sohag Gardens",
+                "Sohag University Area",
+                "University Towers"
+              ]
+            },
+            {
+              "district": "Tahta",
+              "projects": [
+                "Nile View Apartments",
+                "Tahta Center",
+                "Tahta Gardens",
+                "Tahta Residential Complex",
+                "Valley View Apartments"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "South Sinai",
+          "districts": [
+            {
+              "district": "Dahab",
+              "projects": [
+                "Assalah",
+                "Blue Hole Area",
+                "Coral Coast Residences",
+                "Dahab Blue Lagoon Resort",
+                "Dahab Heights",
+                "Laguna",
+                "Lighthouse Area",
+                "Masbat Bay",
+                "Mashraba",
+                "Medina"
+              ]
+            },
+            {
+              "district": "El Tor",
+              "projects": [
+                "Administrative Complex Housing",
+                "El Tor Beach Residences",
+                "El Tor Gardens",
+                "Gulf View Towers"
+              ]
+            },
+            {
+              "district": "Nuweiba",
+              "projects": [
+                "Gulf View Residences",
+                "Muzeina",
+                "Nuweiba Beach",
+                "Nuweiba Beach Resort",
+                "Nuweiba Chalets",
+                "Nuweiba City",
+                "Nuweiba Port",
+                "Tarabin"
+              ]
+            },
+            {
+              "district": "Saint Catherine",
+              "projects": [
+                "Bedouin Villages",
+                "Heritage Housing Complex",
+                "Mount Sinai Area",
+                "Saint Catherine City",
+                "Saint Catherine Monastery",
+                "Saint Catherine Mountain View",
+                "Saint Catherine Plaza",
+                "Wadi Feiran"
+              ]
+            },
+            {
+              "district": "Sharm El Sheikh",
+              "projects": [
+                "Delta Sharm",
+                "Hadaba",
+                "Hay El Nour",
+                "Montazah",
+                "Naama Bay",
+                "Naama Bay Residences",
+                "Nabq Bay",
+                "Nabq Bay Villas",
+                "Old Market",
+                "Ras Um Sid",
+                "Sharks Bay",
+                "Sharm El Sheikh Resort",
+                "Sharm Heights",
+                "Um El Sid"
+              ]
+            },
+            {
+              "district": "Taba",
+              "projects": [
+                "Pharaoh's Island Area",
+                "Taba Beach",
+                "Taba Border",
+                "Taba City",
+                "Taba Heights"
+              ]
+            }
+          ]
+        },
+        {
+          "governorate": "Suez",
+          "districts": [
+            {
+              "district": "Ain Sokhna",
+              "projects": [
+                "Ain Sokhna Beach",
+                "Ain Sokhna Beach Resort",
+                "Ain Sokhna Center",
+                "Ain Sokhna Chalets",
+                "Ain Sokhna Heights",
+                "Ain Sokhna Resort",
+                "Gulf View Residences",
+                "La Vista Ain Sokhna",
+                "Porto Sokhna",
+                "Telal Ain Sokhna"
+              ]
+            },
+            {
+              "district": "Arbaeen",
+              "projects": [
+                "Arbaeen Gardens",
+                "Arbaeen Residential Complex",
+                "Canal View Apartments"
+              ]
+            },
+            {
+              "district": "Ataka",
+              "projects": [
+                "Ataka Center",
+                "Ataka Heights",
+                "Ataka Housing Project",
+                "Ataka Mountain",
+                "Ataka Plaza",
+                "Ataka Residential Project",
+                "Mountain View Compound"
+              ]
+            },
+            {
+              "district": "Faisal",
+              "projects": [
+                "Canal View Residences",
+                "Faisal Center",
+                "Faisal Housing Project",
+                "Faisal Plaza"
+              ]
+            },
+            {
+              "district": "Suez City",
+              "projects": [
+                "Canal View Residences",
+                "Gulf Towers",
+                "Industrial Complex Housing",
+                "Industrial Zone",
+                "Port Area",
+                "Port Towers",
+                "Suez Canal University Area",
+                "Suez Center",
+                "Suez Gardens"
               ]
             }
           ]
