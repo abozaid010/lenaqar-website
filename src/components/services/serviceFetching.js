@@ -301,6 +301,37 @@ export async function createBooking(bookingData) {
   }
 }
 
+
+export async function userAnalytics(days) {
+  const clientId = await getClientid();
+  try {
+    const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}?days=${days}`);
+    console.log(response.data.data);
+    return response.data.data;
+
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+    return { error: error.message };
+  }
+}
+export async function fetchMonthData(searchParams) {
+  // const clientId = await getClientid();
+  const clientId = await getClientid();
+
+  try {
+    const params = {
+      ...JSON.parse(searchParams),
+     
+    };
+
+    const response = await axiosInstance.get(`/analysis/v1/dashboard-action-analysis/${clientId}?days=7`, { params });
+
+console.log(response.data.data)
+    return response.data.data.monthly;
+
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+
 // #### Sales API ####
 export async function getSalesData(searchParams) {
   try {
@@ -327,6 +358,7 @@ export async function deleteEmployee(id) {
     return true;
   } catch (error) {
     console.error("Failed to fetch sales data:", error.message);
+
     return { error: error.message };
   }
 }
