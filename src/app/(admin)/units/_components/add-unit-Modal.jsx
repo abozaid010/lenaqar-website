@@ -65,6 +65,7 @@ export default function AddUnitModal({
     furnishing: unitData?.furnishing || "",
     garageArea: unitData?.garageArea || "",
     images: unitData?.images || [],
+    code: unitData?.code || "",
   }));
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
@@ -110,12 +111,6 @@ export default function AddUnitModal({
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
-  };
-
-  const handleOutsideClick = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      onClose();
-    }
   };
 
   const handleNext = (e) => {
@@ -247,7 +242,12 @@ export default function AddUnitModal({
         return;
       }
 
-      const requiredFields = ["finishing", "developer", "furnishing"];
+      let requiredFields;
+      if (formData.purpose === "sell") {
+        requiredFields = ["finishing", "developer", "furnishing"];
+      } else {
+        requiredFields = ["finishing", "furnishing"];
+      }
       const missingFields = requiredFields.filter((field) => !formData[field]);
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);

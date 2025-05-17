@@ -301,26 +301,26 @@ export default {
     "subtitle": "تصفح عقاراتنا الحصرية"
   },
   shareModel: {
-  "Content": "محتوى الوحدة",
-  "post": "نشر المحتوى",
-  "images": "الصور",
-  "loading": "جاري تحميل بيانات المشاركة...",
-  "copy": "تم النسخ!",
-  "copyLink": "نسخ مع الرابط",
-  "noData": "لا توجد بيانات للمشاركة.",
-  "noImage": "لا توجد صور للمشاركة."
-},
+    "Content": "محتوى الوحدة",
+    "post": "نشر المحتوى",
+    "images": "الصور",
+    "loading": "جاري تحميل بيانات المشاركة...",
+    "copy": "تم النسخ!",
+    "copyLink": "نسخ مع الرابط",
+    "noData": "لا توجد بيانات للمشاركة.",
+    "noImage": "لا توجد صور للمشاركة."
+  },
   unitsFilter: {
     "allDevelopers": "جميع المطورين",
     "allCompounds": "جميع المجمعات",
     "allPurposes": "جميع الأغراض",
     "allPropertyTypes": "جميع أنواع العقارات",
-        "price":"السعر",
-        "max":"اعلى سعر",
-        "min":"اقل سعر",
-        "applay":"تطبيق",
-        "activeFilter":" الفلاتر النشطه :",
-        "clearall":"مسح جميع الفلاتر",
+    "price": "السعر",
+    "max": "اعلى سعر",
+    "min": "اقل سعر",
+    "applay": "تطبيق",
+    "activeFilter": " الفلاتر النشطه :",
+    "clearall": "مسح جميع الفلاتر",
 
     "purposes": {
       "buy": "شراء",
@@ -466,8 +466,10 @@ export default {
     "selectView": "اختر الإطلالة",
     "placeholders": {
       "unitTitle": "أدخل عنوان الوحدة",
-      "district": "اسم الحي"
+      "district": "اسم الحي",
+      "code": "كود الوحدة (اختياري)",
     },
+    "code": "كود الوحدة",
     buildingTypes: {
       "apartment": "شقة",
       "villa": "فيلا",

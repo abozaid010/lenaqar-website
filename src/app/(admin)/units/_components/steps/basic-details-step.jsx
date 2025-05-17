@@ -16,6 +16,7 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
+  const { t } = useI18n();
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
   const [dataProject, setDataProject] = useState([]);
@@ -113,7 +114,6 @@ export default function BasicDetailsStep({
     }
   };
 
-  const { t } = useI18n();
   const handleAddCompound = (newCompound) => {
     // Add the new compound to the list
     setAvailableCompounds([...availableCompounds, newCompound.name]);
@@ -422,6 +422,21 @@ export default function BasicDetailsStep({
               <option value="mountain">{t.basicDetails.views.mountain}</option>
             </select>
           </div>
+        </div>
+
+        {/* code */}
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            {t.basicDetails.code}
+          </label>
+          <input
+            type="text"
+            name="code"
+            value={formData.code}
+            onChange={handleChange}
+            placeholder={t.basicDetails.placeholders.code}
+            className="block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
       </div>
 
