@@ -447,7 +447,8 @@ export default {
     "selectView": "اختر الإطلالة",
     "placeholders": {
       "unitTitle": "أدخل عنوان الوحدة",
-      "district": "اسم الحي"
+      "district": "اسم الحي",
+      "code": "كود الوحدة (اختياري)",
     },
     "code": "كود الوحدة",
     buildingTypes: {

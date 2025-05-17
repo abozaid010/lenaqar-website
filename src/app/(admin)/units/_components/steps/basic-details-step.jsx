@@ -431,6 +431,7 @@ export default function BasicDetailsStep({
           <input
             type="text"
             name="code"
+            disabled={true}
             required
             value={formData.code}
             onChange={handleChange}
