@@ -446,7 +446,7 @@ export default function BasicDetailsStep({
           </label>
           <input
             type="text"
-            name="code"
+            name="model"
             value={formData.model}
             onChange={handleChange}
             placeholder=""
