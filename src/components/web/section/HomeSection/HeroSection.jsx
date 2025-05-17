@@ -20,7 +20,7 @@ const HeroSection = () => {
     t.heroSection.message4,
     t.heroSection.message5,
     t.heroSection.message6,
-    t.heroSection.message7,
+    // t.heroSection.message7,
   ];
 
   useEffect(() => {

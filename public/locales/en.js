@@ -49,11 +49,11 @@ export default {
     "backgroundAlt": "Background",
     "aiImageAlt": "AI Assistant",
     "message1": "⁠Filter Leads",
-    "message2": "24/7 ⁠Instant replies to customers",
-    "message3": "⁠Data Analytics",
-    "message4": "Property and Clients CRM",
-    "message5": "⁠Upselling",
-    "message6": "⁠AI Property Consultant",
+    "message2": "Smart CRM for Units, Leads & Sales Teams",
+    "message3": "24/7 AI Sales Team – Never Miss a Lead",
+    "message4": "AI Chatbot on Your Website",
+    "message5": "Live Client Handling & Market Insights",
+    "message6": "Auto Follow-Ups & Effortless Scaling",
     "message7": "follow up, and scale with effortless"
   },
   dashboard: {
