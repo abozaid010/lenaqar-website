@@ -320,3 +320,13 @@ export async function createNewEmployee(paylod) {
     return { error: error.message };
   }
 }
+
+export async function deleteEmployee(id) {
+  try {
+    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}

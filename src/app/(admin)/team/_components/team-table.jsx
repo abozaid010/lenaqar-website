@@ -1,9 +1,31 @@
 "use client";
 
+import { deleteEmployee } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
 import { Trash2, Edit2 } from "lucide-react";
+import toast from "react-hot-toast";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function TeamTable({ data }) {
+  const router = useRouter();
+  const [currentId, setCurrentId] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(false);
+
+  const handleDelete = async (id) => {
+    setLoadingDelete(true);
+    setCurrentId(id);
+    try {
+      await deleteEmployee(id);
+      toast.success("Team member deleted successfully");
+      router.refresh();
+    } catch (error) {
+      toast.error("Failed to delete team member");
+    } finally {
+      setLoadingDelete(false);
+      setCurrentId(null);
+    }
+  };
   const { t } = useI18n();
 
   return (
@@ -64,12 +86,12 @@ export default function TeamTable({ data }) {
                   </td>
 
                   <td className="px-2 py-2 text-center">
-                    <button
-                      onClick={() => {
-                        /* handle delete */
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
+                    <button onClick={() => handleDelete(item.id)}>
+                      {loadingDelete && currentId === item.id ? (
+                        <div className="animate-spin w-4 h-4 border-2 border-gray-400 rounded-full border-t-transparent"></div>
+                      ) : (
+                        <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
+                      )}
                     </button>
                   </td>
                 </tr>
