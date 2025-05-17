@@ -475,6 +475,7 @@ export default {
       "code": "unit code (optional)",
     },
     "code": "unit code",
+    "model": "Unit Model",
     buildingTypes: {
       "apartment": "Apartment",
       "villa": "Villa",
