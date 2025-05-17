@@ -7,12 +7,13 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import Link from "next/link";
 
-const Header = ({ clientName }) => {
+const Header = ({ clientName, clientID }) => {
   const router = useRouter();
   const { t } = useI18n();
-  const lang = Cookies.get("lang")
- 
+  const lang = Cookies.get("lang");
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const userMenuRef = useRef(null);
@@ -76,7 +77,10 @@ const Header = ({ clientName }) => {
           className="flex items-center gap-2 bg-primary text-white font-medium px-[16px] py-[10px] h-[40px] sm:px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
         >
           <span>{t.header.sendMessage}</span>
-          <HelpCircle size={20} className={`${lang === "ar" ? "rotate-y-180" : ""}`} />
+          <HelpCircle
+            size={20}
+            className={`${lang === "ar" ? "rotate-y-180" : ""}`}
+          />
         </button>
 
         <LanguageSwitcher />
@@ -102,29 +106,20 @@ const Header = ({ clientName }) => {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-50 border border-gray-200 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 relative">
-                <button
-                  onClick={() => setIsUserMenuOpen(false)}
-                  className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-                <p className="text-sm font-medium text-gray-900">
-                  {clientName}
-                </p>
-              </div>
-
-              <a className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150">
-                <Settings className="h-4 w-4 mr-3" />
+            <div className="absolute mt-2 right-0 w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden">
+              <Link
+                href={`/dashboard/client/${clientID}`}
+                className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3"
+              >
+                <Settings className="h-4 w-4" />
                 {t.header.userMenu.settings}
-              </a>
+              </Link>
 
               <button
                 onClick={handleLogout}
-                className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                className="text-base flex items-center w-full text-left py-2 px-4 text-red-600 hover:bg-red-50 transition-colors duration-150 gap-3"
               >
-                <LogOut className="h-4 w-4 mr-3" />
+                <LogOut className="h-4 w-4" />
                 {t.header.userMenu.logout}
               </button>
             </div>

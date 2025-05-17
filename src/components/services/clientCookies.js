@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 export const getClientid = async () => {
   const cookieStore = await cookies();
   const cookie = cookieStore.get("client_id");
-  
+
 
   if (!cookie || !cookie.value) return {};
 
@@ -16,6 +16,19 @@ export const getClientid = async () => {
     console.error("Failed to parse client_id cookie:", error);
     return {};
   }
+};
+
+export const getClientEmail = async () => {
+  const cookieStore = await cookies();
+  const clientInfo = cookieStore.get("client_info");
+
+  const email = JSON.parse(clientInfo?.value)?.email;
+
+  if (email) {
+    return email;
+  } else {
+    return false;
+  };
 };
 export const gettoken = async () => {
   const cookieStore = await cookies();

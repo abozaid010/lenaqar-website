@@ -1,7 +1,7 @@
 'use server';
 
 import axiosInstance from "@/utils/axiosInstance";
-import { getClientid } from "./clientCookies";
+import { getClientEmail, getClientid } from "./clientCookies";
 
 export async function fetchUnits() {
   const clientId = await getClientid();
@@ -327,6 +327,44 @@ export async function deleteEmployee(id) {
     return true;
   } catch (error) {
     console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}
+
+// #### Profile API ####
+export async function getProfileData() {
+  const clientEmail = await getClientEmail();
+
+
+  if (!clientEmail) {
+    console.error("Client email not found");
+    return { error: "Client email not found" };
+  }
+
+  try {
+    const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch profile data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function updateProfileData(formData) {
+  console.log("Form data:", formData);
+  const clientEmail = getClientEmail();
+
+  if (!clientEmail) {
+    console.error("Client email not found");
+    return { error: "Client email not found" };
+  }
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // const response = axiosInstance.patch("/client/update-profile", formData);
+    // return response.data;
+  } catch (error) {
+    console.error("Failed to update profile data:", error.message);
     return { error: error.message };
   }
 }
