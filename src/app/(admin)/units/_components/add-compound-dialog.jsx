@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Dialog from "../_components/dialog";
+import Dialog from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import {
   addCompound,
@@ -96,7 +96,8 @@ export default function AddCompoundDialog({
     const newErrors = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = t.formValidation?.compoundNameRequired || "Compound name is required";
+      newErrors.name =
+        t.formValidation?.compoundNameRequired || "Compound name is required";
     }
 
     if (!formData.city.trim()) {
@@ -104,15 +105,18 @@ export default function AddCompoundDialog({
     }
 
     if (!formData.country.trim()) {
-      newErrors.country = t.formValidation?.countryRequired || "Country is required";
+      newErrors.country =
+        t.formValidation?.countryRequired || "Country is required";
     }
 
     if (!formData.district.trim()) {
-      newErrors.district = t.formValidation?.districtRequired || "District is required";
+      newErrors.district =
+        t.formValidation?.districtRequired || "District is required";
     }
 
     if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
-      newErrors.area = t.formValidation?.areaPositive || "Area must be a positive number";
+      newErrors.area =
+        t.formValidation?.areaPositive || "Area must be a positive number";
     }
 
     return newErrors;
@@ -131,11 +135,15 @@ export default function AddCompoundDialog({
     if (uploadedImageId) {
       try {
         await deleteImage(uploadedImageId);
-        toast.success(t.toasts?.imageRemoved || "Image removed successfully from the server!");
+        toast.success(
+          t.toasts?.imageRemoved ||
+            "Image removed successfully from the server!"
+        );
         setUploadedImageId(null);
       } catch (error) {
         toast.error(
-          t.toasts?.imageRemoveFailed || "Failed to remove image from the server. Please try again."
+          t.toasts?.imageRemoveFailed ||
+            "Failed to remove image from the server. Please try again."
         );
         return;
       }
@@ -176,7 +184,10 @@ export default function AddCompoundDialog({
       toast.success(t.toasts?.imageUploaded || "Image uploaded successfully!");
       setSelectedImage(null);
     } catch (error) {
-      toast.error(t.toasts?.imageUploadFailed || "Failed to upload image. Please try again.");
+      toast.error(
+        t.toasts?.imageUploadFailed ||
+          "Failed to upload image. Please try again."
+      );
     } finally {
       setIsUploading(false);
     }
@@ -201,7 +212,9 @@ export default function AddCompoundDialog({
 
       const res = await addCompound(submissionData);
       if (res.code === 200) {
-        toast.success(t.toasts?.compoundAdded || "Compound added successfully!");
+        toast.success(
+          t.toasts?.compoundAdded || "Compound added successfully!"
+        );
 
         // إضافة المشروع الجديد وإغلاق النافذة
         onAdd({
@@ -232,11 +245,21 @@ export default function AddCompoundDialog({
           master_plan: "",
         });
       } else {
-        toast.error(t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.");
+        toast.error(
+          t.toasts?.compoundAddFailed ||
+            "Failed to add compound. Please try again."
+        );
       }
     } catch (error) {
-      toast.error(t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.");
-      setErrors({ submit: t.toasts?.compoundAddFailed || "Failed to add compound. Please try again." });
+      toast.error(
+        t.toasts?.compoundAddFailed ||
+          "Failed to add compound. Please try again."
+      );
+      setErrors({
+        submit:
+          t.toasts?.compoundAddFailed ||
+          "Failed to add compound. Please try again.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -269,13 +292,18 @@ export default function AddCompoundDialog({
 
   return (
     <>
-      <Dialog isOpen={isOpen} onClose={onClose} title={t.modal?.addNewProject || "Add New Project"}>
+      <Dialog
+        isOpen={isOpen}
+        onClose={onClose}
+        title={t.modal?.addNewProject || "Add New Project"}
+      >
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.compoundName || "Compound Name"} <span className="text-red-500">*</span>
+                {t.formLabels?.compoundName || "Compound Name"}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -303,7 +331,8 @@ export default function AddCompoundDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.city || "City"} <span className="text-red-500">*</span>
+                  {t.formLabels?.city || "City"}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="city"
@@ -311,7 +340,9 @@ export default function AddCompoundDialog({
                   onChange={handleChange}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">{t.formLabels?.selectCity || "Select City"}</option>
+                  <option value="">
+                    {t.formLabels?.selectCity || "Select City"}
+                  </option>
                   {Egypt_cities.countries[0].governorates?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
                       {gov?.governorate}
@@ -322,7 +353,8 @@ export default function AddCompoundDialog({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.country || "Country"} <span className="text-red-500">*</span>
+                  {t.formLabels?.country || "Country"}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -336,7 +368,8 @@ export default function AddCompoundDialog({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.district || "District"} <span className="text-red-500">*</span>
+                {t.formLabels?.district || "District"}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <select
                 name="district"
@@ -346,7 +379,9 @@ export default function AddCompoundDialog({
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
-                  {formData.city ? (t.formLabels?.selectDistrict || "Select District") : (t.formLabels?.cityFirst || "Select City First")}
+                  {formData.city
+                    ? t.formLabels?.selectDistrict || "Select District"
+                    : t.formLabels?.cityFirst || "Select City First"}
                 </option>
                 {formData.city &&
                   Egypt_cities.countries[0].governorates
@@ -397,7 +432,8 @@ export default function AddCompoundDialog({
             {/* Developer */}
             <div className="relative">
               <label className={`block text-sm font-medium mb-1`}>
-                {t.formLabels?.developer || "Developer"} <span className="text-red-500">*</span>
+                {t.formLabels?.developer || "Developer"}{" "}
+                <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -406,7 +442,9 @@ export default function AddCompoundDialog({
                   onChange={handleChange}
                   className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
                 >
-                  <option value="">{t.formLabels?.selectDeveloper || "Select developer"}</option>
+                  <option value="">
+                    {t.formLabels?.selectDeveloper || "Select developer"}
+                  </option>
                   {developers.map((d, idx) => (
                     <option key={idx} value={d}>
                       {d}
@@ -531,10 +569,12 @@ export default function AddCompoundDialog({
                         />
                       </svg>
                       <p className="text-lg text-gray-700 mb-2">
-                        {t.formLabels?.dragDropImage || "Click or drag and drop an image here"}
+                        {t.formLabels?.dragDropImage ||
+                          "Click or drag and drop an image here"}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {t.formLabels?.supportedFormats || "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
+                        {t.formLabels?.supportedFormats ||
+                          "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
                       </p>
                     </>
                   )}
