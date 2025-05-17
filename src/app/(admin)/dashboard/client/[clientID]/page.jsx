@@ -1,12 +1,8 @@
 import { getProfileData } from "@/components/services/serviceFetching";
+import ClientInfo from "../_components/clientInfo";
 
 export default async function ClientPage({ params }) {
   const data = await getProfileData();
 
-  return (
-    <div>
-      <h1>Client Page </h1>
-      <p>This is the client page.</p>
-    </div>
-  );
+  return <ClientInfo data={data.data} />;
 }
