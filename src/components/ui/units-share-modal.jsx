@@ -44,7 +44,7 @@ export default function ShareModal({
       // Add the appropriate prompt based on language type
       if (shareData?.share_link) {
         if (type === "arabic") {
-          combinedText = `تواصل مع لينا: ${shareData.share_link}\n\n`;
+          combinedText = ` كلم لينا: ${shareData.share_link}\n\n`;
         } else {
           combinedText = `Chat with Lena Now: ${shareData.share_link}\n\n`;
         }
