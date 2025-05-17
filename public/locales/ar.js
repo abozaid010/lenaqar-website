@@ -73,7 +73,7 @@ export default {
     "third": "الثالث",
     "th": "ـ"
   }
-,  
+  ,
   dashboard: {
     "title": {
       "part1": "لينا معك",
@@ -201,6 +201,7 @@ export default {
     "dashboard": " المحادثات",
     "analytics": "التحليلات",
     "units": "الوحدات",
+    "team": "الفريق",
     "darkMode": "الوضع المظلم",
     "logout": "تسجيل الخروج",
     "logoutConfirm": {
