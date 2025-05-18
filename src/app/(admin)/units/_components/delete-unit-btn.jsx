@@ -43,7 +43,7 @@ export default function DeleteUnitBtn({ unitId }) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="cursor-pointer bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+        className="cursor-pointer bg-red-500   px-[16px] py-[10px] h-[40px] hover:bg-red-600 text-white rounded-md flex items-center gap-2"
       >
         <Trash2Icon size={18} />{" "}
         <span className="hidden sm:block">{t.unitPage.deleteUnit}</span>

@@ -180,7 +180,7 @@ export default {
     }
   },
   sidebar: {
-    "dashboard": "conversations",
+    "dashboard": "Conversations",
     "analytics": "Analytics",
     "units": "Units",
     "team": "Team",

@@ -227,7 +227,7 @@ export default function BasicDetailsStep({
               value={formData.city || ""}
               required
               onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+              className={`block w-full rounded-md border h-[34px] py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
                 invalidFields.includes("city")
                   ? "border-red-500 ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -260,7 +260,7 @@ export default function BasicDetailsStep({
             onChange={handleChange}
             disabled={!formData.city}
             required
-            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+            className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("district")
                 ? "border-red-500 ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -311,7 +311,7 @@ export default function BasicDetailsStep({
               onChange={handleChange}
               disabled={!formData.district}
               required
-              className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
+              className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
                 invalidFields.includes("project")
                   ? "border-red-500 ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
