@@ -39,26 +39,7 @@ export default function ShareModal({
 
   const copyWithLink = (text, type) => {
     if (text) {
-      let combinedText = "";
-
-      // Add the appropriate prompt based on language type
-      if (shareData?.share_link) {
-        if (type === "arabic") {
-          combinedText = ` كلم لينا: ${shareData.share_link}\n\n`;
-        } else {
-          combinedText = `Chat with Lena Now: ${shareData.share_link}\n\n`;
-        }
-      }
-
-      // Add the text content
-      combinedText += text;
-
-      // Add the first image URL if available
-      if (images && images.length > 0 && typeof images[0] === "string") {
-        combinedText += `\n\n${images[0]}`;
-      }
-
-      navigator.clipboard.writeText(combinedText);
+      navigator.clipboard.writeText(text);
       setCopied((prev) => ({ ...prev, [type]: true }));
       setTimeout(() => setCopied((prev) => ({ ...prev, [type]: false })), 2000);
     }
