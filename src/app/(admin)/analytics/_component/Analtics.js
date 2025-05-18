@@ -65,16 +65,6 @@ const EnhancedBarChart = ({ data, t }) => {
     setActiveIndex(null);
   };
 
-  // Format date for X-axis
-  const formatDate = (value) => {
-    if (!value) return '';
-    const date = new Date(value);
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const day = date.getDate();
-    const month = monthNames[date.getMonth()];
-    // Remove year from conversation chart
-    return `${month}-${day}`;
-  };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
@@ -97,7 +87,7 @@ const EnhancedBarChart = ({ data, t }) => {
             tick={{ fill: '#4B5563' }}
             tickLine={{ stroke: '#4B5563' }}
             axisLine={{ stroke: '#4B5563' }}
-            tickFormatter={formatDate}
+          // tickFormatter={formatDate}
           />
           <YAxis
             label={{
@@ -142,147 +132,97 @@ const EnhancedBarChart = ({ data, t }) => {
   );
 };
 
-const EnhancedDailyActionBarChart = ({ data, t }) => {
-  const [chartData, setChartData] = useState([]);
+const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   const [activeBarIndex, setActiveBarIndex] = useState(null);
   const [animatedBars, setAnimatedBars] = useState([]);
+  const [chartData, setChartData] = useState([]);
 
-  // Actions mapping with translations
-  const ACTIONS = useMemo(
-    () => [
-      { label: t?.dashboardFilter?.actions?.makeCall || "Make a call", value: "Make a call" },
-      { label: t?.dashboardFilter?.actions?.officeVisit || "Office visit", value: "Office visit" },
-      { label: t?.dashboardFilter?.actions?.propertyView || "Property view", value: "Property view" },
-      { label: t?.dashboardFilter?.actions?.notInterested || "Not interested", value: "Not interested" },
-      { label: t?.dashboardFilter?.actions?.notQualified || "Not qualified", value: "Not qualified" },
-      { label: t?.dashboardFilter?.actions?.followUpLater || "Follow up later", value: "Follow up later" },
-      { label: t?.dashboardFilter?.actions?.missingRequirement || "Missing requirement", value: "Missing requirement" },
-      { label: t?.dashboardFilter?.actions?.blocked || "Blocked", value: "Blocked" },
-      { label: t?.dashboardFilter?.actions?.noAction || "No Action", value: "No Action" },
-      { label: t?.dashboardFilter?.actions?.sendEmail || "Send email", value: "Send email" },
-      { label: t?.dashboardFilter?.actions?.scheduleMeeting || "Schedule meeting", value: "Schedule meeting" },
-    ],
-    [t]
-  );
 
-  // Format date for X-axis
-  const formatDate = (value) => {
-    if (!value) return '';
-    const date = new Date(value);
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const month = monthNames[date.getMonth()];
-    const year = date.getFullYear();
-    // Remove day from action chart
-    return `${year}-${month}`;
+  // List of all possible actions (snake_case, matching your new data keys)
+  const ACTION_KEYS = [
+    "make_a_call",
+    "office_visit",
+    "property_view",
+    "not_interested",
+    "not_qualified",
+    "follow_up_later",
+    "missing_requirement",
+    "blocked",
+    "no_action",
+    "qualified_lead"
+  ];
+
+  // Map action keys to display labels (add translations as needed)
+  const ACTION_LABELS = {
+    make_a_call: t?.dashboardFilter?.actions?.makeCall || "Make a call",
+    office_visit: t?.dashboardFilter?.actions?.officeVisit || "Office visit",
+    property_view: t?.dashboardFilter?.actions?.propertyView || "Property view",
+    not_interested: t?.dashboardFilter?.actions?.notInterested || "Not interested",
+    not_qualified: t?.dashboardFilter?.actions?.notQualified || "Not qualified",
+    follow_up_later: t?.dashboardFilter?.actions?.followUpLater || "Follow up later",
+    missing_requirement: t?.dashboardFilter?.actions?.missingRequirement || "Missing requirement",
+    blocked: t?.dashboardFilter?.actions?.blocked || "Blocked",
+    no_action: t?.dashboardFilter?.actions?.noAction || "No Action",
+    qualified_lead: t?.dashboardFilter?.actions?.qualifiedLead || "Qualified Lead"
   };
 
   useEffect(() => {
+    if (!Array.isArray(datamonth) || datamonth.length === 0) {
+      setChartData([]);
+      return;
+    }
+
     // Process data to create proper format for action frequencies
-    const processed = data?.map(day => ({
-      day: day.month,
-      actionFrequency: day.actions_taken || 0,
-      total: day.actions_taken || 0,
-      breakdown: day.action_frequencies || {}
-    })) || [];
+    const processed = datamonth?.map(item => (item.action_frequencies)) || [];
 
-    setChartData(processed);
+    const reduced = ACTION_KEYS.map(action => {
+      const total = processed.reduce((sum, day) => sum + (day[action] || 0), 0);
+      return {
+        action,
+        label: ACTION_LABELS[action] || action,
+        frequency: total
+      };
+    });
 
-    // Animation effect for bars on load
+    setChartData(reduced);
+
+    // Animate bars
     const timer = setTimeout(() => {
-      const indices = Array.from({ length: processed.length }, (_, i) => i);
-      setAnimatedBars(indices);
+      setAnimatedBars(reduced.map((_, i) => i));
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [data]);
+  }, [datamonth]);
 
-  // Get translated action label
-  const getActionLabel = (actionValue) => {
-    const action = ACTIONS.find(a => a.value === actionValue);
-    return action ? action.label : actionValue;
-  };
+  // Find min/max for Y axis
+  const yMax = Math.max(...chartData.map(d => d.frequency), 2);
 
-  // Custom tooltip with enhanced styling
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      const dayData = chartData.find(day => day.day === label);
-
-      if (!dayData) return null;
-
-      // Get action breakdown sorted by count (descending)
-      const actionBreakdown = Object.entries(dayData.breakdown)
-        .filter(([_, count]) => count > 0)
-        .sort((a, b) => b[1] - a[1]);
-
-      return (
-        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-          <div className="font-bold text-lg mb-2 border-b pb-2 text-gray-800">
-            {formatDate(label)}
-          </div>
-          <div className="text-gray-800 font-bold mb-3">
-            Total Actions: {dayData.total}
-          </div>
-
-          {dayData.total > 0 && (
-            <div className="space-y-2">
-              {actionBreakdown.map(([action, count], idx) => {
-                const percentage = Math.round((count / dayData.total) * 100);
-                // Generate a color based on the action type
-                const actionColor = getActionColor(action);
-
-                return (
-                  <div key={idx} className="flex items-center">
-                    <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: actionColor }}></div>
-                    <div className="flex-1 text-sm">{getActionLabel(action)}</div>
-                    <div className="font-medium text-sm">{count} ({percentage}%)</div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      );
-    }
-    return null;
-  };
-
-  // Function to generate color based on action type
   const getActionColor = (action) => {
     const colors = {
-      'Make a call': '#030250', // Dark blue
-      'Send email': '#5d3dd5', // Purple
-      'Schedule meeting': '#9f7afa', // Lighter purple
-      'Office visit': '#4c1d95', // Deep purple
-      'Property view': '#6d28d9', // Medium purple
-      'Not interested': '#ef4444', // Red
-      'Not qualified': '#f59e0b', // Amber
-      'Follow up later': '#10b981', // Green
-      'Missing requirement': '#3b82f6', // Blue
-      'Blocked': '#6b7280', // Gray
-      'No Action': '#9ca3af', // Light gray
-      'default': '#030250' // Default color
+      make_a_call: '#030250',
+      office_visit: '#4c1d95',
+      property_view: '#6d28d9',
+      not_interested: '#ef4444',
+      not_qualified: '#f59e0b',
+      follow_up_later: '#10b981',
+      missing_requirement: '#3b82f6',
+      blocked: '#6b7280',
+      no_action: '#9ca3af',
+      qualified_lead: '#5d3dd5',
+      default: '#030250'
     };
-
     return colors[action] || colors.default;
   };
 
-  // Custom bar with animation and hover effects
   const CustomBar = (props) => {
     const { x, y, width, height, fill, index } = props;
     const isAnimated = animatedBars.includes(index);
-    const isActive = index === activeBarIndex;
 
-    // Animation and hover effect styles
     const animationStyle = {
       transform: isAnimated ? 'scaleY(1)' : 'scaleY(0)',
       transformOrigin: 'bottom',
       transition: 'transform 0.5s ease-out',
       opacity: isAnimated ? 1 : 0,
-    };
-
-    // Remove hover style changes
-    const hoverStyle = {
-      // No color changes on hover
     };
 
     return (
@@ -301,23 +241,35 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
           rx={4}
           ry={4}
           fill={`url(#barGradient-${index})`}
-          style={{ ...animationStyle, ...hoverStyle }}
+          style={animationStyle}
         />
       </g>
     );
   };
 
+  // Tooltip for action frequency
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      const { label, value } = payload[0];
+      return (
+        <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
+          <div className="font-bold text-lg mb-2 border-b pb-2 text-gray-800">
+            {label}
+          </div>
+          <div className="text-gray-800 font-bold mb-1">
+            {t?.actionFrequency || "Action Frequency"}: {value}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-lg">
-      <h3 className="text-xl font-bold text-center mb-4 text-gray-800">
-        {t?.monthlyActionFrequency || "Monthly Action Frequency Analysis"}
-      </h3>
-      <div className="mb-3 text-center text-gray-600 text-sm">
-        {t?.breakdownDescription || "Breakdown of actions taken each month"}
-      </div>
-
       <ResponsiveContainer width="100%" height={400}>
         <ComposedChart
+
           data={chartData}
           margin={{
             top: 20,
@@ -336,13 +288,14 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
           <XAxis
-            dataKey="day"
-            scale="band"
-            padding={{ left: 20, right: 20 }}
-            tick={{ fill: '#4B5563', fontWeight: 500 }}
+            dataKey="label"
+            tick={{ fill: '#4B5563', fontWeight: 500, fontSize: 12 }}
             axisLine={{ stroke: '#9CA3AF' }}
             tickLine={false}
-            tickFormatter={formatDate}
+            interval={0} // Show all labels
+            angle={-35}  // Rotate for better fit
+            dy={32}      // Move labels down a bit
+            height={60}  // Give more space for labels
           />
           <YAxis
             label={{
@@ -354,6 +307,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
                 fill: '#4B5563',
                 fontWeight: 'bold',
                 fontSize: 14
+
               },
               offset: -10
             }}
@@ -361,7 +315,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
             axisLine={{ stroke: '#9CA3AF' }}
             tickLine={false}
             tickFormatter={(value) => value > 0 ? value : ''}
-            domain={[0, 'dataMax + 2']}
+            domain={[0, yMax + 2]}
             allowDecimals={false}
           />
           <Tooltip
@@ -379,16 +333,16 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
           />
 
           <Bar
-            dataKey="actionFrequency"
-            name={t?.actionFrequency || "Action Frequency"}
-            fill="#030250"
-            shape={<CustomBar />}
+            dataKey="frequency"
+            name="All Actions"
             barSize={30}
+            shape={<CustomBar />}
+            legendType="none"
           >
             {chartData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill="#030250"
+                fill={getActionColor(entry.action)}
               />
             ))}
           </Bar>
@@ -404,6 +358,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
 
 const Analytics = ({ data, datamonth, appliedFilters }) => {
   const { t } = useI18n();
+
   return (
     <div className="flex flex-wrap w-full">
       <div className="w-full p-2 mb-4">
@@ -411,24 +366,26 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
         <p className="text-gray-600">{t?.dashboardDescription || "Showing user activities and daily action breakdowns"}</p>
       </div>
 
-      <div className="w-1/2 p-2">
+      <div className="w-full  p-2">
         <div className="border rounded p-3 h-full">
           <h3 className="text-lg font-semibold mb-2">{t?.conversationAnalysis || "Conversation Analysis"}</h3>
           <EnhancedBarChart data={data} t={t} />
         </div>
       </div>
-      <div className="w-1/2 p-2">
+
+      <div className="w-full p-2">
         <div className="border rounded p-3 h-full">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-lg font-semibold">{t?.actionFrequency || "Action Frequency"}</h3>
+              <h3 className="text-lg font-semibold">{t?.monthlyActionFrequency || "Monthly Action Frequency Analysis"}</h3>
               <p className="text-sm text-gray-500">{t?.bubbleVisualization || "Bubble visualization of daily action totals"}</p>
             </div>
             <div className="w-2/5">
               <FilterMonth appliedFilters={appliedFilters} t={t} />
             </div>
           </div>
-          <EnhancedDailyActionBarChart data={datamonth} t={t} />
+
+          <EnhancedDailyActionBarChart datamonth={datamonth} t={t} />
         </div>
       </div>
 
