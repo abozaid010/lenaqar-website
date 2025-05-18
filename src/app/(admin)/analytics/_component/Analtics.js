@@ -1,5 +1,5 @@
 "use client";
-// import "./styles.css";
+
 import React, { useState, useEffect, useMemo } from "react";
 import {
   BarChart,
@@ -31,12 +31,12 @@ import { useI18n } from "@/context/translate-api";
 // Custom tooltip for the enhanced bar chart
 const CustomTooltip = ({ active, payload, label }) => {
   const { t } = useI18n();
-  
+
   if (active && payload && payload.length) {
     // Find the conversation data and average messages data
     const conversationData = payload.find(p => p.dataKey === 'conversations');
     const avgMessagesData = payload.find(p => p.dataKey === 'avg_user_total_messages');
-    
+
     return (
       <div className="bg-white p-4 border border-gray-200 shadow-lg rounded-md">
         <p className="font-bold text-gray-900">{`${label}`}</p>
@@ -56,11 +56,11 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const EnhancedBarChart = ({ data, t }) => {
   const [activeIndex, setActiveIndex] = useState(null);
-  
+
   const handleMouseEnter = (_, index) => {
     setActiveIndex(index);
   };
-  
+
   const handleMouseLeave = () => {
     setActiveIndex(null);
   };
@@ -92,17 +92,17 @@ const EnhancedBarChart = ({ data, t }) => {
           onMouseLeave={handleMouseLeave}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-          <XAxis 
-            dataKey="day" 
+          <XAxis
+            dataKey="day"
             tick={{ fill: '#4B5563' }}
             tickLine={{ stroke: '#4B5563' }}
             axisLine={{ stroke: '#4B5563' }}
             tickFormatter={formatDate}
           />
-          <YAxis 
-            label={{ 
-              value: t?.count || 'Count of Messages & Conversations', 
-              angle: -90, 
+          <YAxis
+            label={{
+              value: t?.count || 'Count of Messages & Conversations',
+              angle: -90,
               position: 'insideLeft',
               style: { textAnchor: 'middle', fill: '#4B5563', fontWeight: 'bold' }
             }}
@@ -111,7 +111,7 @@ const EnhancedBarChart = ({ data, t }) => {
             axisLine={{ stroke: '#4B5563' }}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Legend 
+          <Legend
             wrapperStyle={{ paddingTop: '10px' }}
             iconSize={10}
             iconType="circle"
@@ -140,7 +140,7 @@ const EnhancedBarChart = ({ data, t }) => {
       </ResponsiveContainer>
     </div>
   );
-}
+};
 
 const EnhancedDailyActionBarChart = ({ data, t }) => {
   const [chartData, setChartData] = useState([]);
@@ -184,15 +184,15 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
       total: day.actions_taken || 0,
       breakdown: day.action_frequencies || {}
     })) || [];
-    
+
     setChartData(processed);
-    
+
     // Animation effect for bars on load
     const timer = setTimeout(() => {
       const indices = Array.from({ length: processed.length }, (_, i) => i);
       setAnimatedBars(indices);
     }, 100);
-    
+
     return () => clearTimeout(timer);
   }, [data]);
 
@@ -206,14 +206,14 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       const dayData = chartData.find(day => day.day === label);
-      
+
       if (!dayData) return null;
-      
+
       // Get action breakdown sorted by count (descending)
       const actionBreakdown = Object.entries(dayData.breakdown)
         .filter(([_, count]) => count > 0)
         .sort((a, b) => b[1] - a[1]);
-      
+
       return (
         <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
           <div className="font-bold text-lg mb-2 border-b pb-2 text-gray-800">
@@ -222,14 +222,14 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
           <div className="text-gray-800 font-bold mb-3">
             Total Actions: {dayData.total}
           </div>
-          
+
           {dayData.total > 0 && (
             <div className="space-y-2">
               {actionBreakdown.map(([action, count], idx) => {
                 const percentage = Math.round((count / dayData.total) * 100);
                 // Generate a color based on the action type
                 const actionColor = getActionColor(action);
-                
+
                 return (
                   <div key={idx} className="flex items-center">
                     <div className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: actionColor }}></div>
@@ -262,7 +262,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
       'No Action': '#9ca3af', // Light gray
       'default': '#030250' // Default color
     };
-    
+
     return colors[action] || colors.default;
   };
 
@@ -271,7 +271,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
     const { x, y, width, height, fill, index } = props;
     const isAnimated = animatedBars.includes(index);
     const isActive = index === activeBarIndex;
-    
+
     // Animation and hover effect styles
     const animationStyle = {
       transform: isAnimated ? 'scaleY(1)' : 'scaleY(0)',
@@ -279,12 +279,12 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
       transition: 'transform 0.5s ease-out',
       opacity: isAnimated ? 1 : 0,
     };
-    
+
     // Remove hover style changes
     const hoverStyle = {
       // No color changes on hover
     };
-    
+
     return (
       <g>
         <defs>
@@ -293,15 +293,15 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
             <stop offset="95%" stopColor={fill} stopOpacity={0.6} />
           </linearGradient>
         </defs>
-        <rect 
-          x={x} 
-          y={y} 
-          width={width} 
-          height={height} 
+        <rect
+          x={x}
+          y={y}
+          width={width}
+          height={height}
           rx={4}
           ry={4}
           fill={`url(#barGradient-${index})`}
-          style={{...animationStyle, ...hoverStyle}}
+          style={{ ...animationStyle, ...hoverStyle }}
         />
       </g>
     );
@@ -315,7 +315,7 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
       <div className="mb-3 text-center text-gray-600 text-sm">
         {t?.breakdownDescription || "Breakdown of actions taken each month"}
       </div>
-      
+
       <ResponsiveContainer width="100%" height={400}>
         <ComposedChart
           data={chartData}
@@ -335,23 +335,23 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
           }}
         >
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
-          <XAxis 
-            dataKey="day" 
-            scale="band" 
+          <XAxis
+            dataKey="day"
+            scale="band"
             padding={{ left: 20, right: 20 }}
             tick={{ fill: '#4B5563', fontWeight: 500 }}
             axisLine={{ stroke: '#9CA3AF' }}
             tickLine={false}
             tickFormatter={formatDate}
           />
-          <YAxis 
-            label={{ 
-              value: t?.actionFrequency || 'Action Frequency', 
-              angle: -90, 
-              position: 'insideLeft', 
-              style: { 
-                textAnchor: 'middle', 
-                fill: '#4B5563', 
+          <YAxis
+            label={{
+              value: t?.actionFrequency || 'Action Frequency',
+              angle: -90,
+              position: 'insideLeft',
+              style: {
+                textAnchor: 'middle',
+                fill: '#4B5563',
                 fontWeight: 'bold',
                 fontSize: 14
               },
@@ -364,43 +364,43 @@ const EnhancedDailyActionBarChart = ({ data, t }) => {
             domain={[0, 'dataMax + 2']}
             allowDecimals={false}
           />
-          <Tooltip 
-            content={<CustomTooltip />} 
+          <Tooltip
+            content={<CustomTooltip />}
             cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
           />
-          <Legend 
-            wrapperStyle={{ 
+          <Legend
+            wrapperStyle={{
               paddingTop: '20px',
-              paddingBottom: '10px', 
+              paddingBottom: '10px',
               fontWeight: 'bold'
             }}
             iconType="circle"
             iconSize={10}
           />
-          
-          <Bar 
-            dataKey="actionFrequency" 
-            name={t?.actionFrequency || "Action Frequency"} 
-            fill="#030250" 
+
+          <Bar
+            dataKey="actionFrequency"
+            name={t?.actionFrequency || "Action Frequency"}
+            fill="#030250"
             shape={<CustomBar />}
             barSize={30}
           >
             {chartData.map((entry, index) => (
-              <Cell 
-                key={`cell-${index}`} 
-                fill="#030250" 
+              <Cell
+                key={`cell-${index}`}
+                fill="#030250"
               />
             ))}
           </Bar>
         </ComposedChart>
       </ResponsiveContainer>
-      
+
       <div className="text-center mt-4 text-gray-500 text-xs">
         {t?.clickBarInfo || "Click on any bar to see detailed breakdown of actions"}
       </div>
     </div>
   );
-}
+};
 
 const Analytics = ({ data, datamonth, appliedFilters }) => {
   const { t } = useI18n();
@@ -410,7 +410,7 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
         <h2 className="text-2xl font-bold">{t?.dashboardTitle || "Analytics Dashboard"}</h2>
         <p className="text-gray-600">{t?.dashboardDescription || "Showing user activities and daily action breakdowns"}</p>
       </div>
-      
+
       <div className="w-1/2 p-2">
         <div className="border rounded p-3 h-full">
           <h3 className="text-lg font-semibold mb-2">{t?.conversationAnalysis || "Conversation Analysis"}</h3>
@@ -431,7 +431,7 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
           <EnhancedDailyActionBarChart data={datamonth} t={t} />
         </div>
       </div>
-     
+
     </div>
   );
 };
