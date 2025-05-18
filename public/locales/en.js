@@ -730,6 +730,16 @@ export default {
     addNewProject: "Add New Project",
     addNewUnit: "Add New Unit",
     editUnit: "Edit Unit"
+  },
+  team: {
+    addNew: "Add New",
+    noMembers: "There are no team members yet",
+    name: "Name",
+    email: "Email",
+    phone: "Phone",
+    role: "Position",
+    save: "Save",
+    loading: "saving...",
   }
 }
 

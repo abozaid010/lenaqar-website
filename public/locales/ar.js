@@ -727,4 +727,14 @@ export default {
     addNewUnit: "إضافة وحدة جديدة",
     editUnit: "تعديل الوحدة"
   },
+  team: {
+    addNew: "إضافة جديد",
+    noMembers: "لم يتم إضافة موظفين.",
+    name: "الاسم",
+    email: "البريد الإلكتروني",
+    phone: "الهاتف",
+    role: "الدور",
+    save: "حفظ",
+    loading: "جاري الحفظ...",
+  }
 };

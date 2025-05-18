@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function TeamTable({ data }) {
   const router = useRouter();
+  const { t } = useI18n();
   const [currentId, setCurrentId] = useState(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
@@ -26,16 +27,15 @@ export default function TeamTable({ data }) {
       setCurrentId(null);
     }
   };
-  const { t } = useI18n();
 
   return (
-    <div className="mt-6">
+    <div>
       {!data || data.length === 0 ? (
-        <div className="text-center font-medium text-xl mt-5 text-gray-400">
-          There are no team members yet
+        <div className="text-center w-full font-medium text-xl md:text-2xl text-gray-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          {t.team.noMembers}
         </div>
       ) : (
-        <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory">
+        <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory mt-6">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr className="text-left text-xs sm:text-sm font-medium text-gray-600">
@@ -44,14 +44,14 @@ export default function TeamTable({ data }) {
                 </th>
 
                 <th className="px-2 py-2 text-center whitespace-nowrap">
-                  Email
+                  {t.team.email || "Email"}
                 </th>
 
                 <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
-                  phone
+                  {t.team.phone || "Phone"}
                 </th>
                 <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
-                  Position
+                  {t.team.role || "Position"}
                 </th>
 
                 <th className="px-2 py-2 text-center whitespace-nowrap"></th>
