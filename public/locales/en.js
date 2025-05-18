@@ -415,26 +415,6 @@ export default {
     "priceLabel": "Price",
     "maintenanceLabel": "Maintenance"
   },
-  unitDetails: {
-    "developer": "Developer",
-    "maintenanceLabel": "furniched",
-    "deliveryDate": "Delivery Date",
-    "deliveryDatee": "Delivery Date",
-    "floor": "Floor",
-    "finishing": "Finishing",
-    "furnishing": "Furnishing",
-    "area": "Area",
-    "view": "View",
-    "rooms": "Rooms",
-    "bathrooms": "Bathrooms",
-    "notAvailable": "N/A",
-    "ground": "Ground",
-    "first": "1st",
-    "second": "2nd",
-    "third": "3rd",
-    "th": "th"
-
-  },
   rental: {
     "isAvailable": "Available for Rent",
     "availabilityDate": "Availability Date",
@@ -649,7 +629,24 @@ export default {
     "landArea": "Land Area",
     "gardenSize": "Garden Size",
     "deliveryDate": "Delivery Date:",
-    "deliveryStatus": "Delivery Status:"
+    "deliveryStatus": "Delivery Status:",
+    "developer": "Developer",
+    "maintenanceLabel": "furniched",
+    "deliveryDate": "Delivery Date",
+    "deliveryDatee": "Delivery Date",
+    "floor": "Floor",
+    "finishing": "Finishing",
+    "furnishing": "Furnishing",
+    "area": "Area",
+    "view": "View",
+    "rooms": "Rooms",
+    "bathrooms": "Bathrooms",
+    "notAvailable": "N/A",
+    "ground": "Ground",
+    "first": "1st",
+    "second": "2nd",
+    "third": "3rd",
+    "th": "th"
   },
   common: {
     "ProcessingImages": "Processing images...",
