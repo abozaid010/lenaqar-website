@@ -440,7 +440,7 @@ export default function BasicDetailsStep({
         </div>
 
         {/* model */}
-        <div className="col-span-1 md:col-span-3">
+        <div>
           <label className="block text-sm font-medium mb-1">
             {t.basicDetails.model}
           </label>

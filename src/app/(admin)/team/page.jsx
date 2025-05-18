@@ -12,13 +12,15 @@ export default async function TeamPage() {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto h-full">
       {hasAccess ? (
-        <>
+        <div className="flex flex-col h-full">
           <AddNewMember />
 
-          <TeamTable data={data.data} />
-        </>
+          <div className="flex-1 relative">
+            <TeamTable data={data.data} />
+          </div>
+        </div>
       ) : (
         <div className="flex flex-col items-center justify-center h-full">
           <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>

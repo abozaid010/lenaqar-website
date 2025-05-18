@@ -20,18 +20,6 @@ export default function Uni({ unit }) {
 
       <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
 
-      {unit.code && (
-        <p className="text-sm text-gray-600">
-          unit code: <span className="font-semibold">{unit.code}</span>
-        </p>
-      )}
-
-      {unit.model && (
-        <p className="text-sm text-gray-600">
-          unit model: <span className="font-semibold">{unit.model}</span>
-        </p>
-      )}
-
       <p className="text-sm text-gray-600">
         {unit.project}, {unit.city}
       </p>
@@ -92,31 +80,33 @@ export default function Uni({ unit }) {
           </div>
         )}
 
-        <div className="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-primary mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-            />
-          </svg>
-          <div>
-            <span className="text-xs line-clamp-1 text-gray-500">
-              {t.unitDetails.floor}
-            </span>
-            <p className="font-medium text-xs">
-              <span className="font-bold">{t.unitDetails.floor}:</span>{" "}
-              {getFloorLabel(unit.floor, t)}
-            </p>
+        {unit.floor !== 0 && (
+          <div className="flex items-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-primary mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+              />
+            </svg>
+            <div>
+              <span className="text-xs line-clamp-1 text-gray-500">
+                {t.unitDetails.floor}
+              </span>
+              <p className="font-medium text-xs">
+                <span className="font-bold">{t.unitDetails.floor}:</span>{" "}
+                {getFloorLabel(unit.floor, t)}
+              </p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex items-center">
           <svg
@@ -166,8 +156,69 @@ export default function Uni({ unit }) {
               {unit.furnishing || t.unitDetails?.notAvailable}
             </p>
           </div>
-          {/* <p>{t.unitDetails.deliveryDate}</p> */}
         </div>
+
+        {unit.code && (
+          <div className="flex items-center">
+            {/* Hashtag icon for Unit Code */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6 text-primary mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M7 10h10M7 14h10M9 6l-2 12M17 6l-2 12"
+              />
+            </svg>
+            <div>
+              <span className="text-xs text-gray-500">
+                {t.basicDetails.code}
+              </span>
+              <p
+                className="font-medium text-xs max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap"
+                title={unit.code}
+              >
+                {unit.code}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {unit.model && (
+          <div className="flex items-center">
+            {/* Cube icon for Unit Model */}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 text-primary mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M20 7l-8-4-8 4m16 0v6a8 8 0 01-16 0V7m16 0L12 13 4 7"
+              />
+            </svg>
+            <div>
+              <span className="text-xs text-gray-500">
+                {t.basicDetails.model}
+              </span>
+              <p
+                className="font-medium text-xs max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap"
+                title={unit.model}
+              >
+                {unit.model}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Key Features */}

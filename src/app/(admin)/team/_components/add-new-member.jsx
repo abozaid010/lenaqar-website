@@ -5,6 +5,7 @@ import { PlusIcon, Loader2 } from "lucide-react";
 import { useState, useActionState, useEffect } from "react";
 import { addNewSales } from "../_actions/actions";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 const initialFormData = {
   name: "",
@@ -19,6 +20,7 @@ const initialState = {
 };
 
 export default function AddNewMember() {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
   const [state, formAction, pending] = useActionState(
@@ -47,11 +49,11 @@ export default function AddNewMember() {
   return (
     <>
       <button
-        className="mt-4 flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
+        className="mt-4 self-end w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
         onClick={() => setIsOpen(true)}
       >
         <PlusIcon size={20} />
-        <span className="text-base">Add New Sales</span>
+        <span className="text-base">{t.team.addNew}</span>
       </button>
 
       <Dialog
@@ -62,7 +64,7 @@ export default function AddNewMember() {
         <form action={formAction} className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              name <span className="text-red-500">*</span>
+              {t.team.name} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -76,7 +78,7 @@ export default function AddNewMember() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              email <span className="text-red-500">*</span>
+              {t.team.email} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
@@ -91,7 +93,7 @@ export default function AddNewMember() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              phone <span className="text-red-500">*</span>
+              {t.team.phone} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -113,10 +115,10 @@ export default function AddNewMember() {
             {pending ? (
               <div className="flex items-center justify-center gap-2">
                 <Loader2 size={20} className="animate-spin" />
-                <span>Saving...</span>
+                <span>{t.team.loading}</span>
               </div>
             ) : (
-              <span>Save</span>
+              <span>{t.team.save}</span>
             )}
           </button>
         </form>

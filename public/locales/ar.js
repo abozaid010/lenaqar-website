@@ -55,25 +55,7 @@ export default {
     "message6": "متابعة مباشرة للعملاء وتحليل السوق لحظة بلحظة",
     "message7": "تابع ووسّع نشاطك بسهولة"
   },
-  unitDetails: {
-    "developer": "المطوّر",
-    "deliveryDate": "تاريخ التسليم",
-    "deliveryDatee": "Delivery Date",
-    "floor": "الطابق",
-    "finishing": "التشطيب",
-    "furnishd": "التأثيث",
-    "area": "المساحة",
-    "view": "الإطلالة",
-    "rooms": "الغرف",
-    "bathrooms": "دورات المياه ",
-    "notAvailable": "غير متوفر",
-    "ground": "أرضي",
-    "first": "الأول",
-    "second": "الثاني",
-    "third": "الثالث",
-    "th": "ـ"
-  }
-  ,
+
   dashboard: {
     "title": {
       "part1": "لينا معك",
@@ -645,7 +627,23 @@ export default {
     "landArea": "مساحة الأرض",
     "gardenSize": "مساحة الحديقة",
     "deliveryDate": "تاريخ التسليم:",
-    "deliveryStatus": "حالة التسليم:"
+    "deliveryStatus": "حالة التسليم:",
+    "developer": "المطوّر",
+    "deliveryDate": "تاريخ التسليم",
+    "deliveryDatee": "Delivery Date",
+    "floor": "الطابق",
+    "finishing": "التشطيب",
+    "furnishd": "التأثيث",
+    "area": "المساحة",
+    "view": "الإطلالة",
+    "rooms": "الغرف",
+    "bathrooms": "دورات المياه ",
+    "notAvailable": "غير متوفر",
+    "ground": "أرضي",
+    "first": "الأول",
+    "second": "الثاني",
+    "third": "الثالث",
+    "th": ""
   },
   common: {
     "ProcessingImages": "جارٍ معالجة الصور...",
@@ -727,4 +725,14 @@ export default {
     addNewUnit: "إضافة وحدة جديدة",
     editUnit: "تعديل الوحدة"
   },
+  team: {
+    addNew: "إضافة جديد",
+    noMembers: "لم يتم إضافة موظفين.",
+    name: "الاسم",
+    email: "البريد الإلكتروني",
+    phone: "الهاتف",
+    role: "الدور",
+    save: "حفظ",
+    loading: "جاري الحفظ...",
+  }
 };
