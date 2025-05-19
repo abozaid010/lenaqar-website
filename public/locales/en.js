@@ -42,8 +42,8 @@ export default {
   },
   heroSection: {
     "title1": "Sell Smarter",
-    "title2": "Close More Deals.",
-    "subtitle": "Your AI-powered real estate sales assistant.",
+    "title2": "You market, we sell.",
+    "subtitle": "AI Sales team that handle clients request 24/7.",
     "description": "Lena AI is built to qualify leads instantly, engage prospects 24/7, and boost conversions so you focus on closing, not chasing cold leads.",
     "ctaButton": "Get Started",
     "backgroundAlt": "Background",
@@ -61,15 +61,15 @@ export default {
       "part1": "Lena is with you",
       "part2": "all the time"
     },
-    "subtitle": "Available on Web & Mobile – Access anytime, anywhere.",
-    "featuresTitle": "With Lena's seamless Web and Mobile integration, you can:",
+    "subtitle": "Mobile app, and website, you can track your work anytime anywhere",
+    "featuresTitle": "Some solutions we offer:",
     "features": {
       "feature1": "Mobile Chat App – Engage leads in real-time through a dedicated chat application",
       "feature2": "Broker Mobile App – Instantly notifies your sales team when a property viewing is scheduled.",
       "feature3": " AI Follow-Up – Automatically follows up with leads, saving your team time and effort.",
       "feature4": "Website Chatbot – Handles inquiries from your website visitors 24/7, especially those coming from Google.",
       "feature5": "Smart CRM – Manage sales, units, and client data in one place with a seamless interface.",
-      "feature6": "Client Insights – Get AI-powered analytics about each client’s needs, behaviors, and communication history to close deals faster."
+      "feature6": "Client Insights – Get AI-powered analytics about each client's needs, behaviors, and communication history to close deals faster."
     },
     "ctaButton": "Get Started",
     "images": {
@@ -839,6 +839,28 @@ export default {
     role: "Position",
     save: "Save",
     loading: "saving...",
+  },
+  developerNames: {
+    "Tatweer Misr": "Tatweer Misr",
+    "Emaar Misr": "Emaar Misr",
+    "La Vista Developments": "La Vista Developments",
+    "Misr Italia": "Misr Italia",
+    "Founders": "Founders",
+    "Saudi Egyptian Developers - SED": "Saudi Egyptian Developers - SED",
+    "Capital Group Properties": "Capital Group Properties",
+    "New Giza Developments": "New Giza Developments",
+    "Dorra Developments": "Dorra Developments",
+    "El Hazek Group": "El Hazek Group",
+    "Arabia Holding": "Arabia Holding",
+    "TMG": "TMG",
+    "شركة سوديك (SODIC)": "شركة سوديك (SODIC)",
+    "Madinat Masr": "Madinat Masr",
+    "Mountain View Developments": "Mountain View Developments",
+    "ALDAU Development": "ALDAU Development",
+    "G Developments": "G Developments",
+    "Hassan Allam": "Hassan Allam",
+    "OHK Consultants": "OHK Consultants",
+    "Palm Hills": "Palm Hills"
   }
 }
 

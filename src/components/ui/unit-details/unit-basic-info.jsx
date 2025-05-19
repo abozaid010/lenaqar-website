@@ -48,7 +48,7 @@ export default function Uni({ unit }) {
               {t.unitDetails?.developer}
             </span>
             <p className="font-medium text-xs">
-              {unit.developer || t.unitDetails.notAvailable}
+              {unit.developer ? t.developerNames?.[unit.developer] || unit.developer : t.unitDetails.notAvailable}
             </p>
           </div>
         </div>
@@ -269,10 +269,8 @@ export default function Uni({ unit }) {
               d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">
-            {t.unitDetails.view}
-          </span>
-          <p className="font-medium min-w-[80px] text-center">
+       
+          <p className="font-medium min-w-[80px] whitespace-normal min-h-20 max-w-130 text-center">
             {unit.view ? (t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view) : t.unitDetails?.notAvailable}
           </p>
         </div>

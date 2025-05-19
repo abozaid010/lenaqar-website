@@ -41,6 +41,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     fetchDevelopers(),
     fetchcombounds(),
   ]);
+  console.log("compounds", compounds)
 
   const units = unitsResponse.data?.units || [];
 

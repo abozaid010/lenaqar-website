@@ -106,7 +106,7 @@ const Header = ({ clientName, clientID }) => {
           </button>
 
           {isUserMenuOpen && (
-            <div className="absolute mt-2 right-0 w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden">
+            <div className={`absolute mt-2 ${lang === 'ar' ? 'left-0' : 'right-0'} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}>
               <Link
                 href={`/dashboard/client/${clientID}`}
                 className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3"

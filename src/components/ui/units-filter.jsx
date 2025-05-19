@@ -144,7 +144,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
 
     switch (key) {
       case "developer_name":
-        return value;
+        return getTranslatedDeveloperName(value);
       case "project_name":
         return value;
       case "purpose":
@@ -219,6 +219,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     return filters.project_name;
   };
 
+  const getTranslatedDeveloperName = (name) => {
+    return t.developerNames?.[name] || name;
+  };
+
   return (
     <div className=" ">
       <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
@@ -266,7 +270,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                     setIsDeveloperDropdownOpen(false);
                   }}
                 >
-                  {d}
+                  {getTranslatedDeveloperName(d)}
                 </div>
               ))}
             </div>
