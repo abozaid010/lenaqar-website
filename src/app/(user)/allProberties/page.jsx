@@ -30,6 +30,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           appliedFilters={searchParams}
           developers={developers}
           compounds={compounds}
+          readonly={true}
         />
 
         {/* <UnitsSearch /> */}

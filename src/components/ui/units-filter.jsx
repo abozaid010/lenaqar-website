@@ -8,7 +8,7 @@ import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({ appliedFilters, developers, compounds ,clientName,clientId }) {
+export default function UnitsFilter({ appliedFilters, developers, compounds ,clientName,clientId,readonly }) {
   const { t } = useI18n();
   const router = useRouter();
   const [filters, setFilters] = useState(() => ({
@@ -503,7 +503,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
           )}
         </div>
         
-        <div className="w-full md:w-auto flex-shrink-0">
+       { !readonly && <div className="w-full md:w-auto flex-shrink-0">
           <AddUnitButton
             clientId={clientId}
             clientName={clientName}
@@ -511,7 +511,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
             developers={developersSet}
             className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
           />
-        </div>
+        </div>}
       </div>
 
       {/* Active Filters Display */}

@@ -51,7 +51,12 @@ export default function ActionsModal({ actions, onClose, userId }) {
                     </small>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
-                  {console.log(a)}
+                  {a.partner && (
+                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex flex-col gap-1">
+                      <span className="text-xs font-semibold text-primary">Partner: {a.partner.partner_name}</span>
+                      <span className="text-xs text-primary">Phone: {a.partner.partner_phone}</span>
+                    </div>
+                  )}
                   {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
                     <small className="underline text-xs text-green-600 font-medium">
                       {formatDateForDisplay(a.meeting_time)}
