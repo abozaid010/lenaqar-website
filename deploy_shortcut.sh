@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd /Users/abozaid/workspace/lenaAI-website
+git checkout main
 git pull
 
 FILE="./trigger_deploy.txt"
