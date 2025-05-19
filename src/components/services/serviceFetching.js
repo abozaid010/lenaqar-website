@@ -343,6 +343,7 @@ export async function getProfileData() {
 
   try {
     const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile data:", error.message);
@@ -352,6 +353,7 @@ export async function getProfileData() {
 
 export async function updateProfileData(formData) {
   const clientEmail = getClientEmail();
+  console.log(clientEmail)
 
   if (!clientEmail) {
     console.error("Client email not found");

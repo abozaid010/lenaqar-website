@@ -42,9 +42,9 @@ export default {
   },
   heroSection: {
     "title1": "Sell Smarter",
-    "title2": "You market, we sell.",
-    "subtitle": "AI Sales team that handle clients request 24/7.",
-    "description": "Lena AI is built to qualify leads instantly, engage prospects 24/7, and boost conversions so you focus on closing, not chasing cold leads.",
+    "title2": "You Market, We Sell.",
+    "subtitle": "AI Sales team that handle clients requesst 24/7.",
+    "description": "Lena AI qualify andfilter  leads instantly, engage prospects 24/7, and boost conversions so you focus on closing, not chasing cold leads.",
     "ctaButton": "Get Started",
     "backgroundAlt": "Background",
     "aiImageAlt": "AI Assistant",

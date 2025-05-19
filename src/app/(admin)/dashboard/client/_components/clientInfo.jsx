@@ -8,10 +8,12 @@ import toast from "react-hot-toast";
 
 export default function ClientInfo({ data }) {
   const router = useRouter();
+  console.log(data);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    phone_number: data.phone_number,
-    email: data.email,
+    phone_number: data?.phone_number,
+    email: data?.email,
+    price_percentage: data?.price_percentage || 0,
   });
   const [isChanged, setIsChanged] = useState(false);
 
@@ -21,6 +23,12 @@ export default function ClientInfo({ data }) {
 
   function handleChange(e) {
     const { name, value } = e.target;
+
+    if (name === "price_percentage" && parseFloat(value) > 100) {
+      toast.error("Percentage cannot exceed 100%");
+      return;
+    }
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
       setIsChanged(JSON.stringify(updated) !== JSON.stringify(data));
@@ -30,7 +38,7 @@ export default function ClientInfo({ data }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    console.log(formData);
     try {
       setIsLoading(true);
       await updateProfileData(formData);
@@ -51,33 +59,60 @@ export default function ClientInfo({ data }) {
     >
       <label className="flex flex-col text-gray-600 mb-1">
         Email:
-        <input
-          type="email"
-          name="email"
-          value={formData.email || ""}
-          onChange={handleChange}
-          className="mt-2 p-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200"
-        />
+        <div className="relative">
+          <input
+            type="email"
+            name="email"
+            value={formData.email || ""}
+            onChange={handleChange}
+            disabled={true}
+            className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200 w-full"
+          />
+        </div>
       </label>
       <label className="flex flex-col text-gray-600 mb-1">
         Phone Number:
-        <input
-          type="text"
-          name="phone_number"
-          value={formData.phone_number || ""}
-          onChange={handleChange}
-          className="mt-2 p-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            name="phone_number"
+            value={formData.phone_number || ""}
+            onChange={handleChange}
+            className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
+          />
+        </div>
       </label>
       <label className="flex flex-col text-gray-600 mb-1">
         Client Name:
-        <input
-          type="text"
-          disabled={true}
-          readOnly={true}
-          value={data.client_name}
-          className="mt-2 p-2 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200"
-        />
+        <div className="relative">
+          <input
+            type="text"
+            disabled={true}
+            readOnly={true}
+            value={data?.client_name}
+            className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200 w-full"
+          />
+        </div>
+      </label>
+
+      <label className="flex flex-col font-medium text-gray-700 mb-2">
+        Price Percentage:
+        <div className="relative mt-1">
+          <input
+            type="number"
+            name="price_percentage"
+            step="0.01"
+            min="0"
+            max="100"
+            value={formData.price_percentage || ""}
+            onChange={handleChange}
+            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 pl-3 pr-8 py-2.5 text-gray-900"
+            placeholder="0.00"
+          />
+          <div className="absolute inset-y-0 left-12 flex items-center pointer-events-none pr-3">
+            <span className="text-gray-500 font-medium">%</span>
+          </div>
+        </div>
       </label>
 
       {isChanged && (
