@@ -28,6 +28,14 @@ export default function DashboardImage() {
       id: 4,
       title: t.dashboard.features.feature4,
     },
+    {
+      id: 5,
+      title: t.dashboard.features.feature5,
+    },
+    {
+      id: 6,
+      title: t.dashboard.features.feature6,
+    },
   ];
 
   return (

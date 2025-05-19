@@ -64,10 +64,12 @@ export default {
     "subtitle": "Available on Web & Mobile – Access anytime, anywhere.",
     "featuresTitle": "With Lena's seamless Web and Mobile integration, you can:",
     "features": {
-      "feature1": "Manage leads on the go with a user-friendly mobile app",
-      "feature2": "Instantly qualify & contact leads from anywhere.",
-      "feature3": "AI-Powered Data Insights – Focus on the right leads and close deals faster.",
-      "feature4": "Smart CRM – Track interactions, insights, and lead progress in one place."
+      "feature1": "Mobile Chat App – Engage leads in real-time through a dedicated chat application",
+      "feature2": "Broker Mobile App – Instantly notifies your sales team when a property viewing is scheduled.",
+      "feature3": " AI Follow-Up – Automatically follows up with leads, saving your team time and effort.",
+      "feature4": "Website Chatbot – Handles inquiries from your website visitors 24/7, especially those coming from Google.",
+      "feature5": "Smart CRM – Manage sales, units, and client data in one place with a seamless interface.",
+      "feature6": "Client Insights – Get AI-powered analytics about each client’s needs, behaviors, and communication history to close deals faster."
     },
     "ctaButton": "Get Started",
     "images": {
@@ -80,9 +82,9 @@ export default {
     "subtitle": "Meet Sara & Hani: Real Estate Professionals Facing Real Challenges",
     "haniTitle": "Meet Hani – The Overwhelmed Sales Manager",
     "challenges": {
-      "challenge1": "\"I waste hours talking to unqualified leads who aren't serious buyers.\"",
-      "challenge2": "\"I need a faster way to follow up—before my leads buy somewhere else.\"",
-      "challenge3": "\"Our CRM is full of junk leads, making it hard to track real opportunities.\""
+      "challenge1": "I waste hours talking to unqualified leads who aren't serious buyers.",
+      "challenge2": "I need a faster way to follow up—before my leads buy somewhere else.",
+      "challenge3": "Our CRM is full of junk leads, making it hard to track real opportunities."
     },
     "imageAlt": "Hani - The Overwhelmed Sales Manager"
   },
@@ -90,9 +92,9 @@ export default {
     "imageAlt": "Sara - The Marketing Manager",
     "saraTitle": "Meet Sara – The Marketing Manager",
     "challenges": {
-      "challenge1": "\"I spend thousands on ads, but most leads aren't even serious buyers!\"",
-      "challenge2": "\"Sales blames me for 'low-quality leads,' but I don't have the right tools to qualify them.\"",
-      "challenge3": "\"By the time our team reaches out, leads have already chosen a competitor.\""
+      "challenge1": "I spend thousands on ads, but most leads aren't even serious buyers!",
+      "challenge2": "Sales blames me for 'low-quality leads,' but I don't have the right tools to qualify them.",
+      "challenge3": "By the time our team reaches out, leads have already chosen a competitor."
     },
     "footer": {
       "question": "Sounds familiar?",
@@ -384,7 +386,9 @@ export default {
   },
   purpose: {
     "sell": "Sell",
-    "rent": "Rent"
+    "rent": "Rent",
+    "buy": "Buy",
+    "lease": "Lease"
   },
   view: {
     "garden": "Garden",
@@ -681,7 +685,70 @@ export default {
     "first": "1st",
     "second": "2nd",
     "third": "3rd",
-    "th": "th"
+    "th": "th",
+    "viewTypes": {
+      "garden": "Garden View",
+      "sea": "Sea View",
+      "pool": "Pool View",
+      "mountain": "Mountain View",
+      "street": "Street View",
+      "city": "City View",
+      "park": "Park View",
+      "lake": "Lake View",
+      "golf": "Golf Course View",
+      "landmark": "Landmark View",
+      "partial": "Partial View",
+      "open": "Open View",
+      "desert": "Desert View",
+      "river": "River View",
+      "courtyard": "Courtyard View",
+      "forest": "Forest View",
+      "beach": "Beach View",
+      "lagoon": "Lagoon",
+      "openArea": "Open Area View"
+    },
+    "finishingTypes": {
+      "fully finished": "Fully Finished",
+      "semi finished": "Semi Finished",
+      "core & shell": "Core & Shell",
+      "unfinished": "Unfinished",
+      "finished": "Finished"
+    },
+    "furnishingTypes": {
+      "furnished": "Furnished",
+      "unfurnished": "Unfurnished",
+      "semi furnished": "Semi Furnished"
+    },
+    "amenitiesTypes": {
+      "wifi": "WiFi",
+      "dryer": "Dryer",
+      "air_conditioning": "Air Conditioning",
+      "heating": "Heating",
+      "smart_tv": "Smart TV",
+      "hair_dryer": "Hair Dryer",
+      "pool": "Pool",
+      "free_parking": "Free Parking",
+      "ev_charger": "EV Charger",
+      "bbq_grill": "BBQ Grill",
+      "indoor_fireplace": "Indoor Fireplace",
+      "smoking_allowed": "Smoking Allowed",
+      "beachfront": "Beachfront",
+      "smoke_alarm": "Smoke Alarm",
+      "co_alarm": "CO Alarm"
+    },
+    "buildingTypesMap": {
+      "apartment": "Apartment",
+      "villa": "Villa",
+      "townhouse": "Townhouse",
+      "duplex": "Duplex",
+      "penthouse": "Penthouse",
+      "studio": "Studio",
+      "chalet": "Chalet",
+      "office": "Office",
+      "shop": "Shop",
+      "twinhouse": "Twinhouse",
+      "house": "House"
+    }
   },
   common: {
     "ProcessingImages": "Processing images...",

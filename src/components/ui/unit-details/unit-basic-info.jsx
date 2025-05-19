@@ -10,11 +10,11 @@ export default function Uni({ unit }) {
     <div className="w-full md:w-1/2 xl:w-2/5">
       <div className="flex items-center">
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
-          {unit.purpose}
+          {t.purpose?.[unit.purpose] || unit.purpose}
         </span>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {unit.buildingType.charAt(0).toUpperCase() +
-            unit.buildingType.slice(1)}
+          {t.unitDetails?.buildingTypesMap?.[unit.buildingType.toLowerCase()] || 
+            unit.buildingType.charAt(0).toUpperCase() + unit.buildingType.slice(1)}
         </span>
       </div>
 
@@ -128,7 +128,7 @@ export default function Uni({ unit }) {
               {t.unitDetails?.finishing}
             </span>
             <p className="font-medium text-xs">
-              {unit.finishing || t.unitDetails?.notAvailable}
+              {unit.finishing ? (t.unitDetails?.finishingTypes?.[unit.finishing.toLowerCase()] || unit.finishing) : t.unitDetails?.notAvailable}
             </p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default function Uni({ unit }) {
               {t.unitDetails.finishing}
             </span>
             <p className="font-medium text-xs whitespace-nowrap ">
-              {unit.furnishing || t.unitDetails?.notAvailable}
+              {unit.furnishing ? (t.unitDetails?.furnishingTypes?.[unit.furnishing.toLowerCase()] || unit.furnishing) : t.unitDetails?.notAvailable}
             </p>
           </div>
         </div>
@@ -222,9 +222,9 @@ export default function Uni({ unit }) {
       </div>
 
       {/* Key Features */}
-      <div className="mt-5 flex gap-2 items-center">
+      <div className="mt-5 flex flex-wrap gap-2 items-center">
         {unit.landArea > 0 && (
-          <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-22 w-24">
+          <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-primary"
@@ -242,7 +242,9 @@ export default function Uni({ unit }) {
             <span className="mt-1 text-sm text-gray-500">
               {t.unitDetails.area}
             </span>
-            <span className="font-medium">{unit.landArea} m²</span>
+            <p className="font-medium min-w-[80px] text-center">
+              {unit.landArea} m²
+            </p>
           </div>
         )}
 
@@ -270,9 +272,9 @@ export default function Uni({ unit }) {
           <span className="mt-1 text-sm text-gray-500">
             {t.unitDetails.view}
           </span>
-          <span className="font-medium">
-            {unit.view || t.unitDetails?.notAvailable}
-          </span>
+          <p className="font-medium min-w-[80px] text-center">
+            {unit.view ? (t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view) : t.unitDetails?.notAvailable}
+          </p>
         </div>
 
         <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
@@ -293,7 +295,9 @@ export default function Uni({ unit }) {
           <span className="mt-1 text-sm text-gray-500">
             {t.unitDetails.rooms}
           </span>
-          <span className="font-medium">{unit.roomsCount}</span>
+          <p className="font-medium min-w-[80px] text-center">
+            {unit.roomsCount}
+          </p>
         </div>
 
         <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
@@ -311,8 +315,12 @@ export default function Uni({ unit }) {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
-          <span className="font-medium">{unit.bathroomCount}</span>
+          <span className="mt-1 text-sm text-gray-500">
+            {t.bathrooms}
+          </span>
+          <p className="font-medium min-w-[80px] text-center">
+            {unit.bathroomCount}
+          </p>
         </div>
       </div>
 

@@ -1,4 +1,4 @@
-export default function UnitAmenities({ amenities }) {
+export default function UnitAmenities({ amenities, t }) {
   const amenityIcons = {
     wifi: (
       <svg
@@ -272,10 +272,11 @@ export default function UnitAmenities({ amenities }) {
           </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-primary">
-              {amenity
-                .split("_")
-                .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                .join(" ")}
+              {t?.unitDetails?.amenitiesTypes?.[amenity] || 
+                amenity
+                  .split("_")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
             </p>
           </div>
         </div>
