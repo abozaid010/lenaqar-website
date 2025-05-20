@@ -248,7 +248,9 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {user.requirement_name}
+                            {/* {user.requirement_name} */}
+                            {console.log(user.requirement_name)}
+                            {t.unitDetails?.buildingTypesMap?.[user.requirement_name] || user.requirement_name}
                           </span>
                         )}
                       </td>

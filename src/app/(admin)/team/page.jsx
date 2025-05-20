@@ -2,7 +2,18 @@ import { getSalesData } from "@/components/services/serviceFetching";
 import AddNewMember from "./_components/add-new-member";
 import TeamTable from "./_components/team-table";
 import Link from "next/link";
+import { cookies } from "next/headers";
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const clientName = JSON.parse(
+    cookieStore.get("client_info")?.value
+  )?.client_name;
 
+  return {
+    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
+    description: `LENAAI, your AI property consultant.`,
+  };
+}
 export default async function TeamPage() {
   const data = await getSalesData();
 

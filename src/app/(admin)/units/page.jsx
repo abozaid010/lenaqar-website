@@ -22,7 +22,7 @@ export async function generateMetadata() {
   )?.client_name;
 
   return {
-    title: clientName ? `Units | ${clientName}` : "LENAAI",
+    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
     description: `LENAAI, your AI property consultant.`,
   };
 }

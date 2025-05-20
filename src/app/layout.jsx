@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { I18nProvider } from "@/context/translate-api";
 import { cookies, headers } from "next/headers";
 import { Montserrat , Cairo} from "next/font/google";
+import { getClientid } from "@/components/services/clientCookies";
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
@@ -26,12 +27,18 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+// const clientId = await getClientid();
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const clientName = JSON.parse(
+    cookieStore.get("client_info")?.value
+  )?.client_name;
 
-export const metadata = {
-  title: "LENAAI",
-  description: "LENAAI, your ai property consultant",
-};
-
+  return {
+    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
+    description: `LENAAI, your AI property consultant.`,
+  };
+}
 export default async function RootLayout({ children }) {
   // Get the initial locale from the cookie on the server
   const cookieStore = await cookies();

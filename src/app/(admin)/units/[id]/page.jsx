@@ -8,15 +8,19 @@ import UnitPageHeader from "../_components/unit-page-header";
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
 import Link from "next/link";
+import { cookies } from "next/headers";
 
 // Dynamic metadata
-export async function generateMetadata({ params }) {
-  const { id } = await params;
-  const unit = await fetchUnitById(id);
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+
+  const clientName = JSON.parse(
+    cookieStore.get("client_info")?.value
+  )?.client_name;
 
   return {
-    title: "unit - " + unit.data?.unitTitle,
-    description: `${unit.data.purpose} a ${unit.data.buildingType} in ${unit.data.city}, developed by ${unit.data.developer}. Delivery status: ${unit.data.deliveryStatus}.`,
+    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
+    description: `LENAAI, your AI property consultant.`,
   };
 }
 

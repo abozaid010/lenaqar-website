@@ -578,6 +578,10 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
+  "typeYourMessage": "اكتب رسالتك هنا",
+  "send": "إرسال",
+  "Ai": "الرد الألي",
+  "manual": "رد مناسب",
   "saveDeveloper": "حفظ المطور",
   "saving": "جاري الحفظ...",
   "cancel": "إلغاء",
@@ -736,6 +740,7 @@ export default {
       "co_alarm": "جهاز إنذار أول أكسيد الكربون"
     },
     "buildingTypesMap": {
+      "Not defined": "غير محدد",
       "apartment": "شقة",
       "villa": "فيلا",
       "townhouse": "تاون هاوس",
@@ -860,5 +865,33 @@ export default {
     "Hassan Allam": "حسن علام",
     "OHK Consultants": "أو إتش كيه للاستشارات",
     "Palm Hills": "بالم هيلز"
-  }
+  },
+  "currency": {
+    "egp": "جنيه"
+  },
+  "unit_pricing": {
+    "down_payment": "دفعة أولى",
+    "years": "سنوات",
+    "maintenance": "صيانة",
+    "duration": {
+      "daily": "يومي",
+      "weekly": "أسبوعي",
+      "monthly": "شهري"
+    },
+    "per_duration": {
+      "daily": "للليلة",
+      "weekly": "للأسبوع",
+      "monthly": "لشهر"
+    },
+    "security_deposit": "إيداع تأميني",
+    "cleaning_fee": "رسوم تنظيف",
+    "service_fee": "رسوم خدمة",
+    "available_now": "متاح الآن",
+    "from": "من",
+    "currently_unavailable": "غير متاح حالياً"
+  },
+  "common": {
+    "na": "غير متوفر"
+  },
+ 
 };

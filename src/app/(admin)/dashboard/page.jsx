@@ -15,7 +15,7 @@ export async function generateMetadata() {
   )?.client_name;
 
   return {
-    title: clientName ? `Dashboard | ${clientName}` : "LENAAI",
+    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
     description: `LENAAI, your AI property consultant.`,
   };
 }

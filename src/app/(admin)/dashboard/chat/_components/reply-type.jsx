@@ -3,11 +3,11 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { toggleAutoReply } from "@/components/services/serviceFetching";
-
+import { useI18n } from "@/context/translate-api";
 export default function ToggleReplyType({ phoneNumber, clientID }) {
   const [autoReply, setAutoReply] = useState("auto_reply");
   const [isLoading, setIsLoading] = useState(false);
-
+  const { t }= useI18n();
   const handleChange = async (e) => {
     setIsLoading(true);
     setAutoReply(e.target.value);
@@ -38,8 +38,8 @@ export default function ToggleReplyType({ phoneNumber, clientID }) {
         onChange={handleChange}
         disabled={isLoading}
       >
-        <option value="auto_reply">AI Reply</option>
-        <option value="manual_reply">Manual Reply</option>
+        <option value="auto_reply"> {t.Ai}</option>
+        <option value="manual_reply"> {t.manual}</option>
       </select>
     </form>
   );

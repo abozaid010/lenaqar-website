@@ -11,6 +11,7 @@ const Layout = async ({ children }) => {
   const clientName = JSON.parse(
     cookieStore.get("client_info")?.value
   )?.client_name;
+  
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get("lang")?.value;

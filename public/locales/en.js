@@ -543,6 +543,10 @@ export default {
       "co_alarm": "CO Alarm"
     }
   },
+  "typeYourMessage": "Type your message...",
+  "Ai": "AI Reply",
+  "send": "Send",
+  "manual": "Manual Reply",
   "january": "January",
   "february": "February",
   "march": "March",
@@ -736,7 +740,35 @@ export default {
       "smoke_alarm": "Smoke Alarm",
       "co_alarm": "CO Alarm"
     },
+    "currency": {
+      "egp": "EGP"
+    },
+    "unit_pricing": {
+      "down_payment": "Down Payment",
+      "years": "Years",
+      "maintenance": "Maintenance",
+      "duration": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      },
+      "per_duration": {
+        "daily": "per night",
+        "weekly": "per week",
+        "monthly": "per month"
+      },
+      "security_deposit": "Security Deposit",
+      "cleaning_fee": "Cleaning Fee",
+      "service_fee": "Service Fee",
+      "available_now": "Available Now",
+      "from": "From",
+      "currently_unavailable": "Currently Unavailable"
+    },
+    "common": {
+      "na": "N/A"
+    },
     "buildingTypesMap": {
+      "Notdefined": "Not defined",
       "apartment": "Apartment",
       "villa": "Villa",
       "townhouse": "Townhouse",
