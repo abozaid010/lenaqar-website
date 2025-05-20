@@ -1,9 +1,9 @@
 "use client";
 
 import Dialog from "@/components/ui/Dialog";
-import { PlusIcon, Loader2 } from "lucide-react";
+import { PlusIcon, Loader2, Edit2 } from "lucide-react";
 import { useState, useActionState, useEffect } from "react";
-import { addNewSales } from "../_actions/actions";
+import { addNewSales, editEmployee } from "../_actions/actions";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 
@@ -19,12 +19,23 @@ const initialState = {
   error: null,
 };
 
-export default function AddNewMember() {
+export default function AddNewMember({ isEdit = false, data }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState(() => {
+    if (isEdit) {
+      return {
+        id: data.id,
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        position: data.position,
+      };
+    }
+    return initialFormData;
+  });
   const [state, formAction, pending] = useActionState(
-    addNewSales,
+    isEdit ? editEmployee : addNewSales,
     initialState
   );
 
@@ -48,13 +59,19 @@ export default function AddNewMember() {
 
   return (
     <>
-      <button
-        className="mt-4 self-end w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
-        onClick={() => setIsOpen(true)}
-      >
-        <PlusIcon size={20} />
-        <span className="text-base">{t.team.addNew}</span>
-      </button>
+      {isEdit === true ? (
+        <button onClick={() => setIsOpen(true)}>
+          <Edit2 className="w-4 h-4 text-blue-500 hover:text-blue-700" />
+        </button>
+      ) : (
+        <button
+          className="mt-4 self-end w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
+          onClick={() => setIsOpen(true)}
+        >
+          <PlusIcon size={20} />
+          <span className="text-base">{t.team.addNew}</span>
+        </button>
+      )}
 
       <Dialog
         isOpen={isOpen}
@@ -62,8 +79,10 @@ export default function AddNewMember() {
         title={"Add New Sales"}
       >
         <form action={formAction} className="space-y-2">
+          {isEdit && <input type="hidden" name="id" value={formData.id} />}
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-start">
               {t.team.name} <span className="text-red-500">*</span>
             </label>
             <input
@@ -77,13 +96,13 @@ export default function AddNewMember() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-start">
               {t.team.email} <span className="text-red-500">*</span>
             </label>
             <input
               type="email"
               name="email"
-              value={formData.description}
+              value={formData.email}
               required
               onChange={handleChange}
               rows={2}
@@ -92,7 +111,7 @@ export default function AddNewMember() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-start">
               {t.team.phone} <span className="text-red-500">*</span>
             </label>
             <input

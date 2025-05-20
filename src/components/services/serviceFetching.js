@@ -321,6 +321,15 @@ export async function createNewEmployee(paylod) {
   }
 }
 
+export async function editExistingEmployee(paylod) {
+  try {
+    await axiosInstance.put(`sales-employees/update-employee/${paylod.id}`, paylod);
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
+    return { error: error.message };
+  }
+}
+
 export async function deleteEmployee(id) {
   try {
     await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
@@ -343,7 +352,7 @@ export async function getProfileData() {
 
   try {
     const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
-    console.log(response.data)
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile data:", error.message);
@@ -353,7 +362,7 @@ export async function getProfileData() {
 
 export async function updateProfileData(formData) {
   const clientEmail = getClientEmail();
-  console.log(clientEmail)
+  console.log(clientEmail);
 
   if (!clientEmail) {
     console.error("Client email not found");

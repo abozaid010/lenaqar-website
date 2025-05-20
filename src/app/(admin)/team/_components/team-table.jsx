@@ -6,6 +6,7 @@ import { Trash2, Edit2 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import AddNewMember from "./add-new-member";
 
 export default function TeamTable({ data }) {
   const router = useRouter();
@@ -76,13 +77,7 @@ export default function TeamTable({ data }) {
                     {item.position}
                   </td>
                   <td className="px-2 py-2 text-center">
-                    <button
-                      onClick={() => {
-                        /* handle edit */
-                      }}
-                    >
-                      <Edit2 className="w-4 h-4 text-blue-500 hover:text-blue-700" />
-                    </button>
+                    <AddNewMember isEdit={true} data={item} />
                   </td>
 
                   <td className="px-2 py-2 text-center">
