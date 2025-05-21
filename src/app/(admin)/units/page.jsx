@@ -17,9 +17,9 @@ import UnitsSearch from "@/components/ui/units-search";
 export async function generateMetadata() {
   const cookieStore = await cookies();
 
-  const clientName = JSON.parse(
-    cookieStore.get("client_info")?.value
-  )?.client_name;
+  const clientName = cookieStore.get("client_info")?.value
+    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+    : null;
 
   return {
     title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
@@ -32,14 +32,15 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   const cookieStore = await cookies();
   const clientId = cookieStore.get("client_id")?.value;
-  const clientName = JSON.parse(
-    cookieStore.get("client_info")?.value
-  )?.client_name;
+  const clientName = cookieStore.get("client_info")?.value
+    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+    : null;
 
   const [unitsResponse, developers, compounds] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams), true),
     fetchDevelopers(),
-    fetchcombounds(),
+    fetchcombounds(true),
+    // fetchCitisAndProjects(),
   ]);
   console.log("compounds", compounds)
 

@@ -6,6 +6,7 @@ import HeroSection from "@/components/web/section/HomeSection/HeroSection";
 import DashbordImage from "./web/_components/DashbordImage";
 
 import { cookies } from "next/headers";
+import OurResult from "./web/_components/OurResult";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
@@ -17,6 +18,7 @@ export default async function HomePage() {
 
       {/* Hero Section with Title */}
       <HeroSection />
+      <OurResult />
       <div className=" overflow-hidden">
         <DashbordImage />
       </div>

@@ -5,9 +5,8 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 export async function generateMetadata() {
   const cookieStore = await cookies();
-  const clientName = JSON.parse(
-    cookieStore.get("client_info")?.value
-  )?.client_name;
+  const clientInfoCookie = cookieStore.get("client_info")?.value;
+  const clientName = clientInfoCookie ? JSON.parse(clientInfoCookie)?.client_name : null;
 
   return {
     title: clientName ? `LENAAI | ${clientName}` : "LENAAI",

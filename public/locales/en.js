@@ -543,6 +543,21 @@ export default {
       "co_alarm": "CO Alarm"
     }
   },
+  ourResultsInNumbers: {
+    "title": "Our Results in Numbers",
+    "fasterLeadResponse": "Faster Lead Response",
+    "fasterLeadResponseValue": "3X",
+    "moreConversion": "More Conversion",
+    "moreConversionValue": "40%",
+    "engagement": "Engagement",
+    "engagementValue": "24/7",
+    "lessManualWork": "Less Manual Work",
+    "lessManualWorkValue": "80%",
+    "increaseInSales": "Increase In Sales",
+    "increaseInSalesValue": "26%",
+    "increaseInCSAT": "Increase In CSAT",
+    "increaseInCSATValue": "60%",
+  },
   "typeYourMessage": "Type your message...",
   "Ai": "AI Reply",
   "send": "Send",

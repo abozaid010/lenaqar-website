@@ -15,7 +15,8 @@ export default async function ChatPage({ params }) {
     hasAccess = false;
   }
 
-  const name = initialData.data?.name || "New Lead";
+  const name = initialData.data?.name;
+  console.log("initialData",initialData.data)
 
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">

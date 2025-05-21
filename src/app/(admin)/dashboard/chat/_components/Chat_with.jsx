@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/context/translate-api";
 
 const ChatWith = ({ name }) => {
   const router = useRouter();
+  const { t } = useI18n();
   const handleBack = () => {
     router.back();
   };
@@ -28,7 +30,7 @@ const ChatWith = ({ name }) => {
         </svg>
       </button>
       <h1 className="text-lg text-priamry/90">
-        <span className="text-primary font-bold">{name}</span>
+        <span className="text-primary font-bold">{name || t.clientsTable.newLead}</span>
       </h1>
     </div>
   );
