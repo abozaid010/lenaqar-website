@@ -30,9 +30,9 @@ const geistMono = Geist_Mono({
 // const clientId = await getClientid();
 export async function generateMetadata() {
   const cookieStore = await cookies();
-  const clientName = JSON.parse(
-    cookieStore.get("client_info")?.value
-  )?.client_name;
+  const clientName = cookieStore.get("client_info")?.value
+    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+    : null;
 
   return {
     title: clientName ? `LENAAI | ${clientName}` : "LENAAI",

@@ -370,6 +370,7 @@ export default {
     "cityFirst": "اختر المدينه اولا",
     "selectDistrict": "اختر الحي "
   },
+  
   buildingTypes: {
     "apartment": "شقة",
     "villa": "فيلا",
@@ -893,5 +894,19 @@ export default {
   "common": {
     "na": "غير متوفر"
   },
- 
+  "ourResultsInNumbers": {
+    "title": "نتائجنا في الأرقام",
+    "fasterLeadResponse": "استجابة أسرع للإحتياجات",
+    "fasterLeadResponseValue": "3X",
+    "moreConversion": "زيادة التحويل",
+    "moreConversionValue": "40%",
+    "engagement": "التواصل",
+    "engagementValue": "24/7",
+    "lessManualWork": "أقل عمل ميكانيكي",
+    "lessManualWorkValue": "80%",
+    "increaseInSales": "زيادة المبيعات",
+    "increaseInSalesValue": "26%",
+    "increaseInCSAT": "زيادة الرضا على العملاء",
+    "increaseInCSATValue": "60%"
+  }
 };

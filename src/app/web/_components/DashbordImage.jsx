@@ -40,7 +40,7 @@ export default function DashboardImage() {
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="container mx-auto py-12 md:py-20">
+      <div className="w-[90%] mx-auto py-12 md:py-20">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-priamry mb-4">
@@ -53,7 +53,7 @@ export default function DashboardImage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-6 items-center">
+        <div className="flex flex-col lg:flex-row gap-8 justify-between   px-4  items-center">
           {/* Features List */}
           <div className="w-full lg:w-1/2 space-y-4">
             <h2 className="text-xl md:text-2xl font-semibold text-primary mb-5">
@@ -77,13 +77,13 @@ export default function DashboardImage() {
             <CalendarModal
               buttonText={t.dashboard.ctaButton}
               style={
-                "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
+                "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8   ml-4 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
               }
             />
           </div>
 
           {/* App Preview Image */}
-          <div className="w-full lg:w-[520px]">
+          <div className="w-full lg:w-[620px]">
             <div className="bg-white rounded-xl shadow-xl border border-gray-200 p-4 relative">
               <div className="relative w-full">
                 {/* Desktop Dashboard Image */}

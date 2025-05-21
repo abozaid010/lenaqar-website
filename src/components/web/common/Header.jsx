@@ -76,7 +76,7 @@ const Header = ({ ci }) => {
       <header
         className={`fixed top-0 left-0 right-0 z-40 text-white transition-all duration-300 bg-primary`}
       >
-        <div className="container mx-auto px-4">
+        <div className="w-[90%] mx-auto px-4">
           <div className="flex items-center justify-between py-2">
             {/* Logo */}
             <Link href="/" className="text-xl font-bold flex items-center">
