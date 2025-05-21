@@ -39,7 +39,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const [unitsResponse, developers, compounds] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams), true),
     fetchDevelopers(),
-    fetchcombounds(),
+    fetchcombounds(true),
+    // fetchCitisAndProjects(),
   ]);
   console.log("compounds", compounds)
 

@@ -16,8 +16,20 @@ export async function fetchUnits() {
 }
 
 export async function fetchcombounds(use) {
+  const clientId = await getClientid();
   try {
-    const response = await axiosInstance.get(`${use ? `/projects/all` : '/public/projects'}`);
+    const response = await axiosInstance.get(`${use ? `/projects/all?client_id=${clientId}` : '/public/projects'}`);
+    console.log(response.data);
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch units:", error.message);
+    return { error: error.message };
+  }
+}
+export async function fetchCitisAndProjects() {
+  try {
+    const response = await axiosInstance.get("/projects/cities-and-districts?client_id=dev");
+    console.log(response);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
