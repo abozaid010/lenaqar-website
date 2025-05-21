@@ -32,7 +32,8 @@ const OurResult = () => {
                         className="bg-white rounded-xl shadow-sm border border-gray-200 px-8 py-6 min-w-[200px] text-center flex flex-col items-center flex-1"
                     >
                         <div className="text-3xl font-bold mb-2 bg-gradient-to-r from-[#366cd9] to-[#3ec6e0] bg-clip-text text-transparent">
-                            {isRTL ? toArabicDigits(item.value) : item.value}
+                            {/* {isRTL ? toArabicDigits(item.value) : item.value} */}
+                            {item.value}
                         </div>
                         <div className="text-lg text-gray-600 font-normal leading-snug">
                             {item.label}

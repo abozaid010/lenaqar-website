@@ -896,17 +896,17 @@ export default {
   },
   "ourResultsInNumbers": {
     "title": "نتائجنا في الأرقام",
-    "fasterLeadResponse": "استجابة أسرع للإحتياجات",
+    "fasterLeadResponse": "  هيرد علي اي عميل في 30 ثانيه",
     "fasterLeadResponseValue": "3X",
-    "moreConversion": "زيادة التحويل",
+    "moreConversion": " محادثات اكثر",
     "moreConversionValue": "40%",
-    "engagement": "التواصل",
+    "engagement": "بيبيع",
     "engagementValue": "24/7",
-    "lessManualWork": "أقل عمل ميكانيكي",
+    "lessManualWork": "  مجهود اقل ",
     "lessManualWorkValue": "80%",
-    "increaseInSales": "زيادة المبيعات",
+    "increaseInSales": "زيادة في المبيعات",
     "increaseInSalesValue": "26%",
-    "increaseInCSAT": "زيادة الرضا على العملاء",
+    "increaseInCSAT": "زيادة في رضا  العملاء",
     "increaseInCSATValue": "60%"
   }
 };

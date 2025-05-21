@@ -41,7 +41,7 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center overflow-hidden  ">
+    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center  overflow-hidden  ">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -59,7 +59,7 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto relative z-10 w-[90%] grid grid-cols-1 xl:grid-cols-2 gap- p-0 sm:px-6"
+        className="mx-auto relative z-10 w-[90%]  px-4   grid grid-cols-1 xl:grid-cols-2   "
       >
         <motion.div
           className="md:col-span-1 space-y-4"
@@ -127,7 +127,7 @@ const HeroSection = () => {
 
           {/* Square AI Image */}
           <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96"
+            className="absolute top-1/2   left-[55%] transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96"
             animate={{
               scale: [1, 1.03, 1],
             }}
