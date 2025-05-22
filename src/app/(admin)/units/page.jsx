@@ -2,6 +2,7 @@ import {
   fetchcombounds,
   fetchUnitsFilter,
   fetchDevelopers,
+  fetchCitisAndProjects,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "@/components/ui/units-grid";
 import { Loader2 } from "lucide-react";
@@ -36,13 +37,13 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
     : null;
 
-  const [unitsResponse, developers, compounds] = await Promise.all([
+  const [unitsResponse, developers, compounds,citiesAndDistricts] = await Promise.all([
     fetchUnitsFilter(JSON.stringify(searchParams), true),
     fetchDevelopers(),
     fetchcombounds(true),
-    // fetchCitisAndProjects(),
+    fetchCitisAndProjects(),
   ]);
-  console.log("compounds", compounds)
+
 
   const units = unitsResponse.data?.units || [];
 
@@ -75,6 +76,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           compounds={compounds}
           clientId={clientId}
           clientName={clientName}
+          citiesAndDistricts={citiesAndDistricts}
         />
 
         {/* <UnitsSearch /> */}

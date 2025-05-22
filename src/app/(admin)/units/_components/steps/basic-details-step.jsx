@@ -12,6 +12,7 @@ export default function BasicDetailsStep({
   formData,
   updateFormData,
   developers,
+  citiesAndDistricts,
   setDevelopers = () => {},
   invalidFields = [],
   setInvalidFields = () => {},
@@ -22,7 +23,15 @@ export default function BasicDetailsStep({
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const ar = Cookies.get("lang");
-  // Function to print selected city and district
+  const dataProjectShw = dataProject.map((project) => ({
+  
+    name: project,
+ 
+  }));
+ 
+
+
+   
   const printLocationDetails = async (city, district) => {
     if (city && district) {
       try {
@@ -147,6 +156,7 @@ export default function BasicDetailsStep({
             value={formData.unitTitle || ""}
             onChange={handleChange}
             placeholder={t.basicDetails.placeholders.unitTitle}
+            dir="auto"
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("unitTitle")
                 ? "border-red-500 ring-red-500 placeholder-red-500"
@@ -234,9 +244,9 @@ export default function BasicDetailsStep({
               }`}
             >
               <option value="">{t.basicDetails.selectCity}</option>
-              {Egypt_cities.countries[0].governorates?.map((gov) => (
-                <option key={gov?.governorate} value={gov?.governorate}>
-                  {gov?.governorate}
+              {citiesAndDistricts?.map((gov) => (
+                <option key={gov.governorate} value={gov.governorate}>
+                  {gov.governorate}
                 </option>
               ))}
             </select>
@@ -271,9 +281,9 @@ export default function BasicDetailsStep({
                 ? t.formLabels.selectDistrict
                 : t.formLabels.cityFirst}
             </option>
-            {formData.city &&
-              Egypt_cities.countries[0].governorates
-                .find((gov) => gov.governorate === formData.city)
+            {formData?.city &&
+              citiesAndDistricts
+                ?.find((gov) => gov.governorate === formData.city)
                 ?.districts.map((dist) => (
                   <option key={dist.district} value={dist.district}>
                     {dist.district}
@@ -330,9 +340,9 @@ export default function BasicDetailsStep({
                   Loading projects...
                 </option>
               ) : formData.city && formData.district ? (
-                dataProject && dataProject.length > 0 ? (
-                  dataProject.map((project) => (
-                    <option key={project.id} value={project.name}>
+                dataProjectShw && dataProjectShw.length > 0 ? (
+                  dataProjectShw.map((project) => (
+                    <option key={project.name} value={project.name}>
                       {project.name}
                     </option>
                   ))
@@ -347,8 +357,8 @@ export default function BasicDetailsStep({
               {formData.project &&
               formData.city &&
               formData.district &&
-              dataProject &&
-              !dataProject.some((p) => p.name === formData.project) ? (
+              dataProjectShw &&
+              !dataProjectShw.some((p) => p.name === formData.project) ? (
                 <option key="preserved-selection" value={formData.project}>
                   {formData.project}
                 </option>
@@ -435,6 +445,7 @@ export default function BasicDetailsStep({
             value={formData.code}
             onChange={handleChange}
             placeholder={t.basicDetails.placeholders.code}
+            dir="auto"
             className="block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -450,6 +461,7 @@ export default function BasicDetailsStep({
             value={formData.model}
             onChange={handleChange}
             placeholder=""
+            dir="auto"
             className="block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -478,6 +490,7 @@ export default function BasicDetailsStep({
             placeholder="0"
             onChange={handleChange}
             required
+            dir="auto"
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("roomsCount")
                 ? "border-red-500 ring-red-500 placeholder-red-500"
@@ -505,6 +518,7 @@ export default function BasicDetailsStep({
             value={formData.bathroomCount || ""}
             onChange={handleChange}
             required
+            dir="auto"
             className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
               invalidFields.includes("bathroomCount")
                 ? "border-red-500 ring-red-500"
@@ -525,6 +539,7 @@ export default function BasicDetailsStep({
             value={formData.floor || ""}
             placeholder="0"
             onChange={handleChange}
+            dir="auto"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -541,6 +556,7 @@ export default function BasicDetailsStep({
             placeholder="0"
             value={formData.landArea || ""}
             onChange={handleChange}
+            dir="auto"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -557,6 +573,7 @@ export default function BasicDetailsStep({
             placeholder="0"
             value={formData.gardenSize || ""}
             onChange={handleChange}
+            dir="auto"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
@@ -572,6 +589,7 @@ export default function BasicDetailsStep({
             placeholder="0"
             value={formData.garageArea || ""}
             onChange={handleChange}
+            dir="auto"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
         </div>

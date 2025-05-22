@@ -8,7 +8,7 @@ import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({ appliedFilters, developers, compounds ,clientName,clientId,readonly }) {
+export default function UnitsFilter({ appliedFilters, developers, compounds ,clientName,clientId,readonly,citiesAndDistricts }) {
   const { t } = useI18n();
   const router = useRouter();
   const [filters, setFilters] = useState(() => ({
@@ -19,6 +19,17 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     min_price: appliedFilters.min_price || "",
     max_price: appliedFilters.max_price || "",
   }));
+  const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
+  .filter(([governorate]) => governorate !== 'cities') // استبعاد "cities"
+  .map(([governorate, districts]) => ({
+    governorate,
+    districts: districts.map(district => ({
+      district,
+      
+    }))
+  }));
+
+
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
@@ -509,6 +520,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
             clientName={clientName}
             compounds={compounds}
             developers={developersSet}
+            citiesAndDistricts={formattedDataCitiesAndDistricts}
             className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
           />
         </div>}

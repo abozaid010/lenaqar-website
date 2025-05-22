@@ -524,6 +524,7 @@ export default function CalendarSelector({
                 value={formData.client_name}
                 onChange={handleInputChange}
                 required
+                dir="auto"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -542,6 +543,7 @@ export default function CalendarSelector({
                 value={formData.client_email}
                 onChange={handleInputChange}
                 required
+                dir="auto"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -561,6 +563,7 @@ export default function CalendarSelector({
                 required
                 value={formData.phone_number}
                 onChange={handleInputChange}
+                dir="auto"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -578,6 +581,7 @@ export default function CalendarSelector({
                 name="company"
                 value={formData.company}
                 onChange={handleInputChange}
+                dir="auto"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -595,6 +599,7 @@ export default function CalendarSelector({
                 value={formData.notes}
                 onChange={handleInputChange}
                 rows="3"
+                dir="auto"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder={t.calendar.notesPlaceholder}
               ></textarea>

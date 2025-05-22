@@ -24,7 +24,7 @@ const OurResult = () => {
                 {t.ourResultsInNumbers.title}
             </h2>
             <div
-                className={`flex flex-col md:flex-row ${isRTL ? 'md:flex-row-reverse' : ''} justify-center md:gap-x-6 gap-y-6 md:gap-y-0 w-full md:w-[90%] mx-auto px-2 md:px-6`}
+                className={`flex flex-col md:flex-row ${isRTL ? 'md:flex-row-reverse' : ''} justify-center md:gap-x-6 gap-y-6 md:gap-y-0 w-full container max-w-[1280px]  mx-auto px-2 md:px-6`}
             >
                 {results.map((item, idx) => (
                     <div

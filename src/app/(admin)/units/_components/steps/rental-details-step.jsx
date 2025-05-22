@@ -177,6 +177,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               min="0"
               placeholder="200"
               required
+              dir="auto"
               className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -206,6 +207,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               }
               min="0"
               placeholder="0"
+              dir="auto"
               className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -231,6 +233,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               }
               min="0"
               placeholder="0"
+              dir="auto"
               className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
@@ -256,6 +259,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               }
               min="0"
               placeholder="0"
+              dir="auto"
               className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">

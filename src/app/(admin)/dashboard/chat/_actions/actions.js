@@ -18,7 +18,7 @@ export async function sendNewMessage(prevState, formData) {
         }
         console.log("payload", payload);
         const response = await axiosInstance.post("/chat/client-message", payload);
-        console.log("response_message", response.data.data.message);
+        console.log("response_message", response.data);
 
         return {
             success: true,

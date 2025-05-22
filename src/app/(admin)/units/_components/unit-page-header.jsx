@@ -5,12 +5,21 @@ import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
 import { useI18n } from "@/context/translate-api";
 
-export default function UnitPageHeader({ unit, compounds, developers }) {
+export default function UnitPageHeader({ unit, compounds, developers,citiesAndDistricts,clientId }) {
   const router = useRouter();
   const { t } = useI18n();
   const handleBackToUnits = () => {
     router.back();
   };
+  const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
+  .filter(([governorate]) => governorate !== 'cities') // استبعاد "cities"
+  .map(([governorate, districts]) => ({
+    governorate,
+    districts: districts.map(district => ({
+      district,
+      
+    }))
+  }));
 
   return (
     <div className="py-4 flex justify-between items-between overflow-hidden">
@@ -39,6 +48,8 @@ export default function UnitPageHeader({ unit, compounds, developers }) {
           unitData={unit}
           compounds={compounds}
           developers={developers}
+          citiesAndDistricts={formattedDataCitiesAndDistricts}
+          clientId={clientId}
         />
 
         <DeleteUnitBtn unitId={unit.unitId} />

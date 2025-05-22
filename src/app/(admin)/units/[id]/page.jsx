@@ -1,5 +1,6 @@
 
 import {
+  fetchCitisAndProjects,
   fetchcombounds,
   fetchDevelopers,
   fetchUnitById,
@@ -27,10 +28,15 @@ export async function generateMetadata() {
 const Page = async ({ params }) => {
   const { id } = await params;
   const unit = await fetchUnitById(id);
+  const cookieStore = await cookies();
 
-  const [comboundata, developers] = await Promise.all([
+  const clientId = cookieStore.get("client_id")?.value;
+
+
+  const [comboundata, developers,citiesAndDistricts] = await Promise.all([
     fetchcombounds(),
     fetchDevelopers(),
+    fetchCitisAndProjects(),
   ]);
 
   let hasAccess = true;
@@ -50,6 +56,8 @@ const Page = async ({ params }) => {
             unit={unit.data}
             compounds={comboundata}
             developers={developersSet}
+            citiesAndDistricts={citiesAndDistricts}
+            clientId={clientId}
           />
 
           <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">

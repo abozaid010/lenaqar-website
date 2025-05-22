@@ -91,6 +91,7 @@ export default function SaleDetailsStep({
             value={formatPrice(formData.totalPrice)}
             onChange={handleChange}
             placeholder="5000000"
+            dir="auto"
             className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
               invalidFields.includes("totalPrice")
                 ? "border-red-500 ring-red-500"
@@ -141,6 +142,7 @@ export default function SaleDetailsStep({
             onChange={handleChange}
             min="0"
             placeholder="200000"
+            dir="auto"
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
           <span

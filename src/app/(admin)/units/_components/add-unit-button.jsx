@@ -12,6 +12,7 @@ export default function AddUnitButton({
   clientName,
   compounds,
   developers,
+  citiesAndDistricts,
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -49,6 +50,7 @@ export default function AddUnitButton({
           clientName={clientName}
           compounds={compounds}
           developersData={developers}
+          citiesAndDistricts={citiesAndDistricts}
         />
       )}
     </>
