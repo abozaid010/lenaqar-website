@@ -3,7 +3,7 @@ name: Auto Deploy to GCP
 on:
   push:
     branches:
-      - gcp_hosting
+      - main
 
 jobs:
   deploy:
@@ -28,7 +28,7 @@ jobs:
             cd ~/lenaai-website
 
             echo "📥 Pulling latest changes..."
-            git pull origin gcp_hosting
+            git pull origin main
 
             echo "🧹 Stopping old container if exists..."
             docker rm -f lenaai_nextjs_app || true
