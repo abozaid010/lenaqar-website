@@ -28,8 +28,9 @@ jobs:
             cd ~/lenaai-website
 
             echo "📥 Pulling latest changes..."
-            git pull origin main
 
+            git config pull.rebase false
+            git pull origin main --no-rebase
             echo "🧹 Stopping old container if exists..."
             docker rm -f lenaai_nextjs_app || true
 
