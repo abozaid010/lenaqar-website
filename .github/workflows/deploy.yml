@@ -1,0 +1,39 @@
+name: Auto Deploy to GCP
+
+on:
+  push:
+    branches:
+      - gcp_hosting
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup SSH key
+      run: |
+        echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > github_key
+        chmod 600 github_key
+
+    - name: Deploy to GCP VM
+      env:
+        GCP_VM_IP: ${{ secrets.GCP_VM_IP }}
+        GCP_SSH_USER: ${{ secrets.GCP_SSH_USER }}
+      run: |
+        ssh -o StrictHostKeyChecking=no -i github_key $GCP_SSH_USER@$GCP_VM_IP << 'EOF'
+          set -Eeuo pipefail
+          cd ~/lenaai-website
+          git pull origin gcp_hosting
+
+          echo "🧹 Removing old container..."
+          docker rm -f lenaai_nextjs_app || true
+
+          echo "🚀 Rebuilding image..."
+          docker build -t lenaai_nextjs_app .
+
+          echo "✅ Running container..."
+          docker run -d --restart=always --name lenaai_nextjs_app -p 3002:3000 lenaai_nextjs_app
+        EOF
