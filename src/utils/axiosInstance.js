@@ -4,8 +4,14 @@ import { getClientid } from "@/components/services/clientCookies";
 import axios from "axios";
 import { cookies } from "next/headers";
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if (!BASE_URL) {
+  throw new Error('NEXT_PUBLIC_API_BASE_URL environment variable is not defined');
+}
+
 const axiosInstance = axios.create({
-  baseURL: "https://api.lenaai.net",
+  baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },

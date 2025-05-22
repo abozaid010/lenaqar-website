@@ -13,7 +13,7 @@ const nextConfig = {
         pathname: "/lenaai/**",
       },
     ],
-    domains: ['api.lenaai.net'],
+    domains: [process.env.NEXT_PUBLIC_API_DOMAIN || 'api.lenaai.net'],
   },
   // TODO: i18n configuration in next.config.mjs is unsupported in App Router.
   // i18n: {
