@@ -6,6 +6,8 @@ import AddCompoundDialog from "../add-compound-dialog";
 import { useState, useEffect } from "react";
 import { getprojects } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
+import { v4 as uuidv4 } from 'uuid';
+import AddPhaseDialog from "../AddPhseDilog";
 
 export default function BasicDetailsStep({
   clientId,
@@ -18,14 +20,17 @@ export default function BasicDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t } = useI18n();
+  const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
+  const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
+  const [refreshPhases, setRefreshPhases] = useState(false);
   const ar = Cookies.get("lang");
-  const [availablePhases, setAvailablePhases] = useState([]);
   console.log("dataProject",dataProject)
-  
+  console.log("projectId",projectId)
+
   const printLocationDetails = async (city, district) => {
     if (city && district) {
       try {
@@ -120,7 +125,6 @@ export default function BasicDetailsStep({
       const selectedProject = dataProject.find(
         (p) => p.project_name === value
       );
-      setAvailablePhases(selectedProject?.phases || []);
     }
   };
 
@@ -132,6 +136,33 @@ export default function BasicDetailsStep({
     updateFormData({ project: newCompound.name });
   };
 
+  const handleAddPhase = (newPhase) => {
+    if (phases[0]) {
+      const updatedPhases = [...phases[0].phases, newPhase];
+      const updatedProject = { ...phases[0], phases: updatedPhases };
+      const updatedDataProject = dataProject.map(p => 
+        p.project_name === formData.project ? updatedProject : p
+      );
+      setDataProject(updatedDataProject);
+      setRefreshPhases(prev => !prev);
+      // Update form with the newly added phase
+      updateFormData({ phase: newPhase.name });
+    } else if (projectId) {
+      // If we have a projectId but no phases yet, create new project data
+      const newProjectData = {
+        id: projectId,
+        project_name: formData.project,
+        phases: [newPhase]
+      };
+      setDataProject([...dataProject, newProjectData]);
+      setRefreshPhases(prev => !prev);
+      // Update form with the newly added phase
+      updateFormData({ phase: newPhase.name });
+    }
+  };
+
+  const phases = dataProject.filter(project => project.project_name === formData.project)
+  console.log("phases",phases)
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
@@ -366,29 +397,42 @@ export default function BasicDetailsStep({
 
         {/* Phase */}
         <div>
-          <label className="block text-sm font-medium mb-1">
-            {t.basicDetails.selectPhase || "Select Phase"} <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
+            <span>{t.basicDetails.selectPhase || "Select Phase"} <span className="text-red-500">*</span></span>
+            {formData.project && (
+              <button
+                type="button"
+                onClick={() => setIsAddPhaseDialogOpen(true)}
+                className="text-blue-600 text-sm font-medium"
+              >
+                + Add Phase
+              </button>
+            )}
           </label>
           <select
             name="phase"
             value={formData.phase || ""}
             onChange={handleChange}
-            required
             disabled={!formData.project}
-            className="block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("phase")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           >
+            {console.log(phases[0]?.phases)}
             {!formData.project ? (
               <option value="" disabled>
                 {t.formLabels?.projectFirst || "Select project first"}
               </option>
-            ) : availablePhases.length === 0 ? (
+            ) : !phases[0]?.phases || phases[0]?.phases?.length === 0 ? (
               <option value="" disabled>
-                {t.basicDetails.noPhases || "No phases in this project"}
+                No phases available
               </option>
             ) : (
               <>
-                <option value="">{t.basicDetails.selectPhase || "Select Phase"}</option>
-                {availablePhases.map((phase, idx) => (
+                <option value={""}>{ formData.phase ? formData.phase : "select phase"}</option>
+                {phases[0]?.phases?.map((phase, idx) => (
                   <option key={phase.name + idx} value={phase.name}>
                     {phase.name}
                   </option>
@@ -397,6 +441,16 @@ export default function BasicDetailsStep({
             )}
           </select>
         </div>
+
+        {/* Add Phase Dialog */}
+        {/* console.log(phases[0]) */}
+       
+        <AddPhaseDialog
+          isOpen={isAddPhaseDialogOpen}
+          onClose={() => setIsAddPhaseDialogOpen(false)}
+          onAdd={handleAddPhase}
+          projectId={phases[0]?.id || projectId}
+        />
 
         {/* Purpose */}
         <div>
@@ -629,6 +683,8 @@ export default function BasicDetailsStep({
       {/* Add Compound Dialog */}
       <AddCompoundDialog
         clientId={clientId}
+        projectId={projectId}
+        setProjectId={setProjectId}
         isOpen={isAddCompoundDialogOpen}
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}

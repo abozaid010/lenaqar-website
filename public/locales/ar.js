@@ -433,6 +433,10 @@ export default {
     "currency": "العملة"
   },
   basicDetails: {
+    "selectPhase": "اختر المرحلة",
+    "noPhases": "لا يوجد مراحل في هذا المشروع",
+    "selectProject": "اختر المشروع",
+    
     "propertyDetails": "تفاصيل العقار",
     "propertySpecs": "مواصفات العقار",
     "unitTitle": "عنوان الوحدة",

@@ -434,7 +434,9 @@ export default {
     "currency": "Currency"
   },
   basicDetails: {
-    "propertyDetails": "Property Details",
+    "selectPhase": "Select Phase",
+    "noPhases": "No phases in this project",
+    "noPhasespropertyDetails": "Property Details",
     "propertySpecs": "Property Specifications",
     "unitTitle": "Unit Title",
     "compound": "project",
