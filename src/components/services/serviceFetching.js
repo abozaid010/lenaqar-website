@@ -185,6 +185,16 @@ export async function addUnit(unitData) {
     throw { message: error.response?.data?.message || error.message };
   }
 }
+export async function addNewPhase(phaseData,idProject) {
+  try {
+    const response = await axiosInstance.post(`project-phases/${idProject}/phase-create`, phaseData);
+    console.log(response.data)
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
 export async function addUnitRent(unitData) {
   try {
     const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
