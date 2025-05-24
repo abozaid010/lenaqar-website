@@ -20,6 +20,7 @@ export default function BasicDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t } = useI18n();
+  const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
   const [availableCompounds, setAvailableCompounds] = useState([]);
@@ -28,7 +29,8 @@ export default function BasicDetailsStep({
   const [refreshPhases, setRefreshPhases] = useState(false);
   const ar = Cookies.get("lang");
   console.log("dataProject",dataProject)
-  
+  console.log("projectId",projectId)
+
   const printLocationDetails = async (city, district) => {
     if (city && district) {
       try {
@@ -142,6 +144,17 @@ export default function BasicDetailsStep({
         p.project_name === formData.project ? updatedProject : p
       );
       setDataProject(updatedDataProject);
+      setRefreshPhases(prev => !prev);
+      // Update form with the newly added phase
+      updateFormData({ phase: newPhase.name });
+    } else if (projectId) {
+      // If we have a projectId but no phases yet, create new project data
+      const newProjectData = {
+        id: projectId,
+        project_name: formData.project,
+        phases: [newPhase]
+      };
+      setDataProject([...dataProject, newProjectData]);
       setRefreshPhases(prev => !prev);
       // Update form with the newly added phase
       updateFormData({ phase: newPhase.name });
@@ -407,13 +420,14 @@ export default function BasicDetailsStep({
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
           >
+            {console.log(phases[0]?.phases)}
             {!formData.project ? (
               <option value="" disabled>
                 {t.formLabels?.projectFirst || "Select project first"}
               </option>
-            ) : phases[0]?.phases?.length === 0 ? (
+            ) : !phases[0]?.phases || phases[0]?.phases?.length === 0 ? (
               <option value="" disabled>
-                {t.basicDetails.noPhases || "No phases in this project"}
+                No phases available
               </option>
             ) : (
               <>
@@ -435,7 +449,7 @@ export default function BasicDetailsStep({
           isOpen={isAddPhaseDialogOpen}
           onClose={() => setIsAddPhaseDialogOpen(false)}
           onAdd={handleAddPhase}
-          projectId={phases[0]?.id}
+          projectId={phases[0]?.id || projectId}
         />
 
         {/* Purpose */}
@@ -669,6 +683,8 @@ export default function BasicDetailsStep({
       {/* Add Compound Dialog */}
       <AddCompoundDialog
         clientId={clientId}
+        projectId={projectId}
+        setProjectId={setProjectId}
         isOpen={isAddCompoundDialogOpen}
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}

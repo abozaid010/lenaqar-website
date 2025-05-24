@@ -26,6 +26,8 @@ export default function AddCompoundDialog({
   Egypt_cities,
   defaultCity,
   defaultDistrict,
+  projectId,
+  setProjectId,
 }) {
   const { t } = useI18n();
   const ar = Cookies.get("lang");
@@ -34,6 +36,7 @@ export default function AddCompoundDialog({
   const [uploadedImageId, setUploadedImageId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+ 
   const [errors, setErrors] = useState({});
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
@@ -228,6 +231,8 @@ export default function AddCompoundDialog({
       };
 
       const res = await addCompound(submissionData);
+      setProjectId(res.data.id)
+      console.log(res.data.id)
       if (res.code === 200) {
         toast.success(
           t.toasts?.compoundAdded || "Compound added successfully!"
