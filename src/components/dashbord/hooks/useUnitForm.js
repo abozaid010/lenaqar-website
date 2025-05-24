@@ -140,7 +140,7 @@ export const useUnitForm = (onClose, onSave) => {
       purpose: defaultPurpose.charAt(0).toUpperCase() + defaultPurpose.slice(1),
       compound: "",
       view: defaultView,
-      isGated: false,
+      // isGated: false,
       country: "Egypt",
       city: "",
       district: "",

@@ -19,15 +19,17 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     min_price: appliedFilters.min_price || "",
     max_price: appliedFilters.max_price || "",
   }));
-  const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-  .filter(([governorate]) => governorate !== 'cities') // استبعاد "cities"
-  .map(([governorate, districts]) => ({
-    governorate,
-    districts: districts.map(district => ({
-      district,
-      
-    }))
-  }));
+  const formattedDataCitiesAndDistricts = !readonly
+  ? Object.entries(citiesAndDistricts)
+      .filter(([governorate]) => governorate !== 'cities') //  "discard cities"
+      .map(([governorate, districts]) => ({
+        governorate,
+        districts: districts.map(district => ({
+          district
+        }))
+      }))
+  : [];
+
 
 
 

@@ -49,7 +49,7 @@ export default function AddUnitModal({
     purpose: unitData?.purpose || "",
     project: unitData?.project || "",
     view: unitData?.view || "",
-    isGated: unitData?.isGated || false,
+    // isGated: unitData?.isGated || false,
     city: unitData?.city || "",
     district: unitData?.district || "",
     developer: unitData?.developer || "",
