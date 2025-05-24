@@ -23,7 +23,6 @@ export default function BasicDetailsStep({
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const ar = Cookies.get("lang");
-  const [availablePhases, setAvailablePhases] = useState([]);
   console.log("dataProject",dataProject)
   
   const printLocationDetails = async (city, district) => {
@@ -120,7 +119,6 @@ export default function BasicDetailsStep({
       const selectedProject = dataProject.find(
         (p) => p.project_name === value
       );
-      setAvailablePhases(selectedProject?.phases || []);
     }
   };
 
@@ -131,7 +129,9 @@ export default function BasicDetailsStep({
     // Update selected project in the form
     updateFormData({ project: newCompound.name });
   };
-
+console.log("dataProject",dataProject)
+const phases = dataProject.filter(project => project.project_name === formData.project)
+console.log("phases",phases)
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
@@ -373,22 +373,26 @@ export default function BasicDetailsStep({
             name="phase"
             value={formData.phase || ""}
             onChange={handleChange}
-            required
+          
             disabled={!formData.project}
-            className="block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
+              invalidFields.includes("phase")
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            }`}
           >
             {!formData.project ? (
               <option value="" disabled>
                 {t.formLabels?.projectFirst || "Select project first"}
               </option>
-            ) : availablePhases.length === 0 ? (
+            ) : phases[0]?.phases?.length === 0 ? (
               <option value="" disabled>
                 {t.basicDetails.noPhases || "No phases in this project"}
               </option>
             ) : (
               <>
-                <option value="">{t.basicDetails.selectPhase || "Select Phase"}</option>
-                {availablePhases.map((phase, idx) => (
+                <option value={""}>{ formData.phase ? formData.phase : "select phase"}</option>
+                {phases[0]?.phases?.map((phase, idx) => (
                   <option key={phase.name + idx} value={phase.name}>
                     {phase.name}
                   </option>

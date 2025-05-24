@@ -49,6 +49,7 @@ export default function AddUnitModal({
     purpose: unitData?.purpose || "",
     project: unitData?.project || "",
     view: unitData?.view || "",
+    phase: unitData?.phase || "",
     // isGated: unitData?.isGated || false,
     city: unitData?.city || "",
     district: unitData?.district || "",
@@ -69,6 +70,7 @@ export default function AddUnitModal({
     code: unitData?.code || "",
     model: unitData?.model || "",
   }));
+
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
     downPayment: unitData?.downPayment || "",
@@ -129,6 +131,7 @@ export default function AddUnitModal({
         "roomsCount",
         "bathroomCount",
         "district",
+        "phase",
       ];
       const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
       const sanitizedData = { ...formData };
