@@ -2,7 +2,7 @@
 import { useI18n } from "@/context/translate-api";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
-import { Eye } from "lucide-react";
+import { Eye, UniversityIcon } from "lucide-react";
 // import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
@@ -20,6 +20,35 @@ export default function Uni({ unit }) {
       </div>
 
       <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
+
+      {/* <div className="flex flex-wrap gap-4 mt-2 mb-4">
+        
+        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
+          <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path d="M3 13h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16" />
+          </svg>
+          <span className="text-xs text-gray-500">Project:</span>
+          <span className="text-sm font-semibold text-primary">{unit.project || "N/A"}</span>
+        </div>
+       
+        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
+          <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4l3 3" />
+          </svg>
+          <span className="text-xs text-gray-500">District:</span>
+          <span className="text-sm font-semibold text-green-700">{unit.district || "N/A"}</span>
+        </div>
+       
+        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
+          <svg className="h-4 w-4 text-yellow-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 6v6l4 2" />
+          </svg>
+          <span className="text-xs text-gray-500">Phase:</span>
+          <span className="text-sm font-semibold text-yellow-700">{unit.phase || "N/A"}</span>
+        </div>
+      </div> */}
 
       <p className="text-sm text-gray-600">
         {unit.project}, {unit.city}
@@ -82,7 +111,7 @@ export default function Uni({ unit }) {
         )}
 
         {unit.floor !== 0 && (
-          <div className="flex items-center">
+          <div className="flex items-center gap-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-5 w-5 text-primary mr-2"
@@ -102,7 +131,7 @@ export default function Uni({ unit }) {
                 {t.unitDetails.floor}
               </span>
               <p className="font-medium text-xs">
-                <span className="font-bold">{t.unitDetails.floor}:</span>{" "}
+                {/* <span className="font-bold">{t.unitDetails.floor}:</span>{" "} */}
                 {getFloorLabel(unit.floor, t)}
               </p>
             </div>
@@ -110,31 +139,21 @@ export default function Uni({ unit }) {
         )}
 
         <div className="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-primary mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-            />
-          </svg>
-          <div>
+         
+          <div className="flex flex-row items-center gap-1">
+            <UniversityIcon className="h-5 w-5 text-primary mr-2" />
+            <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails?.finishing}
             </span>
-            <p className="font-medium text-xs">
+            <p className="font-medium text-xs whitespace-nowrap ">
               {unit.finishing ? (t.unitDetails?.finishingTypes?.[unit.finishing.toLowerCase()] || unit.finishing) : t.unitDetails?.notAvailable}
             </p>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center">
+        <div className="flex items-center gap-1">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-5 w-5 text-primary mr-2"
@@ -177,7 +196,7 @@ export default function Uni({ unit }) {
               />
             </svg>
             <div>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 whitespace-nowrap">
                 {t.basicDetails.code}
               </span>
               <p
@@ -208,7 +227,7 @@ export default function Uni({ unit }) {
               />
             </svg>
             <div>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 whitespace-nowrap">
                 {t.basicDetails.model}
               </span>
               <p
@@ -250,7 +269,7 @@ export default function Uni({ unit }) {
         )}
 
         <div className="flex flex-col items-center justify-between py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
-          <Eye className="h-6 w-6 text-primary flex-shrink-0" />
+          <Eye className="h-5 w-5 text-primary flex-shrink-0" />
           <span className="mt-1 text-sm text-gray-500">
             {t.unitDetails.view}
           </span>

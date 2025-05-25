@@ -74,7 +74,7 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
           alt={`${unitName}`}
           loading="eager"
           fill
-          objectFit="cover"
+          style={{ objectFit: "fill" }}
           className="rounded-md transition-transform duration-300 group-hover:scale-105"
         />
 
@@ -136,7 +136,7 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
                 }}
                 alt={`Unit - ${index + 1}`}
                 loading="lazy"
-                objectFit="cover"
+                style={{ objectFit: "fill" }}
               />
               {mainImageIndex === index && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
@@ -201,7 +201,7 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
                         alt={`Unit - ${index + 1}`}
                         fill
                         priority={true}
-                        objectFit="contain"
+                        style={{ objectFit: "fill" }}
                         loading="eager"
                       />
                     </div>

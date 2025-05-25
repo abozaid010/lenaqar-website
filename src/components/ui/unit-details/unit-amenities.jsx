@@ -251,7 +251,7 @@ export default function UnitAmenities({ amenities, t }) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 my-4">
       {amenities.map((amenity) => (
-        <div key={amenity} className="flex items-center">
+        <div key={amenity} className="flex items-center gap-2">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#e2dbff] flex items-center justify-center text-blue-950">
             {amenityIcons[amenity] || (
               <svg
@@ -270,7 +270,7 @@ export default function UnitAmenities({ amenities, t }) {
               </svg>
             )}
           </div>
-          <div className="ml-3">
+          <div className="">
             <p className="text-sm font-medium text-primary">
               {t?.unitDetails?.amenitiesTypes?.[amenity] || 
                 amenity
