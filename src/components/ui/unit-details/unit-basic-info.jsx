@@ -2,6 +2,7 @@
 import { useI18n } from "@/context/translate-api";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
+import { Eye } from "lucide-react";
 // import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
@@ -248,29 +249,12 @@ export default function Uni({ unit }) {
           </div>
         )}
 
-        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-            />
-          </svg>
-       
-          <p className="font-medium min-w-[80px] whitespace-normal min-h-20 max-w-130 text-center">
+        <div className="flex flex-col items-center justify-between py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
+          <Eye className="h-6 w-6 text-primary flex-shrink-0" />
+          <span className="mt-1 text-sm text-gray-500">
+            {t.unitDetails.view}
+          </span>
+          <p className="font-medium min-w-[80px] text-center break-words">
             {unit.view ? (t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view) : t.unitDetails?.notAvailable}
           </p>
         </div>
