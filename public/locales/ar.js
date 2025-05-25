@@ -208,8 +208,14 @@ export default {
       "missingRequirement": "متطلب مفقود",
       "blocked": "محظور",
       "print": "طباعه",
-      "onGoingConversion": "محادثه جاريه"
+      "onGoingConversion": "محادثه جاريه",
+      "qualifiedLead": "موجه للشراء",
+      "noAction": "لا يوجد إجراء",
+      "allActions": "كل الإجراءات",
+
+
     },
+    
     "datePicker": {
       "startDate": "تاريخ البداية",
       "endDate": "تاريخ النهاية",

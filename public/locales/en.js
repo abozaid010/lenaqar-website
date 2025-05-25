@@ -209,8 +209,11 @@ export default {
       "blocked": "blocked",
       "print": "print",
       "onGoingConversion": "On Going Conversion",
-
+      "qualifiedLead": "Qualified Lead",
+      "noAction": "No Action",
+      "allActions": "All Actions",
     },
+
     "datePicker": {
       "startDate": "Start Date",
       "endDate": "End Date",

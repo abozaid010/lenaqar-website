@@ -137,7 +137,6 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   const [animatedBars, setAnimatedBars] = useState([]);
   const [chartData, setChartData] = useState([]);
 
-
   // List of all possible actions (snake_case, matching your new data keys)
   const ACTION_KEYS = [
     "make_a_call",
@@ -153,7 +152,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   ];
 
   // Map action keys to display labels (add translations as needed)
-  const ACTION_LABELS = {
+  const ACTION_LABELS = useMemo(() => ({
     make_a_call: t?.dashboardFilter?.actions?.makeCall || "Make a call",
     office_visit: t?.dashboardFilter?.actions?.officeVisit || "Office visit",
     property_view: t?.dashboardFilter?.actions?.propertyView || "Property view",
@@ -164,7 +163,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     blocked: t?.dashboardFilter?.actions?.blocked || "Blocked",
     no_action: t?.dashboardFilter?.actions?.noAction || "No Action",
     qualified_lead: t?.dashboardFilter?.actions?.qualifiedLead || "Qualified Lead"
-  };
+  }), [t]);
 
   useEffect(() => {
     if (!Array.isArray(datamonth) || datamonth.length === 0) {
@@ -192,7 +191,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [datamonth]);
+  }, [datamonth, ACTION_LABELS]);
 
   // Find min/max for Y axis
   const yMax = Math.max(...chartData.map(d => d.frequency), 2);
@@ -334,7 +333,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
 
           <Bar
             dataKey="frequency"
-            name="All Actions"
+            name={t?.dashboardFilter?.actions?.allActions || "All Actions"}
             barSize={30}
             shape={<CustomBar />}
             legendType="none"

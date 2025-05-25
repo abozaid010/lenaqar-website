@@ -16,6 +16,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const { t } = useI18n();
   // const client_id = Cookies().get("client_id");
   console.log(userId)
+  console.log(state.message)
   const[formData, setFormData] = useState({
     client_message: "",
     user_id: userId,
