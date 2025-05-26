@@ -4,6 +4,15 @@ import { Plus, Trash2Icon } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import { formatPrice } from "@/utils/formatters";
 
+const convertArabicToEnglishNumbers = (input) => {
+  if (typeof input !== "string") return input;
+  const arabicToEnglish = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+  };
+  return input.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+};
+
 export default function SaleDetailsStep({
   formData,
   updateFormData,
@@ -17,10 +26,11 @@ export default function SaleDetailsStep({
     const { name, value, dataset } = e.target;
 
     if (dataset.formatPrice === "true") {
-      const rawValue = value.replace(/\D/g, "");
+      const englishValue = convertArabicToEnglishNumbers(value);
+      const rawValue = englishValue.replace(/\D/g, "");
       updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
     } else {
-      updateFormData({ [name]: value });
+      updateFormData({ [name]: convertArabicToEnglishNumbers(value) });
     }
 
     if (invalidFields.includes(name)) {
@@ -44,7 +54,8 @@ export default function SaleDetailsStep({
   };
 
   const updatePaymentPlan = (index, field, value) => {
-    const rawValue = value.replace(/\D/g, "");
+    const englishValue = convertArabicToEnglishNumbers(value);
+    const rawValue = englishValue.replace(/\D/g, "");
     const updatedPlans = [...formData.paymentPlans];
     updatedPlans[index] = {
       ...updatedPlans[index],
@@ -72,7 +83,10 @@ export default function SaleDetailsStep({
         {t.saleDetails.financialDetails}
       </h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
+      <div
+        className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4"
+        dir={isRTL ? "rtl" : "ltr"}
+      >
         {/* Total Price */}
         <div className="relative">
           <label
@@ -99,7 +113,7 @@ export default function SaleDetailsStep({
             }`}
           />
           <span
-            className={`absolute bottom-1 ${isRTL ? "left-1.5" : "right-1.5"} text-gray-400`}
+            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "left-1.5"} text-gray-400`}
           >
             EGP
           </span>
@@ -146,7 +160,7 @@ export default function SaleDetailsStep({
             className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
           />
           <span
-            className={`absolute bottom-1 ${isRTL ? "left-1.5" : "right-1.5"} text-gray-400`}
+            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "right-1.5"} text-gray-400`}
           >
             EGP
           </span>
@@ -184,7 +198,7 @@ export default function SaleDetailsStep({
                       {t.saleDetails.years}
                     </label>
                     <input
-                      type="number"
+                      type="text"
                       value={plan.years}
                       required
                       onChange={(e) =>

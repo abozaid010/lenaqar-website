@@ -87,6 +87,25 @@ export default function BasicDetailsStep({
     let updatedValue;
     if (type === "checkbox") {
       updatedValue = checked;
+    } else if (
+      [
+        "roomsCount",
+        "bathroomCount",
+        "floor",
+        "landArea",
+        "gardenSize",
+        "garageArea",
+        "code",
+        "model"
+      ].includes(name)
+    ) {
+      // تحويل أي أرقام هندية إلى إنجليزية دائماً
+      const arabicToEnglish = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      };
+      const convertedValue = value.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+      updatedValue = convertedValue;
     } else if (dataset.formatNumber === "true") {
       // Convert Arabic/Indian numerals to English numerals
       const arabicToEnglish = {
@@ -282,7 +301,7 @@ export default function BasicDetailsStep({
               }`}
             >
               <option value="">{t.basicDetails.selectCity}</option>
-              {citiesAndDistricts?.map((gov) => (
+              {citiesAndDistricts?.sort((a, b) => a.governorate.localeCompare(b.governorate)).map((gov) => (
                 <option key={gov.governorate} value={gov.governorate}>
                   {gov.governorate}
                 </option>
@@ -322,7 +341,8 @@ export default function BasicDetailsStep({
             {formData?.city &&
               citiesAndDistricts
                 ?.find((gov) => gov.governorate === formData.city)
-                ?.districts.map((dist) => (
+                ?.districts.sort((a, b) => a.district.localeCompare(b.district))
+                .map((dist) => (
                   <option key={dist.district} value={dist.district}>
                     {dist.district}
                   </option>
@@ -376,7 +396,7 @@ export default function BasicDetailsStep({
                 </option>
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
-                  dataProject.map((project) => (
+                  dataProject.sort((a, b) => a.project_name.localeCompare(b.project_name)).map((project) => (
                     <option key={project.project_name} value={project.project_name}>
                       {project.project_name}
                     </option>
@@ -438,7 +458,7 @@ export default function BasicDetailsStep({
             ) : (
               <>
                 <option value={""}>{ formData.phase ? formData.phase : "select phase"}</option>
-                {phases[0]?.phases?.map((phase, idx) => (
+                {phases[0]?.phases?.sort((a, b) => a.name.localeCompare(b.name)).map((phase, idx) => (
                   <option key={phase.name + idx} value={phase.name}>
                     {phase.name}
                   </option>
@@ -510,17 +530,23 @@ export default function BasicDetailsStep({
               }`}
             >
               <option value="">{t.basicDetails.selectView}</option>
-              <option value="park">{t.basicDetails.views.park}</option>
-              <option value="street">{t.basicDetails.views.street}</option>
-              <option value="lagoon">{t.basicDetails.views.lagoon}</option>
-              <option value="sea">{t.basicDetails.views.sea}</option>
-              <option value="city">{t.basicDetails.views.city}</option>
-              <option value="river">{t.basicDetails.views.river}</option>
-              <option value="pool">{t.basicDetails.views.pool}</option>
-              <option value="golf">{t.basicDetails.views.golf}</option>
-              <option value="garden">{t.basicDetails.views.garden}</option>
-              <option value="open area">{t.basicDetails.views.openArea}</option>
-              <option value="mountain">{t.basicDetails.views.mountain}</option>
+              {[
+                { value: "park", label: t.basicDetails.views.park },
+                { value: "street", label: t.basicDetails.views.street },
+                { value: "lagoon", label: t.basicDetails.views.lagoon },
+                { value: "sea", label: t.basicDetails.views.sea },
+                { value: "city", label: t.basicDetails.views.city },
+                { value: "river", label: t.basicDetails.views.river },
+                { value: "pool", label: t.basicDetails.views.pool },
+                { value: "golf", label: t.basicDetails.views.golf },
+                { value: "garden", label: t.basicDetails.views.garden },
+                { value: "open area", label: t.basicDetails.views.openArea },
+                { value: "mountain", label: t.basicDetails.views.mountain }
+              ].sort((a, b) => a.label.localeCompare(b.label)).map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

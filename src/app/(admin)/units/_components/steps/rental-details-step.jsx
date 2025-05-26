@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useI18n } from "@/context/translate-api";
 import { formatPrice } from "@/utils/formatters";
+
 const availableAmenities = [
   "wifi",
   "dryer",
@@ -20,6 +21,15 @@ const availableAmenities = [
   "smoke_alarm",
   "co_alarm",
 ];
+
+const convertArabicToEnglishNumbers = (input) => {
+  if (typeof input !== "string") return input;
+  const arabicToEnglish = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+  };
+  return input.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+};
 
 export default function RentalDetailsStep({ formData, updateFormData }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
@@ -49,15 +59,17 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         updateFormData({ [name]: checked });
       }
     } else if (dataset.formatPrice === "true") {
-      const rawValue = value.replace(/\D/g, "");
+      const englishValue = convertArabicToEnglishNumbers(value);
+      const rawValue = englishValue.replace(/\D/g, "");
       updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
     } else {
-      updateFormData({ [name]: value });
+      updateFormData({ [name]: convertArabicToEnglishNumbers(value) });
     }
   };
 
   const handlePriceChange = (durationType, field, value) => {
-    const rawValue = value.replace(/\D/g, "");
+    const englishValue = convertArabicToEnglishNumbers(value);
+    const rawValue = englishValue.replace(/\D/g, "");
     updateFormData({
       rentDurationType: {
         ...formData.rentDurationType,
