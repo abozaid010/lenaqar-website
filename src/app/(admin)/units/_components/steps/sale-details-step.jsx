@@ -113,7 +113,7 @@ export default function SaleDetailsStep({
             }`}
           />
           <span
-            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "left-1.5"} text-gray-400`}
+            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "right-1.5"} text-gray-400`}
           >
             EGP
           </span>
