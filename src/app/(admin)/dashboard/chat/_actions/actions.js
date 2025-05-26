@@ -22,7 +22,7 @@ export async function sendNewMessage(prevState, formData) {
 
         return {
             success: true,
-            message: response.data.data.message,
+            message: response?.data?.data?.message || payload.client_message ,
             timestamp: timeStamp
         };
     } catch (error) {

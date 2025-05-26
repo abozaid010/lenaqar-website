@@ -14,12 +14,13 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const [state, action, pending] = useActionState(sendNewMessage, initialState);
   const [message, setMessage] = useState("");
   const { t } = useI18n();
-  // const client_id = Cookies().get("client_id");
+  const client_id = Cookies.get("client_id");
   console.log(userId)
+  console.log(state.message)
   const[formData, setFormData] = useState({
     client_message: "",
     user_id: userId,
-    client_id: "ai",
+    // client_id: client_id,
     platform: "website",
     source: "human"
   });
@@ -41,7 +42,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   return (
     <form className="bg-white h-14 px-2 flex gap-2 items-center justify-center shadow-xl rounded-b-md" action={action}>
       <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name="client_id" value="ai" />
+      <input type="hidden" name="client_id" value={client_id} />
 
       <input
         type="text"

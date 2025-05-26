@@ -137,7 +137,6 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   const [animatedBars, setAnimatedBars] = useState([]);
   const [chartData, setChartData] = useState([]);
 
-
   // List of all possible actions (snake_case, matching your new data keys)
   const ACTION_KEYS = [
     "make_a_call",
@@ -192,7 +191,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [datamonth]);
+  }, [datamonth, t]);
 
   // Find min/max for Y axis
   const yMax = Math.max(...chartData.map(d => d.frequency), 2);
@@ -334,7 +333,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
 
           <Bar
             dataKey="frequency"
-            name="All Actions"
+            name={t?.dashboardFilter?.actions?.allActions || "All Actions"}
             barSize={30}
             shape={<CustomBar />}
             legendType="none"

@@ -88,7 +88,13 @@ export default function BasicDetailsStep({
     if (type === "checkbox") {
       updatedValue = checked;
     } else if (dataset.formatNumber === "true") {
-      const rawValue = value.replace(/\D/g, "");
+      // Convert Arabic/Indian numerals to English numerals
+      const arabicToEnglish = {
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+      };
+      const convertedValue = value.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+      const rawValue = convertedValue.replace(/\D/g, "");
       updatedValue = Number(rawValue);
     } else {
       updatedValue = value;
