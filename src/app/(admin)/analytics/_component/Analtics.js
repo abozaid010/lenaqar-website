@@ -152,7 +152,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
   ];
 
   // Map action keys to display labels (add translations as needed)
-  const ACTION_LABELS = useMemo(() => ({
+  const ACTION_LABELS = {
     make_a_call: t?.dashboardFilter?.actions?.makeCall || "Make a call",
     office_visit: t?.dashboardFilter?.actions?.officeVisit || "Office visit",
     property_view: t?.dashboardFilter?.actions?.propertyView || "Property view",
@@ -163,7 +163,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     blocked: t?.dashboardFilter?.actions?.blocked || "Blocked",
     no_action: t?.dashboardFilter?.actions?.noAction || "No Action",
     qualified_lead: t?.dashboardFilter?.actions?.qualifiedLead || "Qualified Lead"
-  }), [t]);
+  };
 
   useEffect(() => {
     if (!Array.isArray(datamonth) || datamonth.length === 0) {
@@ -191,7 +191,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
     }, 100);
 
     return () => clearTimeout(timer);
-  }, [datamonth, ACTION_LABELS]);
+  }, [datamonth, t]);
 
   // Find min/max for Y axis
   const yMax = Math.max(...chartData.map(d => d.frequency), 2);

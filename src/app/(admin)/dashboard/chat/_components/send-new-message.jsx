@@ -20,7 +20,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const[formData, setFormData] = useState({
     client_message: "",
     user_id: userId,
-    client_id: client_id,
+    // client_id: client_id,
     platform: "website",
     source: "human"
   });
