@@ -191,7 +191,7 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
                     key={index}
                     className="flex items-center justify-center"
                   >
-                    <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto">
+                    <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto flex items-center justify-center">
                       <Image
                         src={image.url || "/images/defaultImage.jpg"}
                         onError={(e) => {
@@ -199,10 +199,12 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
                           e.currentTarget.onerror = null;
                         }}
                         alt={`Unit - ${index + 1}`}
-                        fill
+                        width={1200}
+                        height={800}
                         priority={true}
-                        style={{ objectFit: "fill" }}
+                        style={{ objectFit: "contain" }}
                         loading="eager"
+                        className="max-h-[80vh] w-auto"
                       />
                     </div>
                   </SwiperSlide>

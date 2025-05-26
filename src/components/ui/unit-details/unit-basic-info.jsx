@@ -2,7 +2,7 @@
 import { useI18n } from "@/context/translate-api";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
-import { Eye, UniversityIcon } from "lucide-react";
+import { Eye, UniversityIcon, Calendar, Layers, Building2, Paintbrush, Package } from "lucide-react";
 // import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
@@ -51,7 +51,7 @@ export default function Uni({ unit }) {
       </div> */}
 
       <p className="text-sm text-gray-600">
-        {unit.project}, {unit.city}
+        {unit.project}, {unit.city} , {unit.phase}
       </p>
 
       <UnitPricing unit={unit} />
@@ -59,20 +59,7 @@ export default function Uni({ unit }) {
       {/* Additional Features */}
       <div className="mt-5 grid grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-2 max-w-lg">
         <div className="flex items-center">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-primary mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-            />
-          </svg>
+          <Building2 className="h-5 w-5 text-primary " />
           <div>
             <span className="text-xs text-gray-500">
               {t.unitDetails?.developer}
@@ -84,21 +71,9 @@ export default function Uni({ unit }) {
         </div>
 
         {unit.purpose === "sell" && (
-          <div className="flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-primary mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
+          <div className="flex items-center gap-1">
+          
+            <p><Calendar className="h-5 w-5 text-primary mr-2" /></p>
             <div>
               <span className="text-gray-500 text-xs line-clamp-1">
                 {t.unitDetails?.deliveryDate}
@@ -112,20 +87,7 @@ export default function Uni({ unit }) {
 
         {unit.floor !== 0 && (
           <div className="flex items-center gap-1">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-primary mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-              />
-            </svg>
+            <Layers className="h-5 w-5 text-primary mr-2" />
             <div>
               <span className="text-xs line-clamp-1 text-gray-500">
                 {t.unitDetails.floor}
@@ -141,7 +103,7 @@ export default function Uni({ unit }) {
         <div className="flex items-center">
          
           <div className="flex flex-row items-center gap-1">
-            <UniversityIcon className="h-5 w-5 text-primary mr-2" />
+            <Paintbrush className="h-5 w-5 text-primary " />
             <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails?.finishing}
@@ -154,20 +116,7 @@ export default function Uni({ unit }) {
         </div>
 
         <div className="flex items-center gap-1">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 text-primary mr-2"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7m-6 0H9m6 0l-3-3m3 3l3-3m-3 3l-3-3m0 0L9 4"
-            />
-          </svg>
+          <Package className="h-5 w-5 text-primary " />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails.finishing}
