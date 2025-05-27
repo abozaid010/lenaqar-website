@@ -2,7 +2,15 @@
 import { useI18n } from "@/context/translate-api";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
-import { Eye, UniversityIcon, Calendar, Layers, Building2, Paintbrush, Package } from "lucide-react";
+import {
+  Eye,
+  UniversityIcon,
+  Calendar,
+  Layers,
+  Building2,
+  Paintbrush,
+  Package,
+} from "lucide-react";
 // import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
@@ -14,8 +22,9 @@ export default function Uni({ unit }) {
           {t.purpose?.[unit.purpose] || unit.purpose}
         </span>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {t.unitDetails?.buildingTypesMap?.[unit.buildingType.toLowerCase()] || 
-            unit.buildingType.charAt(0).toUpperCase() + unit.buildingType.slice(1)}
+          {t.unitDetails?.buildingTypesMap?.[unit.buildingType.toLowerCase()] ||
+            unit.buildingType.charAt(0).toUpperCase() +
+              unit.buildingType.slice(1)}
         </span>
       </div>
 
@@ -58,22 +67,25 @@ export default function Uni({ unit }) {
 
       {/* Additional Features */}
       <div className="mt-5 grid grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-2 max-w-lg">
-        <div className="flex items-center">
-          <Building2 className="h-5 w-5 text-primary " />
+        <div className="flex items-center gap-2">
+          <Building2 className="h-5 w-5 text-primary" />
           <div>
             <span className="text-xs text-gray-500">
               {t.unitDetails?.developer}
             </span>
             <p className="font-medium text-xs">
-              {unit.developer ? t.developerNames?.[unit.developer] || unit.developer : t.unitDetails.notAvailable}
+              {unit.developer
+                ? t.developerNames?.[unit.developer] || unit.developer
+                : t.unitDetails.notAvailable}
             </p>
           </div>
         </div>
 
         {unit.purpose === "sell" && (
-          <div className="flex items-center gap-1">
-          
-            <p><Calendar className="h-5 w-5 text-primary mr-2" /></p>
+          <div className="flex items-center gap-2">
+            <p>
+              <Calendar className="h-5 w-5 text-primary" />
+            </p>
             <div>
               <span className="text-gray-500 text-xs line-clamp-1">
                 {t.unitDetails?.deliveryDate}
@@ -86,14 +98,13 @@ export default function Uni({ unit }) {
         )}
 
         {unit.floor !== 0 && (
-          <div className="flex items-center gap-1">
-            <Layers className="h-5 w-5 text-primary mr-2" />
+          <div className="flex items-center gap-2">
+            <Layers className="h-5 w-5 text-primary" />
             <div>
               <span className="text-xs line-clamp-1 text-gray-500">
                 {t.unitDetails.floor}
               </span>
               <p className="font-medium text-xs">
-                {/* <span className="font-bold">{t.unitDetails.floor}:</span>{" "} */}
                 {getFloorLabel(unit.floor, t)}
               </p>
             </div>
@@ -101,38 +112,45 @@ export default function Uni({ unit }) {
         )}
 
         <div className="flex items-center">
-         
-          <div className="flex flex-row items-center gap-1">
-            <Paintbrush className="h-5 w-5 text-primary " />
+          <div className="flex flex-row items-center gap-2">
+            <Paintbrush className="h-5 w-5 text-primary" />
             <div>
-            <span className="text-xs line-clamp-1 text-gray-500">
-              {t.unitDetails?.finishing}
-            </span>
-            <p className="font-medium text-xs whitespace-nowrap ">
-              {unit.finishing ? (t.unitDetails?.finishingTypes?.[unit.finishing.toLowerCase()] || unit.finishing) : t.unitDetails?.notAvailable}
-            </p>
+              <span className="text-xs line-clamp-1 text-gray-500">
+                {t.unitDetails?.finishing}
+              </span>
+              <p className="font-medium text-xs whitespace-nowrap ">
+                {unit.finishing
+                  ? t.unitDetails?.finishingTypes?.[
+                      unit.finishing.toLowerCase()
+                    ] || unit.finishing
+                  : t.unitDetails?.notAvailable}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <Package className="h-5 w-5 text-primary " />
+        <div className="flex items-center gap-2">
+          <Package className="h-5 w-5 text-primary" />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails.finishing}
             </span>
             <p className="font-medium text-xs whitespace-nowrap ">
-              {unit.furnishing ? (t.unitDetails?.furnishingTypes?.[unit.furnishing.toLowerCase()] || unit.furnishing) : t.unitDetails?.notAvailable}
+              {unit.furnishing
+                ? t.unitDetails?.furnishingTypes?.[
+                    unit.furnishing.toLowerCase()
+                  ] || unit.furnishing
+                : t.unitDetails?.notAvailable}
             </p>
           </div>
         </div>
 
         {unit.code && (
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {/* Hashtag icon for Unit Code */}
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-primary mr-2"
+              className="h-6 w-6 text-primary"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -223,7 +241,9 @@ export default function Uni({ unit }) {
             {t.unitDetails.view}
           </span>
           <p className="font-medium min-w-[80px] text-center break-words">
-            {unit.view ? (t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view) : t.unitDetails?.notAvailable}
+            {unit.view
+              ? t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view
+              : t.unitDetails?.notAvailable}
           </p>
         </div>
 
@@ -265,9 +285,7 @@ export default function Uni({ unit }) {
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
-          <span className="mt-1 text-sm text-gray-500">
-            {t.bathrooms}
-          </span>
+          <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
           <p className="font-medium min-w-[80px] text-center">
             {unit.bathroomCount}
           </p>

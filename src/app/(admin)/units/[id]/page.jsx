@@ -1,4 +1,3 @@
-
 import {
   fetchCitisAndProjects,
   fetchcombounds,
@@ -32,8 +31,7 @@ const Page = async ({ params }) => {
 
   const clientId = cookieStore.get("client_id")?.value;
 
-
-  const [comboundata, developers,citiesAndDistricts] = await Promise.all([
+  const [comboundata, developers, citiesAndDistricts] = await Promise.all([
     fetchcombounds(),
     fetchDevelopers(),
     fetchCitisAndProjects(),
@@ -76,7 +74,7 @@ const Page = async ({ params }) => {
         <div className="flex flex-col items-center justify-center h-full">
           <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>
           <p className="text-gray-600 mt-2">
-            You do not have permission to view this chat.
+            You do not have permission to view this unit.
           </p>
           <Link
             href="/dashboard"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { compressImage } from "@/utils/imageCompression";
 import Dialog from "@/components/ui/Dialog";
@@ -9,7 +9,6 @@ import {
   addCompound,
   deleteImage,
   uploadImages,
-  getprojects,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
@@ -36,27 +35,10 @@ export default function AddCompoundDialog({
   const [uploadedImageId, setUploadedImageId] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
- 
+
   const [errors, setErrors] = useState({});
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
-  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  const [dataProject, setDataProject] = useState([]);
-
-  const getProjectByCityAndDistrict = async (city, district) => {
-    if (city && district) {
-      try {
-        setIsLoadingProjects(true);
-        const data = await getprojects(city, district);
-        setDataProject(data);
-      } catch (error) {
-        console.log(error);
-        setDataProject([]);
-      } finally {
-        setIsLoadingProjects(false);
-      }
-    }
-  };
 
   const [formData, setFormData] = useState({
     name: "",
@@ -86,11 +68,6 @@ export default function AddCompoundDialog({
         ...errors,
         [name]: null,
       });
-    }
-
-    // If district changes and city is available, fetch projects
-    if (name === "district" && formData.city && value) {
-      getProjectByCityAndDistrict(formData.city, value);
     }
   };
 
@@ -231,8 +208,8 @@ export default function AddCompoundDialog({
       };
 
       const res = await addCompound(submissionData);
-      setProjectId(res.data.id)
-      console.log(res.data.id)
+      setProjectId(res.data.id);
+
       if (res.code === 200) {
         toast.success(
           t.toasts?.compoundAdded || "Compound added successfully!"
@@ -293,20 +270,6 @@ export default function AddCompoundDialog({
       };
     });
   };
-
-  // Add this useEffect to update the form data when defaultCity or defaultDistrict change
-  useEffect(() => {
-    setFormData((prevData) => ({
-      ...prevData,
-      city: defaultCity || "",
-      district: defaultDistrict || "",
-    }));
-
-    // Fetch projects when component loads if city and district are available
-    if (defaultCity && defaultDistrict) {
-      getProjectByCityAndDistrict(defaultCity, defaultDistrict);
-    }
-  }, [defaultCity, defaultDistrict]);
 
   return (
     <>
@@ -416,7 +379,8 @@ export default function AddCompoundDialog({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.area || "Area (m²)"}
+                  {t.formLabels?.area || "Area (m²)"}{" "}
+                  <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="number"

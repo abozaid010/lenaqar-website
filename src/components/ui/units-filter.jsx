@@ -8,7 +8,15 @@ import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({ appliedFilters, developers, compounds ,clientName,clientId,readonly,citiesAndDistricts }) {
+export default function UnitsFilter({
+  appliedFilters,
+  developers,
+  compounds,
+  clientName,
+  clientId,
+  readonly,
+  citiesAndDistricts,
+}) {
   const { t } = useI18n();
   const router = useRouter();
   const [filters, setFilters] = useState(() => ({
@@ -21,30 +29,27 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     city: appliedFilters.city || "",
   }));
   const formattedDataCitiesAndDistricts = !readonly
-  ? Object.entries(citiesAndDistricts)
-      .filter(([governorate]) => governorate !== 'cities') //  "discard cities"
-      .map(([governorate, districts]) => ({
-        governorate,
-        districts: districts.map(district => ({
-          district
+    ? Object.entries(citiesAndDistricts)
+        .filter(([governorate]) => governorate !== "cities")
+        .map(([governorate, districts]) => ({
+          governorate,
+          districts: districts.map((district) => ({
+            district,
+          })),
         }))
-      }))
-  : [];
+    : [];
   const cities = citiesAndDistricts.cities;
-  console.log("cities",cities)
-
-
-
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
-  const [isPropertyTypeDropdownOpen, setIsPropertyTypeDropdownOpen] = useState(false);
+  const [isPropertyTypeDropdownOpen, setIsPropertyTypeDropdownOpen] =
+    useState(false);
   const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [tempMinPrice, setTempMinPrice] = useState(filters.min_price || "");
   const [tempMaxPrice, setTempMaxPrice] = useState(filters.max_price || "");
-  
+
   const priceDropdownRef = useRef(null);
   const developerDropdownRef = useRef(null);
   const propertyTypeDropdownRef = useRef(null);
@@ -54,8 +59,12 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
 
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
-  useOnClickOutside(developerDropdownRef, () => setIsDeveloperDropdownOpen(false));
-  useOnClickOutside(propertyTypeDropdownRef, () => setIsPropertyTypeDropdownOpen(false));
+  useOnClickOutside(developerDropdownRef, () =>
+    setIsDeveloperDropdownOpen(false)
+  );
+  useOnClickOutside(propertyTypeDropdownRef, () =>
+    setIsPropertyTypeDropdownOpen(false)
+  );
   useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
   useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
   useOnClickOutside(cityDropdownRef, () => setIsCityDropdownOpen(false));
@@ -214,8 +223,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     if (!filters.property_type || filters.property_type === "all") {
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
-    const type = buildingTypes.find(t => t.value === filters.property_type);
-    return type ? type.label : t.unitsFilter.allPropertyTypes || "All Property Types";
+    const type = buildingTypes.find((t) => t.value === filters.property_type);
+    return type
+      ? type.label
+      : t.unitsFilter.allPropertyTypes || "All Property Types";
   };
 
   const getSelectedPurpose = () => {
@@ -254,7 +265,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     <div className=" ">
       <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
         {/* Cities Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={cityDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={cityDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
@@ -276,10 +290,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               ></path>
             </svg>
           </button>
-          
+
           {isCityDropdownOpen && (
             <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div 
+              <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("city", "all");
@@ -289,8 +303,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                 {t.unitsFilter.allCities || "All Cities"}
               </div>
               {cities.map((city, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                   onClick={() => {
                     handleFilterChange("city", city);
@@ -305,7 +319,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Developers Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={developerDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={developerDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px]  bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
@@ -327,10 +344,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               ></path>
             </svg>
           </button>
-          
+
           {isDeveloperDropdownOpen && (
             <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div 
+              <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("developer_name", "all");
@@ -340,8 +357,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                 {t.unitsFilter.allDevelopers}
               </div>
               {developersSet.map((d, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                   onClick={() => {
                     handleFilterChange("developer_name", d);
@@ -356,7 +373,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Compounds Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={projectDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={projectDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
@@ -378,10 +398,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               ></path>
             </svg>
           </button>
-          
+
           {isProjectDropdownOpen && (
             <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div 
+              <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("project_name", "all");
@@ -391,8 +411,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                 {t.unitsFilter.allCompounds}
               </div>
               {compounds.map((c, idx) => (
-                <div 
-                  key={idx} 
+                <div
+                  key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                   onClick={() => {
                     handleFilterChange("project_name", c.name);
@@ -407,7 +427,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Purpose Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={purposeDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={purposeDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
@@ -429,10 +452,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               ></path>
             </svg>
           </button>
-          
+
           {isPurposeDropdownOpen && (
             <div className="absolute z-48 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-56 overflow-y-auto">
-              <div 
+              <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("purpose", "all");
@@ -442,8 +465,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                 {t.unitsFilter.allPurposes}
               </div>
               {EnumPropertyIntent.map((purpose) => (
-                <div 
-                  key={purpose} 
+                <div
+                  key={purpose}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                   onClick={() => {
                     handleFilterChange("purpose", purpose);
@@ -458,11 +481,16 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Property Type Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={propertyTypeDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={propertyTypeDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)}
+            onClick={() =>
+              setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)
+            }
           >
             <span className="truncate">{getSelectedPropertyType()}</span>
             <svg
@@ -480,10 +508,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
               ></path>
             </svg>
           </button>
-          
+
           {isPropertyTypeDropdownOpen && (
             <div className="absolute z-47 mt-1 w-full md:min-w-[200px] bg-[#FFFFFF] rounded-[5px] shadow-2xl py-1 max-h-72 overflow-y-auto">
-              <div 
+              <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                 onClick={() => {
                   handleFilterChange("property_type", "all");
@@ -493,8 +521,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
                 {t.unitsFilter.allPropertyTypes}
               </div>
               {buildingTypes.map((type) => (
-                <div 
-                  key={type.value} 
+                <div
+                  key={type.value}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
                   onClick={() => {
                     handleFilterChange("property_type", type.value);
@@ -509,7 +537,10 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         </div>
 
         {/* Price Filter Dropdown */}
-        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={priceDropdownRef}>
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={priceDropdownRef}
+        >
           <button
             type="button"
             className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
@@ -554,7 +585,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
 
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">
-                    {t.unitsFilter.max}  EGP
+                    {t.unitsFilter.max} EGP
                   </label>
                   <input
                     type="text"
@@ -580,24 +611,26 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
             </div>
           )}
         </div>
-        
-       { !readonly && <div className="w-full md:w-auto flex-shrink-0">
-          <AddUnitButton
-            clientId={clientId}
-            clientName={clientName}
-            compounds={compounds}
-            developers={developersSet}
-            citiesAndDistricts={formattedDataCitiesAndDistricts}
-            className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
-          />
-        </div>}
+
+        {!readonly && (
+          <div className="w-full md:w-auto flex-shrink-0">
+            <AddUnitButton
+              clientId={clientId}
+              clientName={clientName}
+              compounds={compounds}
+              developers={developersSet}
+              citiesAndDistricts={formattedDataCitiesAndDistricts}
+              className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
+            />
+          </div>
+        )}
       </div>
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
         <div className="flex flex-wrap items-center gap-2 mt-4 ">
           <span className="text-xs font-medium text-gray-700">
-             {t.unitsFilter.activeFilter}
+            {t.unitsFilter.activeFilter}
           </span>
 
           {getActiveFilters().map((filter, index) => (
@@ -641,7 +674,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
             className="ml-1 text-primary hover:text-primary-dark text-xs font-medium"
             onClick={handleRemoveAllFilters}
           >
-           {t.unitsFilter.clearall}
+            {t.unitsFilter.clearall}
           </button>
         </div>
       )}

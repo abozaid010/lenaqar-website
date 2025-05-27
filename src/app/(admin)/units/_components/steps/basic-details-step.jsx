@@ -6,7 +6,6 @@ import AddCompoundDialog from "../add-compound-dialog";
 import { useState, useEffect } from "react";
 import { getprojects } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
-import { v4 as uuidv4 } from 'uuid';
 import AddPhaseDialog from "../AddPhseDilog";
 
 export default function BasicDetailsStep({
@@ -28,8 +27,6 @@ export default function BasicDetailsStep({
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
   const [refreshPhases, setRefreshPhases] = useState(false);
   const ar = Cookies.get("lang");
-  console.log("dataProject",dataProject)
-  console.log("projectId",projectId)
 
   const printLocationDetails = async (city, district) => {
     if (city && district) {
@@ -44,13 +41,6 @@ export default function BasicDetailsStep({
       }
     }
   };
-
-  // Load projects when component mounts or when returning from step 2
-  useEffect(() => {
-    if (formData.city && formData.district) {
-      printLocationDetails(formData.city, formData.district);
-    }
-  }, []);
 
   // Update available compounds when district changes
   useEffect(() => {
@@ -83,6 +73,18 @@ export default function BasicDetailsStep({
 
   const handleChange = (e) => {
     const { name, value, type, checked, dataset } = e.target;
+    const arabicToEnglish = {
+      "٠": "0",
+      "١": "1",
+      "٢": "2",
+      "٣": "3",
+      "٤": "4",
+      "٥": "5",
+      "٦": "6",
+      "٧": "7",
+      "٨": "8",
+      "٩": "9",
+    };
 
     let updatedValue;
     if (type === "checkbox") {
@@ -96,23 +98,13 @@ export default function BasicDetailsStep({
         "gardenSize",
         "garageArea",
         "code",
-        "model"
+        "model",
       ].includes(name)
     ) {
-      // تحويل أي أرقام هندية إلى إنجليزية دائماً
-      const arabicToEnglish = {
-        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-      };
-      const convertedValue = value.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+      const convertedValue = value.replace(/[٠-٩]/g, (d) => arabicToEnglish[d]);
       updatedValue = convertedValue;
     } else if (dataset.formatNumber === "true") {
-      // Convert Arabic/Indian numerals to English numerals
-      const arabicToEnglish = {
-        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-        '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-      };
-      const convertedValue = value.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
+      const convertedValue = value.replace(/[٠-٩]/g, (d) => arabicToEnglish[d]);
       const rawValue = convertedValue.replace(/\D/g, "");
       updatedValue = Number(rawValue);
     } else {
@@ -147,9 +139,8 @@ export default function BasicDetailsStep({
     }
 
     if (name === "project") {
-      const selectedProject = dataProject.find(
-        (p) => p.project_name === value
-      );
+      // reset phase when project changes
+      updateFormData({ phase: "" });
     }
   };
 
@@ -165,11 +156,11 @@ export default function BasicDetailsStep({
     if (phases[0]) {
       const updatedPhases = [...phases[0].phases, newPhase];
       const updatedProject = { ...phases[0], phases: updatedPhases };
-      const updatedDataProject = dataProject.map(p => 
+      const updatedDataProject = dataProject.map((p) =>
         p.project_name === formData.project ? updatedProject : p
       );
       setDataProject(updatedDataProject);
-      setRefreshPhases(prev => !prev);
+      setRefreshPhases((prev) => !prev);
       // Update form with the newly added phase
       updateFormData({ phase: newPhase.name });
     } else if (projectId) {
@@ -177,17 +168,19 @@ export default function BasicDetailsStep({
       const newProjectData = {
         id: projectId,
         project_name: formData.project,
-        phases: [newPhase]
+        phases: [newPhase],
       };
       setDataProject([...dataProject, newProjectData]);
-      setRefreshPhases(prev => !prev);
+      setRefreshPhases((prev) => !prev);
       // Update form with the newly added phase
       updateFormData({ phase: newPhase.name });
     }
   };
 
-  const phases = dataProject.filter(project => project.project_name === formData.project)
-  console.log("phases",phases)
+  const phases = dataProject.filter(
+    (project) => project.project_name === formData.project
+  );
+
   return (
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
@@ -301,11 +294,13 @@ export default function BasicDetailsStep({
               }`}
             >
               <option value="">{t.basicDetails.selectCity}</option>
-              {citiesAndDistricts?.sort((a, b) => a.governorate.localeCompare(b.governorate)).map((gov) => (
-                <option key={gov.governorate} value={gov.governorate}>
-                  {gov.governorate}
-                </option>
-              ))}
+              {citiesAndDistricts
+                ?.sort((a, b) => a.governorate.localeCompare(b.governorate))
+                .map((gov) => (
+                  <option key={gov.governorate} value={gov.governorate}>
+                    {gov.governorate}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
@@ -396,11 +391,18 @@ export default function BasicDetailsStep({
                 </option>
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
-                  dataProject.sort((a, b) => a.project_name.localeCompare(b.project_name)).map((project) => (
-                    <option key={project.project_name} value={project.project_name}>
-                      {project.project_name}
-                    </option>
-                  ))
+                  dataProject
+                    .sort((a, b) =>
+                      a.project_name.localeCompare(b.project_name)
+                    )
+                    .map((project) => (
+                      <option
+                        key={project.project_name}
+                        value={project.project_name}
+                      >
+                        {project.project_name}
+                      </option>
+                    ))
                 ) : (
                   <option disabled value="">
                     No data available
@@ -423,8 +425,11 @@ export default function BasicDetailsStep({
 
         {/* Phase */}
         <div>
-          <label className="block text-sm font-medium mb-1 flex items-center justify-between">
-            <span>{t.basicDetails.selectPhase || "Select Phase"} <span className="text-red-500">*</span></span>
+          <label className="text-sm font-medium mb-1 flex items-center justify-between">
+            <span>
+              {t.basicDetails.selectPhase || "Select Phase"}{" "}
+              <span className="text-red-500">*</span>
+            </span>
             {formData.project && (
               <button
                 type="button"
@@ -437,7 +442,7 @@ export default function BasicDetailsStep({
           </label>
           <select
             name="phase"
-            value={formData.phase || ""}
+            value={formData.phase}
             onChange={handleChange}
             disabled={!formData.project}
             className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
@@ -446,31 +451,45 @@ export default function BasicDetailsStep({
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
           >
-            {console.log(phases[0]?.phases)}
-            {!formData.project ? (
-              <option value="" disabled>
+            {!formData.project && (
+              <option value="">
                 {t.formLabels?.projectFirst || "Select project first"}
               </option>
-            ) : !phases[0]?.phases || phases[0]?.phases?.length === 0 ? (
-              <option value="" disabled>
-                No phases available
-              </option>
-            ) : (
-              <>
-                <option value={""}>{ formData.phase ? formData.phase : "select phase"}</option>
-                {phases[0]?.phases?.sort((a, b) => a.name.localeCompare(b.name)).map((phase, idx) => (
-                  <option key={phase.name + idx} value={phase.name}>
-                    {phase.name}
-                  </option>
-                ))}
-              </>
             )}
+
+            {formData.project && isLoadingProjects && (
+              <option value="">
+                {t.formLabels?.loading || "Loading phases..."}
+              </option>
+            )}
+
+            {formData.project &&
+              !isLoadingProjects &&
+              (!phases[0]?.phases || phases[0]?.phases.length === 0) && (
+                <option value="">
+                  {t.formLabels?.noPhases || "No phases available"}
+                </option>
+              )}
+
+            {formData.project &&
+              !isLoadingProjects &&
+              phases[0]?.phases?.length > 0 && (
+                <>
+                  <option value="">
+                    {t.basicDetails.selectPhase || "Select phase"}
+                  </option>
+                  {phases[0].phases
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((phase, idx) => (
+                      <option key={phase.name + idx} value={phase.name}>
+                        {phase.name}
+                      </option>
+                    ))}
+                </>
+              )}
           </select>
         </div>
 
-        {/* Add Phase Dialog */}
-        {/* console.log(phases[0]) */}
-       
         <AddPhaseDialog
           isOpen={isAddPhaseDialogOpen}
           onClose={() => setIsAddPhaseDialogOpen(false)}
@@ -541,12 +560,14 @@ export default function BasicDetailsStep({
                 { value: "golf", label: t.basicDetails.views.golf },
                 { value: "garden", label: t.basicDetails.views.garden },
                 { value: "open area", label: t.basicDetails.views.openArea },
-                { value: "mountain", label: t.basicDetails.views.mountain }
-              ].sort((a, b) => a.label.localeCompare(b.label)).map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+                { value: "mountain", label: t.basicDetails.views.mountain },
+              ]
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
             </select>
           </div>
         </div>
