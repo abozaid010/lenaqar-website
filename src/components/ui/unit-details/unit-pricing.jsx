@@ -34,11 +34,11 @@ export default function UnitPricing({ unit }) {
       // Add "per" prefix based on duration
       switch (duration) {
         case "daily":
-          return getTranslation('rental.per_night', 'في الليله');
+          return getTranslation('rental.per_night', ' ');
         case "weekly":
-          return getTranslation('rental.per_week', 'في الاسبوع');
+          return getTranslation('rental.per_week', '');
         case "monthly":
-          return getTranslation('rental.per_month', 'في الشهر');
+          return getTranslation('rental.per_month', '');
         default:
           return "";
       }
@@ -120,7 +120,7 @@ export default function UnitPricing({ unit }) {
           <div className="mt-3 space-y-1">
             {unit.rentDurationType[activeDuration]?.securityDeposit > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">{getTranslation('unitDetails.unit_pricing.security_deposit', 'إيداع تأميني')}</span>
+                <span className="text-gray-600">{getTranslation('unitDetails.unit_pricing.security_deposit', ' التأمين')}</span>
                 <span className="font-medium">
                   {formatCurrency(
                     unit.rentDurationType[activeDuration]?.securityDeposit

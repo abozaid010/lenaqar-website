@@ -382,7 +382,19 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
+  "addPhase": "Add Phase",
+  "projectFirst": "Select project first",
+  "shareUnitContent": "Share Unit Content",
+  "postContent": "Post Content",
+  "clickCopy": "Click the 'Copy with Link' button to copy the text, images, and share link.",
+  "noImagesAvailable": "No images available to share.",
+  "copyWithLink": "Copy with Link",
+  "copied": "Copied!",
+  "addPhaseSuccess": "Phase added successfully!",
+  "addPhaseFailed": "Failed to add phase. Please try again.",
   formLabels: {
+   
+   
     "unitTitle": "Unit Title",
     "buildingType": "Building Type",
     "purpose": "Purpose",
@@ -804,9 +816,9 @@ export default {
         "monthly": "Monthly"
       },
       "per_duration": {
-        "daily": "per night",
-        "weekly": "per week",
-        "monthly": "per month"
+        "daily": "",
+        "weekly": "",
+        "monthly": ""
       },
       "security_deposit": "Security Deposit",
       "cleaning_fee": "Cleaning Fee",

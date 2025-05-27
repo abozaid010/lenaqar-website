@@ -144,7 +144,7 @@ const Sidebar = () => {
         </div>
 
         {/* Bottom Section */}
-        <div className="mt-auto border-t border-gray-200 pt-2 pb-4">
+        {/* <div className="mt-auto border-t border-gray-200 pt-2 pb-4">
           <button className="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 mb-1 transition-colors">
             <Moon className="h-5 w-5 mr-3" />
             <span>{t.sidebar.darkMode}</span>
@@ -152,14 +152,14 @@ const Sidebar = () => {
 
           <div className=" border-t border-gray-200 my-2"></div>
 
-          {/* <button
+          <button
             onClick={initiateLogout}
             className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <LogOut className="h-5 w-5 mr-3" />
             <span>{t.sidebar.logout}</span>
-          </button> */}
-        </div>
+          </button>
+        </div> */}
       </div>
     </>
   );

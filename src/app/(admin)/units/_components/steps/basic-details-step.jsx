@@ -436,7 +436,7 @@ export default function BasicDetailsStep({
                 onClick={() => setIsAddPhaseDialogOpen(true)}
                 className="text-blue-600 text-sm font-medium"
               >
-                + Add Phase
+               + {t.addPhase}
               </button>
             )}
           </label>
@@ -453,7 +453,7 @@ export default function BasicDetailsStep({
           >
             {!formData.project && (
               <option value="">
-                {t.formLabels?.projectFirst || "Select project first"}
+                {t?.projectFirst || "Select project firstdfas"}
               </option>
             )}
 
