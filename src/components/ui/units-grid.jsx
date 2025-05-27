@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/context/translate-api";
 
-import { Forward, ForwardIcon, MapPin, Share, Share2 } from "lucide-react";
 import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "@/components/ui/units-share-modal";
@@ -15,7 +14,7 @@ export default function UnitsGrid({ units, readonly = false }) {
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
   const { t } = useI18n();
-console.log(units)
+
   // Add a formattcer function for prices
   const formatPrice = (price) => {
     if (!price) return "Price not specified";
@@ -92,8 +91,8 @@ console.log(units)
                       className="absolute  text-[14px]  top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"
                     >
                       {" "}
-                  {t.for}{u.purpose === "rent" ? t.rent: t.sell}
-                     
+                      {t.for}
+                      {u.purpose === "rent" ? t.rent : t.sell}
                     </p>
                   </div>
                 ) : (
@@ -108,7 +107,10 @@ console.log(units)
                 </h3>
                 <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
                   {/* <MapPin className="w-4 h-4 mr-2 flex-shrink-0" /> */}
-                  <p className=" text-white font-normal text-[16px]"> {t.city} </p>
+                  <p className=" text-white font-normal text-[16px]">
+                    {" "}
+                    {t.city}{" "}
+                  </p>
                   <span className="line-clamp-1 text-[14px] font-bold">
                     {u.city || "Location not specified"}
                   </span>
@@ -116,7 +118,9 @@ console.log(units)
 
                 {/* Compound and Purpose Display */}
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
-                  <p className=" text-white text-[16px] font-normal">{t.project}</p>
+                  <p className=" text-white text-[16px] font-normal">
+                    {t.project}
+                  </p>
                   <div>
                     {u.project && (
                       <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
@@ -130,7 +134,9 @@ console.log(units)
                 <div className="text-sm flex items-center justify-between text-white">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="font-normal text-[16px]">{t.rentPrice}</div>
+                      <div className="font-normal text-[16px]">
+                        {t.rentPrice}
+                      </div>
                       <div className=" font-semibold text-[14px]">
                         {u.rentDurationType?.daily?.price
                           ? `${formatPrice(u.rentDurationType.daily.price)} EGP/day`
