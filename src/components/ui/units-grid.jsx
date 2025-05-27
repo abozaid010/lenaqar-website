@@ -15,7 +15,7 @@ export default function UnitsGrid({ units, readonly = false }) {
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
   const { t } = useI18n();
-
+console.log(units)
   // Add a formattcer function for prices
   const formatPrice = (price) => {
     if (!price) return "Price not specified";
@@ -118,9 +118,9 @@ export default function UnitsGrid({ units, readonly = false }) {
                 <div className="flex flex-wrap justify-between gap-2 mb-2">
                   <p className=" text-white text-[16px] font-normal">{t.project}</p>
                   <div>
-                    {u.compound && (
+                    {u.project && (
                       <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
-                        {u.compound}
+                        {u.project}
                       </span>
                     )}
                   </div>
