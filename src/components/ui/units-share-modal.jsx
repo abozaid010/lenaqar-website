@@ -11,6 +11,7 @@ import {
   Globe,
   Type,
 } from "lucide-react";
+import { useI18n } from "@/context/translate-api";
 
 export default function ShareModal({
   showModal,
@@ -26,7 +27,7 @@ export default function ShareModal({
   const [activeTab, setActiveTab] = useState("post");
   const [images, setImages] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const { t } = useI18n();
   useEffect(() => {
     // Extract images if available in shareData
     if (shareData && shareData.images) {
@@ -66,7 +67,7 @@ export default function ShareModal({
         <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
             <Share2 className="w-5 h-5 text-primary" />
-            Share Unit Content
+            {t.shareUnitContent}
           </h2>
           <button
             onClick={() => setShowModal(false)}
@@ -90,7 +91,7 @@ export default function ShareModal({
               }`}
             >
               <Type className="w-4 h-4" />
-              Post Content
+              {t.postContent}
             </button>
             <button
               onClick={() => setActiveTab("images")}
@@ -174,12 +175,12 @@ export default function ShareModal({
                               {copied.arabic ? (
                                 <>
                                   <Check className="w-3 h-3" />
-                                  Copied!
+                                  تم النسخ
                                 </>
                               ) : (
                                 <>
                                   <Copy className="w-3 h-3" />
-                                  Copy with Link
+                                  نسخ مع الرابط
                                 </>
                               )}
                             </button>
@@ -260,7 +261,7 @@ export default function ShareModal({
                       </div>
                     ) : (
                       <div className="text-center py-10 text-gray-500 bg-gray-50 rounded-lg">
-                        No images available to share.
+                        {t.noImagesAvailable}
                       </div>
                     )}
                   </div>
@@ -274,7 +275,7 @@ export default function ShareModal({
         <div className="bg-gray-50 px-6 py-4 rounded-b-xl">
           <div className="text-sm text-gray-500 text-center">
             {activeTab === "post"
-              ? "Click the 'Copy with Link' button to copy the text, images, and share link."
+              ? t.clickCopy
               : activeTab === "images" && images.length > 0
                 ? `${images.length} images available for this listing`
                 : "Share this listing with others"}

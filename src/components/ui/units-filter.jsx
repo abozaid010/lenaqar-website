@@ -181,6 +181,8 @@ export default function UnitsFilter({
       case "property_type":
         const propertyType = buildingTypes.find((type) => type.value === value);
         return propertyType ? propertyType.label : value;
+      case "city":
+        return t.unitsFilter.cities?.[value] || value;
       case "min_price":
       case "max_price":
         // We'll handle price range as a special case
@@ -240,7 +242,7 @@ export default function UnitsFilter({
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
-    return filters.developer_name;
+    return t.developerNames?.[filters.developer_name] || filters.developer_name;
   };
 
   const getSelectedProject = () => {
@@ -254,7 +256,7 @@ export default function UnitsFilter({
     if (!filters.city || filters.city === "all") {
       return t.unitsFilter.allCities || "All Cities";
     }
-    return filters.city;
+    return t.unitsFilter.cities?.[filters.city] || filters.city;
   };
 
   const getTranslatedDeveloperName = (name) => {
@@ -628,52 +630,66 @@ export default function UnitsFilter({
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2 mt-4 ">
-          <span className="text-xs font-medium text-gray-700">
-            {t.unitsFilter.activeFilter}
+        <div className="flex flex-wrap items-center gap-2 mt-4 mb-2">
+          <span className="text-sm text-gray-600">
+            {t.unitsFilter.activeFilter}:
           </span>
-
-          {getActiveFilters().map((filter, index) => (
-            <div
-              key={index}
-              className="flex items-center  gap-1 bg-gray-100 rounded-md px-2 py-2 text-xs"
-            >
-              <p className="truncate max-w-[150px] ">{filter.value}</p>
-              <button
-                type="button"
-                className=" text-gray-500  hover:text-gray-700 flex-shrink-0"
-                onClick={() => {
-                  if (filter.removeKeys) {
-                    // For compound filters like price range
-                    filter.removeKeys.forEach((key) => handleRemoveFilter(key));
-                  } else {
-                    handleRemoveFilter(filter.key);
-                  }
-                }}
+          <div className="flex flex-wrap gap-2">
+            {getActiveFilters().map((filter, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm text-gray-700"
               >
-                <svg
-                  className="w-3 h-3"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
+                <p className="truncate max-w-[150px]">{filter.value}</p>
+                <button
+                  type="button"
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => {
+                    if (filter.removeKeys) {
+                      filter.removeKeys.forEach((key) => handleRemoveFilter(key));
+                    } else {
+                      handleRemoveFilter(filter.key);
+                    }
+                  }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M6 18L18 6M6 6l12 12"
-                  ></path>
-                </svg>
-              </button>
-            </div>
-          ))}
+                  <svg
+                    className="w-3.5 h-3.5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    ></path>
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
 
           <button
             type="button"
-            className="ml-1 text-primary hover:text-primary-dark text-xs font-medium"
+            className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
             onClick={handleRemoveAllFilters}
           >
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+              ></path>
+            </svg>
             {t.unitsFilter.clearall}
           </button>
         </div>

@@ -413,7 +413,10 @@ export default {
     "selectPurpose": "يرجى تحديد غرض الوحدة (بيع/إيجار)",
     "errorProcessing": "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
   },
+  "addPhase": "اضافة مرحلة",
+  "projectFirst": "اختر المشروع اولا",
   formLabels: {
+    
     "unitTitle": "عنوان الوحدة",
     "buildingType": "نوع المبنى",
     "purpose": "الغرض",
@@ -849,6 +852,14 @@ export default {
     selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
   },
+  shareUnitContent: "مشاركة محتوى الوحدة",
+  postContent: "مشاركة محتوى المنشور",
+  clickCopy: "انقر على زر 'نسخ مع الرابط' لنسخ النص والصور ورابط المشاركة",
+  noImagesAvailable: "لا توجد صور متاحة للمشاركة",
+  copyWithLink: "نسخ مع الرابط",
+  copied: "تم النسخ",
+  addPhaseSuccess: "تم إضافة المرحلة بنجاح",
+  addPhaseFailed: "فشل إضافة المرحلة. يرجى المحاولة مرة أخرى.", 
   formLabels: {
     compoundName: "اسم المشروع",
     description: "الوصف",
@@ -954,7 +965,7 @@ export default {
       "weekly": "للأسبوع",
       "monthly": "لشهر"
     },
-    "security_deposit": "إيداع تأميني",
+    "security_deposit": "التأمين",
     "cleaning_fee": "رسوم تنظيف",
     "service_fee": "رسوم خدمة",
     "available_now": "متاح الآن",

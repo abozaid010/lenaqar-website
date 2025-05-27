@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Share2 } from "lucide-react";
 import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/components/services/serviceFetching";
-
+import shareButton from "../../../../public/share.svg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Thumbs } from "swiper/modules";
 import "swiper/css";
@@ -102,9 +102,9 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
      { !readOnly ?  <button
           type="button"
           onClick={handleShareClick}
-          className="absolute top-4 left-4 cursor-pointer p-2.5 bg-white/90 rounded-full shadow-lg border border-gray-200"
+          className="absolute top-3 left-2 cursor-pointer p-2.5  "
         >
-          <Share2 className="w-4 h-4 text-primary hover:text" />
+          <img src={shareButton.src} alt="share" />
         </button> : ""}
       </div>
 

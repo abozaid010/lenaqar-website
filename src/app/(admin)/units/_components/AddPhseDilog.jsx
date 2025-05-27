@@ -148,7 +148,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
     try {
       const res = await addNewPhase(formData, projectId);
       if (res.code === 200) {
-        toast.success("Phase added successfully!");
+        toast.success(t.addPhaseSuccess);
         onAdd({
           name: res.data?.name,
           id: res.data?.id,
@@ -167,12 +167,12 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
         setSelectedImage(null);
         onClose();
       } else {
-        toast.error("Failed to add compound. Please try again.");
+        toast.error(t.addPhaseFailed);
       }
     } catch (error) {
-      toast.error("Failed to add compound. Please try again.");
+      toast.error(t.addPhaseFailed);
       setErrors({
-        submit: "Failed to add compound. Please try again.",
+        submit: t.addPhaseFailed,
       });
     } finally {
       setIsSubmitting(false);
