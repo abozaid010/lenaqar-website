@@ -94,19 +94,21 @@ const Header = ({ clientName, clientID }) => {
 
         <div className="relative" ref={userMenuRef}>
           <button
-            className="flex items-center focus:outline-none"
+            className="flex items-center focus:outline-none gap-2"
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
           >
             <div className="h-8 w-8 cursor-pointer bg-blue-100 rounded-full flex items-center justify-center">
               <User className="h-5 w-5 text-blue-600" />
             </div>
-            <span className="ml-2 text-sm cursor-pointer font-medium text-gray-700 hidden sm:inline">
+            <span className="text-sm cursor-pointer font-medium text-gray-700 hidden sm:inline">
               {clientName}
             </span>
           </button>
 
           {isUserMenuOpen && (
-            <div className={`absolute mt-2 ${lang === 'ar' ? 'left-0' : 'right-0'} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}>
+            <div
+              className={`absolute mt-2 ${lang === "ar" ? "left-0" : "right-0"} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}
+            >
               <Link
                 href={`/dashboard/client/${clientID}`}
                 className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3"

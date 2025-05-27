@@ -1,32 +1,21 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { compressImage } from "@/utils/imageCompression";
 import Dialog from "@/components/ui/Dialog";
 import { Loader2 } from "lucide-react";
 import {
-  addCompound,
   deleteImage,
   uploadImages,
-  getprojects,
   addNewPhase,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
-import AddDeveloperDialog from "./add-developer-dialog";
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
-export default function AddPhseDilog({
-  clientId,
-  isOpen,
-  onClose,
-  onAdd,
-  projectId
-}) {
+export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
   const { t } = useI18n();
-  console.log(projectId)
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -38,7 +27,7 @@ export default function AddPhseDilog({
     id: uuidv4(),
     name: "",
     master_plan: "",
-    updated_at: new Date().toISOString()
+    updated_at: new Date().toISOString(),
   });
 
   const handleChange = (e) => {
@@ -61,7 +50,7 @@ export default function AddPhseDilog({
 
     if (!formData.name.trim()) {
       newErrors.name = "Phase name is required";
-      toast.error( "Phase name is required");
+      toast.error("Phase name is required");
     }
 
     return newErrors;
@@ -74,8 +63,13 @@ export default function AddPhseDilog({
       toast.error("File size exceeds 5MB. Please select a smaller file.");
       return;
     }
-    if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      toast.error("Invalid file type. Please select a JPEG, PNG, or WEBP image.");
+    if (
+      file &&
+      !["image/jpeg", "image/png", "image/webp"].includes(file.type)
+    ) {
+      toast.error(
+        "Invalid file type. Please select a JPEG, PNG, or WEBP image."
+      );
       return;
     }
 
@@ -116,10 +110,16 @@ export default function AddPhseDilog({
     if (selectedImage.imageId) {
       try {
         await deleteImage(uploadedImageId);
-        toast.success(t.toasts?.imageRemoved || "Image removed successfully from the server!");
+        toast.success(
+          t.toasts?.imageRemoved ||
+            "Image removed successfully from the server!"
+        );
         setUploadedImageId(null);
       } catch (error) {
-        toast.error(t.toasts?.imageRemoveFailed || "Failed to remove image from the server. Please try again.");
+        toast.error(
+          t.toasts?.imageRemoveFailed ||
+            "Failed to remove image from the server. Please try again."
+        );
         return;
       }
     }
@@ -146,9 +146,9 @@ export default function AddPhseDilog({
     setIsSubmitting(true);
 
     try {
-      const res = await addNewPhase(formData,projectId);
+      const res = await addNewPhase(formData, projectId);
       if (res.code === 200) {
-        toast.success( "Phase added successfully!");
+        toast.success("Phase added successfully!");
         onAdd({
           name: res.data?.name,
           id: res.data?.id,
@@ -158,7 +158,7 @@ export default function AddPhseDilog({
           id: uuidv4(),
           name: "",
           master_plan: "",
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         });
 
         if (fileInputRef.current) {
@@ -167,12 +167,12 @@ export default function AddPhseDilog({
         setSelectedImage(null);
         onClose();
       } else {
-        toast.error( "Failed to add compound. Please try again.");
+        toast.error("Failed to add compound. Please try again.");
       }
     } catch (error) {
-      toast.error( "Failed to add compound. Please try again.");
+      toast.error("Failed to add compound. Please try again.");
       setErrors({
-        submit:  "Failed to add compound. Please try again.",
+        submit: "Failed to add compound. Please try again.",
       });
     } finally {
       setIsSubmitting(false);
@@ -190,7 +190,8 @@ export default function AddPhseDilog({
           {/* Basic Information */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.phaseName || "Phase Name"} <span className="text-red-500">*</span>
+              {t.formLabels?.phaseName || "Phase Name"}{" "}
+              <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
@@ -230,7 +231,9 @@ export default function AddPhseDilog({
                       />
 
                       {isUploading && (
-                        <div className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}>
+                        <div
+                          className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
+                        >
                           <svg
                             className="animate-spin h-8 w-8 text-white"
                             xmlns="http://www.w3.org/2000/svg"
@@ -314,10 +317,12 @@ export default function AddPhseDilog({
                       />
                     </svg>
                     <p className="text-base text-gray-700 mb-2">
-                      {t.formLabels?.dragDropImage || "Click or drag and drop an image here"}
+                      {t.formLabels?.dragDropImage ||
+                        "Click or drag and drop an image here"}
                     </p>
                     <p className="text-xs text-gray-500">
-                      {t.formLabels?.supportedFormats || "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
+                      {t.formLabels?.supportedFormats ||
+                        "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
                     </p>
                   </>
                 )}
@@ -349,7 +354,7 @@ export default function AddPhseDilog({
                   {t.buttons?.saving || "Saving..."}
                 </div>
               ) : (
-               "Add Phase"
+                "Add Phase"
               )}
             </button>
           </div>
