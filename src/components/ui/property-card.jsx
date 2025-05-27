@@ -78,7 +78,7 @@ export default function PropertyCard({ data }) {
 
       <div>
         <Link
-          href={`/dashboard/units/${unitId}`}
+          href={`/units/${unitId}`}
           className="mb-2 line-clamp-1 text-sm font-medium text-gray-800 hover:text-primary hover:underline"
         >
           {clientName} | {buildingType}{" "}
