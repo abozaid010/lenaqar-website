@@ -457,26 +457,36 @@ export default function BasicDetailsStep({
               </option>
             )}
 
+            {formData.project && isLoadingProjects && (
+              <option value="">
+                {t.formLabels?.loading || "Loading phases..."}
+              </option>
+            )}
+
             {formData.project &&
+              !isLoadingProjects &&
               (!phases[0]?.phases || phases[0]?.phases.length === 0) && (
-                <option value="">No phases available</option>
+                <option value="">
+                  {t.formLabels?.noPhases || "No phases available"}
+                </option>
               )}
 
-            <option value="">
-              {t.basicDetails.selectPhase || "Select phase"}
-            </option>
-
-            {formData.project && phases[0]?.phases?.length > 0 && (
-              <>
-                {phases[0].phases
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((phase, idx) => (
-                    <option key={phase.name + idx} value={phase.name}>
-                      {phase.name}
-                    </option>
-                  ))}
-              </>
-            )}
+            {formData.project &&
+              !isLoadingProjects &&
+              phases[0]?.phases?.length > 0 && (
+                <>
+                  <option value="">
+                    {t.basicDetails.selectPhase || "Select phase"}
+                  </option>
+                  {phases[0].phases
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((phase, idx) => (
+                      <option key={phase.name + idx} value={phase.name}>
+                        {phase.name}
+                      </option>
+                    ))}
+                </>
+              )}
           </select>
         </div>
 
