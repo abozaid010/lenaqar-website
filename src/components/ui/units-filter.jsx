@@ -18,6 +18,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     property_type: appliedFilters.property_type || "",
     min_price: appliedFilters.min_price || "",
     max_price: appliedFilters.max_price || "",
+    city: appliedFilters.city || "",
   }));
   const formattedDataCitiesAndDistricts = !readonly
   ? Object.entries(citiesAndDistricts)
@@ -29,6 +30,8 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
         }))
       }))
   : [];
+  const cities = citiesAndDistricts.cities;
+  console.log("cities",cities)
 
 
 
@@ -38,6 +41,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   const [isPropertyTypeDropdownOpen, setIsPropertyTypeDropdownOpen] = useState(false);
   const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [tempMinPrice, setTempMinPrice] = useState(filters.min_price || "");
   const [tempMaxPrice, setTempMaxPrice] = useState(filters.max_price || "");
   
@@ -46,6 +50,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   const propertyTypeDropdownRef = useRef(null);
   const purposeDropdownRef = useRef(null);
   const projectDropdownRef = useRef(null);
+  const cityDropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
@@ -53,6 +58,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   useOnClickOutside(propertyTypeDropdownRef, () => setIsPropertyTypeDropdownOpen(false));
   useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
   useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
+  useOnClickOutside(cityDropdownRef, () => setIsCityDropdownOpen(false));
 
   const buildingTypes = [
     { value: "apartment", label: t.basicDetails.buildingTypes.apartment },
@@ -129,6 +135,7 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
       property_type: "",
       min_price: "",
       max_price: "",
+      city: "",
     });
 
     // Reset temporary price values
@@ -232,6 +239,13 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
     return filters.project_name;
   };
 
+  const getSelectedCity = () => {
+    if (!filters.city || filters.city === "all") {
+      return t.unitsFilter.allCities || "All Cities";
+    }
+    return filters.city;
+  };
+
   const getTranslatedDeveloperName = (name) => {
     return t.developerNames?.[name] || name;
   };
@@ -239,6 +253,57 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
   return (
     <div className=" ">
       <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
+        {/* Cities Dropdown */}
+        <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={cityDropdownRef}>
+          <button
+            type="button"
+            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+          >
+            <span className="truncate">{getSelectedCity()}</span>
+            <svg
+              className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isCityDropdownOpen ? "rotate-180" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="1"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </button>
+          
+          {isCityDropdownOpen && (
+            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+              <div 
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("city", "all");
+                  setIsCityDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allCities || "All Cities"}
+              </div>
+              {cities.map((city, idx) => (
+                <div 
+                  key={idx} 
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                  onClick={() => {
+                    handleFilterChange("city", city);
+                    setIsCityDropdownOpen(false);
+                  }}
+                >
+                  {t.unitsFilter.cities?.[city] || city}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Developers Dropdown */}
         <div className="relative w-full md:w-auto md:flex-1 min-w-0" ref={developerDropdownRef}>
           <button
@@ -538,9 +603,9 @@ export default function UnitsFilter({ appliedFilters, developers, compounds ,cli
           {getActiveFilters().map((filter, index) => (
             <div
               key={index}
-              className="flex items-center gap-1 bg-gray-100 rounded-full px-2 py-0.5 text-xs"
+              className="flex items-center  gap-1 bg-gray-100 rounded-md px-2 py-2 text-xs"
             >
-              <p className="truncate max-w-[150px]">{filter.value}</p>
+              <p className="truncate max-w-[150px] ">{filter.value}</p>
               <button
                 type="button"
                 className=" text-gray-500  hover:text-gray-700 flex-shrink-0"
