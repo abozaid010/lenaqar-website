@@ -119,16 +119,20 @@ export default function UnitsFilter({
     setIsPriceDropdownOpen(false);
   };
 
-  const formatPrice = (price) => {
-    if (!price) return "";
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  // Format price input with commas as user types
+  const formatPriceInput = (value) => {
+    if (!value) return "";
+    // Remove all non-digit characters
+    const numericValue = value.replace(/\D/g, "");
+    // Format with commas
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
 
   const getPriceDisplayText = () => {
     if (filters.min_price || filters.max_price) {
-      const min = filters.min_price ? formatPrice(filters.min_price) : "0";
+      const min = filters.min_price ? formatPriceInput(filters.min_price) : "0";
       const max = filters.max_price
-        ? formatPrice(filters.max_price)
+        ? formatPriceInput(filters.max_price)
         : "5,000,000,000";
       return `${min} - ${max} EGP`;
     }
@@ -207,9 +211,9 @@ export default function UnitsFilter({
 
     // Add price range as a single filter if either min or max is set
     if (filters.min_price || filters.max_price) {
-      const min = filters.min_price ? formatPrice(filters.min_price) : "0";
+      const min = filters.min_price ? formatPriceInput(filters.min_price) : "0";
       const max = filters.max_price
-        ? formatPrice(filters.max_price)
+        ? formatPriceInput(filters.max_price)
         : "5,000,000,000";
       activeFilters.push({
         key: "price_range",
@@ -575,9 +579,9 @@ export default function UnitsFilter({
                   <input
                     type="text"
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={tempMinPrice}
+                    value={formatPriceInput(tempMinPrice)}
                     onChange={(e) => {
-                      // Only allow numbers
+                      // Remove commas and non-digits, then update state
                       const value = e.target.value.replace(/\D/g, "");
                       setTempMinPrice(value);
                     }}
@@ -592,9 +596,9 @@ export default function UnitsFilter({
                   <input
                     type="text"
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={tempMaxPrice}
+                    value={formatPriceInput(tempMaxPrice)}
                     onChange={(e) => {
-                      // Only allow numbers
+                      // Remove commas and non-digits, then update state
                       const value = e.target.value.replace(/\D/g, "");
                       setTempMaxPrice(value);
                     }}
@@ -630,7 +634,7 @@ export default function UnitsFilter({
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2 mt-4 mb-2">
+        <div className="flex flex-wrap items-center gap-2   py-4 ">
           <span className="text-sm text-gray-600">
             {t.unitsFilter.activeFilter}:
           </span>

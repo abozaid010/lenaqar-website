@@ -102,7 +102,7 @@ export default function ShareModal({
               }`}
             >
               <Globe className="w-4 h-4" />
-              Images ({images.length})
+              {t.images} ({images.length})
             </button>
           </div>
 
@@ -112,7 +112,7 @@ export default function ShareModal({
               <div className="flex items-center justify-center py-10">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
                 <span className="ml-2 text-gray-600">
-                  Loading share data...
+                  {t.loadingShareData}
                 </span>
               </div>
             ) : (

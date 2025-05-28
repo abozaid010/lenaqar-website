@@ -35,14 +35,14 @@ export default async function ChatPage({ params }) {
               <NavigationButtons id={id} />
               <ChatWith name={name} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
              
               <ToggleReplyType phoneNumber={id} clientID={clientID} />
               <Link
                 href={`/dashboard`}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
-                 <CircleX className="w-6 h-6" color="red" />
+                 <CircleX className="w-8 h-8" color="red" />
               </Link>
             </div>
           </div>

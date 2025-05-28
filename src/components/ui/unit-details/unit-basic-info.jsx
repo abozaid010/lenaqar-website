@@ -30,38 +30,11 @@ export default function Uni({ unit }) {
 
       <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
 
-      {/* <div className="flex flex-wrap gap-4 mt-2 mb-4">
-        
-        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
-          <svg className="h-4 w-4 text-primary" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <path d="M3 13h18M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16" />
-          </svg>
-          <span className="text-xs text-gray-500">Project:</span>
-          <span className="text-sm font-semibold text-primary">{unit.project || "N/A"}</span>
-        </div>
-       
-        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
-          <svg className="h-4 w-4 text-green-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v4l3 3" />
-          </svg>
-          <span className="text-xs text-gray-500">District:</span>
-          <span className="text-sm font-semibold text-green-700">{unit.district || "N/A"}</span>
-        </div>
-       
-        <div className="flex items-center gap-1 bg-gray-50 rounded px-2 py-1">
-          <svg className="h-4 w-4 text-yellow-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span className="text-xs text-gray-500">Phase:</span>
-          <span className="text-sm font-semibold text-yellow-700">{unit.phase || "N/A"}</span>
-        </div>
-      </div> */}
-
-      <p className="text-sm text-gray-600">
-        {unit.project}, {unit.city} , {unit.phase}
-      </p>
+      <div className="flex flex-wrap gap-2 mt-2">
+        <span className="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+          {[unit.city, unit.district, unit.project, unit.phase].filter(Boolean).join(" , ")}
+        </span>
+      </div>
 
       <UnitPricing unit={unit} />
 

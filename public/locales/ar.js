@@ -852,6 +852,7 @@ export default {
     selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
   },
+  
   shareUnitContent: "مشاركة محتوى الوحدة",
   postContent: "مشاركة محتوى المنشور",
   clickCopy: "انقر على زر 'نسخ مع الرابط' لنسخ النص والصور ورابط المشاركة",
@@ -860,6 +861,8 @@ export default {
   copied: "تم النسخ",
   addPhaseSuccess: "تم إضافة المرحلة بنجاح",
   addPhaseFailed: "فشل إضافة المرحلة. يرجى المحاولة مرة أخرى.", 
+  loadingShareData: "جاري تحميل بيانات المشاركة...",
+  images: "صور",
   formLabels: {
     compoundName: "اسم المشروع",
     description: "الوصف",

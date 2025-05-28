@@ -383,6 +383,8 @@ export default {
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
   "addPhase": "Add Phase",
+  "images": "Images",
+  "loadingShareData": "Loading share data...",
   "projectFirst": "Select project first",
   "shareUnitContent": "Share Unit Content",
   "postContent": "Post Content",
