@@ -12,7 +12,7 @@ const ChatWith = ({ name }) => {
 
   return (
     <div className="flex items-center justify-start gap-3">
-      <button
+      {/* <button
         onClick={handleBack}
         className="w-6 h-6 p-1 rounded-full bg-primary/90 flex items-center justify-center hover:opacity-85"
       >
@@ -28,7 +28,7 @@ const ChatWith = ({ name }) => {
             clipRule="evenodd"
           />
         </svg>
-      </button>
+      </button> */}
       <h1 className="text-lg text-priamry/90">
         <span className="text-primary font-bold">{name || t.clientsTable.newLead}</span>
       </h1>

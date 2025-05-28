@@ -123,6 +123,11 @@ export default function ClientsTable({
       setLoadingRequirements(null);
     }
   };
+  const usersId = users.map((user) => user.user_id);
+  console.log(usersId)
+  window.localStorage.setItem("usersId", JSON.stringify(usersId));
+  const usersIds = JSON.parse(window.localStorage.getItem("usersId"));
+  console.log(usersIds)
 
   return (
     <>
