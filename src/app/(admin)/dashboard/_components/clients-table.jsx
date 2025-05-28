@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PropertyDetailsModal from "./property-requirements-modal";
@@ -40,6 +40,13 @@ export default function ClientsTable({
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const usersId = users.map((user) => user.user_id);
+      window.localStorage.setItem("usersId", JSON.stringify(usersId));
+    }
+  }, [users]);
 
   const ACTIONS = useMemo(
     () => [
@@ -124,10 +131,8 @@ export default function ClientsTable({
     }
   };
   const usersId = users.map((user) => user.user_id);
-  console.log(usersId)
+ 
   window.localStorage.setItem("usersId", JSON.stringify(usersId));
-  const usersIds = JSON.parse(window.localStorage.getItem("usersId"));
-  console.log(usersIds)
 
   return (
     <>
