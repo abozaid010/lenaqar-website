@@ -16,9 +16,9 @@ export async function fetchUnits() {
 }
 
 export async function fetchcombounds(use) {
-  const clientId = await getClientid();
+ 
   try {
-    const response = await axiosInstance.get(`${use ? `/projects/all?client_id=${clientId}` : '/public/projects'}`);
+    const response = await axiosInstance.get(`${use ? `/projects/all` : '/public/projects'}`);
    
     return response.data.data;
   } catch (error) {
@@ -188,7 +188,7 @@ export async function addUnit(unitData) {
 export async function addNewPhase(phaseData,idProject) {
   try {
     const response = await axiosInstance.post(`project-phases/${idProject}/phase-create`, phaseData);
-    console.log(response.data)
+   
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
@@ -241,7 +241,7 @@ export async function getClientActions(phoneNumber) {
 export async function getprojects(city, district) {
   try {
     const response = await axiosInstance.get(`/projects/get/${city}/${district}`);
-    console.log(response.data);
+   
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
@@ -252,7 +252,7 @@ export async function getprojects(city, district) {
 export async function getClientRequirements(phoneNumber) {
   try {
     const response = await axiosInstance.get(`requirements/${phoneNumber}`);
-    console.log(response);
+   
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
@@ -374,7 +374,7 @@ export async function getProfileData() {
 
   try {
     const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
-    console.log(response.data);
+    
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile data:", error.message);
@@ -384,7 +384,7 @@ export async function getProfileData() {
 
 export async function updateProfileData(formData) {
   const clientEmail = getClientEmail();
-  console.log(clientEmail);
+
 
   if (!clientEmail) {
     console.error("Client email not found");
@@ -405,7 +405,7 @@ export async function userAnalytics(days) {
   const clientId = await getClientid();
   try {
     const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}?days=${days}`);
-    console.log(response.data.data);
+   
     return response.data.data;
 
   } catch (error) {

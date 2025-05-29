@@ -416,7 +416,7 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {compounds.map((c, idx) => (
+              {compounds?.map((c, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
