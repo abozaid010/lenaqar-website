@@ -392,14 +392,9 @@ export default function BasicDetailsStep({
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
                   dataProject
-                    .sort((a, b) =>
-                      a.name.localeCompare(b.name)
-                    )
+                    .sort((a, b) => a.name.localeCompare(b.name))
                     .map((project) => (
-                      <option
-                        key={project.name}
-                        value={project.name}
-                      >
+                      <option key={project.name} value={project.name}>
                         {project.name}
                       </option>
                     ))
@@ -436,7 +431,7 @@ export default function BasicDetailsStep({
                 onClick={() => setIsAddPhaseDialogOpen(true)}
                 className="text-blue-600 text-sm font-medium"
               >
-               + {t.addPhase}
+                + {t.addPhase}
               </button>
             )}
           </label>
@@ -457,38 +452,42 @@ export default function BasicDetailsStep({
               </option>
             )}
 
-            {formData.project && isLoadingProjects && (
-              <option value="">
-                {t.formLabels?.loading || "Loading phases..."}
+          
+            {formData.phase ? (
+              <>
+              <option value="">{t.basicDetails.selectPhase}</option>
+              <option value={formData.phase}>
+                {" "}
+                {formData.phase ? formData.phase : ""}
               </option>
+              </>
+            ) : (
+              ""
             )}
-
-            {formData.project &&
-              !isLoadingProjects &&
-              (!phases[0]?.phases || phases[0]?.phases.length === 0) && (
-                <option value="">
-                  {t.formLabels?.noPhases || "No phases available"}
-                </option>
-              )}
-
+           
+            {phases[0]?.phases && Object.keys(phases[0].phases).length === 0 ? (
+              <option value="">{t.basicDetails.noPhases}</option>
+            ) : null}
+           
             {formData.project &&
               !isLoadingProjects &&
               phases[0]?.phases?.length > 0 && (
                 <>
-                  <option value="">
-                    {t.basicDetails.selectPhase || "Select phase"}
-                  </option>
+                
+                  { !formData.phase && <option value="">{t.basicDetails.selectPhase}</option>}
                   {phases[0].phases
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((phase, idx) => (
-                      <option key={phase.name + idx} value={phase.name}>
-                        {phase.name}
-                      </option>
+                     
+                      formData.phase === phase.name ? "" : <option key={phase.name + idx} value={phase.name}>
+                      {phase.name}
+                    </option>
                     ))}
                 </>
               )}
           </select>
         </div>
+      
 
         <AddPhaseDialog
           isOpen={isAddPhaseDialogOpen}
