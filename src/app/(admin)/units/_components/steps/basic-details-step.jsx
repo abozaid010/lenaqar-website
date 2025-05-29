@@ -157,7 +157,7 @@ export default function BasicDetailsStep({
       const updatedPhases = [...phases[0].phases, newPhase];
       const updatedProject = { ...phases[0], phases: updatedPhases };
       const updatedDataProject = dataProject.map((p) =>
-        p.project_name === formData.project ? updatedProject : p
+        p.name === formData.project ? updatedProject : p
       );
       setDataProject(updatedDataProject);
       setRefreshPhases((prev) => !prev);
@@ -167,7 +167,7 @@ export default function BasicDetailsStep({
       // If we have a projectId but no phases yet, create new project data
       const newProjectData = {
         id: projectId,
-        project_name: formData.project,
+        name: formData.project,
         phases: [newPhase],
       };
       setDataProject([...dataProject, newProjectData]);
@@ -178,7 +178,7 @@ export default function BasicDetailsStep({
   };
 
   const phases = dataProject.filter(
-    (project) => project.project_name === formData.project
+    (project) => project.name === formData.project
   );
 
   return (
@@ -393,14 +393,14 @@ export default function BasicDetailsStep({
                 dataProject && dataProject.length > 0 ? (
                   dataProject
                     .sort((a, b) =>
-                      a.project_name.localeCompare(b.project_name)
+                      a.name.localeCompare(b.name)
                     )
                     .map((project) => (
                       <option
-                        key={project.project_name}
-                        value={project.project_name}
+                        key={project.name}
+                        value={project.name}
                       >
-                        {project.project_name}
+                        {project.name}
                       </option>
                     ))
                 ) : (
@@ -414,7 +414,7 @@ export default function BasicDetailsStep({
               formData.city &&
               formData.district &&
               dataProject &&
-              !dataProject.some((p) => p.project_name === formData.project) ? (
+              !dataProject.some((p) => p.name === formData.project) ? (
                 <option key="preserved-selection" value={formData.project}>
                   {formData.project}
                 </option>
