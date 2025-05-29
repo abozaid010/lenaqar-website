@@ -634,9 +634,9 @@ export default function UnitsFilter({
 
       {/* Active Filters Display */}
       {hasActiveFilters && (
-        <div className="flex flex-wrap items-center gap-2   py-4 ">
+        <div className="flex flex-wrap items-center gap-2   p-4">
           <span className="text-sm text-gray-600">
-            {t.unitsFilter.activeFilter}:
+            {t.unitsFilter.activeFilter}
           </span>
           <div className="flex flex-wrap gap-2">
             {getActiveFilters().map((filter, index) => (

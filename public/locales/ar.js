@@ -852,7 +852,10 @@ export default {
     selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى"
   },
-  
+  "phase": "المرحلة",
+  viewOnGoogleMaps: "عرض على خرائط جوجل",
+  clickToViewFullscreen: "انقر لعرض الصورة بحجم كامل",
+  watchVideo: "مشاهدة الفيديو",
   shareUnitContent: "مشاركة محتوى الوحدة",
   postContent: "مشاركة محتوى المنشور",
   clickCopy: "انقر على زر 'نسخ مع الرابط' لنسخ النص والصور ورابط المشاركة",

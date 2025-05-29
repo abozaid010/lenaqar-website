@@ -382,6 +382,10 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
+  "phase": "Phase",
+  viewOnGoogleMaps: "View on Google Maps",
+  clickToViewFullscreen: "Click to view fullscreen",
+  watchVideo: "Watch Video",
   "addPhase": "Add Phase",
   "images": "Images",
   "loadingShareData": "Loading share data...",
