@@ -446,45 +446,37 @@ export default function BasicDetailsStep({
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             }`}
           >
-            {!formData.project && (
-              <option value="">
-                {t?.projectFirst || "Select project firstdfas"}
-              </option>
-            )}
-
-          
-            {formData.phase ? (
-              <>
-              <option value="">{t.basicDetails.selectPhase}</option>
-              <option value={formData.phase}>
-                {" "}
-                {formData.phase ? formData.phase : ""}
-              </option>
-              </>
+            {!formData.project ? (
+              <option value="">{t?.projectFirst || "Select project first"}</option>
             ) : (
-              ""
+              <>
+                {formData.phase ? (
+                  <>
+                    <option value="">{t.basicDetails.selectPhase}</option>
+                    <option value={formData.phase}>{formData.phase ? formData.phase : ""}</option>
+                  </>
+                ) : null}
+                {phases[0]?.phases && Object.keys(phases[0].phases).length === 0 ? (
+                  <option value="">{t.basicDetails.noPhases}</option>
+                ) : null}
+                {formData.project &&
+                  !isLoadingProjects &&
+                  phases[0]?.phases?.length > 0 && (
+                    <>
+                      {!formData.phase && <option value="">{t.basicDetails.selectPhase}</option>}
+                      {phases[0].phases
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .map((phase, idx) => (
+                          formData.phase === phase.name ? null : (
+                            <option key={phase.name + idx} value={phase.name}>
+                              {phase.name}
+                            </option>
+                          )
+                        ))}
+                    </>
+                  )}
+              </>
             )}
-           
-            {phases[0]?.phases && Object.keys(phases[0].phases).length === 0 ? (
-              <option value="">{t.basicDetails.noPhases}</option>
-            ) : null}
-           
-            {formData.project &&
-              !isLoadingProjects &&
-              phases[0]?.phases?.length > 0 && (
-                <>
-                
-                  { !formData.phase && <option value="">{t.basicDetails.selectPhase}</option>}
-                  {phases[0].phases
-                    .sort((a, b) => a.name.localeCompare(b.name))
-                    .map((phase, idx) => (
-                     
-                      formData.phase === phase.name ? "" : <option key={phase.name + idx} value={phase.name}>
-                      {phase.name}
-                    </option>
-                    ))}
-                </>
-              )}
           </select>
         </div>
       
