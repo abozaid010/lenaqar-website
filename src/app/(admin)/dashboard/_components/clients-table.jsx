@@ -21,7 +21,7 @@ const ACTIONS_COLORS = {
   "Follow up later": "text-orange-800",
   "Missing Requirement": "text-purple-800",
   "No Action": "text-gray-400",
-  "Blocked": "text-red-600",
+  Blocked: "text-red-600",
 };
 
 export default function ClientsTable({
@@ -50,8 +50,8 @@ export default function ClientsTable({
 
   const ACTIONS = useMemo(
     () => [
-      { label: t.dashboardFilter.actions.onGoingConversion , value: null },
-      { label: t.dashboardFilter.actions.onGoingConversion , value: "" },
+      { label: t.dashboardFilter.actions.onGoingConversion, value: null },
+      { label: t.dashboardFilter.actions.onGoingConversion, value: "" },
       { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
       { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
       { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
@@ -257,8 +257,9 @@ export default function ClientsTable({
                         ) : (
                           <span className="line-clamp-1">
                             {/* {user.requirement_name} */}
-                            {console.log(user.requirement_name)}
-                            {t.unitDetails?.buildingTypesMap?.[user.requirement_name] || user.requirement_name}
+                            {t.unitDetails?.buildingTypesMap?.[
+                              user.requirement_name
+                            ] || user.requirement_name}
                           </span>
                         )}
                       </td>

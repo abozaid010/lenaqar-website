@@ -28,15 +28,14 @@ const InfoItem = ({ icon, label, value }) => (
   </div>
 );
 
-export default function PropertyCard({ data ,project_data}) {
+export default function PropertyCard({ data }) {
   const [hoveredImage, setHoveredImage] = useState(null);
-  console.log(data)
+  console.log(data);
   const handleImageHover = () => {
     if (data.images?.length > 1) {
       setHoveredImage(data.images[1].url);
     }
   };
- 
 
   const {
     buildingType,
@@ -52,9 +51,6 @@ export default function PropertyCard({ data ,project_data}) {
     compound,
     clientName,
   } = data;
-  console.log(data)
-  const project_data_items = Object.entries(project_data).map(([k, v]) => ({ [k]: v }));
-  console.log(project_data)
   return (
     <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-62 h-96">
       <Link
@@ -121,9 +117,7 @@ export default function PropertyCard({ data ,project_data}) {
             value={`${totalPrice} EGP`}
           />
         </div>
-        <div>
-     
-        </div>
+        <div></div>
         {/* Actions */}
         {/* <div className="flex items-center mt-2 gap-1">
           <Link
