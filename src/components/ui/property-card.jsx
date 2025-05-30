@@ -30,7 +30,6 @@ const InfoItem = ({ icon, label, value }) => (
 
 export default function PropertyCard({ data }) {
   const [hoveredImage, setHoveredImage] = useState(null);
-  console.log(data);
   const handleImageHover = () => {
     if (data.images?.length > 1) {
       setHoveredImage(data.images[1].url);
