@@ -3,15 +3,21 @@
 import { ArrowBigLeft, ArrowBigRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from "@/context/translate-api";
+import { useState, useEffect } from 'react';
 
 export default function NavigationButtons({id}) {
   const router = useRouter();
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
-  const usersId = JSON.parse(window.localStorage.getItem("usersId"));
-  const currentIndex = usersId?.indexOf(id);
-  const nextId = currentIndex !== -1 && currentIndex < usersId.length - 1 ? usersId[currentIndex + 1] : null;
-  const prevId = currentIndex > 0 ? usersId[currentIndex - 1] : null;
+  const [nextId, setNextId] = useState(null);
+  const [prevId, setPrevId] = useState(null);
+
+  useEffect(() => {
+    const usersId = JSON.parse(localStorage.getItem("usersId") || '[]');
+    const currentIndex = usersId.indexOf(id);
+    setNextId(currentIndex !== -1 && currentIndex < usersId.length - 1 ? usersId[currentIndex + 1] : null);
+    setPrevId(currentIndex > 0 ? usersId[currentIndex - 1] : null);
+  }, [id]);
 
   const handleNavigation = (id) => {
     router.push(`/dashboard/chat/${id}`);

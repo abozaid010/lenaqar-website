@@ -42,9 +42,9 @@ export default function ClientsTable({
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (users) {
       const usersId = users.map((user) => user.user_id);
-      window.localStorage.setItem("usersId", JSON.stringify(usersId));
+      localStorage.setItem("usersId", JSON.stringify(usersId));
     }
   }, [users]);
 
@@ -130,9 +130,7 @@ export default function ClientsTable({
       setLoadingRequirements(null);
     }
   };
-  const usersId = users.map((user) => user.user_id);
- 
-  window.localStorage.setItem("usersId", JSON.stringify(usersId));
+  const usersId = users?.map((user) => user?.user_id);
 
   return (
     <>

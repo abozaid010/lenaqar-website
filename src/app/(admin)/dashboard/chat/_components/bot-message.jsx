@@ -1,3 +1,5 @@
+"use client"
+
 import React, { useState } from "react";
 import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
