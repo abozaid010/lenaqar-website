@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { getprojects } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 import AddPhaseDialog from "../AddPhseDilog";
+import { toast } from "react-hot-toast";
 
 export default function BasicDetailsStep({
   clientId,
@@ -358,8 +359,18 @@ export default function BasicDetailsStep({
             <span className="text-red-500 mr-1">*</span>
             <button
               type="button"
-              disabled={!formData.district}
-              onClick={() => setIsAddCompoundDialogOpen(true)}
+              // disabled={!formData.district}
+              onClick={() => {
+                if (!formData.city) {
+                  toast.error(t.formLabels.cityFirst);
+                  return;
+                }
+                if (!formData.district) {
+                  toast.error(t.formLabels.districtFirst);
+                  return;
+                }
+                setIsAddCompoundDialogOpen(true);
+              }}
               className={`text-blue-600 absolute ${ar === "ar" ? "left-0" : "right-0"} text-sm font-medium disabled:opacity-70 disabled:pointer-events-none`}
             >
               + {t.addNew}

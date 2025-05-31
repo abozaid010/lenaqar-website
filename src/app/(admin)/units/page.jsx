@@ -44,7 +44,6 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     fetchCitisAndProjects(),
   ]);
 
-
   const units = unitsResponse.data?.units || [];
 
   const developersSet = Array.from(

@@ -182,6 +182,7 @@ export default {
     }
   },
   sidebar: {
+    "myProjects": "مشاريعي",
     "dashboard": " المحادثات",
     "analytics": "التحليلات",
     "units": "الوحدات",
@@ -531,6 +532,7 @@ export default {
       "district": "اسم الحي",
       "code": "كود الوحدة (اختياري)",
     },
+   
     "code": "كود الوحدة",
     "model": "نموذج الوحدة",
     buildingTypes: {
@@ -653,6 +655,14 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
+  "deleteButton":"حذف",
+  "cancelButton":"الغاء",
+  "sureDelet":"هل أنت متأكد أنك تريد الحذف؟",
+  "actionDelet":"لا يمكن التراجع عن هذا الإجراء.",
+  "deleteTitel":"حذف المشروع",
+  "failedProject":"خطا في حذف المشروع",
+  "projectDelete":"تم حذف المشروع بنجاح",
+  "associateProject":"هذا المشروع مرتبط بعدة وحدات.",
   "typeYourMessage": "اكتب رسالتك هنا",
   "send": "إرسال",
   "Ai": "الرد الألي",
@@ -933,6 +943,7 @@ export default {
     loading: "جاري الحفظ...",
   },
   developerNames: {
+    "La Vista Developments": "لا فيستا للتطوير",
     "Tatweer Misr": "تطوير مصر",
     "Emaar Misr": "إعمار مصر",
     "La Vista Developments": "لا فيستا للتطوير",

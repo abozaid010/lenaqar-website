@@ -182,6 +182,7 @@ export default {
     }
   },
   sidebar: {
+    "myProjects": "My Projects",
     "dashboard": "Conversations",
     "analytics": "Analytics",
     "units": "Units",
@@ -382,6 +383,14 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
+  "cancelButton":"cancel",
+  "deleteButton":"delete",
+  "sureDelet":" Are you sure you want to delete",
+  "actionDelet":"This action cannot be undone.",
+  "deleteTitel" :"delete project",
+  "failedProject":"Failed to delete project",
+  "projectDelete":"project deleted successfuly",
+  "associateProject":"This project is associated with multiple units. Kindly contact support to delete it",
   "phase": "Phase",
   viewOnGoogleMaps: "View on Google Maps",
   clickToViewFullscreen: "Click to view fullscreen",
@@ -942,6 +951,7 @@ export default {
     loading: "saving...",
   },
   developerNames: {
+    "La Vista Developments": "La Vista Developments",
     "Tatweer Misr": "Tatweer Misr",
     "Emaar Misr": "Emaar Misr",
     "La Vista Developments": "La Vista Developments",

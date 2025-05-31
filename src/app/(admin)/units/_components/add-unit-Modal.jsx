@@ -131,7 +131,7 @@ export default function AddUnitModal({
         "roomsCount",
         "bathroomCount",
         "district",
-        "phase",
+        // "phase",
       ];
       const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
       const sanitizedData = { ...formData };

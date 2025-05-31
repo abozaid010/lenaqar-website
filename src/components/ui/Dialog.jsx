@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-export default function Dialog({ isOpen, onClose, title, children }) {
+export default function Dialog({ isOpen, onClose, title, children , editMode }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -33,10 +33,13 @@ export default function Dialog({ isOpen, onClose, title, children }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+    <div 
+      className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out ${editMode ? "bg-black/5" : "bg-black/50"}`}
+      onClick={handleOutsideClick}
+    >
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[90%]"
+        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[90%] transform transition-all duration-300 ease-in-out"
       >
         <div className="flex justify-between items-center p-3 bg-primary">
           <h3 className="text-lg font-medium text-white">{title}</h3>
