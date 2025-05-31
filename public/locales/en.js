@@ -383,6 +383,7 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
+  "projectUndfined":" No projects found.",
   "cancelButton":"cancel",
   "deleteButton":"delete",
   "sureDelet":" Are you sure you want to delete",

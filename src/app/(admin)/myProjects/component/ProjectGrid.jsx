@@ -60,13 +60,14 @@ export default function ProjectGrid({ projects }) {
 
   return (
     <>
-      {projects.length === 0 ? (
+      {projects?.length === 0  || projects === null? (
         <div className="text-center font-medium text-xl mt-5 text-gray-400 ">
-          No units found.
+          {/* No projects found. */}
+          {t.projectUndfined}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
-          {projects.map((p, idx) => (
+          {projects?.map((p, idx) => (
             <div
               key={idx}
               className="relative"

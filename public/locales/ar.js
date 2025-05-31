@@ -655,6 +655,7 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
+  "projectUndfined":"لا توجد مشاريع متاحة لك",
   "deleteButton":"حذف",
   "cancelButton":"الغاء",
   "sureDelet":"هل أنت متأكد أنك تريد الحذف؟",
