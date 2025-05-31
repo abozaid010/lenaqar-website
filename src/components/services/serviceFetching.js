@@ -26,6 +26,17 @@ export async function fetchcombounds(use) {
     return { error: error.message };
   }
 }
+export async function fetchMyProjects() {
+ const clientId = await getClientid();
+  try {
+    const response = await axiosInstance.get(`/projects/all?client_id=${clientId}` );
+   
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch units:", error.message);
+    return { error: error.message };
+  }
+}
 export async function fetchCitisAndProjects() {
   try {
     const response = await axiosInstance.get("/projects/cities-and-districts");
@@ -210,6 +221,30 @@ export async function addCompound(compoundData) {
 
   try {
     const response = await axiosInstance.post(`/projects/create?client_id=${clientId}`, compoundData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add compound:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
+export async function updatecompound(compoundData,projectId) {
+  const clientId = await getClientid();
+
+  try {
+    const response = await axiosInstance.patch(`/projects/${projectId}/update-fields`, compoundData);
+    console.log(response)
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add compound:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
+export async function deleteProject(project_id) {
+
+
+  try {
+    const response = await axiosInstance.delete(`/projects/delete/${project_id}`);
+    console.log(response.data)
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);

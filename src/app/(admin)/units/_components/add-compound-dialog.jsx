@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { compressImage } from "@/utils/imageCompression";
 import Dialog from "@/components/ui/Dialog";
@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import {
   addCompound,
   deleteImage,
+  updatecompound,
   uploadImages,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
@@ -19,6 +20,9 @@ export default function AddCompoundDialog({
   clientId,
   isOpen,
   onClose,
+  compoundData,
+  editMode,
+
   onAdd,
   developers = [],
   setDevelopers,
@@ -30,6 +34,7 @@ export default function AddCompoundDialog({
 }) {
   const { t } = useI18n();
   const ar = Cookies.get("lang");
+  console.log(compoundData);
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -41,19 +46,92 @@ export default function AddCompoundDialog({
     useState(false);
 
   const [formData, setFormData] = useState({
-    name: "",
-    description: "",
-    developer_name: "",
+    name: compoundData?.name || "",
+    description: compoundData?.description || "",
+    developer_name: compoundData?.developer_name || "",
     city: defaultCity || "",
     country: "Egypt",
     district: defaultDistrict || "",
     area: "",
     gated: false,
-    video_url: "",
-    google_map_link: "",
-    master_plan: "",
+    video_url: compoundData?.video_url || "",
+    google_map_link: compoundData?.google_map_link || "",
+    master_plan: compoundData?.master_plan || "",
     client_id: clientId || "",
   });
+
+  useEffect(() => {
+    if (isOpen) { // When the dialog is opening
+      if (editMode && compoundData) {
+        // Load existing data for editing
+        setFormData({
+          name: compoundData.name || "",
+          description: compoundData.description || "",
+          developer_name: compoundData.developer_name || "",
+          city: compoundData.city || defaultCity || "", // Still use default if compound data is missing city
+          country: compoundData.country || "Egypt",
+          district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
+          area: compoundData.area || "",
+          gated: compoundData.gated || false,
+          video_url: compoundData.video_url || "",
+          google_map_link: compoundData.google_map_link || "",
+          master_plan: compoundData.master_plan || "",
+          client_id: compoundData.client_id || clientId || "",
+        });
+        // Set selected image for existing master plan
+        if (compoundData.master_plan) {
+          setSelectedImage({
+            name: "existing_image",
+            preview: compoundData.master_plan,
+          });
+        } else {
+          setSelectedImage(null);
+        }
+      } else if (!editMode) { // Reset form with defaults for adding
+        setFormData({
+          name: "",
+          description: "",
+          developer_name: "",
+          city: defaultCity || "",
+          country: "Egypt",
+          district: defaultDistrict || "",
+          area: "",
+          gated: false,
+          video_url: "",
+          google_map_link: "",
+          master_plan: "",
+          client_id: clientId || "",
+        });
+        // Clear selected image and file input
+        setSelectedImage(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = null;
+        }
+      }
+      // Clear errors when opening in either mode
+      setErrors({});
+    } else { // When the dialog is closing, reset form and clear errors completely
+      setFormData({
+        name: "",
+        description: "",
+        developer_name: "",
+        city: defaultCity || "", // Reset to defaults on close as well
+        country: "Egypt",
+        district: defaultDistrict || "",
+        area: "",
+        gated: false,
+        video_url: "",
+        google_map_link: "",
+        master_plan: "",
+        client_id: clientId || "",
+      });
+      setSelectedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+      setErrors({});
+    }
+  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]); // Depend on relevant props
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -61,7 +139,7 @@ export default function AddCompoundDialog({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
-
+    
     // Clear error for this field when user types
     if (errors[name]) {
       setErrors({
@@ -202,23 +280,59 @@ export default function AddCompoundDialog({
     setIsSubmitting(true);
 
     try {
-      const submissionData = {
-        ...formData,
-        area: Number(formData.area),
-      };
+      let submissionData;
 
-      const res = await addCompound(submissionData);
-      setProjectId(res.data.id);
+      if (editMode) {
+        // Only include editable fields in edit mode
+        submissionData = {
+          description: formData.description,
+          master_plan: formData.master_plan,
+          video_url: formData.video_url,
+        };
+      } else {
+        // Include all relevant fields in add mode
+        submissionData = {
+          ...formData,
+          area: Number(formData.area),
+        };
+      }
 
-      if (res.code === 200) {
-        toast.success(
-          t.toasts?.compoundAdded || "Compound added successfully!"
-        );
+      console.log(submissionData);
+
+      let res;
+      if (!editMode) {
+        // Add new compound
+        res = await addCompound(submissionData);
+        setProjectId(res.data.id);
+         // Call onAdd after successful add to notify parent (ProjectGrid)
+        if (res?.data?.id) { // Check if ID is returned on successful add
+            onAdd({
+              name: res.data?.name,
+              id: res.data?.id,
+              ...submissionData // Include other form data if needed by parent
+            });
+        }
+      } else {
+        // Update compound
+        res = await updatecompound(submissionData, compoundData.id);
+        // Call onAdd after successful update to notify parent (ProjectGrid)
+        // Pass the updated data structure expected by handleProjectUpdate
         onAdd({
-          name: res.data?.name,
-          id: res.data?.id,
+          name: formData.name,
+          id: compoundData.id,
+          ...submissionData
         });
+      }
 
+      // If we reach here, the API call was successful (no error was thrown)
+      toast.success(
+        editMode
+          ? (t.toasts?.compoundUpdated || "Compound updated successfully!")
+          : (t.toasts?.compoundAdded || "Compound added successfully!")
+      );
+
+      // Reset form and clear image only for new compounds after success
+      if (!editMode) {
         setFormData({
           name: "",
           description: "",
@@ -238,22 +352,24 @@ export default function AddCompoundDialog({
           fileInputRef.current.value = null;
         }
         setSelectedImage(null);
-        onClose();
-      } else {
-        toast.error(
-          t.toasts?.compoundAddFailed ||
-            "Failed to add compound. Please try again."
-        );
       }
+
+      // Close dialog on success for both add and edit
+      onClose();
+
     } catch (error) {
+      console.error("API Error:", error);
       toast.error(
-        t.toasts?.compoundAddFailed ||
-          "Failed to add compound. Please try again."
+        editMode
+          ? (t.toasts?.compoundUpdateFailed || "Failed to update compound. Please try again.")
+          : (t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.")
       );
-      setErrors({
+      setErrors({ // Consider adding a general error state or showing error message from backend if available
         submit:
-          t.toasts?.compoundAddFailed ||
-          "Failed to add compound. Please try again.",
+          error.message ||
+          (editMode
+            ? t.toasts?.compoundUpdateFailed || "Failed to update compound. Please try again."
+            : t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.")
       });
     } finally {
       setIsSubmitting(false);
@@ -270,6 +386,7 @@ export default function AddCompoundDialog({
       };
     });
   };
+  console.log(formData)
 
   return (
     <>
@@ -277,6 +394,7 @@ export default function AddCompoundDialog({
         isOpen={isOpen}
         onClose={onClose}
         title={t.modal?.addNewProject || "Add New Project"}
+        editMode={editMode}
       >
         <div>
           <div className="space-y-2">
@@ -291,10 +409,13 @@ export default function AddCompoundDialog({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                rows={2}
+                disabled={editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.description || "Description"}
@@ -303,9 +424,9 @@ export default function AddCompoundDialog({
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                rows={2}
+                rows={3}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+              ></textarea>
             </div>
 
             {/* Location */}
@@ -319,12 +440,13 @@ export default function AddCompoundDialog({
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
+                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
-                    {t.formLabels?.selectCity || "Select City"}
+                     { editMode ? formData.city : t.formLabels?.selectCity}
                   </option>
-                  {Egypt_cities.countries[0].governorates?.map((gov) => (
+                  {Egypt_cities?.countries[0]?.governorates?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
                       {gov?.governorate}
                     </option>
@@ -342,12 +464,14 @@ export default function AddCompoundDialog({
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
+                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
             </div>
 
             <div>
+             
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.district || "District"}{" "}
                 <span className="text-red-500">*</span>
@@ -356,16 +480,14 @@ export default function AddCompoundDialog({
                 name="district"
                 value={formData.district}
                 onChange={handleChange}
-                disabled={!formData.city}
+                disabled={!formData.city || editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
-                  {formData.city
-                    ? t.formLabels?.selectDistrict || "Select District"
-                    : t.formLabels?.cityFirst || "Select City First"}
+                  {editMode ? formData.district : t.formLabels?.selectCity}
                 </option>
-                {formData.city &&
-                  Egypt_cities.countries[0].governorates
+                {formData?.city &&
+                  Egypt_cities?.countries[0]?.governorates
                     .find((gov) => gov.governorate === formData.city)
                     ?.districts.map((dist) => (
                       <option key={dist.district} value={dist.district}>
@@ -389,6 +511,7 @@ export default function AddCompoundDialog({
                   placeholder="1000"
                   onChange={handleChange}
                   min="0"
+                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -400,6 +523,7 @@ export default function AddCompoundDialog({
                   name="gated"
                   checked={formData.gated}
                   onChange={handleChange}
+                  disabled={editMode}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label
@@ -422,10 +546,11 @@ export default function AddCompoundDialog({
                   name="developer_name"
                   value={formData.developer_name}
                   onChange={handleChange}
+                  disabled={editMode}
                   className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
                 >
                   <option value="">
-                    {t.formLabels?.selectDeveloper || "Select developer"}
+                    { editMode ? formData.developer_name : t.formLabels?.selectDeveloper || "Select developer"}
                   </option>
                   {developers.map((d, idx) => (
                     <option key={idx} value={d}>
@@ -481,6 +606,7 @@ export default function AddCompoundDialog({
                 value={formData.google_map_link}
                 onChange={handleChange}
                 placeholder="https://maps.google.com/..."
+                disabled={editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>

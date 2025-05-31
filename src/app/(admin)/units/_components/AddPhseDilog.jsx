@@ -26,6 +26,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
   const [formData, setFormData] = useState({
     id: uuidv4(),
     name: "",
+    description: "",
     master_plan: "",
     updated_at: new Date().toISOString(),
   });
@@ -157,6 +158,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
         setFormData({
           id: uuidv4(),
           name: "",
+          description: "",
           master_plan: "",
           updated_at: new Date().toISOString(),
         });
@@ -199,6 +201,20 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
               value={formData.name}
               onChange={handleChange}
               className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.description || "Description"}
+            </label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.formLabels?.descriptionPlaceholder || "Enter phase description..."}
             />
           </div>
 
