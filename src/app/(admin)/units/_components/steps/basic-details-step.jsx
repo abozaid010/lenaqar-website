@@ -467,8 +467,8 @@ export default function BasicDetailsStep({
                     <option value={formData.phase}>{formData.phase ? formData.phase : ""}</option>
                   </>
                 ) : null}
-                {phases[0]?.phases && Object.keys(phases[0].phases).length === 0 ? (
-                  <option value="">{t.basicDetails.noPhases}</option>
+                {phases[0]?.phases && phases[0].phases.length === 0 ? (
+                  <option value="" disabled>{t.basicDetails.noPhases}</option>
                 ) : null}
                 {formData.project &&
                   !isLoadingProjects &&

@@ -655,6 +655,13 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
+  "viewInCRM":"زور موقعنا",
+  "noPhsesProject":"لا تتوفر مراحل لهذا المشروع",
+  "compoundUpdated":"تم تعديل المشروع بنجاح",
+  "compoundAdded":"تم اضافة المشروع بنجاح",
+  "updating":"تعديل...",
+  "updatesuccess":"",
+  "updateProject":"تعديل المشروع",
   "projectUndfined":"لا توجد مشاريع متاحة لك",
   "deleteButton":"حذف",
   "cancelButton":"الغاء",

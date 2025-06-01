@@ -327,8 +327,8 @@ export default function AddCompoundDialog({
       // If we reach here, the API call was successful (no error was thrown)
       toast.success(
         editMode
-          ? (t.toasts?.compoundUpdated || "Compound updated successfully!")
-          : (t.toasts?.compoundAdded || "Compound added successfully!")
+          ? (t.compoundUpdated || "project updated successfully!")
+          : (t.compoundAdded || "project added successfully!")
       );
 
       // Reset form and clear image only for new compounds after success
@@ -393,7 +393,7 @@ export default function AddCompoundDialog({
       <Dialog
         isOpen={isOpen}
         onClose={onClose}
-        title={t.modal?.addNewProject || "Add New Project"}
+        title={editMode ? t.updateProject: t.modal?.addNewProject || "Add New Project" }
         editMode={editMode}
       >
         <div>
@@ -572,13 +572,15 @@ export default function AddCompoundDialog({
                   </svg>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setIsAddDeveloperDialogOpen(true)}
-                className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
-              >
-                + {t.buttons?.addNew || "Add New"}
-              </button>
+              {!editMode && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddDeveloperDialogOpen(true)}
+                  className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+                >
+                  + {t.buttons?.addNew || "Add New"}
+                </button>
+              )}
             </div>
 
             {/* Links */}
@@ -764,10 +766,10 @@ export default function AddCompoundDialog({
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 size={20} className="animate-spin mr-2" />
-                    {t.buttons?.saving || "Saving..."}
+                    {editMode ? t.updating: t.buttons?.saving || "Saving..."}
                   </div>
                 ) : (
-                  t.buttons?.saveProject || "Save Project"
+                  editMode ?  t.updateProject: t.buttons?.saveProject || "Save Project"
                 )}
               </button>
             </div>
