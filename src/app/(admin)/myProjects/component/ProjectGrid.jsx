@@ -234,8 +234,18 @@ export default function ProjectList({ projects }) {
                     />
                   </div>
                 ) : (
-                  <div className="w-full h-80 flex items-center justify-center bg-gray-100 rounded-lg mb-6">
-                    <span className="text-gray-400">No master plan image</span>
+                    <div className="w-full h-80 relative mb-6  overflow-hidden ">
+                    <Image
+                      src={
+                        selectedProject.master_plan ||
+                        "/images/defaultImage.jpg"
+                      }
+                      alt={selectedProject.name || "Project Master Plan"}
+                      fill
+                      className="object-cover"
+                      priority
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    />
                   </div>
                 )}
 
