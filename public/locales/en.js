@@ -383,6 +383,13 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
+  "viewInCRM":"View in CRM",
+  "noPhsesProject":"No phases for this project",
+  "updateProject":" update project",
+  "updating":"updating...",
+  "compoundUpdated":"project updated successfully!",
+  "compoundAdded":"project added successfully!",
+  
   "projectUndfined":" No projects found.",
   "cancelButton":"cancel",
   "deleteButton":"delete",
