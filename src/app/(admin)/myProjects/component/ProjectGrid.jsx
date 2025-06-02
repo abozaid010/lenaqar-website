@@ -25,10 +25,12 @@ import toast from "react-hot-toast";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import Cookies from "js-cookie";
 
+// Capitalize function
+const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
+
 export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  developers }) {
   const { t } = useI18n();
   const clientId = Cookies.get("client_id");
-
 
  
   const formattedDataCitiesAndDistricts = !readonly
@@ -174,23 +176,23 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         projectName={projectToDelete?.name}
       />
 
-      <div className=" bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
+      <div className=" bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 ">
         {/* Projects Section */}
-        <div className={`${projects?.length === 0 ? 'lg:col-span-4' : 'lg:col-span-2'} bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden`}>
+        <div className={`${projects?.length === 0 ? 'lg:col-span-4' : 'lg:col-span-2'} bg-white  rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col`}>
           <div className="bg-primary p-4 flex justify-between items-center">
             <h2 className="text-white text-xl font-semibold">{t.sidebar.myProjects}</h2>
             <button
               onClick={() => setShowAddDialog(true)}
-              className="flex items-center gap-2 bg-white text-primary  px-4 py-2 rounded-lg transition-colors duration-200"
+              className="flex items-center gap-2 bg-white text-primary   px-4 py-2 rounded-lg transition-colors duration-200"
             >
               <Plus size={20} />
               <span> {t.addNewProject}</span>
             </button>
           </div>
 
-          <div className="p-6">
+          <div className="flex-1 flex flex-col">
             {projects?.length === 0 || projects === null ? (
-              <div className="flex flex-col items-center justify-center py-12">
+              <div className="flex flex-col items-center justify-center flex-1 p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
                     className="w-8 h-8 text-gray-400"
@@ -211,7 +213,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                 </p>
               </div>
             ) : (
-              <div className="space-y-4 max-h-[600px] overflow-y-auto pr-2">
+              <div className="space-y-3 p-4 overflow-y-auto flex-1">
                 {projects?.map((project) => (
                   <div
                     key={project.id}
@@ -223,7 +225,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                     <h3 className={`font-semibold text-lg mb-2 ${
                       selectedProject?.id === project.id ? 'text-white' : 'text-gray-800'
                     }`}>
-                      {project.name}
+                      {capitalize(project.name)}
                     </h3>
                     <div className={`flex items-center space-x-4 text-sm w-full ${
                       selectedProject?.id === project.id ? 'text-white' : 'text-gray-600'
@@ -248,7 +250,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        {project.city}
+                        {capitalize(project.city)}
                       </div>
                       <div className="flex items-center">
                         <svg
@@ -264,7 +266,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                           />
                         </svg>
-                        {project.district}
+                        {capitalize(project.district)}
                       </div>
                       <div className="flex-1"></div>
                       <button
@@ -331,92 +333,97 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                       <p>{selectedProject.description}</p>
                     </div>
                   )}
-                  <div className="p-4">
-                    <h4 className="font-semibold text-lg mb-2 text-gray-700">
+                  <div className="p-4 ">
+                    <h4 className="font-semibold text-lg mb-2 text-white p-4 bg-primary">
                       {t.phases}
                     </h4>
-                    {selectedProject.phases && selectedProject.phases.length > 0 ? (
-                      <>
-                        {/* Main selected phase full screen */}
-                        <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 p-4">
-                          <Image
-                            src={
-                              selectedProject.phases[selectedPhaseIdx]
-                                ?.master_plan || "/images/defaultImage.jpg"
-                            }
-                            alt={
-                              selectedProject.phases[selectedPhaseIdx]?.name ||
-                              "Phase Image"
-                            }
-                            fill
-                            className="object-cover"
-                            priority
-                            sizes="100vw"
-                          />
-                          <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
-                            <div className="text-white">
-                              <div className="font-bold text-2xl mb-2 line-clamp-1">
-                                {selectedProject?.phases[selectedPhaseIdx]?.name}
-                              </div>
-                              {selectedProject?.phases[selectedPhaseIdx]
-                                ?.description && (
-                                <div className="text-base opacity-90 line-clamp-3">
-                                  {
-                                    selectedProject.phases[selectedPhaseIdx]
-                                      .description
-                                  }
+                    {/* Fixed height container for phases section */}
+                    <div className="h-[500px] flex flex-col">
+                      {selectedProject.phases && selectedProject.phases.length > 0 ? (
+                        <>
+                          {/* Main selected phase full screen */}
+                          <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                            <Image
+                              src={
+                                selectedProject.phases[selectedPhaseIdx]
+                                  ?.master_plan || "/images/defaultImage.jpg"
+                              }
+                              alt={
+                                selectedProject.phases[selectedPhaseIdx]?.name ||
+                                "Phase Image"
+                              }
+                              fill
+                              className="object-cover"
+                              priority
+                              sizes="100vw"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
+                              <div className="text-white">
+                                <div className="font-bold text-2xl mb-2 line-clamp-1">
+                                  {selectedProject?.phases[selectedPhaseIdx]?.name}
                                 </div>
-                              )}
+                                {selectedProject?.phases[selectedPhaseIdx]
+                                  ?.description && (
+                                  <div className="text-base opacity-90 line-clamp-3">
+                                    {
+                                      selectedProject.phases[selectedPhaseIdx]
+                                        .description
+                                    }
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                        {/* Thumbnails for other phases */}
-                        <div className="flex overflow-x-auto gap-4 pb-2 mt-4">
-                          {selectedProject.phases.map((phase, idx) => (
-                            <div
-                              key={idx}
-                              className={`relative min-w-[120px] max-w-[160px] h-28 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0 cursor-pointer transition-all duration-200`}
-                              onClick={() => setSelectedPhaseIdx(idx)}
-                            >
-                              <Image
-                                src={
-                                  phase.master_plan || "/images/defaultImage.jpg"
-                                }
-                                alt={phase.name || "Phase Thumbnail"}
-                                fill
-                                className="object-cover"
-                                sizes="200px"
-                              />
-                              {/* Overlay for name */}
-                              <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-2">
-                                <div className="text-white text-xs font-semibold line-clamp-1">
-                                  {phase.name}
+                          {/* Thumbnails for other phases with scroll */}
+                          <div className="flex overflow-x-auto gap-4 pb-2 mt-4 flex-shrink-0">
+                            {selectedProject.phases.map((phase, idx) => (
+                              <div
+                                key={idx}
+                                className={`relative min-w-[120px] max-w-[160px] h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                                  selectedPhaseIdx === idx ? 'ring-2 ring-primary' : ''
+                                }`}
+                                onClick={() => setSelectedPhaseIdx(idx)}
+                              >
+                                <Image
+                                  src={
+                                    phase.master_plan || "/images/defaultImage.jpg"
+                                  }
+                                  alt={phase.name || "Phase Thumbnail"}
+                                  fill
+                                  className="object-cover"
+                                  sizes="200px"
+                                />
+                                {/* Overlay for name */}
+                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
+                                  <div className="text-white text-xs font-semibold line-clamp-1">
+                                    {phase.name}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          ))}
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <svg
+                            className="w-16 h-16 text-blue-400 mb-6  "
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 3 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 8v4l3 3m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                          <p className="text-xl font-normal text-primary mb-2">
+                            {t.noPhsesProject}
+                          </p>
                         </div>
-                      </>
-                    ) : (
-                      <div className="flex flex-col items-center justify-center h-64  my-8">
-                        <svg
-                          className="w-16 h-16 text-blue-400 mb-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 8v4l3 3m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
-                          />
-                        </svg>
-                        <p className="text-xl font-bold text-primary mb-2">
-                          {t.noPhsesProject}
-                        </p>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
