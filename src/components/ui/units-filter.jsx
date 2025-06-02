@@ -164,7 +164,15 @@ export default function UnitsFilter({
     setFilters((prev) => ({ ...prev, [key]: "" }));
 
     const newParams = new URLSearchParams(window.location.search);
-    newParams.delete(key);
+    
+    // Special handling for price range
+    if (key === "min_price" || key === "max_price") {
+      newParams.delete("min_price");
+      newParams.delete("max_price");
+    } else {
+      newParams.delete(key);
+    }
+    
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
 
