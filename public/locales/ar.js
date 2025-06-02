@@ -655,6 +655,9 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
+  "addNewProject":"اضافة مشروع جديد",
+  "description":"الوصف",
+  "phases":"المراحل",
   "viewInCRM":"زور موقعنا",
   "noPhsesProject":"لا تتوفر مراحل لهذا المشروع",
   "compoundUpdated":"تم تعديل المشروع بنجاح",

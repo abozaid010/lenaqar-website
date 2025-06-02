@@ -42,12 +42,12 @@ export default function BasicDetailsStep({
       }
     }
   };
-
+  
   // Update available compounds when district changes
   useEffect(() => {
     if (formData.city && formData.district) {
-      const selectedCountry = Egypt_cities.countries[0]; // Assuming Egypt is the only country for now
-      const selectedGovernorate = selectedCountry.governorates.find(
+      const selectedCountry = citiesAndDistricts; // Assuming Egypt is the only country for now
+      const selectedGovernorate = selectedCountry?.governorates?.find(
         (gov) => gov.governorate === formData.city
       );
 
@@ -148,6 +148,14 @@ export default function BasicDetailsStep({
   const handleAddCompound = (newCompound) => {
     // Add the new compound to the list
     setAvailableCompounds([...availableCompounds, newCompound.name]);
+
+    // Add the new project to dataProject with empty phases array
+    const newProject = {
+      id: newCompound.id,
+      name: newCompound.name,
+      phases: []
+    };
+    setDataProject([...dataProject, newProject]);
 
     // Update selected project in the form
     updateFormData({ project: newCompound.name });
@@ -744,8 +752,9 @@ export default function BasicDetailsStep({
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}
         developers={developers}
+     
         setDevelopers={setDevelopers}
-        Egypt_cities={Egypt_cities}
+        Egypt_cities={citiesAndDistricts}
         defaultCity={formData.city}
         defaultDistrict={formData.district}
         onProjectsLoaded={(projects) => {

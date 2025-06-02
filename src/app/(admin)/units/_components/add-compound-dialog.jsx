@@ -22,6 +22,7 @@ export default function AddCompoundDialog({
   onClose,
   compoundData,
   editMode,
+ 
 
   onAdd,
   developers = [],
@@ -33,6 +34,7 @@ export default function AddCompoundDialog({
   setProjectId,
 }) {
   const { t } = useI18n();
+  console.log(clientId)
   const ar = Cookies.get("lang");
   console.log(compoundData);
   const fileInputRef = useRef(null);
@@ -135,6 +137,13 @@ export default function AddCompoundDialog({
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+    
+    // Add validation for district selection
+    if (name === 'district' && !formData.city) {
+      toast.error(ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first");
+      return;
+    }
+    
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
@@ -345,7 +354,7 @@ export default function AddCompoundDialog({
           video_url: "",
           google_map_link: "",
           master_plan: "",
-          client_id: clientId || "",
+          client_id: clientId || "ai",
         });
 
         if (fileInputRef.current) {
@@ -359,6 +368,7 @@ export default function AddCompoundDialog({
 
     } catch (error) {
       console.error("API Error:", error);
+      console.log(error)
       toast.error(
         editMode
           ? (t.toasts?.compoundUpdateFailed || "Failed to update compound. Please try again.")
@@ -446,7 +456,7 @@ export default function AddCompoundDialog({
                   <option value="">
                      { editMode ? formData.city : t.formLabels?.selectCity}
                   </option>
-                  {Egypt_cities?.countries[0]?.governorates?.map((gov) => (
+                  {Egypt_cities?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
                       {gov?.governorate}
                     </option>
@@ -481,13 +491,18 @@ export default function AddCompoundDialog({
                 value={formData.district}
                 onChange={handleChange}
                 disabled={!formData.city || editMode}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                  !formData.city ? 'bg-gray-100' : ''
+                }`}
               >
                 <option value="">
-                  {editMode ? formData.district : t.formLabels?.selectCity}
+                  {!formData.city 
+                    ? (ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first")
+                    : (editMode ? formData.district : (ar === "ar" ? t.formLabels?.district  : "Select district"))
+                  }
                 </option>
                 {formData?.city &&
-                  Egypt_cities?.countries[0]?.governorates
+                  Egypt_cities
                     .find((gov) => gov.governorate === formData.city)
                     ?.districts.map((dist) => (
                       <option key={dist.district} value={dist.district}>
@@ -495,6 +510,11 @@ export default function AddCompoundDialog({
                       </option>
                     ))}
               </select>
+              {/* {!formData.city && (
+                <p className="mt-1 text-sm text-red-600">
+                  {ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first"}
+                </p>
+              )} */}
             </div>
 
             {/* Details */}
@@ -552,13 +572,14 @@ export default function AddCompoundDialog({
                   <option value="">
                     { editMode ? formData.developer_name : t.formLabels?.selectDeveloper || "Select developer"}
                   </option>
-                  {developers.map((d, idx) => (
-                    <option key={idx} value={d}>
+                  {developers?.map((d, idx) => (
+                    <option key={idx} value={ d }>
+                      {console.log(d)}
                       {d}
                     </option>
                   ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
                   <svg
                     className="h-5 w-5 text-gray-400"
                     viewBox="0 0 20 20"

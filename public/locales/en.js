@@ -384,6 +384,9 @@ export default {
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
   "viewInCRM":"View in CRM",
+  "phases":"phases",
+  "description":"Description",
+  "addNewProject":"Add New Project",
   "noPhsesProject":"No phases for this project",
   "updateProject":" update project",
   "updating":"updating...",
