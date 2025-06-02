@@ -25,8 +25,11 @@ import toast from "react-hot-toast";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import Cookies from "js-cookie";
 
-export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  developers,clientId }) {
+export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  developers }) {
   const { t } = useI18n();
+  const clientId = Cookies.get("client_id");
+
+
  
   const formattedDataCitiesAndDistricts = !readonly
   ? Object.entries(citiesAndDistricts)
@@ -38,7 +41,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         })),
       }))
   : [];
-  console.log(formattedDataCitiesAndDistricts)
+
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [projectId, setProjectId] = useState(null);
