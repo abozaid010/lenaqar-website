@@ -5,11 +5,11 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY package.json yarn.lock ./
+COPY package.json ./
 
 # Clean yarn cache and install dependencies with increased memory limit
 RUN yarn cache clean && \
-    yarn install --frozen-lockfile --network-timeout 1000000 --max-old-space-size=4096
+    yarn install --network-timeout 1000000 --max-old-space-size=4096
 
 # Copy project files
 COPY . .
