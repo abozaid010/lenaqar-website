@@ -5,14 +5,22 @@ FROM node:18-alpine
 WORKDIR /app
 
 # Install dependencies
-COPY package.json ./
-RUN yarn install --frozen-lockfile
+COPY package.json yarn.lock ./
+
+# Clean yarn cache and install dependencies with increased memory limit
+RUN yarn cache clean && \
+    yarn install --frozen-lockfile --network-timeout 1000000 --max-old-space-size=4096
 
 # Copy project files
 COPY . .
 
 # Build the project
 RUN yarn build
+
+# Clean up unnecessary files to save space
+RUN yarn cache clean && \
+    rm -rf /root/.cache && \
+    rm -rf /root/.npm
 
 # Expose port
 EXPOSE 3000
