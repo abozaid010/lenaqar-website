@@ -1,26 +1,27 @@
 # Dockerfile for the GCP
 FROM node:18-alpine
 
+# Increase tmp size to avoid ENOSPC
+ENV TMPDIR=/tmp
+
 # Create app directory
 WORKDIR /app
 
 # Install dependencies
-COPY package.json ./
+COPY package.json yarn.lock ./
 
 # Clean yarn cache and install dependencies with increased memory limit
+# Prefer offline and frozen lockfile for stability
 RUN yarn cache clean && \
-    yarn install --network-timeout 1000000 --max-old-space-size=4096
+    yarn install --frozen-lockfile --prefer-offline --network-timeout 1000000 --max-old-space-size=4096 && \
+    rm -rf /root/.cache /usr/local/share/.cache /tmp/* /var/cache/* /var/tmp/*
 
-# Copy project files
+# Copy all remaining project files
 COPY . .
 
 # Build the project
-RUN yarn build
-
-# Clean up unnecessary files to save space
-RUN yarn cache clean && \
-    rm -rf /root/.cache && \
-    rm -rf /root/.npm
+RUN yarn build && \
+    rm -rf node_modules/.cache
 
 # Expose port
 EXPOSE 3000
