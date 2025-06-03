@@ -141,7 +141,7 @@ export default {
     "logoAlt": "شعار لينا AI",
     "companyName": "لينا AI",
     "meetingDuration": "اجتماع لمدة 30 دقيقة",
-    "duration": "15 دقيقة",
+    "duration": "30 دقيقة",
     "conferencingDetails": "سيتم توفير تفاصيل المؤتمر عبر الويب عند التأكيد.",
     "bookMeeting": "حجز اجتماع",
     "meetingDescription": "حجز اجتماع لمدة 30 دقيقة مع فريق لينا",
@@ -200,7 +200,7 @@ export default {
   dashboardFilter: {
     "actions": {
       "all": "كل الإجراءات",
-      "Monitorlead":"مراقبة العميل ",
+      "Monitorlead": "مراقبة العميل ",
       "makeCall": "إجراء مكالمة",
       "officeVisit": "زيارة مكتب",
       "propertyView": "معاينه",
@@ -217,7 +217,7 @@ export default {
 
 
     },
-    
+
     "datePicker": {
       "startDate": "تاريخ البداية",
       "endDate": "تاريخ النهاية",
@@ -419,7 +419,7 @@ export default {
   "addPhase": "اضافة مرحلة",
   "projectFirst": "اختر المشروع اولا",
   formLabels: {
-    
+
     "unitTitle": "عنوان الوحدة",
     "buildingType": "نوع المبنى",
     "purpose": "الغرض",
@@ -443,7 +443,7 @@ export default {
     "cityFirst": "اختر المدينه اولا",
     "selectDistrict": "اختر الحي "
   },
-  
+
   buildingTypes: {
     "apartment": "شقة",
     "villa": "فيلا",
@@ -509,7 +509,7 @@ export default {
     "selectPhase": "اختر المرحلة",
     "noPhases": "لا يوجد مراحل في هذا المشروع",
     "selectProject": "اختر المشروع",
-    
+
     "propertyDetails": "تفاصيل العقار",
     "propertySpecs": "مواصفات العقار",
     "unitTitle": "عنوان الوحدة",
@@ -534,7 +534,7 @@ export default {
       "district": "اسم الحي",
       "code": "كود الوحدة (اختياري)",
     },
-   
+
     "code": "كود الوحدة",
     "model": "نموذج الوحدة",
     buildingTypes: {
@@ -657,25 +657,25 @@ export default {
   "totalActions": "إجمالي الإجراءات",
   "clickBarInfo": "انقر على أي شريط لمشاهدة تفاصيل الإجراءات"
   ,
-  "addNewProject":"اضافة مشروع جديد",
-  "description":"الوصف",
-  "phases":"المراحل",
-  "viewInCRM":"زور موقعنا",
-  "noPhsesProject":"لا تتوفر مراحل لهذا المشروع",
-  "compoundUpdated":"تم تعديل المشروع بنجاح",
-  "compoundAdded":"تم اضافة المشروع بنجاح",
-  "updating":"تعديل...",
-  "updatesuccess":"",
-  "updateProject":"تعديل المشروع",
-  "projectUndfined":"لا توجد مشاريع متاحة لك",
-  "deleteButton":"حذف",
-  "cancelButton":"الغاء",
-  "sureDelet":"هل أنت متأكد أنك تريد الحذف؟",
-  "actionDelet":"لا يمكن التراجع عن هذا الإجراء.",
-  "deleteTitel":"حذف المشروع",
-  "failedProject":"خطا في حذف المشروع",
-  "projectDelete":"تم حذف المشروع بنجاح",
-  "associateProject":"هذا المشروع مرتبط بعدة وحدات.",
+  "addNewProject": "اضافة مشروع جديد",
+  "description": "الوصف",
+  "phases": "المراحل",
+  "viewInCRM": "زور موقعنا",
+  "noPhsesProject": "لا تتوفر مراحل لهذا المشروع",
+  "compoundUpdated": "تم تعديل المشروع بنجاح",
+  "compoundAdded": "تم اضافة المشروع بنجاح",
+  "updating": "تعديل...",
+  "updatesuccess": "",
+  "updateProject": "تعديل المشروع",
+  "projectUndfined": "لا توجد مشاريع متاحة لك",
+  "deleteButton": "حذف",
+  "cancelButton": "الغاء",
+  "sureDelet": "هل أنت متأكد أنك تريد الحذف؟",
+  "actionDelet": "لا يمكن التراجع عن هذا الإجراء.",
+  "deleteTitel": "حذف المشروع",
+  "failedProject": "خطا في حذف المشروع",
+  "projectDelete": "تم حذف المشروع بنجاح",
+  "associateProject": "هذا المشروع مرتبط بعدة وحدات.",
   "typeYourMessage": "اكتب رسالتك هنا",
   "send": "إرسال",
   "Ai": "الرد الألي",
@@ -886,7 +886,7 @@ export default {
   copyWithLink: "نسخ مع الرابط",
   copied: "تم النسخ",
   addPhaseSuccess: "تم إضافة المرحلة بنجاح",
-  addPhaseFailed: "فشل إضافة المرحلة. يرجى المحاولة مرة أخرى.", 
+  addPhaseFailed: "فشل إضافة المرحلة. يرجى المحاولة مرة أخرى.",
   loadingShareData: "جاري تحميل بيانات المشاركة...",
   images: "صور",
   formLabels: {
