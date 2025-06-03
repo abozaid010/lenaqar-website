@@ -152,6 +152,17 @@ const Sidebar = () => {
             <Users2 className="h-5 w-5 mr-3" />
             <span>{t.sidebar.myProjects}</span>
           </Link>
+          {/* <Link
+            href="/schedule"
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
+              isLinkActive("/schedule")
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Users2 className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.schedule || "Schedule"}</span>
+          </Link> */}
         </div>
 
         {/* Bottom Section */}

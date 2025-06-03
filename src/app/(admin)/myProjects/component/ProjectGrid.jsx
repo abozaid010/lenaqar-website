@@ -12,6 +12,7 @@ import {
   Eye,
   Play,
   Plus,
+  Clock,
 } from "lucide-react";
 
 import { useState } from "react";
@@ -28,21 +29,20 @@ import Cookies from "js-cookie";
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
-export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  developers }) {
+export default function ProjectList({ projects, citiesAndDistricts, readonly, developers }) {
   const { t } = useI18n();
   const clientId = Cookies.get("client_id");
 
- 
   const formattedDataCitiesAndDistricts = !readonly
-  ? Object.entries(citiesAndDistricts)
-      .filter(([governorate]) => governorate !== "cities")
-      .map(([governorate, districts]) => ({
-        governorate,
-        districts: districts.map((district) => ({
-          district,
-        })),
-      }))
-  : [];
+    ? Object.entries(citiesAndDistricts)
+        .filter(([governorate]) => governorate !== "cities")
+        .map(([governorate, districts]) => ({
+          governorate,
+          districts: districts.map((district) => ({
+            district,
+          })),
+        }))
+    : [];
 
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -54,21 +54,18 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
   const [projectList, setProjectList] = useState(projects);
- 
+
   const developersSet = Array.from(
     new Set(developers.map((developer) => developer.name))
   );
-  // Initialize router
+  
   const router = useRouter();
 
-  // Function to handle project updates from the dialog
   const handleProjectUpdate = (updatedProject) => {
-    // تحديث قائمة المشاريع
     setProjectList((prev) =>
       prev.map((p) => (p.id === updatedProject.id ? updatedProject : p))
     );
     router.refresh();
-    // إذا كان المشروع المعروض هو نفسه الذي تم تعديله، حدثه في selectedProject
     if (selectedProject && selectedProject.id === updatedProject.id) {
       setSelectedProject(updatedProject);
       router.refresh();
@@ -82,10 +79,8 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         toast.error(t.associateProject);
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
-        // Update project list and selected project
         setProjectList((prev) => {
           const updatedList = prev.filter(p => p.id !== project_id);
-          // If the deleted project was selected, select the first available project
           if (selectedProject?.id === project_id) {
             setSelectedProject(updatedList[0] || null);
           }
@@ -114,10 +109,8 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
   const handleConfirmDelete = () => {
     if (projectToDelete) {
       deleteproject(projectToDelete.id);
-      // Update project list and selected project
       setProjectList((prev) => {
         const updatedList = prev.filter(p => p.id !== projectToDelete.id);
-        // If the deleted project was selected, select the first available project
         if (selectedProject?.id === projectToDelete.id) {
           setSelectedProject(updatedList[0] || null);
         }
@@ -134,7 +127,6 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
 
   return (
     <>
-      {/* Edit Dialog */}
       <AddCompoundDialog
         isOpen={showEditDialog}
         onClose={() => setShowEditDialog(false)}
@@ -144,8 +136,6 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
 
-      {/* Add New Project Dialog */}
-      
       <AddCompoundDialog
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
@@ -160,12 +150,9 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         showName={true}
         projectId={projectId}
         setProjectId={setProjectId}
-
-        // Egypt_cities={citiesAndDistricts}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
 
-      {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         isOpen={showDeleteDialog}
         onClose={() => {
@@ -176,23 +163,24 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
         projectName={projectToDelete?.name}
       />
 
-      <div className=" bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4 ">
-        {/* Projects Section */}
-        <div className={`${projects?.length === 0 ? 'lg:col-span-4' : 'lg:col-span-2'} bg-white  rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col`}>
+      <div className="bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
+        {/* Projects Section - تم تعديل ارتفاع هذا القسم */}
+        <div className={`${projects?.length === 0 ? 'lg:col-span-4' : 'lg:col-span-2'} bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden`}>
           <div className="bg-primary p-4 flex justify-between items-center">
             <h2 className="text-white text-xl font-semibold">{t.sidebar.myProjects}</h2>
             <button
               onClick={() => setShowAddDialog(true)}
-              className="flex items-center gap-2 bg-white text-primary   px-4 py-2 rounded-lg transition-colors duration-200"
+              className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
             >
               <Plus size={20} />
               <span> {t.addNewProject}</span>
             </button>
           </div>
 
-          <div className="flex-1 flex flex-col">
+          {/* تم تعديل هذا الجزء ليكون ارتفاعه تلقائيًا حسب المحتوى */}
+          <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
             {projects?.length === 0 || projects === null ? (
-              <div className="flex flex-col items-center justify-center flex-1 p-6">
+              <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
                     className="w-8 h-8 text-gray-400"
@@ -213,7 +201,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                 </p>
               </div>
             ) : (
-              <div className="space-y-3 p-4 overflow-y-auto flex-1">
+              <div className="space-y-3 p-4">
                 {projects?.map((project) => (
                   <div
                     key={project.id}
@@ -271,7 +259,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                       <div className="flex-1"></div>
                       <button
                         onClick={(e) => handleEditClick(project, e)}
-                        className="ml-2 p-2 bg-white/90  text-gray-700  rounded-full shadow transition-all duration-200"
+                        className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
                         title="Edit Project"
                       >
                         <Pencil size={16} />
@@ -298,7 +286,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
               {selectedProject ? (
                 <div>
                   {selectedProject.master_plan ? (
-                    <div className="w-full h-80 relative mb-6  overflow-hidden ">
+                    <div className="w-full h-80 relative mb-6 overflow-hidden">
                       <Image
                         src={
                           selectedProject.master_plan ||
@@ -312,7 +300,7 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                       />
                     </div>
                   ) : (
-                      <div className="w-full h-80 relative mb-6  overflow-hidden ">
+                    <div className="w-full h-80 relative mb-6 overflow-hidden">
                       <Image
                         src={
                           selectedProject.master_plan ||
@@ -333,15 +321,13 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                       <p>{selectedProject.description}</p>
                     </div>
                   )}
-                  <div className="p-4 ">
+                  <div className="p-4">
                     <h4 className="font-semibold text-lg mb-2 text-white p-4 bg-primary">
                       {t.phases}
                     </h4>
-                    {/* Fixed height container for phases section */}
                     <div className="h-[500px] flex flex-col">
                       {selectedProject.phases && selectedProject.phases.length > 0 ? (
                         <>
-                          {/* Main selected phase full screen */}
                           <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             <Image
                               src={
@@ -374,7 +360,6 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                               </div>
                             </div>
                           </div>
-                          {/* Thumbnails for other phases with scroll */}
                           <div className="flex overflow-x-auto gap-4 pb-2 mt-4 flex-shrink-0">
                             {selectedProject.phases.map((phase, idx) => (
                               <div
@@ -393,7 +378,6 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                                   className="object-cover"
                                   sizes="200px"
                                 />
-                                {/* Overlay for name */}
                                 <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
                                   <div className="text-white text-xs font-semibold line-clamp-1">
                                     {phase.name}
@@ -405,19 +389,10 @@ export default function ProjectList({ projects,citiesAndDistricts ,readonly ,  d
                         </>
                       ) : (
                         <div className="flex flex-col items-center justify-center h-full">
-                          <svg
-                            className="w-16 h-16 text-blue-400 mb-6  "
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 3 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8v4l3 3m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
-                            />
-                          </svg>
+                          <Clock
+                            className="w-16 h-16 text-primary mb-6"
+                            strokeWidth={1.5}
+                          />
                           <p className="text-xl font-normal text-primary mb-2">
                             {t.noPhsesProject}
                           </p>

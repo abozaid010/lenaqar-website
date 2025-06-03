@@ -28,7 +28,17 @@ body {
   font-family: "Montserrat", "Cairo", sans-serif;
   overflow-x: hidden;
 }
+input[type="date"] {
+  font-family: Arial, sans-serif, "Segoe UI", Roboto !important;
+  font-feature-settings: "lnum" 1 !important;
+  font-variant-numeric: lining-nums !important;
+  direction: ltr !important;
+}
 
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  font-family: Arial, sans-serif !important;
+}
 button,
 h1,
 p,

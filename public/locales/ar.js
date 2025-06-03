@@ -200,6 +200,7 @@ export default {
   dashboardFilter: {
     "actions": {
       "all": "كل الإجراءات",
+      "Monitorlead":"مراقبة العميل ",
       "makeCall": "إجراء مكالمة",
       "officeVisit": "زيارة مكتب",
       "propertyView": "معاينه",
@@ -296,7 +297,8 @@ export default {
     "aiAction": "إجراءات الذكاء الاصطناعي"
   },
   propertyDetails: {
-    "title": "{id}_المتطلبات",
+    "title": "_المتطلبات",
+    "title2": "/المتطلبات",
     "fields": {
       "buildingType": "نوع المبنى",
       "landArea": "مساحة الأرض",

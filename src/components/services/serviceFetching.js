@@ -262,6 +262,17 @@ export async function getChatHistory(userId) {
     return error;
   }
 }
+export async function getschedual(startDate,endDate) {
+  // const cookieClientId = await getClientid();
+
+  try {
+    const response = await axiosInstance.get(`action/by-date?start_date=${startDate}&end_date=${endDate}`);
+    console.log(response.data)
+    return response.data.data.actions;
+  } catch (error) {
+    return error;
+  }
+}
 
 export async function getClientActions(phoneNumber) {
   try {

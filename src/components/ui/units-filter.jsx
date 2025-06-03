@@ -370,7 +370,7 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {developersSet.map((d, idx) => (
+              {[...developersSet].sort((a, b) => a.localeCompare(b, 'ar')).map((d, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
@@ -424,7 +424,7 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {compounds?.map((c, idx) => (
+              {[...compounds].sort((a, b) => a.name.localeCompare(b.name, 'ar')).map((c, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
@@ -534,7 +534,7 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allPropertyTypes}
               </div>
-              {buildingTypes.map((type) => (
+              {[...buildingTypes].sort((a, b) => a.label.localeCompare(b.label, 'ar')).map((type) => (
                 <div
                   key={type.value}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"

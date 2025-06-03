@@ -200,6 +200,7 @@ export default {
   dashboardFilter: {
     "actions": {
       "all": "All actions",
+      "Monitorlead":"Monitor lead",
       "makeCall": "Make a call",
       "officeVisit": "Office visit",
       "propertyView": "Property view",
@@ -266,7 +267,8 @@ export default {
   },
 
   propertyDetails: {
-    "title": "{id}_Requirements",
+    "title": " Requirements",
+    "title2": "/Requirements",
     "fields": {
       "buildingType": "Building Type",
       "landArea": "Land Area",
