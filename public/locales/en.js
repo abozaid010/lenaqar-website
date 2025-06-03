@@ -141,7 +141,7 @@ export default {
     "logoAlt": "Lena AI logo",
     "companyName": "Lena AI",
     "meetingDuration": "30 Minute Meeting",
-    "duration": "15 min",
+    "duration": "30 min",
     "conferencingDetails": "Web conferencing details provided upon confirmation.",
     "bookMeeting": "Book a meeting",
     "meetingDescription": "Book 30-Minute meeting with Lena Team",
@@ -200,7 +200,7 @@ export default {
   dashboardFilter: {
     "actions": {
       "all": "All actions",
-      "Monitorlead":"Monitor lead",
+      "Monitorlead": "Monitor lead",
       "makeCall": "Make a call",
       "officeVisit": "Office visit",
       "propertyView": "Property view",
@@ -385,25 +385,25 @@ export default {
     "selectPurpose": "Please select a purpose for the unit (sell/rent)",
     "errorProcessing": "An error occurred while processing your request. Please try again"
   },
-  "viewInCRM":"View in CRM",
-  "phases":"Phases",
-  "description":"Description",
-  "addNewProject":"Add New Project",
-  "noPhsesProject":"No phases for this project",
-  "updateProject":" update project",
-  "updating":"updating...",
-  "compoundUpdated":"project updated successfully!",
-  "compoundAdded":"project added successfully!",
-  
-  "projectUndfined":" No projects found.",
-  "cancelButton":"cancel",
-  "deleteButton":"delete",
-  "sureDelet":" Are you sure you want to delete",
-  "actionDelet":"This action cannot be undone.",
-  "deleteTitel" :"delete project",
-  "failedProject":"Failed to delete project",
-  "projectDelete":"project deleted successfuly",
-  "associateProject":"This project is associated with multiple units. Kindly contact support to delete it",
+  "viewInCRM": "View in CRM",
+  "phases": "Phases",
+  "description": "Description",
+  "addNewProject": "Add New Project",
+  "noPhsesProject": "No phases for this project",
+  "updateProject": " update project",
+  "updating": "updating...",
+  "compoundUpdated": "project updated successfully!",
+  "compoundAdded": "project added successfully!",
+
+  "projectUndfined": " No projects found.",
+  "cancelButton": "cancel",
+  "deleteButton": "delete",
+  "sureDelet": " Are you sure you want to delete",
+  "actionDelet": "This action cannot be undone.",
+  "deleteTitel": "delete project",
+  "failedProject": "Failed to delete project",
+  "projectDelete": "project deleted successfuly",
+  "associateProject": "This project is associated with multiple units. Kindly contact support to delete it",
   "phase": "Phase",
   viewOnGoogleMaps: "View on Google Maps",
   clickToViewFullscreen: "Click to view fullscreen",
@@ -421,8 +421,8 @@ export default {
   "addPhaseSuccess": "Phase added successfully!",
   "addPhaseFailed": "Failed to add phase. Please try again.",
   formLabels: {
-   
-   
+
+
     "unitTitle": "Unit Title",
     "buildingType": "Building Type",
     "purpose": "Purpose",
