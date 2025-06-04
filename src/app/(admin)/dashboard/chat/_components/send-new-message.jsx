@@ -14,7 +14,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const [state, action, pending] = useActionState(sendNewMessage, initialState);
   const [message, setMessage] = useState("");
   const { t } = useI18n();
-  const client_id = Cookies.get("lena-website::client_id");
+  const client_id = Cookies.get("lena-website-client_id");
   console.log(userId);
   console.log(state.message);
   const [formData, setFormData] = useState({

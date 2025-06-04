@@ -10,7 +10,7 @@ import OurResult from "./web/_components/OurResult";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const client_id = cookieStore.get("lena-website::client_id")?.value;
+  const client_id = cookieStore.get("lena-website-client_id")?.value;
 
   return (
     <>

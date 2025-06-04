@@ -22,7 +22,7 @@ export default function ProjectList({
   developers,
 }) {
   const { t } = useI18n();
-  const clientId = Cookies.get("lena-website::client_id");
+  const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
     ? Object.entries(citiesAndDistricts)

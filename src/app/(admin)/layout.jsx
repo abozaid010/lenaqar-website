@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 const Layout = async ({ children }) => {
   // Get the clientID from the cookie on the server then pass it as a prop to the Header component => To avoid hydration issues
   const cookieStore = await cookies();
-  const clientID = cookieStore.get("lena-website::client_id")?.value;
+  const clientID = cookieStore.get("lena-website-client_id")?.value;
   const clientInfoCookie = cookieStore.get("client_info")?.value;
   const clientName = clientInfoCookie
     ? JSON.parse(clientInfoCookie)?.client_name

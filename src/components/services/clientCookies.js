@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 
 export const getClientid = async () => {
   const cookieStore = await cookies();
-  const cookie = cookieStore.get("lena-website::client_id");
+  const cookie = cookieStore.get("lena-website-client_id");
 
 
   if (!cookie || !cookie.value) return {};
@@ -46,14 +46,14 @@ export const gettoken = async () => {
 };
 
 export const removeClientId = async () => {
-  const cookie = cookies().get("lena-website::client_id");
+  const cookie = cookies().get("lena-website-client_id");
 
   console.log(cookie);
   if (!cookie || !cookie.value)
     return toast.error("Failed to remove client_id cookie:");
 
   try {
-    cookies.delete("lena-website::client_id");
+    cookies.delete("lena-website-client_id");
     console.log("client_id cookie removed");
   } catch (error) {
     console.error("Failed to remove client_id cookie:", error);

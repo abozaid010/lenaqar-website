@@ -28,7 +28,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
   const cookieStore = await cookies();
-  const clientId = cookieStore.get("lena-website::client_id")?.value;
+  const clientId = cookieStore.get("lena-website-client_id")?.value;
   const clientName = cookieStore.get("client_info")?.value
     ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
     : null;
