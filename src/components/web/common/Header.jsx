@@ -25,7 +25,7 @@ const Header = ({ ci }) => {
   };
 
   const confirmLogout = () => {
-    Cookies.remove("lena-website::client_id");
+    Cookies.remove("lena-website-client_id");
     Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success("Logout Successful");

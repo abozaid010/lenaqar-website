@@ -33,7 +33,7 @@ export async function loginAction(prevState, formData) {
         const { access_token, client_id, client_name, email, phone_number } = response.data.data;
         const cookieStore = await cookies();
         cookieStore.set("access_token", access_token, { path: "/" });
-        cookieStore.set("lena-website::client_id", client_id, { path: "/" });
+        cookieStore.set("lena-website-client_id", client_id, { path: "/" });
         cookieStore.set("client_info", JSON.stringify({ email, client_name, phone_number }), {
             path: "/",
             httpOnly: false, // Allow client-side access if needed

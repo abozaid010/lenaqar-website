@@ -29,7 +29,7 @@ const Page = async ({ params }) => {
   const unit = await fetchUnitById(id);
   const cookieStore = await cookies();
 
-  const clientId = cookieStore.get("lena-website::client_id")?.value;
+  const clientId = cookieStore.get("lena-website-client_id")?.value;
 
   const [comboundata, developers, citiesAndDistricts] = await Promise.all([
     fetchcombounds(),

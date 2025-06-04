@@ -15,7 +15,7 @@ const initialState = {
 export default function NewActionForm({ userId, onSuccess }) {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
-  const clientId = Cookies.get("lena-website::client_id");
+  const clientId = Cookies.get("lena-website-client_id");
 
   const ACTIONS = useMemo(
     () => [
