@@ -152,7 +152,7 @@ const Sidebar = () => {
             <Users2 className="h-5 w-5 mr-3" />
             <span>{t.sidebar.myProjects}</span>
           </Link>
-          {/* <Link
+          <Link
             href="/schedule"
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
               isLinkActive("/schedule")
@@ -162,7 +162,7 @@ const Sidebar = () => {
           >
             <Users2 className="h-5 w-5 mr-3" />
             <span>{t.sidebar.schedule || "Schedule"}</span>
-          </Link> */}
+          </Link>
         </div>
 
         {/* Bottom Section */}
