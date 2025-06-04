@@ -1,6 +1,6 @@
 import React from 'react'
 import Schedual from './components/Schedual'
-import { getschedual } from '@/components/services/serviceFetching';
+import { getSalesData, getschedual } from '@/components/services/serviceFetching';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,10 +24,11 @@ console.log("تاريخ بعد 7 أيام هو:", formattedAfter);
 
 const page =  async () => {
     const data = await getschedual(formattedBefore,formattedAfter)
-    console.log(data)
+    const dataSales = await getSalesData();
+    console.log(dataSales)
   return (
     <div>
-      <Schedual data={data} />
+      <Schedual data={data} dataSales={dataSales?.data} />
     </div>
   )
 }

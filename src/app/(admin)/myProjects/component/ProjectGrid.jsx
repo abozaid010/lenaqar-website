@@ -53,7 +53,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
   const [expandedProject, setExpandedProject] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
-  const [projectList, setProjectList] = useState(projects);
+  const [projectList, setProjectList] = useState(projects || []);
 
   const developersSet = Array.from(
     new Set(developers.map((developer) => developer.name))
@@ -62,9 +62,10 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
   const router = useRouter();
 
   const handleProjectUpdate = (updatedProject) => {
-    setProjectList((prev) =>
-      prev.map((p) => (p.id === updatedProject.id ? updatedProject : p))
-    );
+    setProjectList((prev) => {
+      if (!Array.isArray(prev)) return [updatedProject];
+      return prev.map((p) => (p.id === updatedProject.id ? updatedProject : p));
+    });
     router.refresh();
     if (selectedProject && selectedProject.id === updatedProject.id) {
       setSelectedProject(updatedProject);
@@ -80,6 +81,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
         setProjectList((prev) => {
+          if (!Array.isArray(prev)) return [];
           const updatedList = prev.filter(p => p.id !== project_id);
           if (selectedProject?.id === project_id) {
             setSelectedProject(updatedList[0] || null);
@@ -164,8 +166,18 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
       />
 
       <div className="bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
-        {/* Projects Section - تم تعديل ارتفاع هذا القسم */}
-        <div className={`${projects?.length === 0 ? 'lg:col-span-4' : 'lg:col-span-2'} bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden`}>
+        <div className={`${
+          projects?.length === 0 ? 'h-[350px]' :
+          projects?.length === 1 ? 'h-[250px]' :
+          projects?.length === 2 ? 'h-[350px]' :
+          projects?.length === 3 ? 'h-[450px]' :
+          projects?.length === 4 ? 'h-[550px]' :
+          projects?.length === 5 ? 'h-[660px]' :
+          projects?.length === 6 ? 'h-[780px]' :
+          projects?.length === 7 ? 'h-[880px]' :
+          projects?.length === 8 ? 'h-[1000px]' :
+          'min-h-[350px]'
+        } bg-white rounded-lg shadow-sm border lg:col-span-2 border-gray-200 overflow-hidden`}>
           <div className="bg-primary p-4 flex justify-between items-center">
             <h2 className="text-white text-xl font-semibold">{t.sidebar.myProjects}</h2>
             <button
@@ -175,10 +187,8 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
               <Plus size={20} />
               <span> {t.addNewProject}</span>
             </button>
-          </div>
-
-          {/* تم تعديل هذا الجزء ليكون ارتفاعه تلقائيًا حسب المحتوى */}
-          <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 200px)' }}>
+          </div> 
+          <div className="overflow-y-auto " >
             {projects?.length === 0 || projects === null ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -276,7 +286,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                 ))}
               </div>
             )}
-          </div>
+          </div> 
         </div>
 
         {/* Right Panel - Details/Map/etc */}
