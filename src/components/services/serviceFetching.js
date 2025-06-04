@@ -273,6 +273,18 @@ export async function getschedual(startDate,endDate) {
     return error;
   }
 }
+export async function assignSalsePerson(id,additionalProp1) {
+  // const cookieClientId = await getClientid();
+ 
+
+  try {
+    const response = await axiosInstance.post(`/sales-employees/${id}/assign-task`,additionalProp1);
+    console.log(response.data.data)
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
 
 export async function getClientActions(phoneNumber) {
   try {

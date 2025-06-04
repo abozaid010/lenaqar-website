@@ -1,50 +1,18 @@
 "use client"
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calendar, MapPin, User, ChevronLeft, ChevronRight, Clock, UserPlus, ChevronDown } from 'lucide-react';
+import { Calendar, MapPin, User, ChevronLeft, ChevronRight, Clock, UserPlus, ChevronDown, Loader2 } from 'lucide-react';
+import { assignSalsePerson } from '@/components/services/serviceFetching';
 
-const Schedule = ({data}) => {
+const Schedule = ({data, dataSales}) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
-
-  const mockSalespeople = [
-    {
-      id: 1,
-      name: "John Smith",
-      role: "Senior Sales Agent"
-    },
-    {
-      id: 2,
-      name: "Sarah Johnson",
-      role: "Sales Manager"
-    },
-    {
-      id: 3,
-      name: "Michael Brown",
-      role: "Sales Agent"
-    },
-    {
-      id: 4,
-      name: "Emily Davis",
-      role: "Senior Sales Agent"
-    },
-    {
-      id: 5,
-      name: "David Wilson",
-      role: "Sales Agent"
-    }
-  ];
-
-  const assignSalesperson = (appointmentId, salesperson) => {
-    setAppointments(prevAppointments => 
-      prevAppointments.map(appointment => 
-        appointment.id === appointmentId 
-          ? { ...appointment, assignedSalesperson: salesperson.name, salespersonId: salesperson.id }
-          : appointment
-      )
-    );
-    setOpenDropdown(null);
-  };
+  const [loading, setLoading] = useState(null);
+  const[salesperson, setSalesperson] = useState(null);
+console.log(appointments)
+console.log(salesperson)
+ 
+ 
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -119,10 +87,39 @@ const Schedule = ({data}) => {
     return currentDate < maxDate;
   };
 
-  const toggleDropdown = (appointmentId) => {
-    setOpenDropdown(openDropdown === appointmentId ? null : appointmentId);
+  const toggleDropdown = (index) => {
+    setOpenDropdown(openDropdown === index ? null : index);
+
   };
 
+  const assignSalesPerson = async (appointmentId, additionalProp1, index) => {
+    try {
+      setLoading(index);
+      const response = await assignSalsePerson(appointmentId, additionalProp1);
+      console.log(response.data.name);
+      setSalesperson(response.data.name);
+      setAppointments(prevAppointments => 
+        prevAppointments.map(appointment => 
+          appointment.id === appointmentId 
+            ? { ...appointment, assignedSalesperson: response.data.name, salespersonId: salesperson.id }
+            : appointment
+        )
+      );
+      const newData = filteredData.map(item => 
+        item.id === appointmentId 
+          ? { ...item, assignedSalesperson: response.data.name, salespersonId: salesperson.id }
+          : item
+      );
+      console.log(newData);
+      setOpenDropdown(null);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(null);
+    }
+  };
+
+ console.log(filteredData)
   return (
     <div className='border border-red-50'>   
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 ">
@@ -184,7 +181,7 @@ const Schedule = ({data}) => {
                 <p className="text-gray-400">Your schedule is clear for this week.</p>
               </div>
             ) : (
-              filteredData?.map(appointment => (
+              filteredData?.map((appointment, index) => (
                 <div key={appointment.id} className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200">
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -222,6 +219,7 @@ const Schedule = ({data}) => {
                         <User className="w-5 h-5 text-primary" />
                         <span className={`font-medium ${appointment.assignedSalesperson ? 'text-primary' : 'text-gray-500'}`}>
                           {appointment.assignedSalesperson || 'Unassigned'}
+                          {console.log(appointment)}
                         </span>
                       </div>
                     </div>
@@ -229,8 +227,8 @@ const Schedule = ({data}) => {
                     {!appointment.assignedSalesperson && (
                       <div className="pt-4 border-t border-gray-100">
                         <div className="relative">
-                          {/* <button
-                            onClick={() => toggleDropdown(appointment.id)}
+                          <button
+                            onClick={() => toggleDropdown(index)}
                             className="flex items-center justify-between w-full px-4 py-3 border border-gray-200 rounded-lg transition-all duration-200 group"
                           >
                             <div className="flex items-center gap-3">
@@ -239,24 +237,31 @@ const Schedule = ({data}) => {
                             </div>
                             <ChevronDown 
                               className={`w-5 h-5 text-primary transition-transform duration-200 ${
-                                openDropdown === appointment.id ? 'rotate-180' : ''
+                                openDropdown === index ? 'rotate-180' : ''
                               }`}
                             />
-                          </button> */}
+                          </button>
+                          {console.log(dataSales)}
                           
-                          {openDropdown === appointment.id && (
+                          {openDropdown === index && (
                             <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                               <div className="max-h-60 overflow-y-auto">
-                                {mockSalespeople.map((salesperson, index) => (
+                                {dataSales.map((salesperson, index) => (
                                   <button
-                                    key={salesperson.id}
-                                    onClick={() => assignSalesperson(appointment.id, salesperson)}
+                                    key={index}
+                                    onClick={() => assignSalesPerson(salesperson.id, salesperson, index)}
+                                    disabled={loading === index}
                                     className={`flex items-center gap-3 w-full p-4 text-left hover:bg-gradient-to-r hover:from-violet-50 hover:to-blue-50 transition-all duration-200 group ${
-                                      index !== mockSalespeople.length - 1 ? 'border-b border-gray-100' : ''
-                                    }`}
+                                      index !== dataSales.length - 1 ? 'border-b border-gray-100' : ''
+                                    } ${loading === index ? 'opacity-50 cursor-not-allowed' : ''}`}
                                   >
+                                    {console.log(salesperson)}
                                     <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm group-hover:scale-110 transition-transform duration-200 shadow-md">
-                                      {salesperson.name.split(' ').map(n => n[0]).join('')}
+                                      {loading === index ? (
+                                        <Loader2 className="w-5 h-5 animate-spin" />
+                                      ) : (
+                                        salesperson.name.split(' ').map(n => n[0]).join('')
+                                      )}
                                     </div>
                                     <div className="flex-1">
                                       <div className="font-medium text-gray-800 group-hover:text-primary transition-colors">

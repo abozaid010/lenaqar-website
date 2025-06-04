@@ -261,7 +261,7 @@ export default function UnitsFilter({
     if (!filters.project_name || filters.project_name === "all") {
       return t.unitsFilter.allCompounds || "All Projects";
     }
-    return filters.project_name;
+    return getTranslatedCompoundName(filters.project_name);
   };
 
   const getSelectedCity = () => {
@@ -274,6 +274,16 @@ export default function UnitsFilter({
   const getTranslatedDeveloperName = (name) => {
     return t.developerNames?.[name] || name;
   };
+
+
+  // Function to get translated compound name (if available)
+  const getTranslatedCompoundName = (name) => {
+    // Assuming there might be a translation key for compound names, similar to developer names.
+    // If not, it will just return the original name.
+    console.log(t.compoundNames?.[name]);
+    return t.compoundNames?.[name] || name;
+  };
+
 
   return (
     <div className=" ">
@@ -370,7 +380,11 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {[...developersSet].sort((a, b) => a.localeCompare(b, 'ar')).map((d, idx) => (
+              {[...developersSet].sort((a, b) => {
+                const nameA = getTranslatedDeveloperName(a);
+                const nameB = getTranslatedDeveloperName(b);
+                return nameA.localeCompare(nameB, 'ar');
+              }).map((d, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
@@ -424,7 +438,11 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {[...compounds].sort((a, b) => a.name.localeCompare(b.name, 'ar')).map((c, idx) => (
+              {[...compounds].sort((a, b) => {
+                const nameA = getTranslatedCompoundName(a.name);
+                const nameB = getTranslatedCompoundName(b.name);
+                return nameA.localeCompare(nameB, 'ar');
+              }).map((c, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
@@ -433,7 +451,7 @@ export default function UnitsFilter({
                     setIsProjectDropdownOpen(false);
                   }}
                 >
-                  {c.name}
+                  {getTranslatedCompoundName(c.name)}
                 </div>
               ))}
             </div>
