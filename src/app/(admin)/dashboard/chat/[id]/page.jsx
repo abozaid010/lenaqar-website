@@ -1,20 +1,22 @@
-import {
-  fetchUsersData,
-  getChatHistory,
-} from "@/components/services/serviceFetching";
-import ChatClientWrapper from "../_components/chat-client-wrapper";
-import ToggleReplyType from "../_components/reply-type";
 import { getClientid } from "@/components/services/clientCookies";
-import ChatWith from "../_components/Chat_with";
+import {
+  getChatHistory,
+  resetUnreadMessagesCount,
+} from "@/components/services/serviceFetching";
+import { CircleX } from "lucide-react";
 import Link from "next/link";
+import ChatClientWrapper from "../_components/chat-client-wrapper";
+import ChatWith from "../_components/Chat_with";
+import ToggleReplyType from "../_components/reply-type";
 import NavigationButtons from "./_components/NavigationButtons";
-import { ArrowLeftIcon, CircleX, EyeClosedIcon } from "lucide-react";
 
 export default async function ChatPage({ params }) {
   const { id } = await params;
 
   const clientID = await getClientid();
+
   const initialData = await getChatHistory(id);
+  await resetUnreadMessagesCount(id);
 
   let hasAccess = true;
   if (!initialData?.status) {
@@ -36,13 +38,12 @@ export default async function ChatPage({ params }) {
               <ChatWith name={name} />
             </div>
             <div className="flex items-center gap-4">
-             
               <ToggleReplyType phoneNumber={id} clientID={clientID} />
               <Link
                 href={`/dashboard`}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
-                 <CircleX className="w-8 h-8" color="red" />
+                <CircleX className="w-8 h-8" color="red" />
               </Link>
             </div>
           </div>

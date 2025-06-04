@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import PropertyDetailsModal from "./property-requirements-modal";
-import ClientsTablePagination from "./clients-table-pagination";
 import {
   getClientActions,
   getClientRequirements,
 } from "@/components/services/serviceFetching";
-import ActionsModal from "./actions-modal";
 import { useI18n } from "@/context/translate-api";
+import { BellDot, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import ActionsModal from "./actions-modal";
+import ClientsTablePagination from "./clients-table-pagination";
+import PropertyDetailsModal from "./property-requirements-modal";
 
 const ACTIONS_COLORS = {
   "Make a call": "text-blue-800",
@@ -257,7 +257,6 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {/* {user.requirement_name} */}
                             {t.unitDetails?.buildingTypesMap?.[
                               user.requirement_name
                             ] || user.requirement_name}
@@ -266,7 +265,23 @@ export default function ClientsTable({
                       </td>
 
                       <td className="px-2 py-2 text-center font-medium whitespace-nowrap hidden md:table-cell">
-                        {user.messages_count || 0}
+                        <span className="inline-flex items-center gap-1">
+                          <span className="inline-flex items-center min-w-[24px] px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold">
+                            {user.messages_count || 0}
+                          </span>
+                          {user?.unread_messages_count > 0 && (
+                            <span
+                              className="inline-flex items-center min-w-[24px] px-2 py-0.5 rounded bg-red-500 text-white text-xs font-semibold"
+                              title={
+                                t.clientsTable.headers.unreadMessages ||
+                                "Unread messages"
+                              }
+                            >
+                              {user.unread_messages_count}
+                              <BellDot size={14} className="ml-1" />
+                            </span>
+                          )}
+                        </span>
                       </td>
 
                       <td

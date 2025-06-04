@@ -10,7 +10,7 @@ export async function middleware(request) {
   );
 
   if (isProtectedRoute) {
-    const clientId = request.cookies.get("client_id")?.value;
+    const clientId = request.cookies.get("lena-website::client_id")?.value;
 
     if (!clientId) {
       return NextResponse.redirect(new URL("/login", request.url));
@@ -18,7 +18,7 @@ export async function middleware(request) {
   }
 
   if (path === "/") {
-    const clientId = request.cookies.get("client_id")?.value;
+    const clientId = request.cookies.get("lena-website::client_id")?.value;
     if (clientId) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }

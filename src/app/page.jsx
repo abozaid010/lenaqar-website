@@ -1,16 +1,16 @@
 import Footer from "@/components/web/common/footer";
 import Header from "@/components/web/common/Header";
-import DataInsights from "./web/_components/DataInsigts";
-import SalesManagerSection from "./web/_components/SmartAutmtation";
 import HeroSection from "@/components/web/section/HomeSection/HeroSection";
 import DashbordImage from "./web/_components/DashbordImage";
+import DataInsights from "./web/_components/DataInsigts";
+import SalesManagerSection from "./web/_components/SmartAutmtation";
 
 import { cookies } from "next/headers";
 import OurResult from "./web/_components/OurResult";
 
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const client_id = cookieStore.get("client_id")?.value;
+  const client_id = cookieStore.get("lena-website::client_id")?.value;
 
   return (
     <>

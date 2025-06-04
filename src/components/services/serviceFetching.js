@@ -16,10 +16,10 @@ export async function fetchUnits() {
 }
 
 export async function fetchcombounds(use) {
- 
+
   try {
     const response = await axiosInstance.get(`${use ? `/projects/all` : '/public/projects'}`);
-   
+
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
@@ -27,10 +27,10 @@ export async function fetchcombounds(use) {
   }
 }
 export async function fetchMyProjects() {
- const clientId = await getClientid();
+  const clientId = await getClientid();
   try {
-    const response = await axiosInstance.get(`/projects/all?client_id=${clientId}` );
-   
+    const response = await axiosInstance.get(`/projects/all?client_id=${clientId}`);
+
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
@@ -40,7 +40,7 @@ export async function fetchMyProjects() {
 export async function fetchCitisAndProjects() {
   try {
     const response = await axiosInstance.get("/projects/cities-and-districts");
-  
+
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
@@ -146,6 +146,16 @@ export async function fetchUsersData(searchParams) {
   }
 }
 
+export async function resetUnreadMessagesCount(userId) {
+  try {
+    await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
+
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+    return { error: error.message };
+  }
+}
+
 export async function fetchUnitsFilter(searchParams, use) {
   const clientId = await getClientid();
 
@@ -196,10 +206,10 @@ export async function addUnit(unitData) {
     throw { message: error.response?.data?.message || error.message };
   }
 }
-export async function addNewPhase(phaseData,idProject) {
+export async function addNewPhase(phaseData, idProject) {
   try {
     const response = await axiosInstance.post(`project-phases/${idProject}/phase-create`, phaseData);
-   
+
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
@@ -227,12 +237,12 @@ export async function addCompound(compoundData) {
     throw { message: error.response?.data?.message || error.message };
   }
 }
-export async function updatecompound(compoundData,projectId) {
+export async function updatecompound(compoundData, projectId) {
   const clientId = await getClientid();
 
   try {
     const response = await axiosInstance.patch(`/projects/${projectId}/update-fields`, compoundData);
-    console.log(response)
+    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
@@ -244,7 +254,7 @@ export async function deleteProject(project_id) {
 
   try {
     const response = await axiosInstance.delete(`/projects/delete/${project_id}`);
-    console.log(response.data)
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
@@ -262,24 +272,24 @@ export async function getChatHistory(userId) {
     return error;
   }
 }
-export async function getschedual(startDate,endDate) {
+export async function getschedual(startDate, endDate) {
   // const cookieClientId = await getClientid();
 
   try {
     const response = await axiosInstance.get(`action/by-date?start_date=${startDate}&end_date=${endDate}`);
-    console.log(response.data)
+    console.log(response.data);
     return response.data.data.actions;
   } catch (error) {
     return error;
   }
 }
-export async function assignSalsePerson(id,additionalProp1) {
+export async function assignSalsePerson(id, additionalProp1) {
   // const cookieClientId = await getClientid();
- 
+
 
   try {
-    const response = await axiosInstance.post(`/sales-employees/${id}/assign-task`,additionalProp1);
-    console.log(response.data.data)
+    const response = await axiosInstance.post(`/sales-employees/${id}/assign-task`, additionalProp1);
+    console.log(response.data.data);
     return response.data;
   } catch (error) {
     return error;
@@ -299,7 +309,7 @@ export async function getClientActions(phoneNumber) {
 export async function getprojects(city, district) {
   try {
     const response = await axiosInstance.get(`/projects/get/${city}/${district}`);
-   
+
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
@@ -310,7 +320,7 @@ export async function getprojects(city, district) {
 export async function getClientRequirements(phoneNumber) {
   try {
     const response = await axiosInstance.get(`requirements/${phoneNumber}`);
-   
+
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
@@ -432,7 +442,7 @@ export async function getProfileData() {
 
   try {
     const response = await axiosInstance.get(`client/profile?email=${clientEmail}`);
-    
+
     return response.data;
   } catch (error) {
     console.error("Failed to fetch profile data:", error.message);
@@ -463,7 +473,7 @@ export async function userAnalytics(days) {
   const clientId = await getClientid();
   try {
     const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}?days=${days}`);
-   
+
     return response.data.data;
 
   } catch (error) {

@@ -1,15 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { Menu, X, AlertTriangle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { AlertTriangle, Menu, X } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
+import CalendarModal from "@/components/ui/calendar-modal";
+import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
-import { useI18n } from "@/context/translate-api";
-import CalendarModal from "@/components/ui/calendar-modal";
 
 const Header = ({ ci }) => {
   const { t } = useI18n();
@@ -25,7 +25,7 @@ const Header = ({ ci }) => {
   };
 
   const confirmLogout = () => {
-    Cookies.remove("client_id");
+    Cookies.remove("lena-website::client_id");
     Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success("Logout Successful");

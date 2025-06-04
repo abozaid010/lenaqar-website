@@ -300,6 +300,10 @@ export default {
     lastActivity: {
       na: "غير متاح",
     },
+    unreadMessages: {
+      na: "لا توجد رسائل غير مقروءة",
+      count: "{count} رسالة غير مقروءة",
+    }
   },
   actionForm: {
     actions: {

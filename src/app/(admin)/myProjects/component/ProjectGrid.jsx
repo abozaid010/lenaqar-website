@@ -1,37 +1,28 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { useI18n } from "@/context/translate-api";
-import {
-  Pencil,
-  Trash2,
-  ChevronDown,
-  ChevronUp,
-  MapPin,
-  Eye,
-  Play,
-  Plus,
-  Clock,
-} from "lucide-react";
+import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
+import Image from "next/image";
 
-import { useState } from "react";
-import {
-  deleteProject,
-  getShareUnitData,
-} from "@/components/services/serviceFetching";
-import AddCompoundDialog from "../../units/_components/add-compound-dialog";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
-import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import { deleteProject } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import AddCompoundDialog from "../../units/_components/add-compound-dialog";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
-export default function ProjectList({ projects, citiesAndDistricts, readonly, developers }) {
+export default function ProjectList({
+  projects,
+  citiesAndDistricts,
+  readonly,
+  developers,
+}) {
   const { t } = useI18n();
-  const clientId = Cookies.get("client_id");
+  const clientId = Cookies.get("lena-website::client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
     ? Object.entries(citiesAndDistricts)
@@ -58,7 +49,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
   const developersSet = Array.from(
     new Set(developers.map((developer) => developer.name))
   );
-  
+
   const router = useRouter();
 
   const handleProjectUpdate = (updatedProject) => {
@@ -82,7 +73,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
         toast.success(t.projectDelete);
         setProjectList((prev) => {
           if (!Array.isArray(prev)) return [];
-          const updatedList = prev.filter(p => p.id !== project_id);
+          const updatedList = prev.filter((p) => p.id !== project_id);
           if (selectedProject?.id === project_id) {
             setSelectedProject(updatedList[0] || null);
           }
@@ -112,7 +103,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
     if (projectToDelete) {
       deleteproject(projectToDelete.id);
       setProjectList((prev) => {
-        const updatedList = prev.filter(p => p.id !== projectToDelete.id);
+        const updatedList = prev.filter((p) => p.id !== projectToDelete.id);
         if (selectedProject?.id === projectToDelete.id) {
           setSelectedProject(updatedList[0] || null);
         }
@@ -166,20 +157,33 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
       />
 
       <div className="bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
-        <div className={`${
-          projects?.length === 0 ? 'h-[350px]' :
-          projects?.length === 1 ? 'h-[250px]' :
-          projects?.length === 2 ? 'h-[350px]' :
-          projects?.length === 3 ? 'h-[450px]' :
-          projects?.length === 4 ? 'h-[550px]' :
-          projects?.length === 5 ? 'h-[660px]' :
-          projects?.length === 6 ? 'h-[780px]' :
-          projects?.length === 7 ? 'h-[880px]' :
-          projects?.length === 8 ? 'h-[1000px]' :
-          'min-h-[350px]'
-        } bg-white rounded-lg shadow-sm border lg:col-span-2 border-gray-200 overflow-hidden`}>
+        <div
+          className={`${
+            projects?.length === 0
+              ? "h-[350px]"
+              : projects?.length === 1
+                ? "h-[250px]"
+                : projects?.length === 2
+                  ? "h-[350px]"
+                  : projects?.length === 3
+                    ? "h-[450px]"
+                    : projects?.length === 4
+                      ? "h-[550px]"
+                      : projects?.length === 5
+                        ? "h-[660px]"
+                        : projects?.length === 6
+                          ? "h-[780px]"
+                          : projects?.length === 7
+                            ? "h-[880px]"
+                            : projects?.length === 8
+                              ? "h-[1000px]"
+                              : "min-h-[350px]"
+          } bg-white rounded-lg shadow-sm border lg:col-span-2 border-gray-200 overflow-hidden`}
+        >
           <div className="bg-primary p-4 flex justify-between items-center">
-            <h2 className="text-white text-xl font-semibold">{t.sidebar.myProjects}</h2>
+            <h2 className="text-white text-xl font-semibold">
+              {t.sidebar.myProjects}
+            </h2>
             <button
               onClick={() => setShowAddDialog(true)}
               className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
@@ -187,8 +191,8 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
               <Plus size={20} />
               <span> {t.addNewProject}</span>
             </button>
-          </div> 
-          <div className="overflow-y-auto " >
+          </div>
+          <div className="overflow-y-auto ">
             {projects?.length === 0 || projects === null ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -216,18 +220,28 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                   <div
                     key={project.id}
                     className={`bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                      selectedProject?.id === project.id ? 'bg-primary text-white' : ''
+                      selectedProject?.id === project.id
+                        ? "bg-primary text-white"
+                        : ""
                     }`}
                     onClick={() => setSelectedProject(project)}
                   >
-                    <h3 className={`font-semibold text-lg mb-2 ${
-                      selectedProject?.id === project.id ? 'text-white' : 'text-gray-800'
-                    }`}>
+                    <h3
+                      className={`font-semibold text-lg mb-2 ${
+                        selectedProject?.id === project.id
+                          ? "text-white"
+                          : "text-gray-800"
+                      }`}
+                    >
                       {capitalize(project.name)}
                     </h3>
-                    <div className={`flex items-center space-x-4 text-sm w-full ${
-                      selectedProject?.id === project.id ? 'text-white' : 'text-gray-600'
-                    }`}>
+                    <div
+                      className={`flex items-center space-x-4 text-sm w-full ${
+                        selectedProject?.id === project.id
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    >
                       <div className="flex items-center">
                         <svg
                           className="w-4 h-4 mr-1"
@@ -286,7 +300,7 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                 ))}
               </div>
             )}
-          </div> 
+          </div>
         </div>
 
         {/* Right Panel - Details/Map/etc */}
@@ -327,7 +341,9 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
 
                   {selectedProject.description && (
                     <div className="mb-4 text-gray-700 p-4 leading-relaxed">
-                      <h4 className="font-semibold text-lg mb-2 text-gray-700">{t.description}</h4>
+                      <h4 className="font-semibold text-lg mb-2 text-gray-700">
+                        {t.description}
+                      </h4>
                       <p>{selectedProject.description}</p>
                     </div>
                   )}
@@ -336,7 +352,8 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                       {t.phases}
                     </h4>
                     <div className="h-[500px] flex flex-col">
-                      {selectedProject.phases && selectedProject.phases.length > 0 ? (
+                      {selectedProject.phases &&
+                      selectedProject.phases.length > 0 ? (
                         <>
                           <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                             <Image
@@ -345,8 +362,8 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                                   ?.master_plan || "/images/defaultImage.jpg"
                               }
                               alt={
-                                selectedProject.phases[selectedPhaseIdx]?.name ||
-                                "Phase Image"
+                                selectedProject.phases[selectedPhaseIdx]
+                                  ?.name || "Phase Image"
                               }
                               fill
                               className="object-cover"
@@ -356,7 +373,10 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                             <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
                               <div className="text-white">
                                 <div className="font-bold text-2xl mb-2 line-clamp-1">
-                                  {selectedProject?.phases[selectedPhaseIdx]?.name}
+                                  {
+                                    selectedProject?.phases[selectedPhaseIdx]
+                                      ?.name
+                                  }
                                 </div>
                                 {selectedProject?.phases[selectedPhaseIdx]
                                   ?.description && (
@@ -375,13 +395,16 @@ export default function ProjectList({ projects, citiesAndDistricts, readonly, de
                               <div
                                 key={idx}
                                 className={`relative min-w-[120px] max-w-[160px] h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                                  selectedPhaseIdx === idx ? 'ring-2 ring-primary' : ''
+                                  selectedPhaseIdx === idx
+                                    ? "ring-2 ring-primary"
+                                    : ""
                                 }`}
                                 onClick={() => setSelectedPhaseIdx(idx)}
                               >
                                 <Image
                                   src={
-                                    phase.master_plan || "/images/defaultImage.jpg"
+                                    phase.master_plan ||
+                                    "/images/defaultImage.jpg"
                                   }
                                   alt={phase.name || "Phase Thumbnail"}
                                   fill
