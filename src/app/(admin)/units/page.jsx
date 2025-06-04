@@ -1,19 +1,15 @@
 import {
-  fetchcombounds,
-  fetchUnitsFilter,
-  fetchDevelopers,
   fetchCitisAndProjects,
+  fetchcombounds,
+  fetchDevelopers,
+  fetchUnitsFilter,
 } from "@/components/services/serviceFetching";
 import UnitsGrid from "@/components/ui/units-grid";
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 
-import { cookies } from "next/headers";
-import AddUnitButton from "./_components/add-unit-button";
-import ClearAllFilters from "./_components/filters/clear-all-filters";
-import SideUnitFilters from "@/components/ui/side-units-filter";
 import UnitsFilter from "@/components/ui/units-filter";
-import UnitsSearch from "@/components/ui/units-search";
+import { cookies } from "next/headers";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -32,17 +28,18 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
   const cookieStore = await cookies();
-  const clientId = cookieStore.get("client_id")?.value;
+  const clientId = cookieStore.get("lena-website::client_id")?.value;
   const clientName = cookieStore.get("client_info")?.value
     ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
     : null;
 
-  const [unitsResponse, developers, compounds,citiesAndDistricts] = await Promise.all([
-    fetchUnitsFilter(JSON.stringify(searchParams), true),
-    fetchDevelopers(),
-    fetchcombounds(true),
-    fetchCitisAndProjects(),
-  ]);
+  const [unitsResponse, developers, compounds, citiesAndDistricts] =
+    await Promise.all([
+      fetchUnitsFilter(JSON.stringify(searchParams), true),
+      fetchDevelopers(),
+      fetchcombounds(true),
+      fetchCitisAndProjects(),
+    ]);
 
   const units = unitsResponse.data?.units || [];
 

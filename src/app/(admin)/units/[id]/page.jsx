@@ -4,11 +4,11 @@ import {
   fetchDevelopers,
   fetchUnitById,
 } from "@/components/services/serviceFetching";
-import UnitPageHeader from "../_components/unit-page-header";
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
-import Link from "next/link";
 import { cookies } from "next/headers";
+import Link from "next/link";
+import UnitPageHeader from "../_components/unit-page-header";
 
 // Dynamic metadata
 export async function generateMetadata() {
@@ -29,7 +29,7 @@ const Page = async ({ params }) => {
   const unit = await fetchUnitById(id);
   const cookieStore = await cookies();
 
-  const clientId = cookieStore.get("client_id")?.value;
+  const clientId = cookieStore.get("lena-website::client_id")?.value;
 
   const [comboundata, developers, citiesAndDistricts] = await Promise.all([
     fetchcombounds(),

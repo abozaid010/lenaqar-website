@@ -1,11 +1,11 @@
 "use client";
 
-import { useActionState, useEffect, useState, useMemo } from "react";
-import { addNewAction } from "../_actions/actions";
-import { Loader2, Clock, Calendar, ChevronUp, ChevronDown } from "lucide-react";
-import toast from "react-hot-toast";
-import Cookies from "js-cookie";
 import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
+import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
+import { useActionState, useEffect, useMemo, useState } from "react";
+import toast from "react-hot-toast";
+import { addNewAction } from "../_actions/actions";
 
 const initialState = {
   success: false,
@@ -15,7 +15,7 @@ const initialState = {
 export default function NewActionForm({ userId, onSuccess }) {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
-  const clientId = Cookies.get("client_id");
+  const clientId = Cookies.get("lena-website::client_id");
 
   const ACTIONS = useMemo(
     () => [

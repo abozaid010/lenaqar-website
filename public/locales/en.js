@@ -263,6 +263,10 @@ export default {
     lastActivity: {
       na: "N/A",
     },
+    unreadMessages: {
+      na: "N/A",
+      count: "{count} unread messages",
+    }
   },
   actionForm: {
     actions: {

@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { Bell, User, Menu, LogOut, Settings, HelpCircle } from "lucide-react";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import Cookies from "js-cookie";
-import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
+import { Bell, HelpCircle, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 const Header = ({ clientName, clientID }) => {
   const router = useRouter();
@@ -53,7 +53,7 @@ const Header = ({ clientName, clientID }) => {
   };
 
   const confirmLogout = () => {
-    Cookies.remove("client_id");
+    Cookies.remove("lena-website::client_id");
     Cookies.remove("access_token");
     setShowLogoutConfirm(false);
     toast.success(t.header.logoutSuccess);
