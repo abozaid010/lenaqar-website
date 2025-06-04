@@ -198,6 +198,7 @@ export default {
     },
   },
   sidebar: {
+    "schedule":"schedule",
     myProjects: "My Projects",
     dashboard: "Conversations",
     analytics: "Analytics",
@@ -213,6 +214,26 @@ export default {
     },
     logoutSuccess: "Logout Successful",
   },
+  schaduall: {
+    "assignError":"Failed to assign salesperson",
+    "salesAssigned":"Salesperson assigned successfully",
+    "ChooseSalesperson":"    select your sales for this task",
+    "Available":"Available",
+"NoSalesAvailable":"no Sales Avaliabel",
+    "noappointments": "لا توجد مواعيد هذا الأسبوع",
+    "noSale": "لا توجد مبيعات متاحة",
+    "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
+    "Schedule":"مهام الاسبوع",
+   },
+  "Noappointments":"No appointments this week",
+  "scheduleweek":"Your schedule is clear for this week.",
+  "Schedule":" Week Schedule",
+  "next":"next",
+  "previous":"previous",
+  "AllSales": "All Sales",
+  "Unassigned": "Unassigned",
+  "Noappointments": "No Appointments",
+  "scheduleweek": "No appointments scheduled for this week",
   dashboardFilter: {
     actions: {
       all: "All actions",
@@ -475,6 +496,7 @@ export default {
     shop: "Shop",
     land: "Land",
   },
+ 
   purpose: {
     sell: "Sell",
     rent: "Rent",

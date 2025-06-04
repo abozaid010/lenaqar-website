@@ -326,7 +326,11 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCities || "All Cities"}
               </div>
-              {[...cities].sort().map((city, idx) => (
+              {[...cities].sort((a, b) => {
+                const nameA = t.unitsFilter.cities?.[a] || a;
+                const nameB = t.unitsFilter.cities?.[b] || b;
+                return nameA.localeCompare(nameB, 'ar');
+              }).map((city, idx) => (
                 <div
                   key={idx}
                   className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"

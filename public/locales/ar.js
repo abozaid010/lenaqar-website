@@ -205,6 +205,7 @@ export default {
     },
   },
   sidebar: {
+    "schedule":"مهام الاسبوع",
     myProjects: "مشاريعي",
     dashboard: " المحادثات",
     analytics: "التحليلات",
@@ -1037,6 +1038,29 @@ export default {
   currency: {
     egp: "جنيه",
   },
+  schaduall: {
+    "assignError": "فشل في تعيين مندوب المبيعات",
+"salesAssigned": "تم تعيين مندوب المبيعات بنجاح",
+    "ChooseSalesperson":"اختر السيلز الخاص لهذه المهمه",
+    "Available":"متاح",
+   "noappointments": "لا توجد مواعيد هذا الأسبوع",
+"noSale": "لا توجد مبيعات متاحة",
+"scheduleweek": "جدولك خالٍ هذا الأسبوع.",
+"Schedule":"مهام الاسبوع",
+"NoSalesAvailable":"لا يوجد موظفين مبيعات"
+  },
+
+"noappointments": "لا توجد مواعيد هذا الأسبوع",
+"noSale": "لا توجد مبيعات متاحة",
+"scheduleweek": "جدولك خالٍ هذا الأسبوع.",
+"Schedule":"مهام الاسبوع",
+"previous":"السابق",
+"next":"التالي",
+"AllSales": "جميع المبيعات",
+"Noappointments": "لا توجد مواعيد",
+  "scheduleweek": "لا توجد مواعيد مجدولة لهذا الأسبوع",
+  "Unassigned": "غير مُعيَّن",
+  "no":"لا توجد مواعيد مجدولة لهذا الأسبوع",
   unit_pricing: {
     down_payment: "دفعة أولى",
     years: "سنوات",
