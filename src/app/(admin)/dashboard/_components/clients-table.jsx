@@ -270,16 +270,16 @@ export default function ClientsTable({
                             {user.messages_count || 0}
                           </span>
                           {user?.unread_messages_count > 0 && (
-                            <span
-                              className="inline-flex items-center min-w-[24px] px-2 py-0.5 rounded bg-red-500 text-white text-xs font-semibold"
+                            <div
+                              className="inline-flex items-center justify-center gap-1 min-w-[24px] px-2 py-0.5 rounded bg-red-500 text-white text-xs font-semibold"
                               title={
                                 t.clientsTable.headers.unreadMessages ||
                                 "Unread messages"
                               }
                             >
-                              {user.unread_messages_count}
-                              <BellDot size={14} className="ml-1" />
-                            </span>
+                              <span>{user.unread_messages_count}</span>
+                              <BellDot size={14} />
+                            </div>
                           )}
                         </span>
                       </td>
