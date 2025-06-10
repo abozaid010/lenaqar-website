@@ -33,40 +33,15 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
     ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
     : null;
 
-  const [unitsResponse, developers, compounds, citiesAndDistricts] =
-    await Promise.all([
-      fetchUnitsFilter(JSON.stringify(searchParams), true),
-      fetchDevelopers(),
-      fetchcombounds(true),
-      fetchCitisAndProjects(),
-    ]);
-
-  const units = unitsResponse.data?.units || [];
-
-  const developersSet = Array.from(
-    new Set(developers?.map((developer) => developer.name))
-  );
-  console.log(compounds);
-
-  // const maxPrice =
-  //   units.length > 0 &&
-  //   units
-  //     .filter((unit) => unit.purpose === "sell" && unit.totalPrice)
-  //     .map((unit) => Number.parseInt(unit.totalPrice, 10))
-  //     .reduce((max, price) => (price > max ? price : max), 65000);
+  const [developers, compounds, citiesAndDistricts] = await Promise.all([
+    fetchDevelopers(),
+    fetchcombounds(true),
+    fetchCitisAndProjects(),
+  ]);
 
   return (
     <div className="w-[98%] mx-auto">
-      {/* <div className="mb-4 flex flex-col sm:flex-row items-start justify-between gap-2">
-        <AddUnitButton
-          clientId={clientId}
-          clientName={clientName}
-          compounds={compounds}
-          developers={developersSet}
-        />
-      </div> */}
-
-      <div className="   bg-white  ">
+      <div className="bg-white">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
@@ -75,45 +50,22 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           clientName={clientName}
           citiesAndDistricts={citiesAndDistricts}
         />
-
-        {/* <UnitsSearch /> */}
       </div>
 
-      <div className="flex gap-2">
-        {/* <div className="hidden lg:block">
-          <SideUnitFilters
-            appliedFilters={searchParams}
-            developers={developersSet}
-            projects={compounds}
-            minPrice={0}
-            maxPrice={maxPrice}
-          />
-        </div> */}
-        <div className="flex-1 flex flex-col">
-          {/* Results Count */}
-          {/* <div className="bg-white p-4 rounded-md flex justify-between items-center">
-            <p className="text-sm text-gray-600">
-              {units.length} {units.length === 1 ? "property" : "properties"}{" "}
-              found
-            </p>
-
-            {Object.keys(searchParams).length > 0 && <ClearAllFilters />}
-          </div> */}
-
-          <Suspense
-            key={JSON.stringify(searchParams)}
-            fallback={
-              <div className="flex items-center justify-center h-full mt-12">
-                <Loader2
-                  size={70}
-                  className="text-center animate-spin text-primary"
-                />
-              </div>
-            }
-          >
-            <UnitsList searchParams={searchParams} />
-          </Suspense>
-        </div>
+      <div className="flex-1 flex flex-col">
+        <Suspense
+          key={JSON.stringify(searchParams)}
+          fallback={
+            <div className="flex items-center justify-center h-full mt-12">
+              <Loader2
+                size={70}
+                className="text-center animate-spin text-primary"
+              />
+            </div>
+          }
+        >
+          <UnitsList searchParams={searchParams} />
+        </Suspense>
       </div>
     </div>
   );
