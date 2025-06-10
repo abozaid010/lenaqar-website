@@ -39,6 +39,8 @@ export default {
     tryChat: "Try our Chatbot",
     requestDemo: "Request Demo",
     addNew: "Add New",
+      addPhase:" Add Phase",
+    updatePhase:" update Phase"
   },
   heroSection: {
     title1: "Sell Smarter",
@@ -198,7 +200,7 @@ export default {
     },
   },
   sidebar: {
-    "schedule":"schedule",
+    "schedule":"Calendar",
     myProjects: "My Projects",
     dashboard: "Conversations",
     analytics: "Analytics",
@@ -427,6 +429,7 @@ export default {
     errorProcessing:
       "An error occurred while processing your request. Please try again",
   },
+  updatePhase:"updatePhase",
   viewInCRM: "View in CRM",
   phases: "Phases",
   description: "Description",
@@ -1035,6 +1038,12 @@ export default {
     "marina marassi": "Marina Marassi",
     "mountain view ras el hekma": "Mountain View Ras El Hekma",
   },
+  phasee:{
+    updatePhasesuccess:"   phase updated successfuly",
+    updatePhaseFaile :" Failed to update phase  ",
+    addnew:"add new phase",
+    delete:"phase delete successfuly"
+   },
   MasrdeveloperNames: {
     " La Vista Developments": " La Vista Developments",
     " شركة سوديك (SODIC)": "SODIC",

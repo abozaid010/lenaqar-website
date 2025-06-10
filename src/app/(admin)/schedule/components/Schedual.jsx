@@ -122,7 +122,7 @@ const Schedule = ({data, dataSales}) => {
     }
   };
      
- console.log(filteredData)
+ 
   return (
     <div className='border border-red-50'>   
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 ">

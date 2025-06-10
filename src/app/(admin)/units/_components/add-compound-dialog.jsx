@@ -34,9 +34,9 @@ export default function AddCompoundDialog({
   setProjectId,
 }) {
   const { t } = useI18n();
-  console.log(clientId)
+  
   const ar = Cookies.get("lang");
-  console.log(compoundData);
+  
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -396,7 +396,7 @@ export default function AddCompoundDialog({
       };
     });
   };
-  console.log(formData)
+
 
   return (
     <>
@@ -574,7 +574,7 @@ export default function AddCompoundDialog({
                   </option>
                   {developers?.map((d, idx) => (
                     <option key={idx} value={ d }>
-                      {console.log(d)}
+                     
                       {d}
                     </option>
                   ))}

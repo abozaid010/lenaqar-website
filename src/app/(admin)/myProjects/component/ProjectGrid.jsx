@@ -4,13 +4,14 @@ import { useI18n } from "@/context/translate-api";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
-import { deleteProject } from "@/components/services/serviceFetching";
+import { deletePhase, deleteProject } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -45,6 +46,10 @@ export default function ProjectList({
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
   const [projectList, setProjectList] = useState(projects || []);
+  const [showAddPhaseDialog, setShowAddPhaseDialog] = useState(false);
+  const [showEditPhaseDialog, setShowEditPhaseDialog] = useState(false);
+  const [phaseToEdit, setPhaseToEdit] = useState(null);
+  const [phaseToDelete, setPhaseToDelete] = useState(null);
 
   const developersSet = Array.from(
     new Set(developers.map((developer) => developer.name))
@@ -111,13 +116,31 @@ export default function ProjectList({
       });
       setShowDeleteDialog(false);
       setProjectToDelete(null);
+    } else if (phaseToDelete) {
+      handleDeletePhase(phaseToDelete);
+      setShowDeleteDialog(false);
+      setPhaseToDelete(null);
     }
   };
 
-  const toggleExpand = (projectId) => {
-    setExpandedProject(expandedProject === projectId ? null : projectId);
+ 
+  const handleDeletePhase = async (phase) => {
+    try {
+      const res = await deletePhase(selectedProject.id, phase.id);
+      if (res.code === 200) {
+        toast.success(t.phasee.delete);
+        setSelectedProject((prev) => ({
+          ...prev,
+          phases: prev.phases.filter((p) => p.id !== phase.id),
+        }));
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(t.failedPhase);
+    }
   };
-
+  
+  
   return (
     <>
       <AddCompoundDialog
@@ -151,9 +174,46 @@ export default function ProjectList({
         onClose={() => {
           setShowDeleteDialog(false);
           setProjectToDelete(null);
+          setPhaseToDelete(null);
         }}
         onConfirm={handleConfirmDelete}
-        projectName={projectToDelete?.name}
+        projectName={projectToDelete?.name || phaseToDelete?.name}
+      />
+
+     
+
+      <AddPhaseDialog
+        isOpen={showEditPhaseDialog}
+        onClose={() => setShowEditPhaseDialog(false)}
+        onAdd={(updatedPhase) => {
+          console.log('Updated Phase:', updatedPhase);
+          setSelectedProject((prev) => ({
+            ...prev,
+            phases: prev.phases.map((phase, idx) => 
+              idx === selectedPhaseIdx ? updatedPhase : phase
+            ),
+          }));
+          setShowEditPhaseDialog(false);
+          router.refresh();
+        }}
+        projectIdPhase={selectedProject?.id}
+        editMode={true}
+        phaseData={phaseToEdit}
+      />
+
+      <AddPhaseDialog
+        isOpen={showAddPhaseDialog}
+        onClose={() => setShowAddPhaseDialog(false)}
+        onAdd={(newPhase) => {
+          setSelectedProject((prev) => ({
+            ...prev,
+            phases: [...prev.phases, newPhase],
+          }));
+          setShowAddPhaseDialog(false);
+          router.refresh();
+        }}
+        projectId={selectedProject?.id}
+        editMode={false}
       />
 
       <div className="bg-gray-50 grid grid-cols-1 lg:grid-cols-4 gap-4 p-4">
@@ -348,9 +408,18 @@ export default function ProjectList({
                     </div>
                   )}
                   <div className="p-4">
-                    <h4 className="font-semibold text-lg mb-2 text-white p-4 bg-primary">
+                    <div className=" bg-primary p-4 flex justify-between items-center">
+                    <h4 className="font-semibold text-lg  text-white  bg-primary">
                       {t.phases}
                     </h4>
+                    <button 
+                      onClick={() => setShowAddPhaseDialog(true)}
+                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                    >
+                      <Plus size={20} />
+                      {t.phasee.addnew || "add new phase"}
+                    </button>
+                    </div>
                     <div className="h-[500px] flex flex-col">
                       {selectedProject.phases &&
                       selectedProject.phases.length > 0 ? (
@@ -369,7 +438,27 @@ export default function ProjectList({
                               className="object-cover"
                               priority
                               sizes="100vw"
-                            />
+                            /> 
+                            <div className="absolute top-4 right-4 flex gap-2">
+                              <button 
+                                onClick={() => {
+                                  setPhaseToEdit(selectedProject.phases[selectedPhaseIdx]);
+                                  setShowEditPhaseDialog(true);
+                                }}
+                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
+                              >
+                                <Pencil size={18} />
+                              </button>
+                              <button 
+                                onClick={() => {
+                                  setPhaseToDelete(selectedProject.phases[selectedPhaseIdx]);
+                                  setShowDeleteDialog(true);
+                                }}
+                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
+                              >
+                                <Trash2 size={18} />
+                              </button>
+                            </div>
                             <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
                               <div className="text-white">
                                 <div className="font-bold text-2xl mb-2 line-clamp-1">

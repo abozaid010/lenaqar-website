@@ -46,7 +46,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const developersSet = Array.from(
     new Set(developers?.map((developer) => developer.name))
   );
-  console.log(compounds);
+  
 
   // const maxPrice =
   //   units.length > 0 &&

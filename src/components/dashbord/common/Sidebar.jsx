@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   Moon,
@@ -10,6 +11,8 @@ import {
   Home,
   AlertTriangle,
   Users2,
+  Calendar,
+  FolderKanban,
 } from "lucide-react";
 
 import { useI18n } from "@/context/translate-api";
@@ -90,10 +93,31 @@ const Sidebar = () => {
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-3 flex items-center gap-2"></div>
+        <div className="p-4 mt-1 ">
+           <Link href="/" className="text-xl font-bold flex items-center">
+              <Image
+                src="/images/logo.png"
+                alt="logo_image"
+                width={120}
+                height={40}
+              />
+             
+            </Link>
+            </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 mt-1">
+        <div className="flex-1 ">
+        <Link
+            href="/schedule"
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
+              isLinkActive("/schedule")
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Calendar className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.schedule || "Schedule"}</span>
+          </Link>
           <Link
             href="/dashboard"
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
@@ -149,20 +173,10 @@ const Sidebar = () => {
                 : "text-gray-700 hover:bg-gray-100"
             }`}
           >
-            <Users2 className="h-5 w-5 mr-3" />
+            <FolderKanban className="h-5 w-5 mr-3" />
             <span>{t.sidebar.myProjects}</span>
           </Link>
-          <Link
-            href="/schedule"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/schedule")
-                ? "bg-primary text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <Users2 className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.schedule || "Schedule"}</span>
-          </Link>
+         
         </div>
 
         {/* Bottom Section */}
