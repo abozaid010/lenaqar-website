@@ -22,7 +22,6 @@ export default function AddCompoundDialog({
   onClose,
   compoundData,
   editMode,
-
   onAdd,
   developers = [],
   setDevelopers,

@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-export default function Dialog({ isOpen, onClose, title, children , editMode }) {
+export default function Dialog({ isOpen, onClose, title, children, editMode }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
@@ -33,9 +33,9 @@ export default function Dialog({ isOpen, onClose, title, children , editMode }) 
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className={`fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out ${editMode ? "bg-black/5" : "bg-black/50"}`}
-      onClick={handleOutsideClick}
+      // onClick={handleOutsideClick}
     >
       <div
         ref={dialogRef}

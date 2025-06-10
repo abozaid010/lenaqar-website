@@ -1,22 +1,30 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { compressImage } from "@/utils/imageCompression";
-import Dialog from "@/components/ui/Dialog";
-import { Loader2 } from "lucide-react";
 import {
-  deleteImage,
-  uploadImages,
   addNewPhase,
+  deleteImage,
   updatePhase,
+  uploadImages,
 } from "@/components/services/serviceFetching";
-import toast from "react-hot-toast";
+import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
-import { v4 as uuidv4 } from "uuid";
+import { compressImage } from "@/utils/imageCompression";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
 
-export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMode, phaseData,projectIdPhase}) {
+export default function AddPhseDilog({
+  isOpen,
+  onClose,
+  onAdd,
+  projectId,
+  editMode,
+  phaseData,
+  projectIdPhase,
+}) {
   const { t } = useI18n();
   const router = useRouter();
   const fileInputRef = useRef(null);
@@ -26,12 +34,11 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-
   const [formData, setFormData] = useState({
-    id: uuidv4()||phaseData?.id,
-    name: phaseData?.name||"",
-    description: phaseData?.description||"",
-    master_plan: phaseData?.master_plan||"",
+    id: uuidv4() || phaseData?.id,
+    name: phaseData?.name || "",
+    description: phaseData?.description || "",
+    master_plan: phaseData?.master_plan || "",
     updated_at: new Date().toISOString(),
   });
 
@@ -45,7 +52,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
         master_plan: phaseData.master_plan || "",
         updated_at: new Date().toISOString(),
       });
-      
+
       // Only set selected image if master_plan exists and is not empty
       if (phaseData.master_plan && phaseData.master_plan.trim() !== "") {
         setSelectedImage({
@@ -181,11 +188,17 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
           description: formData.description,
           updated_at: new Date().toISOString(),
         };
-        console.log("formDataToUpdate",formDataToUpdate)
-        const res = await updatePhase(formDataToUpdate, projectIdPhase,phaseData.id);
-        console.log("res",res)
+        console.log("formDataToUpdate", formDataToUpdate);
+        const res = await updatePhase(
+          formDataToUpdate,
+          projectIdPhase,
+          phaseData.id
+        );
+        console.log("res", res);
         if (res.code === 200) {
-          toast.success(t.phasee.updatePhasesuccess || "Phase updated successfully");
+          toast.success(
+            t.phasee.updatePhasesuccess || "Phase updated successfully"
+          );
           onAdd({
             name: res.data?.name,
             id: res.data?.id,
@@ -201,9 +214,11 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
         const res = await addNewPhase(formData, projectId);
         if (res.code === 200) {
           toast.success(t.addPhaseSuccess);
+          console.log("res", res.data, "########");
           onAdd({
             name: res.data?.name,
             id: res.data?.id,
+            master_plan: res.data?.master_plan,
           });
           router.refresh();
 
@@ -225,9 +240,15 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
         }
       }
     } catch (error) {
-      toast.error(editMode ? (t.updatePhaseFailed || "Failed to update phase") : t.addPhaseFailed);
+      toast.error(
+        editMode
+          ? t.updatePhaseFailed || "Failed to update phase"
+          : t.addPhaseFailed
+      );
       setErrors({
-        submit: editMode ? (t.updatePhaseFailed || "Failed to update phase") : t.addPhaseFailed,
+        submit: editMode
+          ? t.updatePhaseFailed || "Failed to update phase"
+          : t.addPhaseFailed,
       });
     } finally {
       setIsSubmitting(false);
@@ -255,7 +276,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
               onChange={handleChange}
               disabled={editMode}
               className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                editMode ? 'bg-gray-100 cursor-not-allowed' : ''
+                editMode ? "bg-gray-100 cursor-not-allowed" : ""
               }`}
             />
           </div>
@@ -270,7 +291,10 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
               onChange={handleChange}
               rows={4}
               className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              placeholder={t.formLabels?.descriptionPlaceholder || "Enter phase description..."}
+              placeholder={
+                t.formLabels?.descriptionPlaceholder ||
+                "Enter phase description..."
+              }
             />
           </div>
 
@@ -297,7 +321,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
                       <Image
                         fill
                         priority={true}
-                        src={ selectedImage?.preview}
+                        src={selectedImage?.preview}
                         alt={`Image ${selectedImage.name}`}
                         className="w-full h-full object-cover rounded-md"
                       />
@@ -425,8 +449,10 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMo
                   <Loader2 size={20} className="animate-spin mr-2" />
                   {editMode ? t.updating : t.buttons?.saving || "Saving..."}
                 </div>
+              ) : editMode ? (
+                t.updatePhase
               ) : (
-                editMode ?  t.updatePhase :t.addPhase
+                t.addPhase
               )}
             </button>
           </div>
