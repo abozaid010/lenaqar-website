@@ -59,8 +59,6 @@ export default function ProjectList({
 
   const router = useRouter();
 
-  console.log("Selected Project:", selectedProject);
-
   const handleProjectUpdate = (updatedProject) => {
     setProjectList((prev) => {
       if (!Array.isArray(prev)) return [updatedProject];
