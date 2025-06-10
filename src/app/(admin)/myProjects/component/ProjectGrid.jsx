@@ -4,14 +4,17 @@ import { useI18n } from "@/context/translate-api";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
-import { deletePhase, deleteProject } from "@/components/services/serviceFetching";
+import {
+  deletePhase,
+  deleteProject,
+} from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
-import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import AddPhaseDialog from "../../units/_components/AddPhseDilog";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -42,7 +45,6 @@ export default function ProjectList({
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
-  const [expandedProject, setExpandedProject] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
   const [projectList, setProjectList] = useState(projects || []);
@@ -56,6 +58,8 @@ export default function ProjectList({
   );
 
   const router = useRouter();
+
+  console.log("Selected Project:", selectedProject);
 
   const handleProjectUpdate = (updatedProject) => {
     setProjectList((prev) => {
@@ -123,7 +127,6 @@ export default function ProjectList({
     }
   };
 
- 
   const handleDeletePhase = async (phase) => {
     try {
       const res = await deletePhase(selectedProject.id, phase.id);
@@ -139,8 +142,7 @@ export default function ProjectList({
       toast.error(t.failedPhase);
     }
   };
-  
-  
+
   return (
     <>
       <AddCompoundDialog
@@ -180,16 +182,14 @@ export default function ProjectList({
         projectName={projectToDelete?.name || phaseToDelete?.name}
       />
 
-     
-
       <AddPhaseDialog
         isOpen={showEditPhaseDialog}
         onClose={() => setShowEditPhaseDialog(false)}
         onAdd={(updatedPhase) => {
-          console.log('Updated Phase:', updatedPhase);
+          console.log("Updated Phase:", updatedPhase);
           setSelectedProject((prev) => ({
             ...prev,
-            phases: prev.phases.map((phase, idx) => 
+            phases: prev.phases.map((phase, idx) =>
               idx === selectedPhaseIdx ? updatedPhase : phase
             ),
           }));
@@ -364,192 +364,152 @@ export default function ProjectList({
         </div>
 
         {/* Right Panel - Details/Map/etc */}
-        {projects?.length > 0 && (
-          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="">
-              {selectedProject ? (
-                <div>
-                  {selectedProject.master_plan ? (
-                    <div className="w-full h-80 relative mb-6 overflow-hidden">
-                      <Image
-                        src={
-                          selectedProject.master_plan ||
-                          "/images/defaultImage.jpg"
-                        }
-                        alt={selectedProject.name || "Project Master Plan"}
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </div>
-                  ) : (
-                    <div className="w-full h-80 relative mb-6 overflow-hidden">
-                      <Image
-                        src={
-                          selectedProject.master_plan ||
-                          "/images/defaultImage.jpg"
-                        }
-                        alt={selectedProject.name || "Project Master Plan"}
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                    </div>
-                  )}
-
-                  {selectedProject.description && (
-                    <div className="mb-4 text-gray-700 p-4 leading-relaxed">
-                      <h4 className="font-semibold text-lg mb-2 text-gray-700">
-                        {t.description}
-                      </h4>
-                      <p>{selectedProject.description}</p>
-                    </div>
-                  )}
-                  <div className="p-4">
-                    <div className=" bg-primary p-4 flex justify-between items-center">
-                    <h4 className="font-semibold text-lg  text-white  bg-primary">
-                      {t.phases}
-                    </h4>
-                    <button 
-                      onClick={() => setShowAddPhaseDialog(true)}
-                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                    >
-                      <Plus size={20} />
-                      {t.phasee.addnew || "add new phase"}
-                    </button>
-                    </div>
-                    <div className="h-[500px] flex flex-col">
-                      {selectedProject.phases &&
-                      selectedProject.phases.length > 0 ? (
-                        <>
-                          <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                            <Image
-                              src={
-                                selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan || "/images/defaultImage.jpg"
-                              }
-                              alt={
-                                selectedProject.phases[selectedPhaseIdx]
-                                  ?.name || "Phase Image"
-                              }
-                              fill
-                              className="object-cover"
-                              priority
-                              sizes="100vw"
-                            /> 
-                            <div className="absolute top-4 right-4 flex gap-2">
-                              <button 
-                                onClick={() => {
-                                  setPhaseToEdit(selectedProject.phases[selectedPhaseIdx]);
-                                  setShowEditPhaseDialog(true);
-                                }}
-                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
-                              >
-                                <Pencil size={18} />
-                              </button>
-                              <button 
-                                onClick={() => {
-                                  setPhaseToDelete(selectedProject.phases[selectedPhaseIdx]);
-                                  setShowDeleteDialog(true);
-                                }}
-                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
-                              <div className="text-white">
-                                <div className="font-bold text-2xl mb-2 line-clamp-1">
-                                  {
-                                    selectedProject?.phases[selectedPhaseIdx]
-                                      ?.name
-                                  }
-                                </div>
-                                {selectedProject?.phases[selectedPhaseIdx]
-                                  ?.description && (
-                                  <div className="text-base opacity-90 line-clamp-3">
-                                    {
-                                      selectedProject.phases[selectedPhaseIdx]
-                                        .description
-                                    }
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex overflow-x-auto gap-4 pb-2 mt-4 flex-shrink-0">
-                            {selectedProject.phases.map((phase, idx) => (
-                              <div
-                                key={idx}
-                                className={`relative min-w-[120px] max-w-[160px] h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0 cursor-pointer transition-all duration-200 ${
-                                  selectedPhaseIdx === idx
-                                    ? "ring-2 ring-primary"
-                                    : ""
-                                }`}
-                                onClick={() => setSelectedPhaseIdx(idx)}
-                              >
-                                <Image
-                                  src={
-                                    phase.master_plan ||
-                                    "/images/defaultImage.jpg"
-                                  }
-                                  alt={phase.name || "Phase Thumbnail"}
-                                  fill
-                                  className="object-cover"
-                                  sizes="200px"
-                                />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
-                                  <div className="text-white text-xs font-semibold line-clamp-1">
-                                    {phase.name}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center h-full">
-                          <Clock
-                            className="w-16 h-16 text-primary mb-6"
-                            strokeWidth={1.5}
-                          />
-                          <p className="text-xl font-normal text-primary mb-2">
-                            {t.noPhsesProject}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200">
+          {selectedProject ? (
+            <div>
+              {selectedProject.master_plan ? (
+                <div className="w-full h-80 relative mb-6 overflow-hidden">
+                  <Image
+                    src={
+                      selectedProject.master_plan || "/images/defaultImage.jpg"
+                    }
+                    alt={selectedProject.name || "Project Master Plan"}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                  {projects?.length > 0 ? (
-                    <div className="text-center">
-                      <svg
-                        className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"
-                        />
-                      </svg>
-                      <p className="text-gray-500">
-                        Select a project to view details
-                      </p>
-                    </div>
-                  ) : null}
+                <div className="w-full h-80 relative mb-6 overflow-hidden">
+                  <Image
+                    src={
+                      selectedProject.master_plan || "/images/defaultImage.jpg"
+                    }
+                    alt={selectedProject.name || "Project Master Plan"}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
                 </div>
               )}
+
+              {selectedProject.description && (
+                <div className="mb-4 text-gray-700 p-4 leading-relaxed">
+                  <h4 className="font-semibold text-lg mb-2 text-gray-700">
+                    {t.description}
+                  </h4>
+                  <p>{selectedProject.description}</p>
+                </div>
+              )}
+              <div className="p-4">
+                <div className=" bg-primary p-4 flex justify-between items-center">
+                  <h4 className="font-semibold text-lg  text-white  bg-primary">
+                    {t.phases}
+                  </h4>
+                  <button
+                    onClick={() => setShowAddPhaseDialog(true)}
+                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                  >
+                    <Plus size={20} />
+                    {t.phasee.addnew || "add new phase"}
+                  </button>
+                </div>
+                <div className="h-[500px] flex flex-col">
+                  {selectedProject.phases &&
+                  selectedProject.phases.length > 0 ? (
+                    <>
+                      <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        <Image
+                          src={phase.master_plan || "/images/defaultImage.jpg"}
+                          alt={phase.name || "Phase Thumbnail"}
+                          fill
+                          className="object-cover"
+                          priority
+                          sizes="100vw"
+                        />
+                        <div className="absolute top-4 right-4 flex gap-2">
+                          <button
+                            onClick={() => {
+                              setPhaseToEdit(
+                                selectedProject.phases[selectedPhaseIdx]
+                              );
+                              setShowEditPhaseDialog(true);
+                            }}
+                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPhaseToDelete(
+                                selectedProject.phases[selectedPhaseIdx]
+                              );
+                              setShowDeleteDialog(true);
+                            }}
+                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
+                          <div className="text-white">
+                            <div className="font-bold text-2xl mb-2 line-clamp-1">
+                              {selectedProject?.phases[selectedPhaseIdx]?.name}
+                            </div>
+                            {selectedProject?.phases[selectedPhaseIdx]
+                              ?.description && (
+                              <div className="text-base opacity-90 line-clamp-3">
+                                {
+                                  selectedProject.phases[selectedPhaseIdx]
+                                    .description
+                                }
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full">
+                      <Clock
+                        className="w-16 h-16 text-primary mb-6"
+                        strokeWidth={1.5}
+                      />
+                      <p className="text-xl font-normal text-primary mb-2">
+                        {t.noPhsesProject}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+              {projects?.length > 0 ? (
+                <div className="text-center">
+                  <svg
+                    className="w-12 h-12 text-gray-400 mx-auto mb-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"
+                    />
+                  </svg>
+                  <p className="text-gray-500">
+                    Select a project to view details
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

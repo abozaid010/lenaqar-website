@@ -1,20 +1,20 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import Image from "next/image";
-import { compressImage } from "@/utils/imageCompression";
-import Dialog from "@/components/ui/Dialog";
-import { Loader2 } from "lucide-react";
 import {
   addCompound,
   deleteImage,
   updatecompound,
   uploadImages,
 } from "@/components/services/serviceFetching";
+import Dialog from "@/components/ui/Dialog";
+import { useI18n } from "@/context/translate-api";
+import { compressImage } from "@/utils/imageCompression";
+import Cookies from "js-cookie";
+import { Loader2 } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import AddDeveloperDialog from "./add-developer-dialog";
-import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
 
 export default function AddCompoundDialog({
   clientId,
@@ -22,7 +22,6 @@ export default function AddCompoundDialog({
   onClose,
   compoundData,
   editMode,
- 
 
   onAdd,
   developers = [],
@@ -34,9 +33,7 @@ export default function AddCompoundDialog({
   setProjectId,
 }) {
   const { t } = useI18n();
-  
   const ar = Cookies.get("lang");
-  
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -63,7 +60,8 @@ export default function AddCompoundDialog({
   });
 
   useEffect(() => {
-    if (isOpen) { // When the dialog is opening
+    if (isOpen) {
+      // When the dialog is opening
       if (editMode && compoundData) {
         // Load existing data for editing
         setFormData({
@@ -89,7 +87,8 @@ export default function AddCompoundDialog({
         } else {
           setSelectedImage(null);
         }
-      } else if (!editMode) { // Reset form with defaults for adding
+      } else if (!editMode) {
+        // Reset form with defaults for adding
         setFormData({
           name: "",
           description: "",
@@ -112,7 +111,8 @@ export default function AddCompoundDialog({
       }
       // Clear errors when opening in either mode
       setErrors({});
-    } else { // When the dialog is closing, reset form and clear errors completely
+    } else {
+      // When the dialog is closing, reset form and clear errors completely
       setFormData({
         name: "",
         description: "",
@@ -137,18 +137,22 @@ export default function AddCompoundDialog({
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Add validation for district selection
-    if (name === 'district' && !formData.city) {
-      toast.error(ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first");
+    if (name === "district" && !formData.city) {
+      toast.error(
+        ar === "ar"
+          ? "الرجاء اختيار المدينة أولاً"
+          : "Please select a city first"
+      );
       return;
     }
-    
+
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
-    
+
     // Clear error for this field when user types
     if (errors[name]) {
       setErrors({
@@ -306,20 +310,19 @@ export default function AddCompoundDialog({
         };
       }
 
-      console.log(submissionData);
-
       let res;
       if (!editMode) {
         // Add new compound
         res = await addCompound(submissionData);
         setProjectId(res.data.id);
-         // Call onAdd after successful add to notify parent (ProjectGrid)
-        if (res?.data?.id) { // Check if ID is returned on successful add
-            onAdd({
-              name: res.data?.name,
-              id: res.data?.id,
-              ...submissionData // Include other form data if needed by parent
-            });
+        // Call onAdd after successful add to notify parent (ProjectGrid)
+        if (res?.data?.id) {
+          // Check if ID is returned on successful add
+          onAdd({
+            name: res.data?.name,
+            id: res.data?.id,
+            ...submissionData, // Include other form data if needed by parent
+          });
         }
       } else {
         // Update compound
@@ -329,15 +332,15 @@ export default function AddCompoundDialog({
         onAdd({
           name: formData.name,
           id: compoundData.id,
-          ...submissionData
+          ...submissionData,
         });
       }
 
       // If we reach here, the API call was successful (no error was thrown)
       toast.success(
         editMode
-          ? (t.compoundUpdated || "project updated successfully!")
-          : (t.compoundAdded || "project added successfully!")
+          ? t.compoundUpdated || "project updated successfully!"
+          : t.compoundAdded || "project added successfully!"
       );
 
       // Reset form and clear image only for new compounds after success
@@ -365,21 +368,24 @@ export default function AddCompoundDialog({
 
       // Close dialog on success for both add and edit
       onClose();
-
     } catch (error) {
       console.error("API Error:", error);
-      console.log(error)
       toast.error(
         editMode
-          ? (t.toasts?.compoundUpdateFailed || "Failed to update compound. Please try again.")
-          : (t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.")
+          ? t.toasts?.compoundUpdateFailed ||
+              "Failed to update compound. Please try again."
+          : t.toasts?.compoundAddFailed ||
+              "Failed to add compound. Please try again."
       );
-      setErrors({ // Consider adding a general error state or showing error message from backend if available
+      setErrors({
+        // Consider adding a general error state or showing error message from backend if available
         submit:
           error.message ||
           (editMode
-            ? t.toasts?.compoundUpdateFailed || "Failed to update compound. Please try again."
-            : t.toasts?.compoundAddFailed || "Failed to add compound. Please try again.")
+            ? t.toasts?.compoundUpdateFailed ||
+              "Failed to update compound. Please try again."
+            : t.toasts?.compoundAddFailed ||
+              "Failed to add compound. Please try again."),
       });
     } finally {
       setIsSubmitting(false);
@@ -397,13 +403,16 @@ export default function AddCompoundDialog({
     });
   };
 
-
   return (
     <>
       <Dialog
         isOpen={isOpen}
         onClose={onClose}
-        title={editMode ? t.updateProject: t.modal?.addNewProject || "Add New Project" }
+        title={
+          editMode
+            ? t.updateProject
+            : t.modal?.addNewProject || "Add New Project"
+        }
         editMode={editMode}
       >
         <div>
@@ -454,7 +463,7 @@ export default function AddCompoundDialog({
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
-                     { editMode ? formData.city : t.formLabels?.selectCity}
+                    {editMode ? formData.city : t.formLabels?.selectCity}
                   </option>
                   {Egypt_cities?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
@@ -481,7 +490,6 @@ export default function AddCompoundDialog({
             </div>
 
             <div>
-             
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.district || "District"}{" "}
                 <span className="text-red-500">*</span>
@@ -492,23 +500,28 @@ export default function AddCompoundDialog({
                 onChange={handleChange}
                 disabled={!formData.city || editMode}
                 className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  !formData.city ? 'bg-gray-100' : ''
+                  !formData.city ? "bg-gray-100" : ""
                 }`}
               >
                 <option value="">
-                  {!formData.city 
-                    ? (ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first")
-                    : (editMode ? formData.district : (ar === "ar" ? t.formLabels?.district  : "Select district"))
-                  }
+                  {!formData.city
+                    ? ar === "ar"
+                      ? "الرجاء اختيار المدينة أولاً"
+                      : "Please select a city first"
+                    : editMode
+                      ? formData.district
+                      : ar === "ar"
+                        ? t.formLabels?.district
+                        : "Select district"}
                 </option>
                 {formData?.city &&
-                  Egypt_cities
-                    .find((gov) => gov.governorate === formData.city)
-                    ?.districts.map((dist) => (
-                      <option key={dist.district} value={dist.district}>
-                        {dist.district}
-                      </option>
-                    ))}
+                  Egypt_cities.find(
+                    (gov) => gov.governorate === formData.city
+                  )?.districts.map((dist) => (
+                    <option key={dist.district} value={dist.district}>
+                      {dist.district}
+                    </option>
+                  ))}
               </select>
               {/* {!formData.city && (
                 <p className="mt-1 text-sm text-red-600">
@@ -570,16 +583,19 @@ export default function AddCompoundDialog({
                   className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
                 >
                   <option value="">
-                    { editMode ? formData.developer_name : t.formLabels?.selectDeveloper || "Select developer"}
+                    {editMode
+                      ? formData.developer_name
+                      : t.formLabels?.selectDeveloper || "Select developer"}
                   </option>
                   {developers?.map((d, idx) => (
-                    <option key={idx} value={ d }>
-                     
+                    <option key={idx} value={d}>
                       {d}
                     </option>
                   ))}
                 </select>
-                <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
+                <div
+                  className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+                >
                   <svg
                     className="h-5 w-5 text-gray-400"
                     viewBox="0 0 20 20"
@@ -787,10 +803,12 @@ export default function AddCompoundDialog({
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 size={20} className="animate-spin mr-2" />
-                    {editMode ? t.updating: t.buttons?.saving || "Saving..."}
+                    {editMode ? t.updating : t.buttons?.saving || "Saving..."}
                   </div>
+                ) : editMode ? (
+                  t.updateProject
                 ) : (
-                  editMode ?  t.updateProject: t.buttons?.saveProject || "Save Project"
+                  t.buttons?.saveProject || "Save Project"
                 )}
               </button>
             </div>
