@@ -420,37 +420,19 @@ export default function ProjectList({
                     <>
                       <div className="w-full h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                         <Image
-                          src={phase.master_plan || "/images/defaultImage.jpg"}
-                          alt={phase.name || "Phase Thumbnail"}
+                          src={
+                            selectedProject.phases[selectedPhaseIdx]
+                              ?.master_plan || "/images/defaultImage.jpg"
+                          }
+                          alt={
+                            selectedProject.phases[selectedPhaseIdx]?.name ||
+                            "Phase Image"
+                          }
                           fill
                           className="object-cover"
                           priority
                           sizes="100vw"
                         />
-                        <div className="absolute top-4 right-4 flex gap-2">
-                          <button
-                            onClick={() => {
-                              setPhaseToEdit(
-                                selectedProject.phases[selectedPhaseIdx]
-                              );
-                              setShowEditPhaseDialog(true);
-                            }}
-                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
-                          >
-                            <Pencil size={18} />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setPhaseToDelete(
-                                selectedProject.phases[selectedPhaseIdx]
-                              );
-                              setShowDeleteDialog(true);
-                            }}
-                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
                           <div className="text-white">
                             <div className="font-bold text-2xl mb-2 line-clamp-1">
@@ -467,6 +449,34 @@ export default function ProjectList({
                             )}
                           </div>
                         </div>
+                      </div>
+                      <div className="flex overflow-x-auto gap-4 pb-2 mt-4 flex-shrink-0">
+                        {selectedProject.phases.map((phase, idx) => (
+                          <div
+                            key={idx}
+                            className={`relative min-w-[120px] max-w-[160px] h-20 rounded-lg overflow-hidden border bg-gray-100 flex-shrink-0 cursor-pointer transition-all duration-200 ${
+                              selectedPhaseIdx === idx
+                                ? "ring-2 ring-primary"
+                                : ""
+                            }`}
+                            onClick={() => setSelectedPhaseIdx(idx)}
+                          >
+                            <Image
+                              src={
+                                phase.master_plan || "/images/defaultImage.jpg"
+                              }
+                              alt={phase.name || "Phase Thumbnail"}
+                              fill
+                              className="object-cover"
+                              sizes="200px"
+                            />
+                            <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
+                              <div className="text-white text-xs font-semibold line-clamp-1">
+                                {phase.name}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </>
                   ) : (
