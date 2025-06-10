@@ -130,10 +130,23 @@ export default function ProjectList({
       const res = await deletePhase(selectedProject.id, phase.id);
       if (res.code === 200) {
         toast.success(t.phasee.delete);
-        setSelectedProject((prev) => ({
-          ...prev,
-          phases: prev.phases.filter((p) => p.id !== phase.id),
-        }));
+        setSelectedProject((prev) => {
+          const updatedPhases = Array.isArray(prev?.phases)
+            ? prev.phases.filter((p) => p.id !== phase.id)
+            : [];
+          // Calculate new selectedPhaseIdx
+          let newIdx = selectedPhaseIdx;
+          if (updatedPhases.length === 0) {
+            newIdx = -1; // No phases left
+          } else if (selectedPhaseIdx >= updatedPhases.length) {
+            newIdx = updatedPhases.length - 1; // Select previous phase
+          }
+          setSelectedPhaseIdx(newIdx);
+          return {
+            ...prev,
+            phases: updatedPhases,
+          };
+        });
       }
     } catch (error) {
       console.log(error);
@@ -186,11 +199,9 @@ export default function ProjectList({
         onAdd={(updatedPhase) => {
           setSelectedProject((prev) => ({
             ...prev,
-            phases: Array.isArray(prev?.phases)
-              ? prev.phases.map((phase, idx) =>
-                  idx === selectedPhaseIdx ? updatedPhase : phase
-                )
-              : [],
+            phases: prev.phases.map((phase, idx) =>
+              idx === selectedPhaseIdx ? updatedPhase : phase
+            ),
           }));
           setShowEditPhaseDialog(false);
           router.refresh();
@@ -244,7 +255,7 @@ export default function ProjectList({
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
+                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2M7 7h10"
                     />
                   </svg>
                 </div>
