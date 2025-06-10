@@ -16,20 +16,16 @@ export default async function ChatPage({ params }) {
   const clientID = await getClientid();
 
   const initialData = await getChatHistory(id);
-  await resetUnreadMessagesCount(id);
 
-  let hasAccess = true;
-  if (!initialData?.status) {
-    hasAccess = false;
+  if (initialData.data?.unread_messages_count !== 0) {
+    await resetUnreadMessagesCount(id);
   }
 
   const name = initialData.data?.name;
 
-  // Find current index and get next/previous IDs
-
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
-      {hasAccess ? (
+      {initialData?.status ? (
         <>
           <div className="flex items-center justify-between container mx-auto bg-white px-4 py-2 rounded-md shadow-md h-auto">
             <div className="flex items-center gap-4">
@@ -57,9 +53,13 @@ export default async function ChatPage({ params }) {
         </>
       ) : (
         <div className="flex flex-col items-center justify-center h-full">
-          <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>
-          <p className="text-gray-600 mt-2">
-            You do not have permission to view this chat.
+          <CircleX className="w-16 h-16 text-red-500 mb-4" />
+          <h1 className="text-2xl font-bold text-red-700">An Error Occurred</h1>
+          <p className="text-gray-600 mt-2 text-center">
+            Sorry, something went wrong or you do not have permission to view
+            this chat.
+            <br />
+            Please try again later or contact support if the issue persists.
           </p>
           <Link
             href="/dashboard"
