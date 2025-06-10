@@ -15,12 +15,10 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const [message, setMessage] = useState("");
   const { t } = useI18n();
   const client_id = Cookies.get("lena-website-client_id");
-  console.log(userId);
-  console.log(state.message);
+
   const [formData, setFormData] = useState({
     client_message: "",
     user_id: userId,
-    // client_id: client_id,
     platform: "website",
     source: "human",
   });
