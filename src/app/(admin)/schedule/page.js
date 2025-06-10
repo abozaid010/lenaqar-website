@@ -25,7 +25,7 @@ console.log("تاريخ بعد 7 أيام هو:", formattedAfter);
 const page =  async () => {
     const data = await getschedual(formattedBefore,formattedAfter)
     const dataSales = await getSalesData();
-    console.log(dataSales)
+   
   return (
     <div>
       <Schedual data={data} dataSales={dataSales?.data} />

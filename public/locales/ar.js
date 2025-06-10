@@ -435,6 +435,8 @@ export default {
     back: "رجوع",
     next: "التالي",
     saveUnit: "حفظ الوحدة",
+    addPhase:"إضافة مرجله",
+    updatePhase:"تعديل مرحله"
   },
   toasts: {
     enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
@@ -443,6 +445,8 @@ export default {
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
   },
   addPhase: "اضافة مرحلة",
+ 
+    updatePhase:"تعديل مرحله",
   projectFirst: "اختر المشروع اولا",
   formLabels: {
     unitTitle: "عنوان الوحدة",
@@ -667,6 +671,7 @@ export default {
   averageMessagesPerUser: "متوسط الرسائل لكل مستخدم",
   count: "عدد الرسائل والمحادثات",
   dashboardTitle: "لوحة التحليلات",
+  updatephase:"تعديل المرحله",
   dashboardDescription: "عرض أنشطة المستخدم وتحليلات الإجراءات اليومية",
   conversationAnalysis: "تحليل المحادثات",
   dailyConversationAnalysis: "تحليل المحادثات اليومية",
@@ -1088,6 +1093,14 @@ export default {
   },
   common: {
     na: "غير متوفر",
+  },
+
+  phasee:{
+   updatePhasesuccess:"تم نعديل المارحله بنجاح",
+   updatePhaseFaile :"فشل في تعديل المرحله",
+   addnew:"إضافة مرحله جديده",
+   delete:"تم حذف المرحله بنجاح"
+   
   },
   ourResultsInNumbers: {
     title: "نتائجنا في الأرقام",

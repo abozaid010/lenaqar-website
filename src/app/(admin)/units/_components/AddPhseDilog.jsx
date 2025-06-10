@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { compressImage } from "@/utils/imageCompression";
 import Dialog from "@/components/ui/Dialog";
@@ -9,13 +9,16 @@ import {
   deleteImage,
   uploadImages,
   addNewPhase,
+  updatePhase,
 } from "@/components/services/serviceFetching";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 import { v4 as uuidv4 } from "uuid";
+import { useRouter } from "next/navigation";
 
-export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
+export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId, editMode, phaseData,projectIdPhase}) {
   const { t } = useI18n();
+  const router = useRouter();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -23,13 +26,37 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+
   const [formData, setFormData] = useState({
-    id: uuidv4(),
-    name: "",
-    description: "",
-    master_plan: "",
+    id: uuidv4()||phaseData?.id,
+    name: phaseData?.name||"",
+    description: phaseData?.description||"",
+    master_plan: phaseData?.master_plan||"",
     updated_at: new Date().toISOString(),
   });
+
+  // Add effect to update form data when phaseData changes
+  useEffect(() => {
+    if (phaseData) {
+      setFormData({
+        id: phaseData.id,
+        name: phaseData.name,
+        description: phaseData.description,
+        master_plan: phaseData.master_plan || "",
+        updated_at: new Date().toISOString(),
+      });
+      
+      // Only set selected image if master_plan exists and is not empty
+      if (phaseData.master_plan && phaseData.master_plan.trim() !== "") {
+        setSelectedImage({
+          name: "Existing Image",
+          preview: phaseData.master_plan,
+        });
+      } else {
+        setSelectedImage(null);
+      }
+    }
+  }, [phaseData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -147,34 +174,60 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
     setIsSubmitting(true);
 
     try {
-      const res = await addNewPhase(formData, projectId);
-      if (res.code === 200) {
-        toast.success(t.addPhaseSuccess);
-        onAdd({
-          name: res.data?.name,
-          id: res.data?.id,
-        });
-
-        setFormData({
-          id: uuidv4(),
-          name: "",
-          description: "",
-          master_plan: "",
+      if (editMode) {
+        const formDataToUpdate = {
+          name: formData.name,
+          master_plan: selectedImage ? formData.master_plan : "",
+          description: formData.description,
           updated_at: new Date().toISOString(),
-        });
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = null;
+        };
+        console.log("formDataToUpdate",formDataToUpdate)
+        const res = await updatePhase(formDataToUpdate, projectIdPhase,phaseData.id);
+        console.log("res",res)
+        if (res.code === 200) {
+          toast.success(t.phasee.updatePhasesuccess || "Phase updated successfully");
+          onAdd({
+            name: res.data?.name,
+            id: res.data?.id,
+            description: res.data?.description,
+            master_plan: res.data?.master_plan,
+          });
+          router.refresh();
+          onClose();
+        } else {
+          toast.error(t.phasee.updatePhaseFaile || "Failed to update phase");
         }
-        setSelectedImage(null);
-        onClose();
       } else {
-        toast.error(t.addPhaseFailed);
+        const res = await addNewPhase(formData, projectId);
+        if (res.code === 200) {
+          toast.success(t.addPhaseSuccess);
+          onAdd({
+            name: res.data?.name,
+            id: res.data?.id,
+          });
+          router.refresh();
+
+          setFormData({
+            id: uuidv4(),
+            name: "",
+            description: "",
+            master_plan: "",
+            updated_at: new Date().toISOString(),
+          });
+
+          if (fileInputRef.current) {
+            fileInputRef.current.value = null;
+          }
+          setSelectedImage(null);
+          onClose();
+        } else {
+          toast.error(t.addPhaseFailed);
+        }
       }
     } catch (error) {
-      toast.error(t.addPhaseFailed);
+      toast.error(editMode ? (t.updatePhaseFailed || "Failed to update phase") : t.addPhaseFailed);
       setErrors({
-        submit: t.addPhaseFailed,
+        submit: editMode ? (t.updatePhaseFailed || "Failed to update phase") : t.addPhaseFailed,
       });
     } finally {
       setIsSubmitting(false);
@@ -185,7 +238,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={t.modal?.addNewProject || "Add New Project"}
+      title={t.phasee?.addnew || "Add New Project"}
     >
       <div>
         <div className="space-y-2">
@@ -200,7 +253,10 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              disabled={editMode}
+              className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                editMode ? 'bg-gray-100 cursor-not-allowed' : ''
+              }`}
             />
           </div>
 
@@ -241,7 +297,7 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
                       <Image
                         fill
                         priority={true}
-                        src={formData.master_plan || selectedImage?.preview}
+                        src={ selectedImage?.preview}
                         alt={`Image ${selectedImage.name}`}
                         className="w-full h-full object-cover rounded-md"
                       />
@@ -367,10 +423,10 @@ export default function AddPhseDilog({ isOpen, onClose, onAdd, projectId }) {
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
                   <Loader2 size={20} className="animate-spin mr-2" />
-                  {t.buttons?.saving || "Saving..."}
+                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
                 </div>
               ) : (
-                "Add Phase"
+                editMode ?  t.updatePhase :t.addPhase
               )}
             </button>
           </div>

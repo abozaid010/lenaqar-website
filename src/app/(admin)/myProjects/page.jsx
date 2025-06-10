@@ -12,8 +12,6 @@ const page = async () => {
     fetchDevelopers(),
   ]);
 
-  console.log("Projects:", projects);
-
   return (
     <ProjectGrid
       projects={projects}

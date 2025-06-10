@@ -216,6 +216,26 @@ export async function addNewPhase(phaseData, idProject) {
     throw { message: error.response?.data?.message || error.message };
   }
 }
+export async function updatePhase(phaseData, idProject,idPhase) {
+  try {
+    const response = await axiosInstance.put(`/project-phases/${idProject}/phase-update/${idPhase}`, phaseData);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
+export async function deletePhase(idProject,idPhase) {
+  try {
+    const response = await axiosInstance.delete(`/project-phases/${idProject}/phase-delete/${idPhase}`);
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    throw { message: error.response?.data?.message || error.message };
+  }
+}
 export async function addUnitRent(unitData) {
   try {
     const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
@@ -276,8 +296,8 @@ export async function getschedual(startDate, endDate) {
   // const cookieClientId = await getClientid();
 
   try {
-    const response = await axiosInstance.get(`action/by-date?start_date=${startDate}&end_date=${endDate}`);
-    console.log(response.data);
+    const response = await axiosInstance.get(`action/scheduled-actions-by-date?start_date=${startDate}&end_date=${endDate}`);
+   
     return response.data.data.actions;
   } catch (error) {
     return error;
