@@ -433,6 +433,30 @@ export default function ProjectList({
                           priority
                           sizes="100vw"
                         />
+                        <div className="absolute top-4 right-4 flex gap-2">
+                          <button
+                            onClick={() => {
+                              setPhaseToEdit(
+                                selectedProject.phases[selectedPhaseIdx]
+                              );
+                              setShowEditPhaseDialog(true);
+                            }}
+                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setPhaseToDelete(
+                                selectedProject.phases[selectedPhaseIdx]
+                              );
+                              setShowDeleteDialog(true);
+                            }}
+                            className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
                         <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
                           <div className="text-white">
                             <div className="font-bold text-2xl mb-2 line-clamp-1">
