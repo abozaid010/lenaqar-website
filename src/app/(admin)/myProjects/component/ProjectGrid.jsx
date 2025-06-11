@@ -56,16 +56,15 @@ export default function ProjectList({
   const router = useRouter();
 
   const handleProject = (data) => {
-    console.log("Project data:", data);
     setProjectList((prev) => {
       const exists = prev.some((p) => p.id === data.id);
       let updatedList;
       if (exists) {
-        // Edit: update the project
-        updatedList = prev.map((p) => (p.id === data.id ? data : p));
+        // Edit: update the project and move it to the top
+        updatedList = [data, ...prev.filter((p) => p.id !== data.id)];
       } else {
-        // Add: append the new project
-        updatedList = [...prev, data];
+        // Add: append the new project to the top
+        updatedList = [data, ...prev];
       }
       return updatedList;
     });
@@ -80,9 +79,13 @@ export default function ProjectList({
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
         setProjectList((prev) => {
+          // Remove the deleted project
           const updatedList = prev.filter((p) => p.id !== project_id);
-          if (selectedProject?.id === project_id) {
-            setSelectedProject(updatedList[0] || null);
+          // Move the next project (if any) to the top
+          if (updatedList.length > 0) {
+            setSelectedProject(updatedList[0]);
+          } else {
+            setSelectedProject(null);
           }
           return updatedList;
         });
