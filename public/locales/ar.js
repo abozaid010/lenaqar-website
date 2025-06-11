@@ -957,6 +957,7 @@ export default {
     images: "الصور",
     districtFirst: "اختر المنطقة أولاً",
     selectDistrict: "اختر المنطقة",
+    projectImages: "صور المشروع",
   },
   buttons: {
     addNew: "إضافة جديد",

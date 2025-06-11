@@ -497,6 +497,149 @@ export default function AddCompoundDialog({
 
   const totalImagesCount = selectedImages.length + uploadedImages.length;
 
+  // Helper function to render image item (copy from images-step.jsx, adapt variable names)
+  const renderImageItem = (image, isSelected = false) => {
+    const imageId = isSelected ? image.id : image.fileId;
+    const isProcessing =
+      isSelected && imagesUploadStatus[imageId] === "uploading";
+
+    return (
+      <div key={imageId} className="relative group aspect-square">
+        <div className="relative w-full h-full">
+          <Image
+            fill
+            priority={true}
+            src={image.preview || image.url || "/placeholder.svg"}
+            alt={`Image ${image.name}`}
+            className="w-full h-full object-cover rounded-md"
+          />
+
+          {/* Status Overlay */}
+          {isSelected && imagesUploadStatus[imageId] && (
+            <div
+              className={`absolute inset-0 flex items-center justify-center rounded-md ${
+                imagesUploadStatus[imageId] === "compressing"
+                  ? "bg-yellow-500/50"
+                  : imagesUploadStatus[imageId] === "uploading"
+                    ? "bg-black/50"
+                    : imagesUploadStatus[imageId] === "success"
+                      ? "bg-green-500/50"
+                      : "bg-red-500/50"
+              }`}
+            >
+              {imagesUploadStatus[imageId] === "uploading" && (
+                <svg
+                  className="animate-spin h-8 w-8 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+              )}
+              {imagesUploadStatus[imageId] === "success" && (
+                <svg
+                  className="h-8 w-8 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+              {imagesUploadStatus[imageId] === "error" && (
+                <div className="text-center">
+                  <svg
+                    className="h-8 w-8 text-white mx-auto mb-1"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  {/* Optionally add retry logic here */}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Success indicator for uploaded images */}
+          {!isSelected && (
+            <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+          )}
+
+          {/* Delete button - only show if not currently processing */}
+          {!isProcessing && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isSelected) {
+                  handleRemoveSelectedProjectImage(imageId);
+                } else {
+                  handleRemoveUploadedProjectImage(imageId);
+                }
+              }}
+              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
+        </div>
+        {/* Image label */}
+        <div className="mt-1 text-xs text-gray-500 truncate">{image.name}</div>
+      </div>
+    );
+  };
+
   return (
     <>
       <Dialog
@@ -872,6 +1015,9 @@ export default function AddCompoundDialog({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.projectImages || "Project Images"}
+                <span className="text-sm font-normal text-gray-500">
+                  ({totalImagesCount} / 8)
+                </span>
               </label>
               <input
                 type="file"
@@ -883,96 +1029,8 @@ export default function AddCompoundDialog({
                 disabled={isUploading}
               />
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 mt-2">
-                {/* Uploaded images */}
-                {uploadedImages.map((img, idx) => (
-                  <div
-                    key={img.fileId || idx}
-                    className="relative group aspect-square"
-                  >
-                    <Image
-                      fill
-                      src={img.url}
-                      alt={`Project Image ${idx + 1}`}
-                      className="object-cover rounded-md"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        handleRemoveUploadedProjectImage(img.fileId)
-                      }
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      {/* X icon */}
-                      <svg
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-
-                {/* Selected (not yet uploaded) images */}
-                {selectedImages.map((img, idx) => (
-                  <div key={img.id} className="relative group aspect-square">
-                    <Image
-                      fill
-                      src={img.preview}
-                      alt={`Selected Image ${idx + 1}`}
-                      className="object-cover rounded-md"
-                    />
-                    {/* Status overlay */}
-                    {imagesUploadStatus[img.id] === "uploading" && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md">
-                        <svg
-                          className="animate-spin h-8 w-8 text-white"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
-                      </div>
-                    )}
-                    {/* Remove button */}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSelectedProjectImage(img.id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      {/* X icon */}
-                      <svg
-                        className="h-4 w-4"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-
-                {/* Add More Button */}
+                {uploadedImages.map((img) => renderImageItem(img, false))}
+                {selectedImages.map((img) => renderImageItem(img, true))}
                 {totalImagesCount < 8 && (
                   <div
                     onClick={() => multiImageInputRef.current.click()}
