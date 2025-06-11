@@ -1,7 +1,7 @@
 "use client";
 
-import SendNewMessageForm from "../_components/send-new-message";
 import ChatHistory from "../_components/chat-history";
+import SendNewMessageForm from "../_components/send-new-message";
 
 import { useState } from "react";
 
@@ -13,7 +13,7 @@ export default function ChatClientWrapper({ initialData, userId }) {
   };
 
   return (
-    <div className="container mx-auto flex flex-col gap-3 bg-gray-100 rounded-md h-full">
+    <div className="container mx-auto flex flex-col gap-3 bg-gray-100 rounded-md h-full !px-0">
       <div className="flex-1 overflow-y-auto rounded-lg px-4 pt-4">
         <ChatHistory data={chatHistory} />
       </div>

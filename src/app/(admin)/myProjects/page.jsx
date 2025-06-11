@@ -12,11 +12,15 @@ const page = async () => {
     fetchDevelopers(),
   ]);
 
+  const developersSet = Array.from(
+    new Set(developers.map((developer) => developer.name))
+  );
+
   return (
     <ProjectGrid
       projects={projects}
       citiesAndDistricts={citiesAndDistricts}
-      developers={developers}
+      developers={developersSet}
     />
   );
 };

@@ -1,9 +1,9 @@
 "use client";
 
+import { useI18n } from "@/context/translate-api";
+import formatDateForDisplay from "@/utils/formateDate";
 import { X } from "lucide-react";
 import NewActionForm from "./new-action-form";
-import formatDateForDisplay from "@/utils/formateDate";
-import { useI18n } from "@/context/translate-api";
 const NOPREFRERED_TIME = [
   "Qualified lead",
   "Not interested",
@@ -47,14 +47,18 @@ export default function ActionsModal({ actions, onClose, userId }) {
                     </div>
 
                     <small className="text-gray-500 font-medium ">
-                      {formatDateForDisplay(a.created_at, true)}
+                      {formatDateForDisplay(a.created_at, false)}
                     </small>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
                   {a.partner && (
                     <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-primary">Partner: {a.partner.partner_name}</span>
-                      <span className="text-xs text-primary">Phone: {a.partner.partner_phone}</span>
+                      <span className="text-xs font-semibold text-primary">
+                        Partner: {a.partner.partner_name}
+                      </span>
+                      <span className="text-xs text-primary">
+                        Phone: {a.partner.partner_phone}
+                      </span>
                     </div>
                   )}
                   {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (

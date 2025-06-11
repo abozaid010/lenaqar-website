@@ -39,11 +39,11 @@ export default function ProjectList({
         }))
     : [];
 
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [projectId, setProjectId] = useState(null);
+  const [developersSet, setDevelopersSet] = useState(developers || []);
+  const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
@@ -53,22 +53,22 @@ export default function ProjectList({
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
 
-  const developersSet = Array.from(
-    new Set(developers.map((developer) => developer.name))
-  );
-
   const router = useRouter();
 
-  const handleProjectUpdate = (updatedProject) => {
+  const handleProject = (data) => {
     setProjectList((prev) => {
-      if (!Array.isArray(prev)) return [updatedProject];
-      return prev.map((p) => (p.id === updatedProject.id ? updatedProject : p));
+      const exists = prev.some((p) => p.id === data.id);
+      let updatedList;
+      if (exists) {
+        // Edit: update the project
+        updatedList = prev.map((p) => (p.id === data.id ? data : p));
+      } else {
+        // Add: append the new project
+        updatedList = [...prev, data];
+      }
+      return updatedList;
     });
-    router.refresh();
-    if (selectedProject && selectedProject.id === updatedProject.id) {
-      setSelectedProject(updatedProject);
-      router.refresh();
-    }
+    setSelectedProject(data);
   };
 
   const deleteproject = async (project_id) => {
@@ -79,14 +79,12 @@ export default function ProjectList({
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
         setProjectList((prev) => {
-          if (!Array.isArray(prev)) return [];
           const updatedList = prev.filter((p) => p.id !== project_id);
           if (selectedProject?.id === project_id) {
             setSelectedProject(updatedList[0] || null);
           }
           return updatedList;
         });
-        router.refresh();
       }
     } catch (error) {
       console.log(error);
@@ -100,9 +98,8 @@ export default function ProjectList({
     setShowDeleteDialog(true);
   };
 
-  const handleEditClick = (project, e) => {
-    e.stopPropagation();
-    setShowEditDialog(true);
+  const handleEditClick = (project) => {
+    setShowProjectDialog(true);
     setProjectToEdit(project);
   };
 
@@ -157,29 +154,17 @@ export default function ProjectList({
   return (
     <>
       <AddCompoundDialog
-        isOpen={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
-        compoundData={projectToEdit}
-        editMode={true}
-        onAdd={handleProjectUpdate}
-        Egypt_cities={formattedDataCitiesAndDistricts}
-      />
-
-      <AddCompoundDialog
-        isOpen={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
-        onAdd={(newProject) => {
-          setProjectList((prev) => [...prev, newProject]);
-          setSelectedProject(newProject);
-          router.refresh();
+        isOpen={showProjectDialog}
+        onClose={() => {
+          setShowProjectDialog(false);
+          setProjectToEdit(null);
         }}
-        developers={developersSet}
-        clientId={clientId}
-        editMode={false}
-        showName={true}
-        projectId={projectId}
-        setProjectId={setProjectId}
+        compoundData={projectToEdit}
+        onAdd={handleProject}
         Egypt_cities={formattedDataCitiesAndDistricts}
+        developers={developersSet}
+        setDevelopers={setDevelopersSet}
+        clientId={clientId}
       />
 
       <DeleteConfirmDialog
@@ -233,7 +218,7 @@ export default function ProjectList({
               {t.sidebar.myProjects}
             </h2>
             <button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => setShowProjectDialog(true)}
               className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
             >
               <Plus size={20} />
@@ -242,7 +227,7 @@ export default function ProjectList({
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">
-            {projects?.length === 0 || projects === null ? (
+            {projectList.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
@@ -265,7 +250,7 @@ export default function ProjectList({
               </div>
             ) : (
               <div className="space-y-3 p-4">
-                {projects?.map((project) => (
+                {projectList.map((project) => (
                   <div
                     key={project.id}
                     className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
@@ -331,7 +316,7 @@ export default function ProjectList({
                       </div>
                       <div className="flex-1"></div>
                       <button
-                        onClick={(e) => handleEditClick(project, e)}
+                        onClick={() => handleEditClick(project)}
                         className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
                         title="Edit Project"
                       >
@@ -353,7 +338,7 @@ export default function ProjectList({
         </div>
 
         {/* Right Panel - Details/Map/etc */}
-        {projects?.length > 0 && (
+        {projectList.length > 0 && (
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
             {selectedProject ? (
               <>
@@ -495,7 +480,7 @@ export default function ProjectList({
               </>
             ) : (
               <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                {projects?.length > 0 ? (
+                {projectList.length > 0 ? (
                   <div className="text-center">
                     <svg
                       className="w-12 h-12 text-gray-400 mx-auto mb-4"

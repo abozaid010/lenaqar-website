@@ -9,7 +9,6 @@ import {
 import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
-import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -21,18 +20,18 @@ export default function AddCompoundDialog({
   isOpen,
   onClose,
   compoundData,
-  editMode,
-  onAdd,
+  onAdd = () => {},
   developers = [],
   setDevelopers,
   Egypt_cities,
   defaultCity,
   defaultDistrict,
-  projectId,
-  setProjectId,
 }) {
-  const { t } = useI18n();
-  const ar = Cookies.get("lang");
+  const { t, locale } = useI18n();
+
+  // Determine edit mode based on compoundData
+  const editMode = !!(compoundData && compoundData.id);
+
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -108,15 +107,13 @@ export default function AddCompoundDialog({
           fileInputRef.current.value = null;
         }
       }
-      // Clear errors when opening in either mode
       setErrors({});
     } else {
-      // When the dialog is closing, reset form and clear errors completely
       setFormData({
         name: "",
         description: "",
         developer_name: "",
-        city: defaultCity || "", // Reset to defaults on close as well
+        city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
@@ -132,7 +129,7 @@ export default function AddCompoundDialog({
       }
       setErrors({});
     }
-  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]); // Depend on relevant props
+  }, [isOpen, editMode]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -140,7 +137,7 @@ export default function AddCompoundDialog({
     // Add validation for district selection
     if (name === "district" && !formData.city) {
       toast.error(
-        ar === "ar"
+        locale === "ar"
           ? "الرجاء اختيار المدينة أولاً"
           : "Please select a city first"
       );
@@ -293,101 +290,67 @@ export default function AddCompoundDialog({
 
     try {
       let submissionData;
+      let res;
 
       if (editMode) {
-        // Only include editable fields in edit mode
         submissionData = {
           description: formData.description,
           master_plan: formData.master_plan,
           video_url: formData.video_url,
         };
+        res = await updatecompound(submissionData, compoundData.id);
+        onAdd(res.data);
       } else {
-        // Include all relevant fields in add mode
         submissionData = {
           ...formData,
           area: Number(formData.area),
         };
-      }
-
-      let res;
-      if (!editMode) {
-        // Add new compound
         res = await addCompound(submissionData);
-        setProjectId(res.data.id);
-        // Call onAdd after successful add to notify parent (ProjectGrid)
-        if (res?.data?.id) {
-          // Check if ID is returned on successful add
-          onAdd({
-            name: res.data?.name,
-            id: res.data?.id,
-            ...submissionData, // Include other form data if needed by parent
-          });
-        }
-      } else {
-        // Update compound
-        res = await updatecompound(submissionData, compoundData.id);
-        // Call onAdd after successful update to notify parent (ProjectGrid)
-        // Pass the updated data structure expected by handleProjectUpdate
-        onAdd({
-          name: formData.name,
-          id: compoundData.id,
-          ...submissionData,
-        });
+        onAdd(res.data);
       }
 
-      // If we reach here, the API call was successful (no error was thrown)
       toast.success(
         editMode
           ? t.compoundUpdated || "project updated successfully!"
           : t.compoundAdded || "project added successfully!"
       );
 
-      // Reset form and clear image only for new compounds after success
-      if (!editMode) {
-        setFormData({
-          name: "",
-          description: "",
-          developer_name: "",
-          city: defaultCity || "",
-          country: "Egypt",
-          district: defaultDistrict || "",
-          area: "",
-          gated: false,
-          video_url: "",
-          google_map_link: "",
-          master_plan: "",
-          client_id: clientId || "ai",
-        });
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = null;
-        }
-        setSelectedImage(null);
-      }
-
-      // Close dialog on success for both add and edit
       onClose();
     } catch (error) {
-      console.error("API Error:", error);
       toast.error(
         editMode
-          ? t.toasts?.compoundUpdateFailed ||
-              "Failed to update compound. Please try again."
-          : t.toasts?.compoundAddFailed ||
-              "Failed to add compound. Please try again."
+          ? "Failed to update compound. Please try again."
+          : "Failed to add compound. Please try again."
       );
       setErrors({
         // Consider adding a general error state or showing error message from backend if available
         submit:
           error.message ||
           (editMode
-            ? t.toasts?.compoundUpdateFailed ||
-              "Failed to update compound. Please try again."
-            : t.toasts?.compoundAddFailed ||
-              "Failed to add compound. Please try again."),
+            ? "Failed to update compound. Please try again."
+            : "Failed to add compound. Please try again."),
       });
     } finally {
       setIsSubmitting(false);
+      setFormData({
+        name: "",
+        description: "",
+        developer_name: "",
+        city: defaultCity || "",
+        country: "Egypt",
+        district: defaultDistrict || "",
+        area: "",
+        gated: false,
+        video_url: "",
+        google_map_link: "",
+        master_plan: "",
+        client_id: clientId || "ai",
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+      setSelectedImage(null);
     }
   };
 
@@ -412,7 +375,6 @@ export default function AddCompoundDialog({
             ? t.updateProject
             : t.modal?.addNewProject || "Add New Project"
         }
-        editMode={editMode}
       >
         <div>
           <div className="space-y-2">
@@ -427,7 +389,6 @@ export default function AddCompoundDialog({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                rows={2}
                 disabled={editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -498,18 +459,16 @@ export default function AddCompoundDialog({
                 value={formData.district}
                 onChange={handleChange}
                 disabled={!formData.city || editMode}
-                className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  !formData.city ? "bg-gray-100" : ""
-                }`}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
                   {!formData.city
-                    ? ar === "ar"
+                    ? locale === "ar"
                       ? "الرجاء اختيار المدينة أولاً"
                       : "Please select a city first"
                     : editMode
                       ? formData.district
-                      : ar === "ar"
+                      : locale === "ar"
                         ? t.formLabels?.district
                         : "Select district"}
                 </option>
@@ -522,11 +481,6 @@ export default function AddCompoundDialog({
                     </option>
                   ))}
               </select>
-              {/* {!formData.city && (
-                <p className="mt-1 text-sm text-red-600">
-                  {ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first"}
-                </p>
-              )} */}
             </div>
 
             {/* Details */}
@@ -579,7 +533,7 @@ export default function AddCompoundDialog({
                   value={formData.developer_name}
                   onChange={handleChange}
                   disabled={editMode}
-                  className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
                     {editMode
@@ -592,8 +546,8 @@ export default function AddCompoundDialog({
                     </option>
                   ))}
                 </select>
-                <div
-                  className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+                {/* <div
+                  className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
                 >
                   <svg
                     className="h-5 w-5 text-gray-400"
@@ -606,13 +560,13 @@ export default function AddCompoundDialog({
                       clipRule="evenodd"
                     />
                   </svg>
-                </div>
+                </div> */}
               </div>
               {!editMode && (
                 <button
                   type="button"
                   onClick={() => setIsAddDeveloperDialogOpen(true)}
-                  className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+                  className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
                 >
                   + {t.buttons?.addNew || "Add New"}
                 </button>

@@ -1,21 +1,21 @@
 "use client";
 
+import { useI18n } from "@/context/translate-api";
+import formatDateForDisplay from "@/utils/formateDate";
 import {
-  X,
-  Home,
-  Square,
-  Building2,
   Bath,
   Bed,
-  Eye,
-  Landmark,
+  Building2,
   Calendar,
   DollarSign,
-  User,
+  Eye,
+  Home,
+  Landmark,
   Phone,
+  Square,
+  User,
+  X,
 } from "lucide-react";
-import formatDateForDisplay from "@/utils/formateDate";
-import { useI18n } from "@/context/translate-api";
 
 const PropertyDetailsModal = ({ onClose, property }) => {
   const { t } = useI18n();
@@ -145,7 +145,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                     label={t.propertyDetails.fields.deliveryDate}
                     value={formatDateForDisplay(
                       formattedProperty.deliveryDate,
-                      true
+                      false
                     )}
                   />
                 )}

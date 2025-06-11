@@ -39,8 +39,8 @@ export default {
     tryChat: "Try our Chatbot",
     requestDemo: "Request Demo",
     addNew: "Add New",
-      addPhase:" Add Phase",
-    updatePhase:" update Phase"
+    addPhase: " Add Phase",
+    updatePhase: " update Phase"
   },
   heroSection: {
     title1: "Sell Smarter",
@@ -200,7 +200,7 @@ export default {
     },
   },
   sidebar: {
-    "schedule":"Calendar",
+    "schedule": "Calendar",
     myProjects: "My Projects",
     dashboard: "Conversations",
     analytics: "Analytics",
@@ -217,21 +217,21 @@ export default {
     logoutSuccess: "Logout Successful",
   },
   schaduall: {
-    "assignError":"Failed to assign salesperson",
-    "salesAssigned":"Salesperson assigned successfully",
-    "ChooseSalesperson":"    select your sales for this task",
-    "Available":"Available",
-"NoSalesAvailable":"no Sales Avaliabel",
+    "assignError": "Failed to assign salesperson",
+    "salesAssigned": "Salesperson assigned successfully",
+    "ChooseSalesperson": "    select your sales for this task",
+    "Available": "Available",
+    "NoSalesAvailable": "no Sales Avaliabel",
     "noappointments": "لا توجد مواعيد هذا الأسبوع",
     "noSale": "لا توجد مبيعات متاحة",
     "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-    "Schedule":"مهام الاسبوع",
-   },
-  "Noappointments":"No appointments this week",
-  "scheduleweek":"Your schedule is clear for this week.",
-  "Schedule":" Week Schedule",
-  "next":"next",
-  "previous":"previous",
+    "Schedule": "مهام الاسبوع",
+  },
+  "Noappointments": "No appointments this week",
+  "scheduleweek": "Your schedule is clear for this week.",
+  "Schedule": " Week Schedule",
+  "next": "next",
+  "previous": "previous",
   "AllSales": "All Sales",
   "Unassigned": "Unassigned",
   "Noappointments": "No Appointments",
@@ -429,7 +429,7 @@ export default {
     errorProcessing:
       "An error occurred while processing your request. Please try again",
   },
-  updatePhase:"updatePhase",
+  updatePhase: "updatePhase",
   viewInCRM: "View in CRM",
   phases: "Phases",
   description: "Description",
@@ -503,7 +503,7 @@ export default {
     shop: "Shop",
     land: "Land",
   },
- 
+
   purpose: {
     sell: "Sell",
     rent: "Rent",
@@ -956,7 +956,7 @@ export default {
     district: "District",
     selectDistrict: "Select District",
     cityFirst: "Select City First",
-    area: "Area (m²)",
+    area: "Area (fdan)",
     gatedCommunity: "Gated Community",
     developer: "Developer",
     selectDeveloper: "Select developer",
@@ -1038,12 +1038,12 @@ export default {
     "marina marassi": "Marina Marassi",
     "mountain view ras el hekma": "Mountain View Ras El Hekma",
   },
-  phasee:{
-    updatePhasesuccess:"   phase updated successfuly",
-    updatePhaseFaile :" Failed to update phase  ",
-    addnew:"add new phase",
-    delete:"phase delete successfuly"
-   },
+  phasee: {
+    updatePhasesuccess: "   phase updated successfuly",
+    updatePhaseFaile: " Failed to update phase  ",
+    addnew: "add new phase",
+    delete: "phase delete successfuly"
+  },
   MasrdeveloperNames: {
     " La Vista Developments": " La Vista Developments",
     " شركة سوديك (SODIC)": "SODIC",

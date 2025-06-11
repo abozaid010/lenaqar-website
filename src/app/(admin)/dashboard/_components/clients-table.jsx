@@ -100,7 +100,7 @@ export default function ClientsTable({
     return rowSelection.includes(user_id);
   };
 
-  const handleclientAction = async (e, phone_number, user_id) => {
+  const handleclientAction = async (e, user_id) => {
     e.stopPropagation();
     setLoadingClientActions(user_id);
     try {
@@ -288,9 +288,7 @@ export default function ClientsTable({
                         className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap ${
                           ACTIONS_COLORS[user.last_action] || "text-gray-400"
                         }`}
-                        onClick={(e) =>
-                          handleclientAction(e, user.phone_number, user.user_id)
-                        }
+                        onClick={(e) => handleclientAction(e, user.user_id)}
                       >
                         {loadingClientActions === user.user_id &&
                         !openActionModal ? (

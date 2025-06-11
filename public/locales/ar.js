@@ -205,7 +205,7 @@ export default {
     },
   },
   sidebar: {
-    "schedule":"مهام الاسبوع",
+    "schedule": "مهام الاسبوع",
     myProjects: "مشاريعي",
     dashboard: " المحادثات",
     analytics: "التحليلات",
@@ -435,8 +435,8 @@ export default {
     back: "رجوع",
     next: "التالي",
     saveUnit: "حفظ الوحدة",
-    addPhase:"إضافة مرجله",
-    updatePhase:"تعديل مرحله"
+    addPhase: "إضافة مرجله",
+    updatePhase: "تعديل مرحله"
   },
   toasts: {
     enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
@@ -445,8 +445,8 @@ export default {
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
   },
   addPhase: "اضافة مرحلة",
- 
-    updatePhase:"تعديل مرحله",
+
+  updatePhase: "تعديل مرحله",
   projectFirst: "اختر المشروع اولا",
   formLabels: {
     unitTitle: "عنوان الوحدة",
@@ -671,7 +671,7 @@ export default {
   averageMessagesPerUser: "متوسط الرسائل لكل مستخدم",
   count: "عدد الرسائل والمحادثات",
   dashboardTitle: "لوحة التحليلات",
-  updatephase:"تعديل المرحله",
+  updatephase: "تعديل المرحله",
   dashboardDescription: "عرض أنشطة المستخدم وتحليلات الإجراءات اليومية",
   conversationAnalysis: "تحليل المحادثات",
   dailyConversationAnalysis: "تحليل المحادثات اليومية",
@@ -928,7 +928,7 @@ export default {
     district: "المنطقة",
     selectDistrict: "اختر المنطقة",
     cityFirst: "اختر المدينة أولاً",
-    area: "المساحة (م²)",
+    area: "المساحة (فدان)",
     gatedCommunity: "مجتمع مغلق",
     developer: "المطور",
     selectDeveloper: "اختر المطور",
@@ -1049,27 +1049,27 @@ export default {
   },
   schaduall: {
     "assignError": "فشل في تعيين مندوب المبيعات",
-"salesAssigned": "تم تعيين مندوب المبيعات بنجاح",
-    "ChooseSalesperson":"اختر السيلز الخاص لهذه المهمه",
-    "Available":"متاح",
-   "noappointments": "لا توجد مواعيد هذا الأسبوع",
-"noSale": "لا توجد مبيعات متاحة",
-"scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-"Schedule":"مهام الاسبوع",
-"NoSalesAvailable":"لا يوجد موظفين مبيعات"
+    "salesAssigned": "تم تعيين مندوب المبيعات بنجاح",
+    "ChooseSalesperson": "اختر السيلز الخاص لهذه المهمه",
+    "Available": "متاح",
+    "noappointments": "لا توجد مواعيد هذا الأسبوع",
+    "noSale": "لا توجد مبيعات متاحة",
+    "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
+    "Schedule": "مهام الاسبوع",
+    "NoSalesAvailable": "لا يوجد موظفين مبيعات"
   },
 
-"noappointments": "لا توجد مواعيد هذا الأسبوع",
-"noSale": "لا توجد مبيعات متاحة",
-"scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-"Schedule":"مهام الاسبوع",
-"previous":"السابق",
-"next":"التالي",
-"AllSales": "جميع المبيعات",
-"Noappointments": "لا توجد مواعيد",
+  "noappointments": "لا توجد مواعيد هذا الأسبوع",
+  "noSale": "لا توجد مبيعات متاحة",
+  "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
+  "Schedule": "مهام الاسبوع",
+  "previous": "السابق",
+  "next": "التالي",
+  "AllSales": "جميع المبيعات",
+  "Noappointments": "لا توجد مواعيد",
   "scheduleweek": "لا توجد مواعيد مجدولة لهذا الأسبوع",
   "Unassigned": "غير مُعيَّن",
-  "no":"لا توجد مواعيد مجدولة لهذا الأسبوع",
+  "no": "لا توجد مواعيد مجدولة لهذا الأسبوع",
   unit_pricing: {
     down_payment: "دفعة أولى",
     years: "سنوات",
@@ -1095,12 +1095,12 @@ export default {
     na: "غير متوفر",
   },
 
-  phasee:{
-   updatePhasesuccess:"تم نعديل المارحله بنجاح",
-   updatePhaseFaile :"فشل في تعديل المرحله",
-   addnew:"إضافة مرحله جديده",
-   delete:"تم حذف المرحله بنجاح"
-   
+  phasee: {
+    updatePhasesuccess: "تم نعديل المارحله بنجاح",
+    updatePhaseFaile: "فشل في تعديل المرحله",
+    addnew: "إضافة مرحله جديده",
+    delete: "تم حذف المرحله بنجاح"
+
   },
   ourResultsInNumbers: {
     title: "نتائجنا في الأرقام",
