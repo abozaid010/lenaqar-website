@@ -39,6 +39,7 @@ export default function ProjectList({
         }))
     : [];
 
+  const [developersSet, setDevelopersSet] = useState(developers || []);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [projectId, setProjectId] = useState(null);
@@ -52,10 +53,6 @@ export default function ProjectList({
   const [showEditPhaseDialog, setShowEditPhaseDialog] = useState(false);
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
-
-  const developersSet = Array.from(
-    new Set(developers.map((developer) => developer.name))
-  );
 
   const router = useRouter();
 
@@ -174,6 +171,7 @@ export default function ProjectList({
           router.refresh();
         }}
         developers={developersSet}
+        setDevelopers={setDevelopersSet}
         clientId={clientId}
         editMode={false}
         showName={true}
