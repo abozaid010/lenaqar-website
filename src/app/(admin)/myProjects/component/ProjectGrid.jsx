@@ -55,20 +55,21 @@ export default function ProjectList({
 
   const router = useRouter();
 
-  const handleProjectUpdate = (updatedProject) => {
+  const handleProject = (data) => {
+    console.log("Project data:", data);
     setProjectList((prev) => {
-      if (!Array.isArray(prev)) return [updatedProject];
-      return prev.map((p) => (p.id === updatedProject.id ? updatedProject : p));
+      const exists = prev.some((p) => p.id === data.id);
+      let updatedList;
+      if (exists) {
+        // Edit: update the project
+        updatedList = prev.map((p) => (p.id === data.id ? data : p));
+      } else {
+        // Add: append the new project
+        updatedList = [...prev, data];
+      }
+      return updatedList;
     });
-    router.refresh();
-    if (selectedProject && selectedProject.id === updatedProject.id) {
-      setSelectedProject(updatedProject);
-      router.refresh();
-    }
-
-    setProjectList((prev) => [...prev, newProject]);
-    setSelectedProject(newProject);
-    router.refresh();
+    setSelectedProject(data);
   };
 
   const deleteproject = async (project_id) => {
@@ -79,14 +80,12 @@ export default function ProjectList({
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
         setProjectList((prev) => {
-          if (!Array.isArray(prev)) return [];
           const updatedList = prev.filter((p) => p.id !== project_id);
           if (selectedProject?.id === project_id) {
             setSelectedProject(updatedList[0] || null);
           }
           return updatedList;
         });
-        router.refresh();
       }
     } catch (error) {
       console.log(error);
@@ -160,18 +159,14 @@ export default function ProjectList({
         isOpen={showEditDialog}
         onClose={() => setShowEditDialog(false)}
         compoundData={projectToEdit}
-        onAdd={handleProjectUpdate}
+        onAdd={handleProject}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
 
       <AddCompoundDialog
         isOpen={showAddDialog}
         onClose={() => setShowAddDialog(false)}
-        onAdd={(newProject) => {
-          setProjectList((prev) => [...prev, newProject]);
-          setSelectedProject(newProject);
-          router.refresh();
-        }}
+        onAdd={handleProject}
         developers={developersSet}
         setDevelopers={setDevelopersSet}
         clientId={clientId}

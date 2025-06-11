@@ -20,7 +20,7 @@ export default function AddCompoundDialog({
   isOpen,
   onClose,
   compoundData,
-  onAdd,
+  onAdd = () => {},
   developers = [],
   setDevelopers,
   Egypt_cities,
@@ -44,7 +44,6 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
-  console.log(compoundData, "compoundData");
   const [formData, setFormData] = useState({
     name: compoundData?.name || "",
     description: compoundData?.description || "",
@@ -295,78 +294,31 @@ export default function AddCompoundDialog({
 
     try {
       let submissionData;
+      let res;
 
       if (editMode) {
-        // Only include editable fields in edit mode
         submissionData = {
           description: formData.description,
           master_plan: formData.master_plan,
           video_url: formData.video_url,
         };
+        res = await updatecompound(submissionData, compoundData.id);
+        onAdd(res.data);
       } else {
-        // Include all relevant fields in add mode
         submissionData = {
           ...formData,
           area: Number(formData.area),
         };
-      }
-
-      let res;
-      if (!editMode) {
-        // Add new compound
         res = await addCompound(submissionData);
-        // Call onAdd after successful add to notify parent (ProjectGrid)
-        if (res?.data?.id) {
-          // Check if ID is returned on successful add
-          onAdd({
-            name: res.data?.name,
-            id: res.data?.id,
-            ...submissionData, // Include other form data if needed by parent
-          });
-        }
-      } else {
-        // Update compound
-        res = await updatecompound(submissionData, compoundData.id);
-        // Call onAdd after successful update to notify parent (ProjectGrid)
-        // Pass the updated data structure expected by handleProjectUpdate
-        onAdd({
-          name: formData.name,
-          id: compoundData.id,
-          ...submissionData,
-        });
+        onAdd(res.data);
       }
 
-      // If we reach here, the API call was successful (no error was thrown)
       toast.success(
         editMode
           ? t.compoundUpdated || "project updated successfully!"
           : t.compoundAdded || "project added successfully!"
       );
 
-      // Reset form and clear image only for new compounds after success
-      if (!editMode) {
-        setFormData({
-          name: "",
-          description: "",
-          developer_name: "",
-          city: defaultCity || "",
-          country: "Egypt",
-          district: defaultDistrict || "",
-          area: "",
-          gated: false,
-          video_url: "",
-          google_map_link: "",
-          master_plan: "",
-          client_id: clientId || "ai",
-        });
-
-        if (fileInputRef.current) {
-          fileInputRef.current.value = null;
-        }
-        setSelectedImage(null);
-      }
-
-      // Close dialog on success for both add and edit
       onClose();
     } catch (error) {
       console.error("API Error:", error);
@@ -389,6 +341,25 @@ export default function AddCompoundDialog({
       });
     } finally {
       setIsSubmitting(false);
+      setFormData({
+        name: "",
+        description: "",
+        developer_name: "",
+        city: defaultCity || "",
+        country: "Egypt",
+        district: defaultDistrict || "",
+        area: "",
+        gated: false,
+        video_url: "",
+        google_map_link: "",
+        master_plan: "",
+        client_id: clientId || "ai",
+      });
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = null;
+      }
+      setSelectedImage(null);
     }
   };
 
