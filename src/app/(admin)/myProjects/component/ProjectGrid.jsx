@@ -155,7 +155,10 @@ export default function ProjectList({
     <>
       <AddCompoundDialog
         isOpen={showProjectDialog}
-        onClose={() => setShowProjectDialog(false)}
+        onClose={() => {
+          setShowProjectDialog(false);
+          setProjectToEdit(null);
+        }}
         compoundData={projectToEdit}
         onAdd={handleProject}
         Egypt_cities={formattedDataCitiesAndDistricts}

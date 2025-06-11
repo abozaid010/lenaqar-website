@@ -107,15 +107,13 @@ export default function AddCompoundDialog({
           fileInputRef.current.value = null;
         }
       }
-      // Clear errors when opening in either mode
       setErrors({});
     } else {
-      // When the dialog is closing, reset form and clear errors completely
       setFormData({
         name: "",
         description: "",
         developer_name: "",
-        city: defaultCity || "", // Reset to defaults on close as well
+        city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
@@ -131,7 +129,7 @@ export default function AddCompoundDialog({
       }
       setErrors({});
     }
-  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]);
+  }, [isOpen, editMode]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -319,23 +317,18 @@ export default function AddCompoundDialog({
 
       onClose();
     } catch (error) {
-      console.error("API Error:", error);
       toast.error(
         editMode
-          ? t.toasts?.compoundUpdateFailed ||
-              "Failed to update compound. Please try again."
-          : t.toasts?.compoundAddFailed ||
-              "Failed to add compound. Please try again."
+          ? "Failed to update compound. Please try again."
+          : "Failed to add compound. Please try again."
       );
       setErrors({
         // Consider adding a general error state or showing error message from backend if available
         submit:
           error.message ||
           (editMode
-            ? t.toasts?.compoundUpdateFailed ||
-              "Failed to update compound. Please try again."
-            : t.toasts?.compoundAddFailed ||
-              "Failed to add compound. Please try again."),
+            ? "Failed to update compound. Please try again."
+            : "Failed to add compound. Please try again."),
       });
     } finally {
       setIsSubmitting(false);
@@ -396,7 +389,6 @@ export default function AddCompoundDialog({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                rows={2}
                 disabled={editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
@@ -467,9 +459,7 @@ export default function AddCompoundDialog({
                 value={formData.district}
                 onChange={handleChange}
                 disabled={!formData.city || editMode}
-                className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  !formData.city ? "bg-gray-100" : ""
-                }`}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
                   {!formData.city
@@ -543,7 +533,7 @@ export default function AddCompoundDialog({
                   value={formData.developer_name}
                   onChange={handleChange}
                   disabled={editMode}
-                  className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none`}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
                     {editMode
@@ -556,7 +546,7 @@ export default function AddCompoundDialog({
                     </option>
                   ))}
                 </select>
-                <div
+                {/* <div
                   className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
                 >
                   <svg
@@ -570,7 +560,7 @@ export default function AddCompoundDialog({
                       clipRule="evenodd"
                     />
                   </svg>
-                </div>
+                </div> */}
               </div>
               {!editMode && (
                 <button
