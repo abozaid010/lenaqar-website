@@ -20,7 +20,6 @@ export default function AddCompoundDialog({
   isOpen,
   onClose,
   compoundData,
-  editMode,
   onAdd,
   developers = [],
   setDevelopers,
@@ -29,6 +28,11 @@ export default function AddCompoundDialog({
   defaultDistrict,
 }) {
   const { t, locale } = useI18n();
+
+  // Determine edit mode based on compoundData
+  const editMode = !!(compoundData && compoundData.id);
+
+  console.log(editMode, "editMode");
 
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -40,6 +44,7 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
+  console.log(compoundData, "compoundData");
   const [formData, setFormData] = useState({
     name: compoundData?.name || "",
     description: compoundData?.description || "",

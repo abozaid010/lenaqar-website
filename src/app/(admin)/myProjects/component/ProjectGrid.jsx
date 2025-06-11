@@ -157,7 +157,6 @@ export default function ProjectList({
         isOpen={showEditDialog}
         onClose={() => setShowEditDialog(false)}
         compoundData={projectToEdit}
-        editMode={true}
         onAdd={handleProjectUpdate}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
@@ -174,7 +173,6 @@ export default function ProjectList({
         developers={developersSet}
         setDevelopers={setDevelopersSet}
         clientId={clientId}
-        editMode={false}
         showName={true}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
