@@ -40,7 +40,7 @@ export default function ProjectList({
     : [];
 
   const [developersSet, setDevelopersSet] = useState(developers || []);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -99,9 +99,8 @@ export default function ProjectList({
     setShowDeleteDialog(true);
   };
 
-  const handleEditClick = (project, e) => {
-    e.stopPropagation();
-    setShowEditDialog(true);
+  const handleEditClick = (project) => {
+    setShowProjectDialog(true);
     setProjectToEdit(project);
   };
 
@@ -156,16 +155,16 @@ export default function ProjectList({
   return (
     <>
       <AddCompoundDialog
-        isOpen={showEditDialog}
-        onClose={() => setShowEditDialog(false)}
+        isOpen={showProjectDialog}
+        onClose={() => setShowProjectDialog(false)}
         compoundData={projectToEdit}
         onAdd={handleProject}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
 
       <AddCompoundDialog
-        isOpen={showAddDialog}
-        onClose={() => setShowAddDialog(false)}
+        isOpen={showProjectDialog}
+        onClose={() => setShowProjectDialog(false)}
         onAdd={handleProject}
         developers={developersSet}
         setDevelopers={setDevelopersSet}
@@ -225,7 +224,7 @@ export default function ProjectList({
               {t.sidebar.myProjects}
             </h2>
             <button
-              onClick={() => setShowAddDialog(true)}
+              onClick={() => setShowProjectDialog(true)}
               className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
             >
               <Plus size={20} />
@@ -323,7 +322,7 @@ export default function ProjectList({
                       </div>
                       <div className="flex-1"></div>
                       <button
-                        onClick={(e) => handleEditClick(project, e)}
+                        onClick={() => handleEditClick(project)}
                         className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
                         title="Edit Project"
                       >
