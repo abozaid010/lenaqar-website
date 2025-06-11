@@ -9,7 +9,6 @@ import {
 import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
-import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -29,8 +28,8 @@ export default function AddCompoundDialog({
   defaultCity,
   defaultDistrict,
 }) {
-  const { t } = useI18n();
-  const ar = Cookies.get("lang");
+  const { t, locale } = useI18n();
+
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -138,7 +137,7 @@ export default function AddCompoundDialog({
     // Add validation for district selection
     if (name === "district" && !formData.city) {
       toast.error(
-        ar === "ar"
+        locale === "ar"
           ? "الرجاء اختيار المدينة أولاً"
           : "Please select a city first"
       );
@@ -500,12 +499,12 @@ export default function AddCompoundDialog({
               >
                 <option value="">
                   {!formData.city
-                    ? ar === "ar"
+                    ? locale === "ar"
                       ? "الرجاء اختيار المدينة أولاً"
                       : "Please select a city first"
                     : editMode
                       ? formData.district
-                      : ar === "ar"
+                      : locale === "ar"
                         ? t.formLabels?.district
                         : "Select district"}
                 </option>
@@ -518,11 +517,6 @@ export default function AddCompoundDialog({
                     </option>
                   ))}
               </select>
-              {/* {!formData.city && (
-                <p className="mt-1 text-sm text-red-600">
-                  {ar === "ar" ? "الرجاء اختيار المدينة أولاً" : "Please select a city first"}
-                </p>
-              )} */}
             </div>
 
             {/* Details */}
@@ -589,7 +583,7 @@ export default function AddCompoundDialog({
                   ))}
                 </select>
                 <div
-                  className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+                  className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
                 >
                   <svg
                     className="h-5 w-5 text-gray-400"
@@ -608,7 +602,7 @@ export default function AddCompoundDialog({
                 <button
                   type="button"
                   onClick={() => setIsAddDeveloperDialogOpen(true)}
-                  className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+                  className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
                 >
                   + {t.buttons?.addNew || "Add New"}
                 </button>
