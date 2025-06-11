@@ -1,25 +1,18 @@
 export default function formatDateForDisplay(isoString, showTime = true) {
   const date = new Date(isoString);
+  if (isNaN(date.getTime())) throw new Error('Invalid ISO date string');
 
-  if (isNaN(date.getTime())) {
-    throw new Error('Invalid ISO date string');
-  }
-
-  const dateOptions = {
+  const options = {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  };
-
-  const timeOptions = {
     hour: '2-digit',
     minute: '2-digit',
     hour12: true,
+    timeZone: 'UTC', // Force UTC
   };
 
-  if (showTime) {
-    return date.toLocaleString('en-US', { ...dateOptions, ...timeOptions });
-  } else {
-    return date.toLocaleDateString('en-US', dateOptions);
-  }
+  return showTime
+    ? date.toLocaleString('en-US', options)
+    : date.toLocaleDateString('en-US', { ...options, hour: undefined, minute: undefined });
 }
