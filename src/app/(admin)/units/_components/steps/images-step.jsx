@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
-import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
+import Image from "next/image";
+import { useRef, useState } from "react";
+import toast from "react-hot-toast";
 
-import AddDeveloperDialog from "../add-developer-dialog";
 import {
   deleteImage,
   uploadImages,
 } from "@/components/services/serviceFetching";
-import Cookies from "js-cookie";
+import AddDeveloperDialog from "../add-developer-dialog";
 
 export default function ImagesStep({
   formData,
@@ -23,8 +22,7 @@ export default function ImagesStep({
   setInvalidFields = () => {},
 }) {
   const fileInputRef = useRef(null);
-  const { t } = useI18n();
-  const ar = Cookies.get("lang") 
+  const { t, locale } = useI18n();
 
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -415,7 +413,9 @@ export default function ImagesStep({
               <option value="semi finished">{t.semiFinished}</option>
               <option value="core & shell">{t.coreAndShell}</option>
             </select>
-            <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
+            <div
+              className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+            >
               <svg
                 className="h-5 w-5 text-gray-400"
                 viewBox="0 0 20 20"
@@ -440,7 +440,8 @@ export default function ImagesStep({
                 : "text-gray-700"
             }`}
           >
-           {t.furnishingType}<span className="text-red-500">*</span>
+            {t.furnishingType}
+            <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
@@ -457,7 +458,9 @@ export default function ImagesStep({
               <option value="furnished">{t.furnished}</option>
               <option value="unfurnished">{t.unfurnished}</option>
             </select>
-            <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
+            <div
+              className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+            >
               <svg
                 className="h-5 w-5 text-gray-400"
                 viewBox="0 0 20 20"
@@ -503,7 +506,9 @@ export default function ImagesStep({
                   </option>
                 ))}
               </select>
-              <div className={`absolute inset-y-0 ${ar === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}>
+              <div
+                className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
+              >
                 <svg
                   className="h-5 w-5 text-gray-400"
                   viewBox="0 0 20 20"
@@ -520,13 +525,12 @@ export default function ImagesStep({
             <button
               type="button"
               onClick={() => setIsAddDeveloperDialogOpen(true)}
-              className={`absolute ${ar === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+              className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
             >
               + {t.addNew}
             </button>
           </div>
         )}
-
       </div>
 
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
