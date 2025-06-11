@@ -60,11 +60,11 @@ export default function ProjectList({
       const exists = prev.some((p) => p.id === data.id);
       let updatedList;
       if (exists) {
-        // Edit: update the project and move it to the top
-        updatedList = [data, ...prev.filter((p) => p.id !== data.id)];
+        // Edit: update the project
+        updatedList = prev.map((p) => (p.id === data.id ? data : p));
       } else {
-        // Add: append the new project to the top
-        updatedList = [data, ...prev];
+        // Add: append the new project
+        updatedList = [...prev, data];
       }
       return updatedList;
     });
@@ -79,13 +79,9 @@ export default function ProjectList({
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
         setProjectList((prev) => {
-          // Remove the deleted project
           const updatedList = prev.filter((p) => p.id !== project_id);
-          // Move the next project (if any) to the top
-          if (updatedList.length > 0) {
-            setSelectedProject(updatedList[0]);
-          } else {
-            setSelectedProject(null);
+          if (selectedProject?.id === project_id) {
+            setSelectedProject(updatedList[0] || null);
           }
           return updatedList;
         });
