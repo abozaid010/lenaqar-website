@@ -798,7 +798,7 @@ export default function AddCompoundDialog({
 
             {/* Developer */}
             <div className="relative">
-              <label className={`block text-sm font-medium mb-1`}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.developer || "Developer"}{" "}
                 <span className="text-red-500">*</span>
               </label>
@@ -1015,7 +1015,7 @@ export default function AddCompoundDialog({
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.projectImages || "Project Images"}
-                <span className="text-sm font-normal text-gray-500">
+                <span className="text-xs font-normal text-gray-500">
                   ({totalImagesCount} / 8)
                 </span>
               </label>
@@ -1037,7 +1037,7 @@ export default function AddCompoundDialog({
                     className="aspect-square border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors"
                   >
                     <svg
-                      className="h-8 w-8 text-gray-400"
+                      className="h-7 w-7 text-gray-400"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -1049,7 +1049,7 @@ export default function AddCompoundDialog({
                         d="M12 4v16m8-8H4"
                       />
                     </svg>
-                    <span className="mt-2 text-sm text-gray-500">
+                    <span className="mt-2 text-xs text-gray-500">
                       {t.common?.addImage || "Add Image"}
                     </span>
                   </div>
