@@ -984,6 +984,7 @@ export default {
     images: "Images",
     districtFirst: "select district first",
     selectDistrict: "select district",
+    projectImages: "Project Images",
   },
   buttons: {
     addNew: "Add New",
