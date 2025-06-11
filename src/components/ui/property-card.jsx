@@ -1,19 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { useState } from "react";
 
 import {
-  Home,
-  Square,
   Bath,
   Bed,
-  Eye,
-  Landmark,
   DollarSign,
+  Eye,
+  Home,
+  Landmark,
   MapPin,
-  Share2Icon,
+  Square,
 } from "lucide-react";
 
 const InfoItem = ({ icon, label, value }) => (
@@ -56,7 +55,7 @@ export default function PropertyCard({ data }) {
         href={`/units/${unitId}`}
         className="rounded-md bg-gray-100 h-44 overflow-hidden relative"
       >
-        {data.images?.length > 0 ? (
+        {data.images?.length > 0 && (hoveredImage || data.images[0].url) ? (
           <Image
             onMouseEnter={handleImageHover}
             onMouseLeave={() => setHoveredImage(null)}
@@ -116,24 +115,6 @@ export default function PropertyCard({ data }) {
             value={`${totalPrice} EGP`}
           />
         </div>
-        <div></div>
-        {/* Actions */}
-        {/* <div className="flex items-center mt-2 gap-1">
-          <Link
-            href={`/dashboard/units/${unitId}`}
-            role="button"
-            className="flex-1"
-          >
-            <div className="w-full px-2 h-8 bg-primary text-white/90 rounded-md font-medium transition hover:opacity-95 duration-300 flex items-center gap-2 justify-center text-sm">
-              <Eye size={22} />
-              <span>View Details</span>
-            </div>
-          </Link>
-
-          <button className="flex items-center cursor-pointer justify-center h-8 w-10 py-1.5 bg-gray-50 rounded-md hover:bg-gray-100 transition duration-300">
-            <Share2Icon size={22} />
-          </button>
-        </div> */}
       </div>
     </div>
   );
