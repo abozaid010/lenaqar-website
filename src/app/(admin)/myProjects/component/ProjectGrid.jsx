@@ -168,6 +168,7 @@ export default function ProjectList({
         onAdd={(newProject) => {
           setProjectList((prev) => [...prev, newProject]);
           setSelectedProject(newProject);
+          setProjectId(newProject.id);
           router.refresh();
         }}
         developers={developersSet}
@@ -175,8 +176,6 @@ export default function ProjectList({
         clientId={clientId}
         editMode={false}
         showName={true}
-        projectId={projectId}
-        setProjectId={setProjectId}
         Egypt_cities={formattedDataCitiesAndDistricts}
       />
 

@@ -28,8 +28,6 @@ export default function AddCompoundDialog({
   Egypt_cities,
   defaultCity,
   defaultDistrict,
-  projectId,
-  setProjectId,
 }) {
   const { t } = useI18n();
   const ar = Cookies.get("lang");
@@ -132,7 +130,7 @@ export default function AddCompoundDialog({
       }
       setErrors({});
     }
-  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]); // Depend on relevant props
+  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -313,7 +311,6 @@ export default function AddCompoundDialog({
       if (!editMode) {
         // Add new compound
         res = await addCompound(submissionData);
-        setProjectId(res.data.id);
         // Call onAdd after successful add to notify parent (ProjectGrid)
         if (res?.data?.id) {
           // Check if ID is returned on successful add
@@ -412,7 +409,6 @@ export default function AddCompoundDialog({
             ? t.updateProject
             : t.modal?.addNewProject || "Add New Project"
         }
-        editMode={editMode}
       >
         <div>
           <div className="space-y-2">
