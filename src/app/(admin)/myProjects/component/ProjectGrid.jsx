@@ -42,7 +42,6 @@ export default function ProjectList({
   const [developersSet, setDevelopersSet] = useState(developers || []);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [projectId, setProjectId] = useState(null);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
@@ -66,6 +65,10 @@ export default function ProjectList({
       setSelectedProject(updatedProject);
       router.refresh();
     }
+
+    setProjectList((prev) => [...prev, newProject]);
+    setSelectedProject(newProject);
+    router.refresh();
   };
 
   const deleteproject = async (project_id) => {
@@ -167,7 +170,6 @@ export default function ProjectList({
         onAdd={(newProject) => {
           setProjectList((prev) => [...prev, newProject]);
           setSelectedProject(newProject);
-          setProjectId(newProject.id);
           router.refresh();
         }}
         developers={developersSet}
@@ -237,7 +239,7 @@ export default function ProjectList({
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">
-            {projects?.length === 0 || projects === null ? (
+            {projectList.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
@@ -260,7 +262,7 @@ export default function ProjectList({
               </div>
             ) : (
               <div className="space-y-3 p-4">
-                {projects?.map((project) => (
+                {projectList.map((project) => (
                   <div
                     key={project.id}
                     className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
@@ -348,7 +350,7 @@ export default function ProjectList({
         </div>
 
         {/* Right Panel - Details/Map/etc */}
-        {projects?.length > 0 && (
+        {projectList.length > 0 && (
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
             {selectedProject ? (
               <>
@@ -490,7 +492,7 @@ export default function ProjectList({
               </>
             ) : (
               <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                {projects?.length > 0 ? (
+                {projectList.length > 0 ? (
                   <div className="text-center">
                     <svg
                       className="w-12 h-12 text-gray-400 mx-auto mb-4"
