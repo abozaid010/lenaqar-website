@@ -41,9 +41,9 @@ export default function ProjectList({
 
   const [developersSet, setDevelopersSet] = useState(developers || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
-  const [showAddDialog, setShowAddDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
@@ -160,17 +160,9 @@ export default function ProjectList({
         compoundData={projectToEdit}
         onAdd={handleProject}
         Egypt_cities={formattedDataCitiesAndDistricts}
-      />
-
-      <AddCompoundDialog
-        isOpen={showProjectDialog}
-        onClose={() => setShowProjectDialog(false)}
-        onAdd={handleProject}
         developers={developersSet}
         setDevelopers={setDevelopersSet}
         clientId={clientId}
-        showName={true}
-        Egypt_cities={formattedDataCitiesAndDistricts}
       />
 
       <DeleteConfirmDialog

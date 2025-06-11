@@ -32,8 +32,6 @@ export default function AddCompoundDialog({
   // Determine edit mode based on compoundData
   const editMode = !!(compoundData && compoundData.id);
 
-  console.log(editMode, "editMode");
-
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
