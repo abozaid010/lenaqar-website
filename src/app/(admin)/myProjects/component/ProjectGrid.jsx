@@ -10,7 +10,6 @@ import {
 } from "@/components/services/serviceFetching";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -45,22 +44,20 @@ export default function ProjectList({
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [fullScreenImages, setFullScreenImages] = useState([]);
   const [fullScreenMasterPlan, setFullScreenMasterPlan] = useState(null);
-  // State management for projects and phases
+
   const [developersSet, setDevelopersSet] = useState(developers || []);
+
+  const [projectList, setProjectList] = useState(projects || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
+
+  const [showPhaseDialog, setShowPhaseDialog] = useState(false);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
-  const [projectList, setProjectList] = useState(projects || []);
-  const [showAddPhaseDialog, setShowAddPhaseDialog] = useState(false);
-  const [showEditPhaseDialog, setShowEditPhaseDialog] = useState(false);
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
-
-  const router = useRouter();
 
   const handleProject = (data) => {
     setProjectList((prev) => {
@@ -76,6 +73,27 @@ export default function ProjectList({
       return updatedList;
     });
     setSelectedProject(data);
+  };
+
+  const handlePhase = (data) => {
+    setSelectedProject((prev) => {
+      const updatedPhases = [...(prev.phases || [])];
+      if (data.id) {
+        // Edit: update the existing phase
+        const phaseIndex = updatedPhases.findIndex((p) => p.id === data.id);
+        if (phaseIndex !== -1) {
+          updatedPhases[phaseIndex] = data;
+        }
+      } else {
+        // Add: append the new phase
+        updatedPhases.push(data);
+      }
+      return {
+        ...prev,
+        phases: updatedPhases,
+      };
+    });
+    setShowPhaseDialog(false);
   };
 
   const deleteproject = async (project_id) => {
@@ -184,36 +202,14 @@ export default function ProjectList({
       />
 
       <AddPhaseDialog
-        isOpen={showEditPhaseDialog}
-        onClose={() => setShowEditPhaseDialog(false)}
-        onAdd={(updatedPhase) => {
-          setSelectedProject((prev) => ({
-            ...prev,
-            phases: prev.phases.map((phase, idx) =>
-              idx === selectedPhaseIdx ? updatedPhase : phase
-            ),
-          }));
-          setShowEditPhaseDialog(false);
-          router.refresh();
+        isOpen={showPhaseDialog}
+        onClose={() => {
+          setShowPhaseDialog(false);
+          setPhaseToEdit(null);
         }}
-        projectIdPhase={selectedProject?.id}
-        editMode={true}
         phaseData={phaseToEdit}
-      />
-
-      <AddPhaseDialog
-        isOpen={showAddPhaseDialog}
-        onClose={() => setShowAddPhaseDialog(false)}
-        onAdd={(newPhase) => {
-          setSelectedProject((prev) => ({
-            ...prev,
-            phases: [...prev.phases, newPhase],
-          }));
-          setShowAddPhaseDialog(false);
-          router.refresh();
-        }}
-        projectId={selectedProject?.id}
-        editMode={false}
+        onAdd={handlePhase}
+        projectIdPhase={selectedProject?.id}
       />
 
       <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
@@ -414,7 +410,7 @@ export default function ProjectList({
                     {t.phases}
                   </h4>
                   <button
-                    onClick={() => setShowAddPhaseDialog(true)}
+                    onClick={() => setShowPhaseDialog(true)}
                     className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
                   >
                     <Plus size={20} />
@@ -503,7 +499,7 @@ export default function ProjectList({
                               setPhaseToEdit(
                                 selectedProject.phases[selectedPhaseIdx]
                               );
-                              setShowEditPhaseDialog(true);
+                              setShowPhaseDialog(true);
                             }}
                             className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
                           >

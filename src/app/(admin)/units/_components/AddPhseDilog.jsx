@@ -22,12 +22,15 @@ export default function AddPhseDilog({
   onClose,
   onAdd,
   projectId,
-  editMode,
   phaseData,
   projectIdPhase,
 }) {
   const { t } = useI18n();
   const router = useRouter();
+
+  // Determine edit mode based on compoundData
+  const editMode = !!(phaseData && phaseData.id);
+
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
