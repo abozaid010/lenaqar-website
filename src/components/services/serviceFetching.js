@@ -192,7 +192,7 @@ export async function addDeveloper(developerData) {
     return response.data;
   } catch (error) {
     console.error("Failed to add developer:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 
@@ -203,7 +203,7 @@ export async function addUnit(unitData) {
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 export async function addNewPhase(phaseData, idProject) {
@@ -213,27 +213,27 @@ export async function addNewPhase(phaseData, idProject) {
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
-export async function updatePhase(phaseData, idProject,idPhase) {
+export async function updatePhase(phaseData, idProject, idPhase) {
   try {
     const response = await axiosInstance.put(`/project-phases/${idProject}/phase-update/${idPhase}`, phaseData);
 
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
-export async function deletePhase(idProject,idPhase) {
+export async function deletePhase(idProject, idPhase) {
   try {
     const response = await axiosInstance.delete(`/project-phases/${idProject}/phase-delete/${idPhase}`);
 
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 export async function addUnitRent(unitData) {
@@ -242,7 +242,7 @@ export async function addUnitRent(unitData) {
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 
@@ -254,7 +254,7 @@ export async function addCompound(compoundData) {
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 export async function updatecompound(compoundData, projectId) {
@@ -266,7 +266,7 @@ export async function updatecompound(compoundData, projectId) {
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 export async function deleteProject(project_id) {
@@ -278,7 +278,7 @@ export async function deleteProject(project_id) {
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
-    throw { message: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.message || error.message };
   }
 }
 
@@ -297,7 +297,7 @@ export async function getschedual(startDate, endDate) {
 
   try {
     const response = await axiosInstance.get(`action/scheduled-actions-by-date?start_date=${startDate}&end_date=${endDate}`);
-   
+
     return response.data.data.actions;
   } catch (error) {
     return error;
