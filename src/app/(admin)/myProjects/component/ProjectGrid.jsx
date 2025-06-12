@@ -8,10 +8,13 @@ import {
   deletePhase,
   deleteProject,
 } from "@/components/services/serviceFetching";
+import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import "swiper/css";
+import "swiper/css/pagination";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
 import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
@@ -39,6 +42,7 @@ export default function ProjectList({
         }))
     : [];
 
+  const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [developersSet, setDevelopersSet] = useState(developers || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
@@ -342,11 +346,16 @@ export default function ProjectList({
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
             {selectedProject ? (
               <>
-                {selectedProject.master_plan && (
-                  <div className="h-80 relative">
+                {(selectedProject.master_plan ||
+                  selectedProject.images.length > 0) && (
+                  <div
+                    className="h-80 relative cursor-pointer"
+                    onClick={() => setShowFullScreenSwiper(true)}
+                  >
                     <Image
                       src={
                         selectedProject.master_plan ||
+                        selectedProject.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}
@@ -505,6 +514,13 @@ export default function ProjectList({
           </div>
         )}
       </div>
+
+      <ImageSwiperModal
+        open={showFullScreenSwiper}
+        onClose={() => setShowFullScreenSwiper(false)}
+        images={selectedProject.images || []}
+        masterPlan={selectedProject.master_plan || null}
+      />
     </>
   );
 }
