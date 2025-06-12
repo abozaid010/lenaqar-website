@@ -33,9 +33,7 @@ export default function ImageSwiperModal({
       <div className="relative w-full h-full max-w-7xl max-h-screen">
         <Swiper
           modules={[Pagination]}
-          spaceBetween={10}
           slidesPerView={1}
-          navigation
           pagination={{ clickable: true, type: "bullets" }}
           className="w-full h-full"
         >
