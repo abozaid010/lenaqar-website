@@ -450,51 +450,51 @@ export default function ProjectList({
                         />
 
                         {/* Overlay for indication */}
-                        {selectedProject.phases[selectedPhaseIdx].images
+                        {(selectedProject.phases[selectedPhaseIdx].images
                           ?.length > 0 ||
-                          (selectedProject.phases[selectedPhaseIdx]
-                            ?.master_plan && (
-                            <div
-                              onClick={() => {
-                                setFullScreenImages(
-                                  selectedProject.phases[selectedPhaseIdx]
-                                    .images || []
-                                );
-                                setFullScreenMasterPlan(
-                                  selectedProject.phases[selectedPhaseIdx]
-                                    ?.master_plan || null
-                                );
-                                setShowFullScreenSwiper(true);
-                              }}
-                              className={`absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity ${fullScreenImages.length > 0 || fullScreenMasterPlan ? "cursor-pointer" : "pointer-events-none"}`}
+                          selectedProject.phases[selectedPhaseIdx]
+                            ?.master_plan) && (
+                          <div
+                            className={`absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
+                            onClick={() => {
+                              setFullScreenImages(
+                                selectedProject.phases[selectedPhaseIdx]
+                                  .images || []
+                              );
+                              setFullScreenMasterPlan(
+                                selectedProject.phases[selectedPhaseIdx]
+                                  ?.master_plan || null
+                              );
+                              setShowFullScreenSwiper(true);
+                            }}
+                          >
+                            <svg
+                              className="w-10 h-10 text-white mb-2"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              viewBox="0 0 24 24"
                             >
-                              <svg
-                                className="w-10 h-10 text-white mb-2"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth={2}
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
-                                />
-                              </svg>
-                              <span className="text-white text-lg font-semibold">
-                                {(selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan
-                                  ? 1
-                                  : 0) +
-                                  (selectedProject.phases[selectedPhaseIdx]
-                                    .images?.length || 0)}{" "}
-                                {t?.images || "Images"}
-                              </span>
-                              <span className="text-white text-xs mt-1">
-                                {t?.clickToView || "Click to view"}
-                              </span>
-                            </div>
-                          ))}
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
+                              />
+                            </svg>
+                            <span className="text-white text-lg font-semibold">
+                              {(selectedProject.phases[selectedPhaseIdx]
+                                ?.master_plan
+                                ? 1
+                                : 0) +
+                                (selectedProject.phases[selectedPhaseIdx].images
+                                  ?.length || 0)}{" "}
+                              {t?.images || "Images"}
+                            </span>
+                            <span className="text-white text-xs mt-1">
+                              {t?.clickToView || "Click to view"}
+                            </span>
+                          </div>
+                        )}
 
                         <div className="absolute top-4 right-4 flex gap-2">
                           <button

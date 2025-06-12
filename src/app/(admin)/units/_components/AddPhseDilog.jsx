@@ -190,6 +190,7 @@ export default function AddPhseDilog({
           master_plan: selectedImage ? formData.master_plan : "",
           description: formData.description,
           updated_at: new Date().toISOString(),
+          images: formData.images,
         };
         console.log("formDataToUpdate", formDataToUpdate);
         const res = await updatePhase(
@@ -197,7 +198,6 @@ export default function AddPhseDilog({
           projectIdPhase,
           phaseData.id
         );
-        console.log("res", res);
         if (res.code === 200) {
           toast.success(
             t.phasee.updatePhasesuccess || "Phase updated successfully"
@@ -207,6 +207,7 @@ export default function AddPhseDilog({
             id: res.data?.id,
             description: res.data?.description,
             master_plan: res.data?.master_plan,
+            images: res.data?.images || [],
           });
           router.refresh();
           onClose();
