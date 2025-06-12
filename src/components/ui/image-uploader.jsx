@@ -324,7 +324,7 @@ export default function ImageUploader({
         onChange={handleFileSelect}
         className="hidden"
       />
-      <div className="mt-4">
+      <div className="mt-2">
         <div
           className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2`}
           onDragEnter={handleDrag}

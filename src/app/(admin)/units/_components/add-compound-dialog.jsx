@@ -136,7 +136,6 @@ export default function AddCompoundDialog({
     }
   }, [isOpen, editMode]);
 
-  console.log("compoundData", formData, "#######");
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 

@@ -7,6 +7,7 @@ import {
   uploadImages,
 } from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
+import ImageUploader from "@/components/ui/image-uploader";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
 import { Loader2 } from "lucide-react";
@@ -40,6 +41,7 @@ export default function AddPhseDilog({
     description: phaseData?.description || "",
     master_plan: phaseData?.master_plan || "",
     updated_at: new Date().toISOString(),
+    images: phaseData?.images || [],
   });
 
   // Add effect to update form data when phaseData changes
@@ -51,6 +53,7 @@ export default function AddPhseDilog({
         description: phaseData.description,
         master_plan: phaseData.master_plan || "",
         updated_at: new Date().toISOString(),
+        images: phaseData.images || [],
       });
 
       // Only set selected image if master_plan exists and is not empty
@@ -424,6 +427,25 @@ export default function AddPhseDilog({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Phase Images */}
+          <div>
+            <div className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.phaseImage || "Phase Images"} {""}
+              <span className="text-xs font-normal text-gray-500">
+                ({formData.images?.length || 0} / 8)
+              </span>
+            </div>
+            <ImageUploader
+              maxImages={8}
+              initialImages={editMode ? phaseData?.images || [] : []}
+              onImagesChange={(images) =>
+                setFormData((prev) => ({ ...prev, images }))
+              }
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
+            />
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
