@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
+import { Clock, Pencil, Plus, Trash2, X } from "lucide-react";
 import Image from "next/image";
 
 import {
@@ -10,12 +10,14 @@ import {
 } from "@/components/services/serviceFetching";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import toast from "react-hot-toast";
+import "swiper/css";
+import "swiper/css/pagination";
+import { Swiper, SwiperSlide } from "swiper/react";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
 import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
-
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
@@ -26,6 +28,7 @@ export default function ProjectList({
   developers,
 }) {
   const { t } = useI18n();
+  const swiperRef = useRef(null);
   const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
@@ -39,6 +42,7 @@ export default function ProjectList({
         }))
     : [];
 
+  const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [developersSet, setDevelopersSet] = useState(developers || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
@@ -342,11 +346,16 @@ export default function ProjectList({
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
             {selectedProject ? (
               <>
-                {selectedProject.master_plan && (
-                  <div className="h-80 relative">
+                {(selectedProject.master_plan ||
+                  selectedProject.images.length > 0) && (
+                  <div
+                    className="h-80 relative cursor-pointer"
+                    onClick={() => setShowFullScreenSwiper(true)}
+                  >
                     <Image
                       src={
                         selectedProject.master_plan ||
+                        selectedProject.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}
@@ -505,6 +514,58 @@ export default function ProjectList({
           </div>
         )}
       </div>
+
+      {showFullScreenSwiper && (
+        <div
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+          onClick={(e) => {
+            // Only close if the overlay itself is clicked, not the modal content
+            if (e.target === e.currentTarget) setShowFullScreenSwiper(false);
+          }}
+        >
+          <div className="relative w-full h-full max-w-7xl max-h-screen">
+            <Swiper
+              ref={swiperRef}
+              spaceBetween={10}
+              slidesPerView={1}
+              navigation
+              pagination={{ clickable: true, type: "bullets" }} // Show pagination indicator
+              className="w-full h-full"
+            >
+              {/* Include master_plan as the first image if it exists */}
+              {[
+                ...(selectedProject.master_plan
+                  ? [{ url: selectedProject.master_plan }]
+                  : []),
+                ...(selectedProject.images || []),
+              ].map((image, index) => (
+                <SwiperSlide
+                  key={index}
+                  className="flex items-center justify-center"
+                >
+                  <Image
+                    src={image.url || "/images/defaultImage.jpg"}
+                    alt={`Project Image ${index + 1}`}
+                    fill
+                    objectFit="contain"
+                  />
+                  {index === 0 && selectedProject.master_plan && (
+                    <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
+                      Master Plan
+                    </div>
+                  )}
+                </SwiperSlide>
+              ))}
+            </Swiper>
+            <button
+              onClick={() => setShowFullScreenSwiper(false)}
+              className="fixed top-6 right-6 text-white bg-black bg-opacity-50 p-1.5 rounded-full hover:bg-opacity-70 transition-colors z-50 hover:text-white/80"
+            >
+              <X />
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
