@@ -349,7 +349,7 @@ export default function ProjectList({
                 {(selectedProject.master_plan ||
                   selectedProject.images.length > 0) && (
                   <div
-                    className="h-80 relative cursor-pointer"
+                    className="h-80 relative cursor-pointer group"
                     onClick={() => setShowFullScreenSwiper(true)}
                   >
                     <Image
@@ -363,6 +363,29 @@ export default function ProjectList({
                       objectFit="cover"
                       priority
                     />
+                    {/* Overlay for indication */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <svg
+                        className="w-10 h-10 text-white mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
+                        />
+                      </svg>
+                      <span className="text-white text-lg font-semibold">
+                        {1 + (selectedProject.images?.length || 0)}{" "}
+                        {t?.images || "Images"}
+                      </span>
+                      <span className="text-white text-xs mt-1">
+                        {t?.clickToView || "Click to view"}
+                      </span>
+                    </div>
                   </div>
                 )}
 
@@ -391,7 +414,7 @@ export default function ProjectList({
                   {selectedProject.phases &&
                   selectedProject.phases.length > 0 ? (
                     <>
-                      <div className="h-96 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="h-96 relative overflow-hidden bg-gray-100 flex-shrink-0">
                         <Image
                           src={
                             selectedProject.phases[selectedPhaseIdx]
