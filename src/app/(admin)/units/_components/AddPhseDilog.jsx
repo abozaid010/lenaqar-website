@@ -35,6 +35,8 @@ export default function AddPhseDilog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const [masterPlanUploaded, setMasterPlanUploaded] = useState(false);
+
   const [formData, setFormData] = useState({
     id: uuidv4() || phaseData?.id,
     name: phaseData?.name || "",
@@ -121,7 +123,7 @@ export default function AddPhseDilog({
     reader.readAsDataURL(file);
 
     try {
-      setIsUploading(true);
+      setMasterPlanUploaded(true);
 
       const compressedFile = await compressImage(file);
 
@@ -138,7 +140,7 @@ export default function AddPhseDilog({
       console.error("Error compressing image:", error);
       toast.error("Failed to compress image. Please try again.");
     } finally {
-      setIsUploading(false);
+      setMasterPlanUploaded(false);
     }
   };
 
@@ -192,7 +194,6 @@ export default function AddPhseDilog({
           updated_at: new Date().toISOString(),
           images: formData.images,
         };
-        console.log("formDataToUpdate", formDataToUpdate);
         const res = await updatePhase(
           formDataToUpdate,
           projectIdPhase,
@@ -218,7 +219,6 @@ export default function AddPhseDilog({
         const res = await addNewPhase(formData, projectId);
         if (res.code === 200) {
           toast.success(t.addPhaseSuccess);
-          console.log("res", res.data, "########");
           onAdd({
             name: res.data?.name,
             id: res.data?.id,
@@ -313,7 +313,7 @@ export default function AddPhseDilog({
                 accept="image/jpeg, image/png, image/webp"
                 onChange={handleFileSelect}
                 className="hidden"
-                disabled={isUploading}
+                disabled={masterPlanUploaded}
               />
               <div
                 onClick={() => fileInputRef.current.click()}
@@ -330,7 +330,7 @@ export default function AddPhseDilog({
                         className="w-full h-full object-cover rounded-md"
                       />
 
-                      {isUploading && (
+                      {masterPlanUploaded && (
                         <div
                           className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
                         >
@@ -357,7 +357,7 @@ export default function AddPhseDilog({
                         </div>
                       )}
 
-                      {!isUploading && (
+                      {!masterPlanUploaded && (
                         <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -374,7 +374,7 @@ export default function AddPhseDilog({
                         </div>
                       )}
 
-                      {!isUploading && (
+                      {!masterPlanUploaded && (
                         <button
                           type="button"
                           onClick={handleRemoveImage}
@@ -462,7 +462,7 @@ export default function AddPhseDilog({
               onClick={handleSubmit}
               disabled={isSubmitting}
               className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                isSubmitting || isUploading
+                isSubmitting || isUploading || masterPlanUploaded
                   ? "pointer-events-none opacity-80"
                   : "hover:bg-primary/90"
               }`}
