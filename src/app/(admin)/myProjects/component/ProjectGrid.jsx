@@ -441,9 +441,10 @@ export default function ProjectList({
                           src={
                             selectedProject.phases[selectedPhaseIdx]
                               ?.master_plan ||
-                            selectedProject.phases[selectedPhaseIdx].images[0]
-                              .url ||
-                            "/images/defaultImage.jpg"
+                            (Array.isArray(selectedProject.phases.images) &&
+                            phase.images.length > 0
+                              ? phase.images[0].url
+                              : "/images/defaultImage.jpg")
                           }
                           alt={
                             selectedProject.phases[selectedPhaseIdx]?.name ||
@@ -485,7 +486,8 @@ export default function ProjectList({
 
                         <div className="absolute top-4 right-4 flex gap-2">
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setPhaseToEdit(
                                 selectedProject.phases[selectedPhaseIdx]
                               );
@@ -541,8 +543,10 @@ export default function ProjectList({
                             <Image
                               src={
                                 phase.master_plan ||
-                                phase?.images[0].url ||
-                                "/images/defaultImage.jpg"
+                                (Array.isArray(phase.images) &&
+                                phase.images.length > 0
+                                  ? phase.images[0].url
+                                  : "/images/defaultImage.jpg")
                               }
                               alt={phase.name || "Phase Thumbnail"}
                               fill
