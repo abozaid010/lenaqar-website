@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
+import { Keyboard, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function ImageSwiperModal({
@@ -32,9 +32,10 @@ export default function ImageSwiperModal({
     >
       <div className="relative w-full h-full max-w-7xl max-h-screen">
         <Swiper
-          modules={[Pagination]}
+          modules={[Pagination, Keyboard]}
           slidesPerView={1}
           pagination={{ clickable: true, type: "bullets" }}
+          keyboard={{ enabled: true }}
           className="w-full h-full"
         >
           {allImages.map((image, index) => (
