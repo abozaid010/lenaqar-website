@@ -1,24 +1,24 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { Clock, Pencil, Plus, Trash2, X } from "lucide-react";
+import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
 import {
   deletePhase,
   deleteProject,
 } from "@/components/services/serviceFetching";
+import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
-import { Swiper, SwiperSlide } from "swiper/react";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
 import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
@@ -29,7 +29,6 @@ export default function ProjectList({
   developers,
 }) {
   const { t } = useI18n();
-  const swiperRef = useRef(null);
   const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
@@ -516,58 +515,12 @@ export default function ProjectList({
         )}
       </div>
 
-      {showFullScreenSwiper && (
-        <div
-          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
-          onClick={(e) => {
-            // Only close if the overlay itself is clicked, not the modal content
-            if (e.target === e.currentTarget) setShowFullScreenSwiper(false);
-          }}
-        >
-          <div className="relative w-full h-full max-w-7xl max-h-screen">
-            <Swiper
-              modules={[Pagination]}
-              ref={swiperRef}
-              spaceBetween={10}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true, type: "bullets" }}
-              className="w-full h-full"
-            >
-              {/* Include master_plan as the first image if it exists */}
-              {[
-                ...(selectedProject.master_plan
-                  ? [{ url: selectedProject.master_plan }]
-                  : []),
-                ...(selectedProject.images || []),
-              ].map((image, index) => (
-                <SwiperSlide
-                  key={index}
-                  className="flex items-center justify-center"
-                >
-                  <Image
-                    src={image.url || "/images/defaultImage.jpg"}
-                    alt={`Project Image ${index + 1}`}
-                    fill
-                    objectFit="contain"
-                  />
-                  {index === 0 && selectedProject.master_plan && (
-                    <div className="fixed top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
-                      Master Plan
-                    </div>
-                  )}
-                </SwiperSlide>
-              ))}
-            </Swiper>
-            <button
-              onClick={() => setShowFullScreenSwiper(false)}
-              className="fixed top-6 right-6 text-white bg-black bg-opacity-50 p-1.5 rounded-full hover:bg-opacity-70 transition-colors z-50 hover:text-white/80"
-            >
-              <X />
-            </button>
-          </div>
-        </div>
-      )}
+      <ImageSwiperModal
+        open={showFullScreenSwiper}
+        onClose={() => setShowFullScreenSwiper(false)}
+        images={selectedProject.images || []}
+        masterPlan={selectedProject.master_plan || null}
+      />
     </>
   );
 }
