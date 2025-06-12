@@ -91,7 +91,6 @@ export default function ProjectList({
         });
       }
     } catch (error) {
-      console.log(error);
       toast.error(t.failedProject);
     }
   };
@@ -150,7 +149,6 @@ export default function ProjectList({
         });
       }
     } catch (error) {
-      console.log(error);
       toast.error(t.failedPhase);
     }
   };
@@ -347,7 +345,7 @@ export default function ProjectList({
             {selectedProject ? (
               <>
                 {(selectedProject.master_plan ||
-                  selectedProject.images.length > 0) && (
+                  selectedProject.images?.length > 0) && (
                   <div
                     className="h-80 relative cursor-pointer group"
                     onClick={() => setShowFullScreenSwiper(true)}
@@ -355,7 +353,7 @@ export default function ProjectList({
                     <Image
                       src={
                         selectedProject.master_plan ||
-                        selectedProject.images[0]?.url ||
+                        selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}

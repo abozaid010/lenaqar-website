@@ -118,7 +118,7 @@ export default function ImageUploader({
       }
     }
     const sanitizedUploads = [...uploadedImages, ...successfulUploads].map(
-      ({ preview, ...rest }) => rest
+      ({ preview, name, ...rest }) => rest
     );
     setUploadedImages([...uploadedImages, ...successfulUploads]);
     onImagesChange(sanitizedUploads);
@@ -305,7 +305,11 @@ export default function ImageUploader({
             </button>
           )}
         </div>
-        <div className="mt-1 text-xs text-gray-500 truncate">{image.name}</div>
+        {isSelected && (
+          <div className="mt-1 text-xs text-gray-500 truncate">
+            {image.name}
+          </div>
+        )}
       </div>
     );
   };
