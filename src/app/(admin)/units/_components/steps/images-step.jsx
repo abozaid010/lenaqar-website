@@ -202,7 +202,6 @@ export default function ImagesStep({
         onImagesChange={(images) => updateFormData({ images })}
         isUploading={isUploading}
         setIsUploading={setIsUploading}
-        t={t}
       />
 
       <AddDeveloperDialog

@@ -4,6 +4,7 @@ import {
   deleteImage,
   uploadImages,
 } from "@/components/services/serviceFetching";
+import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
 import Image from "next/image";
 import { useRef, useState } from "react";
@@ -15,8 +16,8 @@ export default function ImageUploader({
   onImagesChange = () => {},
   isUploading,
   setIsUploading,
-  t,
 }) {
+  const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
