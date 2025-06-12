@@ -7,6 +7,7 @@ import {
   uploadImages,
 } from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
+import ImageUploader from "@/components/ui/image-uploader";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
 import { Loader2 } from "lucide-react";
@@ -21,12 +22,15 @@ export default function AddPhseDilog({
   onClose,
   onAdd,
   projectId,
-  editMode,
   phaseData,
   projectIdPhase,
 }) {
   const { t } = useI18n();
   const router = useRouter();
+
+  // Determine edit mode based on compoundData
+  const editMode = !!(phaseData && phaseData.id);
+
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
@@ -34,12 +38,15 @@ export default function AddPhseDilog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const [masterPlanUploaded, setMasterPlanUploaded] = useState(false);
+
   const [formData, setFormData] = useState({
     id: uuidv4() || phaseData?.id,
     name: phaseData?.name || "",
     description: phaseData?.description || "",
     master_plan: phaseData?.master_plan || "",
     updated_at: new Date().toISOString(),
+    images: phaseData?.images || [],
   });
 
   // Add effect to update form data when phaseData changes
@@ -51,6 +58,7 @@ export default function AddPhseDilog({
         description: phaseData.description,
         master_plan: phaseData.master_plan || "",
         updated_at: new Date().toISOString(),
+        images: phaseData.images || [],
       });
 
       // Only set selected image if master_plan exists and is not empty
@@ -118,7 +126,7 @@ export default function AddPhseDilog({
     reader.readAsDataURL(file);
 
     try {
-      setIsUploading(true);
+      setMasterPlanUploaded(true);
 
       const compressedFile = await compressImage(file);
 
@@ -135,7 +143,7 @@ export default function AddPhseDilog({
       console.error("Error compressing image:", error);
       toast.error("Failed to compress image. Please try again.");
     } finally {
-      setIsUploading(false);
+      setMasterPlanUploaded(false);
     }
   };
 
@@ -187,14 +195,13 @@ export default function AddPhseDilog({
           master_plan: selectedImage ? formData.master_plan : "",
           description: formData.description,
           updated_at: new Date().toISOString(),
+          images: formData.images,
         };
-        console.log("formDataToUpdate", formDataToUpdate);
         const res = await updatePhase(
           formDataToUpdate,
           projectIdPhase,
           phaseData.id
         );
-        console.log("res", res);
         if (res.code === 200) {
           toast.success(
             t.phasee.updatePhasesuccess || "Phase updated successfully"
@@ -204,6 +211,7 @@ export default function AddPhseDilog({
             id: res.data?.id,
             description: res.data?.description,
             master_plan: res.data?.master_plan,
+            images: res.data?.images || [],
           });
           router.refresh();
           onClose();
@@ -214,7 +222,6 @@ export default function AddPhseDilog({
         const res = await addNewPhase(formData, projectId);
         if (res.code === 200) {
           toast.success(t.addPhaseSuccess);
-          console.log("res", res.data, "########");
           onAdd({
             name: res.data?.name,
             id: res.data?.id,
@@ -309,7 +316,7 @@ export default function AddPhseDilog({
                 accept="image/jpeg, image/png, image/webp"
                 onChange={handleFileSelect}
                 className="hidden"
-                disabled={isUploading}
+                disabled={masterPlanUploaded}
               />
               <div
                 onClick={() => fileInputRef.current.click()}
@@ -326,7 +333,7 @@ export default function AddPhseDilog({
                         className="w-full h-full object-cover rounded-md"
                       />
 
-                      {isUploading && (
+                      {masterPlanUploaded && (
                         <div
                           className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
                         >
@@ -353,7 +360,7 @@ export default function AddPhseDilog({
                         </div>
                       )}
 
-                      {!isUploading && (
+                      {!masterPlanUploaded && (
                         <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -370,7 +377,7 @@ export default function AddPhseDilog({
                         </div>
                       )}
 
-                      {!isUploading && (
+                      {!masterPlanUploaded && (
                         <button
                           type="button"
                           onClick={handleRemoveImage}
@@ -426,6 +433,25 @@ export default function AddPhseDilog({
             </div>
           </div>
 
+          {/* Phase Images */}
+          <div>
+            <div className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.phaseImage || "Phase Images"} {""}
+              <span className="text-xs font-normal text-gray-500">
+                ({formData.images?.length || 0} / 8)
+              </span>
+            </div>
+            <ImageUploader
+              maxImages={8}
+              initialImages={editMode ? phaseData?.images || [] : []}
+              onImagesChange={(images) =>
+                setFormData((prev) => ({ ...prev, images }))
+              }
+              isUploading={isUploading}
+              setIsUploading={setIsUploading}
+            />
+          </div>
+
           <div className="flex justify-end space-x-3 pt-4">
             <button
               type="button"
@@ -439,7 +465,7 @@ export default function AddPhseDilog({
               onClick={handleSubmit}
               disabled={isSubmitting}
               className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                isSubmitting || isUploading
+                isSubmitting || isUploading || masterPlanUploaded
                   ? "pointer-events-none opacity-80"
                   : "hover:bg-primary/90"
               }`}

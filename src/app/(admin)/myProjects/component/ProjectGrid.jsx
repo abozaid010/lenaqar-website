@@ -10,7 +10,6 @@ import {
 } from "@/components/services/serviceFetching";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -43,21 +42,22 @@ export default function ProjectList({
     : [];
 
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
+  const [fullScreenImages, setFullScreenImages] = useState([]);
+  const [fullScreenMasterPlan, setFullScreenMasterPlan] = useState(null);
+
   const [developersSet, setDevelopersSet] = useState(developers || []);
+
+  const [projectList, setProjectList] = useState(projects || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
+
+  const [showPhaseDialog, setShowPhaseDialog] = useState(false);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
-  const [projectList, setProjectList] = useState(projects || []);
-  const [showAddPhaseDialog, setShowAddPhaseDialog] = useState(false);
-  const [showEditPhaseDialog, setShowEditPhaseDialog] = useState(false);
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
-
-  const router = useRouter();
 
   const handleProject = (data) => {
     setProjectList((prev) => {
@@ -73,6 +73,27 @@ export default function ProjectList({
       return updatedList;
     });
     setSelectedProject(data);
+  };
+
+  const handlePhase = (data) => {
+    setSelectedProject((prev) => {
+      const updatedPhases = [...(prev.phases || [])];
+      if (data.id) {
+        // Edit: update the existing phase
+        const phaseIndex = updatedPhases.findIndex((p) => p.id === data.id);
+        if (phaseIndex !== -1) {
+          updatedPhases[phaseIndex] = data;
+        }
+      } else {
+        // Add: append the new phase
+        updatedPhases.push(data);
+      }
+      return {
+        ...prev,
+        phases: updatedPhases,
+      };
+    });
+    setShowPhaseDialog(false);
   };
 
   const deleteproject = async (project_id) => {
@@ -91,7 +112,6 @@ export default function ProjectList({
         });
       }
     } catch (error) {
-      console.log(error);
       toast.error(t.failedProject);
     }
   };
@@ -150,7 +170,6 @@ export default function ProjectList({
         });
       }
     } catch (error) {
-      console.log(error);
       toast.error(t.failedPhase);
     }
   };
@@ -183,36 +202,14 @@ export default function ProjectList({
       />
 
       <AddPhaseDialog
-        isOpen={showEditPhaseDialog}
-        onClose={() => setShowEditPhaseDialog(false)}
-        onAdd={(updatedPhase) => {
-          setSelectedProject((prev) => ({
-            ...prev,
-            phases: prev.phases.map((phase, idx) =>
-              idx === selectedPhaseIdx ? updatedPhase : phase
-            ),
-          }));
-          setShowEditPhaseDialog(false);
-          router.refresh();
+        isOpen={showPhaseDialog}
+        onClose={() => {
+          setShowPhaseDialog(false);
+          setPhaseToEdit(null);
         }}
-        projectIdPhase={selectedProject?.id}
-        editMode={true}
         phaseData={phaseToEdit}
-      />
-
-      <AddPhaseDialog
-        isOpen={showAddPhaseDialog}
-        onClose={() => setShowAddPhaseDialog(false)}
-        onAdd={(newPhase) => {
-          setSelectedProject((prev) => ({
-            ...prev,
-            phases: [...prev.phases, newPhase],
-          }));
-          setShowAddPhaseDialog(false);
-          router.refresh();
-        }}
-        projectId={selectedProject?.id}
-        editMode={false}
+        onAdd={handlePhase}
+        projectIdPhase={selectedProject?.id}
       />
 
       <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
@@ -347,15 +344,21 @@ export default function ProjectList({
             {selectedProject ? (
               <>
                 {(selectedProject.master_plan ||
-                  selectedProject.images.length > 0) && (
+                  selectedProject.images?.length > 0) && (
                   <div
                     className="h-80 relative cursor-pointer group"
-                    onClick={() => setShowFullScreenSwiper(true)}
+                    onClick={() => {
+                      setFullScreenImages(selectedProject.images || []);
+                      setFullScreenMasterPlan(
+                        selectedProject.master_plan || null
+                      );
+                      setShowFullScreenSwiper(true);
+                    }}
                   >
                     <Image
                       src={
                         selectedProject.master_plan ||
-                        selectedProject.images[0]?.url ||
+                        selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}
@@ -364,28 +367,32 @@ export default function ProjectList({
                       priority
                     />
                     {/* Overlay for indication */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <svg
-                        className="w-10 h-10 text-white mb-2"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
-                        />
-                      </svg>
-                      <span className="text-white text-lg font-semibold">
-                        {1 + (selectedProject.images?.length || 0)}{" "}
-                        {t?.images || "Images"}
-                      </span>
-                      <span className="text-white text-xs mt-1">
-                        {t?.clickToView || "Click to view"}
-                      </span>
-                    </div>
+                    {(selectedProject.images?.length > 0 ||
+                      selectedProject.master_plan) && (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <svg
+                          className="w-10 h-10 text-white mb-2"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth={2}
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
+                          />
+                        </svg>
+                        <span className="text-white text-lg font-semibold">
+                          {(selectedProject.master_plan ? 1 : 0) +
+                            (selectedProject.images?.length || 0)}{" "}
+                          {t?.images || "Images"}
+                        </span>
+                        <span className="text-white text-xs mt-1">
+                          {t?.clickToView || "Click to view"}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -403,7 +410,7 @@ export default function ProjectList({
                     {t.phases}
                   </h4>
                   <button
-                    onClick={() => setShowAddPhaseDialog(true)}
+                    onClick={() => setShowPhaseDialog(true)}
                     className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
                   >
                     <Plus size={20} />
@@ -411,14 +418,23 @@ export default function ProjectList({
                   </button>
                 </div>
                 <div className="flex flex-col">
-                  {selectedProject.phases &&
+                  {(selectedProject.phases ||
+                    selectedProject.phases.images?.length > 0) &&
                   selectedProject.phases.length > 0 ? (
                     <>
-                      <div className="h-96 relative overflow-hidden bg-gray-100 flex-shrink-0">
+                      <div className="h-96 relative overflow-hidden bg-gray-50 group">
                         <Image
                           src={
                             selectedProject.phases[selectedPhaseIdx]
-                              ?.master_plan || "/images/defaultImage.jpg"
+                              ?.master_plan ||
+                            (Array.isArray(
+                              selectedProject.phases[selectedPhaseIdx]?.images
+                            ) &&
+                            selectedProject.phases[selectedPhaseIdx]?.images
+                              .length > 0
+                              ? selectedProject.phases[selectedPhaseIdx]
+                                  ?.images[0].url
+                              : "/images/defaultImage.jpg")
                           }
                           alt={
                             selectedProject.phases[selectedPhaseIdx]?.name ||
@@ -428,20 +444,70 @@ export default function ProjectList({
                           objectFit="cover"
                           priority
                         />
+
+                        {/* Overlay for indication */}
+                        {(selectedProject.phases[selectedPhaseIdx].images
+                          ?.length > 0 ||
+                          selectedProject.phases[selectedPhaseIdx]
+                            ?.master_plan) && (
+                          <div
+                            className={`absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
+                            onClick={() => {
+                              setFullScreenImages(
+                                selectedProject.phases[selectedPhaseIdx]
+                                  .images || []
+                              );
+                              setFullScreenMasterPlan(
+                                selectedProject.phases[selectedPhaseIdx]
+                                  ?.master_plan || null
+                              );
+                              setShowFullScreenSwiper(true);
+                            }}
+                          >
+                            <svg
+                              className="w-10 h-10 text-white mb-2"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15 10l4.553 2.276A2 2 0 0121 14.118V17a2 2 0 01-2 2H5a2 2 0 01-2-2v-2.882a2 2 0 01.447-1.342L8 10m7 0V7a5 5 0 00-10 0v3m10 0H8"
+                              />
+                            </svg>
+                            <span className="text-white text-lg font-semibold">
+                              {(selectedProject.phases[selectedPhaseIdx]
+                                ?.master_plan
+                                ? 1
+                                : 0) +
+                                (selectedProject.phases[selectedPhaseIdx].images
+                                  ?.length || 0)}{" "}
+                              {t?.images || "Images"}
+                            </span>
+                            <span className="text-white text-xs mt-1">
+                              {t?.clickToView || "Click to view"}
+                            </span>
+                          </div>
+                        )}
+
                         <div className="absolute top-4 right-4 flex gap-2">
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setPhaseToEdit(
                                 selectedProject.phases[selectedPhaseIdx]
                               );
-                              setShowEditPhaseDialog(true);
+                              setShowPhaseDialog(true);
                             }}
                             className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
                           >
                             <Pencil size={18} />
                           </button>
                           <button
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setPhaseToDelete(
                                 selectedProject.phases[selectedPhaseIdx]
                               );
@@ -452,14 +518,15 @@ export default function ProjectList({
                             <Trash2 size={18} />
                           </button>
                         </div>
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 p-6">
+
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-6 py-4">
                           <div className="text-white">
                             <div className="font-bold text-2xl mb-2 line-clamp-1">
                               {selectedProject?.phases[selectedPhaseIdx]?.name}
                             </div>
                             {selectedProject?.phases[selectedPhaseIdx]
                               ?.description && (
-                              <div className="text-base opacity-90 line-clamp-3">
+                              <div className="text-base opacity-90 line-clamp-2">
                                 {
                                   selectedProject.phases[selectedPhaseIdx]
                                     .description
@@ -469,7 +536,8 @@ export default function ProjectList({
                           </div>
                         </div>
                       </div>
-                      <div className="flex overflow-x-auto gap-4 pb-2 mt-4 flex-shrink-0">
+
+                      <div className="flex overflow-x-auto gap-4 px-4 pb-2 mt-4 flex-shrink-0">
                         {selectedProject.phases.map((phase, idx) => (
                           <div
                             key={idx}
@@ -482,7 +550,11 @@ export default function ProjectList({
                           >
                             <Image
                               src={
-                                phase.master_plan || "/images/defaultImage.jpg"
+                                phase.master_plan ||
+                                (Array.isArray(phase?.images) &&
+                                phase?.images.length > 0
+                                  ? phase.images[0].url
+                                  : "/images/defaultImage.jpg")
                               }
                               alt={phase.name || "Phase Thumbnail"}
                               fill
@@ -541,8 +613,8 @@ export default function ProjectList({
       <ImageSwiperModal
         open={showFullScreenSwiper}
         onClose={() => setShowFullScreenSwiper(false)}
-        images={selectedProject.images || []}
-        masterPlan={selectedProject.master_plan || null}
+        images={fullScreenImages}
+        masterPlan={fullScreenMasterPlan}
       />
     </>
   );

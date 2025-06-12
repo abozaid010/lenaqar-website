@@ -5,7 +5,7 @@ import Image from "next/image";
 import { createPortal } from "react-dom";
 import "swiper/css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper/modules";
+import { Keyboard, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function ImageSwiperModal({
@@ -25,16 +25,17 @@ export default function ImageSwiperModal({
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
       <div className="relative w-full h-full max-w-7xl max-h-screen">
         <Swiper
-          modules={[Pagination]}
+          modules={[Pagination, Keyboard]}
           slidesPerView={1}
           pagination={{ clickable: true, type: "bullets" }}
+          keyboard={{ enabled: true }}
           className="w-full h-full"
         >
           {allImages.map((image, index) => (
