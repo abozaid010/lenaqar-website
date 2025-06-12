@@ -14,6 +14,7 @@ import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
+import { Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import AddCompoundDialog from "../../units/_components/add-compound-dialog";
 import AddPhaseDialog from "../../units/_components/AddPhseDilog";
@@ -525,11 +526,12 @@ export default function ProjectList({
         >
           <div className="relative w-full h-full max-w-7xl max-h-screen">
             <Swiper
+              modules={[Pagination]}
               ref={swiperRef}
               spaceBetween={10}
               slidesPerView={1}
               navigation
-              pagination={{ clickable: true, type: "bullets" }} // Show pagination indicator
+              pagination={{ clickable: true, type: "bullets" }}
               className="w-full h-full"
             >
               {/* Include master_plan as the first image if it exists */}
@@ -550,7 +552,7 @@ export default function ProjectList({
                     objectFit="contain"
                   />
                   {index === 0 && selectedProject.master_plan && (
-                    <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
+                    <div className="fixed top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
                       Master Plan
                     </div>
                   )}
