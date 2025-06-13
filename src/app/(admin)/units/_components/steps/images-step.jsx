@@ -4,7 +4,7 @@ import ImageUploader from "@/components/ui/image-uploader";
 import { useI18n } from "@/context/translate-api";
 import { useState } from "react";
 
-import AddDeveloperDialog from "../add-developer-dialog";
+import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 
 export default function ImagesStep({
   formData,

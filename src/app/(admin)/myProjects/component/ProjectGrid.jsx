@@ -8,14 +8,14 @@ import {
   deletePhase,
   deleteProject,
 } from "@/components/services/serviceFetching";
+import AddCompoundDialog from "@/components/ui/add-compound-dialog";
+import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
-import AddCompoundDialog from "../../units/_components/add-compound-dialog";
-import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
