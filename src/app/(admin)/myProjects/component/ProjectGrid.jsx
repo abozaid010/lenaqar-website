@@ -452,7 +452,7 @@ export default function ProjectList({
                           selectedProject.phases[selectedPhaseIdx]
                             ?.master_plan) && (
                           <div
-                            className={`absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
+                            className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                             onClick={() => {
                               setFullScreenImages(
                                 selectedProject.phases[selectedPhaseIdx]
