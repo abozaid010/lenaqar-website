@@ -30,7 +30,7 @@ export default function ImageSwiperModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full h-full max-w-7xl max-h-screen">
+      <div className="relative w-[85%] h-full max-w-5xl max-h-screen">
         <Swiper
           modules={[Pagination, Keyboard]}
           slidesPerView={1}
@@ -48,6 +48,7 @@ export default function ImageSwiperModal({
                 alt={`Project Image ${index + 1}`}
                 fill
                 objectFit="contain"
+                className="bg-stone-50"
               />
               {showMasterPlanLabel && image.isMasterPlan && (
                 <div className="fixed top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
