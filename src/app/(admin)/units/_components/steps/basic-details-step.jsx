@@ -1,8 +1,8 @@
 "use client";
 
 import { getprojects } from "@/components/services/serviceFetching";
+import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
-import AddCompoundDialog from "@/components/ui/ui/add-compound-dialog";
 import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
