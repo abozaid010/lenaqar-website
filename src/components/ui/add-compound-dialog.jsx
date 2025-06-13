@@ -6,6 +6,7 @@ import {
   updatecompound,
   uploadImages,
 } from "@/components/services/serviceFetching";
+import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/image-uploader";
 import { useI18n } from "@/context/translate-api";
@@ -14,7 +15,6 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import AddDeveloperDialog from "./add-developer-dialog";
 
 export default function AddCompoundDialog({
   clientId,
@@ -36,6 +36,9 @@ export default function AddCompoundDialog({
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadedImageId, setUploadedImageId] = useState(null);
+
+  const [masterPlanUploaded, setMasterPlanUploaded] = useState(false);
+
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -229,7 +232,7 @@ export default function AddCompoundDialog({
     reader.readAsDataURL(file);
 
     try {
-      setIsUploading(true);
+      setMasterPlanUploaded(true);
 
       const compressedFile = await compressImage(file);
 
@@ -246,7 +249,7 @@ export default function AddCompoundDialog({
       console.error("Error compressing image:", error);
       toast.error("Failed to compress image. Please try again.");
     } finally {
-      setIsUploading(false);
+      setMasterPlanUploaded(false);
     }
   };
 
@@ -621,7 +624,7 @@ export default function AddCompoundDialog({
                   accept="image/jpeg, image/png, image/webp"
                   onChange={handleFileSelect}
                   className="hidden"
-                  disabled={isUploading}
+                  disabled={masterPlanUploaded}
                 />
                 <div
                   onClick={() => fileInputRef.current.click()}
@@ -639,7 +642,7 @@ export default function AddCompoundDialog({
                         />
 
                         {/* Status Overlay */}
-                        {isUploading && (
+                        {masterPlanUploaded && (
                           <div
                             className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
                           >
@@ -667,7 +670,7 @@ export default function AddCompoundDialog({
                         )}
 
                         {/* Success indicator for uploaded images */}
-                        {!isUploading && (
+                        {!masterPlanUploaded && (
                           <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -685,7 +688,7 @@ export default function AddCompoundDialog({
                         )}
 
                         {/* Delete button - only show if not currently processing */}
-                        {!isUploading && (
+                        {!masterPlanUploaded && (
                           <button
                             type="button"
                             onClick={handleRemoveImage}
@@ -774,7 +777,7 @@ export default function AddCompoundDialog({
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  isSubmitting || isUploading
+                  isSubmitting || isUploading || masterPlanUploaded
                     ? "pointer-events-none opacity-80"
                     : "hover:bg-primary/90"
                 }`}

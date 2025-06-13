@@ -8,14 +8,14 @@ import {
   deletePhase,
   deleteProject,
 } from "@/components/services/serviceFetching";
+import AddCompoundDialog from "@/components/ui/add-compound-dialog";
+import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
-import AddCompoundDialog from "../../units/_components/add-compound-dialog";
-import AddPhaseDialog from "../../units/_components/AddPhseDilog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
@@ -83,10 +83,11 @@ export default function ProjectList({
         const phaseIndex = updatedPhases.findIndex((p) => p.id === data.id);
         if (phaseIndex !== -1) {
           updatedPhases[phaseIndex] = data;
+        } else {
+          // Add: append the new phase
+          updatedPhases.push(data);
+          setSelectedPhaseIdx(updatedPhases.length - 1);
         }
-      } else {
-        // Add: append the new phase
-        updatedPhases.push(data);
       }
       return {
         ...prev,
@@ -209,7 +210,7 @@ export default function ProjectList({
         }}
         phaseData={phaseToEdit}
         onAdd={handlePhase}
-        projectIdPhase={selectedProject?.id}
+        projectId={selectedProject?.id}
       />
 
       <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
@@ -451,7 +452,7 @@ export default function ProjectList({
                           selectedProject.phases[selectedPhaseIdx]
                             ?.master_plan) && (
                           <div
-                            className={`absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
+                            className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                             onClick={() => {
                               setFullScreenImages(
                                 selectedProject.phases[selectedPhaseIdx]

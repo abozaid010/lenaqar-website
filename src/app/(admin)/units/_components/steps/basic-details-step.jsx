@@ -1,12 +1,11 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
-import Egypt_cities from "../../../../../data/Egypt_cities.json";
-import AddCompoundDialog from "../add-compound-dialog";
-import { useState, useEffect } from "react";
 import { getprojects } from "@/components/services/serviceFetching";
+import AddPhaseDialog from "@/components/ui/add-phase-dialog";
+import AddCompoundDialog from "@/components/ui/ui/add-compound-dialog";
+import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
-import AddPhaseDialog from "../AddPhseDilog";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
 export default function BasicDetailsStep({
@@ -42,7 +41,7 @@ export default function BasicDetailsStep({
       }
     }
   };
-  
+
   // Update available compounds when district changes
   useEffect(() => {
     if (formData.city && formData.district) {
@@ -153,7 +152,7 @@ export default function BasicDetailsStep({
     const newProject = {
       id: newCompound.id,
       name: newCompound.name,
-      phases: []
+      phases: [],
     };
     setDataProject([...dataProject, newProject]);
 
@@ -466,39 +465,46 @@ export default function BasicDetailsStep({
             }`}
           >
             {!formData.project ? (
-              <option value="">{t?.projectFirst || "Select project first"}</option>
+              <option value="">
+                {t?.projectFirst || "Select project first"}
+              </option>
             ) : (
               <>
                 {formData.phase ? (
                   <>
                     <option value="">{t.basicDetails.selectPhase}</option>
-                    <option value={formData.phase}>{formData.phase ? formData.phase : ""}</option>
+                    <option value={formData.phase}>
+                      {formData.phase ? formData.phase : ""}
+                    </option>
                   </>
                 ) : null}
                 {phases[0]?.phases && phases[0].phases.length === 0 ? (
-                  <option value="" disabled>{t.basicDetails.noPhases}</option>
+                  <option value="" disabled>
+                    {t.basicDetails.noPhases}
+                  </option>
                 ) : null}
                 {formData.project &&
                   !isLoadingProjects &&
                   phases[0]?.phases?.length > 0 && (
                     <>
-                      {!formData.phase && <option value="">{t.basicDetails.selectPhase}</option>}
+                      {!formData.phase && (
+                        <option value="">{t.basicDetails.selectPhase}</option>
+                      )}
                       {phases[0].phases
                         .sort((a, b) => a.name.localeCompare(b.name))
-                        .map((phase, idx) => (
+                        .map((phase, idx) =>
                           formData.phase === phase.name ? null : (
                             <option key={phase.name + idx} value={phase.name}>
                               {phase.name}
                             </option>
                           )
-                        ))}
+                        )}
                     </>
                   )}
               </>
             )}
           </select>
         </div>
-      
 
         <AddPhaseDialog
           isOpen={isAddPhaseDialogOpen}
@@ -752,7 +758,6 @@ export default function BasicDetailsStep({
         onClose={() => setIsAddCompoundDialogOpen(false)}
         onAdd={handleAddCompound}
         developers={developers}
-     
         setDevelopers={setDevelopers}
         Egypt_cities={citiesAndDistricts}
         defaultCity={formData.city}
