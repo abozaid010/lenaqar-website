@@ -83,10 +83,11 @@ export default function ProjectList({
         const phaseIndex = updatedPhases.findIndex((p) => p.id === data.id);
         if (phaseIndex !== -1) {
           updatedPhases[phaseIndex] = data;
+        } else {
+          // Add: append the new phase
+          updatedPhases.push(data);
+          setSelectedPhaseIdx(updatedPhases.length - 1);
         }
-      } else {
-        // Add: append the new phase
-        updatedPhases.push(data);
       }
       return {
         ...prev,
@@ -209,7 +210,7 @@ export default function ProjectList({
         }}
         phaseData={phaseToEdit}
         onAdd={handlePhase}
-        projectIdPhase={selectedProject?.id}
+        projectId={selectedProject?.id}
       />
 
       <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">

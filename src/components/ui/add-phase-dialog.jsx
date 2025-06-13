@@ -12,7 +12,6 @@ import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -21,12 +20,10 @@ export default function AddPhseDilog({
   isOpen,
   onClose,
   onAdd,
-  projectId,
   phaseData,
-  projectIdPhase,
+  projectId,
 }) {
   const { t } = useI18n();
-  const router = useRouter();
 
   // Determine edit mode based on compoundData
   const editMode = !!(phaseData && phaseData.id);
@@ -197,9 +194,10 @@ export default function AddPhseDilog({
           updated_at: new Date().toISOString(),
           images: formData.images,
         };
+
         const res = await updatePhase(
           formDataToUpdate,
-          projectIdPhase,
+          projectId,
           phaseData.id
         );
         if (res.code === 200) {
@@ -213,7 +211,7 @@ export default function AddPhseDilog({
             master_plan: res.data?.master_plan,
             images: res.data?.images || [],
           });
-          router.refresh();
+
           onClose();
         } else {
           toast.error(t.phasee.updatePhaseFaile || "Failed to update phase");
@@ -226,8 +224,9 @@ export default function AddPhseDilog({
             name: res.data?.name,
             id: res.data?.id,
             master_plan: res.data?.master_plan,
+            description: res.data?.description,
+            images: res.data?.images || [],
           });
-          router.refresh();
 
           setFormData({
             id: uuidv4(),
