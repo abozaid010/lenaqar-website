@@ -207,7 +207,13 @@ export async function getClientDevelopers(client_id) {
 
 }
 export async function updateDeveloper(developerData, id) {
-
+  try {
+    const response = await axiosInstance.put(`/developers/${id}`, developerData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update developer:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
 }
 
 // Add this function to your serviceFetching.js file

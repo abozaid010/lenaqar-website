@@ -1,6 +1,9 @@
 "use client";
 
-import { addDeveloper } from "@/components/services/serviceFetching";
+import {
+  addDeveloper,
+  updateDeveloper,
+} from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
 import { Loader2 } from "lucide-react";
@@ -67,7 +70,12 @@ export default function AddDeveloperDialog({
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await addDeveloper(formData); // You may want to use a separate updateDeveloper API for editing
+      let res;
+      if (isEdit) {
+        res = await updateDeveloper(formData, developer.id);
+      } else {
+        res = await addDeveloper(formData);
+      }
       if (res.code === 200) {
         toast.success(
           isEdit
@@ -106,6 +114,7 @@ export default function AddDeveloperDialog({
               type="text"
               name="name"
               value={formData.name}
+              disabled={isEdit}
               required
               onChange={handleChange}
               className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -123,7 +132,7 @@ export default function AddDeveloperDialog({
               name="description"
               value={formData.description}
               onChange={handleChange}
-              rows={2}
+              rows={3}
               className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>

@@ -80,12 +80,16 @@ export default function DevelopersClientWrapper({
                 {developers.map((d) => (
                   <div
                     key={d.id}
-                    className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer flex justify-between items-start"
+                    className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer flex justify-between items-start gap-4"
                   >
                     <div>
                       <h3 className="font-semibold text-lg">{d.name}</h3>
 
-                      {d.description && <p>{d.description}</p>}
+                      {d.description && (
+                        <span className="text-sm text-gray-700 break-all whitespace-pre-line">
+                          {d.description}
+                        </span>
+                      )}
                     </div>
 
                     <div className="flex items-center space-x-2 text-sm">
