@@ -22,9 +22,10 @@ import "swiper/css/pagination";
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
 function getDisplayName(name, ar_name, en_name, locale) {
-  if (name) return name;
-  if (locale === "ar") return ar_name || en_name || "";
-  return en_name || ar_name || "";
+  if (name) return [name];
+  if (ar_name && en_name) return [ar_name, en_name];
+  if (locale === "ar") return [ar_name || en_name || ""];
+  return [en_name || ar_name || ""];
 }
 
 export default function ProjectList({
@@ -65,9 +66,7 @@ export default function ProjectList({
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
 
-  console.log("Selected Project:", projectList);
   const handleProject = (data) => {
-    console.log("Project data received:", data);
     setProjectList((prev) => {
       const exists = prev.some((p) => p.id === data.id);
       let updatedList;
@@ -280,7 +279,9 @@ export default function ProjectList({
                         project.ar_name,
                         project.en_name,
                         local
-                      )}
+                      ).map((line, idx) => (
+                        <div key={idx}>{line}</div>
+                      ))}
                     </h3>
                     <div
                       className={`flex items-center space-x-4 text-sm ${

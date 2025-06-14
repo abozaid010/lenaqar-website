@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import { motion } from "framer-motion";
 import CalendarModal from "@/components/ui/calendar-modal";
 import { useI18n } from "@/context/translate-api";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 
 const HeroSection = () => {
-  console.log("infinite Re-render hero section");
   const { t } = useI18n();
 
   const [visibleMessages, setVisibleMessages] = useState([]);

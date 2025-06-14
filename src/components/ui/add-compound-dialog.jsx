@@ -324,9 +324,7 @@ export default function AddCompoundDialog({
           ...formData,
           area: Number(formData.area),
         };
-        console.log("submissionData", submissionData);
         res = await addCompound(submissionData);
-        console.log("res", res.data);
         onAdd(res.data);
       }
 
