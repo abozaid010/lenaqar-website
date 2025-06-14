@@ -3,7 +3,7 @@ import {
   fetchDevelopers,
   fetchMyProjects,
 } from "@/components/services/serviceFetching";
-import ProjectGrid from "./component/ProjectGrid";
+import ProjectGrid from "./_components/ProjectGrid";
 
 const page = async () => {
   const [projects, citiesAndDistricts, developers] = await Promise.all([
