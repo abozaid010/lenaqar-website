@@ -60,18 +60,18 @@ export default function DevelopersClientWrapper({
 
   return (
     <>
-      <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
-        <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 p-3 max-w-4xl">
+        <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex justify-between items-center">
             <h2 className="text-white text-xl font-semibold">
-              {t.sidebar.myProjects}
+              {t.sidebar.developers}
             </h2>
             <button
               onClick={() => setIsOpen(true)}
               className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
             >
               <Plus size={20} />
-              <span> {t.addNewProject}</span>
+              <span> {t.developerPage.addDeveloper}</span>
             </button>
           </div>
 
