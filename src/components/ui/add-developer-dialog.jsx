@@ -4,7 +4,7 @@ import { addDeveloper } from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
@@ -12,15 +12,37 @@ export default function AddDeveloperDialog({
   isOpen,
   onClose,
   onAdd,
+  onEdit,
   client_id,
+  developer,
 }) {
-  const [formData, setFormData] = useState({
-    id: uuidv4(),
-    name: "",
-    description: "",
-    logo: "",
-    client_id: client_id || "",
-  });
+  const isEdit = !!developer;
+  const [formData, setFormData] = useState(
+    developer
+      ? { ...developer }
+      : {
+          id: uuidv4(),
+          name: "",
+          description: "",
+          logo: "",
+          client_id: client_id || "",
+        }
+  );
+
+  useEffect(() => {
+    if (developer) {
+      setFormData({ ...developer });
+    } else {
+      setFormData({
+        id: uuidv4(),
+        name: "",
+        description: "",
+        logo: "",
+        client_id: client_id || "",
+      });
+    }
+  }, [developer, client_id, isOpen]);
+
   const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -43,34 +65,37 @@ export default function AddDeveloperDialog({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsSubmitting(true);
     try {
-      const res = await addDeveloper(formData);
+      const res = await addDeveloper(formData); // You may want to use a separate updateDeveloper API for editing
       if (res.code === 200) {
-        toast.success("Developer added successfully!");
-        setFormData({
-          id: uuidv4(),
-          name: "",
-          description: "",
-          logo: "",
-          client_id: client_id || "",
-        });
-        onAdd(res.data);
+        toast.success(
+          isEdit
+            ? "Developer updated successfully!"
+            : "Developer added successfully!"
+        );
+        if (isEdit) {
+          onEdit && onEdit(res.data);
+        } else {
+          onAdd && onAdd(res.data);
+        }
         onClose();
       } else {
-        toast.error("Failed to add developer. Please try again.");
+        toast.error("Failed to save developer. Please try again.");
       }
     } catch (error) {
-      console.error("Error adding developer:", error);
-      setErrors({ submit: "Failed to add developer. Please try again." });
+      setErrors({ submit: "Failed to save developer. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Add New Developer">
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isEdit ? "Edit Developer" : "Add New Developer"}
+    >
       <div>
         <div className="space-y-2">
           <div>
@@ -126,6 +151,8 @@ export default function AddDeveloperDialog({
                   <Loader2 size={20} className="animate-spin" />
                   {t.saving}
                 </div>
+              ) : isEdit ? (
+                "Save Changes"
               ) : (
                 t.saveDeveloper
               )}

@@ -14,13 +14,20 @@ export default function DevelopersClientWrapper({
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleEdit = (developerData) => {
-    selectedDeveloper(developerData);
+  const handleEdit = (updatedDeveloper) => {
+    setDevelopers((prev) =>
+      prev.map((dev) =>
+        dev.id === updatedDeveloper.id ? updatedDeveloper : dev
+      )
+    );
+    setIsOpen(false);
+    setSelectedDeveloper(null);
   };
 
   const handleAdd = (newDeveloper) => {
     setDevelopers((prev) => [...prev, newDeveloper]);
     setIsOpen(false);
+    setSelectedDeveloper(null);
   };
 
   const handleDelete = (developerId) => {
@@ -28,8 +35,6 @@ export default function DevelopersClientWrapper({
       prev.filter((developer) => developer.id !== developerId)
     );
   };
-
-  console.log("Developers:", developers);
 
   return (
     <>
@@ -85,6 +90,10 @@ export default function DevelopersClientWrapper({
 
                     <div className="flex items-center space-x-2 text-sm">
                       <button
+                        onClick={() => {
+                          setSelectedDeveloper(d);
+                          setIsOpen(true);
+                        }}
                         className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 hover:bg-primary hover:text-white"
                         title="Edit Developer"
                       >
@@ -108,8 +117,13 @@ export default function DevelopersClientWrapper({
       <AddDeveloperDialog
         client_id={clientId}
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={() => {
+          setIsOpen(false);
+          setSelectedDeveloper(null);
+        }}
         onAdd={handleAdd}
+        onEdit={handleEdit}
+        developer={selectedDeveloper}
       />
     </>
   );
