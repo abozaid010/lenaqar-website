@@ -137,13 +137,6 @@ export default function ProjectList({
   const handleConfirmDelete = () => {
     if (projectToDelete) {
       deleteproject(projectToDelete.id);
-      setProjectList((prev) => {
-        const updatedList = prev.filter((p) => p.id !== projectToDelete.id);
-        if (selectedProject?.id === projectToDelete.id) {
-          setSelectedProject(updatedList[0] || null);
-        }
-        return updatedList;
-      });
       setShowDeleteDialog(false);
       setProjectToDelete(null);
     } else if (phaseToDelete) {
@@ -181,7 +174,6 @@ export default function ProjectList({
     }
   };
 
-  console.log("Project List:", projectList);
   return (
     <>
       <AddCompoundDialog

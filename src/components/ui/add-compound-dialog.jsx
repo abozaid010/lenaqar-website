@@ -47,7 +47,8 @@ export default function AddCompoundDialog({
     useState(false);
 
   const [formData, setFormData] = useState({
-    name: compoundData?.name || "",
+    ar_name: compoundData?.ar_name || "",
+    en_name: compoundData?.en_name || "",
     description: compoundData?.description || "",
     developer_name: compoundData?.developer_name || "",
     city: defaultCity || "",
@@ -68,7 +69,8 @@ export default function AddCompoundDialog({
       if (editMode && compoundData) {
         // Load existing data for editing
         setFormData({
-          name: compoundData.name || "",
+          ar_name: compoundData?.ar_name || "",
+          en_name: compoundData?.en_name || "",
           description: compoundData.description || "",
           developer_name: compoundData.developer_name || "",
           city: compoundData.city || defaultCity || "", // Still use default if compound data is missing city
@@ -94,7 +96,8 @@ export default function AddCompoundDialog({
       } else if (!editMode) {
         // Reset form with defaults for adding
         setFormData({
-          name: "",
+          ar_name: "",
+          en_name: "",
           description: "",
           developer_name: "",
           city: defaultCity || "",
@@ -117,7 +120,8 @@ export default function AddCompoundDialog({
       setErrors({});
     } else {
       setFormData({
-        name: "",
+        ar_name: "",
+        en_name: "",
         description: "",
         developer_name: "",
         city: defaultCity || "",
@@ -169,11 +173,14 @@ export default function AddCompoundDialog({
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name =
-        t.formValidation?.compoundNameRequired || "Compound name is required";
+    if (!formData.ar_name.trim() && !formData.en_name.trim()) {
+      newErrors.ar_name =
+        t.formValidation?.compoundNameRequired ||
+        "At least one compound name is required";
+      newErrors.en_name = newErrors.ar_name;
       toast.error(
-        t.formValidation?.compoundNameRequired || "Compound name is required"
+        t.formValidation?.compoundNameRequired ||
+          "At least one compound name is required"
       );
     }
 
@@ -194,11 +201,11 @@ export default function AddCompoundDialog({
       toast.error(t.formValidation?.districtRequired || "District is required");
     }
 
-    if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
+    if (!formData.area || Number(formData.area) <= 0) {
       newErrors.area =
-        t.formValidation?.areaPositive || "Area must be a positive number";
+        t.formValidation?.areaRequired || "Area must be greater than 0";
       toast.error(
-        t.formValidation?.areaPositive || "Area must be a positive number"
+        t.formValidation?.areaRequired || "Area must be greater than 0"
       );
     }
 
@@ -342,7 +349,8 @@ export default function AddCompoundDialog({
     } finally {
       setIsSubmitting(false);
       setFormData({
-        name: "",
+        ar_name: "",
+        en_name: "",
         description: "",
         developer_name: "",
         city: defaultCity || "",
@@ -388,19 +396,41 @@ export default function AddCompoundDialog({
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.compoundName || "Compound Name"}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                disabled={editMode}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div className="grid grid-cols-1 gap-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.formLabels?.compoundNameAr || "Compound Name (Arabic)"}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="ar_name"
+                  value={formData.ar_name}
+                  onChange={handleChange}
+                  disabled={editMode}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={
+                    t.formLabels?.compoundNameAr || "Compound Name (Arabic)"
+                  }
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t.formLabels?.compoundNameEn || "Compound Name (English)"}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="en_name"
+                  value={formData.en_name}
+                  onChange={handleChange}
+                  disabled={editMode}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={
+                    t.formLabels?.compoundNameEn || "Compound Name (English)"
+                  }
+                />
+              </div>
             </div>
 
             {/* Description */}
