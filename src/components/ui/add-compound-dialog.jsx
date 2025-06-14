@@ -318,21 +318,36 @@ export default function AddCompoundDialog({
           images: formData.images,
         };
         res = await updatecompound(submissionData, compoundData.id);
-        onAdd(res.data);
       } else {
         submissionData = {
           ...formData,
           area: Number(formData.area),
         };
         res = await addCompound(submissionData);
-        onAdd(res.data);
       }
 
-      toast.success(
-        editMode
-          ? t.compoundUpdated || "project updated successfully!"
-          : t.compoundAdded || "project added successfully!"
-      );
+      if (res.status) {
+        onAdd(res.data);
+        toast.success(
+          editMode
+            ? t.compoundUpdated || "project updated successfully!"
+            : t.compoundAdded || "project added successfully!"
+        );
+      } else {
+        toast.error(
+          editMode
+            ? "Failed to update compound. Please try again."
+            : "Failed to add compound. Please try again."
+        );
+        setErrors({
+          submit:
+            res.message ||
+            (editMode
+              ? "Failed to update compound. Please try again."
+              : "Failed to add compound. Please try again."),
+        });
+        return;
+      }
 
       onClose();
     } catch (error) {
