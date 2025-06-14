@@ -220,6 +220,7 @@ export default {
       confirm: "تسجيل الخروج",
     },
     logoutSuccess: "تم تسجيل الخروج بنجاح",
+    developers: "المطورين",
   },
   dashboardFilter: {
     actions: {

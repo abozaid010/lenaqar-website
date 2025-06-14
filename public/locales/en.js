@@ -215,6 +215,7 @@ export default {
       confirm: "Log Out",
     },
     logoutSuccess: "Logout Successful",
+    developers: "Developers",
   },
   schaduall: {
     "assignError": "Failed to assign salesperson",
