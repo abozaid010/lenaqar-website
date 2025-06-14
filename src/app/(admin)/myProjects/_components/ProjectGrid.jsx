@@ -21,13 +21,19 @@ import "swiper/css/pagination";
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
+function getDisplayName(name, ar_name, en_name, locale) {
+  if (name) return name;
+  if (locale === "ar") return ar_name || en_name || "";
+  return en_name || ar_name || "";
+}
+
 export default function ProjectList({
   projects,
   citiesAndDistricts,
   readonly,
   developers,
 }) {
-  const { t } = useI18n();
+  const { t, local } = useI18n();
   const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
@@ -175,6 +181,7 @@ export default function ProjectList({
     }
   };
 
+  console.log("Project List:", projectList);
   return (
     <>
       <AddCompoundDialog
@@ -274,7 +281,12 @@ export default function ProjectList({
                           : "text-gray-800"
                       }`}
                     >
-                      {capitalize(project.name)}
+                      {getDisplayName(
+                        project.name,
+                        project.ar_name,
+                        project.en_name,
+                        local
+                      )}
                     </h3>
                     <div
                       className={`flex items-center space-x-4 text-sm ${
