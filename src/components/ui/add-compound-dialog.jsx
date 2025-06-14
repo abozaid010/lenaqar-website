@@ -369,7 +369,7 @@ export default function AddCompoundDialog({
     setFormData((prev) => {
       return {
         ...prev,
-        developer_name: newDeveloper,
+        developer_name: newDeveloper.name,
       };
     });
   };

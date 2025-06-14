@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import Dialog from "@/components/ui/Dialog";
-import { Loader2 } from "lucide-react";
 import { addDeveloper } from "@/components/services/serviceFetching";
-import { v4 as uuidv4 } from "uuid";
-import toast from "react-hot-toast";
+import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
+
 export default function AddDeveloperDialog({
   isOpen,
   onClose,
@@ -55,7 +56,7 @@ export default function AddDeveloperDialog({
           logo: "",
           client_id: client_id || "",
         });
-        onAdd(res.data?.name);
+        onAdd(res.data);
         onClose();
       } else {
         toast.error("Failed to add developer. Please try again.");

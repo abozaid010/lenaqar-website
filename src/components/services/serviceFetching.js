@@ -196,6 +196,20 @@ export async function addDeveloper(developerData) {
   }
 }
 
+export async function getClientDevelopers(client_id) {
+  try {
+    const response = await axiosInstance.get(`/developers/?client_id=${client_id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch developers:", error.message);
+    return { error: error.message };
+  }
+
+}
+export async function updateDeveloper(developerData, id) {
+
+}
+
 // Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {
