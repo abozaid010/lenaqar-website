@@ -1,3 +1,4 @@
+
 export default {
   // common
   direction: "ltr",
@@ -446,7 +447,8 @@ export default {
   deleteButton: "delete",
   sureDelet: " Are you sure you want to delete",
   actionDelet: "This action cannot be undone.",
-  deleteTitel: "delete project",
+  deleteProjectTitel: "delete project",
+  deletePhaseTitel: "delete phase",
   failedProject: "Failed to delete project",
   projectDelete: "project deleted successfuly",
   associateProject:

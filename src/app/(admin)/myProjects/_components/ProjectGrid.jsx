@@ -10,13 +10,13 @@ import {
 } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
-import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -191,16 +191,19 @@ export default function ProjectList({
         clientId={clientId}
       />
 
-      <DeleteConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => {
-          setShowDeleteDialog(false);
-          setProjectToDelete(null);
-          setPhaseToDelete(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        projectName={projectToDelete?.name || phaseToDelete?.name}
-      />
+      {projectToDelete || phaseToDelete ? (
+        <DeleteConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={() => {
+            setShowDeleteDialog(false);
+            setProjectToDelete(null);
+            setPhaseToDelete(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title={projectToDelete ? t.deleteProjectTitel : t.deletePhaseTitel}
+          message={`${t.sureDelet} ${projectToDelete ? `"${projectToDelete?.name}"` : `"${phaseToDelete?.name}"`}? ${" "} ${t.actionDelet}`}
+        />
+      ) : null}
 
       <AddPhaseDialog
         isOpen={showPhaseDialog}
