@@ -5,29 +5,18 @@ import DevelopersClientWrapper from "./_components/developers-client-wrapper";
 export default async function DevelopersPage() {
   const clientId = await getClientid();
   let developers = [];
-  let error = null;
 
   try {
     const res = await getClientDevelopers(clientId);
-    if (res.status && Array.isArray(res.data)) {
-      developers = res.data;
-    } else {
-      error =
-        res.error_message || "Something went wrong. Please try again later.";
-    }
+    developers = res.data;
   } catch (e) {
-    error = "Something went wrong. Please try again later.";
-  }
-
-  if (error) {
-    return (
-      <div className="p-8 text-center text-red-600 font-semibold">{error}</div>
-    );
+    console.error("Error fetching developers:", e);
+    // Handle error appropriately, e.g., show a toast or log it
   }
 
   return (
     <DevelopersClientWrapper
-      initialDevelopers={developers}
+      initialDevelopers={developers || []}
       clientId={clientId}
     />
   );
