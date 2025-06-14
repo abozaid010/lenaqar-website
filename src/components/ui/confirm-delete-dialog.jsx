@@ -23,16 +23,16 @@ export default function DeleteConfirmDialog({
         <p className="text-gray-600 text-center mb-6">
           {children ? children : message}
         </p>
-        <div className="flex justify-end gap-3">
+        <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+            className="px-4 py-1.5 text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className="px-4 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
           >
             {confirmLabel}
           </button>

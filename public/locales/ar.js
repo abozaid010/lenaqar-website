@@ -699,6 +699,7 @@ export default {
   updateProject: "تعديل المشروع",
   projectUndfined: "لا توجد مشاريع متاحة لك",
   deleteButton: "حذف",
+  saveChangesButton: "حفظ التغييرات",
   cancelButton: "الغاء",
   sureDelet: "هل أنت متأكد أنك تريد الحذف؟",
   actionDelet: "لا يمكن التراجع عن هذا الإجراء.",
@@ -1120,4 +1121,10 @@ export default {
     increaseInCSAT: "زيادة في رضا  العملاء",
     increaseInCSATValue: "60%",
   },
+  developerPage: {
+    DeleteTitle: "حذف المطور",
+    deleteMessage: "هل أنت متأكد أنك تريد حذف هذا المطور؟",
+    editDeveloper: "تعديل بيانات المطور",
+    addDeveloper: "إضافة مطور جديد",
+  }
 };

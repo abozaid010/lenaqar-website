@@ -216,6 +216,16 @@ export async function updateDeveloper(developerData, id) {
   }
 }
 
+export async function deleteDeveloper(id) {
+  try {
+    const response = await axiosInstance.delete(`/developers/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete developer:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
 // Add this function to your serviceFetching.js file
 export async function addUnit(unitData) {
   try {

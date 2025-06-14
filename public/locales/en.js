@@ -445,6 +445,7 @@ export default {
   projectUndfined: " No projects found.",
   cancelButton: "cancel",
   deleteButton: "delete",
+  saveChangesButton: "Save Changes",
   sureDelet: " Are you sure you want to delete",
   actionDelet: "This action cannot be undone.",
   deleteProjectTitel: "delete project",
@@ -1074,4 +1075,10 @@ export default {
     "OHK Consultants": "OHK Consultants",
     "Palm Hills": "Palm Hills",
   },
+  developerPage: {
+    DeleteTitle: "Delete Developer",
+    deleteMessage: "Are you sure you want to delete this developer?",
+    editDeveloper: "Edit Developer",
+    addDeveloper: "Add New Developer",
+  }
 };

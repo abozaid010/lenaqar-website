@@ -1,9 +1,12 @@
 "use client";
 
+import { deleteDeveloper } from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/context/translate-api";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function DevelopersClientWrapper({
   initialDevelopers,
@@ -13,6 +16,8 @@ export default function DevelopersClientWrapper({
   const [developers, setDevelopers] = useState(initialDevelopers || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -30,10 +35,27 @@ export default function DevelopersClientWrapper({
     setSelectedDeveloper(null);
   };
 
-  const handleDelete = (developerId) => {
-    setDevelopers((prev) =>
-      prev.filter((developer) => developer.id !== developerId)
-    );
+  const handleDelete = async (developerId) => {
+    console.log("Deleting developer with ID:", developerId);
+    try {
+      const res = await deleteDeveloper(developerId);
+      if (!res.status) {
+        toast.error(
+          res.error_message || "Something went wrong. Please try again later."
+        );
+        return;
+      }
+
+      setDevelopers((prev) =>
+        prev.filter((developer) => developer.id !== developerId)
+      );
+      toast.success("Developer deleted successfully.");
+      setSelectedDeveloper(null);
+      setShowDeleteDialog(false);
+    } catch (error) {
+      console.error("Error deleting developer:", error);
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -104,6 +126,10 @@ export default function DevelopersClientWrapper({
                         <Pencil size={16} />
                       </button>
                       <button
+                        onClick={(e) => {
+                          setShowDeleteDialog(true);
+                          setSelectedDeveloper(d);
+                        }}
                         className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
                         title="Delete Developer"
                       >
@@ -117,6 +143,16 @@ export default function DevelopersClientWrapper({
           </div>
         </div>
       </div>
+
+      <DeleteConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={() => handleDelete(selectedDeveloper.id)}
+        title={t.developerPage.DeleteTitle}
+        message={t.developerPage.deleteMessage}
+        confirmLabel={t.deleteButton}
+        cancelLabel={t.cancelButton}
+      />
 
       <AddDeveloperDialog
         client_id={clientId}

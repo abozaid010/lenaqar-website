@@ -102,7 +102,9 @@ export default function AddDeveloperDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? "Edit Developer" : "Add New Developer"}
+      title={
+        isEdit ? t.developerPage.editDeveloper : t.developerPage.addDeveloper
+      }
     >
       <div>
         <div className="space-y-2">
@@ -161,7 +163,7 @@ export default function AddDeveloperDialog({
                   {t.saving}
                 </div>
               ) : isEdit ? (
-                "Save Changes"
+                t.saveChangesButton
               ) : (
                 t.saveDeveloper
               )}

@@ -199,6 +199,8 @@ export default function ProjectList({
             setProjectToDelete(null);
             setPhaseToDelete(null);
           }}
+          confirmLabel={t.deleteButton}
+          cancelLabel={t.cancelButton}
           onConfirm={handleConfirmDelete}
           title={projectToDelete ? t.deleteProjectTitel : t.deletePhaseTitel}
           message={`${t.sureDelet} ${projectToDelete ? `"${projectToDelete?.name}"` : `"${phaseToDelete?.name}"`}? ${" "} ${t.actionDelet}`}
