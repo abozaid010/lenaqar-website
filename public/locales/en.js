@@ -1080,6 +1080,7 @@ export default {
     deleteMessage: "Are you sure you want to delete this developer?",
     editDeveloper: "Edit Developer",
     addDeveloper: "Add New Developer",
+    NoDevelopers: "No developers found.",
   },
   placeholders: {
     projectArName: "Enter project name in Arabic",

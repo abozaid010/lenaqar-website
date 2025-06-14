@@ -94,7 +94,7 @@ export default function DevelopersClientWrapper({
                   </svg>
                 </div>
                 <p className="text-center font-medium text-xl text-gray-400">
-                  {t.projectUndfined}
+                  {t.developerPage.NoDevelopers}
                 </p>
               </div>
             ) : (
