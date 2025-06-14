@@ -1126,5 +1126,9 @@ export default {
     deleteMessage: "هل أنت متأكد أنك تريد حذف هذا المطور؟",
     editDeveloper: "تعديل بيانات المطور",
     addDeveloper: "إضافة مطور جديد",
+  },
+  placeholders: {
+    projectArName: "أدخل اسم المشروع بالعربية",
+    projectEnName: "أدخل اسم المشروع بالإنجليزية",
   }
 };

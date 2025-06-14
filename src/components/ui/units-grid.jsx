@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { useI18n } from "@/context/translate-api";
+import Image from "next/image";
+import Link from "next/link";
 
-import { useState } from "react";
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "@/components/ui/units-share-modal";
+import { useState } from "react";
 import shareButton from "../../../public/share.svg";
 
 export default function UnitsGrid({ units, readonly = false }) {
@@ -30,7 +30,6 @@ export default function UnitsGrid({ units, readonly = false }) {
 
     try {
       const data = await getShareUnitData(unitId);
-      console.log("Received share data:", data);
       setShareData(data);
     } catch (error) {
       console.error("Error fetching share data:", error);

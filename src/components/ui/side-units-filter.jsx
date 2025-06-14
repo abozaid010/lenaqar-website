@@ -1,9 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { useI18n } from "@/context/translate-api";
 import FilterCheckboxGroup from "@/components/ui/filter-checkbox-group";
+import { useI18n } from "@/context/translate-api";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import PriceRangeSlider from "./price-range-slider";
 
 const EnumPropertyIntent = ["rent", "sell"];
@@ -54,7 +54,6 @@ export default function SideUnitFilters({
   ];
 
   const handleFilterChange = (key, value) => {
-    console.log("Filter changed:", key, value);
     setFilters((prev) => ({ ...prev, [key]: value }));
 
     const newParams = new URLSearchParams(window.location.search);

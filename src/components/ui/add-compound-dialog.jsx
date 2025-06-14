@@ -46,8 +46,11 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
+  const [activeNameLang, setActiveNameLang] = useState("ar");
+
   const [formData, setFormData] = useState({
-    name: compoundData?.name || "",
+    ar_name: compoundData?.ar_name || "",
+    en_name: compoundData?.en_name || "",
     description: compoundData?.description || "",
     developer_name: compoundData?.developer_name || "",
     city: defaultCity || "",
@@ -68,7 +71,8 @@ export default function AddCompoundDialog({
       if (editMode && compoundData) {
         // Load existing data for editing
         setFormData({
-          name: compoundData.name || "",
+          ar_name: compoundData?.ar_name || "",
+          en_name: compoundData?.en_name || "",
           description: compoundData.description || "",
           developer_name: compoundData.developer_name || "",
           city: compoundData.city || defaultCity || "", // Still use default if compound data is missing city
@@ -94,7 +98,8 @@ export default function AddCompoundDialog({
       } else if (!editMode) {
         // Reset form with defaults for adding
         setFormData({
-          name: "",
+          ar_name: "",
+          en_name: "",
           description: "",
           developer_name: "",
           city: defaultCity || "",
@@ -117,7 +122,8 @@ export default function AddCompoundDialog({
       setErrors({});
     } else {
       setFormData({
-        name: "",
+        ar_name: "",
+        en_name: "",
         description: "",
         developer_name: "",
         city: defaultCity || "",
@@ -169,12 +175,16 @@ export default function AddCompoundDialog({
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name =
-        t.formValidation?.compoundNameRequired || "Compound name is required";
-      toast.error(
-        t.formValidation?.compoundNameRequired || "Compound name is required"
-      );
+    if (!formData.ar_name.trim()) {
+      newErrors.ar_name = "Arabic compound name is required";
+      setActiveNameLang("ar");
+      toast.error("Arabic compound name is required");
+    }
+
+    if (!formData.en_name.trim()) {
+      newErrors.en_name = "English compound name is required";
+      setActiveNameLang("en");
+      toast.error("English compound name is required");
     }
 
     if (!formData.city.trim()) {
@@ -194,11 +204,11 @@ export default function AddCompoundDialog({
       toast.error(t.formValidation?.districtRequired || "District is required");
     }
 
-    if (formData.area && (isNaN(formData.area) || Number(formData.area) <= 0)) {
+    if (!formData.area || Number(formData.area) <= 0) {
       newErrors.area =
-        t.formValidation?.areaPositive || "Area must be a positive number";
+        t.formValidation?.areaRequired || "Area must be greater than 0";
       toast.error(
-        t.formValidation?.areaPositive || "Area must be a positive number"
+        t.formValidation?.areaRequired || "Area must be greater than 0"
       );
     }
 
@@ -308,21 +318,36 @@ export default function AddCompoundDialog({
           images: formData.images,
         };
         res = await updatecompound(submissionData, compoundData.id);
-        onAdd(res.data);
       } else {
         submissionData = {
           ...formData,
           area: Number(formData.area),
         };
         res = await addCompound(submissionData);
-        onAdd(res.data);
       }
 
-      toast.success(
-        editMode
-          ? t.compoundUpdated || "project updated successfully!"
-          : t.compoundAdded || "project added successfully!"
-      );
+      if (res.status) {
+        onAdd(res.data);
+        toast.success(
+          editMode
+            ? t.compoundUpdated || "project updated successfully!"
+            : t.compoundAdded || "project added successfully!"
+        );
+      } else {
+        toast.error(
+          editMode
+            ? "Failed to update compound. Please try again."
+            : "Failed to add compound. Please try again."
+        );
+        setErrors({
+          submit:
+            res.message ||
+            (editMode
+              ? "Failed to update compound. Please try again."
+              : "Failed to add compound. Please try again."),
+        });
+        return;
+      }
 
       onClose();
     } catch (error) {
@@ -342,7 +367,8 @@ export default function AddCompoundDialog({
     } finally {
       setIsSubmitting(false);
       setFormData({
-        name: "",
+        ar_name: "",
+        en_name: "",
         description: "",
         developer_name: "",
         city: defaultCity || "",
@@ -388,19 +414,59 @@ export default function AddCompoundDialog({
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.compoundName || "Compound Name"}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                disabled={editMode}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
+            <div className="grid grid-cols-1 gap-2">
+              <div>
+                <div className="text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                  <label>
+                    {t.formLabels?.compoundName || "Compound Name"}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <div className="inline-flex rounded bg-gray-100 border border-gray-300 overflow-hidden">
+                    <button
+                      type="button"
+                      className={`px-2 py-0.5 text-xs font-semibold ${
+                        activeNameLang === "ar"
+                          ? "bg-primary text-white border border-gray-300 rtl:rounded-r ltr:rounded-l"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => setActiveNameLang("ar")}
+                    >
+                      AR
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-2 py-0.5 text-xs font-semibold ${
+                        activeNameLang === "en"
+                          ? "bg-primary text-white border border-gray-300 rtl:rounded-l ltr:rounded-r"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => setActiveNameLang("en")}
+                    >
+                      EN
+                    </button>
+                  </div>
+                </div>
+                <input
+                  type="text"
+                  name={activeNameLang === "ar" ? "ar_name" : "en_name"}
+                  value={
+                    activeNameLang === "ar"
+                      ? formData.ar_name
+                      : formData.en_name
+                  }
+                  onChange={handleChange}
+                  disabled={editMode}
+                  dir={activeNameLang === "ar" ? "rtl" : "ltr"}
+                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={
+                    activeNameLang === "ar"
+                      ? t.placeholders.projectArName
+                      : t.placeholders.projectEnName ||
+                        "Compound Name (English)"
+                  }
+                />
+              </div>
             </div>
 
             {/* Description */}

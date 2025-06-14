@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
+import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
-import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
@@ -164,7 +164,7 @@ export default function UnitsFilter({
     setFilters((prev) => ({ ...prev, [key]: "" }));
 
     const newParams = new URLSearchParams(window.location.search);
-    
+
     // Special handling for price range
     if (key === "min_price" || key === "max_price") {
       newParams.delete("min_price");
@@ -172,7 +172,7 @@ export default function UnitsFilter({
     } else {
       newParams.delete(key);
     }
-    
+
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
 
@@ -275,15 +275,12 @@ export default function UnitsFilter({
     return t.developerNames?.[name] || name;
   };
 
-
   // Function to get translated compound name (if available)
   const getTranslatedCompoundName = (name) => {
     // Assuming there might be a translation key for compound names, similar to developer names.
     // If not, it will just return the original name.
-    console.log(t.compoundNames?.[name]);
     return t.compoundNames?.[name] || name;
   };
-
 
   return (
     <div className=" ">
@@ -326,22 +323,24 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCities || "All Cities"}
               </div>
-              {[...cities].sort((a, b) => {
-                const nameA = t.unitsFilter.cities?.[a] || a;
-                const nameB = t.unitsFilter.cities?.[b] || b;
-                return nameA.localeCompare(nameB, 'ar');
-              }).map((city, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    handleFilterChange("city", city);
-                    setIsCityDropdownOpen(false);
-                  }}
-                >
-                  {t.unitsFilter.cities?.[city] || city}
-                </div>
-              ))}
+              {[...cities]
+                .sort((a, b) => {
+                  const nameA = t.unitsFilter.cities?.[a] || a;
+                  const nameB = t.unitsFilter.cities?.[b] || b;
+                  return nameA.localeCompare(nameB, "ar");
+                })
+                .map((city, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("city", city);
+                      setIsCityDropdownOpen(false);
+                    }}
+                  >
+                    {t.unitsFilter.cities?.[city] || city}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -384,22 +383,24 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {[...developersSet].sort((a, b) => {
-                const nameA = getTranslatedDeveloperName(a);
-                const nameB = getTranslatedDeveloperName(b);
-                return nameA.localeCompare(nameB, 'ar');
-              }).map((d, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    handleFilterChange("developer_name", d);
-                    setIsDeveloperDropdownOpen(false);
-                  }}
-                >
-                  {getTranslatedDeveloperName(d)}
-                </div>
-              ))}
+              {[...developersSet]
+                .sort((a, b) => {
+                  const nameA = getTranslatedDeveloperName(a);
+                  const nameB = getTranslatedDeveloperName(b);
+                  return nameA.localeCompare(nameB, "ar");
+                })
+                .map((d, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("developer_name", d);
+                      setIsDeveloperDropdownOpen(false);
+                    }}
+                  >
+                    {getTranslatedDeveloperName(d)}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -442,22 +443,24 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {[...compounds].sort((a, b) => {
-                const nameA = getTranslatedCompoundName(a.name);
-                const nameB = getTranslatedCompoundName(b.name);
-                return nameA.localeCompare(nameB, 'ar');
-              }).map((c, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    handleFilterChange("project_name", c.name);
-                    setIsProjectDropdownOpen(false);
-                  }}
-                >
-                  {getTranslatedCompoundName(c.name)}
-                </div>
-              ))}
+              {[...compounds]
+                .sort((a, b) => {
+                  const nameA = getTranslatedCompoundName(a.name);
+                  const nameB = getTranslatedCompoundName(b.name);
+                  return nameA.localeCompare(nameB, "ar");
+                })
+                .map((c, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("project_name", c.name);
+                      setIsProjectDropdownOpen(false);
+                    }}
+                  >
+                    {getTranslatedCompoundName(c.name)}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -556,18 +559,20 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allPropertyTypes}
               </div>
-              {[...buildingTypes].sort((a, b) => a.label.localeCompare(b.label, 'ar')).map((type) => (
-                <div
-                  key={type.value}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("property_type", type.value);
-                    setIsPropertyTypeDropdownOpen(false);
-                  }}
-                >
-                  {type.label}
-                </div>
-              ))}
+              {[...buildingTypes]
+                .sort((a, b) => a.label.localeCompare(b.label, "ar"))
+                .map((type) => (
+                  <div
+                    key={type.value}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                    onClick={() => {
+                      handleFilterChange("property_type", type.value);
+                      setIsPropertyTypeDropdownOpen(false);
+                    }}
+                  >
+                    {type.label}
+                  </div>
+                ))}
             </div>
           )}
         </div>
@@ -680,7 +685,9 @@ export default function UnitsFilter({
                   className="text-gray-500 hover:text-gray-700"
                   onClick={() => {
                     if (filter.removeKeys) {
-                      filter.removeKeys.forEach((key) => handleRemoveFilter(key));
+                      filter.removeKeys.forEach((key) =>
+                        handleRemoveFilter(key)
+                      );
                     } else {
                       handleRemoveFilter(filter.key);
                     }

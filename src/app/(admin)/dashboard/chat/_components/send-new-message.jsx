@@ -28,7 +28,6 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
         ...formData,
         client_message: "",
       });
-      console.log(state);
       setMessage(""); // Clear the message input after successful submission
       onNewMessage(state.message); // Call the parent function to update the chat history
     } else if (state.message) {
