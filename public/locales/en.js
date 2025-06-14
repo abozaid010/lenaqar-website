@@ -1,3 +1,4 @@
+
 export default {
   // common
   direction: "ltr",
@@ -215,6 +216,7 @@ export default {
       confirm: "Log Out",
     },
     logoutSuccess: "Logout Successful",
+    developers: "Developers",
   },
   schaduall: {
     "assignError": "Failed to assign salesperson",
@@ -443,9 +445,11 @@ export default {
   projectUndfined: " No projects found.",
   cancelButton: "cancel",
   deleteButton: "delete",
+  saveChangesButton: "Save Changes",
   sureDelet: " Are you sure you want to delete",
   actionDelet: "This action cannot be undone.",
-  deleteTitel: "delete project",
+  deleteProjectTitel: "delete project",
+  deletePhaseTitel: "delete phase",
   failedProject: "Failed to delete project",
   projectDelete: "project deleted successfuly",
   associateProject:
@@ -1071,4 +1075,10 @@ export default {
     "OHK Consultants": "OHK Consultants",
     "Palm Hills": "Palm Hills",
   },
+  developerPage: {
+    DeleteTitle: "Delete Developer",
+    deleteMessage: "Are you sure you want to delete this developer?",
+    editDeveloper: "Edit Developer",
+    addDeveloper: "Add New Developer",
+  }
 };

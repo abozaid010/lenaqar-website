@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
 import {
-  Moon,
-  LayoutDashboard,
-  BarChart2,
-  Home,
   AlertTriangle,
-  Users2,
+  BarChart2,
   Calendar,
   FolderKanban,
+  Home,
+  LayoutDashboard,
+  Users2,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { useI18n } from "@/context/translate-api";
 
@@ -94,30 +93,18 @@ const Sidebar = () => {
       >
         {/* Logo/Brand */}
         <div className="p-4 mt-1 ">
-           <Link href="/" className="text-xl font-bold flex items-center">
-              <Image
-                src="/images/logo.png"
-                alt="logo_image"
-                width={120}
-                height={40}
-              />
-             
-            </Link>
-            </div>
+          <Link href="/" className="text-xl font-bold flex items-center">
+            <Image
+              src="/images/logo.png"
+              alt="logo_image"
+              width={120}
+              height={40}
+            />
+          </Link>
+        </div>
 
         {/* Navigation Menu */}
         <div className="flex-1 ">
-        <Link
-            href="/schedule"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/schedule")
-                ? "bg-primary text-white"
-                : "text-gray-700 hover:bg-gray-100"
-            }`}
-          >
-            <Calendar className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.schedule || "Schedule"}</span>
-          </Link>
           <Link
             href="/dashboard"
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
@@ -128,6 +115,18 @@ const Sidebar = () => {
           >
             <LayoutDashboard className="h-5 w-5 mr-3" />
             <span>{t.sidebar.dashboard}</span>
+          </Link>
+
+          <Link
+            href="/schedule"
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
+              isLinkActive("/schedule")
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Calendar className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.schedule || "Schedule"}</span>
           </Link>
 
           <Link
@@ -176,26 +175,19 @@ const Sidebar = () => {
             <FolderKanban className="h-5 w-5 mr-3" />
             <span>{t.sidebar.myProjects}</span>
           </Link>
-         
-        </div>
 
-        {/* Bottom Section */}
-        {/* <div className="mt-auto border-t border-gray-200 pt-2 pb-4">
-          <button className="flex w-full items-center px-4 py-2 text-gray-700 hover:bg-gray-100 mb-1 transition-colors">
-            <Moon className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.darkMode}</span>
-          </button>
-
-          <div className=" border-t border-gray-200 my-2"></div>
-
-          <button
-            onClick={initiateLogout}
-            className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors"
+          <Link
+            href="/developers"
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
+              isLinkActive("/developers")
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
           >
-            <LogOut className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.logout}</span>
-          </button>
-        </div> */}
+            <LayoutDashboard className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.developers}</span>
+          </Link>
+        </div>
       </div>
     </>
   );

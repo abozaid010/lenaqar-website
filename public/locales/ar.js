@@ -220,6 +220,7 @@ export default {
       confirm: "تسجيل الخروج",
     },
     logoutSuccess: "تم تسجيل الخروج بنجاح",
+    developers: "المطورين",
   },
   dashboardFilter: {
     actions: {
@@ -698,10 +699,12 @@ export default {
   updateProject: "تعديل المشروع",
   projectUndfined: "لا توجد مشاريع متاحة لك",
   deleteButton: "حذف",
+  saveChangesButton: "حفظ التغييرات",
   cancelButton: "الغاء",
   sureDelet: "هل أنت متأكد أنك تريد الحذف؟",
   actionDelet: "لا يمكن التراجع عن هذا الإجراء.",
-  deleteTitel: "حذف المشروع",
+  deleteProjectTitel: "حذف المشروع",
+  deletePhaseTitel: "حذف المرحلة",
   failedProject: "خطا في حذف المشروع",
   projectDelete: "تم حذف المشروع بنجاح",
   associateProject: "هذا المشروع مرتبط بعدة وحدات.",
@@ -1118,4 +1121,10 @@ export default {
     increaseInCSAT: "زيادة في رضا  العملاء",
     increaseInCSATValue: "60%",
   },
+  developerPage: {
+    DeleteTitle: "حذف المطور",
+    deleteMessage: "هل أنت متأكد أنك تريد حذف هذا المطور؟",
+    editDeveloper: "تعديل بيانات المطور",
+    addDeveloper: "إضافة مطور جديد",
+  }
 };

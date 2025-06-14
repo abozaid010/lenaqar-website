@@ -10,16 +10,22 @@ import {
 } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
-import DeleteConfirmDialog from "./DeleteConfirmDialog";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
+
+function getDisplayName(name, ar_name, en_name, locale) {
+  if (name) return name;
+  if (locale === "ar") return ar_name || en_name || "";
+  return en_name || ar_name || "";
+}
 
 export default function ProjectList({
   projects,
@@ -27,7 +33,7 @@ export default function ProjectList({
   readonly,
   developers,
 }) {
-  const { t } = useI18n();
+  const { t, local } = useI18n();
   const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
@@ -175,6 +181,7 @@ export default function ProjectList({
     }
   };
 
+  console.log("Project List:", projectList);
   return (
     <>
       <AddCompoundDialog
@@ -191,16 +198,21 @@ export default function ProjectList({
         clientId={clientId}
       />
 
-      <DeleteConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => {
-          setShowDeleteDialog(false);
-          setProjectToDelete(null);
-          setPhaseToDelete(null);
-        }}
-        onConfirm={handleConfirmDelete}
-        projectName={projectToDelete?.name || phaseToDelete?.name}
-      />
+      {projectToDelete || phaseToDelete ? (
+        <DeleteConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={() => {
+            setShowDeleteDialog(false);
+            setProjectToDelete(null);
+            setPhaseToDelete(null);
+          }}
+          confirmLabel={t.deleteButton}
+          cancelLabel={t.cancelButton}
+          onConfirm={handleConfirmDelete}
+          title={projectToDelete ? t.deleteProjectTitel : t.deletePhaseTitel}
+          message={`${t.sureDelet} ${projectToDelete ? `"${projectToDelete?.name}"` : `"${phaseToDelete?.name}"`}? ${" "} ${t.actionDelet}`}
+        />
+      ) : null}
 
       <AddPhaseDialog
         isOpen={showPhaseDialog}
@@ -269,7 +281,12 @@ export default function ProjectList({
                           : "text-gray-800"
                       }`}
                     >
-                      {capitalize(project.name)}
+                      {getDisplayName(
+                        project.name,
+                        project.ar_name,
+                        project.en_name,
+                        local
+                      )}
                     </h3>
                     <div
                       className={`flex items-center space-x-4 text-sm ${
