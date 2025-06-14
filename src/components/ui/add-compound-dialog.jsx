@@ -46,6 +46,8 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
+  const [activeNameLang, setActiveNameLang] = useState("ar");
+
   const [formData, setFormData] = useState({
     ar_name: compoundData?.ar_name || "",
     en_name: compoundData?.en_name || "",
@@ -321,7 +323,9 @@ export default function AddCompoundDialog({
           ...formData,
           area: Number(formData.area),
         };
+        console.log("submissionData", submissionData);
         res = await addCompound(submissionData);
+        console.log("res", res.data);
         onAdd(res.data);
       }
 
@@ -398,36 +402,54 @@ export default function AddCompoundDialog({
             {/* Basic Information */}
             <div className="grid grid-cols-1 gap-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.compoundNameAr || "Compound Name (Arabic)"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
+                <div className="text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+                  <label>
+                    {t.formLabels?.compoundName || "Compound Name"}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <div className="inline-flex rounded bg-gray-100 border border-gray-300 overflow-hidden">
+                    <button
+                      type="button"
+                      className={`px-2 py-0.5 text-xs font-semibold ${
+                        activeNameLang === "ar"
+                          ? "bg-primary text-white border border-gray-300 rtl:rounded-r ltr:rounded-l"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => setActiveNameLang("ar")}
+                    >
+                      AR
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-2 py-0.5 text-xs font-semibold ${
+                        activeNameLang === "en"
+                          ? "bg-primary text-white border border-gray-300 rtl:rounded-l ltr:rounded-r"
+                          : "text-gray-700"
+                      }`}
+                      onClick={() => setActiveNameLang("en")}
+                    >
+                      EN
+                    </button>
+                  </div>
+                </div>
                 <input
                   type="text"
-                  name="ar_name"
-                  value={formData.ar_name}
-                  onChange={handleChange}
-                  disabled={editMode}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder={
-                    t.formLabels?.compoundNameAr || "Compound Name (Arabic)"
+                  name={activeNameLang === "ar" ? "ar_name" : "en_name"}
+                  value={
+                    activeNameLang === "ar"
+                      ? formData.ar_name
+                      : formData.en_name
                   }
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.compoundNameEn || "Compound Name (English)"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="en_name"
-                  value={formData.en_name}
                   onChange={handleChange}
                   disabled={editMode}
+                  dir={activeNameLang === "ar" ? "rtl" : "ltr"}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   placeholder={
-                    t.formLabels?.compoundNameEn || "Compound Name (English)"
+                    activeNameLang === "ar"
+                      ? t.placeholders.projectArName
+                      : t.placeholders.projectEnName ||
+                        "Compound Name (English)"
                   }
                 />
               </div>

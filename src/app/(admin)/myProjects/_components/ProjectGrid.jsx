@@ -65,7 +65,9 @@ export default function ProjectList({
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
 
+  console.log("Selected Project:", projectList);
   const handleProject = (data) => {
+    console.log("Project data received:", data);
     setProjectList((prev) => {
       const exists = prev.some((p) => p.id === data.id);
       let updatedList;
