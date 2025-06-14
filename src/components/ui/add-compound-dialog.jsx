@@ -175,15 +175,16 @@ export default function AddCompoundDialog({
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.ar_name.trim() && !formData.en_name.trim()) {
-      newErrors.ar_name =
-        t.formValidation?.compoundNameRequired ||
-        "At least one compound name is required";
-      newErrors.en_name = newErrors.ar_name;
-      toast.error(
-        t.formValidation?.compoundNameRequired ||
-          "At least one compound name is required"
-      );
+    if (!formData.ar_name.trim()) {
+      newErrors.ar_name = "Arabic compound name is required";
+      setActiveNameLang("ar");
+      toast.error("Arabic compound name is required");
+    }
+
+    if (!formData.en_name.trim()) {
+      newErrors.en_name = "English compound name is required";
+      setActiveNameLang("en");
+      toast.error("English compound name is required");
     }
 
     if (!formData.city.trim()) {
