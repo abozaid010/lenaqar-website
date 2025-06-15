@@ -4,6 +4,7 @@ import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import { useI18n } from "@/context/translate-api";
+import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -73,40 +74,14 @@ export default function BasicDetailsStep({
 
   const handleChange = (e) => {
     const { name, value, type, checked, dataset } = e.target;
-    const arabicToEnglish = {
-      "٠": "0",
-      "١": "1",
-      "٢": "2",
-      "٣": "3",
-      "٤": "4",
-      "٥": "5",
-      "٦": "6",
-      "٧": "7",
-      "٨": "8",
-      "٩": "9",
-    };
-
     let updatedValue;
+
     if (type === "checkbox") {
       updatedValue = checked;
-    } else if (
-      [
-        "roomsCount",
-        "bathroomCount",
-        "floor",
-        "landArea",
-        "gardenSize",
-        "garageArea",
-        "code",
-        "model",
-      ].includes(name)
-    ) {
-      const convertedValue = value.replace(/[٠-٩]/g, (d) => arabicToEnglish[d]);
-      updatedValue = convertedValue;
     } else if (dataset.formatNumber === "true") {
-      const convertedValue = value.replace(/[٠-٩]/g, (d) => arabicToEnglish[d]);
-      const rawValue = convertedValue.replace(/\D/g, "");
-      updatedValue = Number(rawValue);
+      const englishValue = convertArabicToEnglishNumbers(value);
+      const rawValue = englishValue.replace(/\D/g, "");
+      updatedValue = rawValue === "" ? "" : Number(rawValue);
     } else {
       updatedValue = value;
     }
@@ -439,10 +414,7 @@ export default function BasicDetailsStep({
         {/* Phase */}
         <div>
           <label className="text-sm font-medium mb-1 flex items-center justify-between">
-            <span>
-              {t.basicDetails.selectPhase || "Select Phase"}{" "}
-              <span className="text-red-500">*</span>
-            </span>
+            <span>{t.basicDetails.selectPhase || "Select Phase"} </span>
             {formData.project && (
               <button
                 type="button"
@@ -458,11 +430,7 @@ export default function BasicDetailsStep({
             value={formData.phase}
             onChange={handleChange}
             disabled={!formData.project}
-            className={`block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 ${
-              invalidFields.includes("phase")
-                ? "border-red-500 ring-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
+            className="block w-full rounded-md border py-1 h-[34px] px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           >
             {!formData.project ? (
               <option value="">
@@ -639,6 +607,7 @@ export default function BasicDetailsStep({
           </label>
           <input
             type="text"
+            data-format-number
             name="roomsCount"
             value={formData.roomsCount || ""}
             placeholder="0"
@@ -739,6 +708,7 @@ export default function BasicDetailsStep({
           </label>
           <input
             type="text"
+            data-format-number
             name="garageArea"
             placeholder="0"
             value={formData.garageArea || ""}
