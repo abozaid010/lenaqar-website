@@ -270,7 +270,6 @@ export default function AddUnitModal({
       if (!isEdit) {
         if (formData.purpose === "sell") {
           const finalFormData = { ...formData, ...SellFormData };
-          console.log("Final Form Data for Sell:", finalFormData);
           res = await addUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
