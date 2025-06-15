@@ -1,11 +1,9 @@
 import {
   fetchcombounds,
-  fetchUnitsFilter,
   fetchDevelopers,
+  fetchUnitsFilter,
 } from "@/components/services/serviceFetching";
 import UnitsFilter from "@/components/ui/units-filter";
-import UnitsSearch from "@/components/ui/units-search";
-import IdentifierUnit from "@/components/ui/IdentifierUnit";
 import UnitsGrid from "@/components/ui/units-grid";
 
 export default async function UnitsPage({ searchParams: rawSearchParams }) {

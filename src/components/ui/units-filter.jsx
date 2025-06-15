@@ -38,7 +38,8 @@ export default function UnitsFilter({
           })),
         }))
     : [];
-  const cities = citiesAndDistricts.cities;
+
+  const cities = citiesAndDistricts?.cities;
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
@@ -286,64 +287,66 @@ export default function UnitsFilter({
     <div className=" ">
       <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
         {/* Cities Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={cityDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
+        {!readonly && (
+          <div
+            className="relative w-full md:w-auto md:flex-1 min-w-0"
+            ref={cityDropdownRef}
           >
-            <span className="truncate">{getSelectedCity()}</span>
-            <svg
-              className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isCityDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+            <button
+              type="button"
+              className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+              onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
-          </button>
-
-          {isCityDropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("city", "all");
-                  setIsCityDropdownOpen(false);
-                }}
+              <span className="truncate">{getSelectedCity()}</span>
+              <svg
+                className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isCityDropdownOpen ? "rotate-180" : ""}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
               >
-                {t.unitsFilter.allCities || "All Cities"}
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="1"
+                  d="M19 9l-7 7-7-7"
+                ></path>
+              </svg>
+            </button>
+
+            {isCityDropdownOpen && !readonly && (
+              <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+                <div
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("city", "all");
+                    setIsCityDropdownOpen(false);
+                  }}
+                >
+                  {t.unitsFilter.allCities || "All Cities"}
+                </div>
+                {[...cities]
+                  .sort((a, b) => {
+                    const nameA = t.unitsFilter.cities?.[a] || a;
+                    const nameB = t.unitsFilter.cities?.[b] || b;
+                    return nameA.localeCompare(nameB, "ar");
+                  })
+                  .map((city, idx) => (
+                    <div
+                      key={idx}
+                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                      onClick={() => {
+                        handleFilterChange("city", city);
+                        setIsCityDropdownOpen(false);
+                      }}
+                    >
+                      {t.unitsFilter.cities?.[city] || city}
+                    </div>
+                  ))}
               </div>
-              {[...cities]
-                .sort((a, b) => {
-                  const nameA = t.unitsFilter.cities?.[a] || a;
-                  const nameB = t.unitsFilter.cities?.[b] || b;
-                  return nameA.localeCompare(nameB, "ar");
-                })
-                .map((city, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("city", city);
-                      setIsCityDropdownOpen(false);
-                    }}
-                  >
-                    {t.unitsFilter.cities?.[city] || city}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Developers Dropdown */}
         <div
