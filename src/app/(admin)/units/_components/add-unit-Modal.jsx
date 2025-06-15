@@ -1,18 +1,18 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 import StepIndicator from "./step-indicator";
 import BasicDetailsStep from "./steps/basic-details-step";
-import SaleDetailsStep from "./steps/sale-details-step";
-import RentalDetailsStep from "./steps/rental-details-step";
 import ImagesStep from "./steps/images-step";
+import RentalDetailsStep from "./steps/rental-details-step";
+import SaleDetailsStep from "./steps/sale-details-step";
 
-import { X } from "lucide-react";
-import { v4 as uuidv4 } from "uuid";
-import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import { X } from "lucide-react";
+import toast from "react-hot-toast";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   addUnit,
@@ -131,7 +131,6 @@ export default function AddUnitModal({
         "roomsCount",
         "bathroomCount",
         "district",
-        // "phase",
       ];
       const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
       const sanitizedData = { ...formData };
@@ -266,23 +265,32 @@ export default function AddUnitModal({
     }
 
     try {
+      let res;
       setLoading(true);
       if (!isEdit) {
         if (formData.purpose === "sell") {
           const finalFormData = { ...formData, ...SellFormData };
-          await addUnit(finalFormData);
+          console.log("Final Form Data for Sell:", finalFormData);
+          res = await addUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
-          await addUnitRent(finalFormData);
+          res = await addUnitRent(finalFormData);
         }
       } else {
         if (formData.purpose === "sell") {
           const finalFormData = { ...formData, ...SellFormData };
-          await updateUnit(finalFormData);
+          res = await updateUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
-          await updateUnitRent(finalFormData);
+          res = await updateUnitRent(finalFormData);
         }
+      }
+
+      if (!res || !res.status) {
+        toast.error(
+          "An error occurred while processing your request. Please try again."
+        );
+        return;
       }
       onClose();
       window.location.reload();

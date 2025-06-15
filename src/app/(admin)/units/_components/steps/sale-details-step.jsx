@@ -1,17 +1,8 @@
 "use client";
 
-import { Plus, Trash2Icon } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
-import { formatPrice } from "@/utils/formatters";
-
-const convertArabicToEnglishNumbers = (input) => {
-  if (typeof input !== "string") return input;
-  const arabicToEnglish = {
-    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-  };
-  return input.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
-};
+import { convertArabicToEnglishNumbers, formatPrice } from "@/utils/formatters";
+import { Plus, Trash2Icon } from "lucide-react";
 
 export default function SaleDetailsStep({
   formData,
