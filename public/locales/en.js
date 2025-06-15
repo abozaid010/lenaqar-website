@@ -563,7 +563,7 @@ export default {
     noPhasespropertyDetails: "Property Details",
     propertySpecs: "Property Specifications",
     unitTitle: "Unit Title",
-    compound: "project",
+    compound: "Project",
     buildingType: "Building Type",
     purpose: "Purpose",
     city: "City",
