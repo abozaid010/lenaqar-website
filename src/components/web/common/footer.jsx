@@ -1,17 +1,17 @@
 "use client";
-import Link from "next/link";
+import ChatBot from "@/components/ui/ChatBot";
+import { useI18n } from "@/context/translate-api";
 import {
-  Linkedin,
-  Phone,
+  Apple,
+  Bot,
   Building,
   Facebook,
+  Linkedin,
   MessageCircle,
-  Bot,
-  Apple,
+  Phone,
   ShoppingBag,
 } from "lucide-react";
-import { useI18n } from "@/context/translate-api";
-import ChatBot from "@/components/ui/ChatBot";
+import Link from "next/link";
 
 const Footer = () => {
   const { t } = useI18n();
@@ -93,7 +93,7 @@ const Footer = () => {
                 </div>
                 <div className="flex flex-col">
                   <div className="space-y-1">
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2">
                       <span className="text-white font-medium">
                         {t.footer.contact.sales} :
                       </span>
@@ -103,7 +103,7 @@ const Footer = () => {
                       >
                         01016080323
                       </a>
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium">
                         {t.footer.contact.support} :
