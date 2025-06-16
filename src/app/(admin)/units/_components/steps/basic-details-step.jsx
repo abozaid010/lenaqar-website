@@ -161,7 +161,7 @@ export default function BasicDetailsStep({
   };
 
   const phases = dataProject.filter(
-    (project) => project.name === formData.project
+    (project) => project.en_name === formData.project
   );
 
   return (
@@ -214,11 +214,7 @@ export default function BasicDetailsStep({
               name="buildingType"
               value={formData.buildingType || ""}
               onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
-                invalidFields.includes("buildingType")
-                  ? "border-red-500 ring-red-500"
-                  : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-              }`}
+              className="border-gray-300 focus:ring-blue-500 focus:border-blue-500 block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none"
             >
               <option value="apartment">
                 {t.basicDetails.buildingTypes.apartment}
@@ -387,8 +383,8 @@ export default function BasicDetailsStep({
                   dataProject
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((project) => (
-                      <option key={project.name} value={project.name}>
-                        {project.name}
+                      <option key={project.en_name} value={project.en_name}>
+                        {project.en_name}
                       </option>
                     ))
                 ) : (
@@ -413,7 +409,7 @@ export default function BasicDetailsStep({
 
         {/* Phase */}
         <div>
-          <label className="text-sm font-medium mb-1 flex items-center justify-between">
+          <label className="text-sm font-medium mb-1 text-gray-700 flex items-center justify-between">
             <span>{t.basicDetails.selectPhase || "Select Phase"} </span>
             {formData.project && (
               <button
@@ -558,7 +554,7 @@ export default function BasicDetailsStep({
 
         {/* code */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
             {t.basicDetails.code}
           </label>
           <input
@@ -574,7 +570,7 @@ export default function BasicDetailsStep({
 
         {/* model */}
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label className="block text-sm font-medium mb-1 text-gray-700">
             {t.basicDetails.model}
           </label>
           <input
