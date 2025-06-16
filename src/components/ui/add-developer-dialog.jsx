@@ -6,6 +6,7 @@ import {
 } from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
 import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +21,12 @@ export default function AddDeveloperDialog({
   developer,
 }) {
   const isEdit = !!developer;
+
+  // Get client_id from cookies if not provided
+  const getClientId = () => {
+    return client_id || Cookies.get("lena-website-client_id") || "";
+  };
+
   const [formData, setFormData] = useState(
     developer
       ? { ...developer }
@@ -28,7 +35,7 @@ export default function AddDeveloperDialog({
           name: "",
           description: "",
           logo: "",
-          client_id: client_id || "",
+          client_id: getClientId(),
         }
   );
 
@@ -41,10 +48,10 @@ export default function AddDeveloperDialog({
         name: "",
         description: "",
         logo: "",
-        client_id: client_id || "",
+        client_id: getClientId(),
       });
     }
-  }, [developer, client_id, isOpen]);
+  }, [developer, isOpen]);
 
   const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
