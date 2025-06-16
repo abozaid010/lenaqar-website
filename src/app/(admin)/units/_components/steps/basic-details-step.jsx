@@ -381,7 +381,7 @@ export default function BasicDetailsStep({
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
                   dataProject
-                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .sort((a, b) => a.en_name.localeCompare(b.name))
                     .map((project) => (
                       <option key={project.en_name} value={project.en_name}>
                         {project.en_name}
