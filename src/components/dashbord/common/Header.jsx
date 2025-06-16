@@ -43,9 +43,10 @@ const Header = ({ clientName, clientID }) => {
   };
 
   const sendMessageWhatsApp = () => {
-    const phoneNumber = "201016080323";
-    const url = `https://wa.me/${phoneNumber}`;
-    window.open(url, "_blank");
+    console.log("WhatsApp message button clicked");
+    // const phoneNumber = "201016080323";
+    // const url = `https://wa.me/${phoneNumber}`;
+    // window.open(url, "_blank");
   };
 
   const cancelLogout = () => {
