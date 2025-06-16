@@ -2,18 +2,15 @@
 
 import {
   addCompound,
-  deleteImage,
   updatecompound,
-  uploadImages,
 } from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/image-uploader";
+import SingleImageUploader from "@/components/ui/single-image-uploader";
 import { useI18n } from "@/context/translate-api";
-import { compressImage } from "@/utils/imageCompression";
 import { Loader2 } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function AddCompoundDialog({
@@ -33,12 +30,7 @@ export default function AddCompoundDialog({
   // Determine edit mode based on compoundData
   const editMode = !!(compoundData && compoundData.id);
 
-  const fileInputRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [uploadedImageId, setUploadedImageId] = useState(null);
-
-  const [masterPlanUploaded, setMasterPlanUploaded] = useState(false);
-
+  const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -86,15 +78,6 @@ export default function AddCompoundDialog({
           client_id: compoundData.client_id || clientId || "",
           images: compoundData.images || [],
         });
-        // Set selected image for existing master plan
-        if (compoundData.master_plan) {
-          setSelectedImage({
-            name: "existing_image",
-            preview: compoundData.master_plan,
-          });
-        } else {
-          setSelectedImage(null);
-        }
       } else if (!editMode) {
         // Reset form with defaults for adding
         setFormData({
@@ -113,11 +96,6 @@ export default function AddCompoundDialog({
           client_id: clientId || "",
           images: [],
         });
-        // Clear selected image and file input
-        setSelectedImage(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = null;
-        }
       }
       setErrors({});
     } else {
@@ -137,10 +115,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "",
         images: [],
       });
-      setSelectedImage(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = null;
-      }
+
       setErrors({});
     }
   }, [isOpen, editMode]);
@@ -213,87 +188,6 @@ export default function AddCompoundDialog({
     }
 
     return newErrors;
-  };
-
-  const handleFileSelect = async (e) => {
-    const file = e.target.files[0];
-
-    if (file && file.size > 5 * 1024 * 1024) {
-      toast.error("File size exceeds 5MB. Please select a smaller file.");
-      return;
-    }
-    if (
-      file &&
-      !["image/jpeg", "image/png", "image/webp"].includes(file.type)
-    ) {
-      toast.error(
-        "Invalid file type. Please select a JPEG, PNG, or WEBP image."
-      );
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSelectedImage({
-        name: file.name,
-        preview: reader.result,
-      });
-    };
-    reader.readAsDataURL(file);
-
-    try {
-      setMasterPlanUploaded(true);
-
-      const compressedFile = await compressImage(file);
-
-      const formDataToUpload = new FormData();
-      formDataToUpload.append("file", compressedFile);
-
-      const res = await uploadImages(formDataToUpload);
-
-      setFormData((prev) => ({
-        ...prev,
-        master_plan: res.url,
-      }));
-    } catch (error) {
-      console.error("Error compressing image:", error);
-      toast.error("Failed to compress image. Please try again.");
-    } finally {
-      setMasterPlanUploaded(false);
-    }
-  };
-
-  const handleRemoveImage = async (e) => {
-    e.stopPropagation();
-
-    if (selectedImage.imageId) {
-      try {
-        await deleteImage(uploadedImageId);
-        toast.success(
-          t.toasts?.imageRemoved ||
-            "Image removed successfully from the server!"
-        );
-        setUploadedImageId(null);
-      } catch (error) {
-        toast.error(
-          t.toasts?.imageRemoveFailed ||
-            "Failed to remove image from the server. Please try again."
-        );
-        return;
-      }
-    }
-
-    // Clear the selected image and reset the master_plan field
-    setSelectedImage(null);
-    setFormData((prev) => ({
-      ...prev,
-      master_plan: "",
-    }));
-
-    // Reset the file input value to ensure the onChange event is triggered
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-    }
   };
 
   const handleSubmit = async (e) => {
@@ -381,11 +275,6 @@ export default function AddCompoundDialog({
         master_plan: "",
         client_id: clientId || "ai",
       });
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = null;
-      }
-      setSelectedImage(null);
     }
   };
 
@@ -679,137 +568,16 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Master Plan Image */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.masterPlanImage || "Master Plan Image"}
-              </label>
-              <div className="border-2 border-dashed rounded-lg p-5 text-center cursor-pointer">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg, image/png, image/webp"
-                  onChange={handleFileSelect}
-                  className="hidden"
-                  disabled={masterPlanUploaded}
-                />
-                <div
-                  onClick={() => fileInputRef.current.click()}
-                  className="flex flex-col items-center justify-center"
-                >
-                  {selectedImage || formData.master_plan ? (
-                    <div className="relative group min-h-[200px] aspect-square flex flex-col gap-1 items-center justify-center">
-                      <div className="relative flex-1 w-full h-full">
-                        <Image
-                          fill
-                          priority={true}
-                          src={formData.master_plan || selectedImage?.preview}
-                          alt={`Image ${selectedImage.name}`}
-                          className="w-full h-full object-cover rounded-md"
-                        />
-
-                        {/* Status Overlay */}
-                        {masterPlanUploaded && (
-                          <div
-                            className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
-                          >
-                            <svg
-                              className="animate-spin h-8 w-8 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                          </div>
-                        )}
-
-                        {/* Success indicator for uploaded images */}
-                        {!masterPlanUploaded && (
-                          <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                        )}
-
-                        {/* Delete button - only show if not currently processing */}
-                        {!masterPlanUploaded && (
-                          <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              className="h-4 w-4"
-                              viewBox="0 0 20 20"
-                              fill="currentColor"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Image label */}
-                      <div className="mt-1 text-xs text-gray-500 truncate">
-                        {selectedImage.name}
-                      </div>
-                    </div>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-12 w-12 text-gray-400 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <p className="text-base text-gray-700 mb-2">
-                        {t.formLabels?.dragDropImage ||
-                          "Click or drag and drop an image here"}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {t.formLabels?.supportedFormats ||
-                          "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
-                      </p>
-                    </>
-                  )}
-                </div>
-              </div>
-            </div>
+            <SingleImageUploader
+              label={t.formLabels.masterPlanImage || "Master Plan Image"}
+              value={formData.master_plan}
+              onChange={(url) =>
+                setFormData((prev) => ({ ...prev, master_plan: url }))
+              }
+              disabled={isMasterPlanUploading || isSubmitting}
+              isUploading={isMasterPlanUploading}
+              setIsUploading={setIsMasterPlanUploading}
+            />
 
             {/* Project Images */}
             <div>
@@ -843,7 +611,7 @@ export default function AddCompoundDialog({
                 onClick={handleSubmit}
                 disabled={isSubmitting}
                 className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  isSubmitting || isUploading || masterPlanUploaded
+                  isSubmitting || isUploading || isMasterPlanUploading
                     ? "pointer-events-none opacity-80"
                     : "hover:bg-primary/90"
                 }`}
