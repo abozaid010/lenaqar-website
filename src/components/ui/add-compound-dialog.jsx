@@ -338,7 +338,6 @@ export default function AddCompoundDialog({
                       : formData.en_name
                   }
                   onChange={handleChange}
-                  disabled={editMode}
                   dir={activeNameLang === "ar" ? "rtl" : "ltr"}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                   placeholder={
@@ -376,7 +375,6 @@ export default function AddCompoundDialog({
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
-                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
@@ -400,7 +398,6 @@ export default function AddCompoundDialog({
                   name="country"
                   value={formData.country}
                   onChange={handleChange}
-                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -415,7 +412,7 @@ export default function AddCompoundDialog({
                 name="district"
                 value={formData.district}
                 onChange={handleChange}
-                disabled={!formData.city || editMode}
+                disabled={!formData.city}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">
@@ -454,7 +451,6 @@ export default function AddCompoundDialog({
                   placeholder="1000"
                   onChange={handleChange}
                   min="0"
-                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 />
               </div>
@@ -466,7 +462,6 @@ export default function AddCompoundDialog({
                   name="gated"
                   checked={formData.gated}
                   onChange={handleChange}
-                  disabled={editMode}
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
                 <label
@@ -489,7 +484,6 @@ export default function AddCompoundDialog({
                   name="developer_name"
                   value={formData.developer_name}
                   onChange={handleChange}
-                  disabled={editMode}
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
@@ -555,7 +549,6 @@ export default function AddCompoundDialog({
                 value={formData.google_map_link}
                 onChange={handleChange}
                 placeholder="https://maps.google.com/..."
-                disabled={editMode}
                 className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
