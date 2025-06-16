@@ -308,7 +308,7 @@ export default function AddPhseDilog({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.formLabels?.masterPlanImage || "Master Plan Image"}
             </label>
-            <div className="border-2 border-dashed rounded-lg p-5 text-center cursor-pointer">
+            <div>
               <input
                 ref={fileInputRef}
                 type="file"
@@ -319,23 +319,25 @@ export default function AddPhseDilog({
               />
               <div
                 onClick={() => fileInputRef.current.click()}
-                className="flex flex-col items-center justify-center"
+                className="w-full rounded-md overflow-hidden mt-2"
+                style={{
+                  cursor: masterPlanUploaded ? "not-allowed" : "pointer",
+                }}
               >
                 {selectedImage || formData.master_plan ? (
-                  <div className="relative group min-h-[200px] aspect-square flex flex-col gap-1 items-center justify-center">
-                    <div className="relative flex-1 w-full h-full">
+                  <div className="relative group flex flex-col gap-1 items-center justify-center">
+                    <div className="relative w-full h-[240px] rounded-md overflow-hidden">
                       <Image
                         fill
                         priority={true}
                         src={selectedImage?.preview}
                         alt={`Image ${selectedImage.name}`}
-                        className="w-full h-full object-cover rounded-md"
+                        objectFit="cover"
+                        className="rounded-md"
                       />
 
                       {masterPlanUploaded && (
-                        <div
-                          className={`absolute inset-0 flex items-center justify-center rounded-md bg-black/50`}
-                        >
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                           <svg
                             className="animate-spin h-8 w-8 text-white"
                             xmlns="http://www.w3.org/2000/svg"
@@ -360,31 +362,14 @@ export default function AddPhseDilog({
                       )}
 
                       {!masterPlanUploaded && (
-                        <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
-
-                      {!masterPlanUploaded && (
                         <button
                           type="button"
                           onClick={handleRemoveImage}
-                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            className="h-4 w-4"
+                            className="h-5 w-5"
                             viewBox="0 0 20 20"
                             fill="currentColor"
                           >
@@ -397,13 +382,12 @@ export default function AddPhseDilog({
                         </button>
                       )}
                     </div>
-
-                    <div className="mt-1 text-xs text-gray-500 truncate">
+                    <div className="mt-1 text-xs text-gray-500 truncate w-full text-center">
                       {selectedImage.name}
                     </div>
                   </div>
                 ) : (
-                  <>
+                  <div className="flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50  border-2 border-dashed border-gray-300">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-12 w-12 text-gray-400 mb-4"
@@ -426,7 +410,7 @@ export default function AddPhseDilog({
                       {t.formLabels?.supportedFormats ||
                         "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
                     </p>
-                  </>
+                  </div>
                 )}
               </div>
             </div>
