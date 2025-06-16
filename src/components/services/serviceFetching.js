@@ -288,11 +288,8 @@ export async function addCompound(compoundData) {
   }
 }
 export async function updatecompound(compoundData, projectId) {
-  const clientId = await getClientid();
-
   try {
     const response = await axiosInstance.patch(`/projects/${projectId}/update-fields`, compoundData);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);

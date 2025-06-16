@@ -201,22 +201,15 @@ export default function AddCompoundDialog({
     setIsSubmitting(true);
 
     try {
-      let submissionData;
-      let res;
+      const submissionData = {
+        ...formData,
+        area: Number(formData.area),
+      };
 
+      let res;
       if (editMode) {
-        submissionData = {
-          description: formData.description,
-          master_plan: formData.master_plan,
-          video_url: formData.video_url,
-          images: formData.images,
-        };
         res = await updatecompound(submissionData, compoundData.id);
       } else {
-        submissionData = {
-          ...formData,
-          area: Number(formData.area),
-        };
         res = await addCompound(submissionData);
       }
 
