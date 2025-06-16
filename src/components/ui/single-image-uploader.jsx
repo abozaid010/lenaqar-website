@@ -192,7 +192,7 @@ export default function SingleImageUploader({
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 rounded-md border border-gray-200">
+          <div className="flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 rounded-md border-2 border-dashed border-gray-300">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-12 w-12 text-gray-400 mb-4"
