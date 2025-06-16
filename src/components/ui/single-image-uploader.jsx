@@ -5,7 +5,7 @@ import {
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function SingleImageUploader({
@@ -23,6 +23,14 @@ export default function SingleImageUploader({
     value ? { name: null, preview: value, imageId: null } : null
   );
   const [isUploading, setIsUploadingLocal] = useState(false);
+
+  useEffect(() => {
+    if (!value) {
+      setSelectedImage(null);
+    } else {
+      setSelectedImage({ name: null, preview: value, imageId: null });
+    }
+  }, [value]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
