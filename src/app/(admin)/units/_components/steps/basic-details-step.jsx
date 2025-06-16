@@ -161,7 +161,7 @@ export default function BasicDetailsStep({
   };
 
   const phases = dataProject.filter(
-    (project) => project.name === formData.project
+    (project) => project.en_name === formData.project
   );
 
   return (
@@ -383,8 +383,8 @@ export default function BasicDetailsStep({
                   dataProject
                     .sort((a, b) => a.name.localeCompare(b.name))
                     .map((project) => (
-                      <option key={project.name} value={project.name}>
-                        {project.name}
+                      <option key={project.en_name} value={project.en_name}>
+                        {project.en_name}
                       </option>
                     ))
                 ) : (
