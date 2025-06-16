@@ -132,14 +132,18 @@ export default function PrivacyPage() {
         </h2>
         <div id="account-deletion">
           <p className="text-[#3926A7] mb-2">
-            If you wish to delete your account and associated data, you can do so by:
+            If you wish to delete your account and associated data, you can do
+            so by:
           </p>
           <ul className="list-disc pl-6 text-[#3926A7] mb-4">
             <li className="mb-1">
-              Sending an email directly to hr@lenaai.net requesting account deletion
+              Sending an email directly to hr@lenaai.net requesting account
+              deletion
             </li>
             <li className="mb-1">
-              LenaAI is committed to processing all account deletion requests and removing associated data within 24 hours of receiving the request
+              LenaAI is committed to processing all account deletion requests
+              and removing associated data within 24 hours of receiving the
+              request
             </li>
           </ul>
         </div>
@@ -153,8 +157,8 @@ export default function PrivacyPage() {
           If you have any questions or concerns regarding this Privacy Policy,
           please contact us at:
         </p>
-        <p className="text-[#3926A7] mb-1">Email: abozaid@lenaai.net</p>
-        <p className="text-[#3926A7] mb-1">Phone: 01016080323</p>
+        {/* <p className="text-[#3926A7] mb-1">Email: abozaid@lenaai.net</p> */}
+        {/* <p className="text-[#3926A7] mb-1">Phone: 01016080323</p> */}
         <p className="text-[#3926A7]">
           Company Address: 505 Siac Building, ARCHPLAN Square, New Capital,
           Cairo, Egypt
@@ -162,5 +166,4 @@ export default function PrivacyPage() {
       </section>
     </div>
   );
-};
-
+}
