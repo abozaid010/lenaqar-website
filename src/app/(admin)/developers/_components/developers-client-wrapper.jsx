@@ -16,7 +16,6 @@ export default function DevelopersClientWrapper({
   const [developers, setDevelopers] = useState(initialDevelopers || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const handleEdit = (updatedDeveloper) => {
@@ -36,7 +35,6 @@ export default function DevelopersClientWrapper({
   };
 
   const handleDelete = async (developerId) => {
-    console.log("Deleting developer with ID:", developerId);
     try {
       const res = await deleteDeveloper(developerId);
       if (!res.status) {

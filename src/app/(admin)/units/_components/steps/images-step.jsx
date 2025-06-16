@@ -31,7 +31,7 @@ export default function ImagesStep({
   };
 
   const handleAddDeveloper = (newDeveloper) => {
-    setDevelopers([...developers, newDeveloper]);
+    setDevelopers([...developers, newDeveloper.name]);
     updateFormData({ developer: newDeveloper.name });
   };
 
