@@ -24,11 +24,7 @@ const page = async () => {
   const data = await getschedual(formattedBefore, formattedAfter);
   const dataSales = await getSalesData();
 
-  return (
-    <div>
-      <Schedual data={data} dataSales={dataSales?.data} />
-    </div>
-  );
+  return <Schedual data={data} dataSales={dataSales?.data} />;
 };
 
 export default page;
