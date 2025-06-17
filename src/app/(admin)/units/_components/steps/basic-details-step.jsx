@@ -9,7 +9,6 @@ import {
   formatCityLabel,
   formatDistrictLabel,
 } from "@/utils/formatters";
-import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 
@@ -29,7 +28,6 @@ export default function BasicDetailsStep({
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
   const [dataProject, setDataProject] = useState([]);
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-  const ar = Cookies.get("lang");
 
   const printLocationDetails = async (city, district) => {
     if (city && district) {
@@ -305,7 +303,6 @@ export default function BasicDetailsStep({
             <span className="text-red-500 mr-1">*</span>
             <button
               type="button"
-              // disabled={!formData.district}
               onClick={() => {
                 if (!formData.city) {
                   toast.error(t.formLabels.cityFirst);
@@ -317,7 +314,7 @@ export default function BasicDetailsStep({
                 }
                 setIsAddCompoundDialogOpen(true);
               }}
-              className={`text-blue-600 absolute ${ar === "ar" ? "left-0" : "right-0"} text-sm font-medium disabled:opacity-70 disabled:pointer-events-none`}
+              className="text-blue-600 absolute rtl:left-0 ltr:right-0 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
             >
               + {t.addNew}
             </button>
