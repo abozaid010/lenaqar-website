@@ -3,6 +3,7 @@
 import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
+import { formatCityLabel } from "@/utils/formatters";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
@@ -17,7 +18,7 @@ export default function UnitsFilter({
   readonly,
   citiesAndDistricts,
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer || "",
@@ -325,24 +326,18 @@ export default function UnitsFilter({
                 >
                   {t.unitsFilter.allCities || "All Cities"}
                 </div>
-                {[...cities]
-                  .sort((a, b) => {
-                    const nameA = t.unitsFilter.cities?.[a] || a;
-                    const nameB = t.unitsFilter.cities?.[b] || b;
-                    return nameA.localeCompare(nameB, "ar");
-                  })
-                  .map((city, idx) => (
-                    <div
-                      key={idx}
-                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                      onClick={() => {
-                        handleFilterChange("city", city);
-                        setIsCityDropdownOpen(false);
-                      }}
-                    >
-                      {t.unitsFilter.cities?.[city] || city}
-                    </div>
-                  ))}
+                {[...cities].map((city, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("city", city);
+                      setIsCityDropdownOpen(false);
+                    }}
+                  >
+                    {formatCityLabel(city, locale)}
+                  </div>
+                ))}
               </div>
             )}
           </div>

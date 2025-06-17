@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { getShareUnitData } from "@/components/services/serviceFetching";
 import ShareModal from "@/components/ui/units-share-modal";
+import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
 
@@ -13,7 +14,7 @@ export default function UnitsGrid({ units, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   // Add a formattcer function for prices
   const formatPrice = (price) => {
@@ -111,7 +112,8 @@ export default function UnitsGrid({ units, readonly = false }) {
                     {t.city}{" "}
                   </p>
                   <span className="line-clamp-1 text-[14px] font-bold">
-                    {u.city || "Location not specified"}
+                    {formatCityLabel(u.city, locale) ||
+                      "Location not specified"}
                   </span>
                 </div>
 

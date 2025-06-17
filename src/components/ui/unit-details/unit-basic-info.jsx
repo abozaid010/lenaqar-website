@@ -1,20 +1,20 @@
 "use client";
 import { useI18n } from "@/context/translate-api";
+import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
+import {
+  Building2,
+  Calendar,
+  Eye,
+  Layers,
+  Package,
+  Paintbrush,
+} from "lucide-react";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
-import {
-  Eye,
-  UniversityIcon,
-  Calendar,
-  Layers,
-  Building2,
-  Paintbrush,
-  Package,
-} from "lucide-react";
 // import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
       <div className="flex items-center">
@@ -32,7 +32,14 @@ export default function Uni({ unit }) {
 
       <div className="flex flex-wrap gap-2 mt-2">
         <span className="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {[unit.city, unit.district, unit.project, unit.phase].filter(Boolean).join(" , ")}
+          {[
+            formatCityLabel(unit.city, locale),
+            formatDistrictLabel(unit.district, unit.city, locale),
+            unit.project,
+            unit.phase,
+          ]
+            .filter(Boolean)
+            .join(" , ")}
         </span>
       </div>
 
