@@ -441,24 +441,18 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {[...compounds]
-                .sort((a, b) => {
-                  const nameA = getTranslatedCompoundName(a.name);
-                  const nameB = getTranslatedCompoundName(b.name);
-                  return nameA.localeCompare(nameB, "ar");
-                })
-                .map((c, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("project_name", c.name);
-                      setIsProjectDropdownOpen(false);
-                    }}
-                  >
-                    {getTranslatedCompoundName(c.name)}
-                  </div>
-                ))}
+              {[...compounds].map((c, idx) => (
+                <div
+                  key={idx}
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                  onClick={() => {
+                    handleFilterChange("project_name", c.name);
+                    setIsProjectDropdownOpen(false);
+                  }}
+                >
+                  {getTranslatedCompoundName(c.name)}
+                </div>
+              ))}
             </div>
           )}
         </div>
