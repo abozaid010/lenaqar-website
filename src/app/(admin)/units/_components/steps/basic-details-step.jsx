@@ -4,7 +4,11 @@ import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import { useI18n } from "@/context/translate-api";
-import { convertArabicToEnglishNumbers } from "@/utils/formatters";
+import {
+  convertArabicToEnglishNumbers,
+  formatCityLabel,
+  formatDistrictLabel,
+} from "@/utils/formatters";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -19,7 +23,7 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -277,7 +281,7 @@ export default function BasicDetailsStep({
                 ?.sort((a, b) => a.governorate.localeCompare(b.governorate))
                 .map((gov) => (
                   <option key={gov.governorate} value={gov.governorate}>
-                    {gov.governorate}
+                    {formatCityLabel(gov.governorate, locale)}
                   </option>
                 ))}
             </select>
@@ -318,7 +322,7 @@ export default function BasicDetailsStep({
                 ?.districts.sort((a, b) => a.district.localeCompare(b.district))
                 .map((dist) => (
                   <option key={dist.district} value={dist.district}>
-                    {dist.district}
+                    {formatDistrictLabel(dist.district, formData.city, locale)}
                   </option>
                 ))}
           </select>

@@ -1,3 +1,19 @@
+import { LOCALIZED_CITIES, LOCALIZED_DISTRICTS } from '@/data/cities.js';
+
+export function formatCityLabel(cityValue, locale = "en") {
+    const city = LOCALIZED_CITIES.find(c => c.value === cityValue);
+    if (!city) return cityValue;
+    return locale === "ar" ? (city.ar_label || city.value) : (city.en_label || city.value);
+}
+
+export function formatDistrictLabel(districtValue, cityValue, locale = "en") {
+    const district = LOCALIZED_DISTRICTS.find(
+        d => d.value === districtValue && d.city === cityValue
+    );
+    if (!district) return districtValue;
+    return locale === "ar" ? (district.ar_label || district.value) : (district.en_label || district.value);
+}
+
 export const formatPrice = (num) => {
     if (num === '' || num === null || num === undefined) return '';
     return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
