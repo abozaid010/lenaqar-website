@@ -124,19 +124,9 @@ export default function BasicDetailsStep({
   };
 
   const handleAddCompound = (newCompound) => {
-    // Add the new compound to the list
-    setAvailableCompounds([...availableCompounds, newCompound.name]);
+    setDataProject([...dataProject, newCompound]);
 
-    // Add the new project to dataProject with empty phases array
-    const newProject = {
-      id: newCompound.id,
-      name: newCompound.name,
-      phases: [],
-    };
-    setDataProject([...dataProject, newProject]);
-
-    // Update selected project in the form
-    updateFormData({ project: newCompound.name });
+    updateFormData({ project: newCompound.en_name });
   };
 
   const handleAddPhase = (newPhase) => {
@@ -384,13 +374,11 @@ export default function BasicDetailsStep({
                 </option>
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
-                  dataProject
-                    .sort((a, b) => a.en_name.localeCompare(b.name))
-                    .map((project) => (
-                      <option key={project.en_name} value={project.en_name}>
-                        {project.en_name}
-                      </option>
-                    ))
+                  dataProject.map((project) => (
+                    <option key={project.en_name} value={project.en_name}>
+                      {project.en_name}
+                    </option>
+                  ))
                 ) : (
                   <option disabled value="">
                     No data available
