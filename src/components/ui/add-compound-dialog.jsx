@@ -9,6 +9,7 @@ import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/image-uploader";
 import SingleImageUploader from "@/components/ui/single-image-uploader";
 import { useI18n } from "@/context/translate-api";
+import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -272,7 +273,7 @@ export default function AddCompoundDialog({
   };
 
   const handleAddDeveloper = (newDeveloper) => {
-    setDevelopers([...developers, newDeveloper]);
+    setDevelopers([...developers, newDeveloper.name]);
 
     setFormData((prev) => {
       return {
@@ -378,11 +379,13 @@ export default function AddCompoundDialog({
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
-                    {editMode ? formData.city : t.formLabels?.selectCity}
+                    {editMode
+                      ? formatCityLabel(formData.city, locale)
+                      : t.formLabels?.selectCity}
                   </option>
                   {Egypt_cities?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>
-                      {gov?.governorate}
+                      {formatCityLabel(gov?.governorate, locale)}
                     </option>
                   ))}
                 </select>
@@ -431,7 +434,11 @@ export default function AddCompoundDialog({
                     (gov) => gov.governorate === formData.city
                   )?.districts.map((dist) => (
                     <option key={dist.district} value={dist.district}>
-                      {dist.district}
+                      {formatDistrictLabel(
+                        dist.district,
+                        formData.city,
+                        locale
+                      )}
                     </option>
                   ))}
               </select>

@@ -4,7 +4,11 @@ import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import { useI18n } from "@/context/translate-api";
-import { convertArabicToEnglishNumbers } from "@/utils/formatters";
+import {
+  convertArabicToEnglishNumbers,
+  formatCityLabel,
+  formatDistrictLabel,
+} from "@/utils/formatters";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -19,7 +23,7 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -120,19 +124,9 @@ export default function BasicDetailsStep({
   };
 
   const handleAddCompound = (newCompound) => {
-    // Add the new compound to the list
-    setAvailableCompounds([...availableCompounds, newCompound.name]);
+    setDataProject([...dataProject, newCompound]);
 
-    // Add the new project to dataProject with empty phases array
-    const newProject = {
-      id: newCompound.id,
-      name: newCompound.name,
-      phases: [],
-    };
-    setDataProject([...dataProject, newProject]);
-
-    // Update selected project in the form
-    updateFormData({ project: newCompound.name });
+    updateFormData({ project: newCompound.en_name });
   };
 
   const handleAddPhase = (newPhase) => {
@@ -277,7 +271,7 @@ export default function BasicDetailsStep({
                 ?.sort((a, b) => a.governorate.localeCompare(b.governorate))
                 .map((gov) => (
                   <option key={gov.governorate} value={gov.governorate}>
-                    {gov.governorate}
+                    {formatCityLabel(gov.governorate, locale)}
                   </option>
                 ))}
             </select>
@@ -318,7 +312,7 @@ export default function BasicDetailsStep({
                 ?.districts.sort((a, b) => a.district.localeCompare(b.district))
                 .map((dist) => (
                   <option key={dist.district} value={dist.district}>
-                    {dist.district}
+                    {formatDistrictLabel(dist.district, formData.city, locale)}
                   </option>
                 ))}
           </select>
@@ -380,13 +374,11 @@ export default function BasicDetailsStep({
                 </option>
               ) : formData.city && formData.district ? (
                 dataProject && dataProject.length > 0 ? (
-                  dataProject
-                    .sort((a, b) => a.en_name.localeCompare(b.name))
-                    .map((project) => (
-                      <option key={project.en_name} value={project.en_name}>
-                        {project.en_name}
-                      </option>
-                    ))
+                  dataProject.map((project) => (
+                    <option key={project.en_name} value={project.en_name}>
+                      {project.en_name}
+                    </option>
+                  ))
                 ) : (
                   <option disabled value="">
                     No data available
