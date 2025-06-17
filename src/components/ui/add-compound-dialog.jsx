@@ -379,7 +379,9 @@ export default function AddCompoundDialog({
                   className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">
-                    {editMode ? formData.city : t.formLabels?.selectCity}
+                    {editMode
+                      ? formatCityLabel(formData.city, locale)
+                      : t.formLabels?.selectCity}
                   </option>
                   {Egypt_cities?.map((gov) => (
                     <option key={gov?.governorate} value={gov?.governorate}>

@@ -12,6 +12,7 @@ import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import Cookies from "js-cookie";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -34,7 +35,7 @@ export default function ProjectList({
   readonly,
   developers,
 }) {
-  const { t, local } = useI18n();
+  const { t, locale } = useI18n();
   const clientId = Cookies.get("lena-website-client_id");
 
   const formattedDataCitiesAndDistricts = !readonly
@@ -278,7 +279,7 @@ export default function ProjectList({
                         project.name,
                         project.ar_name,
                         project.en_name,
-                        local
+                        locale
                       ).map((line, idx) => (
                         <div key={idx}>{line}</div>
                       ))}
@@ -310,7 +311,7 @@ export default function ProjectList({
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        {capitalize(project.city)}
+                        {formatCityLabel(capitalize(project.city), locale)}
                       </div>
                       <div className="flex items-center">
                         <svg
@@ -326,7 +327,11 @@ export default function ProjectList({
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                           />
                         </svg>
-                        {capitalize(project.district)}
+                        {formatDistrictLabel(
+                          capitalize(project.district),
+                          capitalize(project.city),
+                          locale
+                        )}
                       </div>
                       <div className="flex-1"></div>
                       <button
