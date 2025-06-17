@@ -381,24 +381,18 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {[...developersSet]
-                .sort((a, b) => {
-                  const nameA = getTranslatedDeveloperName(a);
-                  const nameB = getTranslatedDeveloperName(b);
-                  return nameA.localeCompare(nameB, "ar");
-                })
-                .map((d, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("developer_name", d);
-                      setIsDeveloperDropdownOpen(false);
-                    }}
-                  >
-                    {getTranslatedDeveloperName(d)}
-                  </div>
-                ))}
+              {[...developersSet].map((d, idx) => (
+                <div
+                  key={idx}
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                  onClick={() => {
+                    handleFilterChange("developer_name", d);
+                    setIsDeveloperDropdownOpen(false);
+                  }}
+                >
+                  {getTranslatedDeveloperName(d)}
+                </div>
+              ))}
             </div>
           )}
         </div>
