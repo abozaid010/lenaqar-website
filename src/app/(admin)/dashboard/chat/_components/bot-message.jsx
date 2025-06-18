@@ -1,21 +1,31 @@
 "use client";
 
+import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
 export default function BotMessageCard({ message }) {
-  const { properties, bot_response, timestamp, project_data, crm_link } =
-    message;
+  const {
+    properties,
+    bot_response,
+    timestamp,
+    project_data,
+    crm_link,
+    project_phases,
+  } = message;
   const [fullscreenImg, setFullscreenImg] = useState(null);
+  const [swiperImages, setSwiperImages] = useState([]);
+  const [showImagesModal, setShowImagesModal] = useState(false);
 
   const propertiesItems = properties ? Object.values(properties) : [];
   const { t } = useI18n();
 
   return (
-    <div className="w-fit rounded-lg p-2 bg-white flex flex-col ">
-      <div className="text-sm ">{bot_response || message}</div>
+    <div className="rounded-lg p-3 bg-white flex flex-col max-w-xl">
+      <div className="text-sm">{bot_response || message}</div>
 
       {propertiesItems?.length > 0 &&
         propertiesItems.map((itm, idx) => (
@@ -24,21 +34,67 @@ export default function BotMessageCard({ message }) {
 
       {/* Project Data Card */}
       {project_data && Object.keys(project_data).length > 0 && (
-        <div className="mt-4 p-4 rounded-xl shadow-lg border bg-gray-50 flex flex-col gap-3 max-w-md">
-          <h2 className="text-lg font-bold text-gray-800 mb-2">
-            {project_data.name}
-          </h2>
+        <div className="mt-4 p-4 rounded shadow-lg border bg-gray-50 flex flex-col gap-3 max-w-md">
+          <div>
+            <h2 className="text-lg font-bold text-gray-800">
+              {project_data?.en_name}
+            </h2>
+            {project_data.description && (
+              <div className="text-gray-700 text-sm">
+                {project_data.description}
+              </div>
+            )}
+          </div>
+
           {project_data.master_plan && (
-            <img
+            <Image
               src={project_data.master_plan}
               alt="Master Plan"
-              className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
+              width={400}
+              height={200}
+              className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
               onClick={() => setFullscreenImg(project_data.master_plan)}
               title={t.clickToViewFullscreen}
             />
           )}
-          <div className="flex gap-3 mt-2">
-            {project_data.google_map_link && (
+
+          {/* Project Images Preview */}
+          {project_data.images &&
+            Array.isArray(project_data.images) &&
+            project_data.images.length > 0 && (
+              <div className="flex flex-wrap gap-2 relative">
+                {project_data.images.slice(0, 4).map((img, idx) => (
+                  <div key={img.fileId || idx} className="relative">
+                    <Image
+                      src={img.url}
+                      alt={`Project Image ${idx + 1}`}
+                      width={80}
+                      height={80}
+                      className="w-20 h-20 object-cover rounded cursor-pointer border hover:scale-105 transition"
+                      onClick={() => {
+                        setShowImagesModal(true);
+                        setSwiperImages(project_data.images);
+                      }}
+                    />
+                    {/* If this is the 4th image and there are more, show overlay */}
+                    {idx === 3 && project_data.images.length > 4 && (
+                      <div
+                        className="absolute inset-0 bg-black/60 flex items-center justify-center rounded cursor-pointer text-white text-lg font-semibold"
+                        onClick={() => {
+                          setShowImagesModal(true);
+                          setSwiperImages(project_data.images);
+                        }}
+                      >
+                        +{project_data.images.length - 4}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
+          {(project_data.google_map_link || project_data.video_url) && (
+            <div className="flex gap-3">
               <a
                 href={project_data.google_map_link}
                 target="_blank"
@@ -56,8 +112,7 @@ export default function BotMessageCard({ message }) {
                 </svg>
                 {t.viewOnGoogleMaps}
               </a>
-            )}
-            {project_data.video_url && (
+
               <a
                 href={project_data.video_url}
                 target="_blank"
@@ -69,37 +124,80 @@ export default function BotMessageCard({ message }) {
                 </svg>
                 {t.watchVideo}
               </a>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Phases Card */}
-      {project_data?.phases && Object.keys(project_data.phases).length > 0 && (
-        <div className="mt-4 p-4 rounded-xl shadow-lg border bg-white flex flex-col gap-3 max-w-md">
-          <h3 className="text-md font-semibold text-gray-700 mb-2 flex items-center gap-2">
-            <svg
-              width="20"
-              height="20"
-              fill="currentColor"
-              className="text-blue-500"
-              viewBox="0 0 24 24"
-            >
-              <path d="M4 13h4v-2H4v2zm0 4h4v-2H4v2zm0-8h4V7H4v2zm6 8h10v-2H10v2zm0-4h10v-2H10v2zm0-6v2h10V7H10z" />
-            </svg>
-            {t.phase}: {project_data.phases.name}
-          </h3>
-          {project_data.phases.master_plan && (
-            <img
-              src={project_data.phases.master_plan}
-              alt="Phase Master Plan"
-              className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-105 hover:shadow-2xl"
-              onClick={() => setFullscreenImg(project_data.phases.master_plan)}
-              title={t.clickToViewFullscreen}
-            />
+            </div>
           )}
         </div>
       )}
+
+      {/* Project Phases Cards */}
+      {project_phases &&
+        Array.isArray(project_phases) &&
+        project_phases.length > 0 && (
+          <div className="mt-6 flex flex-col gap-4">
+            {project_phases.map((phase, idx) => (
+              <div
+                key={phase.id || idx}
+                className="p-4 rounded shadow-lg border bg-gray-50 flex flex-col gap-3 max-w-md"
+              >
+                <div>
+                  <h2 className="text-lg font-bold text-gray-800">
+                    {phase.name}
+                  </h2>
+                  {phase.description && (
+                    <div className="text-gray-700 text-sm">
+                      {phase.description}
+                    </div>
+                  )}
+                </div>
+                {phase.master_plan && (
+                  <Image
+                    src={phase.master_plan}
+                    alt="Master Plan"
+                    width={400}
+                    height={200}
+                    className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+                    onClick={() => setFullscreenImg(phase.master_plan)}
+                    title={t.clickToViewFullscreen}
+                  />
+                )}
+                {/* Phase Images Preview */}
+                {phase.images &&
+                  Array.isArray(phase.images) &&
+                  phase.images.length > 0 && (
+                    <div className="flex flex-wrap gap-2 relative">
+                      {phase.images.slice(0, 4).map((img, idx) => (
+                        <div key={img.fileId || idx} className="relative">
+                          <Image
+                            src={img.url}
+                            alt={`Phase Image ${idx + 1}`}
+                            width={80}
+                            height={80}
+                            className="w-20 h-20 object-cover rounded cursor-pointer border hover:scale-105 transition"
+                            onClick={() => {
+                              console.log(phase.images);
+                              setShowImagesModal(true);
+                              setSwiperImages(phase.images);
+                            }}
+                          />
+                          {idx === 3 && phase.images.length > 4 && (
+                            <div
+                              className="absolute inset-0 bg-black/60 flex items-center justify-center rounded cursor-pointer text-white text-lg font-semibold"
+                              onClick={() => {
+                                setShowImagesModal(true);
+                                setSwiperImages(phase.images);
+                              }}
+                            >
+                              +{phase.images.length - 4}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+              </div>
+            ))}
+          </div>
+        )}
 
       {/* Fullscreen Modal */}
       {fullscreenImg && (
@@ -111,13 +209,28 @@ export default function BotMessageCard({ message }) {
           >
             ×
           </button>
-          <img
+          <Image
             src={fullscreenImg}
             alt="Fullscreen"
+            width={900}
+            height={600}
             className="max-h-[90vh] max-w-[90vw] rounded-lg shadow-2xl border-4 border-white"
           />
         </div>
       )}
+
+      {/* Project Images Swiper Modal */}
+      {showImagesModal && (
+        <ImageSwiperModal
+          open={showImagesModal}
+          onClose={() => {
+            setShowImagesModal(false);
+            setSwiperImages([]);
+          }}
+          images={swiperImages}
+        />
+      )}
+
       {crm_link && (
         <Link
           href={crm_link}
