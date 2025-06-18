@@ -13,7 +13,7 @@ export default function SaleDetailsStep({
 }) {
   const { t } = useI18n();
 
-  const handleChange = (e, type = "money") => {
+  const handleChange = (e, type = "") => {
     const { name, value } = e.target;
 
     if (invalidFields.includes(name)) {
@@ -28,7 +28,6 @@ export default function SaleDetailsStep({
     }
 
     if (name === "deliveryDate") {
-      console.log("Delivery Date Changed:", value);
       const today = new Date().toISOString().split("T")[0];
       const deliveryStatus = value > today ? "off-plan" : "ready to move";
       updateFormData({ deliveryStatus, deliveryDate: value });
