@@ -17,11 +17,15 @@ const FormInput = ({
   ...rest
 }) => {
   // Format value for money type
-  let inputValue = value;
+  let inputValue = value,
+    inputType = type;
+
   if (type === "money") {
     inputValue = formatPrice(value);
   }
 
+  if (type === "number") inputType = "text";
+  if (type === "money") inputType = "text";
   return (
     <div className="relative">
       {label && (
@@ -35,7 +39,7 @@ const FormInput = ({
       <input
         id={name}
         name={name}
-        type={type === "number" ? "text" : "text"}
+        type={inputType}
         value={inputValue || ""}
         onChange={onChange}
         placeholder={placeholder}

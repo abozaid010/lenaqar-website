@@ -14,25 +14,28 @@ export default function SaleDetailsStep({
   const { t } = useI18n();
 
   const handleChange = (e, type = "money") => {
-    const { name, value, dataset } = e.target;
-
-    if (type === "money") {
-      const englishValue = String(convertArabicToEnglishNumbers(value));
-      const rawValue = englishValue.replace(/\D/g, "");
-      updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
-    } else {
-      updateFormData({ [name]: String(convertArabicToEnglishNumbers(value)) });
-    }
+    const { name, value } = e.target;
 
     if (invalidFields.includes(name)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
 
+    if (type === "money") {
+      const englishValue = String(convertArabicToEnglishNumbers(value));
+      const rawValue = englishValue.replace(/\D/g, "");
+      updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
+      return;
+    }
+
     if (name === "deliveryDate") {
+      console.log("Delivery Date Changed:", value);
       const today = new Date().toISOString().split("T")[0];
       const deliveryStatus = value > today ? "off-plan" : "ready to move";
-      updateFormData({ deliveryStatus });
+      updateFormData({ deliveryStatus, deliveryDate: value });
+      return;
     }
+
+    updateFormData({ [name]: value });
   };
 
   const addPaymentPlan = () => {

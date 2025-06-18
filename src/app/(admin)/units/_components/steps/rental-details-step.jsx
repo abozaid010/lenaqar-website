@@ -222,7 +222,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-2">
           {availableAmenities.map((amenity) => (
-            <div key={amenity} className="flex items-center">
+            <div key={amenity} className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id={`amenity-${amenity}`}
@@ -233,7 +233,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               />
               <label
                 htmlFor={`amenity-${amenity}`}
-                className="ml-2 block text-sm text-gray-700 cursor-pointer"
+                className="block text-sm text-gray-700 cursor-pointer"
               >
                 {typeof t.rentalDetails.amenities === "object" &&
                 t.rentalDetails.amenities[amenity]
