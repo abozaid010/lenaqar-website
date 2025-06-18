@@ -6,8 +6,8 @@ import {
 } from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
-import ImageUploader from "@/components/ui/image-uploader";
-import SingleImageUploader from "@/components/ui/single-image-uploader";
+import ImageUploader from "@/components/ui/inputs/image-uploader";
+import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import { useI18n } from "@/context/translate-api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";

@@ -1,6 +1,6 @@
 "use client";
 
-import ImageUploader from "@/components/ui/image-uploader";
+import ImageUploader from "@/components/ui/inputs/image-uploader";
 import { useI18n } from "@/context/translate-api";
 import { useState } from "react";
 

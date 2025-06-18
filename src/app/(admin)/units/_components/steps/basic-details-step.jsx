@@ -3,7 +3,7 @@
 import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
-import FormInput from "@/components/ui/form-input";
+import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
 import {
   convertArabicToEnglishNumbers,
@@ -132,11 +132,7 @@ export default function BasicDetailsStep({
   );
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-3 text-slate-800">
-        {t.basicDetails.propertyDetails}
-      </h3>
-
+    <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Unit Title */}
         <div className="col-span-1 md:col-span-2">
@@ -612,6 +608,6 @@ export default function BasicDetailsStep({
           }
         }}
       />
-    </div>
+    </>
   );
 }
