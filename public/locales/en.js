@@ -552,9 +552,9 @@ export default {
     placeholders: {
       unitTitle: "Enter unit title",
       district: "district name",
-      code: "unit code (optional)",
+      code: "Unit Code (optional)",
     },
-    code: "unit code",
+    code: "Unit Code",
     model: "Unit Model",
     buildingTypes: {
       apartment: "Apartment",
@@ -1053,7 +1053,7 @@ export default {
     NoDevelopers: "No developers found.",
   },
   placeholders: {
-    projectArName: "Enter project name in Arabic",
-    projectEnName: "Enter project name in English",
+    projectArName: "Enter project Name In Arabic",
+    projectEnName: "Enter project Name In English",
   }
 };

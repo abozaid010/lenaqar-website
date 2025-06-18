@@ -56,7 +56,6 @@ export default function AddUnitModal({
     developer: unitData?.developer || "",
     unitId: unitData?.unitId || uuidv4(),
     unitTitle: unitData?.unitTitle || "",
-    deliveryDate: unitData?.deliveryDate || "",
     deliveryStatus: unitData?.deliveryStatus || "",
     bathroomCount: unitData?.bathroomCount || "",
     floor: unitData?.floor || "",
@@ -459,5 +458,3 @@ export default function AddUnitModal({
     document.body
   );
 }
-
-// Add this useEffect to update formData when unitData changes

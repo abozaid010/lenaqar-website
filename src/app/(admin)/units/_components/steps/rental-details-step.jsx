@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
-import { formatPrice } from "@/utils/formatters";
+import { convertArabicToEnglishNumbers } from "@/utils/formatters";
+import { useState } from "react";
 
 const availableAmenities = [
   "wifi",
@@ -21,15 +22,6 @@ const availableAmenities = [
   "smoke_alarm",
   "co_alarm",
 ];
-
-const convertArabicToEnglishNumbers = (input) => {
-  if (typeof input !== "string") return input;
-  const arabicToEnglish = {
-    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-  };
-  return input.replace(/[٠-٩]/g, d => arabicToEnglish[d]);
-};
 
 export default function RentalDetailsStep({ formData, updateFormData }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
@@ -70,6 +62,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
   const handlePriceChange = (durationType, field, value) => {
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
+    console.log(`Updating ${durationType} ${field} with value:`, rawValue);
     updateFormData({
       rentDurationType: {
         ...formData.rentDurationType,
@@ -172,113 +165,53 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
         {/* Price */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.rentalDetails.price} <span className="text-red-500">*</span>
-          </label>
-          <div className="flex">
-            <input
-              type="text"
-              data-format-price
-              value={formatPrice(
-                formData.rentDurationType[activeDuration].price
-              )}
-              onChange={(e) =>
-                handlePriceChange(activeDuration, "price", e.target.value)
-              }
-              min="0"
-              placeholder="200"
-              required
-              dir="auto"
-              className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
-              EGP
-            </span>
-          </div>
-        </div>
+        <FormInput
+          label={t.rentalDetails.price}
+          required
+          value={formData.rentDurationType[activeDuration].price}
+          onChange={(e) =>
+            handlePriceChange(activeDuration, "price", e.target.value)
+          }
+          placeholder="200"
+          type="money"
+          adornment="EGP"
+        />
 
         {/* Security Deposit */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.rentalDetails.securityDeposit}
-          </label>
-          <div className="flex">
-            <input
-              type="text"
-              data-format-price
-              value={formatPrice(
-                formData.rentDurationType[activeDuration].securityDeposit
-              )}
-              onChange={(e) =>
-                handlePriceChange(
-                  activeDuration,
-                  "securityDeposit",
-                  e.target.value
-                )
-              }
-              min="0"
-              placeholder="0"
-              dir="auto"
-              className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
-              EGP
-            </span>
-          </div>
-        </div>
+        <FormInput
+          label={t.rentalDetails.securityDeposit}
+          value={formData.rentDurationType[activeDuration].securityDeposit}
+          onChange={(e) =>
+            handlePriceChange(activeDuration, "securityDeposit", e.target.value)
+          }
+          placeholder="0"
+          type="money"
+          adornment="EGP"
+        />
 
         {/* Cleaning Fee */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.rentalDetails.cleaningFee}
-          </label>
-          <div className="flex">
-            <input
-              type="text"
-              data-format-price
-              value={formatPrice(
-                formData.rentDurationType[activeDuration].cleaningFee
-              )}
-              onChange={(e) =>
-                handlePriceChange(activeDuration, "cleaningFee", e.target.value)
-              }
-              min="0"
-              placeholder="0"
-              dir="auto"
-              className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
-              EGP
-            </span>
-          </div>
-        </div>
+        <FormInput
+          label={t.rentalDetails.cleaningFee}
+          value={formData.rentDurationType[activeDuration].cleaningFee}
+          onChange={(e) =>
+            handlePriceChange(activeDuration, "cleaningFee", e.target.value)
+          }
+          placeholder="0"
+          type="money"
+          adornment="EGP"
+        />
 
         {/* Service Fee */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.rentalDetails.serviceFee}
-          </label>
-          <div className="flex">
-            <input
-              type="text"
-              data-format-price
-              value={formatPrice(
-                formData.rentDurationType[activeDuration].serviceFee
-              )}
-              onChange={(e) =>
-                handlePriceChange(activeDuration, "serviceFee", e.target.value)
-              }
-              min="0"
-              placeholder="0"
-              dir="auto"
-              className="block w-full rounded-l-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            />
-            <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500">
-              EGP
-            </span>
-          </div>
-        </div>
+        <FormInput
+          label={t.rentalDetails.serviceFee}
+          value={formData.rentDurationType[activeDuration].serviceFee}
+          onChange={(e) =>
+            handlePriceChange(activeDuration, "serviceFee", e.target.value)
+          }
+          placeholder="0"
+          type="money"
+          adornment="EGP"
+        />
       </div>
 
       {/* Amenities */}
@@ -288,7 +221,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
         </h4>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-y-2">
           {availableAmenities.map((amenity) => (
-            <div key={amenity} className="flex items-center">
+            <div key={amenity} className="flex items-center gap-2">
               <input
                 type="checkbox"
                 id={`amenity-${amenity}`}
@@ -299,7 +232,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
               />
               <label
                 htmlFor={`amenity-${amenity}`}
-                className="ml-2 block text-sm text-gray-700 cursor-pointer"
+                className="block text-sm text-gray-700 cursor-pointer"
               >
                 {typeof t.rentalDetails.amenities === "object" &&
                 t.rentalDetails.amenities[amenity]
