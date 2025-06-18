@@ -209,7 +209,6 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
             handlePriceChange(activeDuration, "serviceFee", e.target.value)
           }
           placeholder="0"
-          dir="auto"
           type="money"
           adornment="EGP"
         />
