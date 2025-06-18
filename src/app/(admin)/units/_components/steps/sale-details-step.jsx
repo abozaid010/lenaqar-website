@@ -1,5 +1,6 @@
 "use client";
 
+import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
 import { convertArabicToEnglishNumbers, formatPrice } from "@/utils/formatters";
 import { Plus, Trash2Icon } from "lucide-react";
@@ -11,17 +12,16 @@ export default function SaleDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t } = useI18n();
-  const isRTL = t.direction === "rtl";
 
-  const handleChange = (e) => {
+  const handleChange = (e, type = "money") => {
     const { name, value, dataset } = e.target;
 
-    if (dataset.formatPrice === "true") {
-      const englishValue = convertArabicToEnglishNumbers(value);
+    if (type === "money") {
+      const englishValue = String(convertArabicToEnglishNumbers(value));
       const rawValue = englishValue.replace(/\D/g, "");
       updateFormData({ [name]: rawValue === "" ? "" : Number(rawValue) });
     } else {
-      updateFormData({ [name]: convertArabicToEnglishNumbers(value) });
+      updateFormData({ [name]: String(convertArabicToEnglishNumbers(value)) });
     }
 
     if (invalidFields.includes(name)) {
@@ -74,88 +74,41 @@ export default function SaleDetailsStep({
         {t.saleDetails.financialDetails}
       </h3>
 
-      <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4"
-        dir={isRTL ? "rtl" : "ltr"}
-      >
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Total Price */}
-        <div className="relative">
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("totalPrice")
-                ? "text-red-500"
-                : "text-gray-700"
-            }`}
-          >
-            {t.saleDetails.totalPrice} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            data-format-price
-            name="totalPrice"
-            value={formatPrice(formData.totalPrice)}
-            onChange={handleChange}
-            placeholder="5000000"
-            dir="auto"
-            className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
-              invalidFields.includes("totalPrice")
-                ? "border-red-500 ring-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
-          />
-          <span
-            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "right-1.5"} text-gray-400`}
-          >
-            EGP
-          </span>
-        </div>
+        <FormInput
+          label={t.saleDetails.totalPrice}
+          name="totalPrice"
+          required
+          value={formData.totalPrice}
+          onChange={(e) => handleChange(e, "money")}
+          placeholder="5000000"
+          error={invalidFields.includes("totalPrice")}
+          type="money"
+          adornment="EGP"
+        />
 
         {/* Delivery Date */}
-        <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("deliveryDate")
-                ? "text-red-500"
-                : "text-gray-700"
-            }`}
-          >
-            {t.saleDetails.deliveryDate} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            name="deliveryDate"
-            value={formData.deliveryDate}
-            onChange={handleChange}
-            className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
-              invalidFields.includes("deliveryDate")
-                ? "border-red-500 ring-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
-          />
-        </div>
+        <FormInput
+          label={t.saleDetails.deliveryDate}
+          name="deliveryDate"
+          required
+          value={formData.deliveryDate}
+          onChange={handleChange}
+          type="date"
+          error={invalidFields.includes("deliveryDate")}
+        />
 
         {/* Down Payment */}
-        <div className="relative">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.saleDetails.downPayment}
-          </label>
-          <input
-            type="text"
-            data-format-price
-            name="downPayment"
-            value={formatPrice(formData.downPayment)}
-            onChange={handleChange}
-            min="0"
-            placeholder="200000"
-            dir="auto"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-          <span
-            className={`absolute bottom-1 ${isRTL ? "right-1.5" : "right-1.5"} text-gray-400`}
-          >
-            EGP
-          </span>
-        </div>
+        <FormInput
+          label={t.saleDetails.downPayment}
+          name="downPayment"
+          value={formData.downPayment}
+          onChange={(e) => handleChange(e, "money")}
+          placeholder="200000"
+          type="money"
+          adornment="EGP"
+        />
       </div>
 
       {/* Payment Plans */}

@@ -58,7 +58,7 @@ export default function BasicDetailsStep({
     if (type === "checkbox") {
       updatedValue = checked;
     } else if (dataInput === "number") {
-      const englishValue = convertArabicToEnglishNumbers(value);
+      const englishValue = String(convertArabicToEnglishNumbers(value));
       const rawValue = englishValue.replace(/\D/g, "");
       updatedValue = rawValue === "" ? "" : Number(rawValue);
     } else {
@@ -513,7 +513,6 @@ export default function BasicDetailsStep({
           name="model"
           value={formData.model}
           onChange={handleChange}
-          placeholder=""
         />
       </div>
 
@@ -529,7 +528,7 @@ export default function BasicDetailsStep({
             name="roomsCount"
             required
             value={formData.roomsCount || ""}
-            onChange={(e) => handleChange(e, "number")}
+            onChange={handleChange}
             placeholder="0"
             error={invalidFields.includes("roomsCount")}
             type="number"

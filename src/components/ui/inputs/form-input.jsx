@@ -40,17 +40,15 @@ const FormInput = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 bg-white appearance-none ${
+        className={`block w-full rounded-md border py-1 px-2 focus:outline-none focus:ring-1 bg-white appearance-none ${
           error
             ? "border-red-500 ring-red-500 placeholder-red-500"
             : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-        } ${adornment ? (dir === "rtl" ? "pr-12" : "pl-12") : ""} ${className}`}
+        } ${adornment ? "ltr:pr-12 rtyl:pl-12" : ""} ${className}`}
         {...rest}
       />
       {adornment && (
-        <span
-          className={`absolute bottom-1 ${dir === "rtl" ? "left-1.5" : "right-1.5"} text-gray-400`}
-        >
+        <span className="absolute bottom-1 rtl:left-1.5 ltr:right-1.5 text-gray-400">
           {adornment}
         </span>
       )}
