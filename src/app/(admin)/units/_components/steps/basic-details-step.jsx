@@ -222,50 +222,70 @@ export default function BasicDetailsStep({
         </FormSelect>
 
         {/* Project */}
-        <FormSelect
-          label={t.basicDetails.compound}
-          name="project"
-          value={formData.project || ""}
-          onChange={handleChange}
-          disabled={!formData.district}
-          required
-          error={invalidFields.includes("project")}
-        >
-          <option value="">
-            {!formData.city
-              ? t.formLabels.cityFirst
-              : !formData.district
-                ? t.formLabels.districtFirst
-                : t.basicDetails.selectCompound}
-          </option>
-          {isLoadingProjects ? (
-            <option disabled value="">
-              Loading projects...
+        <div className="relative">
+          <FormSelect
+            label={t.basicDetails.compound}
+            name="project"
+            value={formData.project || ""}
+            onChange={handleChange}
+            disabled={!formData.district}
+            required
+            error={invalidFields.includes("project")}
+          >
+            <option value="">
+              {!formData.city
+                ? t.formLabels.cityFirst
+                : !formData.district
+                  ? t.formLabels.districtFirst
+                  : t.basicDetails.selectCompound}
             </option>
-          ) : formData.city && formData.district ? (
-            dataProject && dataProject.length > 0 ? (
-              dataProject.map((project) => (
-                <option key={project.en_name} value={project.en_name}>
-                  {project.en_name}
-                </option>
-              ))
-            ) : (
+            {isLoadingProjects ? (
               <option disabled value="">
-                No data available
+                Loading projects...
               </option>
-            )
-          ) : null}
-          {/* If we have a selected project but it's not in the loaded list, add it separately */}
-          {formData.project &&
-          formData.city &&
-          formData.district &&
-          dataProject &&
-          !dataProject.some((p) => p.name === formData.project) ? (
-            <option key="preserved-selection" value={formData.project}>
-              {formData.project}
-            </option>
-          ) : null}
-        </FormSelect>
+            ) : formData.city && formData.district ? (
+              dataProject && dataProject.length > 0 ? (
+                dataProject.map((project) => (
+                  <option key={project.en_name} value={project.en_name}>
+                    {project.en_name}
+                  </option>
+                ))
+              ) : (
+                <option disabled value="">
+                  No data available
+                </option>
+              )
+            ) : null}
+            {/* If we have a selected project but it's not in the loaded list, add it separately */}
+            {formData.project &&
+            formData.city &&
+            formData.district &&
+            dataProject &&
+            !dataProject.some((p) => p.name === formData.project) ? (
+              <option key="preserved-selection" value={formData.project}>
+                {formData.project}
+              </option>
+            ) : null}
+          </FormSelect>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (!formData.city) {
+                toast.error(t.formLabels.cityFirst);
+                return;
+              }
+              if (!formData.district) {
+                toast.error(t.formLabels.districtFirst);
+                return;
+              }
+              setIsAddCompoundDialogOpen(true);
+            }}
+            className="text-blue-600 absolute top-0 rtl:left-0 ltr:right-0 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
+          >
+            + {t.addNew}
+          </button>
+        </div>
 
         {/* Phase */}
         <FormSelect
