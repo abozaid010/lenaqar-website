@@ -3,6 +3,7 @@
 import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
+import FormInput from "@/components/ui/form-input";
 import { useI18n } from "@/context/translate-api";
 import {
   convertArabicToEnglishNumbers,
@@ -50,13 +51,13 @@ export default function BasicDetailsStep({
     }
   }, [formData.city, formData.district]);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked, dataset } = e.target;
+  const handleChange = (e, dataInput = "") => {
+    const { name, value, type, checked } = e.target;
     let updatedValue;
 
     if (type === "checkbox") {
       updatedValue = checked;
-    } else if (dataset.formatNumber === "true") {
+    } else if (dataInput === "number") {
       const englishValue = convertArabicToEnglishNumbers(value);
       const rawValue = englishValue.replace(/\D/g, "");
       updatedValue = rawValue === "" ? "" : Number(rawValue);
@@ -139,28 +140,14 @@ export default function BasicDetailsStep({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Unit Title */}
         <div className="col-span-1 md:col-span-2">
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("unitTitle")
-                ? "text-red-500"
-                : "text-gray-700"
-            }`}
-          >
-            {t.basicDetails.unitTitle} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
+          <FormInput
+            label={t.basicDetails.unitTitle}
             name="unitTitle"
             required
             value={formData.unitTitle || ""}
             onChange={handleChange}
             placeholder={t.basicDetails.placeholders.unitTitle}
-            dir="auto"
-            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
-              invalidFields.includes("unitTitle")
-                ? "border-red-500 ring-red-500 placeholder-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
+            error={invalidFields.includes("unitTitle")}
           />
         </div>
 
@@ -516,36 +503,22 @@ export default function BasicDetailsStep({
         </div>
 
         {/* code */}
-        <div>
-          <label className="block text-sm font-medium mb-1 text-gray-700">
-            {t.basicDetails.code}
-          </label>
-          <input
-            type="text"
-            name="code"
-            value={formData.code}
-            onChange={handleChange}
-            placeholder={t.basicDetails.placeholders.code}
-            dir="auto"
-            className="block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={t.basicDetails.code}
+          name="code"
+          value={formData.code}
+          onChange={handleChange}
+          placeholder={t.basicDetails.placeholders.code}
+        />
 
         {/* model */}
-        <div>
-          <label className="block text-sm font-medium mb-1 text-gray-700">
-            {t.basicDetails.model}
-          </label>
-          <input
-            type="text"
-            name="model"
-            value={formData.model}
-            onChange={handleChange}
-            placeholder=""
-            dir="auto"
-            className="block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={t.basicDetails.model}
+          name="model"
+          value={formData.model}
+          onChange={handleChange}
+          placeholder=""
+        />
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-8 text-slate-800">
@@ -555,127 +528,69 @@ export default function BasicDetailsStep({
       <div className="grid grid-cols-2 gap-x-2 md:grid-cols-3 gap-y-3 md:gap-x-4">
         {/* Rooms */}
         <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("roomsCount")
-                ? "text-red-500 "
-                : "text-gray-700"
-            }`}
-          >
-            {t.basicDetails.rooms} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            data-format-number
+          <FormInput
+            label={t.basicDetails.rooms}
             name="roomsCount"
-            value={formData.roomsCount || ""}
-            placeholder="0"
-            onChange={handleChange}
             required
-            dir="auto"
-            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
-              invalidFields.includes("roomsCount")
-                ? "border-red-500 ring-red-500 placeholder-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
+            value={formData.roomsCount || ""}
+            onChange={(e) => handleChange(e, "number")}
+            placeholder="0"
+            error={invalidFields.includes("roomsCount")}
+            type="number"
           />
         </div>
 
         {/* Bathrooms */}
-        <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${
-              invalidFields.includes("bathroomCount")
-                ? "text-red-500"
-                : "text-gray-700"
-            }`}
-          >
-            {t.basicDetails.bathrooms} <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            data-format-number
-            name="bathroomCount"
-            placeholder="0"
-            value={formData.bathroomCount || ""}
-            onChange={handleChange}
-            required
-            dir="auto"
-            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 ${
-              invalidFields.includes("bathroomCount")
-                ? "border-red-500 ring-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            }`}
-          />
-        </div>
+        <FormInput
+          label={t.basicDetails.bathrooms}
+          name="bathroomCount"
+          required
+          value={formData.bathroomCount || ""}
+          onChange={(e) => handleChange(e, "number")}
+          placeholder="0"
+          error={invalidFields.includes("bathroomCount")}
+          type="number"
+        />
 
         {/* Floor */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.floor}
-          </label>
-          <input
-            type="text"
-            data-format-number
-            name="floor"
-            value={formData.floor || ""}
-            placeholder="0"
-            onChange={handleChange}
-            dir="auto"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={t.basicDetails.floor}
+          name="floor"
+          value={formData.floor || ""}
+          onChange={(e) => handleChange(e, "number")}
+          placeholder="0"
+          type="number"
+        />
 
         {/* Land Area */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.landArea} (m²)
-          </label>
-          <input
-            type="text"
-            data-format-number
-            name="landArea"
-            placeholder="0"
-            value={formData.landArea || ""}
-            onChange={handleChange}
-            dir="auto"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={`${t.basicDetails.landArea} (m²)`}
+          name="landArea"
+          value={formData.landArea || ""}
+          onChange={(e) => handleChange(e, "number")}
+          placeholder="0"
+          type="number"
+        />
 
         {/* Garden Size */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.gardenSize} (m²)
-          </label>
-          <input
-            type="text"
-            data-format-number
-            name="gardenSize"
-            placeholder="0"
-            value={formData.gardenSize || ""}
-            onChange={handleChange}
-            dir="auto"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={`${t.basicDetails.gardenSize} (m²)`}
+          name="gardenSize"
+          value={formData.gardenSize || ""}
+          onChange={(e) => handleChange(e, "number")}
+          placeholder="0"
+          type="number"
+        />
 
         {/* Garage Area */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.basicDetails.garageArea} (m²)
-          </label>
-          <input
-            type="text"
-            data-format-number
-            name="garageArea"
-            placeholder="0"
-            value={formData.garageArea || ""}
-            onChange={handleChange}
-            dir="auto"
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
+        <FormInput
+          label={`${t.basicDetails.garageArea} (m²)`}
+          name="garageArea"
+          value={formData.garageArea || ""}
+          onChange={(e) => handleChange(e, "number")}
+          placeholder="0"
+          type="number"
+        />
       </div>
 
       {/* Add Compound Dialog */}
