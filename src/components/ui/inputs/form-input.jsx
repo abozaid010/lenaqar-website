@@ -44,11 +44,11 @@ const FormInput = ({
           error
             ? "border-red-500 ring-red-500 placeholder-red-500"
             : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-        } ${adornment ? "ltr:pr-12 rtyl:pl-12" : ""} ${className}`}
+        } ${adornment ? "ltr:pr-12 rtl:pl-12" : ""} ${className}`}
         {...rest}
       />
       {adornment && (
-        <span className="absolute bottom-1 rtl:left-1.5 ltr:right-1.5 text-gray-400">
+        <span className="absolute py-1 bottom-0 rtl:left-0 ltr:right-0 inline-flex items-center px-3 ltr:rounded-r-md border rtl:rounded-l-md ltr:border-l-0 rtl:border-r-0 border-gray-300 bg-gray-100 text-gray-500">
           {adornment}
         </span>
       )}

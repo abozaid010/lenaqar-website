@@ -36,11 +36,7 @@ export default function ImagesStep({
   };
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-4 text-slate-800">
-        {t.additionalDetails}
-      </h3>
-
+    <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-6">
         {/* Finishing Type */}
         <div>
@@ -209,6 +205,6 @@ export default function ImagesStep({
         onClose={() => setIsAddDeveloperDialogOpen(false)}
         onAdd={handleAddDeveloper}
       />
-    </div>
+    </>
   );
 }
