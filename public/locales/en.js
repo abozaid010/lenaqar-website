@@ -245,6 +245,7 @@ export default {
       makeCall: "Make a call",
       officeVisit: "Office visit",
       propertyView: "Property view",
+      Interested: "Interested",
       notInterested: "Not interested",
       notQualified: "Not qualified",
       followUpLater: "Follow up later",

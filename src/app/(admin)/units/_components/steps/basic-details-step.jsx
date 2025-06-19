@@ -5,10 +5,10 @@ import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
+import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import {
   convertArabicToEnglishNumbers,
-  formatCityLabel,
   formatDistrictLabel,
 } from "@/utils/formatters";
 import { useEffect, useState } from "react";
@@ -177,23 +177,12 @@ export default function BasicDetailsStep({
         </FormSelect>
 
         {/* City */}
-        <FormSelect
-          label={t.basicDetails.city}
-          name="city"
-          value={formData.city || ""}
-          required
+        <CitySelect
+          value={formData.city}
           onChange={handleChange}
+          required
           error={invalidFields.includes("city")}
-        >
-          <option value="">{t.basicDetails.selectCity}</option>
-          {citiesAndDistricts
-            ?.sort((a, b) => a.governorate.localeCompare(b.governorate))
-            .map((gov) => (
-              <option key={gov.governorate} value={gov.governorate}>
-                {formatCityLabel(gov.governorate, locale)}
-              </option>
-            ))}
-        </FormSelect>
+        />
 
         {/* District */}
         <FormSelect
