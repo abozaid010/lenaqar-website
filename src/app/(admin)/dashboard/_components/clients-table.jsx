@@ -301,7 +301,6 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {console.log(user.last_action, "user.last_action")}
                             {getActionLabel(user.last_action)}
                           </span>
                         )}
