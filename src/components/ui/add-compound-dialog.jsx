@@ -6,13 +6,16 @@ import {
 } from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
+import FormInput from "@/components/ui/inputs/form-input";
+import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import { useI18n } from "@/context/translate-api";
-import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
+import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import CitySelect from "./inputs/sorted-city-select";
 
 export default function AddCompoundDialog({
   clientId,
@@ -165,19 +168,16 @@ export default function AddCompoundDialog({
 
     if (!formData.city.trim()) {
       newErrors.city = t.formValidation?.cityRequired || "City is required";
-      toast.error(t.formValidation?.cityRequired || "City is required");
     }
 
     if (!formData.country.trim()) {
       newErrors.country =
         t.formValidation?.countryRequired || "Country is required";
-      toast.error(t.formValidation?.countryRequired || "Country is required");
     }
 
     if (!formData.district.trim()) {
       newErrors.district =
         t.formValidation?.districtRequired || "District is required";
-      toast.error(t.formValidation?.districtRequired || "District is required");
     }
 
     if (!formData.area || Number(formData.area) <= 0) {
@@ -188,6 +188,7 @@ export default function AddCompoundDialog({
       );
     }
 
+    setErrors(newErrors);
     return newErrors;
   };
 
@@ -330,7 +331,7 @@ export default function AddCompoundDialog({
                     </button>
                   </div>
                 </div>
-                <input
+                <FormInput
                   type="text"
                   name={activeNameLang === "ar" ? "ar_name" : "en_name"}
                   value={
@@ -367,82 +368,54 @@ export default function AddCompoundDialog({
 
             {/* Location */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.city || "City"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <select
-                  name="city"
-                  value={formData.city}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">
-                    {editMode
-                      ? formatCityLabel(formData.city, locale)
-                      : t.formLabels?.selectCity}
-                  </option>
-                  {Egypt_cities?.map((gov) => (
-                    <option key={gov?.governorate} value={gov?.governorate}>
-                      {formatCityLabel(gov?.governorate, locale)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.country || "Country"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="country"
-                  value={formData.country}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.district || "District"}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="district"
-                value={formData.district}
+              <CitySelect
+                value={formData.city}
                 onChange={handleChange}
-                disabled={!formData.city}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">
-                  {!formData.city
-                    ? locale === "ar"
-                      ? "الرجاء اختيار المدينة أولاً"
-                      : "Please select a city first"
-                    : editMode
-                      ? formData.district
-                      : locale === "ar"
-                        ? t.formLabels?.district
-                        : "Select district"}
-                </option>
-                {formData?.city &&
-                  Egypt_cities.find(
-                    (gov) => gov.governorate === formData.city
-                  )?.districts.map((dist) => (
-                    <option key={dist.district} value={dist.district}>
-                      {formatDistrictLabel(
-                        dist.district,
-                        formData.city,
-                        locale
-                      )}
-                    </option>
-                  ))}
-              </select>
+                error={errors.city}
+                required
+              />
+
+              <FormInput
+                type="text"
+                name="country"
+                label={t.formLabels?.country || "Country"}
+                value={formData.country}
+                onChange={handleChange}
+                required
+                error={errors.country}
+              />
             </div>
+
+            <FormSelect
+              name="district"
+              label={t.formLabels?.district || "District"}
+              value={formData.district}
+              onChange={handleChange}
+              required
+              error={errors.district}
+              errorMessage={errors.district}
+              disabled={!formData.city}
+            >
+              <option value="">
+                {!formData.city
+                  ? locale === "ar"
+                    ? "الرجاء اختيار المدينة أولاً"
+                    : "Please select a city first"
+                  : editMode
+                    ? formData.district
+                    : locale === "ar"
+                      ? t.formLabels?.district
+                      : "Select district"}
+              </option>
+              {formData?.city &&
+                Egypt_cities.find(
+                  (gov) => gov.governorate === formData.city
+                )?.districts.map((dist) => (
+                  <option key={dist.district} value={dist.district}>
+                    {formatDistrictLabel(dist.district, formData.city, locale)}
+                  </option>
+                ))}
+            </FormSelect>
 
             {/* Details */}
             <div className="grid grid-cols-2 gap-4">
@@ -462,7 +435,7 @@ export default function AddCompoundDialog({
                 />
               </div>
 
-              <div className="flex items-center h-full pt-6">
+              <div className="flex items-center gap-1 h-full pt-6">
                 <input
                   type="checkbox"
                   id="gated"
@@ -482,83 +455,51 @@ export default function AddCompoundDialog({
 
             {/* Developer */}
             <div className="relative">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.developer || "Developer"}{" "}
-                <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  name="developer_name"
-                  value={formData.developer_name}
-                  onChange={handleChange}
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">
-                    {editMode
-                      ? formData.developer_name
-                      : t.formLabels?.selectDeveloper || "Select developer"}
+              <FormSelect
+                name="developer_name"
+                label={t.formLabels?.developer || "Developer"}
+                value={formData.developer_name}
+                onChange={handleChange}
+                required
+                error={errors.developer_name}
+              >
+                <option value="">
+                  {editMode
+                    ? formData.developer_name
+                    : t.formLabels?.selectDeveloper || "Select developer"}
+                </option>
+                {developers?.map((d, idx) => (
+                  <option key={idx} value={d}>
+                    {d}
                   </option>
-                  {developers?.map((d, idx) => (
-                    <option key={idx} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-                {/* <div
-                  className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}
-                >
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div> */}
-              </div>
-              {!editMode && (
-                <button
-                  type="button"
-                  onClick={() => setIsAddDeveloperDialogOpen(true)}
-                  className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
-                >
-                  + {t.buttons?.addNew || "Add New"}
-                </button>
-              )}
+                ))}
+              </FormSelect>
+              <button
+                type="button"
+                onClick={() => setIsAddDeveloperDialogOpen(true)}
+                className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+              >
+                + {t.buttons?.addNew || "Add New"}
+              </button>
             </div>
 
             {/* Links */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.videoURL || "Video URL"}
-              </label>
-              <input
-                type="url"
-                name="video_url"
-                value={formData.video_url}
-                onChange={handleChange}
-                placeholder="https://example.com/video"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.googleMapsLink || "Google Maps Link"}
-              </label>
-              <input
-                type="url"
-                name="google_map_link"
-                value={formData.google_map_link}
-                onChange={handleChange}
-                placeholder="https://maps.google.com/..."
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+            <FormInput
+              type="url"
+              name="video_url"
+              label={t.formLabels?.videoURL || "Video URL"}
+              value={formData.video_url}
+              onChange={handleChange}
+              placeholder="https://example.com/video"
+            />
+            <FormInput
+              type="url"
+              name="google_map_link"
+              label={t.formLabels?.googleMapsLink || "Google Maps Link"}
+              value={formData.google_map_link}
+              onChange={handleChange}
+              placeholder="https://maps.google.com/..."
+            />
 
             {/* Master Plan Image */}
             <SingleImageUploader
