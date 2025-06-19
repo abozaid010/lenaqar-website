@@ -3,9 +3,9 @@
 import { getprojects } from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
-import CitySelect from "@/components/ui/inputs/city-select";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
+import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import {
   convertArabicToEnglishNumbers,
