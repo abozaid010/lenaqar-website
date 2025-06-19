@@ -33,7 +33,7 @@ const FormSelect = ({
           required={required}
           className={`block w-full rounded-md border py-1 px-2 bg-white focus:outline-none focus:ring-1 appearance-none ${
             error
-              ? "border-red-500 ring-red-500"
+              ? "border-red-500 ring-red-500 text-red-500"
               : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           } ${className}`}
           {...rest}

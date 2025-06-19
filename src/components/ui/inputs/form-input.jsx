@@ -14,6 +14,7 @@ const FormInput = ({
   type = "text",
   adornment = null,
   className = "",
+  dir = undefined, // add dir prop
   ...rest
 }) => {
   // Format value for money type
@@ -49,6 +50,7 @@ const FormInput = ({
             ? "border-red-500 ring-red-500 placeholder-red-500"
             : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
         } ${adornment ? "ltr:pr-12 rtl:pl-12" : ""} ${className}`}
+        dir={dir}
         {...rest}
       />
       {adornment && (
