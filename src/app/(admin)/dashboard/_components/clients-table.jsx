@@ -7,7 +7,7 @@ import {
 import { useI18n } from "@/context/translate-api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
 import ClientsTablePagination from "./clients-table-pagination";
 import PropertyDetailsModal from "./property-requirements-modal";
@@ -48,32 +48,33 @@ export default function ClientsTable({
     }
   }, [users]);
 
-  const ACTIONS = useMemo(
-    () => [
-      { label: t.dashboardFilter.actions.onGoingConversion, value: null },
-      { label: t.dashboardFilter.actions.onGoingConversion, value: "" },
-      { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
-      { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
-      { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-      { label: t.dashboardFilter.actions.Monitorlead, value: "Monitor lead" },
-      {
-        label: t.dashboardFilter.actions.notInterested,
-        value: "Not interested",
-      },
-      { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
-      {
-        label: t.dashboardFilter.actions.followUpLater,
-        value: "Follow up later",
-      },
-      {
-        label: t.dashboardFilter.actions.missingRequirement,
-        value: "Missing requirement",
-      },
-      { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
-      { label: t.dashboardFilter.actions.noAction, value: "No Action" },
-    ],
-    [t]
-  );
+  const ACTIONS = [
+    { label: t.dashboardFilter.actions.onGoingConversion, value: null },
+    { label: t.dashboardFilter.actions.onGoingConversion, value: "" },
+    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
+    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
+    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
+    // { label: t.dashboardFilter.actions.Monitorlead, value: "Monitor lead" },
+    {
+      label: t.dashboardFilter.actions.qualifiedLead,
+      value: "Qualified lead",
+    },
+    {
+      label: t.dashboardFilter.actions.notInterested,
+      value: "Not interested",
+    },
+    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
+    {
+      label: t.dashboardFilter.actions.followUpLater,
+      value: "Follow up later",
+    },
+    {
+      label: t.dashboardFilter.actions.missingRequirement,
+      value: "Missing requirement",
+    },
+    { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
+    { label: t.dashboardFilter.actions.Interested, value: "Interested" },
+  ];
 
   const getActionLabel = (actionValue) => {
     const action = ACTIONS.find((a) => a.value === actionValue);
@@ -300,6 +301,7 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
+                            {console.log(user.last_action, "user.last_action")}
                             {getActionLabel(user.last_action)}
                           </span>
                         )}

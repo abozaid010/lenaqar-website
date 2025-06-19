@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { ChevronDown, Printer } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
+import { ChevronDown, Printer } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 
 const formatDate = (date) => {
   const isoString = date.toISOString();
@@ -15,29 +15,33 @@ export default function DashbordFilter({ appliedFilters }) {
   const { t } = useI18n();
   const router = useRouter();
 
-  const ACTIONS = useMemo(
-    () => [
-      { label: t.dashboardFilter.actions.all, value: "" },
-      { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
-      { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
-      { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-      {
-        label: t.dashboardFilter.actions.notInterested,
-        value: "Not interested",
-      },
-      { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
-      {
-        label: t.dashboardFilter.actions.followUpLater,
-        value: "Follow up later",
-      },
-      {
-        label: t.dashboardFilter.actions.missingRequirement,
-        value: "Missing requirement",
-      },
-      { label: t.dashboardFilter.actions.blocked , value: "Blocked" },
-    ],
-    [t]
-  );
+  const ACTIONS = [
+    { label: t.dashboardFilter.actions.all, value: "" },
+    { label: t.dashboardFilter.actions.onGoingConversion, value: null },
+    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
+    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
+    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
+    // { label: t.dashboardFilter.actions.Monitorlead, value: "Monitor lead" },
+    {
+      label: t.dashboardFilter.actions.qualifiedLead,
+      value: "Qualified lead",
+    },
+    {
+      label: t.dashboardFilter.actions.notInterested,
+      value: "Not interested",
+    },
+    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
+    {
+      label: t.dashboardFilter.actions.followUpLater,
+      value: "Follow up later",
+    },
+    {
+      label: t.dashboardFilter.actions.missingRequirement,
+      value: "Missing requirement",
+    },
+    { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
+    { label: t.dashboardFilter.actions.Interested, value: "Interested" },
+  ];
 
   const tomorrow = useMemo(() => {
     const date = new Date();
@@ -115,10 +119,7 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   return (
-
     <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap no-print">
-
-      
       <div className="relative inline-block w-full sm:w-52">
         <select
           name="action_type"
@@ -207,9 +208,9 @@ export default function DashbordFilter({ appliedFilters }) {
           </div>
         )}
       </div>
-      
+
       {/* Improved print button with icon and better styling */}
-      <button 
+      <button
         onClick={handlePrint}
         className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
       >

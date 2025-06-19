@@ -23,7 +23,6 @@ const Schedule = ({ data, dataSales }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
-  const [salesperson, setSalesperson] = useState(null);
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
 
@@ -96,7 +95,7 @@ const Schedule = ({ data, dataSales }) => {
 
   const canNavigateNext = () => {
     const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 7); // Only one week forward allowed
+    maxDate.setDate(maxDate.getDate() + 7);
     return currentDate < maxDate;
   };
 
@@ -160,7 +159,7 @@ const Schedule = ({ data, dataSales }) => {
                     {getWeekRangeDisplay()}
                   </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 rtl:flex-row-reverse">
                   <button
                     onClick={() => navigateWeek("prev")}
                     disabled={!canNavigatePrev()}

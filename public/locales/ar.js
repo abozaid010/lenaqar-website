@@ -1,3 +1,4 @@
+
 export default {
   // common
   direction: "rtl",
@@ -230,6 +231,7 @@ export default {
       officeVisit: "زيارة مكتب",
       propertyView: "معاينه",
       notInterested: "غير مهتم",
+      Interested: "مهتم",
       notQualified: "غير مؤهل",
       followUpLater: "متابعة لاحقاً",
       missingRequirement: "متطلب مفقود",

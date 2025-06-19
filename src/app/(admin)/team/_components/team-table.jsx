@@ -2,10 +2,10 @@
 
 import { deleteEmployee } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
-import { Trash2, Edit2 } from "lucide-react";
-import toast from "react-hot-toast";
-import { useState } from "react";
+import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import AddNewMember from "./add-new-member";
 
 export default function TeamTable({ data }) {
