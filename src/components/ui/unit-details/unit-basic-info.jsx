@@ -2,12 +2,16 @@
 import { useI18n } from "@/context/translate-api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import {
+  Bath,
+  BedDouble,
   Building2,
   Calendar,
   Eye,
+  Hash,
   Layers,
   Package,
   Paintbrush,
+  Ruler,
 } from "lucide-react";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
@@ -17,8 +21,8 @@ export default function Uni({ unit }) {
   const { t, locale } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
-      <div className="flex items-center">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mr-2">
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
           {t.purpose?.[unit.purpose] || unit.purpose}
         </span>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
@@ -46,9 +50,9 @@ export default function Uni({ unit }) {
       <UnitPricing unit={unit} />
 
       {/* Additional Features */}
-      <div className="mt-5 grid grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-2 max-w-lg">
+      <div className="mt-5 grid grid-cols-3 gap-x-8 gap-y-2 max-w-lg">
         <div className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
+          <Building2 className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs text-gray-500">
               {t.unitDetails?.developer}
@@ -63,9 +67,7 @@ export default function Uni({ unit }) {
 
         {unit.purpose === "sell" && (
           <div className="flex items-center gap-2">
-            <p>
-              <Calendar className="h-5 w-5 text-primary" />
-            </p>
+            <Calendar className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-gray-500 text-xs line-clamp-1">
                 {t.unitDetails?.deliveryDate}
@@ -79,7 +81,7 @@ export default function Uni({ unit }) {
 
         {unit.floor !== 0 && (
           <div className="flex items-center gap-2">
-            <Layers className="h-5 w-5 text-primary" />
+            <Layers className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs line-clamp-1 text-gray-500">
                 {t.unitDetails.floor}
@@ -91,26 +93,24 @@ export default function Uni({ unit }) {
           </div>
         )}
 
-        <div className="flex items-center">
-          <div className="flex flex-row items-center gap-2">
-            <Paintbrush className="h-5 w-5 text-primary" />
-            <div>
-              <span className="text-xs line-clamp-1 text-gray-500">
-                {t.unitDetails?.finishing}
-              </span>
-              <p className="font-medium text-xs whitespace-nowrap ">
-                {unit.finishing
-                  ? t.unitDetails?.finishingTypes?.[
-                      unit.finishing.toLowerCase()
-                    ] || unit.finishing
-                  : t.unitDetails?.notAvailable}
-              </p>
-            </div>
+        <div className="flex items-center gap-2">
+          <Paintbrush className="h-5 w-5 text-primary shrink-0" />
+          <div>
+            <span className="text-xs line-clamp-1 text-gray-500">
+              {t.unitDetails?.finishing}
+            </span>
+            <p className="font-medium text-xs whitespace-nowrap ">
+              {unit.finishing
+                ? t.unitDetails?.finishingTypes?.[
+                    unit.finishing.toLowerCase()
+                  ] || unit.finishing
+                : t.unitDetails?.notAvailable}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <Package className="h-5 w-5 text-primary" />
+          <Package className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails.finishing}
@@ -127,21 +127,7 @@ export default function Uni({ unit }) {
 
         {unit.code && (
           <div className="flex items-center gap-2">
-            {/* Hashtag icon for Unit Code */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-primary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M7 10h10M7 14h10M9 6l-2 12M17 6l-2 12"
-              />
-            </svg>
+            <Hash className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs text-gray-500 whitespace-nowrap">
                 {t.basicDetails.code}
@@ -157,22 +143,8 @@ export default function Uni({ unit }) {
         )}
 
         {unit.model && (
-          <div className="flex items-center">
-            {/* Cube icon for Unit Model */}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 text-primary mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M20 7l-8-4-8 4m16 0v6a8 8 0 01-16 0V7m16 0L12 13 4 7"
-              />
-            </svg>
+          <div className="flex items-center gap-2">
+            <Box className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs text-gray-500 whitespace-nowrap">
                 {t.basicDetails.model}
@@ -189,84 +161,47 @@ export default function Uni({ unit }) {
       </div>
 
       {/* Key Features */}
-      <div className="mt-5 flex flex-wrap gap-2 items-center">
+      <div className="mt-5 grid grid-cols-4 gap-x-1.5 gap-y-2 max-w-lg">
+        {/* Land Area */}
         {unit.landArea > 0 && (
-          <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 text-primary"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-              />
-            </svg>
+          <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
+            <Ruler className="h-6 w-6 text-primary" />
             <span className="mt-1 text-sm text-gray-500">
               {t.unitDetails.area}
             </span>
-            <p className="font-medium min-w-[80px] text-center">
+            <p className="font-medium text-center text-sm">
               {unit.landArea} m²
             </p>
           </div>
         )}
 
-        <div className="flex flex-col items-center justify-between py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
+        {/* View */}
+        <div className="flex flex-col items-center justify-between py-1.5 bg-white rounded-md border border-gray-200 h-20">
           <Eye className="h-5 w-5 text-primary flex-shrink-0" />
           <span className="mt-1 text-sm text-gray-500">
             {t.unitDetails.view}
           </span>
-          <p className="font-medium min-w-[80px] text-center break-words">
+          <p className="font-medium text-center break-words text-sm">
             {unit.view
               ? t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view
               : t.unitDetails?.notAvailable}
           </p>
         </div>
 
-        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-            />
-          </svg>
+        {/* Rooms */}
+        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
+          <BedDouble className="h-6 w-6 text-primary" />
           <span className="mt-1 text-sm text-gray-500">
             {t.unitDetails.rooms}
           </span>
-          <p className="font-medium min-w-[80px] text-center">
-            {unit.roomsCount}
-          </p>
+          <p className="font-medium text-center text-sm">{unit.roomsCount}</p>
         </div>
 
-        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20 w-24">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 text-primary"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
+        {/* Bathrooms */}
+        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
+          <Bath className="h-6 w-6 text-primary" />
           <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
-          <p className="font-medium min-w-[80px] text-center">
+          <p className="font-medium text-center text-sm">
             {unit.bathroomCount}
           </p>
         </div>

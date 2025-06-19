@@ -71,11 +71,7 @@ export default function SaleDetailsStep({
   };
 
   return (
-    <div>
-      <h3 className="text-xl font-semibold mb-3 text-slate-800">
-        {t.saleDetails.financialDetails}
-      </h3>
-
+    <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Total Price */}
         <FormInput
@@ -208,6 +204,6 @@ export default function SaleDetailsStep({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }
