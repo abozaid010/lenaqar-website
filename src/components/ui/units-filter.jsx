@@ -185,6 +185,7 @@ export default function UnitsFilter({
     setTempMinPrice("");
     setTempMaxPrice("");
 
+    setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
     // Clear URL parameters
     router.push(window.location.pathname);
   };
@@ -203,6 +204,10 @@ export default function UnitsFilter({
       newParams.delete(key);
     }
 
+    if (key === "project_name") {
+      setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
+    }
+
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
 
@@ -217,7 +222,7 @@ export default function UnitsFilter({
       case "developer_name":
         return getTranslatedDeveloperName(value);
       case "project_name":
-        return value;
+        return selectedProjectName || value;
       case "purpose":
         return t.unitsFilter.purposes[value] || value;
       case "property_type":
@@ -299,7 +304,7 @@ export default function UnitsFilter({
   };
 
   return (
-    <div className="p-4 space-y-4 bg-white rounded-lg shadow-md overflow-hidden">
+    <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
         {/* Cities Dropdown */}
         {!readonly && (
