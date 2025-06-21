@@ -4,6 +4,7 @@ import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import {
   Bath,
   BedDouble,
+  Box,
   Building2,
   Calendar,
   Eye,
@@ -15,7 +16,6 @@ import {
 } from "lucide-react";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
-// import { useI18n } from "@/context/translate-api";
 
 export default function Uni({ unit }) {
   const { t, locale } = useI18n();
