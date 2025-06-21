@@ -3,43 +3,35 @@ import { useI18n } from "@/context/translate-api";
 import { formatCityLabel } from "@/utils/formatters";
 
 const STATIC_CITIES = [
-  "Alexandria",
-  "Aswan",
-  "Asyut",
-  "Beheira",
-  "Beni Suef",
-  "Cairo",
-  "Dakahlia",
-  "Damietta",
-  "Faiyum",
-  "Gharbia",
-  "Giza",
-  "Ismailia",
-  "Kafr El Sheikh",
-  "Luxor",
-  "Matrouh",
-  "Minya",
-  "Monufia",
-  "New Administrative Capital",
-  "New Valley",
-  "North Coast",
-  "North Sinai",
-  "Port Said",
-  "Qalyubia",
-  "Qena",
-  "Red Sea",
-  "Sharqia",
-  "Sohag",
-  "South Sinai",
-  "Suez",
+  "alexandria",
+  "aswan",
+  "asyut",
+  "beheira",
+  "beni suef",
+  "cairo",
+  "dakahlia",
+  "damietta",
+  "faiyum",
+  "gharbia",
+  "giza",
+  "ismailia",
+  "kafr el sheikh",
+  "luxor",
+  "matrouh",
+  "minya",
+  "monufia",
+  "new administrative capital",
+  "new valley",
+  "north coast",
+  "north sinai",
+  "port said",
+  "qalyubia",
+  "qena",
+  "red sea",
+  "sharqia",
+  "sohag",
+  "south sinai",
 ];
-
-function toTitleCase(str) {
-  return str.replace(
-    /\w\S*/g,
-    (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
-  );
-}
 
 export default function CitySelect({ value, onChange, error, required }) {
   const { t, locale } = useI18n();
@@ -47,7 +39,7 @@ export default function CitySelect({ value, onChange, error, required }) {
     <FormSelect
       label={t.basicDetails.city}
       name="city"
-      value={toTitleCase(value) || ""}
+      value={value || ""}
       required={required}
       onChange={onChange}
       error={error}
