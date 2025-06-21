@@ -574,15 +574,6 @@ export default {
       sell: "Sell",
       rent: "Rent",
     },
-    cities: {
-      cairo: "Cairo",
-      alexandria: "Alexandria",
-      giza: "Giza",
-      newCairo: "New Cairo",
-      october6: "6th of October",
-      elShorouk: "El Shorouk",
-      sheikhZayed: "Sheikh Zayed",
-    },
     views: {
       park: "Park",
       street: "Street",

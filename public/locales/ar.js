@@ -556,15 +556,6 @@ export default {
       sell: "بيع",
       rent: "إيجار",
     },
-    cities: {
-      cairo: "القاهرة",
-      alexandria: "الإسكندرية",
-      giza: "الجيزة",
-      newCairo: "القاهرة الجديدة",
-      october6: "السادس من أكتوبر",
-      elShorouk: "الشروق",
-      sheikhZayed: "الشيخ زايد",
-    },
     views: {
       park: "حديقة",
       street: "شارع",
