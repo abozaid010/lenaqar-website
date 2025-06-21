@@ -11,6 +11,7 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import { useI18n } from "@/context/translate-api";
+import { COUNTRIES } from "@/data/cities";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -375,15 +376,21 @@ export default function AddCompoundDialog({
                 required
               />
 
-              <FormInput
-                type="text"
+              <FormSelect
                 name="country"
                 label={t.formLabels?.country || "Country"}
                 value={formData.country}
                 onChange={handleChange}
                 required
                 error={errors.country}
-              />
+                disabled={editMode}
+              >
+                {COUNTRIES.map((country) => (
+                  <option key={country.value} value={country.value}>
+                    {locale === "ar" ? country.ar_label : country.en_label}
+                  </option>
+                ))}
+              </FormSelect>
             </div>
 
             <FormSelect
