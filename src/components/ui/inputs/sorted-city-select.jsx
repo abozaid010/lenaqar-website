@@ -34,13 +34,20 @@ const STATIC_CITIES = [
   "Suez",
 ];
 
+function toTitleCase(str) {
+  return str.replace(
+    /\w\S*/g,
+    (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase()
+  );
+}
+
 export default function CitySelect({ value, onChange, error, required }) {
   const { t, locale } = useI18n();
   return (
     <FormSelect
       label={t.basicDetails.city}
       name="city"
-      value={value || ""}
+      value={toTitleCase(value) || ""}
       required={required}
       onChange={onChange}
       error={error}

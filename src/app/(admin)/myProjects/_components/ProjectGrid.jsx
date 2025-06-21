@@ -22,13 +22,6 @@ import "swiper/css/pagination";
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
-function getDisplayName(name, ar_name, en_name, locale) {
-  if (name) return [name];
-  if (ar_name && en_name) return [ar_name, en_name];
-  if (locale === "ar") return [ar_name || en_name || ""];
-  return [en_name || ar_name || ""];
-}
-
 export default function ProjectList({
   projects,
   citiesAndDistricts,
@@ -275,14 +268,7 @@ export default function ProjectList({
                           : "text-gray-800"
                       }`}
                     >
-                      {getDisplayName(
-                        project.name,
-                        project.ar_name,
-                        project.en_name,
-                        locale
-                      ).map((line, idx) => (
-                        <div key={idx}>{line}</div>
-                      ))}
+                      {locale === "ar" ? project.ar_name : project.en_name}
                     </h3>
                     <div
                       className={`flex items-center space-x-4 text-sm ${
