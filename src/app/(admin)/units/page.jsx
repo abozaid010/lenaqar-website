@@ -41,16 +41,14 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   return (
     <div className="w-[98%] mx-auto">
-      <div className="bg-white">
-        <UnitsFilter
-          appliedFilters={searchParams}
-          developers={developers}
-          compounds={compounds}
-          clientId={clientId}
-          clientName={clientName}
-          citiesAndDistricts={citiesAndDistricts}
-        />
-      </div>
+      <UnitsFilter
+        appliedFilters={searchParams}
+        developers={developers}
+        compounds={compounds}
+        clientId={clientId}
+        clientName={clientName}
+        citiesAndDistricts={citiesAndDistricts}
+      />
 
       <div className="flex-1 flex flex-col">
         <Suspense
