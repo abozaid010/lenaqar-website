@@ -1,3 +1,7 @@
+export const COUNTRIES = [
+    { "value": "Egypt", "en_label": "Egypt", "ar_label": "مصر" },
+];
+
 export const LOCALIZED_CITIES = [
     { "value": "Beni Suef", "en_label": "Beni Suef", "ar_label": "بني سويف" },
     { "value": "Qena", "en_label": "Qena", "ar_label": "قنا" },

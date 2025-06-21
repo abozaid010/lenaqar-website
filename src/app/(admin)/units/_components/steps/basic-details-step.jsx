@@ -236,7 +236,7 @@ export default function BasicDetailsStep({
               dataProject && dataProject.length > 0 ? (
                 dataProject.map((project) => (
                   <option key={project.en_name} value={project.en_name}>
-                    {project.en_name}
+                    {locale === "ar" ? project.ar_name : project.en_name}
                   </option>
                 ))
               ) : (
