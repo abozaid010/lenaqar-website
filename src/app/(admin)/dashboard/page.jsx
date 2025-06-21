@@ -1,9 +1,8 @@
 import { fetchUsersData } from "@/components/services/serviceFetching";
+import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
 import ClientsTable from "./_components/clients-table";
 import DashbordFilter from "./_components/dashbord-filter";
-import SearchBar from "./_components/client-search";
-import { Suspense } from "react";
-import { Loader2 } from "lucide-react";
 
 import { cookies } from "next/headers";
 import PremiumFeatures from "./_components/premuim-features";
@@ -31,7 +30,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
       <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
         <DashbordFilter appliedFilters={searchParams} />
 
-        <SearchBar q={searchParams.query} />
+        {/* <SearchBar q={searchParams.query} /> */}
 
         <Suspense
           key={JSON.stringify(searchParams)}

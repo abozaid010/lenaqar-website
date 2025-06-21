@@ -1,5 +1,6 @@
 "use client";
 
+import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
 import { ChevronDown, Printer } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,11 +18,9 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const ACTIONS = [
     { label: t.dashboardFilter.actions.all, value: "" },
-    { label: t.dashboardFilter.actions.onGoingConversion, value: null },
     { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
     { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
     { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-    // { label: t.dashboardFilter.actions.Monitorlead, value: "Monitor lead" },
     {
       label: t.dashboardFilter.actions.qualifiedLead,
       value: "Qualified lead",
@@ -152,44 +151,36 @@ export default function DashbordFilter({ appliedFilters }) {
         {isDatePickerOpen && (
           <div className="absolute mt-2 w-full sm:w-66 bg-white border border-gray-200 rounded-md shadow-lg p-3 z-10 left-0">
             <div className="space-y-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.dashboardFilter.datePicker.startDate}
-                </label>
-                <input
-                  type="date"
-                  value={filters.start_date.split("T")[0]}
-                  onChange={(filter) => {
-                    const selectedDate = filter.target.value;
-                    const dateObj = new Date(selectedDate + "T00:00:00.000Z");
-                    const formattedDate = formatDate(dateObj);
-                    setFilters((prev) => ({
-                      ...prev,
-                      start_date: formattedDate,
-                    }));
-                  }}
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.dashboardFilter.datePicker.endDate}
-                </label>
-                <input
-                  type="date"
-                  value={filters.end_date.split("T")[0]}
-                  onChange={(filter) => {
-                    const selectedDate = filter.target.value;
-                    const dateObj = new Date(selectedDate + "T23:59:59.999Z");
-                    const formattedDate = formatDate(dateObj);
-                    setFilters((prev) => ({
-                      ...prev,
-                      end_date: formattedDate,
-                    }));
-                  }}
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                />
-              </div>
+              <FormInput
+                type="date"
+                label={t.dashboardFilter.datePicker.startDate}
+                value={filters.start_date.split("T")[0]}
+                onChange={(filter) => {
+                  const selectedDate = filter.target.value;
+                  const dateObj = new Date(selectedDate + "T00:00:00.000Z");
+                  const formattedDate = formatDate(dateObj);
+                  setFilters((prev) => ({
+                    ...prev,
+                    start_date: formattedDate,
+                  }));
+                }}
+              />
+
+              <FormInput
+                type="date"
+                label={t.dashboardFilter.datePicker.endDate}
+                value={filters.end_date.split("T")[0]}
+                onChange={(filter) => {
+                  const selectedDate = filter.target.value;
+                  const dateObj = new Date(selectedDate + "T23:59:59.999Z");
+                  const formattedDate = formatDate(dateObj);
+                  setFilters((prev) => ({
+                    ...prev,
+                    end_date: formattedDate,
+                  }));
+                }}
+              />
+
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => setIsDatePickerOpen(false)}

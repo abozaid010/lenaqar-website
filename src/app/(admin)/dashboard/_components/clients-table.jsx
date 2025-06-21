@@ -54,7 +54,6 @@ export default function ClientsTable({
     { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
     { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
     { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-    // { label: t.dashboardFilter.actions.Monitorlead, value: "Monitor lead" },
     {
       label: t.dashboardFilter.actions.qualifiedLead,
       value: "Qualified lead",
