@@ -131,6 +131,7 @@ export default function BasicDetailsStep({
     (project) => project.en_name === formData.project
   );
 
+  console.log(dataProject, "dataProject");
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">

@@ -234,6 +234,7 @@ export default function AddUnitModal({
     }
   };
 
+  console.log("formData", formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -269,6 +270,7 @@ export default function AddUnitModal({
       if (!isEdit) {
         if (formData.purpose === "sell") {
           const finalFormData = { ...formData, ...SellFormData };
+          console.log("finalFormData", finalFormData);
           res = await addUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
@@ -280,6 +282,7 @@ export default function AddUnitModal({
           res = await updateUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
+          console.log("finalFormData", finalFormData);
           res = await updateUnitRent(finalFormData);
         }
       }
@@ -291,7 +294,7 @@ export default function AddUnitModal({
         return;
       }
       onClose();
-      window.location.reload();
+      // window.location.reload();
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
