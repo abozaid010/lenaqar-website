@@ -1,6 +1,7 @@
 "use client";
 
 import FormInput from "@/components/ui/inputs/form-input";
+import FormSelect from "@/components/ui/inputs/form-select";
 import { useI18n } from "@/context/translate-api";
 import { ChevronDown, Printer } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -121,23 +122,18 @@ export default function DashbordFilter({ appliedFilters }) {
 
   return (
     <div className="flex items-center gap-2 mb-2 flex-wrap sm:flex-nowrap no-print">
-      <div className="relative inline-block w-full sm:w-52">
-        <select
-          name="action_type"
-          onChange={(e) => onFilterChange("action", e.target.value)}
-          value={filters.action || "all"}
-          className="border w-full border-gray-300 rounded-md p-2 pr-8 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm appearance-none"
-        >
-          {ACTIONS.map((action) => (
-            <option key={action.value} value={action.value}>
-              {action.label}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-          <ChevronDown size={16} />
-        </div>
-      </div>
+      <FormSelect
+        name="action_type"
+        onChange={(e) => onFilterChange("action", e.target.value)}
+        value={filters.action || "all"}
+        className=" w-full sm:w-52 py-1.5 text-gray-700"
+      >
+        {ACTIONS.map((action) => (
+          <option key={action.value} value={action.value}>
+            {action.label}
+          </option>
+        ))}
+      </FormSelect>
 
       <div className="relative inline-block w-full sm:max-w-[210px]">
         <button
@@ -147,7 +143,7 @@ export default function DashbordFilter({ appliedFilters }) {
           {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
             filters.end_date
           )}`}
-          <ChevronDown size={16} />
+          <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         </button>
 
         {isDatePickerOpen && (
