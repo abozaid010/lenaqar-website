@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useI18n } from "@/context/translate-api";
+import { debounce } from "@/utils/debounce";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { debounce } from "@/utils/debounce";
-import { useI18n } from "@/context/translate-api";
+import { useCallback, useEffect, useState } from "react";
 
 export default function SearchBar({ q }) {
   const { t } = useI18n();
@@ -43,20 +43,20 @@ export default function SearchBar({ q }) {
       <div className="relative flex-1">
         <Search
           size={20}
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+          className="absolute rtl:right-3 ltr:left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
         />
         <input
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           placeholder={t.search.placeholder}
-          className="border border-gray-300 rounded-md p-2 w-full pl-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 text-sm"
+          className="border border-gray-300 rounded-md p-2 w-full ltr:pl-10 rtl:pr-10 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 text-sm"
         />
         {searchTerm && (
           <button
             type="button"
             onClick={handleSearchClear}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-black"
+            className="absolute top-1/2 transform -translate-y-1/2 text-gray-600 cursor-pointer hover:text-black rtl:left-4 ltr:right-4"
             aria-label="Clear search"
           >
             <X size={18} />
