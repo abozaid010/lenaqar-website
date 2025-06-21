@@ -263,7 +263,6 @@ export default function UnitsFilter({
     if (!filters.project_name || filters.project_name === "all") {
       return t.unitsFilter.allCompounds || "All Projects";
     }
-    return getTranslatedCompoundName(filters.project_name);
   };
 
   const getSelectedCity = () => {
@@ -275,13 +274,6 @@ export default function UnitsFilter({
 
   const getTranslatedDeveloperName = (name) => {
     return t.developerNames?.[name] || name;
-  };
-
-  // Function to get translated compound name (if available)
-  const getTranslatedCompoundName = (name) => {
-    // Assuming there might be a translation key for compound names, similar to developer names.
-    // If not, it will just return the original name.
-    return t.compoundNames?.[name] || name;
   };
 
   return (
@@ -450,7 +442,7 @@ export default function UnitsFilter({
                     setIsProjectDropdownOpen(false);
                   }}
                 >
-                  {getTranslatedCompoundName(c.name)}
+                  {locale === "ar" ? c.ar_name : c.en_name}
                 </div>
               ))}
             </div>

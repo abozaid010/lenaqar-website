@@ -962,38 +962,6 @@ export default {
     save: "حفظ",
     loading: "جاري الحفظ...",
   },
-  compoundNames: {
-    بريفادو: "بريفادو",
-
-    "the address east": " ذا أدرس إيست",
-
-    "new giza": "نيو جيزة",
-
-    Sarai: "سراي",
-
-    Wesal: "وصال",
-
-    "Palm Hills New Cairo": " بالم هيلز القاهرة الجديدة",
-
-    "New Administrative Capital": " العاصمة الإدارية الجديدة",
-
-    "lake view residence": "منزل البحر",
-    "the arabesque compound": "العربسك المجمع",
-    "ALDAU Development": "الدواو للتطوير",
-    "New Giza": "الجديدة الجيزة",
-    "El Borouj": "البروج",
-    "El Rehab": "الرحاب",
-    "Hassan Allam": "حسن علام",
-    Madinaty: "مدينتي",
-    Mivida: "ميفيدا",
-    "Solare North Coast": "سولاري الشمالي",
-    "Swan Lake": "البحر الوردي",
-    "Terrace Smouha": "تريس سموحة",
-    cairohouse: "المنزل القاهري",
-    "jayd residence": "جايد ريسيدنس",
-    "marina marassi": "مارينا مراسي",
-    "mountain view ras el hekma": "مونتاين فيو راس الحكمة",
-  },
   developerNames: {
     " La Vista Developments": "لا فيستا للتطوير",
     "Tatweer Misr": "تطوير مصر",
