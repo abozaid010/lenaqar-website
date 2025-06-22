@@ -269,7 +269,6 @@ export default function AddUnitModal({
       if (!isEdit) {
         if (formData.purpose === "sell") {
           const finalFormData = { ...formData, ...SellFormData };
-          console.log("finalFormData", finalFormData);
           res = await addUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
@@ -281,7 +280,6 @@ export default function AddUnitModal({
           res = await updateUnit(finalFormData);
         } else if (formData.purpose === "rent") {
           const finalFormData = { ...formData, ...rentFormData };
-          console.log("finalFormData", finalFormData);
           res = await updateUnitRent(finalFormData);
         }
       }
