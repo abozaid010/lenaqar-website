@@ -1,14 +1,14 @@
 "use client";
-import Image from "next/image";
-import { X } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
+import { X } from "lucide-react";
+import Image from "next/image";
 
 const SalesManagerSection = () => {
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
 
   return (
-    <section className="mt-6 w-[90%] mx-auto px-4">
+    <section className="mt-6 container">
       <div className="mx-auto text-center py-5">
         <h1 className="text-2xl md:text-3xl font-extrabold text-primary mb-4 bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500">
           {t.salesManager.title}
