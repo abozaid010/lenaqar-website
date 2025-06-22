@@ -111,12 +111,12 @@ const HeroSection = () => {
           transition={{ delay: 0.5, duration: 0.8 }}
         >
           {/* Large blue circle background */}
-          <div className="absolute top-1/2 left-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
+          <div className="absolute top-1/2 rtl:left-[100px] ltr:right-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
             <motion.div className="w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40" />
           </div>
 
           {/* Square AI Image */}
-          <motion.div className="absolute top-1/2 left-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96">
+          <motion.div className="absolute top-1/2 rtl:left-[100px] ltr:right-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96">
             <Image
               src={"/images/happy man.png"}
               alt={t.heroSection.aiImageAlt}
