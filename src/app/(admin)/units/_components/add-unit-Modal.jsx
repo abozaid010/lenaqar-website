@@ -234,7 +234,6 @@ export default function AddUnitModal({
     }
   };
 
-  console.log("formData", formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
