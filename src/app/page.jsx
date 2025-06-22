@@ -18,6 +18,7 @@ export default async function HomePage() {
 
       {/* Hero Section with Title */}
       <HeroSection />
+
       <OurResult />
       <div className=" overflow-hidden">
         <DashbordImage />

@@ -19,7 +19,6 @@ const HeroSection = () => {
     t.heroSection.message4,
     t.heroSection.message5,
     t.heroSection.message6,
-    // t.heroSection.message7,
   ];
 
   useEffect(() => {
@@ -40,7 +39,7 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center   overflow-hidden  ">
+    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -58,7 +57,7 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="mx-auto relative z-10 container max-w-[1280px]    grid grid-cols-1 xl:grid-cols-2   "
+        className="relative z-10 container grid grid-cols-1 xl:grid-cols-2"
       >
         <motion.div
           className="md:col-span-1 space-y-4"
@@ -67,7 +66,7 @@ const HeroSection = () => {
           transition={{ duration: 0.8 }}
         >
           <motion.div
-            className="  px-2 font-semibold text-blue-300 my-4 py-2   w-fit text-[20px]  bg-primary/50 rounded-lg border border-blue-400/20 "
+            className="px-2 font-semibold text-blue-300 my-4 py-2 w-fit text-lg bg-primary/50 rounded-lg border border-blue-400/20"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
