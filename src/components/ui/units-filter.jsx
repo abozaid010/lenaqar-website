@@ -35,7 +35,7 @@ export default function UnitsFilter({
   });
 
   const [filters, setFilters] = useState(() => ({
-    developer_name: appliedFilters.developer || "",
+    developer_name: appliedFilters.developer_name || "",
     project_name: appliedFilters.project_name || "",
     purpose: appliedFilters.purpose || "",
     property_type: appliedFilters.property_type || "",
@@ -219,8 +219,6 @@ export default function UnitsFilter({
     if (!value) return null;
 
     switch (key) {
-      case "developer_name":
-        return getTranslatedDeveloperName(value);
       case "project_name":
         return selectedProjectName || value;
       case "purpose":
@@ -232,7 +230,6 @@ export default function UnitsFilter({
         return t.unitsFilter.cities?.[value] || value;
       case "min_price":
       case "max_price":
-        // We'll handle price range as a special case
         return null;
       default:
         return value;
@@ -289,7 +286,8 @@ export default function UnitsFilter({
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
-    return t.developerNames?.[filters.developer_name] || filters.developer_name;
+
+    return filters.developer_name;
   };
 
   const getSelectedCity = () => {
@@ -297,10 +295,6 @@ export default function UnitsFilter({
       return t.unitsFilter.allCities || "All Cities";
     }
     return formatCityLabel(filters.city, locale) || filters.city;
-  };
-
-  const getTranslatedDeveloperName = (name) => {
-    return t.developerNames?.[name] || name;
   };
 
   return (
@@ -406,18 +400,23 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {[...developersSet].map((d, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    handleFilterChange("developer_name", d);
-                    setIsDeveloperDropdownOpen(false);
-                  }}
-                >
-                  {getTranslatedDeveloperName(d)}
-                </div>
-              ))}
+              {[...developersSet]
+                ?.slice()
+                .sort((a, b) =>
+                  a.localeCompare(b.trim(), "ar", { sensitivity: "base" })
+                )
+                .map((d, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("developer_name", d);
+                      setIsDeveloperDropdownOpen(false);
+                    }}
+                  >
+                    {d}
+                  </div>
+                ))}
             </div>
           )}
         </div>

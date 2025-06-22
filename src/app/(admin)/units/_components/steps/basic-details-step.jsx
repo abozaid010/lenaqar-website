@@ -12,6 +12,7 @@ import {
   formatDistrictLabel,
 } from "@/utils/formatters";
 import { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 
 export default function BasicDetailsStep({
   clientId,

@@ -475,11 +475,16 @@ export default function AddCompoundDialog({
                     ? formData.developer_name
                     : t.formLabels?.selectDeveloper || "Select developer"}
                 </option>
-                {developers?.map((d, idx) => (
-                  <option key={idx} value={d}>
-                    {d}
-                  </option>
-                ))}
+                {developers
+                  ?.slice()
+                  .sort((a, b) =>
+                    a.localeCompare(b, undefined, { sensitivity: "base" })
+                  )
+                  .map((d, idx) => (
+                    <option key={idx} value={d}>
+                      {d}
+                    </option>
+                  ))}
               </FormSelect>
               <button
                 type="button"

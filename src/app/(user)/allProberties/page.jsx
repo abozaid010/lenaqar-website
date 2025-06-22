@@ -18,20 +18,14 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const units = unitsResponse.data?.units || [];
 
   return (
-    <div className="w-[90%] mx-auto mb-4">
-      {/* <div className="mb-4">
-        <IdentifierUnit />
-      </div> */}
-
-      <div className="mb-4  bg-white ">
+    <div className="container mx-auto mb-4">
+      <div className="mb-4 bg-white ">
         <UnitsFilter
           appliedFilters={searchParams}
           developers={developers}
           compounds={compounds}
           readonly={true}
         />
-
-        {/* <UnitsSearch /> */}
       </div>
 
       <UnitsGrid units={units} readonly={true} />
