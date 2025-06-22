@@ -293,7 +293,7 @@ export default function AddUnitModal({
         return;
       }
       onClose();
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
