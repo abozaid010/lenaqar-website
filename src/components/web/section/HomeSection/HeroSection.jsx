@@ -39,7 +39,7 @@ const HeroSection = () => {
   }, [currentMessageIndex, messages.length]);
 
   return (
-    <div className="relative w-full h-[70vh] md:h-[80vh] xl:h-screen flex items-center overflow-hidden">
+    <div className="relative w-full h-[70vh] md:h-[80vh] flex items-center overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -57,10 +57,10 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 container grid grid-cols-1 xl:grid-cols-2"
+        className="relative z-10 container flex justify-between"
       >
         <motion.div
-          className="md:col-span-1 space-y-4"
+          className="space-y-4 flex-1"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -105,7 +105,7 @@ const HeroSection = () => {
         </motion.div>
 
         <motion.div
-          className="hidden xl:col-span-1 xl:flex justify-center md:justify-end relative"
+          className="hidden xl:flex justify-center relative flex-1"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
