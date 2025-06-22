@@ -67,6 +67,9 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const formatDateForDisplay = (date) => {
     const options = { day: "2-digit", month: "short", year: "2-digit" };
+    console.log(
+      `Formatting date for display: ${new Date(date).toLocaleDateString("en-GB", options).replace(",", "")}`
+    );
     return new Date(date).toLocaleDateString("en-GB", options).replace(",", "");
   };
 
@@ -136,15 +139,19 @@ export default function DashbordFilter({ appliedFilters }) {
       </FormSelect>
 
       <div className="relative inline-block w-full sm:max-w-[210px]">
-        <button
-          onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-          className="flex justify-between w-full whitespace-nowrap items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
-        >
-          {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
-            filters.end_date
-          )}`}
+        <div className="w-full items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm">
+          <button
+            dir="ltr"
+            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+            className="whitespace-nowrap "
+          >
+            {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
+              filters.end_date
+            )}`}
+          </button>
+
           <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-        </button>
+        </div>
 
         {isDatePickerOpen && (
           <div className="absolute mt-2 w-full sm:w-66 bg-white border border-gray-200 rounded-md shadow-lg p-3 z-10 left-0">
