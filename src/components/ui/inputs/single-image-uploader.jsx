@@ -4,6 +4,7 @@ import {
 } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
 import { compressImage } from "@/utils/imageCompression";
+import { Loader2, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -23,6 +24,7 @@ export default function SingleImageUploader({
     value ? { name: null, preview: value, imageId: null } : null
   );
   const [isUploading, setIsUploadingLocal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     if (!value) {
@@ -89,13 +91,16 @@ export default function SingleImageUploader({
   const handleRemoveImage = async (e) => {
     e.stopPropagation();
 
-    if (selectedImage.imageId) {
-      try {
-        await deleteImage(selectedImage.imageId);
-        console.log("Image deleted successfully from server");
-      } catch (error) {
-        console.error("Error deleting image:", error);
-      }
+    const imageID = selectedImage.preview.split("/").pop();
+    if (!imageID) return;
+
+    try {
+      setDeleteLoading(true);
+      await deleteImage(imageID);
+    } catch (error) {
+      console.error("Error deleting image:", error);
+    } finally {
+      setDeleteLoading(false);
     }
 
     setSelectedImage(null);
@@ -126,7 +131,10 @@ export default function SingleImageUploader({
         }
         className="w-full mt-2"
         style={{
-          cursor: disabled || isUploading ? "not-allowed" : "pointer",
+          cursor:
+            disabled || isUploading || deleteLoading
+              ? "not-allowed"
+              : "pointer",
         }}
       >
         {selectedImage || value ? (
@@ -170,20 +178,14 @@ export default function SingleImageUploader({
                 <button
                   type="button"
                   onClick={handleRemoveImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity"
+                  disabled={deleteLoading}
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity disabled:pointer-events-none disabled:cursor-auto"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  {deleteLoading ? (
+                    <Loader2 className="animate-spin h-4 w-4" />
+                  ) : (
+                    <X className="h-4 w-4" />
+                  )}
                 </button>
               )}
             </div>
