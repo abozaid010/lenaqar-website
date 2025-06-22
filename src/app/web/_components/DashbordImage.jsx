@@ -1,11 +1,11 @@
 "use client";
 
+import CalendarModal from "@/components/ui/calendar-modal";
+import { useI18n } from "@/context/translate-api";
 import { Check } from "lucide-react";
+import Image from "next/image";
 import dashborddesctop from "../../../../public/images/dasbordDesctop.png";
 import dashbordmobile from "../../../../public/images/dashbordmobile.png";
-import Image from "next/image";
-import { useI18n } from "@/context/translate-api";
-import CalendarModal from "@/components/ui/calendar-modal";
 
 export default function DashboardImage() {
   const { t } = useI18n();
@@ -53,7 +53,7 @@ export default function DashboardImage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-8 justify-between px-4 items-center container max-w-[1280px] mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 justify-between items-center container">
           {/* Features List */}
           <div className="w-full lg:w-[40%] space-y-4">
             <h2 className="text-xl md:text-2xl font-semibold text-primary mb-5">
