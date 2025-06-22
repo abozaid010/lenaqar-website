@@ -57,10 +57,10 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="relative z-10 container grid grid-cols-1 xl:grid-cols-2"
+        className="relative z-10 container flex justify-between"
       >
         <motion.div
-          className="md:col-span-1 space-y-4"
+          className="flex-1 space-y-4"
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
@@ -105,36 +105,18 @@ const HeroSection = () => {
         </motion.div>
 
         <motion.div
-          className="hidden xl:col-span-1 xl:flex justify-center md:justify-end relative"
+          className="hidden xl:flex flex-1 justify-center md:justify-end relative"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.8 }}
         >
           {/* Large blue circle background */}
-          <motion.div
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40"
-            animate={{
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
+          <div className="absolute top-1/2 left-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
+            <motion.div className="w-72 h-72 md:w-80 md:h-80 rounded-full bg-[#5EADF5]/40" />
+          </div>
 
           {/* Square AI Image */}
-          <motion.div
-            className="absolute top-1/2   left-[55%] transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 md:w-96 md:h-96"
-            animate={{
-              scale: [1, 1.03, 1],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          >
+          <motion.div className="absolute top-1/2 left-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96">
             <Image
               src={"/images/happy man.png"}
               alt={t.heroSection.aiImageAlt}
@@ -155,7 +137,7 @@ const HeroSection = () => {
               }}
             />
             {/* Display messages with improved layout */}
-            <div className="absolute top-0 left-[5%] w-[90%] h-full z-10">
+            <div className="absolute top-0 left-0 w-full h-full z-10">
               {visibleMessages.map((message, index) => (
                 <AiMessageBubble
                   key={index}
