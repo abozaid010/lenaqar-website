@@ -40,7 +40,7 @@ export default function DashboardImage() {
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-[90%] mx-auto py-12 md:py-20">
+      <div className="container py-12 lg:pt-20 lg:pb-24">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-priamry mb-4">
@@ -98,7 +98,7 @@ export default function DashboardImage() {
 
                 {/* Mobile Mockup Image */}
                 <div
-                  className={`hidden lg:block absolute bottom-[-16%] ${isRTL ? "-left-12" : "-right-12"} w-1/3 transform`}
+                  className={`hidden lg:block absolute bottom-[-14%] ${isRTL ? "-left-12" : "-right-12"} w-1/3 transform`}
                 >
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image

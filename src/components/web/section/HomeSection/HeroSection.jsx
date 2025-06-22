@@ -246,7 +246,7 @@ const AiMessageBubble = ({ message, position, total, index }) => {
       }}
     >
       <div
-        className={`px-3 py-2 border rounded-lg shadow-lg font-medium text-sm md:text-base relative min-w-[140px] max-w-[200px] ${getBubbleStyle()} text-white`}
+        className={`p-2 border rounded-lg shadow-lg font-medium text-sm md:text-base relative min-w-[140px] max-w-[200px] ${getBubbleStyle()} text-white`}
       >
         {message}
       </div>
