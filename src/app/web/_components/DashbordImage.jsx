@@ -1,11 +1,11 @@
 "use client";
 
+import CalendarModal from "@/components/ui/calendar-modal";
+import { useI18n } from "@/context/translate-api";
 import { Check } from "lucide-react";
+import Image from "next/image";
 import dashborddesctop from "../../../../public/images/dasbordDesctop.png";
 import dashbordmobile from "../../../../public/images/dashbordmobile.png";
-import Image from "next/image";
-import { useI18n } from "@/context/translate-api";
-import CalendarModal from "@/components/ui/calendar-modal";
 
 export default function DashboardImage() {
   const { t } = useI18n();
@@ -40,7 +40,7 @@ export default function DashboardImage() {
 
   return (
     <div className="bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="w-[90%] mx-auto py-12 md:py-20">
+      <div className="container py-12 lg:pt-20 lg:pb-24">
         {/* Hero Section */}
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-priamry mb-4">
@@ -53,7 +53,7 @@ export default function DashboardImage() {
         </div>
 
         {/* Main Content */}
-        <div className="flex flex-col lg:flex-row gap-8 justify-between px-4 items-center container max-w-[1280px] mx-auto">
+        <div className="flex flex-col lg:flex-row gap-8 justify-between items-center container">
           {/* Features List */}
           <div className="w-full lg:w-[40%] space-y-4">
             <h2 className="text-xl md:text-2xl font-semibold text-primary mb-5">
@@ -98,7 +98,7 @@ export default function DashboardImage() {
 
                 {/* Mobile Mockup Image */}
                 <div
-                  className={`hidden lg:block absolute bottom-[-16%] ${isRTL ? "-left-12" : "-right-12"} w-1/3 transform`}
+                  className={`hidden lg:block absolute bottom-[-14%] ${isRTL ? "-left-12" : "-right-12"} w-1/3 transform`}
                 >
                   <div className="relative rounded-lg border-2 border-white shadow-lg overflow-hidden">
                     <Image

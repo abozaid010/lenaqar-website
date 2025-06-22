@@ -1,15 +1,15 @@
 "use client";
-import Image from "next/image";
-import { ArrowRight, X } from "lucide-react";
 import CalendarModal from "@/components/ui/calendar-modal";
 import { useI18n } from "@/context/translate-api";
+import { ArrowRight, X } from "lucide-react";
+import Image from "next/image";
 
 const DataInsights = () => {
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
 
   return (
-    <section className="w-[90%] mx-auto px-4 my-6 md:my-8">
+    <section className="container my-6 md:my-8">
       <div className="bg-white overflow-hidden mt-4 rounded-2xl shadow-lg">
         <div className="flex flex-col items-center lg:flex-row justify-between gap-6 py-6 px-4 md:px-6">
           {/* Image Side - Improved */}

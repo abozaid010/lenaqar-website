@@ -234,7 +234,6 @@ export default function AddUnitModal({
     }
   };
 
-  console.log("formData", formData);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -294,7 +293,7 @@ export default function AddUnitModal({
         return;
       }
       onClose();
-      // window.location.reload();
+      window.location.reload();
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
