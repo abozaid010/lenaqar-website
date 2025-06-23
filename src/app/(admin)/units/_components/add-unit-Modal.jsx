@@ -112,8 +112,6 @@ export default function AddUnitModal({
     amenities: unitData?.amenities || [],
   }));
 
-  console.log("Unit Data:", unitData);
-
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
   };
