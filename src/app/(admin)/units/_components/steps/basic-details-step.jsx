@@ -238,13 +238,16 @@ export default function BasicDetailsStep({
               </option>
             )}
 
-            {!isLoadingProjects &&
-              dataProject.length > 0 &&
-              dataProject.map((project) => (
-                <option key={project.en_name} value={project.en_name}>
-                  {locale === "ar" ? project.ar_name : project.en_name}
-                </option>
-              ))}
+            {!isLoadingProjects && dataProject.length > 0 && (
+              <>
+                <option value="">{t.basicDetails.selectCompound}</option>
+                {dataProject.map((project) => (
+                  <option key={project.en_name} value={project.en_name}>
+                    {locale === "ar" ? project.ar_name : project.en_name}
+                  </option>
+                ))}
+              </>
+            )}
 
             {!isLoadingProjects && dataProject.length === 0 && (
               <option disabled value="">
