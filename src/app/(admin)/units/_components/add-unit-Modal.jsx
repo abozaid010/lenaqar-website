@@ -48,9 +48,9 @@ export default function AddUnitModal({
     buildingType: unitData?.buildingType || "apartment",
     purpose: unitData?.purpose || "",
     project: unitData?.project || "",
+    project_ar: unitData?.project_ar || "",
     view: unitData?.view || "",
     phase: unitData?.phase || "",
-    // isGated: unitData?.isGated || false,
     city: unitData?.city || "",
     district: unitData?.district || "",
     developer: unitData?.developer || "",
@@ -111,6 +111,8 @@ export default function AddUnitModal({
     },
     amenities: unitData?.amenities || [],
   }));
+
+  console.log("Unit Data:", unitData);
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
