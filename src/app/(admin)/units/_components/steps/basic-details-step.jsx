@@ -28,7 +28,18 @@ export default function BasicDetailsStep({
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
-  const [dataProject, setDataProject] = useState([]);
+  const [dataProject, setDataProject] = useState(() => {
+    if (formData.project) {
+      return [
+        {
+          en_name: formData.project,
+          ar_name: formData.project_ar || "",
+        },
+      ];
+    }
+    return [];
+  });
+
   const [isLoadingProjects, setIsLoadingProjects] = useState(false);
 
   const printLocationDetails = async (city, district) => {
@@ -45,7 +56,6 @@ export default function BasicDetailsStep({
     }
   };
 
-  // Update available compounds when district changes
   useEffect(() => {
     if (formData.city && formData.district) {
       printLocationDetails(formData.city, formData.district);
@@ -222,40 +232,31 @@ export default function BasicDetailsStep({
             required
             error={invalidFields.includes("project")}
           >
-            <option value="">
-              {!formData.city
-                ? t.formLabels.cityFirst
-                : !formData.district
-                  ? t.formLabels.districtFirst
-                  : t.basicDetails.selectCompound}
-            </option>
-            {isLoadingProjects ? (
-              <option disabled value="">
-                Loading projects...
+            {formData.project && isLoadingProjects && (
+              <option key={formData.project} value={formData.project}>
+                {locale === "ar" ? formData.project_ar : formData.project}
               </option>
-            ) : formData.city && formData.district ? (
-              dataProject && dataProject.length > 0 ? (
-                dataProject.map((project) => (
-                  <option key={project.en_name} value={project.en_name}>
-                    {locale === "ar" ? project.ar_name : project.en_name}
-                  </option>
-                ))
-              ) : (
-                <option disabled value="">
-                  No data available
+            )}
+
+            {!isLoadingProjects &&
+              dataProject.length > 0 &&
+              dataProject.map((project) => (
+                <option key={project.en_name} value={project.en_name}>
+                  {locale === "ar" ? project.ar_name : project.en_name}
                 </option>
-              )
-            ) : null}
-            {/* If we have a selected project but it's not in the loaded list, add it separately */}
-            {formData.project &&
-            formData.city &&
-            formData.district &&
-            dataProject &&
-            !dataProject.some((p) => p.name === formData.project) ? (
-              <option key="preserved-selection" value={formData.project}>
-                {formData.project}
+              ))}
+
+            {!isLoadingProjects && dataProject.length === 0 && (
+              <option disabled value="">
+                {t.basicDetails.placeholders.noProjects}
               </option>
-            ) : null}
+            )}
+
+            {formData.city && formData.district && isLoadingProjects && (
+              <option value="">
+                {t.basicDetails.placeholders.loadingProjects}
+              </option>
+            )}
           </FormSelect>
 
           <button

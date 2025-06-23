@@ -1,6 +1,5 @@
 
 export default {
-  // common
   direction: "rtl",
   login: "تسجيل الدخول",
   header: {
@@ -535,6 +534,8 @@ export default {
       unitTitle: "أدخل عنوان الوحدة",
       district: "اسم الحي",
       code: "كود الوحدة (اختياري)",
+      loadingProjects: "جارٍ تحميل المشاريع...",
+      noProjects: "لا توجد مشاريع متاحة",
     },
 
     code: "كود الوحدة",

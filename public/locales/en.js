@@ -554,6 +554,8 @@ export default {
       unitTitle: "Enter unit title",
       district: "district name",
       code: "Unit Code (optional)",
+      loadingProjects: "Loading projects...",
+      noProjects: "No projects available",
     },
     code: "Unit Code",
     model: "Unit Model",

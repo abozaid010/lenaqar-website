@@ -45,20 +45,20 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const tomorrow = useMemo(() => {
     const date = new Date();
-    date.setDate(date.getDate() + 2);
+    date.setDate(date.getDate() + 1);
     return date;
   }, []);
 
-  const tenDaysAgo = useMemo(() => {
+  const twoMonthsAgo = useMemo(() => {
     const date = new Date(tomorrow);
-    date.setDate(tomorrow.getDate() - 11);
+    date.setMonth(tomorrow.getMonth() - 2);
     return date;
   }, [tomorrow]);
 
   const [filters, setFilters] = useState(() => {
     return {
       action: appliedFilters.action || "",
-      start_date: appliedFilters.start_date || formatDate(tenDaysAgo),
+      start_date: appliedFilters.start_date || formatDate(twoMonthsAgo),
       end_date: appliedFilters.end_date || formatDate(tomorrow),
     };
   });
@@ -118,7 +118,6 @@ export default function DashbordFilter({ appliedFilters }) {
     });
   };
 
-  // Function to handle print button click - triggers browser print dialog
   const handlePrint = () => {
     window.print();
   };
