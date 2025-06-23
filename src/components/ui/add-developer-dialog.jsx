@@ -5,7 +5,7 @@ import {
   updateDeveloper,
 } from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
-import FormInput from "@/components/ui/inputs/form-input";
+import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
@@ -32,7 +32,8 @@ export default function AddDeveloperDialog({
       ? { ...developer }
       : {
           id: uuidv4(),
-          name: "",
+          en_name: "",
+          ar_name: "",
           description: "",
           logo: "",
           client_id: getClientId(),
@@ -45,7 +46,8 @@ export default function AddDeveloperDialog({
     } else {
       setFormData({
         id: uuidv4(),
-        name: "",
+        en_name: "",
+        ar_name: "",
         description: "",
         logo: "",
         client_id: getClientId(),
@@ -75,6 +77,17 @@ export default function AddDeveloperDialog({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Validation
+    const newErrors = {};
+    if (!formData.ar_name?.trim())
+      newErrors.ar_name = t.errors?.required || "Required";
+    if (!formData.en_name?.trim())
+      newErrors.en_name = t.errors?.required || "Required";
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       let res;
@@ -114,16 +127,20 @@ export default function AddDeveloperDialog({
       }
     >
       <div className="space-y-2">
-        <FormInput
-          type="text"
+        <MultiLangInput
           label={t.DeveloperName}
-          name="name"
-          value={formData.name}
-          disabled={isEdit}
           required
+          arValue={formData.ar_name}
+          enValue={formData.en_name}
           onChange={handleChange}
-          error={errors.name}
-          errorMessage={errors.name || ""}
+          placeholders={{
+            ar: t.placeholders?.developerArName || "اسم المطور (العربية)",
+            en: t.placeholders?.developerEnName || "Developer Name (English)",
+          }}
+          errors={{
+            ar_name: errors.ar_name,
+            en_name: errors.en_name,
+          }}
         />
 
         <div>
