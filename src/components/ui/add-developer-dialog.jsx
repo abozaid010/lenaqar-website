@@ -32,6 +32,7 @@ export default function AddDeveloperDialog({
       ? { ...developer }
       : {
           id: uuidv4(),
+          name: "",
           en_name: "",
           ar_name: "",
           description: "",
@@ -46,12 +47,15 @@ export default function AddDeveloperDialog({
     } else {
       setFormData({
         id: uuidv4(),
+        name: "",
         en_name: "",
         ar_name: "",
         description: "",
         logo: "",
         client_id: getClientId(),
       });
+      setErrors({});
+      setMissingLang(null);
     }
   }, [developer, isOpen]);
 
@@ -66,7 +70,6 @@ export default function AddDeveloperDialog({
       [name]: value,
     });
 
-    // Clear error for this field when user types
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -100,10 +103,14 @@ export default function AddDeveloperDialog({
     setIsSubmitting(true);
     try {
       let res;
+      const submittedData = {
+        ...formData,
+        name: formData.en_name,
+      };
       if (isEdit) {
-        res = await updateDeveloper(formData, developer.id);
+        res = await updateDeveloper(submittedData, developer.id);
       } else {
-        res = await addDeveloper(formData);
+        res = await addDeveloper(submittedData);
       }
       if (res.code === 200) {
         toast.success(

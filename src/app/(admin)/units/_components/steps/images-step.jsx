@@ -123,11 +123,16 @@ export default function ImagesStep({
                 }`}
               >
                 <option value="">{t.selectDeveloper}</option>
-                {developers.map((d, idx) => (
-                  <option key={idx} value={d}>
-                    {d}
-                  </option>
-                ))}
+                {developers
+                  ?.slice()
+                  .sort((a, b) =>
+                    a.localeCompare(b, undefined, { sensitivity: "base" })
+                  )
+                  .map((d, idx) => (
+                    <option key={idx} value={d}>
+                      {d}
+                    </option>
+                  ))}
               </select>
               <div
                 className={`absolute inset-y-0 ${locale === "ar" ? "left-0" : "right-0"} flex items-center px-2 pointer-events-none`}

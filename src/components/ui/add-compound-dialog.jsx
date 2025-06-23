@@ -40,6 +40,7 @@ export default function AddCompoundDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [errors, setErrors] = useState({});
+  const [missingLang, setMissingLang] = useState(null);
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
@@ -155,12 +156,12 @@ export default function AddCompoundDialog({
 
     if (!formData.ar_name.trim()) {
       newErrors.ar_name = "Arabic compound name is required";
-      toast.error("Arabic compound name is required");
+      setMissingLang("ar");
     }
 
     if (!formData.en_name.trim()) {
       newErrors.en_name = "English compound name is required";
-      toast.error("English compound name is required");
+      setMissingLang("en");
     }
 
     if (!formData.city.trim()) {
@@ -180,9 +181,6 @@ export default function AddCompoundDialog({
     if (!formData.area || Number(formData.area) <= 0) {
       newErrors.area =
         t.formValidation?.areaRequired || "Area must be greater than 0";
-      toast.error(
-        t.formValidation?.areaRequired || "Area must be greater than 0"
-      );
     }
 
     setErrors(newErrors);
@@ -243,7 +241,6 @@ export default function AddCompoundDialog({
           : "Failed to add compound. Please try again."
       );
       setErrors({
-        // Consider adding a general error state or showing error message from backend if available
         submit:
           error.message ||
           (editMode
@@ -302,11 +299,15 @@ export default function AddCompoundDialog({
                 arValue={formData.ar_name}
                 enValue={formData.en_name}
                 onChange={handleChange}
-                errors={errors}
-                placeholders={{
-                  ar: t.placeholders?.projectArName,
-                  en: t.placeholders?.projectEnName,
+                errors={{
+                  ar_name: errors.ar_name,
+                  en_name: errors.en_name,
                 }}
+                placeholders={{
+                  ar: "اسم المشروع (العربية)",
+                  en: "Compound Name (English)",
+                }}
+                missingLang={missingLang}
               />
             </div>
 
@@ -357,7 +358,6 @@ export default function AddCompoundDialog({
               onChange={handleChange}
               required
               error={errors.district}
-              errorMessage={errors.district}
               disabled={!formData.city}
             >
               <option value="">
