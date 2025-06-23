@@ -1,6 +1,6 @@
 import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function MultiLangInput({
   label,
@@ -10,9 +10,16 @@ export default function MultiLangInput({
   onChange,
   errors = {},
   placeholders = {},
+  missingLang,
 }) {
-  const [activeLang, setActiveLang] = useState("ar");
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const [activeLang, setActiveLang] = useState(locale || "en");
+
+  useEffect(() => {
+    if (missingLang) {
+      setActiveLang(missingLang);
+    }
+  }, [missingLang, errors.en_name, errors.ar_name]);
 
   return (
     <div>

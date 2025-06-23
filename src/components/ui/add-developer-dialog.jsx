@@ -22,11 +22,11 @@ export default function AddDeveloperDialog({
 }) {
   const isEdit = !!developer;
 
-  // Get client_id from cookies if not provided
   const getClientId = () => {
     return client_id || Cookies.get("lena-website-client_id") || "";
   };
 
+  const [missingLang, setMissingLang] = useState(null);
   const [formData, setFormData] = useState(
     developer
       ? { ...developer }
@@ -79,12 +79,21 @@ export default function AddDeveloperDialog({
     e.preventDefault();
     // Validation
     const newErrors = {};
-    if (!formData.ar_name?.trim())
+    if (!formData.ar_name?.trim()) {
       newErrors.ar_name = t.errors?.required || "Required";
-    if (!formData.en_name?.trim())
-      newErrors.en_name = t.errors?.required || "Required";
-    if (Object.keys(newErrors).length > 0) {
+      setMissingLang("ar");
       setErrors(newErrors);
+      return;
+    }
+
+    if (!formData.en_name?.trim()) {
+      newErrors.en_name = t.errors?.required || "Required";
+      setMissingLang("en");
+      setErrors(newErrors);
+      return;
+    }
+
+    if (Object.keys(newErrors).length > 0) {
       return;
     }
 
@@ -141,6 +150,7 @@ export default function AddDeveloperDialog({
             ar_name: errors.ar_name,
             en_name: errors.en_name,
           }}
+          missingLang={missingLang}
         />
 
         <div>
