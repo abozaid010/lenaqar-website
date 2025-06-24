@@ -1,37 +1,26 @@
 "use client";
 
-import { useState, useRef } from "react";
-import Image from "next/image";
-import { Share2 } from "lucide-react";
-import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/components/services/serviceFetching";
-import shareButton from "../../../../public/share.svg";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Thumbs } from "swiper/modules";
+import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import ShareModal from "@/components/ui/units-share-modal";
+import Image from "next/image";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
 import "swiper/css/thumbs";
-import toast from "react-hot-toast";
+import { Navigation, Thumbs } from "swiper/modules";
+import { Swiper, SwiperSlide } from "swiper/react";
+import shareButton from "../../../../public/share.svg";
 
-export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
+export default function ImageGallary({ images, unitName, unitId, readOnly }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
 
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const fullscreenSwiperRef = useRef(null);
-
-  const openFullscreenGallery = () => {
-    setIsFullscreen(true);
-    if (fullscreenSwiperRef.current && fullscreenSwiperRef.current.swiper) {
-      setTimeout(() => {
-        fullscreenSwiperRef.current.swiper.slideTo(mainImageIndex, 0);
-      }, 100);
-    }
-  };
 
   const handleShareClick = async (e) => {
     if (!unitId) {
@@ -54,15 +43,11 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
     }
   };
 
-  const closeFullscreenGallery = () => {
-    setIsFullscreen(false);
-  };
-
   return (
     <div className="space-y-2 w-full md:w-1/2 xl:w-2/5">
       <div
         className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
-        onClick={openFullscreenGallery}
+        onClick={() => setIsFullscreen(true)}
       >
         <Image
           src={images[mainImageIndex].url || "/images/defaultImage.jpg"}
@@ -75,7 +60,7 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
           loading="eager"
           fill
           style={{ objectFit: "fill" }}
-          className="rounded-md transition-transform duration-300 group-hover:scale-105"
+          className="rounded-md transition-transform duration-300 group-hover:scale-[1.02]"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -99,13 +84,17 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
         </div>
 
         {/* Share Button */}
-     { !readOnly ?  <button
-          type="button"
-          onClick={handleShareClick}
-          className="absolute top-3 left-2 cursor-pointer p-2.5  "
-        >
-          <img src={shareButton.src} alt="share" />
-        </button> : ""}
+        {!readOnly ? (
+          <button
+            type="button"
+            onClick={handleShareClick}
+            className="absolute top-3 left-2 cursor-pointer p-2.5  "
+          >
+            <img src={shareButton.src} alt="share" />
+          </button>
+        ) : (
+          ""
+        )}
       </div>
 
       {/* Thumbnail swiper */}
@@ -149,86 +138,12 @@ export default function ImageGallary({ images, unitName, unitId ,readOnly }) {
       </Swiper>
 
       {/* Enhanced Fullscreen Gallery Modal */}
-      {isFullscreen && (
-        <div className="fixed inset-0 bg-black z-50 flex flex-col">
-          <div className="flex justify-between items-center p-4">
-            <div className="text-white text-lg font-medium">{unitName}</div>
-            <button
-              onClick={closeFullscreenGallery}
-              className="text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-70 transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-          <div className="flex-1 flex items-center justify-center">
-            <Swiper
-              ref={fullscreenSwiperRef}
-              modules={[Navigation, Pagination]}
-              spaceBetween={0}
-              slidesPerView={1}
-              navigation
-              pagination={{ clickable: true }}
-              className="w-full h-full"
-              initialSlide={mainImageIndex}
-              onSlideChange={(swiper) => setMainImageIndex(swiper.activeIndex)}
-            >
-              {images.length > 0 ? (
-                images.map((image, index) => (
-                  <SwiperSlide
-                    key={index}
-                    className="flex items-center justify-center"
-                  >
-                    <div className="relative w-full h-full max-w-7xl max-h-screen mx-auto flex items-center justify-center">
-                      <Image
-                        src={image.url || "/images/defaultImage.jpg"}
-                        onError={(e) => {
-                          e.currentTarget.src = "/images/defaultImage.jpg";
-                          e.currentTarget.onerror = null;
-                        }}
-                        alt={`Unit - ${index + 1}`}
-                        width={1200}
-                        height={800}
-                        priority={true}
-                        style={{ objectFit: "contain" }}
-                        loading="eager"
-                        className="max-h-[80vh] w-auto"
-                      />
-                    </div>
-                  </SwiperSlide>
-                ))
-              ) : (
-                <SwiperSlide className="flex items-center justify-center">
-                  <div className="text-white text-center">
-                    <p className="text-xl">No images available</p>
-                  </div>
-                </SwiperSlide>
-              )}
-            </Swiper>
-          </div>
-          <div className="p-4 flex justify-between items-center bg-black bg-opacity-50 backdrop-blur-sm">
-            <div className="text-white">
-              {images.length > 0
-                ? `Image ${mainImageIndex + 1} of ${images.length}`
-                : "No images"}
-            </div>
-            <div className="text-white text-sm">
-              Use arrow keys or swipe to navigate
-            </div>
-          </div>
-        </div>
+      {images.length > 0 && (
+        <ImageSwiperModal
+          open={isFullscreen}
+          onClose={() => setIsFullscreen(false)}
+          images={images}
+        />
       )}
 
       {/* ShareModal component with the correct props */}
