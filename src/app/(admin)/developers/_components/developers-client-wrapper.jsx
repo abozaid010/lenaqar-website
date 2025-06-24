@@ -12,7 +12,7 @@ export default function DevelopersClientWrapper({
   initialDevelopers,
   clientId,
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [developers, setDevelopers] = useState(initialDevelopers || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -103,7 +103,9 @@ export default function DevelopersClientWrapper({
                     className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer flex justify-between items-start gap-4"
                   >
                     <div>
-                      <h3 className="font-semibold text-lg">{d.name}</h3>
+                      <h3 className="font-semibold text-lg">
+                        {locale === "ar" ? d.ar_name : d.en_name}
+                      </h3>
 
                       {d.description && (
                         <span className="text-sm text-gray-700 break-all whitespace-pre-line">

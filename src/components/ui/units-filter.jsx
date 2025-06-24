@@ -11,7 +11,7 @@ const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({
   appliedFilters,
-  developers,
+  developers = [],
   compounds,
   clientName,
   clientId,
@@ -98,10 +98,6 @@ export default function UnitsFilter({
     { value: "twinhouse", label: t.basicDetails.buildingTypes.twinhouse },
     { value: "house", label: t.basicDetails.buildingTypes.house },
   ];
-
-  const developersSet = Array.from(
-    new Set(developers.map((developer) => developer.name))
-  );
 
   useEffect(() => {
     // Update selected project name when locale changes
@@ -400,21 +396,25 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allDevelopers}
               </div>
-              {[...developersSet]
+              {developers
                 ?.slice()
-                .sort((a, b) =>
-                  a.localeCompare(b.trim(), "ar", { sensitivity: "base" })
-                )
+                .sort((a, b) => {
+                  const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                  const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                  return nameA.trim().localeCompare(nameB.trim(), locale, {
+                    sensitivity: "base",
+                  });
+                })
                 .map((d, idx) => (
                   <div
                     key={idx}
                     className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                     onClick={() => {
-                      handleFilterChange("developer_name", d);
+                      handleFilterChange("developer_name", d.name);
                       setIsDeveloperDropdownOpen(false);
                     }}
                   >
-                    {d}
+                    {locale === "ar" ? d.ar_name : d.en_name}
                   </div>
                 ))}
             </div>
@@ -672,7 +672,7 @@ export default function UnitsFilter({
               clientId={clientId}
               clientName={clientName}
               compounds={compounds}
-              developers={developersSet}
+              developers={developers}
               citiesAndDistricts={formattedDataCitiesAndDistricts}
               className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
             />

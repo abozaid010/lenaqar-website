@@ -104,8 +104,11 @@ export default function BasicDetailsStep({
     }
 
     if (name === "project") {
-      // reset phase when project changes
-      updateFormData({ phase: "" });
+      const project_ar = dataProject.find(
+        (project) => project.en_name === updatedValue
+      );
+
+      updateFormData({ phase: "", project_ar: project_ar?.ar_name || "" });
     }
   };
 
