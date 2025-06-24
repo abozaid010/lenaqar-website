@@ -45,7 +45,7 @@ export default function ImageSwiperModal({
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative p-4 w-[85%] h-[80vh] max-w-5xl max-h-screen bg-white rounded-lg overflow-hidden flex flex-col">
+      <div className="relative p-4 w-[85%] h-[85vh] max-w-7xl max-h-screen bg-white rounded-lg overflow-hidden flex flex-col">
         <X
           size={26}
           onClick={onClose}
