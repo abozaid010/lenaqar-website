@@ -99,7 +99,6 @@ export default function UnitsFilter({
     { value: "house", label: t.basicDetails.buildingTypes.house },
   ];
 
-  console.log("Developers Set:", developers);
   useEffect(() => {
     // Update selected project name when locale changes
     if (appliedFilters.project_name) {
