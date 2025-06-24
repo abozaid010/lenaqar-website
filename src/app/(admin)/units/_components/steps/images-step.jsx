@@ -18,7 +18,7 @@ export default function ImagesStep({
 }) {
   const { t, locale } = useI18n();
 
-  const [developers, setDevelopers] = useState(Array.from(developersSet) || []);
+  const [developers, setDevelopers] = useState(developersSet || []);
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
@@ -32,7 +32,7 @@ export default function ImagesStep({
   };
 
   const handleAddDeveloper = (newDeveloper) => {
-    setDevelopers([...developers, newDeveloper.name]);
+    setDevelopers([...developers, newDeveloper]);
     updateFormData({ developer: newDeveloper.name });
   };
 
@@ -125,12 +125,16 @@ export default function ImagesStep({
                 <option value="">{t.selectDeveloper}</option>
                 {developers
                   ?.slice()
-                  .sort((a, b) =>
-                    a.localeCompare(b, undefined, { sensitivity: "base" })
-                  )
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
                   .map((d, idx) => (
-                    <option key={idx} value={d}>
-                      {d}
+                    <option key={idx} value={d.en_name}>
+                      {locale === "ar" ? d.ar_name : d.en_name}
                     </option>
                   ))}
               </select>

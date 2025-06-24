@@ -402,7 +402,7 @@ export default function UnitsFilter({
                 .sort((a, b) => {
                   const nameA = locale === "ar" ? a.ar_name : a.en_name;
                   const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                  return nameA.localeCompare(nameB, locale, {
+                  return nameA.trim().localeCompare(nameB.trim(), locale, {
                     sensitivity: "base",
                   });
                 })
