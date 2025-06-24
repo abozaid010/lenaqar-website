@@ -138,18 +138,17 @@ export default function DashbordFilter({ appliedFilters }) {
       </FormSelect>
 
       <div className="relative inline-block w-full sm:max-w-[210px]">
-        <div className="w-full items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm">
-          <button
-            dir="ltr"
-            onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-            className="whitespace-nowrap "
-          >
+        <div
+          onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
+          className="w-full items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
+        >
+          <button dir="ltr" className="whitespace-nowrap ">
             {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
               filters.end_date
             )}`}
           </button>
 
-          <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <ChevronDown className="absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
         </div>
 
         {isDatePickerOpen && (
