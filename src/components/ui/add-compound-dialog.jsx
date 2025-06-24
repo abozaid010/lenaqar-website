@@ -11,13 +11,13 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
+import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import CitySelect from "./inputs/sorted-city-select";
 
 export default function AddCompoundDialog({
   clientId,
@@ -268,12 +268,12 @@ export default function AddCompoundDialog({
   };
 
   const handleAddDeveloper = (newDeveloper) => {
-    setDevelopers([...developers, newDeveloper.name]);
+    setDevelopers([...developers, newDeveloper]);
 
     setFormData((prev) => {
       return {
         ...prev,
-        developer_name: newDeveloper.name,
+        developer_name: newDeveloper.en_name,
       };
     });
   };
@@ -434,12 +434,16 @@ export default function AddCompoundDialog({
                 </option>
                 {developers
                   ?.slice()
-                  .sort((a, b) =>
-                    a.localeCompare(b, undefined, { sensitivity: "base" })
-                  )
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
                   .map((d, idx) => (
-                    <option key={idx} value={d}>
-                      {d}
+                    <option key={idx} value={d.en_name}>
+                      {locale === "ar" ? d.ar_name : d.en_name}
                     </option>
                   ))}
               </FormSelect>

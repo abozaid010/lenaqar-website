@@ -42,10 +42,6 @@ const Page = async ({ params }) => {
     hasAccess = false;
   }
 
-  const developersSet = Array.from(
-    new Set(developers?.map((developer) => developer.name))
-  );
-
   return (
     <div className="container mx-auto h-full">
       {hasAccess ? (
@@ -53,7 +49,7 @@ const Page = async ({ params }) => {
           <UnitPageHeader
             unit={unit.data}
             compounds={comboundata}
-            developers={developersSet}
+            developers={developers}
             citiesAndDistricts={citiesAndDistricts}
             clientId={clientId}
           />
