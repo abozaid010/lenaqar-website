@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "swiper/css";
 import { Keyboard, Navigation } from "swiper/modules";
@@ -16,6 +16,19 @@ export default function ImageSwiperModal({
   showMasterPlanLabel = true,
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [open]);
 
   if (!open) return null;
 
