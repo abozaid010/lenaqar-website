@@ -22,10 +22,10 @@ export default function BotMessageCard({ message }) {
 
   const propertiesItems = properties ? Object.values(properties) : [];
   const { t } = useI18n();
-
+  console.log("Bot Message Card", message);
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
-      <div className="text-sm">{bot_response || message}</div>
+      {bot_response && <div className="text-sm">{bot_response}</div>}
 
       {propertiesItems?.length > 0 &&
         propertiesItems.map((itm, idx) => (
