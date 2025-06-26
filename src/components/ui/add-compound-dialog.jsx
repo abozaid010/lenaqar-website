@@ -164,6 +164,15 @@ export default function AddCompoundDialog({
       setMissingLang("en");
     }
 
+    if (!formData.description.trim()) {
+      newErrors.description =
+        t.formValidation?.descriptionRequired || "Description is required";
+    } else if (formData.description.trim().length < 300) {
+      newErrors.description =
+        t.formValidation?.descriptionMinLength ||
+        "Description must be at least 300 characters";
+    }
+
     if (!formData.city.trim()) {
       newErrors.city = t.formValidation?.cityRequired || "City is required";
     }
@@ -313,16 +322,31 @@ export default function AddCompoundDialog({
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.description || "Description"}
+              <label
+                className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700"}`}
+              >
+                {t.formLabels?.description || "Description"}{" "}
+                <span className="text-red-500">*</span>
+                <span className="text-xs text-gray-500 ml-2">
+                  ({formData.description.length}/300 min)
+                </span>
               </label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                rows={3}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-              ></textarea>
+                required
+                rows={11}
+                className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.description ? "border-red-500" : "border-gray-300"
+                }`}
+                placeholder={t.placeholders.projectDescription}
+              />
+              {errors.description && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             {/* Location */}
@@ -383,21 +407,17 @@ export default function AddCompoundDialog({
 
             {/* Details */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t.formLabels?.area || "Area (m²)"}{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="number"
-                  name="area"
-                  value={formData.area}
-                  placeholder="1000"
-                  onChange={handleChange}
-                  min="0"
-                  className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+              <FormInput
+                type="number"
+                name="area"
+                label={t.formLabels?.area || "Area (m²)"}
+                value={formData.area}
+                onChange={handleChange}
+                required
+                placeholder="1000"
+                min="0"
+                error={errors.area}
+              />
 
               <div className="flex items-center gap-1 h-full pt-6">
                 <input

@@ -2,7 +2,7 @@
 
 import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
-import { convertArabicToEnglishNumbers, formatPrice } from "@/utils/formatters";
+import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import { Plus, Trash2Icon } from "lucide-react";
 
 export default function SaleDetailsStep({
@@ -41,7 +41,7 @@ export default function SaleDetailsStep({
     updateFormData({
       paymentPlans: [
         ...formData.paymentPlans,
-        { years: 1, price: "", maintenance: "" },
+        { years: 1, price: "", maintenance: "", downPayment: "" },
       ],
     });
   };
@@ -57,10 +57,10 @@ export default function SaleDetailsStep({
     updateFormData({ paymentPlans: updatedPlans });
 
     setInvalidFields((prev) => {
-      if (field === "price" && value === "") {
-        return [...prev, `price-${index}`];
+      if ((field === "price" || field === "downPayment") && value === "") {
+        return [...prev, `${field}-${index}`];
       } else {
-        return prev.filter((f) => f !== `price-${index}`);
+        return prev.filter((f) => f !== `${field}-${index}`);
       }
     });
   };
@@ -72,7 +72,7 @@ export default function SaleDetailsStep({
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
         {/* Total Price */}
         <FormInput
           label={t.saleDetails.totalPrice}
@@ -95,17 +95,6 @@ export default function SaleDetailsStep({
           onChange={handleChange}
           type="date"
           error={invalidFields.includes("deliveryDate")}
-        />
-
-        {/* Down Payment */}
-        <FormInput
-          label={t.saleDetails.downPayment}
-          name="downPayment"
-          value={formData.downPayment}
-          onChange={(e) => handleChange(e, "money")}
-          placeholder="200000"
-          type="money"
-          adornment="EGP"
         />
       </div>
 
@@ -132,63 +121,65 @@ export default function SaleDetailsStep({
             {formData?.paymentPlans?.map((plan, index) => (
               <div
                 key={index}
-                className="flex items-center gap-4 py-1 border-b border-gray-300 pb-4"
+                className="flex items-center py-1 border-b border-gray-300 pb-4"
               >
-                <div className="flex-grow grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t.saleDetails.years}
-                    </label>
-                    <input
-                      type="text"
-                      value={plan.years}
+                <div className="flex-grow grid grid-cols-1 md:grid-cols-7 gap-1.5">
+                  <FormInput
+                    label={t.saleDetails.years}
+                    placeholder={"1"}
+                    name={`years-${index}`}
+                    required
+                    value={plan.years}
+                    onChange={(e) =>
+                      updatePaymentPlan(index, "years", e.target.value)
+                    }
+                    error={invalidFields.includes(`years-${index}`)}
+                    type="number"
+                  />
+
+                  <div className="col-span-2">
+                    <FormInput
+                      label={t.saleDetails.price}
+                      name={`price-${index}`}
                       required
-                      onChange={(e) =>
-                        updatePaymentPlan(index, "years", e.target.value)
-                      }
-                      min="1"
-                      className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      className={`block text-sm font-medium mb-1 ${
-                        invalidFields.includes(`price-${index}`)
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {t.saleDetails.price}{" "}
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      data-format-price
-                      placeholder="20000"
-                      value={formatPrice(plan.price)}
+                      value={plan.price}
                       onChange={(e) =>
                         updatePaymentPlan(index, "price", e.target.value)
                       }
-                      className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
-                        invalidFields.includes(`price-${index}`)
-                          ? "border-red-500 ring-red-500"
-                          : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                      }`}
+                      placeholder="500000"
+                      error={invalidFields.includes(`price-${index}`)}
+                      type="money"
+                      adornment="EGP"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t.saleDetails.maintenance}
-                    </label>
-                    <input
-                      type="text"
-                      data-format-price
-                      placeholder="2000"
-                      value={formatPrice(plan.maintenance)}
+
+                  <div className="col-span-2">
+                    <FormInput
+                      label={t.saleDetails.downPayment}
+                      name={`downPayment-${index}`}
+                      required
+                      value={plan.downPayment}
+                      onChange={(e) =>
+                        updatePaymentPlan(index, "downPayment", e.target.value)
+                      }
+                      placeholder="20000"
+                      error={invalidFields.includes(`downPayment-${index}`)}
+                      type="money"
+                      adornment="EGP"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormInput
+                      label={t.saleDetails.maintenance}
+                      name={`maintenance-${index}`}
+                      value={plan.maintenance}
                       onChange={(e) =>
                         updatePaymentPlan(index, "maintenance", e.target.value)
                       }
-                      className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="2000"
+                      type="money"
+                      adornment="EGP"
                     />
                   </div>
                 </div>
