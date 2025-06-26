@@ -127,11 +127,20 @@ export default function AddUnitModal({
         "purpose",
         "city",
         "view",
-        "roomsCount",
-        "bathroomCount",
         "district",
       ];
-      const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
+      // Add rooms and bathroom count only if building type is not office
+      if (formData.buildingType !== "office") {
+        requiredFields.push("roomsCount", "bathroomCount");
+      }
+      const zeroFields = [
+        "floor",
+        "landArea",
+        "gardenSize",
+        "garageArea",
+        "roomsCount",
+        "bathroomCount",
+      ];
       const sanitizedData = { ...formData };
 
       // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
