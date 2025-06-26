@@ -162,8 +162,14 @@ export default function AddUnitModal({
         // Validate paymentPlans
         if (SellFormData.paymentPlans.length > 0) {
           SellFormData.paymentPlans.forEach((plan, index) => {
+            if (plan.years === "" || plan.years === 0) {
+              missingFields.push(`years-${index}`);
+            }
             if (!plan.price || plan.price === 0) {
               missingFields.push(`price-${index}`);
+            }
+            if (!plan.downPayment || plan.downPayment === 0) {
+              missingFields.push(`downPayment-${index}`);
             }
           });
         }

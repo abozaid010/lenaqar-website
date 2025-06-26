@@ -41,7 +41,7 @@ export default function SaleDetailsStep({
     updateFormData({
       paymentPlans: [
         ...formData.paymentPlans,
-        { years: 1, price: "", maintenance: "" },
+        { years: 1, price: "", maintenance: "", downPayment: "" },
       ],
     });
   };
@@ -57,10 +57,10 @@ export default function SaleDetailsStep({
     updateFormData({ paymentPlans: updatedPlans });
 
     setInvalidFields((prev) => {
-      if (field === "price" && value === "") {
-        return [...prev, `price-${index}`];
+      if ((field === "price" || field === "downPayment") && value === "") {
+        return [...prev, `${field}-${index}`];
       } else {
-        return prev.filter((f) => f !== `price-${index}`);
+        return prev.filter((f) => f !== `${field}-${index}`);
       }
     });
   };
@@ -133,7 +133,7 @@ export default function SaleDetailsStep({
                     onChange={(e) =>
                       updatePaymentPlan(index, "years", e.target.value)
                     }
-                    error={invalidFields.includes(`year-${index}`)}
+                    error={invalidFields.includes(`years-${index}`)}
                     type="number"
                   />
 
