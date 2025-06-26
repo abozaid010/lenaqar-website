@@ -997,5 +997,7 @@ export default {
   placeholders: {
     projectArName: "Enter project Name In Arabic",
     projectEnName: "Enter project Name In English",
+    projectDescription:
+      "Add area, delivery, unit types and pyament plan about this project.",
   },
 };

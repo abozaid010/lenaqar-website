@@ -1035,5 +1035,7 @@ export default {
   placeholders: {
     projectArName: "أدخل اسم المشروع بالعربية",
     projectEnName: "أدخل اسم المشروع بالإنجليزية",
+    projectDescription:
+      "برجاء اضافة تفاصيل المشروع وخطط السداد ومواعيد الاستلام  وجودة المشروع",
   },
 };
