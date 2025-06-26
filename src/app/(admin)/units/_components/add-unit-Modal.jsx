@@ -192,6 +192,7 @@ export default function AddUnitModal({
             years: plan.years === "" ? 0 : plan.years,
             price: plan.price === "" ? 0 : plan.price,
             maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
+            downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
           };
         });
 
