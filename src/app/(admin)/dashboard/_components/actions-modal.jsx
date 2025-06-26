@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import formatDateForDisplay from "@/utils/formateDate";
+import { formatDateForDisplay } from "@/utils/formateDate";
 import { X } from "lucide-react";
 import NewActionForm from "./new-action-form";
 const NOPREFRERED_TIME = [
