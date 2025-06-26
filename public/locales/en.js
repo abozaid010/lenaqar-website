@@ -1,4 +1,3 @@
-
 export default {
   // common
   direction: "ltr",
@@ -41,7 +40,7 @@ export default {
     requestDemo: "Request Demo",
     addNew: "Add New",
     addPhase: " Add Phase",
-    updatePhase: " update Phase"
+    updatePhase: " update Phase",
   },
   heroSection: {
     title1: "Sell Smarter",
@@ -201,7 +200,7 @@ export default {
     },
   },
   sidebar: {
-    "schedule": "Calendar",
+    schedule: "Calendar",
     myProjects: "My Projects",
     dashboard: "Conversations",
     analytics: "Analytics",
@@ -219,25 +218,25 @@ export default {
     developers: "Developers",
   },
   schaduall: {
-    "assignError": "Failed to assign salesperson",
-    "salesAssigned": "Salesperson assigned successfully",
-    "ChooseSalesperson": "    select your sales for this task",
-    "Available": "Available",
-    "NoSalesAvailable": "no Sales Avaliabel",
-    "noappointments": "لا توجد مواعيد هذا الأسبوع",
-    "noSale": "لا توجد مبيعات متاحة",
-    "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-    "Schedule": "مهام الاسبوع",
+    assignError: "Failed to assign salesperson",
+    salesAssigned: "Salesperson assigned successfully",
+    ChooseSalesperson: "    select your sales for this task",
+    Available: "Available",
+    NoSalesAvailable: "no Sales Avaliabel",
+    noappointments: "لا توجد مواعيد هذا الأسبوع",
+    noSale: "لا توجد مبيعات متاحة",
+    scheduleweek: "جدولك خالٍ هذا الأسبوع.",
+    Schedule: "مهام الاسبوع",
   },
-  "Noappointments": "No appointments this week",
-  "scheduleweek": "Your schedule is clear for this week.",
-  "Schedule": " Week Schedule",
-  "next": "next",
-  "previous": "previous",
-  "AllSales": "All Sales",
-  "Unassigned": "Unassigned",
-  "Noappointments": "No Appointments",
-  "scheduleweek": "No appointments scheduled for this week",
+  Noappointments: "No appointments this week",
+  scheduleweek: "Your schedule is clear for this week.",
+  Schedule: " Week Schedule",
+  next: "next",
+  previous: "previous",
+  AllSales: "All Sales",
+  Unassigned: "Unassigned",
+  Noappointments: "No Appointments",
+  scheduleweek: "No appointments scheduled for this week",
   dashboardFilter: {
     actions: {
       all: "All actions",
@@ -292,7 +291,7 @@ export default {
     unreadMessages: {
       na: "N/A",
       count: "{count} unread messages",
-    }
+    },
   },
   actionForm: {
     actions: {
@@ -592,9 +591,9 @@ export default {
   },
   saleDetails: {
     financialDetails: "Financial Details",
-    totalPrice: "Total Price",
+    totalPrice: "cach Price",
     deliveryDate: "Delivery Date",
-    downPayment: "Down Payment",
+    downPayment: "yearly installment",
     paymentPlans: "Payment Plans",
     addPlan: "Add Plan",
     noPlans: "No payment plans added yet.",
@@ -986,7 +985,7 @@ export default {
     updatePhasesuccess: "   phase updated successfuly",
     updatePhaseFaile: " Failed to update phase  ",
     addnew: "add new phase",
-    delete: "phase delete successfuly"
+    delete: "phase delete successfuly",
   },
   developerPage: {
     DeleteTitle: "Delete Developer",
@@ -998,5 +997,5 @@ export default {
   placeholders: {
     projectArName: "Enter project Name In Arabic",
     projectEnName: "Enter project Name In English",
-  }
+  },
 };

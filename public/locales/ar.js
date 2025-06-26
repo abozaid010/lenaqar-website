@@ -1,4 +1,3 @@
-
 export default {
   direction: "rtl",
   login: "تسجيل الدخول",
@@ -205,7 +204,7 @@ export default {
     },
   },
   sidebar: {
-    "schedule": "مهام الاسبوع",
+    schedule: "مهام الاسبوع",
     myProjects: "مشاريعي",
     dashboard: " المحادثات",
     analytics: "التحليلات",
@@ -306,7 +305,7 @@ export default {
     unreadMessages: {
       na: "لا توجد رسائل غير مقروءة",
       count: "{count} رسالة غير مقروءة",
-    }
+    },
   },
   actionForm: {
     actions: {
@@ -408,7 +407,7 @@ export default {
     next: "التالي",
     saveUnit: "حفظ الوحدة",
     addPhase: "إضافة مرجله",
-    updatePhase: "تعديل مرحله"
+    updatePhase: "تعديل مرحله",
   },
   toasts: {
     enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
@@ -573,9 +572,9 @@ export default {
   },
   saleDetails: {
     financialDetails: "التفاصيل المالية",
-    totalPrice: "السعر الإجمالي",
+    totalPrice: "سعر الكـاش",
     deliveryDate: "تاريخ التسليم",
-    downPayment: "الدفعة المقدمة",
+    downPayment: "قيمة القسط السنوى",
     paymentPlans: "خطط الدفع",
     addPlan: "إضافة خطة",
     noPlans: "لم يتم إضافة خطط دفع بعد.",
@@ -958,28 +957,28 @@ export default {
     egp: "جنيه",
   },
   schaduall: {
-    "assignError": "فشل في تعيين مندوب المبيعات",
-    "salesAssigned": "تم تعيين مندوب المبيعات بنجاح",
-    "ChooseSalesperson": "اختر السيلز الخاص لهذه المهمه",
-    "Available": "متاح",
-    "noappointments": "لا توجد مواعيد هذا الأسبوع",
-    "noSale": "لا توجد مبيعات متاحة",
-    "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-    "Schedule": "مهام الاسبوع",
-    "NoSalesAvailable": "لا يوجد موظفين مبيعات"
+    assignError: "فشل في تعيين مندوب المبيعات",
+    salesAssigned: "تم تعيين مندوب المبيعات بنجاح",
+    ChooseSalesperson: "اختر السيلز الخاص لهذه المهمه",
+    Available: "متاح",
+    noappointments: "لا توجد مواعيد هذا الأسبوع",
+    noSale: "لا توجد مبيعات متاحة",
+    scheduleweek: "جدولك خالٍ هذا الأسبوع.",
+    Schedule: "مهام الاسبوع",
+    NoSalesAvailable: "لا يوجد موظفين مبيعات",
   },
 
-  "noappointments": "لا توجد مواعيد هذا الأسبوع",
-  "noSale": "لا توجد مبيعات متاحة",
-  "scheduleweek": "جدولك خالٍ هذا الأسبوع.",
-  "Schedule": "مهام الاسبوع",
-  "previous": "السابق",
-  "next": "التالي",
-  "AllSales": "جميع المبيعات",
-  "Noappointments": "لا توجد مواعيد",
-  "scheduleweek": "لا توجد مواعيد مجدولة لهذا الأسبوع",
-  "Unassigned": "غير مُعيَّن",
-  "no": "لا توجد مواعيد مجدولة لهذا الأسبوع",
+  noappointments: "لا توجد مواعيد هذا الأسبوع",
+  noSale: "لا توجد مبيعات متاحة",
+  scheduleweek: "جدولك خالٍ هذا الأسبوع.",
+  Schedule: "مهام الاسبوع",
+  previous: "السابق",
+  next: "التالي",
+  AllSales: "جميع المبيعات",
+  Noappointments: "لا توجد مواعيد",
+  scheduleweek: "لا توجد مواعيد مجدولة لهذا الأسبوع",
+  Unassigned: "غير مُعيَّن",
+  no: "لا توجد مواعيد مجدولة لهذا الأسبوع",
   unit_pricing: {
     down_payment: "دفعة أولى",
     years: "سنوات",
@@ -1009,8 +1008,7 @@ export default {
     updatePhasesuccess: "تم نعديل المارحله بنجاح",
     updatePhaseFaile: "فشل في تعديل المرحله",
     addnew: "إضافة مرحله جديده",
-    delete: "تم حذف المرحله بنجاح"
-
+    delete: "تم حذف المرحله بنجاح",
   },
   ourResultsInNumbers: {
     title: "نتائجنا في الأرقام",
@@ -1037,5 +1035,5 @@ export default {
   placeholders: {
     projectArName: "أدخل اسم المشروع بالعربية",
     projectEnName: "أدخل اسم المشروع بالإنجليزية",
-  }
+  },
 };
