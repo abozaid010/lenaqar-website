@@ -410,31 +410,34 @@ export default function BasicDetailsStep({
       </h3>
 
       <div className="grid grid-cols-2 gap-x-2 md:grid-cols-3 gap-y-3 md:gap-x-4">
-        {/* Rooms */}
-        <div>
-          <FormInput
-            label={t.basicDetails.rooms}
-            name="roomsCount"
-            required
-            value={formData.roomsCount || ""}
-            onChange={handleChange}
-            placeholder="0"
-            error={invalidFields.includes("roomsCount")}
-            type="number"
-          />
-        </div>
-
-        {/* Bathrooms */}
-        <FormInput
-          label={t.basicDetails.bathrooms}
-          name="bathroomCount"
-          required
-          value={formData.bathroomCount || ""}
-          onChange={(e) => handleChange(e, "number")}
-          placeholder="0"
-          error={invalidFields.includes("bathroomCount")}
-          type="number"
-        />
+        {formData.buildingType !== "office" && (
+          <>
+            {/* Rooms */}
+            <div>
+              <FormInput
+                label={t.basicDetails.rooms}
+                name="roomsCount"
+                required
+                value={formData.roomsCount || ""}
+                onChange={handleChange}
+                placeholder="0"
+                error={invalidFields.includes("roomsCount")}
+                type="number"
+              />
+            </div>
+            {/* Bathrooms */}
+            <FormInput
+              label={t.basicDetails.bathrooms}
+              name="bathroomCount"
+              required
+              value={formData.bathroomCount || ""}
+              onChange={(e) => handleChange(e, "number")}
+              placeholder="0"
+              error={invalidFields.includes("bathroomCount")}
+              type="number"
+            />
+          </>
+        )}
 
         {/* Floor */}
         <FormInput
@@ -457,14 +460,16 @@ export default function BasicDetailsStep({
         />
 
         {/* Garden Size */}
-        <FormInput
-          label={`${t.basicDetails.gardenSize} (m²)`}
-          name="gardenSize"
-          value={formData.gardenSize || ""}
-          onChange={(e) => handleChange(e, "number")}
-          placeholder="0"
-          type="number"
-        />
+        {formData.buildingType !== "office" && (
+          <FormInput
+            label={`${t.basicDetails.gardenSize} (m²)`}
+            name="gardenSize"
+            value={formData.gardenSize || ""}
+            onChange={(e) => handleChange(e, "number")}
+            placeholder="0"
+            type="number"
+          />
+        )}
 
         {/* Garage Area */}
         <FormInput

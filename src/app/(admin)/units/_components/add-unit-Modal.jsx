@@ -127,10 +127,12 @@ export default function AddUnitModal({
         "purpose",
         "city",
         "view",
-        "roomsCount",
-        "bathroomCount",
         "district",
       ];
+      // Add rooms and bathroom count only if building type is not office
+      if (formData.buildingType !== "office") {
+        requiredFields.push("roomsCount", "bathroomCount");
+      }
       const zeroFields = ["floor", "landArea", "gardenSize", "garageArea"];
       const sanitizedData = { ...formData };
 
