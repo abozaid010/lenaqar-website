@@ -113,17 +113,11 @@ export default function ClientsTable({
     }
   };
 
-  const handleClientRequirements = async (
-    e,
-    phone_number,
-    user_id,
-    name,
-    phone
-  ) => {
+  const handleClientRequirements = async (e, user_id, name, phone) => {
     e.stopPropagation();
     setLoadingRequirements(user_id);
     try {
-      const requirements = await getClientRequirements(phone_number);
+      const requirements = await getClientRequirements(user_id);
       setRowRequirements({ ...requirements, name: name, phone: phone });
       setOpenRequirementsModal(true);
     } catch (error) {
@@ -240,7 +234,6 @@ export default function ClientsTable({
                           ) {
                             handleClientRequirements(
                               e,
-                              user.user_id,
                               user.user_id,
                               user.name,
                               user.phone_number
