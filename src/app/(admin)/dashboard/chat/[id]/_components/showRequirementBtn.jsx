@@ -9,16 +9,17 @@ export default function ShowRequirementBtn({ id }) {
   const [loading, setIsLoading] = useState(false);
   const [requirements, setRequirements] = useState(null);
 
-  const handleRequirements = async (user_id, name, phone) => {
+  const handleRequirements = async (name, phone) => {
     setIsLoading(true);
 
     try {
-      const requirements = await getClientRequirements(user_id);
-      setRequirements({ ...requirements, name: name, phone: phone });
-      setOpenRequirementsModal(true);
+      const requirements = await getClientRequirements(id);
+      setRequirements({ ...requirements, name, phone });
+      setIsOpen(true);
     } catch (error) {
       console.error("Error fetching requirements:", error);
-      setLoadingRequirements(null);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -26,10 +27,7 @@ export default function ShowRequirementBtn({ id }) {
     <>
       {isOpen && (
         <PropertyDetailsModal
-          onClose={() => {
-            setIsOpen(false);
-            setLoadingRequirements(null);
-          }}
+          onClose={() => setIsOpen(false)}
           property={requirements}
         />
       )}

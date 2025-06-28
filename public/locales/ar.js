@@ -325,7 +325,6 @@ export default {
   },
   propertyDetails: {
     title: "_المتطلبات",
-    title2: "/المتطلبات",
     fields: {
       buildingType: "نوع المبنى",
       landArea: "مساحة الأرض",

@@ -60,8 +60,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
             {formattedProperty.name ||
               formattedProperty.phone ||
               t.clientsTable.newLead}
-            {t.propertyDetails.title2}
-            {/* المتطلبات */}
+            {t.propertyDetails.title}
           </h3>
           <button
             onClick={onClose}
