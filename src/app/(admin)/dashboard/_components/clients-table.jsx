@@ -125,7 +125,6 @@ export default function ClientsTable({
       setLoadingRequirements(null);
     }
   };
-  const usersId = users?.map((user) => user?.user_id);
 
   return (
     <>

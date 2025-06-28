@@ -9,6 +9,7 @@ import ChatClientWrapper from "../_components/chat-client-wrapper";
 import ChatWith from "../_components/Chat_with";
 import ToggleReplyType from "../_components/reply-type";
 import NavigationButtons from "./_components/NavigationButtons";
+import ShowRequirementBtn from "./_components/showRequirementBtn";
 
 export default async function ChatPage({ params }) {
   const { id } = await params;
@@ -22,7 +23,9 @@ export default async function ChatPage({ params }) {
   }
 
   const name = initialData.data?.name;
+  const phoneNumber = initialData.data?.phone_number || null;
 
+  console.log(initialData);
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
       {initialData?.status ? (
@@ -34,6 +37,11 @@ export default async function ChatPage({ params }) {
               <ChatWith name={name} />
             </div>
             <div className="flex items-center gap-4">
+              <ShowRequirementBtn
+                id={id}
+                name={name}
+                phoneNumber={phoneNumber}
+              />
               <ToggleReplyType phoneNumber={id} clientID={clientID} />
               <Link
                 href={`/dashboard`}
