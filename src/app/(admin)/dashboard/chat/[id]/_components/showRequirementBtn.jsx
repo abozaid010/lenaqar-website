@@ -11,13 +11,21 @@ export default function ShowRequirementBtn({ id, name, phone }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setIsLoading] = useState(false);
   const [requirements, setRequirements] = useState(null);
+  const [hasFetched, setHasFetched] = useState(false);
 
   const handleRequirements = async () => {
+    if (hasFetched && requirements) {
+      setIsOpen(true);
+      return;
+    }
+
+    // Only fetch if we haven't fetched before
     setIsLoading(true);
 
     try {
       const requirements = await getClientRequirements(id);
       setRequirements({ ...requirements, name, phone });
+      setHasFetched(true);
       setIsOpen(true);
     } catch (error) {
       console.error("Error fetching requirements:", error);
