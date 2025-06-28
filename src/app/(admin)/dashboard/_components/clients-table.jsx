@@ -47,7 +47,6 @@ export default function ClientsTable({
       localStorage.setItem("usersId", JSON.stringify(usersId));
     }
   }, [users]);
-  console.log(users);
 
   const ACTIONS = [
     { label: t.dashboardFilter.actions.onGoingConversion, value: null },

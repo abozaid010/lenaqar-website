@@ -2,14 +2,17 @@
 
 import { getClientRequirements } from "@/components/services/serviceFetching";
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
+import { useI18n } from "@/context/translate-api";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
-export default function ShowRequirementBtn({ id }) {
+export default function ShowRequirementBtn({ id, name, phone }) {
+  const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setIsLoading] = useState(false);
   const [requirements, setRequirements] = useState(null);
 
-  const handleRequirements = async (name, phone) => {
+  const handleRequirements = async () => {
     setIsLoading(true);
 
     try {
@@ -25,6 +28,15 @@ export default function ShowRequirementBtn({ id }) {
 
   return (
     <>
+      <button onClick={handleRequirements}>
+        {loading ? (
+          <Loader2 className="animate-spin text-primary/90" />
+        ) : (
+          <span className="text-primary/90 text-sm cursor-pointer hover:underline font-semibold">
+            {t.propertyDetails.title}
+          </span>
+        )}
+      </button>
       {isOpen && (
         <PropertyDetailsModal
           onClose={() => setIsOpen(false)}

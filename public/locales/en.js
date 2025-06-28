@@ -311,7 +311,7 @@ export default {
   },
 
   propertyDetails: {
-    title: "_Requirements",
+    title: "Requirements",
     fields: {
       buildingType: "Building Type",
       landArea: "Land Area",

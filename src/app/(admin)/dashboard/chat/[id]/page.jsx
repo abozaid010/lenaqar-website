@@ -25,7 +25,6 @@ export default async function ChatPage({ params }) {
   const name = initialData.data?.name;
   const phoneNumber = initialData.data?.phone_number || null;
 
-  console.log(initialData);
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
       {initialData?.status ? (
