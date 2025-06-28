@@ -30,12 +30,12 @@ export default async function ChatPage({ params }) {
       {initialData?.status ? (
         <>
           <div className="flex items-center justify-between container mx-auto bg-white px-4 py-2 rounded-md shadow-md h-auto">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {/* Navigation Buttons */}
               <NavigationButtons id={id} />
               <ChatWith name={name} />
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <ShowRequirementBtn
                 id={id}
                 name={name}
@@ -46,7 +46,7 @@ export default async function ChatPage({ params }) {
                 href={`/dashboard`}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
-                <CircleX className="w-8 h-8" color="red" />
+                <CircleX size={26} color="red" />
               </Link>
             </div>
           </div>
