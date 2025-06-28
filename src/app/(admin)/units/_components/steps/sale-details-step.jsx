@@ -41,7 +41,13 @@ export default function SaleDetailsStep({
     updateFormData({
       paymentPlans: [
         ...formData.paymentPlans,
-        { years: 1, price: "", maintenance: "", downPayment: "" },
+        {
+          years: 1,
+          price: "",
+          maintenance: "",
+          downPayment: "",
+          installment_amount_yearly: "",
+        },
       ],
     });
   };
@@ -57,7 +63,12 @@ export default function SaleDetailsStep({
     updateFormData({ paymentPlans: updatedPlans });
 
     setInvalidFields((prev) => {
-      if ((field === "price" || field === "downPayment") && value === "") {
+      if (
+        (field === "price" ||
+          field === "downPayment" ||
+          field === "installment_amount_yearly") &&
+        value === ""
+      ) {
         return [...prev, `${field}-${index}`];
       } else {
         return prev.filter((f) => f !== `${field}-${index}`);
@@ -123,7 +134,7 @@ export default function SaleDetailsStep({
                 key={index}
                 className="flex items-center py-1 border-b border-gray-300 pb-4"
               >
-                <div className="flex-grow grid grid-cols-1 md:grid-cols-7 gap-1.5">
+                <div className="flex-grow grid grid-cols-1 md:grid-cols-9 gap-1.5">
                   <FormInput
                     label={t.saleDetails.years}
                     placeholder={"1"}
@@ -171,6 +182,28 @@ export default function SaleDetailsStep({
 
                   <div className="col-span-2">
                     <FormInput
+                      label={t.saleDetails.installment}
+                      name={`installment_amount_yearly-${index}`}
+                      required
+                      value={plan.installment_amount_yearly}
+                      onChange={(e) =>
+                        updatePaymentPlan(
+                          index,
+                          "installment_amount_yearly",
+                          e.target.value
+                        )
+                      }
+                      placeholder="20000"
+                      error={invalidFields.includes(
+                        `installment_amount_yearly-${index}`
+                      )}
+                      type="money"
+                      adornment="EGP"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <FormInput
                       label={t.saleDetails.maintenance}
                       name={`maintenance-${index}`}
                       value={plan.maintenance}
@@ -186,7 +219,7 @@ export default function SaleDetailsStep({
                 <button
                   type="button"
                   onClick={() => removePaymentPlan(index)}
-                  className="text-red-500 hover:text-red-600 mx-3 mt-4"
+                  className="text-red-500 hover:text-red-600 ltr:ml-2 mt-4"
                 >
                   <Trash2Icon size={18} />
                 </button>
