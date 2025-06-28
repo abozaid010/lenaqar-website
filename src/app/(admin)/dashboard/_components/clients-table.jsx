@@ -47,6 +47,7 @@ export default function ClientsTable({
       localStorage.setItem("usersId", JSON.stringify(usersId));
     }
   }, [users]);
+  console.log(users);
 
   const ACTIONS = [
     { label: t.dashboardFilter.actions.onGoingConversion, value: null },
@@ -223,13 +224,15 @@ export default function ClientsTable({
 
                       <td
                         className={`px-2 py-2 whitespace-nowrap ${
-                          user.requirement_name !== t.clientsTable.notDefined
+                          user.requirement_name &&
+                          user.requirement_name !== "Not defined"
                             ? "text-primary/90 cursor-pointer hover:underline font-semibold"
                             : "pointer-events-none text-gray-500"
                         }`}
                         onClick={(e) => {
                           if (
-                            user.requirement_name !== t.clientsTable.notDefined
+                            user.requirement_name &&
+                            user.requirement_name !== "Not defined"
                           ) {
                             handleClientRequirements(
                               e,
@@ -249,9 +252,12 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {t.unitDetails?.buildingTypesMap?.[
-                              user.requirement_name
-                            ] || user.requirement_name}
+                            {user.requirement_name &&
+                            user.requirement_name !== "Not defined"
+                              ? t.unitDetails?.buildingTypesMap?.[
+                                  user.requirement_name
+                                ] || user.requirement_name
+                              : t.clientsTable.notDefined}
                           </span>
                         )}
                       </td>
