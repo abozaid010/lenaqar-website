@@ -4,13 +4,13 @@ import {
   getClientActions,
   getClientRequirements,
 } from "@/components/services/serviceFetching";
+import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
 import ClientsTablePagination from "./clients-table-pagination";
-import PropertyDetailsModal from "./property-requirements-modal";
 
 const ACTIONS_COLORS = {
   "Make a call": "text-blue-800",
@@ -113,17 +113,11 @@ export default function ClientsTable({
     }
   };
 
-  const handleClientRequirements = async (
-    e,
-    phone_number,
-    user_id,
-    name,
-    phone
-  ) => {
+  const handleClientRequirements = async (e, user_id, name, phone) => {
     e.stopPropagation();
     setLoadingRequirements(user_id);
     try {
-      const requirements = await getClientRequirements(phone_number);
+      const requirements = await getClientRequirements(user_id);
       setRowRequirements({ ...requirements, name: name, phone: phone });
       setOpenRequirementsModal(true);
     } catch (error) {
@@ -131,7 +125,6 @@ export default function ClientsTable({
       setLoadingRequirements(null);
     }
   };
-  const usersId = users?.map((user) => user?.user_id);
 
   return (
     <>
@@ -230,17 +223,18 @@ export default function ClientsTable({
 
                       <td
                         className={`px-2 py-2 whitespace-nowrap ${
-                          user.requirement_name !== t.clientsTable.notDefined
+                          user.requirement_name &&
+                          user.requirement_name !== "Not defined"
                             ? "text-primary/90 cursor-pointer hover:underline font-semibold"
                             : "pointer-events-none text-gray-500"
                         }`}
                         onClick={(e) => {
                           if (
-                            user.requirement_name !== t.clientsTable.notDefined
+                            user.requirement_name &&
+                            user.requirement_name !== "Not defined"
                           ) {
                             handleClientRequirements(
                               e,
-                              user.user_id,
                               user.user_id,
                               user.name,
                               user.phone_number
@@ -257,9 +251,12 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {t.unitDetails?.buildingTypesMap?.[
-                              user.requirement_name
-                            ] || user.requirement_name}
+                            {user.requirement_name &&
+                            user.requirement_name !== "Not defined"
+                              ? t.unitDetails?.buildingTypesMap?.[
+                                  user.requirement_name
+                                ] || user.requirement_name
+                              : t.clientsTable.notDefined}
                           </span>
                         )}
                       </td>

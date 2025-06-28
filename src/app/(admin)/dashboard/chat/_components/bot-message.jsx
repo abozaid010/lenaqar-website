@@ -3,6 +3,7 @@
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
+import { formatTimestamp } from "@/utils/formateDate";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -22,7 +23,6 @@ export default function BotMessageCard({ message }) {
 
   const propertiesItems = properties ? Object.values(properties) : [];
   const { t } = useI18n();
-  console.log("Bot Message Card", message);
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
       {bot_response && <div className="text-sm">{bot_response}</div>}
@@ -243,6 +243,12 @@ export default function BotMessageCard({ message }) {
           </svg>
           {t.viewInCRM || "View in CRM"}
         </Link>
+      )}
+
+      {timestamp && (
+        <div className="text-xs mt-2 text-gray-600 text-end">
+          {formatTimestamp(timestamp)}
+        </div>
       )}
     </div>
   );

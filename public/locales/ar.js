@@ -324,8 +324,7 @@ export default {
     aiAction: "إجراءات الذكاء الاصطناعي",
   },
   propertyDetails: {
-    title: "_المتطلبات",
-    title2: "/المتطلبات",
+    title: "المتطلبات",
     fields: {
       buildingType: "نوع المبنى",
       landArea: "مساحة الأرض",
