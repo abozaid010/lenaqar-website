@@ -4,13 +4,13 @@ import {
   getClientActions,
   getClientRequirements,
 } from "@/components/services/serviceFetching";
+import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
 import ClientsTablePagination from "./clients-table-pagination";
-import PropertyDetailsModal from "./property-requirements-modal";
 
 const ACTIONS_COLORS = {
   "Make a call": "text-blue-800",

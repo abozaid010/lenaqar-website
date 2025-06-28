@@ -1,8 +1,8 @@
 "use client";
 
 import { getClientRequirements } from "@/components/services/serviceFetching";
+import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useState } from "react";
-import PropertyDetailsModal from "../../../_components/property-requirements-modal";
 
 export default function ShowRequirementBtn({ id }) {
   const [isOpen, setIsOpen] = useState(false);
