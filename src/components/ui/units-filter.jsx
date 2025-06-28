@@ -459,21 +459,30 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allCompounds}
               </div>
-              {[...compounds].map((c, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    setSelectedProjectName(
-                      locale === "ar" ? c.ar_name : c.en_name
-                    );
-                    handleFilterChange("project_name", c.en_name);
-                    setIsProjectDropdownOpen(false);
-                  }}
-                >
-                  {locale === "ar" ? c.ar_name : c.en_name}
-                </div>
-              ))}
+              {compounds
+                ?.slice()
+                .sort((a, b) => {
+                  const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                  const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                  return nameA.trim().localeCompare(nameB.trim(), locale, {
+                    sensitivity: "base",
+                  });
+                })
+                .map((c, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      setSelectedProjectName(
+                        locale === "ar" ? c.ar_name : c.en_name
+                      );
+                      handleFilterChange("project_name", c.en_name);
+                      setIsProjectDropdownOpen(false);
+                    }}
+                  >
+                    {locale === "ar" ? c.ar_name : c.en_name}
+                  </div>
+                ))}
             </div>
           )}
         </div>

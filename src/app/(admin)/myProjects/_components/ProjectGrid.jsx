@@ -251,92 +251,100 @@ export default function ProjectList({
               </div>
             ) : (
               <div className="space-y-3 p-4">
-                {projectList.map((project) => (
-                  <div
-                    key={project.id}
-                    className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                      selectedProject?.id === project.id
-                        ? "bg-primary text-white"
-                        : ""
-                    }`}
-                    onClick={() => setSelectedProject(project)}
-                  >
-                    <h3
-                      className={`font-semibold text-lg ${
-                        selectedProject?.id === project.id
-                          ? "text-white"
-                          : "text-gray-800"
-                      }`}
-                    >
-                      {locale === "ar" ? project.ar_name : project.en_name}
-                    </h3>
+                {projectList
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
+                  .map((project) => (
                     <div
-                      className={`flex items-center space-x-4 text-sm ${
+                      key={project.id}
+                      className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                         selectedProject?.id === project.id
-                          ? "text-white"
-                          : "text-gray-600"
+                          ? "bg-primary text-white"
+                          : ""
                       }`}
+                      onClick={() => setSelectedProject(project)}
                     >
-                      <div className="flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
-                        {formatCityLabel(capitalize(project.city), locale)}
-                      </div>
-                      <div className="flex items-center">
-                        <svg
-                          className="w-4 h-4 mr-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                          />
-                        </svg>
-                        {formatDistrictLabel(
-                          capitalize(project.district),
-                          capitalize(project.city),
-                          locale
-                        )}
-                      </div>
-                      <div className="flex-1"></div>
-                      <button
-                        onClick={() => handleEditClick(project)}
-                        className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
-                        title="Edit Project"
+                      <h3
+                        className={`font-semibold text-lg ${
+                          selectedProject?.id === project.id
+                            ? "text-white"
+                            : "text-gray-800"
+                        }`}
                       >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        onClick={(e) => handleDeleteClick(project, e)}
-                        className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
-                        title="Delete Project"
+                        {locale === "ar" ? project.ar_name : project.en_name}
+                      </h3>
+                      <div
+                        className={`flex items-center space-x-4 text-sm ${
+                          selectedProject?.id === project.id
+                            ? "text-white"
+                            : "text-gray-600"
+                        }`}
                       >
-                        <Trash2 size={16} />
-                      </button>
+                        <div className="flex items-center">
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                          </svg>
+                          {formatCityLabel(capitalize(project.city), locale)}
+                        </div>
+                        <div className="flex items-center">
+                          <svg
+                            className="w-4 h-4 mr-1"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                            />
+                          </svg>
+                          {formatDistrictLabel(
+                            capitalize(project.district),
+                            capitalize(project.city),
+                            locale
+                          )}
+                        </div>
+                        <div className="flex-1"></div>
+                        <button
+                          onClick={() => handleEditClick(project)}
+                          className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
+                          title="Edit Project"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteClick(project, e)}
+                          className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
+                          title="Delete Project"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>

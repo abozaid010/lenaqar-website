@@ -244,11 +244,19 @@ export default function BasicDetailsStep({
             {!isLoadingProjects && dataProject.length > 0 && (
               <>
                 <option value="">{t.basicDetails.selectCompound}</option>
-                {dataProject.map((project) => (
-                  <option key={project.en_name} value={project.en_name}>
-                    {locale === "ar" ? project.ar_name : project.en_name}
-                  </option>
-                ))}
+                {dataProject
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
+                  .map((project) => (
+                    <option key={project.en_name} value={project.en_name}>
+                      {locale === "ar" ? project.ar_name : project.en_name}
+                    </option>
+                  ))}
               </>
             )}
 
