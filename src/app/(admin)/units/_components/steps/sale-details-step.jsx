@@ -219,7 +219,7 @@ export default function SaleDetailsStep({
                 <button
                   type="button"
                   onClick={() => removePaymentPlan(index)}
-                  className="text-red-500 hover:text-red-600 ltr:ml-2 mt-4"
+                  className="text-red-500 hover:text-red-600 ltr:ml-2 rtl:mr-2 mt-5"
                 >
                   <Trash2Icon size={18} />
                 </button>

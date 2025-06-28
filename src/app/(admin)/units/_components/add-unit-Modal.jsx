@@ -208,6 +208,10 @@ export default function AddUnitModal({
             price: plan.price === "" ? 0 : plan.price,
             maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
             downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
+            installment_amount_yearly:
+              plan.installment_amount_yearly === ""
+                ? 0
+                : plan.installment_amount_yearly,
           };
         });
 

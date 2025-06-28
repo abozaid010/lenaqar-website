@@ -55,6 +55,7 @@ export default function UnitPricing({ unit }) {
     return getTranslation(`rental.${duration}`, duration);
   };
 
+  console.log(unit.paymentPlans);
   return (
     <div className="mt-2">
       {isSale ? (
@@ -86,13 +87,13 @@ export default function UnitPricing({ unit }) {
                 >
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-base font-bold text-primary">
-                      {p.years} {t.saleDetails.years}
+                      {p.years}{" "}
+                      {p.years > 1
+                        ? t.saleDetails.years
+                        : t.saleDetails.yearLabel}
                     </span>
                     <span className="text-xs text-gray-600">
-                      {getTranslation(
-                        "unitDetails.unit_pricing.payment_plan",
-                        "Payment Plan"
-                      )}
+                      {t.saleDetails.paymentPlan}
                     </span>
                   </div>
 
@@ -121,8 +122,20 @@ export default function UnitPricing({ unit }) {
                       </div>
                     )}
 
+                    {/* Down Payment */}
+                    {p.downPayment && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-700 font-semibold">
+                          {t.saleDetails.installment}:
+                        </span>
+                        <span className="font-bold text-red-500">
+                          {formatCurrency(p.installment_amount_yearly)} EGP
+                        </span>
+                      </div>
+                    )}
+
                     {/* Maintenance */}
-                    {p.maintenance && (
+                    {p.maintenance ? (
                       <div className="flex justify-between items-center">
                         <span className="text-gray-700 font-semibold">
                           {t.saleDetails.maintenance}:
@@ -131,7 +144,7 @@ export default function UnitPricing({ unit }) {
                           {formatCurrency(p.maintenance)} EGP
                         </span>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               ))}
