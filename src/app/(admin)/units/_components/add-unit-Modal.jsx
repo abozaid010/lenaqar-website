@@ -180,6 +180,12 @@ export default function AddUnitModal({
             if (!plan.downPayment || plan.downPayment === 0) {
               missingFields.push(`downPayment-${index}`);
             }
+            if (
+              !plan.installment_amount_yearly ||
+              plan.installment_amount_yearly === 0
+            ) {
+              missingFields.push(`installment_amount_yearly-${index}`);
+            }
           });
         }
 
