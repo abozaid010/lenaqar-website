@@ -10,7 +10,7 @@ import RentalDetailsStep from "./steps/rental-details-step";
 import SaleDetailsStep from "./steps/sale-details-step";
 
 import { useI18n } from "@/context/translate-api";
-import { X } from "lucide-react";
+import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
@@ -31,8 +31,7 @@ export default function AddUnitModal({
   citiesAndDistricts,
 }) {
   const modalRef = useRef(null);
-  const { t } = useI18n();
-  const isRTL = t.direction === "rtl";
+  const { t, locale } = useI18n();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload statecl
@@ -415,22 +414,15 @@ export default function AddUnitModal({
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition-colors"
+                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1.5 px-6 rounded-md transition-colors"
               >
-                {isRTL ? t.buttons.back : ""}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {isRTL ? "" : t.buttons.back}
+                {locale === "ar" ? (
+                  <ArrowRight size={17} />
+                ) : (
+                  <ArrowLeft size={17} />
+                )}
+
+                <span className="block mb-1">{t.buttons.back}</span>
               </button>
             ) : (
               <div></div>
@@ -440,22 +432,14 @@ export default function AddUnitModal({
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors"
+                className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-1.5 px-6 rounded-md transition-colors"
               >
-                {isRTL ? "" : t.buttons.next}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {isRTL ? t.buttons.next : ""}
+                {locale === "ar" ? (
+                  <ArrowLeft size={17} />
+                ) : (
+                  <ArrowRight size={17} />
+                )}
+                <span className="block mb-1">{t.buttons.next}</span>
               </button>
             ) : (
               <button

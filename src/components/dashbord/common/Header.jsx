@@ -11,8 +11,7 @@ import toast from "react-hot-toast";
 
 const Header = ({ clientName, clientID }) => {
   const router = useRouter();
-  const { t } = useI18n();
-  const lang = Cookies.get("lang");
+  const { t, locale } = useI18n();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -77,11 +76,11 @@ const Header = ({ clientName, clientID }) => {
           onClick={sendMessageWhatsApp}
           className="flex items-center gap-2 bg-primary text-white font-medium px-[16px] py-[10px] h-[40px] sm:px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
         >
-          <span>{t.header.sendMessage}</span>
           <HelpCircle
             size={20}
-            className={`${lang === "ar" ? "rotate-y-180" : ""}`}
+            className={`${locale === "ar" ? "rotate-y-180" : ""}`}
           />
+          <span>{t.header.sendMessage}</span>
         </button>
 
         <LanguageSwitcher />
@@ -108,7 +107,7 @@ const Header = ({ clientName, clientID }) => {
 
           {isUserMenuOpen && (
             <div
-              className={`absolute mt-2 ${lang === "ar" ? "left-0" : "right-0"} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}
+              className={`absolute mt-2 ${locale === "ar" ? "left-0" : "right-0"} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}
             >
               <Link
                 href={`/dashboard/client/${clientID}`}
