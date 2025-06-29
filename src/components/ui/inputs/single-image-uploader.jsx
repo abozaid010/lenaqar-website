@@ -41,13 +41,8 @@ export default function SingleImageUploader({
       toast.error("File size exceeds 5MB. Please select a smaller file.");
       return;
     }
-    if (
-      file &&
-      !["image/jpeg", "image/png", "image/webp"].includes(file.type)
-    ) {
-      toast.error(
-        "Invalid file type. Please select a JPEG, PNG, or WEBP image."
-      );
+    if (file && !["image/jpeg", "image/png"].includes(file.type)) {
+      toast.error("Invalid file type. Please select a JPEG or PNG image.");
       return;
     }
 
@@ -120,7 +115,7 @@ export default function SingleImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg, image/png, image/webp"
+        accept="image/jpeg, image/png"
         onChange={handleFileSelect}
         className="hidden"
         disabled={disabled || isUploading || uploading}
@@ -216,7 +211,7 @@ export default function SingleImageUploader({
             </p>
             <p className="text-xs text-gray-500">
               {t?.formLabels?.supportedFormats ||
-                "Supported formats: JPG, PNG, WEBP (Max 5MB each)"}
+                "Supported formats: JPG or PNG (Max 5MB each)"}
             </p>
           </div>
         )}

@@ -716,7 +716,7 @@ export default {
   propertyImages: "Property Images",
   maximum: "Maximum",
   clickOrDragAndDrop: "Click or drag and drop images here",
-  supportedFormats: "Supported formats: JPG, PNG, WEBP (Max 5MB each)",
+  supportedFormats: "Supported formats: JPG, PNG (Max 5MB each)",
   uploading: "Uploading...",
   upload: "Upload",
   selectedImage: "Selected Image",
@@ -729,7 +729,7 @@ export default {
   failedToDeleteImage: "Failed to delete image. Please try again.",
   maxImagesError:
     "You can only upload a maximum of 8 images. Please remove some images before adding new ones.",
-  invalidFileType: "Invalid file type. Please upload JPG, PNG, or WEBP images.",
+  invalidFileType: "Invalid file type. Please upload JPG or PNG images.",
   fileSizeExceeds: "exceeds 3MB. Please upload smaller images.",
   failedToUploadImage: "Failed to upload image",
 
@@ -934,7 +934,7 @@ export default {
     masterPlanImage: "Master Plan Image",
     selectedImage: "Selected",
     dragDropImage: "Click or drag and drop an image here",
-    supportedFormats: "Supported formats: JPG, PNG, WEBP (Max 5MB each)",
+    supportedFormats: "Supported formats: JPG, PNG (Max 5MB each)",
     unitTitle: "Unit Title",
     buildingType: "Building Type",
     purpose: "Purpose",

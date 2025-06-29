@@ -706,7 +706,7 @@ export default {
   maximum: "الحد الأقصى",
   clickOrDragAndDrop: "انقر أو اسحب وأفلت الصور هنا",
   supportedFormats:
-    "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل صورة)",
+    "الصيغ المدعومة: JPG، PNG (الحد الأقصى 5 ميجابايت لكل صورة)",
   uploading: "جارٍ التحميل...",
   upload: "تحميل",
   selectedImage: "صورة محددة",
@@ -719,7 +719,7 @@ export default {
   failedToDeleteImage: "فشل في حذف الصورة. يرجى المحاولة مرة أخرى.",
   maxImagesError:
     "يمكنك تحميل 8 صور كحد أقصى. يرجى إزالة بعض الصور قبل إضافة صور جديدة.",
-  invalidFileType: "نوع ملف غير صالح. يرجى تحميل صور بصيغة JPG أو PNG أو WEBP.",
+  invalidFileType: "نوع ملف غير صالح. يرجى تحميل صور بصيغة JPG أو PNG.",
   fileSizeExceeds: "تجاوز 3 ميجابايت. يرجى تحميل صور أصغر.",
   failedToUploadImage: "فشل في تحميل الصورة",
   unitPage: {
@@ -906,7 +906,7 @@ export default {
     selectedImage: "الصورة المختارة",
     dragDropImage: "انقر أو اسحب وأفلت صورة هنا",
     supportedFormats:
-      "الصيغ المدعومة: JPG، PNG، WEBP (الحد الأقصى 5 ميجابايت لكل منها)",
+      "الصيغ المدعومة: JPG، PNG (الحد الأقصى 5 ميجابايت لكل منها)",
     unitTitle: "عنوان الوحدة",
     buildingType: "نوع المبنى",
     purpose: "الغرض",

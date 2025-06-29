@@ -62,11 +62,7 @@ export default function ImageUploader({
     const newSelectedImages = [];
     const newUploadStatus = { ...uploadStatus };
     for (const file of Array.from(files)) {
-      if (
-        !file.type.match("image/jpeg") &&
-        !file.type.match("image/png") &&
-        !file.type.match("image/webp")
-      ) {
+      if (!file.type.match("image/jpeg") && !file.type.match("image/png")) {
         toast.error(t.invalidFileType);
         continue;
       }
@@ -319,7 +315,7 @@ export default function ImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg, image/png, image/webp"
+        accept="image/jpeg, image/png"
         multiple
         onChange={handleFileSelect}
         className="hidden"

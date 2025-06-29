@@ -1,45 +1,40 @@
 "use client";
 
+import { useI18n } from "@/context/translate-api";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
-import { useI18n } from "@/context/translate-api";
 
-export default function UnitPageHeader({ unit, compounds, developers,citiesAndDistricts,clientId }) {
+export default function UnitPageHeader({
+  unit,
+  compounds,
+  developers,
+  citiesAndDistricts,
+  clientId,
+}) {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const handleBackToUnits = () => {
     router.back();
   };
   const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-  .filter(([governorate]) => governorate !== 'cities') // استبعاد "cities"
-  .map(([governorate, districts]) => ({
-    governorate,
-    districts: districts.map(district => ({
-      district,
-      
-    }))
-  }));
+    .filter(([governorate]) => governorate !== "cities") // استبعاد "cities"
+    .map(([governorate, districts]) => ({
+      governorate,
+      districts: districts.map((district) => ({
+        district,
+      })),
+    }));
 
   return (
     <div className="py-4 flex justify-between items-between overflow-hidden">
       <button
         onClick={handleBackToUnits}
-        className="cursor-pointer bg-gray-500 text-white px-[16px] py-[10px] h-[40px]  rounded-md flex items-center"
+        className="cursor-pointer bg-gray-500 text-white px-[16px] py-[10px] h-[40px] rounded-md flex items-center gap-2"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-1"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
-            clipRule="evenodd"
-          />
-        </svg>
-        {t.unitPage.backToUnits}
+        {locale === "ar" ? <ArrowRight size={20} /> : <ArrowLeft size={20} />}
+        <span>{t.unitPage.backToUnits}</span>
       </button>
 
       <div className="flex gap-2">
