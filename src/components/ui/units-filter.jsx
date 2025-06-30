@@ -6,7 +6,6 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-
 const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({
@@ -17,6 +16,8 @@ export default function UnitsFilter({
   clientId,
   readonly,
   citiesAndDistricts,
+  setIsLoading = () => {},
+  setUnit = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function UnitsFilter({
     max_price: appliedFilters.max_price || "",
     city: appliedFilters.city || "",
   }));
+
   const formattedDataCitiesAndDistricts = !readonly
     ? Object.entries(citiesAndDistricts)
         .filter(([governorate]) => governorate !== "cities")
@@ -113,11 +115,11 @@ export default function UnitsFilter({
     }
   }, [locale]);
 
-  const handleFilterChange = (key, value) => {
+  const handleFilterChange = async (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-
     const newParams = new URLSearchParams(window.location.search);
     value !== "all" ? newParams.set(key, value) : newParams.delete(key);
+    console.log("New Params:", newParams.toString());
     router.push(`${window.location.pathname}?${newParams.toString()}`);
   };
 
