@@ -27,7 +27,7 @@ export default function UnitsClientWrapper({
         clientName={clientName}
         citiesAndDistricts={citiesAndDistricts}
         setIsLoading={setIsLoading}
-        setUnit={setUnits}
+        setUnits={setUnits}
       />
 
       <div className="flex-1 flex flex-col">

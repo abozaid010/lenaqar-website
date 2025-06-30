@@ -6,6 +6,8 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { fetchUnitsFilter } from "../services/serviceFetching";
+
 const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({
@@ -17,7 +19,7 @@ export default function UnitsFilter({
   readonly,
   citiesAndDistricts,
   setIsLoading = () => {},
-  setUnit = () => {},
+  setUnits = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -116,11 +118,32 @@ export default function UnitsFilter({
   }, [locale]);
 
   const handleFilterChange = async (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-    const newParams = new URLSearchParams(window.location.search);
-    value !== "all" ? newParams.set(key, value) : newParams.delete(key);
-    console.log("New Params:", newParams.toString());
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    const updatedFilters = { ...filters, [key]: value };
+    setFilters(updatedFilters);
+
+    // Build queryParams with only valid filters
+    const queryParams = {};
+    // Only add filters that have valid values and are not "all"
+    Object.entries(updatedFilters).forEach(([filterKey, filterValue]) => {
+      if (filterValue && filterValue !== "" && filterValue !== "all") {
+        queryParams[filterKey] = filterValue;
+      }
+    });
+
+    try {
+      setIsLoading(true);
+      const res = await fetchUnitsFilter(
+        JSON.stringify({ ...queryParams, client_id: clientId }),
+        true
+      );
+      if (res.status) {
+        setUnits(res.data.units);
+      }
+    } catch (e) {
+      console.error("Error fetching units:", e);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePriceApply = () => {

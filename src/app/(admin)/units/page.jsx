@@ -4,10 +4,9 @@ import {
   fetchDevelopers,
   fetchUnitsFilter,
 } from "@/components/services/serviceFetching";
-import UnitsGrid from "@/components/ui/units-grid";
 
-import UnitsFilter from "@/components/ui/units-filter";
 import { cookies } from "next/headers";
+import UnitsClientWrapper from "./_components/units-client-wrapper";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -38,22 +37,18 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       fetchcombounds(true),
       fetchCitisAndProjects(),
     ]);
-
-  console.log("Units Response:", unintsRes);
+  console.log("unintsRes", unintsRes);
   return (
     <div className="container">
-      <UnitsFilter
-        appliedFilters={searchParams}
+      <UnitsClientWrapper
+        initialUnits={unintsRes.data.units}
+        searchParams={searchParams}
         developers={developers}
         compounds={compounds}
         clientId={clientId}
         clientName={clientName}
         citiesAndDistricts={citiesAndDistricts}
       />
-
-      <div className="flex-1 flex flex-col">
-        <UnitsGrid units={unintsRes.data.units || []} />
-      </div>
     </div>
   );
 }
