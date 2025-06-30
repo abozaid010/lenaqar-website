@@ -438,7 +438,7 @@ export default function ProjectList({
                         <Image
                           src={
                             selectedProject.phases[selectedPhaseIdx]
-                              ?.master_plan ||
+                              ?.master_plan.url ||
                             (Array.isArray(
                               selectedProject.phases[selectedPhaseIdx]?.images
                             ) &&
@@ -460,8 +460,8 @@ export default function ProjectList({
                         {/* Overlay for indication */}
                         {(selectedProject.phases[selectedPhaseIdx].images
                           ?.length > 0 ||
-                          selectedProject.phases[selectedPhaseIdx]
-                            ?.master_plan) && (
+                          selectedProject.phases[selectedPhaseIdx]?.master_plan
+                            .url) && (
                           <div
                             className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                             onClick={() => {
@@ -471,7 +471,7 @@ export default function ProjectList({
                               );
                               setFullScreenMasterPlan(
                                 selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan || null
+                                  ?.master_plan.url || null
                               );
                               setShowFullScreenSwiper(true);
                             }}
@@ -491,7 +491,7 @@ export default function ProjectList({
                             </svg>
                             <span className="text-white text-lg font-semibold">
                               {(selectedProject.phases[selectedPhaseIdx]
-                                ?.master_plan
+                                ?.master_plan.url
                                 ? 1
                                 : 0) +
                                 (selectedProject.phases[selectedPhaseIdx].images
@@ -562,7 +562,7 @@ export default function ProjectList({
                           >
                             <Image
                               src={
-                                phase.master_plan ||
+                                phase.master_plan.url ||
                                 (Array.isArray(phase?.images) &&
                                 phase?.images.length > 0
                                   ? phase.images[0].url

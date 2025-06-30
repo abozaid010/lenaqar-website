@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 export default function SingleImageUploader({
   label,
   value,
-  fileId,
+  imageId,
   onChange,
   disabled = false,
   uploading = false,
@@ -22,7 +22,7 @@ export default function SingleImageUploader({
   const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(
-    value ? { name: null, preview: value, imageId: fileId } : null
+    value ? { name: null, preview: value, imageId: imageId } : null
   );
   const [isUploading, setIsUploadingLocal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -31,7 +31,7 @@ export default function SingleImageUploader({
     if (!value) {
       setSelectedImage(null);
     } else {
-      setSelectedImage({ name: null, preview: value, imageId: fileId });
+      setSelectedImage({ name: null, preview: value, imageId: imageId });
     }
   }, [value]);
 
