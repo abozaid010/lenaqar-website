@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 export default function SingleImageUploader({
   label,
   value,
+  imageId,
   onChange,
   disabled = false,
   uploading = false,
@@ -21,7 +22,7 @@ export default function SingleImageUploader({
   const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(
-    value ? { name: null, preview: value, imageId: null } : null
+    value ? { name: null, preview: value, imageId: imageId } : null
   );
   const [isUploading, setIsUploadingLocal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function SingleImageUploader({
     if (!value) {
       setSelectedImage(null);
     } else {
-      setSelectedImage({ name: null, preview: value, imageId: null });
+      setSelectedImage({ name: null, preview: value, imageId: imageId });
     }
   }, [value]);
 
@@ -68,7 +69,7 @@ export default function SingleImageUploader({
 
       if (res && res.url) {
         setSelectedImage((prev) => ({ ...(prev || {}), imageId: res.fileId }));
-        onChange(res.url);
+        onChange(res.url, res.fileId);
       } else {
         toast.error("Image upload failed. Please try again.");
         setSelectedImage(null);
@@ -86,12 +87,11 @@ export default function SingleImageUploader({
   const handleRemoveImage = async (e) => {
     e.stopPropagation();
 
-    const imageID = selectedImage.preview.split("/").pop();
-    if (!imageID) return;
+    if (!selectedImage.imageId) return;
 
     try {
       setDeleteLoading(true);
-      await deleteImage(imageID);
+      await deleteImage(selectedImage.imageId);
     } catch (error) {
       console.error("Error deleting image:", error);
     } finally {

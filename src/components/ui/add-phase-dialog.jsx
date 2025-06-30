@@ -34,7 +34,7 @@ export default function AddPhseDilog({
     id: uuidv4() || phaseData?.id,
     name: phaseData?.name || "",
     description: phaseData?.description || "",
-    master_plan: phaseData?.master_plan || "",
+    master_plan: phaseData?.master_plan || { url: null, fileId: null },
     updated_at: new Date().toISOString(),
     images: phaseData?.images || [],
   });
@@ -46,7 +46,7 @@ export default function AddPhseDilog({
         id: phaseData.id,
         name: phaseData.name,
         description: phaseData.description,
-        master_plan: phaseData.master_plan || "",
+        master_plan: phaseData.master_plan || { url: null, fileId: null },
         updated_at: new Date().toISOString(),
         images: phaseData.images || [],
       });
@@ -93,7 +93,7 @@ export default function AddPhseDilog({
       if (editMode) {
         const formDataToUpdate = {
           name: formData.name,
-          master_plan: formData.master_plan || "",
+          master_plan: formData.master_plan,
           description: formData.description,
           updated_at: new Date().toISOString(),
           images: formData.images,
@@ -136,7 +136,7 @@ export default function AddPhseDilog({
             id: uuidv4(),
             name: "",
             description: "",
-            master_plan: "",
+            master_plan: { url: null, fileId: null },
             updated_at: new Date().toISOString(),
           });
 
@@ -207,9 +207,13 @@ export default function AddPhseDilog({
           {/* Master Plan Image */}
           <SingleImageUploader
             label={t.formLabels.masterPlanImage || "Master Plan Image"}
-            value={formData.master_plan}
-            onChange={(url) =>
-              setFormData((prev) => ({ ...prev, master_plan: url }))
+            value={formData.master_plan.url}
+            imageId={formData.master_plan.fileId}
+            onChange={(url, id) =>
+              setFormData((prev) => ({
+                ...prev,
+                master_plan: { url, fileId: id },
+              }))
             }
             disabled={isMasterPlanUploading || isSubmitting}
             isUploading={isMasterPlanUploading}

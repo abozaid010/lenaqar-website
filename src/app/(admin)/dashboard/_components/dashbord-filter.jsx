@@ -67,9 +67,6 @@ export default function DashbordFilter({ appliedFilters }) {
 
   const formatDateForDisplay = (date) => {
     const options = { day: "2-digit", month: "short", year: "2-digit" };
-    console.log(
-      `Formatting date for display: ${new Date(date).toLocaleDateString("en-GB", options).replace(",", "")}`
-    );
     return new Date(date).toLocaleDateString("en-GB", options).replace(",", "");
   };
 
