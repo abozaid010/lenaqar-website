@@ -355,21 +355,21 @@ export default function ProjectList({
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
             {selectedProject ? (
               <>
-                {(selectedProject.master_plan ||
+                {(selectedProject.master_plan.url ||
                   selectedProject.images?.length > 0) && (
                   <div
                     className="h-80 relative cursor-pointer group"
                     onClick={() => {
                       setFullScreenImages(selectedProject.images || []);
                       setFullScreenMasterPlan(
-                        selectedProject.master_plan || null
+                        selectedProject.master_plan.url || null
                       );
                       setShowFullScreenSwiper(true);
                     }}
                   >
                     <Image
                       src={
-                        selectedProject.master_plan ||
+                        selectedProject.master_plan.url ||
                         selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
@@ -380,7 +380,7 @@ export default function ProjectList({
                     />
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
-                      selectedProject.master_plan) && (
+                      selectedProject.master_plan.url) && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg
                           className="w-10 h-10 text-white mb-2"
@@ -396,7 +396,7 @@ export default function ProjectList({
                           />
                         </svg>
                         <span className="text-white text-lg font-semibold">
-                          {(selectedProject.master_plan ? 1 : 0) +
+                          {(selectedProject.master_plan.url ? 1 : 0) +
                             (selectedProject.images?.length || 0)}{" "}
                           {t?.images || "Images"}
                         </span>
