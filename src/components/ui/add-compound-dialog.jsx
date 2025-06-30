@@ -56,7 +56,7 @@ export default function AddCompoundDialog({
     gated: false,
     video_url: compoundData?.video_url || "",
     google_map_link: compoundData?.google_map_link || "",
-    master_plan: compoundData?.master_plan || "",
+    master_plan: compoundData?.master_plan || { url: null, fileId: null },
     client_id: clientId || "",
     images: compoundData?.images || [],
   });
@@ -78,7 +78,7 @@ export default function AddCompoundDialog({
           gated: compoundData.gated || false,
           video_url: compoundData.video_url || "",
           google_map_link: compoundData.google_map_link || "",
-          master_plan: compoundData.master_plan || "",
+          master_plan: compoundData?.master_plan || { url: null, fileId: null },
           client_id: compoundData.client_id || clientId || "",
           images: compoundData.images || [],
         });
@@ -96,7 +96,7 @@ export default function AddCompoundDialog({
           gated: false,
           video_url: "",
           google_map_link: "",
-          master_plan: "",
+          master_plan: { url: null, fileId: null },
           client_id: clientId || "",
           images: [],
         });
@@ -115,7 +115,7 @@ export default function AddCompoundDialog({
         gated: false,
         video_url: "",
         google_map_link: "",
-        master_plan: "",
+        master_plan: { url: null, fileId: null },
         client_id: clientId || "",
         images: [],
       });
@@ -243,6 +243,21 @@ export default function AddCompoundDialog({
       }
 
       onClose();
+      setFormData({
+        ar_name: "",
+        en_name: "",
+        description: "",
+        developer_name: "",
+        city: defaultCity || "",
+        country: "Egypt",
+        district: defaultDistrict || "",
+        area: "",
+        gated: false,
+        video_url: "",
+        google_map_link: "",
+        master_plan: { url: null, fileId: null },
+        client_id: clientId || "ai",
+      });
     } catch (error) {
       toast.error(
         editMode
@@ -258,21 +273,6 @@ export default function AddCompoundDialog({
       });
     } finally {
       setIsSubmitting(false);
-      setFormData({
-        ar_name: "",
-        en_name: "",
-        description: "",
-        developer_name: "",
-        city: defaultCity || "",
-        country: "Egypt",
-        district: defaultDistrict || "",
-        area: "",
-        gated: false,
-        video_url: "",
-        google_map_link: "",
-        master_plan: "",
-        client_id: clientId || "ai",
-      });
     }
   };
 
@@ -497,9 +497,16 @@ export default function AddCompoundDialog({
             {/* Master Plan Image */}
             <SingleImageUploader
               label={t.formLabels.masterPlanImage || "Master Plan Image"}
-              value={formData.master_plan}
-              onChange={(url) =>
-                setFormData((prev) => ({ ...prev, master_plan: url }))
+              value={formData.master_plan.url || null}
+              imageId={formData.master_plan.fileId || null}
+              onChange={(url, id) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  master_plan: {
+                    url,
+                    fileId: id,
+                  },
+                }))
               }
               disabled={isMasterPlanUploading || isSubmitting}
               isUploading={isMasterPlanUploading}
