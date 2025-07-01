@@ -5,21 +5,23 @@ const protectedRoutes = ["/dashboard", "/units", "/team", "/client"];
 export async function middleware(request) {
   const path = request.nextUrl.pathname;
 
+  const accessToken = request.cookies.get("access_token")?.value;
   const isProtectedRoute = protectedRoutes.some((route) =>
     path.startsWith(route)
   );
 
   if (isProtectedRoute) {
-    const clientId = request.cookies.get("lena-website-client_id")?.value;
-
-    if (!clientId) {
-      return NextResponse.redirect(new URL("/login", request.url));
+    if (!accessToken) {
+      const response = NextResponse.redirect(new URL("/login", request.url));
+      response.cookies.delete("access_token");
+      response.cookies.delete("refresh_token");
+      response.cookies.delete("lena-website-client_id");
+      return response;
     }
   }
 
   if (path === "/") {
-    const clientId = request.cookies.get("lena-website-client_id")?.value;
-    if (clientId) {
+    if (accessToken) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
