@@ -53,11 +53,11 @@ const Header = ({ clientName, clientID }) => {
   };
 
   const confirmLogout = () => {
+    router.replace("/");
     Cookies.remove("lena-website-client_id");
     Cookies.remove("access_token");
-    setShowLogoutConfirm(false);
+    Cookies.remove("refresh_token");
     toast.success(t.header.logoutSuccess);
-    router.replace("/");
   };
 
   return (

@@ -42,12 +42,12 @@ export async function loginAction(prevState, formData) {
     cookieStore.set("access_token", access_token, {
       path: "/",
       secure: true,
-      httpOnly: true,
+      httpOnly: false,
     });
     cookieStore.set("refresh_token", refresh_token, {
       path: "/",
       secure: true,
-      httpOnly: true,
+      httpOnly: false,
     });
     cookieStore.set("lena-website-client_id", client_id, { path: "/" });
     cookieStore.set(
