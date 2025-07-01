@@ -600,6 +600,7 @@ export default {
     noPlans: "No payment plans added yet.",
     years: "Years",
     yearLabel: "year",
+    yearsLabel: "years",
     price: "Price",
     maintenance: "Maintenance",
   },
