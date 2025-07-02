@@ -12,8 +12,6 @@
     "axios": "^1.8.4",
     "browser-image-compression": "^2.0.2",
     "date-fns": "^4.1.0",
-    "dayjs": "^1.11.13",
-    "formik": "^2.4.6",
     "framer-motion": "^12.7.4",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.487.0",
@@ -21,11 +19,9 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "react-to-print": "^3.1.0",
     "recharts": "^2.15.3",
     "swiper": "^11.2.6",
-    "uuid": "^11.1.0",
-    "yup": "^1.6.1"
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

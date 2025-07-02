@@ -10,6 +10,7 @@ import RentalDetailsStep from "./steps/rental-details-step";
 import SaleDetailsStep from "./steps/sale-details-step";
 
 import { useI18n } from "@/context/translate-api";
+import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -117,6 +118,23 @@ export default function AddUnitModal({
     setFormData((prev) => ({ ...prev, ...newData }));
   };
 
+  const validateDeliveryDate = (dateString) => {
+    if (!dateString) return false;
+
+    const deliveryDate = new Date(dateString);
+    const currentDate = new Date();
+
+    // Check if date is valid
+    if (isNaN(deliveryDate.getTime())) return false;
+
+    // Calculate date ranges
+    const minDate = subYears(currentDate, 30);
+    const maxDate = addYears(currentDate, 10);
+
+    // Check if delivery date is within valid range
+    return !isBefore(deliveryDate, minDate) && !isAfter(deliveryDate, maxDate);
+  };
+
   const handleNext = (e) => {
     e.preventDefault();
     // Validate required fields for step 1
@@ -168,6 +186,20 @@ export default function AddUnitModal({
         const missingFields = requiredFields.filter(
           (field) => !SellFormData[field]
         );
+
+        if (
+          SellFormData.deliveryDate &&
+          !validateDeliveryDate(SellFormData.deliveryDate)
+        ) {
+          missingFields.push("deliveryDate");
+          toast.error(
+            t.saleDetails.deleveryError ||
+              "Delivery date must be between 30 years ago and 10 years from now",
+            {
+              duration: 5000,
+            }
+          );
+        }
 
         // Validate paymentPlans
         if (SellFormData.paymentPlans.length > 0) {

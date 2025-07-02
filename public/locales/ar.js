@@ -56,7 +56,6 @@ export default {
     message6: "متابعة مباشرة للعملاء وتحليل السوق لحظة بلحظة",
     message7: "تابع ووسّع نشاطك بسهولة",
   },
-
   dashboard: {
     title: {
       part1: "لينا معك",
@@ -436,7 +435,6 @@ export default {
     cityFirst: "اختر المدينه اولا",
     selectDistrict: "اختر الحي ",
   },
-
   buildingTypes: {
     apartment: "شقة",
     villa: "فيلا",
@@ -502,7 +500,6 @@ export default {
     selectPhase: "اختر المرحلة",
     noPhases: "لا يوجد مراحل في هذا المشروع",
     selectProject: "اختر المشروع",
-
     propertyDetails: "تفاصيل العقار",
     propertySpecs: "مواصفات العقار",
     unitTitle: "عنوان الوحدة",
@@ -578,6 +575,8 @@ export default {
     yearsLabel: "سنوات",
     price: "السعر",
     maintenance: "الصيانة",
+    deleveryError:
+      "يجب أن يكون تاريخ التسليم بين 30 سنة مضت و 10 سنوات من الآن",
   },
   rentalDetails: {
     availability: "التوفر",
