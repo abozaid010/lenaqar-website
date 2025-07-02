@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { Edit, Plus } from "lucide-react";
-import AddUnitModal from "./add-unit-Modal";
 import { useI18n } from "@/context/translate-api";
+import { Edit, Plus } from "lucide-react";
+import { useState } from "react";
+import AddUnitModal from "./add-unit-Modal";
 
 export default function AddUnitButton({
   isEdit = false,
@@ -13,6 +13,7 @@ export default function AddUnitButton({
   compounds,
   developers,
   citiesAndDistricts,
+  setUnits = () => {},
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +34,7 @@ export default function AddUnitButton({
           </span>
         ) : (
           <span className="flex items-center gap-2">
-            <Plus  width={24} height={24} />{" "}
+            <Plus width={24} height={24} />{" "}
             <span className={`${isEdit ? "hidden sm:block" : "block"}`}>
               {t.units.addButton.addNew}
             </span>
@@ -51,6 +52,7 @@ export default function AddUnitButton({
           compounds={compounds}
           developersData={developers}
           citiesAndDistricts={citiesAndDistricts}
+          setUnits={setUnits}
         />
       )}
     </>

@@ -19,6 +19,7 @@ export default function UnitsFilter({
   readonly,
   citiesAndDistricts,
   setIsLoading = () => {},
+  setUnits = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -676,6 +677,7 @@ export default function UnitsFilter({
               developers={developers}
               citiesAndDistricts={formattedDataCitiesAndDistricts}
               className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
+              setUnits={setUnits}
             />
           </div>
         )}

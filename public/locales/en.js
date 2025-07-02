@@ -401,6 +401,8 @@ export default {
     selectPurpose: "Please select a purpose for the unit (sell/rent)",
     errorProcessing:
       "An error occurred while processing your request. Please try again",
+    unitAdded: "Unit added successfully",
+    unitUpdated: "Unit updated successfully",
   },
   updatePhase: "updatePhase",
   viewInCRM: "View in CRM",
