@@ -89,7 +89,7 @@ export default function UnitPricing({ unit }) {
                     <span className="text-base font-bold text-primary">
                       {p.years}{" "}
                       {p.years > 1
-                        ? t.saleDetails.years
+                        ? t.saleDetails.yearsLabel
                         : t.saleDetails.yearLabel}
                     </span>
                     <span className="text-xs text-gray-600">

@@ -581,6 +581,7 @@ export default {
     noPlans: "لم يتم إضافة خطط دفع بعد.",
     years: "السنوات",
     yearLabel: "سنـة",
+    yearsLabel: "سنوات",
     price: "السعر",
     maintenance: "الصيانة",
   },
