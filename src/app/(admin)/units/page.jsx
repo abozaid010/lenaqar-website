@@ -4,12 +4,9 @@ import {
   fetchDevelopers,
   fetchUnitsFilter,
 } from "@/components/services/serviceFetching";
-import UnitsGrid from "@/components/ui/units-grid";
-import { Loader2 } from "lucide-react";
-import { Suspense } from "react";
 
-import UnitsFilter from "@/components/ui/units-filter";
 import { cookies } from "next/headers";
+import UnitsClientWrapper from "./_components/units-client-wrapper";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -26,52 +23,33 @@ export async function generateMetadata() {
 
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
-
   const cookieStore = await cookies();
   const clientId = cookieStore.get("lena-website-client_id")?.value;
   const clientName = cookieStore.get("client_info")?.value
     ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
     : null;
 
-  const [developers, compounds, citiesAndDistricts] = await Promise.all([
-    fetchDevelopers(),
-    fetchcombounds(true),
-    fetchCitisAndProjects(),
-  ]);
+  searchParams.client_id = clientId;
+  const [unintsRes, developers, compounds, citiesAndDistricts] =
+    await Promise.all([
+      fetchUnitsFilter(JSON.stringify(searchParams), true),
+      fetchDevelopers(),
+      fetchcombounds(true),
+      fetchCitisAndProjects(),
+    ]);
 
+  console.log(unintsRes.data.units);
   return (
-    <div className="w-[98%] mx-auto">
-      <UnitsFilter
-        appliedFilters={searchParams}
+    <div className="container">
+      <UnitsClientWrapper
+        initialUnits={unintsRes.data.units}
+        searchParams={searchParams}
         developers={developers}
         compounds={compounds}
         clientId={clientId}
         clientName={clientName}
         citiesAndDistricts={citiesAndDistricts}
       />
-
-      <div className="flex-1 flex flex-col">
-        <Suspense
-          key={JSON.stringify(searchParams)}
-          fallback={
-            <div className="flex items-center justify-center h-full mt-12">
-              <Loader2
-                size={70}
-                className="text-center animate-spin text-primary"
-              />
-            </div>
-          }
-        >
-          <UnitsList searchParams={searchParams} />
-        </Suspense>
-      </div>
     </div>
   );
-}
-
-async function UnitsList({ searchParams }) {
-  const res = await fetchUnitsFilter(JSON.stringify(searchParams), true);
-  const units = res.data?.units || [];
-
-  return <UnitsGrid units={units} />;
 }

@@ -29,6 +29,8 @@ export default function AddUnitModal({
   clientName,
   developersData,
   citiesAndDistricts,
+  setUnits = () => {},
+  setUnitData = () => {},
 }) {
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -283,28 +285,24 @@ export default function AddUnitModal({
       }
     }
 
-    if (!formData.purpose) {
-      toast.error(t("toasts.selectPurpose"));
-      return;
-    }
-
     try {
       let res;
+      let finalFormData = { ...formData };
       setLoading(true);
       if (!isEdit) {
         if (formData.purpose === "sell") {
-          const finalFormData = { ...formData, ...SellFormData };
+          finalFormData = { ...finalFormData, ...SellFormData };
           res = await addUnit(finalFormData);
         } else if (formData.purpose === "rent") {
-          const finalFormData = { ...formData, ...rentFormData };
+          finalFormData = { ...finalFormData, ...rentFormData };
           res = await addUnitRent(finalFormData);
         }
       } else {
         if (formData.purpose === "sell") {
-          const finalFormData = { ...formData, ...SellFormData };
+          finalFormData = { ...finalFormData, ...SellFormData };
           res = await updateUnit(finalFormData);
         } else if (formData.purpose === "rent") {
-          const finalFormData = { ...formData, ...rentFormData };
+          finalFormData = { ...finalFormData, ...rentFormData };
           res = await updateUnitRent(finalFormData);
         }
       }
@@ -316,7 +314,12 @@ export default function AddUnitModal({
         return;
       }
       onClose();
-      window.location.reload();
+      toast.success(isEdit ? t.toasts.unitUpdated : t.toasts.unitAdded);
+
+      if (isEdit && setUnitData) setUnitData(finalFormData);
+
+      if (!isEdit && setUnits)
+        setUnits((prevUnits) => [...prevUnits, res.data]);
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {

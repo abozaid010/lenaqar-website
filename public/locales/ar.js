@@ -372,7 +372,8 @@ export default {
     activeFilter: " الفلاتر النشطه :",
     clearall: "مسح جميع الفلاتر",
     allCities: "جميع المدن",
-
+    from: "من",
+    upTo: "إلى",
     purposes: {
       buy: "شراء",
       rent: "إيجار",
@@ -408,14 +409,7 @@ export default {
     addPhase: "إضافة مرجله",
     updatePhase: "تعديل مرحله",
   },
-  toasts: {
-    enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
-    uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
-    selectPurpose: "يرجى تحديد غرض الوحدة (بيع/إيجار)",
-    errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
-  },
   addPhase: "اضافة مرحلة",
-
   updatePhase: "تعديل مرحله",
   projectFirst: "اختر المشروع اولا",
   formLabels: {
@@ -873,6 +867,12 @@ export default {
     uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
     selectPurpose: "يرجى اختيار غرض للوحدة (بيع/إيجار)",
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
+    enterValidPrice: "يرجى إدخال سعر أكبر من 0 لنوع مدة واحد على الأقل",
+    uploadImage: "يرجى تحميل صورة واحدة على الأقل.",
+    selectPurpose: "يرجى تحديد غرض الوحدة (بيع/إيجار)",
+    errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
+    unitAdded: "تم إضافة الوحدة بنجاح",
+    unitUpdated: "تم تحديث الوحدة بنجاح",
   },
   phase: "المرحلة",
   viewOnGoogleMaps: "عرض على خرائط جوجل",

@@ -160,14 +160,12 @@ export async function resetUnreadMessagesCount(userId) {
 }
 
 export async function fetchUnitsFilter(searchParams, use) {
-  const clientId = await getClientid();
-
   try {
     const params = {
       ...JSON.parse(searchParams),
     };
 
-    use && (params.client_id = clientId);
+    console.log(params);
     const response = await axiosInstance.get(
       `${use ? "/units/all" : "/public/units"}`,
       { params }
