@@ -349,6 +349,8 @@ export default {
     allCities: "All Cities",
     activeFilter: " Active Filters:",
     clearall: " Clear All",
+    from: "From",
+    upTo: "Up to",
     purposes: {
       buy: "Buy",
       rent: "Rent",

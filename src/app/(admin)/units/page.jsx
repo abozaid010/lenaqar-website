@@ -37,7 +37,8 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       fetchcombounds(true),
       fetchCitisAndProjects(),
     ]);
-  console.log("unintsRes", unintsRes);
+
+  console.log(unintsRes.data.units);
   return (
     <div className="container">
       <UnitsClientWrapper

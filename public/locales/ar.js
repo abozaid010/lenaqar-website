@@ -372,7 +372,8 @@ export default {
     activeFilter: " الفلاتر النشطه :",
     clearall: "مسح جميع الفلاتر",
     allCities: "جميع المدن",
-
+    from: "من",
+    upTo: "إلى",
     purposes: {
       buy: "شراء",
       rent: "إيجار",

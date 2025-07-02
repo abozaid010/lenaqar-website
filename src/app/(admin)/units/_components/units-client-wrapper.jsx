@@ -3,7 +3,7 @@
 import UnitsFilter from "@/components/ui/units-filter";
 import UnitsGrid from "@/components/ui/units-grid";
 import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function UnitsClientWrapper({
   initialUnits,
@@ -16,6 +16,10 @@ export default function UnitsClientWrapper({
 }) {
   const [units, setUnits] = useState(initialUnits);
   const [loading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setUnits(initialUnits);
+  }, [searchParams]);
 
   return (
     <div className="container">

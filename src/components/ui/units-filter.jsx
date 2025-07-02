@@ -4,9 +4,9 @@ import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
+import { ChevronDown, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { fetchUnitsFilter } from "../services/serviceFetching";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
@@ -19,7 +19,6 @@ export default function UnitsFilter({
   readonly,
   citiesAndDistricts,
   setIsLoading = () => {},
-  setUnits = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -67,8 +66,40 @@ export default function UnitsFilter({
   const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
-  const [tempMinPrice, setTempMinPrice] = useState(filters.min_price || "");
-  const [tempMaxPrice, setTempMaxPrice] = useState(filters.max_price || "");
+  const [activeFilters, setActiveFilters] = useState(() => {
+    const initialFilters = [];
+    if (filters.developer_name) {
+      initialFilters.push({
+        key: "developer_name",
+        value: filters.developer_name,
+      });
+    }
+    if (filters.project_name) {
+      initialFilters.push({
+        key: "project_name",
+        value: filters.project_name,
+      });
+    }
+    if (filters.purpose) {
+      initialFilters.push({ key: "purpose", value: filters.purpose });
+    }
+    if (filters.property_type) {
+      initialFilters.push({
+        key: "property_type",
+        value: filters.property_type,
+      });
+    }
+    if (filters.min_price || filters.max_price) {
+      initialFilters.push({
+        key: "price_range",
+        value: getPriceDisplayText(),
+      });
+    }
+    if (filters.city) {
+      initialFilters.push({ key: "city", value: getSelectedCity() });
+    }
+    return initialFilters;
+  });
 
   const priceDropdownRef = useRef(null);
   const developerDropdownRef = useRef(null);
@@ -117,78 +148,117 @@ export default function UnitsFilter({
     }
   }, [locale]);
 
-  const handleFilterChange = async (key, value) => {
+  // Clear loading state when component receives new data after navigation
+  useEffect(() => {
+    setIsLoading(false);
+  }, [appliedFilters, setIsLoading]);
+
+  const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
 
-    // Build queryParams with only valid filters
-    const queryParams = {};
-    // Only add filters that have valid values and are not "all"
-    Object.entries(updatedFilters).forEach(([filterKey, filterValue]) => {
-      if (filterValue && filterValue !== "" && filterValue !== "all") {
-        queryParams[filterKey] = filterValue;
+    // Update URL parameters
+    const newParams = new URLSearchParams(window.location.search);
+
+    if (value && value !== "" && value !== "all") {
+      newParams.set(key, value);
+    } else {
+      newParams.delete(key);
+    }
+
+    // Set loading state and update the URL
+    setIsLoading(true);
+    router.push(`${window.location.pathname}?${newParams.toString()}`);
+
+    setActiveFilters((prev) => {
+      const existingFilterIndex = prev.findIndex((f) => f.key === key);
+      if (existingFilterIndex > -1) {
+        // Update existing filter
+        const updatedFilter = { ...prev[existingFilterIndex], value };
+        return [
+          ...prev.slice(0, existingFilterIndex),
+          updatedFilter,
+          ...prev.slice(existingFilterIndex + 1),
+        ];
+      } else {
+        // Add new filter
+        return [...prev, { key, value }];
       }
     });
-
-    try {
-      setIsLoading(true);
-      const res = await fetchUnitsFilter(
-        JSON.stringify({ ...queryParams, client_id: clientId }),
-        true
-      );
-      if (res.status) {
-        setUnits(res.data.units);
-      }
-    } catch (e) {
-      console.error("Error fetching units:", e);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const handlePriceApply = () => {
     // Update filters state
-    setFilters((prev) => ({
-      ...prev,
-      min_price: tempMinPrice || "0", // Set default to "0" if empty
-      max_price: tempMaxPrice,
-    }));
+    const newMinPrice = filters.min_price;
+    const newMaxPrice = filters.max_price;
+
+    console.log("Applying price filter:", { newMinPrice, newMaxPrice });
 
     // Update URL params
     const newParams = new URLSearchParams(window.location.search);
 
-    // Always set min_price to at least 0
-    newParams.set("min_price", tempMinPrice || "0");
-
-    if (tempMaxPrice) {
-      newParams.set("max_price", tempMaxPrice);
+    if (newMinPrice) {
+      newParams.set("min_price", newMinPrice);
     } else {
-      newParams.set("max_price", "5000000000"); // Default max price
+      newParams.delete("min_price");
     }
 
+    if (newMaxPrice) {
+      newParams.set("max_price", newMaxPrice);
+    } else {
+      newParams.delete("max_price");
+    }
+
+    // Set loading state and update the URL
+    setIsLoading(true);
     router.push(`${window.location.pathname}?${newParams.toString()}`);
     setIsPriceDropdownOpen(false);
+
+    setActiveFilters((prev) => {
+      const existingFilterIndex = prev.findIndex(
+        (f) => f.key === "price_range"
+      );
+      const priceText = getPriceDisplayText();
+
+      if (existingFilterIndex > -1) {
+        // Update existing price filter
+        const updatedFilter = { key: "price_range", value: priceText };
+        return [
+          ...prev.slice(0, existingFilterIndex),
+          updatedFilter,
+          ...prev.slice(existingFilterIndex + 1),
+        ];
+      } else {
+        // Add new price filter
+        return [...prev, { key: "price_range", value: priceText }];
+      }
+    });
   };
 
   // Format price input with commas as user types
-  const formatPriceInput = (value) => {
+  function formatPriceInput(value) {
     if (!value) return "";
     // Remove all non-digit characters
     const numericValue = value.replace(/\D/g, "");
     // Format with commas
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  };
+  }
 
-  const getPriceDisplayText = () => {
+  function getPriceDisplayText() {
     if (filters.min_price || filters.max_price) {
-      const min = filters.min_price ? formatPriceInput(filters.min_price) : "0";
-      const max = filters.max_price
-        ? formatPriceInput(filters.max_price)
-        : "5,000,000,000";
-      return `${min} - ${max} EGP`;
+      const min = filters.min_price ? formatPriceInput(filters.min_price) : "";
+      const max = filters.max_price ? formatPriceInput(filters.max_price) : "";
+
+      if (min && max) {
+        return `${min} - ${max} EGP`;
+      } else if (min) {
+        return `${t.unitsFilter.from || "From"} ${min} EGP`;
+      } else if (max) {
+        return `${t.unitsFilter.upTo || "Up to"} ${max} EGP`;
+      }
     }
     return t.unitsFilter.price;
-  };
+  }
 
   // Function to remove all filters
   const handleRemoveAllFilters = () => {
@@ -202,13 +272,13 @@ export default function UnitsFilter({
       city: "",
     });
 
-    // Reset temporary price values
-    setTempMinPrice("");
-    setTempMaxPrice("");
-
     setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
-    // Clear URL parameters
+
+    // Set loading state and clear URL parameters
+    setIsLoading(true);
     router.push(window.location.pathname);
+
+    setActiveFilters([]);
   };
 
   // Function to remove a specific filter
@@ -229,64 +299,15 @@ export default function UnitsFilter({
       setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
     }
 
+    setIsLoading(true);
     router.push(`${window.location.pathname}?${newParams.toString()}`);
+
+    setActiveFilters((prev) =>
+      prev.filter((f) => f.key !== key && f.removeKeys?.indexOf(key) === -1)
+    );
   };
 
-  // Check if any filters are applied
-  const hasActiveFilters = Object.values(filters).some((value) => value !== "");
-
-  // Get display name for a filter value
-  const getFilterDisplayName = (key, value) => {
-    if (!value) return null;
-
-    switch (key) {
-      case "project_name":
-        return selectedProjectName || value;
-      case "purpose":
-        return t.unitsFilter.purposes[value] || value;
-      case "property_type":
-        const propertyType = buildingTypes.find((type) => type.value === value);
-        return propertyType ? propertyType.label : value;
-      case "city":
-        return t.unitsFilter.cities?.[value] || value;
-      case "min_price":
-      case "max_price":
-        return null;
-      default:
-        return value;
-    }
-  };
-
-  // Get active filters for display
-  const getActiveFilters = () => {
-    const activeFilters = [];
-
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value && key !== "min_price" && key !== "max_price") {
-        const displayName = getFilterDisplayName(key, value);
-        if (displayName) {
-          activeFilters.push({ key, value: displayName });
-        }
-      }
-    });
-
-    // Add price range as a single filter if either min or max is set
-    if (filters.min_price || filters.max_price) {
-      const min = filters.min_price ? formatPriceInput(filters.min_price) : "0";
-      const max = filters.max_price
-        ? formatPriceInput(filters.max_price)
-        : "5,000,000,000";
-      activeFilters.push({
-        key: "price_range",
-        value: `${min} - ${max} EGP`,
-        removeKeys: ["min_price", "max_price"],
-      });
-    }
-
-    return activeFilters;
-  };
-
-  const getSelectedPropertyType = () => {
+  function getSelectedPropertyType() {
     if (!filters.property_type || filters.property_type === "all") {
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
@@ -294,33 +315,52 @@ export default function UnitsFilter({
     return type
       ? type.label
       : t.unitsFilter.allPropertyTypes || "All Property Types";
-  };
+  }
 
-  const getSelectedPurpose = () => {
+  function getSelectedPurpose() {
     if (!filters.purpose || filters.purpose === "all") {
       return t.unitsFilter.allPurposes || "All Purposes";
     }
     return t.unitsFilter.purposes[filters.purpose] || filters.purpose;
-  };
+  }
 
-  const getSelectedDeveloper = () => {
+  function getSelectedDeveloper() {
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
 
     return filters.developer_name;
-  };
+  }
 
-  const getSelectedCity = () => {
+  function getSelectedCity() {
     if (!filters.city || filters.city === "all") {
       return t.unitsFilter.allCities || "All Cities";
     }
     return formatCityLabel(filters.city, locale) || filters.city;
-  };
+  }
+
+  function getFilterDisplayText(key, value) {
+    switch (key) {
+      case "developer_name":
+        return getSelectedDeveloper();
+      case "project_name":
+        return selectedProjectName;
+      case "purpose":
+        return getSelectedPurpose();
+      case "property_type":
+        return getSelectedPropertyType();
+      case "city":
+        return getSelectedCity();
+      case "price_range":
+        return getPriceDisplayText();
+      default:
+        return value;
+    }
+  }
 
   return (
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center flex-wrap md:flex-nowrap md:gap-3 gap-2 md:justify-between">
+      <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
         {/* Cities Dropdown */}
         {!readonly && (
           <div
@@ -329,24 +369,11 @@ export default function UnitsFilter({
           >
             <button
               type="button"
-              className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
               onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
             >
               <span className="truncate">{getSelectedCity()}</span>
-              <svg
-                className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isCityDropdownOpen ? "rotate-180" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="1"
-                  d="M19 9l-7 7-7-7"
-                ></path>
-              </svg>
+              <ChevronDown size={22} className="inline-block mt-1" />
             </button>
 
             {isCityDropdownOpen && !readonly && (
@@ -390,24 +417,11 @@ export default function UnitsFilter({
         >
           <button
             type="button"
-            className="w-full px-[16px] py-[10px] h-[40px]  bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
           >
             <span className="truncate">{getSelectedDeveloper()}</span>
-            <svg
-              className={`w-[24px] h-[24px]  text-[#000000] ml-1 flex-shrink-0 transition-transform ${isDeveloperDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
           </button>
 
           {isDeveloperDropdownOpen && (
@@ -453,24 +467,11 @@ export default function UnitsFilter({
         >
           <button
             type="button"
-            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
           >
             <span className="truncate">{selectedProjectName}</span>
-            <svg
-              className={`w-[24px] h-[24px] text-[#000000] ml-1 flex-shrink-0 transition-transform ${isProjectDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
           </button>
 
           {isProjectDropdownOpen && (
@@ -519,24 +520,11 @@ export default function UnitsFilter({
         >
           <button
             type="button"
-            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsPurposeDropdownOpen(!isPurposeDropdownOpen)}
           >
             <span className="truncate">{getSelectedPurpose()}</span>
-            <svg
-              className={`w-[24px] h-[24px] text-[#000000]  ml-1 flex-shrink-0 transition-transform ${isPurposeDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
           </button>
 
           {isPurposeDropdownOpen && (
@@ -573,26 +561,13 @@ export default function UnitsFilter({
         >
           <button
             type="button"
-            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() =>
               setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)
             }
           >
             <span className="truncate">{getSelectedPropertyType()}</span>
-            <svg
-              className={`w-[24px] h-[24px] text-[#000000]  ml-1 flex-shrink-0 transition-transform ${isPropertyTypeDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
           </button>
 
           {isPropertyTypeDropdownOpen && (
@@ -631,24 +606,11 @@ export default function UnitsFilter({
         >
           <button
             type="button"
-            className="w-full px-[16px] py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
           >
             <span className="truncate">{getPriceDisplayText()}</span>
-            <svg
-              className={`w-[24px] h-[24px] ml-1  text-[#000000] flex-shrink-0 transition-transform ${isPriceDropdownOpen ? "rotate-180" : ""}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="1"
-                d="M19 9l-7 7-7-7"
-              ></path>
-            </svg>
+            <ChevronDown size={22} className="inline-block mt-0.5 shrink-0" />
           </button>
 
           {isPriceDropdownOpen && (
@@ -661,11 +623,14 @@ export default function UnitsFilter({
                   <input
                     type="text"
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={formatPriceInput(tempMinPrice)}
+                    value={formatPriceInput(filters.min_price)}
                     onChange={(e) => {
                       // Remove commas and non-digits, then update state
                       const value = e.target.value.replace(/\D/g, "");
-                      setTempMinPrice(value);
+                      setFilters((prev) => ({
+                        ...prev,
+                        min_price: value,
+                      }));
                     }}
                     placeholder="0"
                   />
@@ -678,11 +643,13 @@ export default function UnitsFilter({
                   <input
                     type="text"
                     className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={formatPriceInput(tempMaxPrice)}
+                    value={formatPriceInput(filters.max_price)}
                     onChange={(e) => {
-                      // Remove commas and non-digits, then update state
                       const value = e.target.value.replace(/\D/g, "");
-                      setTempMaxPrice(value);
+                      setFilters((prev) => ({
+                        ...prev,
+                        max_price: value,
+                      }));
                     }}
                     placeholder="5,000,000,000"
                   />
@@ -715,18 +682,20 @@ export default function UnitsFilter({
       </div>
 
       {/* Active Filters Display */}
-      {hasActiveFilters && (
+      {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-600">
             {t.unitsFilter.activeFilter}
           </span>
           <div className="flex flex-wrap gap-2">
-            {getActiveFilters().map((filter, index) => (
+            {activeFilters.map((filter, index) => (
               <div
                 key={index}
-                className="flex items-center gap-1 bg-gray-100 rounded px-2 py-1 text-sm text-gray-700"
+                className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
               >
-                <p className="truncate max-w-[150px]">{filter.value}</p>
+                <p className="truncate max-w-[180px] text-xs">
+                  {getFilterDisplayText(filter.key, filter.value)}
+                </p>
                 <button
                   type="button"
                   className="text-gray-500 hover:text-gray-700"
@@ -740,20 +709,7 @@ export default function UnitsFilter({
                     }
                   }}
                 >
-                  <svg
-                    className="w-3.5 h-3.5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    ></path>
-                  </svg>
+                  <X size={16} />
                 </button>
               </div>
             ))}
@@ -764,20 +720,7 @@ export default function UnitsFilter({
             className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
             onClick={handleRemoveAllFilters}
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-              ></path>
-            </svg>
+            <Trash2 size={16} />
             {t.unitsFilter.clearall}
           </button>
         </div>
