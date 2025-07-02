@@ -597,6 +597,8 @@ export default {
     yearsLabel: "years",
     price: "Price",
     maintenance: "Maintenance",
+    deleveryError:
+      "Delivery date must be between 30 years ago and 10 years from now",
   },
   rentalDetails: {
     availability: "Availability",
