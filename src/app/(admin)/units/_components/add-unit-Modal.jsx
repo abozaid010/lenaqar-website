@@ -30,6 +30,7 @@ export default function AddUnitModal({
   developersData,
   citiesAndDistricts,
   setUnits = () => {},
+  setUnitData = () => {},
 }) {
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -314,7 +315,11 @@ export default function AddUnitModal({
       }
       onClose();
       toast.success(isEdit ? t.toasts.unitUpdated : t.toasts.unitAdded);
-      setUnits((prevUnits) => [finalFormData, ...prevUnits]);
+
+      if (isEdit && setUnitData) setUnitData(finalFormData);
+
+      if (!isEdit && setUnits)
+        setUnits((prevUnits) => [...prevUnits, res.data]);
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {

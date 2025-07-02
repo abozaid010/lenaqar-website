@@ -55,7 +55,6 @@ export default function UnitPricing({ unit }) {
     return getTranslation(`rental.${duration}`, duration);
   };
 
-  console.log(unit.paymentPlans);
   return (
     <div className="mt-2">
       {isSale ? (

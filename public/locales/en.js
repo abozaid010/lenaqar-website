@@ -394,16 +394,6 @@ export default {
     next: "Next",
     saveUnit: "Save Unit",
   },
-  toasts: {
-    enterValidPrice:
-      "Please enter a price greater than 0 for at least one duration type",
-    uploadImage: "Please upload at least one image.",
-    selectPurpose: "Please select a purpose for the unit (sell/rent)",
-    errorProcessing:
-      "An error occurred while processing your request. Please try again",
-    unitAdded: "Unit added successfully",
-    unitUpdated: "Unit updated successfully",
-  },
   updatePhase: "updatePhase",
   viewInCRM: "View in CRM",
   phases: "Phases",
@@ -920,6 +910,14 @@ export default {
     selectPurpose: "Please select a purpose for the unit (sell/rent)",
     errorProcessing:
       "An error occurred while processing your request. Please try again",
+    enterValidPrice:
+      "Please enter a price greater than 0 for at least one duration type",
+    uploadImage: "Please upload at least one image.",
+    selectPurpose: "Please select a purpose for the unit (sell/rent)",
+    errorProcessing:
+      "An error occurred while processing your request. Please try again",
+    unitAdded: "Unit added successfully",
+    unitUpdated: "Unit updated successfully",
   },
   formLabels: {
     compoundName: "Project Name",

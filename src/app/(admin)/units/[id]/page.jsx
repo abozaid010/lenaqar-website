@@ -4,11 +4,9 @@ import {
   fetchDevelopers,
   fetchUnitById,
 } from "@/components/services/serviceFetching";
-import ImageGallary from "@/components/ui/unit-details/image-gallary";
-import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
 import { cookies } from "next/headers";
 import Link from "next/link";
-import UnitPageHeader from "../_components/unit-page-header";
+import UnitClientWrapper from "./_components/unit-client-wrapper";
 
 // Dynamic metadata
 export async function generateMetadata() {
@@ -45,27 +43,13 @@ const Page = async ({ params }) => {
   return (
     <div className="container mx-auto h-full">
       {hasAccess ? (
-        <>
-          <UnitPageHeader
-            unit={unit.data}
-            compounds={comboundata}
-            developers={developers}
-            citiesAndDistricts={citiesAndDistricts}
-            clientId={clientId}
-          />
-
-          <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
-            <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">
-              <ImageGallary
-                images={unit.data.images}
-                unitName={unit.data.unitTitle}
-                unitId={unit.data.unitId}
-              />
-
-              <UnitBasicInfo unit={unit.data} />
-            </div>
-          </div>
-        </>
+        <UnitClientWrapper
+          data={unit.data}
+          compounds={comboundata}
+          developers={developers}
+          citiesAndDistricts={citiesAndDistricts}
+          clientId={clientId}
+        />
       ) : (
         <div className="flex flex-col items-center justify-center h-full">
           <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>

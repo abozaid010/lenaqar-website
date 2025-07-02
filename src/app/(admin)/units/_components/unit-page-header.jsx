@@ -12,6 +12,7 @@ export default function UnitPageHeader({
   developers,
   citiesAndDistricts,
   clientId,
+  setUnitData = () => {},
 }) {
   const router = useRouter();
   const { t, locale } = useI18n();
@@ -19,7 +20,7 @@ export default function UnitPageHeader({
     router.back();
   };
   const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-    .filter(([governorate]) => governorate !== "cities") // استبعاد "cities"
+    .filter(([governorate]) => governorate !== "cities")
     .map(([governorate, districts]) => ({
       governorate,
       districts: districts.map((district) => ({
@@ -45,6 +46,8 @@ export default function UnitPageHeader({
           developers={developers}
           citiesAndDistricts={formattedDataCitiesAndDistricts}
           clientId={clientId}
+          setUnits={() => {}}
+          setUnitData={setUnitData} // Function to update unit data in parent components
         />
 
         <DeleteUnitBtn unitId={unit.unitId} />
