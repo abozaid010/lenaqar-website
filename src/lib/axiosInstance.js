@@ -12,12 +12,7 @@ export const axiosInstance = axios.create({
   },
 });
 
-// Debug the created instance
-console.log("Created axios instance baseURL:", axiosInstance.defaults.baseURL);
-console.log("Full axios defaults:", axiosInstance.defaults);
-
 axiosInstance.interceptors.request.use((config) => {
-  console.log(config.baseURL, config.url);
   if (!config.headers.Authorization) {
     const token = Cookies.get("access_token");
     if (token) {

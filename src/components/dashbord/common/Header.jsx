@@ -52,12 +52,26 @@ const Header = ({ clientName, clientID }) => {
     setShowLogoutConfirm(false);
   };
 
-  const confirmLogout = () => {
-    router.replace("/");
-    Cookies.remove("lena-website-client_id");
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
-    toast.success(t.header.logoutSuccess);
+  const confirmLogout = async () => {
+    try {
+      // Remove cookies first
+      Cookies.remove("lena-website-client_id");
+      Cookies.remove("access_token");
+      Cookies.remove("refresh_token");
+
+      // Wait a brief moment to ensure cookies are cleared
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Show success message
+      toast.success(t.header.logoutSuccess);
+
+      // Then redirect
+      router.replace("/");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Force redirect anyway
+      window.location.href = "/";
+    }
   };
 
   return (

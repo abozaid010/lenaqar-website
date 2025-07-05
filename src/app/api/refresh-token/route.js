@@ -2,7 +2,9 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://api.lenaai.net";
 
 export async function POST() {
   try {

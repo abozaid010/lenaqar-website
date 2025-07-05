@@ -18,7 +18,7 @@ export default function AxiosDebugger() {
         typeof window !== "undefined" ? window.navigator.userAgent : "N/A",
     };
 
-    console.log("=== AXIOS DEBUGGER ===", info);
+    // console.log("=== AXIOS DEBUGGER ===", info);
     setDebugInfo(info);
   }, []);
 
