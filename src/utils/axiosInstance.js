@@ -3,7 +3,9 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://api.lenaai.net";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
@@ -13,10 +15,6 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
-  console.log(
-    "Request Interceptor: Adding Authorization header if not present",
-    config.headers.Authorization
-  );
   if (!config.headers.Authorization) {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
@@ -65,7 +63,6 @@ axiosInstance.interceptors.response.use(
         console.log("Token refreshed successfully");
 
         const newAccessToken = refreshResponse.data.access_token;
-        console.log("New Access Token:", newAccessToken);
         if (newAccessToken) {
           // Update the Authorization header in the original request with the new token
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

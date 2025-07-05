@@ -1,14 +1,13 @@
 "use client";
 
-import { Loader2, Tornado } from "lucide-react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { updateProfileData } from "@/components/services/serviceFetching";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ClientInfo({ data }) {
   const router = useRouter();
-  console.log(data);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     phone_number: data?.phone_number,
@@ -38,7 +37,6 @@ export default function ClientInfo({ data }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(formData);
     try {
       setIsLoading(true);
       await updateProfileData(formData);

@@ -1,6 +1,7 @@
 import Header from "@/components/dashbord/common/Header";
 import Sidebar from "@/components/dashbord/common/Sidebar";
 import { I18nProvider } from "@/context/translate-api";
+import TanStackQueryProvider from "@/providers/query-client-provider";
 
 import { cookies } from "next/headers";
 
@@ -30,7 +31,7 @@ const Layout = async ({ children }) => {
           <Header clientName={clientName} clientID={clientID} />
 
           <main className="overflow-y-auto p-3 relative flex-1">
-            {children}
+            <TanStackQueryProvider>{children}</TanStackQueryProvider>
           </main>
         </div>
       </div>
