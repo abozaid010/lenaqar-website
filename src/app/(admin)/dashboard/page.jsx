@@ -1,6 +1,7 @@
 import ClientsListQuery from "./_components/clients-list-query";
 import DashbordFilter from "./_components/dashbord-filter";
 
+import AxiosDebugger from "@/components/debug/axios-debugger";
 import { cookies } from "next/headers";
 import PremiumFeatures from "./_components/premuim-features";
 
