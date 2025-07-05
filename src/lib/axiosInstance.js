@@ -3,21 +3,7 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
-
-console.log("=== AXIOS INSTANCE DEBUG ===");
-console.log("NODE_ENV:", process.env.NODE_ENV);
-console.log(
-  "NEXT_PUBLIC_API_BASE_URL env var:",
-  process.env.NEXT_PUBLIC_API_BASE_URL
-);
-console.log("Final BASE_URL:", BASE_URL);
-console.log("typeof BASE_URL:", typeof BASE_URL);
-console.log(
-  "All env vars starting with NEXT_PUBLIC:",
-  Object.keys(process.env).filter((key) => key.startsWith("NEXT_PUBLIC"))
-);
+const BASE_URL = "https://api.lenaai.net"; // Force public URL for client-side requests
 
 export const axiosInstance = axios.create({
   baseURL: BASE_URL,

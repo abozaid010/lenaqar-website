@@ -3,7 +3,9 @@ import axios from "axios";
 import { cookies } from "next/headers";
 
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+  process.env.API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://api.lenaai.net";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
