@@ -92,6 +92,8 @@ export default function DashbordFilter({ appliedFilters }) {
         dateObj.setHours(23, 59, 59, 999);
       }
       selectdDate = formatDate(dateObj);
+
+      console.log(`Formatted ${key}: ${selectdDate} (original: ${value})`);
     }
 
     setFilters((prev) => ({
