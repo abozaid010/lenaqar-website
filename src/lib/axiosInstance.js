@@ -35,36 +35,32 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const refreshToken = Cookies.get("refresh_token");
+        console.log("Attempting to refresh token...");
 
-        if (!refreshToken) {
-          throw new Error("No refresh token found");
+        // Call your own API route instead of external API
+        const refreshResponse = await fetch("/api/refresh-token", {
+          method: "POST",
+          credentials: "include", // Include cookies
+        });
+
+        if (!refreshResponse.ok) {
+          throw new Error("Failed to refresh token");
         }
 
-        console.log("Attempting to refresh token...", refreshToken);
-        const refreshResponse = await axios.post(
-          `${BASE_URL}/client/refresh-token`,
-          {
-            refresh_token: refreshToken,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Cookie: `refresh_token=${refreshToken}`,
-              Authorization: `Bearer ${Cookies.get("access_token")}`,
-            },
-          }
-        );
+        const data = await refreshResponse.json();
+        const newAccessToken = data.access_token;
 
-        const newAccessToken = refreshResponse.data.access_token;
-        console.log("Token refreshed successfully", refreshResponse);
-        Cookies.set("access_token", newAccessToken);
+        console.log("Token refreshed successfully");
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         console.error("Failed to refresh token:", refreshError.message);
-        throw refreshError;
+
+        // Redirect to login on refresh failure
+        Cookies.remove("access_token");
+        Cookies.remove("refresh_token");
+        window.location.href = "/login";
       }
     }
 
