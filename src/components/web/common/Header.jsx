@@ -57,20 +57,13 @@ const Header = ({ ci }) => {
             {/* Action Buttons */}
             <div className="hidden lg:flex items-center space-x-4">
               <LanguageSwitcher />
-              {!ci ? (
+              {!ci && (
                 <Link
                   href="/login"
                   className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                 >
                   {t.header.login}
                 </Link>
-              ) : (
-                <button
-                  onClick={initiateLogout}
-                  className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
-                >
-                  {t.header.logOut}
-                </button>
               )}
             </div>
 
@@ -106,28 +99,13 @@ const Header = ({ ci }) => {
                   {t.header.allProperties}
                 </Link>
                 <div className="flex items-center space-x-3 pt-2">
-                  {!ci ? (
-                    <>
-                      <Link
-                        href="/signup"
-                        className="text-white border border-[#21EAF4] px-5 py-1.5 rounded-full hover:bg-[#21EAF4]/10 transition-all duration-300"
-                      >
-                        Sign Up
-                      </Link>
-                      <Link
-                        href="/login"
-                        className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
-                      >
-                        Sign In
-                      </Link>
-                    </>
-                  ) : (
-                    <button
-                      onClick={initiateLogout}
+                  {!ci && (
+                    <Link
+                      href="/login"
                       className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
                     >
-                      {t.header.logOut}
-                    </button>
+                      {t.header.login}
+                    </Link>
                   )}
                 </div>
               </nav>
