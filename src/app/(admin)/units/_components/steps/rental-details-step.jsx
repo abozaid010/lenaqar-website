@@ -62,6 +62,7 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
   const handlePriceChange = (durationType, field, value) => {
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
+    console.log(`Updating ${durationType} ${field} with value:`, rawValue);
     updateFormData({
       rentDurationType: {
         ...formData.rentDurationType,
