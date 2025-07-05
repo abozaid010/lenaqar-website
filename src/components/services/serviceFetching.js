@@ -326,7 +326,6 @@ export async function deleteProject(project_id) {
     const response = await axiosInstance.delete(
       `/projects/delete/${project_id}`
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to add compound:", error.message);
@@ -367,7 +366,6 @@ export async function assignSalsePerson(id, additionalProp1) {
       `/sales-employees/${id}/assign-task`,
       additionalProp1
     );
-    console.log(response.data.data);
     return response.data;
   } catch (error) {
     return error;

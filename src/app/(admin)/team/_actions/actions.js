@@ -1,64 +1,63 @@
-'use server';
+"use server";
 
 import { getClientid } from "@/components/services/clientCookies";
-import { createNewEmployee, editExistingEmployee } from "@/components/services/serviceFetching";
+import {
+  createNewEmployee,
+  editExistingEmployee,
+} from "@/components/services/serviceFetching";
 import { revalidatePath } from "next/cache";
 
 export async function addNewSales(prevState, formData) {
-    try {
-        const clientId = await getClientid();
+  try {
+    const clientId = await getClientid();
 
-        const payload = Object.fromEntries(formData.entries());
+    const payload = Object.fromEntries(formData.entries());
 
-        const newSales = {
-            ...payload,
-            "position": "sales",
-            client_id: clientId,
-        };
+    const newSales = {
+      ...payload,
+      position: "sales",
+      client_id: clientId,
+    };
 
-        await createNewEmployee(newSales);
+    await createNewEmployee(newSales);
 
-        revalidatePath("/team");
+    revalidatePath("/team");
 
-        return {
-            success: true,
-            data: newSales,
-        };
-    } catch (error) {
-
-        return {
-            success: false,
-            error: "Failed to add new sales.",
-        };
-    }
+    return {
+      success: true,
+      data: newSales,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Failed to add new sales.",
+    };
+  }
 }
 
 export async function editEmployee(prevState, formData) {
-    try {
-        const clientId = await getClientid();
+  try {
+    const clientId = await getClientid();
 
-        const payload = Object.fromEntries(formData.entries());
+    const payload = Object.fromEntries(formData.entries());
+    const newSales = {
+      ...payload,
+      position: "sales",
+      client_id: clientId,
+    };
 
-        console.log(payload);
-        const newSales = {
-            ...payload,
-            "position": "sales",
-            client_id: clientId,
-        };
+    await editExistingEmployee(newSales);
 
-        await editExistingEmployee(newSales);
+    revalidatePath("/team");
 
-        revalidatePath("/team");
-
-        return {
-            success: true,
-            data: newSales,
-        };
-    } catch (error) {
-
-        return {
-            success: false,
-            error: "Failed to add new sales.",
-        };
-    }
+    return {
+      success: true,
+      data: newSales,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Failed to add new sales.",
+    };
+  }
 }
