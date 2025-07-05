@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.81.5",
     "axios": "^1.8.4",
     "browser-image-compression": "^2.0.2",
     "date-fns": "^4.1.0",

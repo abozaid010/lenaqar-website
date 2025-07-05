@@ -1,5 +1,7 @@
-import AxiosDebugger from "@/components/debug/axios-debugger";
-import ClientsListQuery from "./_components/clients-list-query";
+import { fetchUsersData } from "@/components/services/serviceFetching";
+import { Loader2 } from "lucide-react";
+import { Suspense } from "react";
+import ClientsTable from "./_components/clients-table";
 import DashbordFilter from "./_components/dashbord-filter";
 
 import { cookies } from "next/headers";
@@ -28,13 +30,42 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
       <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
         <DashbordFilter appliedFilters={searchParams} />
 
-        {/* Debug component to investigate the axios issue */}
-        <AxiosDebugger />
-
         {/* <SearchBar q={searchParams.query} /> */}
 
-        <ClientsListQuery searchParams={searchParams} />
+        <Suspense
+          key={JSON.stringify(searchParams)}
+          fallback={
+            <div className="flex items-center justify-center h-full">
+              <Loader2
+                size={70}
+                className="text-center animate-spin text-primary"
+              />
+            </div>
+          }
+        >
+          <ClientsList searchParams={searchParams} />
+        </Suspense>
       </div>
     </div>
+  );
+}
+
+async function ClientsList({ searchParams }) {
+  const res = await fetchUsersData(JSON.stringify(searchParams));
+  const initialData = res?.data?.users;
+  const hasMoreNext = initialData?.pagination?.has_more_next;
+  const hasMorePrev = initialData?.pagination?.has_more_prev;
+
+  const nextCursor = initialData?.pagination?.next_cursor;
+  const previousCursor = initialData?.pagination?.prev_cursor;
+
+  return (
+    <ClientsTable
+      users={initialData}
+      disableNext={!hasMoreNext}
+      disablePrev={!hasMorePrev}
+      nextCursor={nextCursor}
+      previousCursor={previousCursor}
+    />
   );
 }
