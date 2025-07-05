@@ -38,6 +38,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       fetchCitisAndProjects(),
     ]);
 
+  console.log(unintsRes.data.units);
   return (
     <div className="container">
       <UnitsClientWrapper
