@@ -23,7 +23,6 @@ const Sidebar = () => {
   const pathname = usePathname();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-  // const initiateLogout = () => setShowLogoutConfirm(true);
   const cancelLogout = () => setShowLogoutConfirm(false);
 
   const isLinkActive = (path) => {

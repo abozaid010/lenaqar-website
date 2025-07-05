@@ -1,6 +1,7 @@
 import Header from "@/components/dashbord/common/Header";
 import Sidebar from "@/components/dashbord/common/Sidebar";
 import { I18nProvider } from "@/context/translate-api";
+import TanStackQueryProvider from "@/providers/query-client-provider";
 
 import { cookies } from "next/headers";
 
@@ -22,19 +23,21 @@ const Layout = async ({ children }) => {
     : defaultLocale;
 
   return (
-    <I18nProvider initialLocal={initialLocale}>
-      <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-        <Sidebar />
+    <TanStackQueryProvider>
+      <I18nProvider initialLocal={initialLocale}>
+        <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
+          <Sidebar />
 
-        <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-          <Header clientName={clientName} clientID={clientID} />
+          <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
+            <Header clientName={clientName} clientID={clientID} />
 
-          <main className="overflow-y-auto p-3 relative flex-1">
-            {children}
-          </main>
+            <main className="overflow-y-auto p-3 relative flex-1">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
-    </I18nProvider>
+      </I18nProvider>
+    </TanStackQueryProvider>
   );
 };
 

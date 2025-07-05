@@ -10,7 +10,6 @@ import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
-import ClientsTablePagination from "./clients-table-pagination";
 
 const ACTIONS_COLORS = {
   "Make a call": "text-blue-800",
@@ -308,7 +307,7 @@ export default function ClientsTable({
             </table>
           </div>
 
-          <div className="flex flex-col mt-4 gap-3  no-print">
+          {/* <div className="flex flex-col mt-4 gap-3  no-print">
             <div className="flex justify-between items-center flex-row-reverse">
               <ClientsTablePagination
                 nextCursor={nextCursor}
@@ -326,7 +325,7 @@ export default function ClientsTable({
                 </button>
               )}
             </div>
-          </div>
+          </div> */}
         </>
       )}
 
