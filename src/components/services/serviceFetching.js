@@ -165,6 +165,7 @@ export async function fetchUnitsFilter(searchParams, use) {
       ...JSON.parse(searchParams),
     };
 
+    console.log(params);
     const response = await axiosInstance.get(
       `${use ? "/units/all" : "/public/units"}`,
       { params }

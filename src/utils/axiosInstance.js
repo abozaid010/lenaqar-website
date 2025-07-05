@@ -13,6 +13,10 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
+  console.log(
+    "Request Interceptor: Adding Authorization header if not present",
+    config.headers.Authorization
+  );
   if (!config.headers.Authorization) {
     const cookieStore = await cookies();
     const token = cookieStore.get("access_token")?.value;
@@ -61,6 +65,7 @@ axiosInstance.interceptors.response.use(
         console.log("Token refreshed successfully");
 
         const newAccessToken = refreshResponse.data.access_token;
+        console.log("New Access Token:", newAccessToken);
         if (newAccessToken) {
           // Update the Authorization header in the original request with the new token
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

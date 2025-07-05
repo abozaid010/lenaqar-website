@@ -174,6 +174,7 @@ export default function BotMessageCard({ message }) {
                             height={80}
                             className="w-20 h-20 object-cover rounded cursor-pointer border hover:scale-105 transition"
                             onClick={() => {
+                              console.log(phase.images);
                               setShowImagesModal(true);
                               setSwiperImages(phase.images);
                             }}
