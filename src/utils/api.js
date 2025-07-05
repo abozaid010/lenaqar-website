@@ -6,7 +6,6 @@ import Cookies from "js-cookie";
 export async function fetchUsersData(searchParams) {
   const clientId = Cookies.get("lena-website-client_id");
 
-  console.log("Client ID:", clientId);
   try {
     const params = {
       ...JSON.parse(searchParams),
