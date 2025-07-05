@@ -23,21 +23,19 @@ const Layout = async ({ children }) => {
     : defaultLocale;
 
   return (
-    <TanStackQueryProvider>
-      <I18nProvider initialLocal={initialLocale}>
-        <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-          <Sidebar />
+    <I18nProvider initialLocal={initialLocale}>
+      <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
+        <Sidebar />
 
-          <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-            <Header clientName={clientName} clientID={clientID} />
+        <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
+          <Header clientName={clientName} clientID={clientID} />
 
-            <main className="overflow-y-auto p-3 relative flex-1">
-              {children}
-            </main>
-          </div>
+          <main className="overflow-y-auto p-3 relative flex-1">
+            <TanStackQueryProvider>{children}</TanStackQueryProvider>
+          </main>
         </div>
-      </I18nProvider>
-    </TanStackQueryProvider>
+      </div>
+    </I18nProvider>
   );
 };
 
