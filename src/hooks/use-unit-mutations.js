@@ -20,7 +20,8 @@ export function useAddUnit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData) => {
+    mutationFn: async ({ formData }) => {
+      console.log("Adding unit with formData:", formData);
       let res;
       if (formData.purpose === "sell") {
         res = await addUnit(formData);
@@ -29,12 +30,12 @@ export function useAddUnit() {
       }
 
       if (!res || !res.status) {
-        throw new Error(res.error_message || "Failed to add unit");
+        throw new Error("Failed to add unit");
       }
 
-      return formData;
+      return res;
     },
-    onMutate: async (formData) => {
+    onMutate: async ({ formData }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
@@ -57,9 +58,10 @@ export function useAddUnit() {
     },
     onSuccess: (data, variables, context) => {
       // Replace the optimistic unit with the real data
-      if (context?.optimisticUnit && data) {
+      const realUnit = data.data;
+      if (context?.optimisticUnit && realUnit) {
         updateUnitsInCache(queryClient, context.optimisticUnit.unitId, () => ({
-          ...data,
+          ...realUnit,
           _isOptimistic: false,
         }));
       }
@@ -83,8 +85,7 @@ export function useUpdateUnit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (formData) => {
-      console.log("Updating unit with formData:", formData);
+    mutationFn: async ({ formData }) => {
       let res;
       if (formData.purpose === "sell") {
         res = await updateUnit(formData);
@@ -93,12 +94,12 @@ export function useUpdateUnit() {
       }
 
       if (!res || !res.status) {
-        throw new Error(res.error_message || "Failed to update unit");
+        throw new Error("Failed to update unit");
       }
 
-      return formData;
+      return { ...res };
     },
-    onMutate: async (formData) => {
+    onMutate: async ({ formData }) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
@@ -114,12 +115,10 @@ export function useUpdateUnit() {
         _isOptimistic: true,
       }));
 
-      console.log("Optimistically updating unit:", formData);
       // Return a context object with the snapshotted value
       return { previousUnits };
     },
     onSuccess: (data, variables) => {
-      console.log("Unit updated successfully:", data);
       // Mark the unit as no longer optimistic
       updateUnitsInCache(queryClient, variables.unitId, (unit) => ({
         ...unit,

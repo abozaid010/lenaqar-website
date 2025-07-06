@@ -10,11 +10,17 @@ import RentalDetailsStep from "./steps/rental-details-step";
 import SaleDetailsStep from "./steps/sale-details-step";
 
 import { useI18n } from "@/context/translate-api";
-import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
+
+import {
+  addUnit,
+  addUnitRent,
+  updateUnit,
+  updateUnitRent,
+} from "@/components/services/serviceFetching";
 
 export default function AddUnitModal({
   isEdit,
@@ -27,13 +33,10 @@ export default function AddUnitModal({
   setUnits = () => {},
   setUnitData = () => {},
 }) {
-  // Add the mutation hooks
-  const addUnitMutation = useAddUnit();
-  const updateUnitMutation = useUpdateUnit();
-
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
   const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
@@ -315,34 +318,45 @@ export default function AddUnitModal({
     }
 
     try {
+      let res;
       let finalFormData = { ...formData };
-
-      // Prepare final form data based on purpose
-      if (formData.purpose === "sell") {
-        finalFormData = { ...finalFormData, ...SellFormData };
-      } else if (formData.purpose === "rent") {
-        finalFormData = { ...finalFormData, ...rentFormData };
-      }
-
-      // Use TanStack Query mutations
+      setLoading(true);
       if (!isEdit) {
-        // This will:
-        // 1. Immediately show the new unit in the UI (optimistic update)
-        // 2. Make the API call in the background
-        // 3. Replace the optimistic data with real data when successful
-        await addUnitMutation.mutateAsync(finalFormData);
-        toast.success(t.toasts.unitAdded);
+        if (formData.purpose === "sell") {
+          finalFormData = { ...finalFormData, ...SellFormData };
+          res = await addUnit(finalFormData);
+        } else if (formData.purpose === "rent") {
+          finalFormData = { ...finalFormData, ...rentFormData };
+          res = await addUnitRent(finalFormData);
+        }
       } else {
-        await updateUnitMutation.mutateAsync(finalFormData);
-        toast.success(t.toasts.unitUpdated);
+        if (formData.purpose === "sell") {
+          finalFormData = { ...finalFormData, ...SellFormData };
+          res = await updateUnit(finalFormData);
+        } else if (formData.purpose === "rent") {
+          finalFormData = { ...finalFormData, ...rentFormData };
+          res = await updateUnitRent(finalFormData);
+        }
       }
 
-      // Close modal on success
+      if (!res || !res.status) {
+        toast.error(
+          "An error occurred while processing your request. Please try again."
+        );
+        return;
+      }
       onClose();
+      toast.success(isEdit ? t.toasts.unitUpdated : t.toasts.unitAdded);
+
+      if (isEdit && setUnitData) setUnitData(finalFormData);
+
+      if (!isEdit && setUnits)
+        setUnits((prevUnits) => [...prevUnits, res.data]);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
       setInvalidFields([]);
+      setLoading(false);
     }
   };
 
@@ -464,8 +478,8 @@ export default function AddUnitModal({
               </button>
             ) : (
               <button
-                disabled={addUnitMutation.isPending && isUploading}
-                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${addUnitMutation.isPending || isUploading ? "opacity-50 pointer-events-none" : ""}`}
+                disabled={loading && isUploading}
+                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${loading || isUploading ? "opacity-50 pointer-events-none" : ""}`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
