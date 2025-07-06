@@ -5,7 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import Cookies from "js-cookie";
 import { Loader2, RotateCcw } from "lucide-react";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({ searchParams }) {
   // Get client data from cookies
@@ -32,11 +32,6 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
     hasErrors,
     errorMessage,
   } = useUnitsPageData(JSON.stringify(searchParamsWithClient));
-
-  const handleSetUnits = useCallback((unitsData) => {
-    // TanStack Query manages data automatically
-    // This is a no-op but keeps the interface compatible
-  }, []);
 
   if (isInitialLoading) {
     return (
@@ -135,11 +130,10 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
         clientId={clientId}
         clientName={clientName}
         citiesAndDistricts={citiesAndDistricts.data}
-        setUnits={handleSetUnits}
       />
 
       <div className="flex-1 flex flex-col">
-        {units.isFetching ? (
+        {units.isLoading ? (
           <div className="flex items-center justify-center h-full mt-12">
             <Loader2
               size={70}

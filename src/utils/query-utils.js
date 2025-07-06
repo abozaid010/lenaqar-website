@@ -107,3 +107,50 @@ export function useUnitQueries() {
     prefetchUnits,
   };
 }
+
+// Helper function to update units in cache after mutations
+export function updateUnitsInCache(queryClient, unitId, updateFn) {
+  queryClient.setQueriesData({ queryKey: unitKeys.lists() }, (oldData) => {
+    if (!oldData?.data?.units) return oldData;
+
+    return {
+      ...oldData,
+      data: {
+        ...oldData.data,
+        units: oldData.data.units.map((unit) =>
+          unit.unitId === unitId ? updateFn(unit) : unit
+        ),
+      },
+    };
+  });
+}
+
+// Helper function to add unit to cache
+export function addUnitToCache(queryClient, newUnit) {
+  queryClient.setQueriesData({ queryKey: unitKeys.lists() }, (oldData) => {
+    if (!oldData?.data?.units) return oldData;
+
+    return {
+      ...oldData,
+      data: {
+        ...oldData.data,
+        units: [...oldData.data.units, newUnit],
+      },
+    };
+  });
+}
+
+// Helper function to remove unit from cache
+export function removeUnitFromCache(queryClient, unitId) {
+  queryClient.setQueriesData({ queryKey: unitKeys.lists() }, (oldData) => {
+    if (!oldData?.data?.units) return oldData;
+
+    return {
+      ...oldData,
+      data: {
+        ...oldData.data,
+        units: oldData.data.units.filter((unit) => unit.unitId !== unitId),
+      },
+    };
+  });
+}
