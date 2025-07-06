@@ -8,7 +8,6 @@ export default function ClientsListQuery({ searchParams }) {
   const {
     data: usersData,
     isLoading,
-    error,
     isError,
     refetch,
     isFetching,
@@ -30,7 +29,7 @@ export default function ClientsListQuery({ searchParams }) {
             Error loading clients
           </div>
           <div className="text-gray-600 text-sm mb-4">
-            {error?.message || "An unexpected error occurred"}
+            An unexpected error occurred
           </div>
           <button
             onClick={() => refetch()}

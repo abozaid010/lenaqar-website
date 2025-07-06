@@ -130,26 +130,6 @@ export async function deleteUnit(id) {
   }
 }
 
-export async function fetchUsersData(searchParams) {
-  const clientId = await getClientid();
-
-  try {
-    const params = {
-      ...JSON.parse(searchParams),
-      limit: 20,
-    };
-
-    const response = await axiosInstance.get(`dashboard/${clientId}`, {
-      params,
-    });
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function resetUnreadMessagesCount(userId) {
   try {
     await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
