@@ -284,15 +284,19 @@ export default function UnitsFilter({
 
   // Function to remove a specific filter
   const handleRemoveFilter = (key) => {
-    setFilters((prev) => ({ ...prev, [key]: "" }));
-
     const newParams = new URLSearchParams(window.location.search);
 
     // Special handling for price range
-    if (key === "min_price" || key === "max_price") {
+    if (key === "price_range") {
       newParams.delete("min_price");
       newParams.delete("max_price");
+      setFilters((prev) => ({
+        ...prev,
+        min_price: "",
+        max_price: "",
+      }));
     } else {
+      setFilters((prev) => ({ ...prev, [key]: "" }));
       newParams.delete(key);
     }
 
@@ -358,7 +362,6 @@ export default function UnitsFilter({
         return value;
     }
   }
-
   return (
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
