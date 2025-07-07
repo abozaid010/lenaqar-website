@@ -5,12 +5,10 @@ import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import { Bell, HelpCircle, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const Header = ({ clientName, clientID }) => {
-  const router = useRouter();
   const { t, locale } = useI18n();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
@@ -64,12 +62,9 @@ const Header = ({ clientName, clientID }) => {
 
       // Show success message
       toast.success(t.header.logoutSuccess);
-
-      // Then redirect
-      router.replace("/");
     } catch (error) {
       console.error("Logout error:", error);
-      // Force redirect anyway
+    } finally {
       window.location.href = "/";
     }
   };

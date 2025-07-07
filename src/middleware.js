@@ -1,5 +1,5 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
 const protectedRoutes = [
   "/dashboard",
   "/units",
@@ -11,10 +11,11 @@ const protectedRoutes = [
 ];
 
 export async function middleware(request, response) {
-  const path = request.nextUrl.pathname;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("access_token")?.value;
+  const refreshToken = cookieStore.get("refresh_token")?.value;
 
-  const accessToken = request.cookies.get("access_token")?.value;
-  const refreshToken = request.cookies.get("refresh_token")?.value;
+  const path = request.nextUrl.pathname;
 
   const isProtectedRoute = protectedRoutes.some((route) =>
     path.startsWith(route)
@@ -30,10 +31,9 @@ export async function middleware(request, response) {
     }
   }
 
-  if (path === "/") {
-    if (accessToken) {
-      return NextResponse.redirect(new URL("/dashboard", request.url));
-    }
+  if (path === "/" && accessToken) {
+    console.log("Redirecting to dashboard");
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
