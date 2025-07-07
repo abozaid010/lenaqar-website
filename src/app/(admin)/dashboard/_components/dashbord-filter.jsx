@@ -3,6 +3,7 @@
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
 import { useI18n } from "@/context/translate-api";
+import { getActionLabel, getFilterActions } from "@/utils/actions";
 import { ChevronDown, Printer } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -15,34 +16,15 @@ const formatDate = (date) => {
 };
 
 export default function DashbordFilter({ appliedFilters }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
 
-  const ACTIONS = [
-    { label: t.dashboardFilter.actions.all, value: "" },
-    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
-    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
-    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-    {
-      label: t.dashboardFilter.actions.qualifiedLead,
-      value: "Qualified lead",
-    },
-    {
-      label: t.dashboardFilter.actions.notInterested,
-      value: "Not interested",
-    },
-    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
-    {
-      label: t.dashboardFilter.actions.followUpLater,
-      value: "Follow up later",
-    },
-    {
-      label: t.dashboardFilter.actions.missingRequirement,
-      value: "Missing requirement",
-    },
-    { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
-    { label: t.dashboardFilter.actions.Interested, value: "Interested" },
-  ];
+  const ACTIONS = useMemo(() => {
+    return getFilterActions(locale).map((action) => ({
+      value: action.value,
+      label: getActionLabel(action.value, locale),
+    }));
+  }, [locale]);
 
   const tomorrow = useMemo(() => {
     const date = new Date();
