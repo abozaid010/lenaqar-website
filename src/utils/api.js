@@ -21,3 +21,25 @@ export async function fetchUsersData(searchParams) {
     return { error: error.message };
   }
 }
+
+export async function getClientActions(phoneNumber) {
+  try {
+    const response = await axiosInstance.get(`action/${phoneNumber}`);
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function getClientRequirements(user_id) {
+  try {
+    const response = await axiosInstance.get(`requirements/${user_id}`);
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
+    return { error: error.message };
+  }
+}

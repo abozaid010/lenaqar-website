@@ -1,8 +1,8 @@
 "use client";
 
-import { getClientRequirements } from "@/components/services/serviceFetching";
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
+import { getClientRequirements } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 
