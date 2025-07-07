@@ -2,6 +2,7 @@
 
 import { useUsersData } from "@/hooks/use-users-data";
 import { Loader2, RotateCcw } from "lucide-react";
+import { useEffect } from "react";
 import ClientsTable from "./clients-table";
 
 export default function ClientsListQuery({ searchParams }) {
@@ -13,6 +14,25 @@ export default function ClientsListQuery({ searchParams }) {
     refetch,
     isFetching,
   } = useUsersData(JSON.stringify(searchParams));
+
+  const users = usersData?.data?.users || [];
+
+  // Calculate and store average score in localStorage
+  useEffect(() => {
+    if (users.length > 0) {
+      const totalScore = users.reduce(
+        (sum, user) => sum + (user.score || 0),
+        0
+      );
+      const averageScore = totalScore / users.length;
+      console.log("Average Score:", averageScore);
+
+      localStorage.setItem("averageScore", averageScore.toString());
+    } else {
+      // Clear average score if no users
+      localStorage.removeItem("averageScore");
+    }
+  }, [users]);
 
   if (isLoading) {
     return (
@@ -44,8 +64,6 @@ export default function ClientsListQuery({ searchParams }) {
       </div>
     );
   }
-
-  const users = usersData?.data?.users || [];
 
   return (
     <div className="relative">

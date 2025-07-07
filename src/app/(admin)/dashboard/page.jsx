@@ -1,7 +1,6 @@
 import ClientsListQuery from "./_components/clients-list-query";
 import DashbordFilter from "./_components/dashbord-filter";
 
-import AxiosDebugger from "@/components/debug/axios-debugger";
 import { cookies } from "next/headers";
 import PremiumFeatures from "./_components/premuim-features";
 
@@ -27,9 +26,6 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 
       <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
         <DashbordFilter appliedFilters={searchParams} />
-
-        {/* Debug component to investigate the axios issue */}
-        <AxiosDebugger />
 
         {/* <SearchBar q={searchParams.query} /> */}
 
