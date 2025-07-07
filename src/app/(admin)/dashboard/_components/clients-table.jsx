@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  getClientActions,
-  getClientRequirements,
-} from "@/components/services/serviceFetching";
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
+import { getClientActions, getClientRequirements } from "@/utils/api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,15 +20,10 @@ const ACTIONS_COLORS = {
   Blocked: "text-red-600",
 };
 
-export default function ClientsTable({
-  users,
-  nextCursor,
-  disableNext,
-  disablePrev,
-  previousCursor,
-}) {
+export default function ClientsTable({ users }) {
   const { t } = useI18n();
   const router = useRouter();
+
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
