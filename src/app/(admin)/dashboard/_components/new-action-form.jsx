@@ -3,7 +3,7 @@
 import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
 
@@ -12,27 +12,35 @@ const initialState = {
   message: "",
 };
 
-export default function NewActionForm({ userId, onSuccess }) {
+export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = Cookies.get("lena-website-client_id");
 
-  const ACTIONS = useMemo(
-    () => [
-      { value: "Office visit", label: t.actionForm.actions.officeVisit },
-      { value: "Make a call", label: t.actionForm.actions.makeCall },
-      { value: "Property view", label: t.actionForm.actions.propertyView },
-      { value: "Not interested", label: t.actionForm.actions.notInterested },
-      { value: "Not qualified", label: t.actionForm.actions.notQualified },
-      { value: "Follow up later", label: t.actionForm.actions.followUpLater },
-      {
-        value: "Missing requirement",
-        label: t.actionForm.actions.missingRequirement,
-      },
-      { label: "Blocked", value: "Blocked" },
-    ],
-    [t]
-  );
+  const ACTIONS = [
+    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
+    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
+    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
+    {
+      label: t.dashboardFilter.actions.qualifiedLead,
+      value: "Qualified lead",
+    },
+    {
+      label: t.dashboardFilter.actions.notInterested,
+      value: "Not interested",
+    },
+    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
+    {
+      label: t.dashboardFilter.actions.followUpLater,
+      value: "Follow up later",
+    },
+    {
+      label: t.dashboardFilter.actions.missingRequirement,
+      value: "Missing requirement",
+    },
+    { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
+    { label: t.dashboardFilter.actions.Interested, value: "Interested" },
+  ];
 
   // Convert 24h to 12h format
   const to12HourFormat = (time24) => {
@@ -93,6 +101,12 @@ export default function NewActionForm({ userId, onSuccess }) {
         duration: 3000,
         position: "top-right",
       });
+
+      // Update the action in the table
+      if (onActionUpdate && userId) {
+        onActionUpdate(userId, formData.action);
+      }
+
       const defaultTime = getDefaultTime();
       setFormData({
         action: ACTIONS[0].value,
@@ -115,7 +129,7 @@ export default function NewActionForm({ userId, onSuccess }) {
         position: "top-right",
       });
     }
-  }, [state, userId, onSuccess, t, ACTIONS, clientId]);
+  }, [state]);
 
   // Update 24-hour time in formData whenever any time component changes
   useEffect(() => {

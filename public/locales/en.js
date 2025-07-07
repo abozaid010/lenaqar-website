@@ -294,15 +294,6 @@ export default {
     },
   },
   actionForm: {
-    actions: {
-      officeVisit: "Office visit",
-      makeCall: "Make a call",
-      propertyView: "Property view",
-      notInterested: "Not interested",
-      notQualified: "Not qualified",
-      followUpLater: "Follow up later",
-      missingRequirement: "Missing Requirement",
-    },
     commentPlaceholder: "Enter your comment here...",
     submitButton: "Send",
     successMessage: "Action added successfully",
