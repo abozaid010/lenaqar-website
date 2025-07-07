@@ -307,15 +307,6 @@ export default {
     },
   },
   actionForm: {
-    actions: {
-      officeVisit: "زيارة مكتب",
-      makeCall: "إجراء مكالمة",
-      propertyView: "عرض عقار",
-      notInterested: "غير مهتم",
-      notQualified: "غير مؤهل",
-      followUpLater: "متابعة لاحقاً",
-      missingRequirement: "متطلب مفقود",
-    },
     commentPlaceholder: "أدخل تعليقك هنا...",
     submitButton: "إرسال",
     successMessage: "تم إضافة الإجراء بنجاح",

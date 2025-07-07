@@ -31,11 +31,13 @@ export default function ClientsTable({ users }) {
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
+  const [localUsers, setLocalUsers] = useState(users);
 
   useEffect(() => {
     if (users) {
       const usersId = users.map((user) => user.user_id);
       localStorage.setItem("usersId", JSON.stringify(usersId));
+      setLocalUsers(users);
     }
   }, [users]);
 
@@ -72,10 +74,10 @@ export default function ClientsTable({ users }) {
   };
 
   const toggleSelectAll = () => {
-    if (rowSelection.length === users.length) {
+    if (rowSelection.length === localUsers.length) {
       setRowSelection([]);
     } else {
-      setRowSelection(users.map((user) => user.user_id));
+      setRowSelection(localUsers.map((user) => user.user_id));
     }
   };
 
@@ -117,9 +119,17 @@ export default function ClientsTable({ users }) {
     }
   };
 
+  const handleActionUpdate = (userId, newAction) => {
+    setLocalUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.user_id === userId ? { ...user, last_action: newAction } : user
+      )
+    );
+  };
+
   return (
     <>
-      {users?.length === 0 ? (
+      {localUsers?.length === 0 ? (
         <div>
           <div className="text-center font-medium text-xl mt-5 text-gray-400">
             {t.clientsTable.noClients}
@@ -134,7 +144,7 @@ export default function ClientsTable({ users }) {
                   <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6 ">
                     <input
                       type="checkbox"
-                      checked={rowSelection?.length === users?.length}
+                      checked={rowSelection?.length === localUsers?.length}
                       onChange={toggleSelectAll}
                       className="cursor-pointer no-print"
                     />
@@ -161,7 +171,7 @@ export default function ClientsTable({ users }) {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {users?.map((user) => {
+                {localUsers?.map((user) => {
                   let lastActivity = t.clientsTable.lastActivity.na;
                   try {
                     if (user.updated_at) {
@@ -329,6 +339,7 @@ export default function ClientsTable({ users }) {
             setOpenActionModal(false);
             setLoadingClientActions(null);
           }}
+          onActionUpdate={handleActionUpdate}
         />
       )}
 
