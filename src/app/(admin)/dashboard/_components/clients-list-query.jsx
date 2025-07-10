@@ -1,11 +1,14 @@
 "use client";
 
+import { useAverageScore } from "@/context/average-score";
 import { useUsersData } from "@/hooks/use-users-data";
 import { Loader2, RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 import ClientsTable from "./clients-table";
 
 export default function ClientsListQuery({ searchParams }) {
+  const { setAverageScore } = useAverageScore();
+
   const {
     data: usersData,
     isLoading,
@@ -17,7 +20,6 @@ export default function ClientsListQuery({ searchParams }) {
 
   const users = usersData?.data?.users || [];
 
-  // Calculate and store average score in localStorage
   useEffect(() => {
     if (users.length > 0) {
       const totalScore = users.reduce(
@@ -25,12 +27,9 @@ export default function ClientsListQuery({ searchParams }) {
         0
       );
       const averageScore = totalScore / users.length;
-      console.log("Average Score:", averageScore);
-
-      localStorage.setItem("averageScore", averageScore.toString());
+      setAverageScore(averageScore);
     } else {
-      // Clear average score if no users
-      localStorage.removeItem("averageScore");
+      setAverageScore(null);
     }
   }, [users]);
 
@@ -65,18 +64,5 @@ export default function ClientsListQuery({ searchParams }) {
     );
   }
 
-  return (
-    <div className="relative">
-      {isFetching && !isLoading && (
-        <div className="absolute top-0 right-0 z-10">
-          <div className="flex items-center gap-2 bg-blue-50 text-blue-600 px-3 py-1 rounded-md text-sm">
-            <Loader2 size={14} className="animate-spin" />
-            Updating...
-          </div>
-        </div>
-      )}
-
-      <ClientsTable users={users} />
-    </div>
-  );
+  return <ClientsTable users={users} />;
 }
