@@ -1,6 +1,7 @@
 import ClientsListQuery from "./_components/clients-list-query";
 import DashbordFilter from "./_components/dashbord-filter";
 
+import { AverageScoreProvider } from "@/context/average-score";
 import { cookies } from "next/headers";
 import PremiumFeatures from "./_components/premuim-features";
 
@@ -25,11 +26,13 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
       </div>
 
       <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
-        <DashbordFilter appliedFilters={searchParams} />
+        <AverageScoreProvider>
+          <DashbordFilter appliedFilters={searchParams} />
 
-        {/* <SearchBar q={searchParams.query} /> */}
+          {/* <SearchBar q={searchParams.query} /> */}
 
-        <ClientsListQuery searchParams={searchParams} />
+          <ClientsListQuery searchParams={searchParams} />
+        </AverageScoreProvider>
       </div>
     </div>
   );
