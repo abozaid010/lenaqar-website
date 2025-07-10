@@ -351,7 +351,7 @@ export default function AddUnitModal({
       if (isEdit && setUnitData) setUnitData(finalFormData);
 
       if (!isEdit && setUnits)
-        setUnits((prevUnits) => [...prevUnits, res.data]);
+        setUnits((prevUnits) => [...prevUnits, finalFormData]);
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {
