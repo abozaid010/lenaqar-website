@@ -84,3 +84,53 @@ export async function fetchUnitById(id) {
     return { error: error.message };
   }
 }
+
+export async function addUnit(unitData) {
+  try {
+    const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
+export async function addUnitRent(unitData) {
+  try {
+    const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add unit:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
+export async function deleteUnit(id) {
+  try {
+    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete unit:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function updateUnit(unit) {
+  try {
+    const response = await axiosInstance.post(`/units/v1/update-sale`, unit);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update unit:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function updateUnitRent(unit) {
+  try {
+    const response = await axiosInstance.post(`/units/v1/update-rent`, unit);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update unit:", error.message);
+    return { error: error.message };
+  }
+}

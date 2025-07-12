@@ -6,7 +6,7 @@ import {
   deleteUnit,
   updateUnit,
   updateUnitRent,
-} from "@/components/services/serviceFetching";
+} from "@/utils/api";
 import {
   addUnitToCache,
   removeUnitFromCache,

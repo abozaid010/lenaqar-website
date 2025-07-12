@@ -101,36 +101,6 @@ export async function fetchUnitByIdpublic(id) {
   }
 }
 
-export async function updateUnit(unit) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/update-sale`, unit);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update unit:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function updateUnitRent(unit) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/update-rent`, unit);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update unit:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function deleteUnit(id) {
-  try {
-    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to delete unit:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function resetUnreadMessagesCount(userId) {
   try {
     await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
@@ -218,16 +188,6 @@ export async function deleteDeveloper(id) {
   }
 }
 
-// Add this function to your serviceFetching.js file
-export async function addUnit(unitData) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
 export async function addNewPhase(phaseData, idProject) {
   try {
     const response = await axiosInstance.post(
@@ -260,15 +220,6 @@ export async function deletePhase(idProject, idPhase) {
       `/project-phases/${idProject}/phase-delete/${idPhase}`
     );
 
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-export async function addUnitRent(unitData) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
     return response.data;
   } catch (error) {
     console.error("Failed to add unit:", error.message);

@@ -1,12 +1,12 @@
 "use client";
 
-import { deleteUnit } from "@/components/services/serviceFetching";
+import { useI18n } from "@/context/translate-api";
+import { deleteUnit } from "@/utils/api";
 import { Loader2, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useI18n } from "@/context/translate-api";
 
 export default function DeleteUnitBtn({ unitId }) {
   const modalRef = useRef(null);
