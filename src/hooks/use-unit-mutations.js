@@ -55,13 +55,13 @@ export function useAddUnit() {
       return { previousUnits, optimisticUnit };
     },
     onSuccess: (data, variables, context) => {
-      // Replace the optimistic unit with the real data
-      if (context?.optimisticUnit && data) {
-        updateUnitsInCache(queryClient, context.optimisticUnit.unitId, () => ({
-          ...data,
-          _isOptimistic: false,
-        }));
-      }
+      // // Replace the optimistic unit with the real data
+      // if (context?.optimisticUnit && data) {
+      //   updateUnitsInCache(queryClient, context.optimisticUnit.unitId, () => ({
+      //     ...data,
+      //     _isOptimistic: false,
+      //   }));
+      // }
 
       // Invalidate to ensure data consistency
       queryClient.invalidateQueries({ queryKey: unitKeys.all });
