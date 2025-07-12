@@ -13,8 +13,6 @@ export default function AddUnitButton({
   compounds,
   developers,
   citiesAndDistricts,
-  setUnits = () => {},
-  setUnitData = () => {}, // Function to update unit data in parent components
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -53,8 +51,6 @@ export default function AddUnitButton({
           compounds={compounds}
           developersData={developers}
           citiesAndDistricts={citiesAndDistricts}
-          setUnits={setUnits}
-          setUnitData={setUnitData}
         />
       )}
     </>

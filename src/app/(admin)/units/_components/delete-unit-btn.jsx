@@ -1,17 +1,19 @@
 "use client";
 
-import { deleteUnit } from "@/components/services/serviceFetching";
+import { useI18n } from "@/context/translate-api";
+import { useDeleteUnit } from "@/hooks/use-unit-mutations";
 import { Loader2, Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { useI18n } from "@/context/translate-api";
 
 export default function DeleteUnitBtn({ unitId }) {
   const modalRef = useRef(null);
   const router = useRouter();
   const { t } = useI18n();
+
+  const deleteUnitMutation = useDeleteUnit();
 
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,15 +27,11 @@ export default function DeleteUnitBtn({ unitId }) {
   const handleDeleteUnit = async () => {
     setLoading(true);
     try {
-      const response = await deleteUnit(unitId);
-      if (response.code === 200) {
-        router.push("/units");
-      } else {
-        toast.error(t("unitPage.deleteFail"));
-      }
-      setIsOpen(false);
+      await deleteUnitMutation.mutateAsync(unitId);
+      toast.success(t.toasts?.unitDeleted || "Unit deleted successfully");
+      router.push("/units");
     } catch (error) {
-      toast.error(t("unitPage.deleteError"));
+      toast.error(error.message || "Failed to delete unit");
     } finally {
       setLoading(false);
     }

@@ -7,12 +7,11 @@ import { useEffect } from "react";
 import ClientsTable from "./clients-table";
 
 export default function ClientsListQuery({ searchParams }) {
-  const { setAverageScore } = useAverageScore();
+  const { setAverageScore, setLoading } = useAverageScore();
 
   const {
     data: usersData,
     isLoading,
-    error,
     isError,
     refetch,
     isFetching,
@@ -21,6 +20,7 @@ export default function ClientsListQuery({ searchParams }) {
   const users = usersData?.data?.users || [];
 
   useEffect(() => {
+    setLoading(isLoading);
     if (users.length > 0) {
       const totalScore = users.reduce(
         (sum, user) => sum + (user.score || 0),
@@ -49,7 +49,7 @@ export default function ClientsListQuery({ searchParams }) {
             Error loading clients
           </div>
           <div className="text-gray-600 text-sm mb-4">
-            {error?.message || "An unexpected error occurred"}
+            An unexpected error occurred
           </div>
           <button
             onClick={() => refetch()}

@@ -6,7 +6,7 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
@@ -18,24 +18,10 @@ export default function UnitsFilter({
   clientId,
   readonly,
   citiesAndDistricts,
-  setIsLoading = () => {},
   setUnits = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
-  const [selectedProjectName, setSelectedProjectName] = useState(() => {
-    if (appliedFilters.project_name) {
-      const compound = compounds.find(
-        (c) => c.en_name === appliedFilters.project_name
-      );
-      return compound
-        ? locale === "ar"
-          ? compound.ar_name
-          : compound.en_name
-        : "";
-    }
-    return t.unitsFilter.allCompounds || "All Projects";
-  });
 
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer_name || "",
@@ -72,13 +58,13 @@ export default function UnitsFilter({
     if (filters.developer_name) {
       initialFilters.push({
         key: "developer_name",
-        value: filters.developer_name,
+        value: getSelectedDeveloper(),
       });
     }
     if (filters.project_name) {
       initialFilters.push({
         key: "project_name",
-        value: filters.project_name,
+        value: getSelectedProjectName(),
       });
     }
     if (filters.purpose) {
@@ -135,25 +121,6 @@ export default function UnitsFilter({
     { value: "house", label: t.basicDetails.buildingTypes.house },
   ];
 
-  useEffect(() => {
-    // Update selected project name when locale changes
-    if (appliedFilters.project_name) {
-      const compound = compounds.find(
-        (c) => c.en_name === appliedFilters.project_name
-      );
-      setSelectedProjectName(
-        compound ? (locale === "ar" ? compound.ar_name : compound.en_name) : ""
-      );
-    } else {
-      setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
-    }
-  }, [locale]);
-
-  // Clear loading state when component receives new data after navigation
-  useEffect(() => {
-    setIsLoading(false);
-  }, [appliedFilters, setIsLoading]);
-
   const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
@@ -167,8 +134,6 @@ export default function UnitsFilter({
       newParams.delete(key);
     }
 
-    // Set loading state and update the URL
-    setIsLoading(true);
     router.push(`${window.location.pathname}?${newParams.toString()}`);
 
     setActiveFilters((prev) => {
@@ -193,8 +158,6 @@ export default function UnitsFilter({
     const newMinPrice = filters.min_price;
     const newMaxPrice = filters.max_price;
 
-    console.log("Applying price filter:", { newMinPrice, newMaxPrice });
-
     // Update URL params
     const newParams = new URLSearchParams(window.location.search);
 
@@ -210,8 +173,6 @@ export default function UnitsFilter({
       newParams.delete("max_price");
     }
 
-    // Set loading state and update the URL
-    setIsLoading(true);
     router.push(`${window.location.pathname}?${newParams.toString()}`);
     setIsPriceDropdownOpen(false);
 
@@ -273,10 +234,6 @@ export default function UnitsFilter({
       city: "",
     });
 
-    setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
-
-    // Set loading state and clear URL parameters
-    setIsLoading(true);
     router.push(window.location.pathname);
 
     setActiveFilters([]);
@@ -300,11 +257,6 @@ export default function UnitsFilter({
       newParams.delete(key);
     }
 
-    if (key === "project_name") {
-      setSelectedProjectName(t.unitsFilter.allCompounds || "All Projects");
-    }
-
-    setIsLoading(true);
     router.push(`${window.location.pathname}?${newParams.toString()}`);
 
     setActiveFilters((prev) =>
@@ -322,6 +274,14 @@ export default function UnitsFilter({
       : t.unitsFilter.allPropertyTypes || "All Property Types";
   }
 
+  function getSelectedProjectName() {
+    if (!filters.project_name || filters.project_name === "all") {
+      return t.unitsFilter.allCompounds || "All Projects";
+    }
+    const c = compounds.find((c) => c.en_name === filters.project_name);
+    return locale === "ar" ? c.ar_name : c.en_name || filters.project_name;
+  }
+
   function getSelectedPurpose() {
     if (!filters.purpose || filters.purpose === "all") {
       return t.unitsFilter.allPurposes || "All Purposes";
@@ -333,8 +293,9 @@ export default function UnitsFilter({
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
+    const d = developers.find((d) => d.name === filters.developer_name);
 
-    return filters.developer_name;
+    return locale === "ar" ? d.ar_name : d.en_name || filters.developer_name;
   }
 
   function getSelectedCity() {
@@ -349,7 +310,7 @@ export default function UnitsFilter({
       case "developer_name":
         return getSelectedDeveloper();
       case "project_name":
-        return selectedProjectName;
+        return getSelectedProjectName();
       case "purpose":
         return getSelectedPurpose();
       case "property_type":
@@ -474,7 +435,7 @@ export default function UnitsFilter({
             className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
             onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
           >
-            <span className="truncate">{selectedProjectName}</span>
+            <span className="truncate">{getSelectedProjectName()}</span>
             <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
           </button>
 
@@ -503,9 +464,6 @@ export default function UnitsFilter({
                     key={idx}
                     className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
                     onClick={() => {
-                      setSelectedProjectName(
-                        locale === "ar" ? c.ar_name : c.en_name
-                      );
                       handleFilterChange("project_name", c.en_name);
                       setIsProjectDropdownOpen(false);
                     }}

@@ -864,6 +864,7 @@ export default {
     errorProcessing: "حدث خطأ أثناء معالجة طلبك. يرجى المحاولة مرة أخرى",
     unitAdded: "تم إضافة الوحدة بنجاح",
     unitUpdated: "تم تحديث الوحدة بنجاح",
+    unitDeleted: "تم حذف الوحدة بنجاح",
   },
   phase: "المرحلة",
   viewOnGoogleMaps: "عرض على خرائط جوجل",

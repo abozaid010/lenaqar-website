@@ -12,7 +12,6 @@ export default function UnitPageHeader({
   developers,
   citiesAndDistricts,
   clientId,
-  setUnitData = () => {},
 }) {
   const router = useRouter();
   const { t, locale } = useI18n();
@@ -46,8 +45,6 @@ export default function UnitPageHeader({
           developers={developers}
           citiesAndDistricts={formattedDataCitiesAndDistricts}
           clientId={clientId}
-          setUnits={() => {}}
-          setUnitData={setUnitData} // Function to update unit data in parent components
         />
 
         <DeleteUnitBtn unitId={unit.unitId} />

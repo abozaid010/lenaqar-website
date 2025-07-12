@@ -39,7 +39,7 @@ export default function Uni({ unit }) {
           {[
             formatCityLabel(unit.city, locale),
             formatDistrictLabel(unit.district, unit.city, locale),
-            unit.project,
+            locale === "ar" ? unit.project_ar : unit.project,
             unit.phase,
           ]
             .filter(Boolean)
@@ -58,9 +58,9 @@ export default function Uni({ unit }) {
               {t.unitDetails?.developer}
             </span>
             <p className="font-medium text-xs">
-              {unit.developer
-                ? t.developerNames?.[unit.developer] || unit.developer
-                : t.unitDetails.notAvailable}
+              {locale === "ar"
+                ? unit.developer_ar || unit.developer
+                : unit.developer}
             </p>
           </div>
         </div>
