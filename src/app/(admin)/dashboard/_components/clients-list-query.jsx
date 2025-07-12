@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import ClientsTable from "./clients-table";
 
 export default function ClientsListQuery({ searchParams }) {
-  const { setAverageScore } = useAverageScore();
+  const { setAverageScore, setLoading } = useAverageScore();
 
   const {
     data: usersData,
@@ -20,6 +20,7 @@ export default function ClientsListQuery({ searchParams }) {
   const users = usersData?.data?.users || [];
 
   useEffect(() => {
+    setLoading(isLoading);
     if (users.length > 0) {
       const totalScore = users.reduce(
         (sum, user) => sum + (user.score || 0),
