@@ -20,8 +20,7 @@ export function useAddUnit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ formData }) => {
-      console.log("Adding unit with formData:", formData);
+    mutationFn: async (formData) => {
       let res;
       if (formData.purpose === "sell") {
         res = await addUnit(formData);
@@ -33,13 +32,12 @@ export function useAddUnit() {
         throw new Error("Failed to add unit");
       }
 
-      return res;
+      return formData;
     },
-    onMutate: async ({ formData }) => {
+    onMutate: async (formData) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
-      // Snapshot the previous value
       const previousUnits = queryClient.getQueriesData({
         queryKey: unitKeys.all,
       });
@@ -58,10 +56,9 @@ export function useAddUnit() {
     },
     onSuccess: (data, variables, context) => {
       // Replace the optimistic unit with the real data
-      const realUnit = data.data;
-      if (context?.optimisticUnit && realUnit) {
+      if (context?.optimisticUnit && data) {
         updateUnitsInCache(queryClient, context.optimisticUnit.unitId, () => ({
-          ...realUnit,
+          ...data,
           _isOptimistic: false,
         }));
       }
@@ -85,7 +82,7 @@ export function useUpdateUnit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ formData }) => {
+    mutationFn: async (formData) => {
       let res;
       if (formData.purpose === "sell") {
         res = await updateUnit(formData);
@@ -97,9 +94,9 @@ export function useUpdateUnit() {
         throw new Error("Failed to update unit");
       }
 
-      return { ...res };
+      return formData;
     },
-    onMutate: async ({ formData }) => {
+    onMutate: async (formData) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
@@ -108,8 +105,9 @@ export function useUpdateUnit() {
         queryKey: unitKeys.all,
       });
 
+      console.log("Previous units before update:", previousUnits);
       // Optimistically update the unit in the cache
-      updateUnitsInCache(queryClient, (oldUnit) => ({
+      updateUnitsInCache(queryClient, formData.unitId, (oldUnit) => ({
         ...oldUnit,
         ...formData,
         _isOptimistic: true,

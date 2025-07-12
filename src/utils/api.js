@@ -74,3 +74,13 @@ export async function fetchcombounds(use = true) {
     return { error: error.message };
   }
 }
+
+export async function fetchUnitById(id) {
+  try {
+    const response = await axiosInstance.get(`/units/details/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch unit by id:", error.message);
+    return { error: error.message };
+  }
+}

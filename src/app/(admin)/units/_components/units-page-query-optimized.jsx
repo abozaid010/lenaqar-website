@@ -5,7 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import Cookies from "js-cookie";
 import { Loader2, RotateCcw } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({ searchParams }) {
   // Get client data from cookies
@@ -32,18 +32,6 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
     hasErrors,
     errorMessage,
   } = useUnitsPageData(JSON.stringify(searchParamsWithClient));
-
-  const [unitsData, setUnitsData] = useState(() => {
-    // Initialize unitsData with the fetched units data or an empty array
-    return units.data || [];
-  });
-
-  useEffect(() => {
-    // Update unitsData whenever the units data changes
-    if (units.data) {
-      setUnitsData(units.data);
-    }
-  }, [isInitialLoading, units.isFetching]);
 
   if (isInitialLoading) {
     return (
@@ -137,12 +125,11 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
     <div className="container relative">
       <UnitsFilter
         appliedFilters={searchParams}
-        developers={developers.data}
-        compounds={compounds.data}
+        developers={developers}
+        compounds={compounds}
         clientId={clientId}
         clientName={clientName}
-        citiesAndDistricts={citiesAndDistricts.data}
-        setUnits={setUnitsData}
+        citiesAndDistricts={citiesAndDistricts}
       />
 
       <div className="flex-1 flex flex-col">
@@ -154,7 +141,7 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
             />
           </div>
         ) : (
-          <UnitsGrid units={unitsData} />
+          <UnitsGrid units={units} />
         )}
       </div>
     </div>

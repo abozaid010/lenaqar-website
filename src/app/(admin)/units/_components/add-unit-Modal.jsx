@@ -15,12 +15,7 @@ import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
-import {
-  addUnit,
-  addUnitRent,
-  updateUnit,
-  updateUnitRent,
-} from "@/components/services/serviceFetching";
+import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 
 export default function AddUnitModal({
   isEdit,
@@ -30,9 +25,11 @@ export default function AddUnitModal({
   clientName,
   developersData,
   citiesAndDistricts,
-  setUnits = () => {},
-  setUnitData = () => {},
 }) {
+  // Add the mutation hooks
+  const addUnitMutation = useAddUnit();
+  const updateUnitMutation = useUpdateUnit();
+
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
   const [currentStep, setCurrentStep] = useState(1);
@@ -318,40 +315,27 @@ export default function AddUnitModal({
     }
 
     try {
-      let res;
-      let finalFormData = { ...formData };
       setLoading(true);
+      let finalFormData = { ...formData };
+
+      // Merge form data based on purpose
+      if (formData.purpose === "sell") {
+        finalFormData = { ...finalFormData, ...SellFormData };
+      } else if (formData.purpose === "rent") {
+        finalFormData = { ...finalFormData, ...rentFormData };
+      }
+
       if (!isEdit) {
-        if (formData.purpose === "sell") {
-          finalFormData = { ...finalFormData, ...SellFormData };
-          res = await addUnit(finalFormData);
-        } else if (formData.purpose === "rent") {
-          finalFormData = { ...finalFormData, ...rentFormData };
-          res = await addUnitRent(finalFormData);
-        }
+        // Use TanStack Query mutation for adding
+        await addUnitMutation.mutateAsync(finalFormData);
+        toast.success(t.toasts.unitAdded);
       } else {
-        if (formData.purpose === "sell") {
-          finalFormData = { ...finalFormData, ...SellFormData };
-          res = await updateUnit(finalFormData);
-        } else if (formData.purpose === "rent") {
-          finalFormData = { ...finalFormData, ...rentFormData };
-          res = await updateUnitRent(finalFormData);
-        }
+        // Use TanStack Query mutation for updating
+        await updateUnitMutation.mutateAsync(finalFormData);
+        toast.success(t.toasts.unitUpdated);
       }
 
-      if (!res || !res.status) {
-        toast.error(
-          "An error occurred while processing your request. Please try again."
-        );
-        return;
-      }
       onClose();
-      toast.success(isEdit ? t.toasts.unitUpdated : t.toasts.unitAdded);
-
-      if (isEdit && setUnitData) setUnitData(finalFormData);
-
-      if (!isEdit && setUnits)
-        setUnits((prevUnits) => [...prevUnits, res.data]);
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
     } finally {

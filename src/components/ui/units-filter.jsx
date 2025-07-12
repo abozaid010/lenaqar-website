@@ -158,8 +158,6 @@ export default function UnitsFilter({
     const newMinPrice = filters.min_price;
     const newMaxPrice = filters.max_price;
 
-    console.log("Applying price filter:", { newMinPrice, newMaxPrice });
-
     // Update URL params
     const newParams = new URLSearchParams(window.location.search);
 
