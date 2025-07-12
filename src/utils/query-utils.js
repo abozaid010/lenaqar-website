@@ -131,10 +131,9 @@ export function addUnitToCache(queryClient, newUnit) {
     if (!oldData?.data?.units) return oldData;
 
     return {
-      ...oldData,
       data: {
         ...oldData.data,
-        units: [...oldData.data.units, newUnit],
+        units: [newUnit, ...oldData.data.units],
       },
     };
   });

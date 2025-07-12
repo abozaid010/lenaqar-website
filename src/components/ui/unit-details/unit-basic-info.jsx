@@ -18,6 +18,7 @@ import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
 export default function Uni({ unit }) {
+  console.log("Rendering UnitBasicInfo with unit:", unit);
   const { t, locale } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
@@ -39,7 +40,7 @@ export default function Uni({ unit }) {
           {[
             formatCityLabel(unit.city, locale),
             formatDistrictLabel(unit.district, unit.city, locale),
-            unit.project,
+            locale === "ar" ? unit.project_ar : unit.project,
             unit.phase,
           ]
             .filter(Boolean)
