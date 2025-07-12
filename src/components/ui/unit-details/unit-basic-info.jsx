@@ -18,7 +18,6 @@ import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
 export default function Uni({ unit }) {
-  console.log("Rendering UnitBasicInfo with unit:", unit);
   const { t, locale } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
@@ -59,9 +58,9 @@ export default function Uni({ unit }) {
               {t.unitDetails?.developer}
             </span>
             <p className="font-medium text-xs">
-              {unit.developer
-                ? t.developerNames?.[unit.developer] || unit.developer
-                : t.unitDetails.notAvailable}
+              {locale === "ar"
+                ? unit.developer_ar || unit.developer
+                : unit.developer}
             </p>
           </div>
         </div>

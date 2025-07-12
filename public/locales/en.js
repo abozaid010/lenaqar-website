@@ -920,6 +920,7 @@ export default {
       "An error occurred while processing your request. Please try again",
     unitAdded: "Unit added successfully",
     unitUpdated: "Unit updated successfully",
+    unitDeleted: "Unit deleted successfully",
   },
   formLabels: {
     compoundName: "Project Name",

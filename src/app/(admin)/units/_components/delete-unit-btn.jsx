@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { deleteUnit } from "@/utils/api";
+import { useDeleteUnit } from "@/hooks/use-unit-mutations";
 import { Loader2, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -12,6 +12,8 @@ export default function DeleteUnitBtn({ unitId }) {
   const modalRef = useRef(null);
   const router = useRouter();
   const { t } = useI18n();
+
+  const deleteUnitMutation = useDeleteUnit();
 
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -25,15 +27,11 @@ export default function DeleteUnitBtn({ unitId }) {
   const handleDeleteUnit = async () => {
     setLoading(true);
     try {
-      const response = await deleteUnit(unitId);
-      if (response.code === 200) {
-        router.push("/units");
-      } else {
-        toast.error(t("unitPage.deleteFail"));
-      }
-      setIsOpen(false);
+      await deleteUnitMutation.mutateAsync(unitId);
+      toast.success(t.toasts?.unitDeleted || "Unit deleted successfully");
+      router.push("/units");
     } catch (error) {
-      toast.error(t("unitPage.deleteError"));
+      toast.error(error.message || "Failed to delete unit");
     } finally {
       setLoading(false);
     }

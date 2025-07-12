@@ -145,7 +145,6 @@ export function removeUnitFromCache(queryClient, unitId) {
     if (!oldData?.data?.units) return oldData;
 
     return {
-      ...oldData,
       data: {
         ...oldData.data,
         units: oldData.data.units.filter((unit) => unit.unitId !== unitId),

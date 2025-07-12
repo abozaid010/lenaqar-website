@@ -156,7 +156,7 @@ export function useDeleteUnit() {
         throw new Error("Failed to delete unit");
       }
 
-      return { ...res, unitId };
+      return unitId;
     },
     onMutate: async (unitId) => {
       // Cancel any outgoing refetches
