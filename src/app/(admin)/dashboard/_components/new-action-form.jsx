@@ -1,9 +1,10 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
+import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
 import Cookies from "js-cookie";
 import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
 
@@ -12,27 +13,18 @@ const initialState = {
   message: "",
 };
 
-export default function NewActionForm({ userId, onSuccess }) {
-  const { t } = useI18n();
+export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
+  const { t, locale } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = Cookies.get("lena-website-client_id");
 
-  const ACTIONS = useMemo(
-    () => [
-      { value: "Office visit", label: t.actionForm.actions.officeVisit },
-      { value: "Make a call", label: t.actionForm.actions.makeCall },
-      { value: "Property view", label: t.actionForm.actions.propertyView },
-      { value: "Not interested", label: t.actionForm.actions.notInterested },
-      { value: "Not qualified", label: t.actionForm.actions.notQualified },
-      { value: "Follow up later", label: t.actionForm.actions.followUpLater },
-      {
-        value: "Missing requirement",
-        label: t.actionForm.actions.missingRequirement,
-      },
-      { label: "Blocked", value: "Blocked" },
-    ],
-    [t]
-  );
+  // Get actions suitable for the action form (excluding "all" and null values)
+  const ACTIONS = USER_ACTIONS.filter(
+    (action) => action.value && action.value !== "" && action.value !== null
+  ).map((action) => ({
+    label: getActionLabel(action.value, locale),
+    value: action.value,
+  }));
 
   // Convert 24h to 12h format
   const to12HourFormat = (time24) => {
@@ -55,13 +47,17 @@ export default function NewActionForm({ userId, onSuccess }) {
     if (ampm === "PM" && hours24 < 12) hours24 += 12;
     if (ampm === "AM" && hours24 === 12) hours24 = 0;
 
-    return `${String(hours24).padStart(2, "0")}:${String(minutes || "00").padStart(2, "0")}`;
+    return `${String(hours24).padStart(2, "0")}:${String(
+      minutes || "00"
+    ).padStart(2, "0")}`;
   };
 
   // Get current time in 24h format
   const getDefaultTime = () => {
     const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    return `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
   };
 
   // Get current date
@@ -71,7 +67,7 @@ export default function NewActionForm({ userId, onSuccess }) {
   };
 
   const [formData, setFormData] = useState({
-    action: ACTIONS[0].value,
+    action: ACTIONS[0]?.value || "Make a call",
     comment: "",
     meeting_date: getDefaultDate(),
     meeting_time: getDefaultTime(),
@@ -93,9 +89,15 @@ export default function NewActionForm({ userId, onSuccess }) {
         duration: 3000,
         position: "top-right",
       });
+
+      // Update the action in the table
+      if (onActionUpdate && userId) {
+        onActionUpdate(userId, formData.action);
+      }
+
       const defaultTime = getDefaultTime();
       setFormData({
-        action: ACTIONS[0].value,
+        action: ACTIONS[0]?.value || "Make a call",
         comment: "",
         meeting_date: getDefaultDate(),
         meeting_time: defaultTime,
@@ -115,7 +117,16 @@ export default function NewActionForm({ userId, onSuccess }) {
         position: "top-right",
       });
     }
-  }, [state, userId, onSuccess, t, ACTIONS, clientId]);
+  }, [
+    state,
+    t,
+    onActionUpdate,
+    userId,
+    formData.action,
+    onSuccess,
+    clientId,
+    ACTIONS,
+  ]);
 
   // Update 24-hour time in formData whenever any time component changes
   useEffect(() => {

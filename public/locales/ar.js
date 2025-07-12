@@ -60,6 +60,7 @@ export default {
     title: {
       part1: "لينا معك",
       part2: "طوال الوقت",
+      averageScore: "جدية العملاء",
     },
     subtitle:
       "موقع إلكتروني وتطبيق موبايل - تقدر تتابع شغلك في أي وقت ومن أي مكان",
@@ -307,15 +308,6 @@ export default {
     },
   },
   actionForm: {
-    actions: {
-      officeVisit: "زيارة مكتب",
-      makeCall: "إجراء مكالمة",
-      propertyView: "عرض عقار",
-      notInterested: "غير مهتم",
-      notQualified: "غير مؤهل",
-      followUpLater: "متابعة لاحقاً",
-      missingRequirement: "متطلب مفقود",
-    },
     commentPlaceholder: "أدخل تعليقك هنا...",
     submitButton: "إرسال",
     successMessage: "تم إضافة الإجراء بنجاح",

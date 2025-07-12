@@ -1,37 +1,18 @@
 "use client";
 
-import {
-  getClientActions,
-  getClientRequirements,
-} from "@/components/services/serviceFetching";
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
+import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
+import { getClientActions, getClientRequirements } from "@/utils/api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
 
-const ACTIONS_COLORS = {
-  "Make a call": "text-blue-800",
-  "Office visit": "text-yellow-800",
-  "Property view": "text-teal-800",
-  "Not interested": "text-gray-800",
-  "Not qualified": "text-red-800",
-  "Follow up later": "text-orange-800",
-  "Missing Requirement": "text-purple-800",
-  "No Action": "text-gray-400",
-  Blocked: "text-red-600",
-};
-
-export default function ClientsTable({
-  users,
-  nextCursor,
-  disableNext,
-  disablePrev,
-  previousCursor,
-}) {
-  const { t } = useI18n();
+export default function ClientsTable({ users }) {
+  const { t, locale } = useI18n();
   const router = useRouter();
+
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
@@ -39,51 +20,21 @@ export default function ClientsTable({
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
+  const [localUsers, setLocalUsers] = useState(users);
 
   useEffect(() => {
     if (users) {
       const usersId = users.map((user) => user.user_id);
       localStorage.setItem("usersId", JSON.stringify(usersId));
+      setLocalUsers(users);
     }
   }, [users]);
 
-  const ACTIONS = [
-    { label: t.dashboardFilter.actions.onGoingConversion, value: null },
-    { label: t.dashboardFilter.actions.onGoingConversion, value: "" },
-    { label: t.dashboardFilter.actions.makeCall, value: "Make a call" },
-    { label: t.dashboardFilter.actions.officeVisit, value: "Office visit" },
-    { label: t.dashboardFilter.actions.propertyView, value: "Property view" },
-    {
-      label: t.dashboardFilter.actions.qualifiedLead,
-      value: "Qualified lead",
-    },
-    {
-      label: t.dashboardFilter.actions.notInterested,
-      value: "Not interested",
-    },
-    { label: t.dashboardFilter.actions.notQualified, value: "Not qualified" },
-    {
-      label: t.dashboardFilter.actions.followUpLater,
-      value: "Follow up later",
-    },
-    {
-      label: t.dashboardFilter.actions.missingRequirement,
-      value: "Missing requirement",
-    },
-    { label: t.dashboardFilter.actions.blocked, value: "Blocked" },
-    { label: t.dashboardFilter.actions.Interested, value: "Interested" },
-  ];
-
-  const getActionLabel = (actionValue) => {
-    const action = ACTIONS.find((a) => a.value === actionValue);
-    return action ? action.label : actionValue;
-  };
-
   const toggleSelectAll = () => {
-    if (rowSelection.length === users.length) {
+    if (rowSelection.length === localUsers.length) {
       setRowSelection([]);
     } else {
-      setRowSelection(users.map((user) => user.user_id));
+      setRowSelection(localUsers.map((user) => user.user_id));
     }
   };
 
@@ -125,9 +76,17 @@ export default function ClientsTable({
     }
   };
 
+  const handleActionUpdate = (userId, newAction) => {
+    setLocalUsers((prevUsers) =>
+      prevUsers.map((user) =>
+        user.user_id === userId ? { ...user, last_action: newAction } : user
+      )
+    );
+  };
+
   return (
     <>
-      {users?.length === 0 ? (
+      {localUsers?.length === 0 ? (
         <div>
           <div className="text-center font-medium text-xl mt-5 text-gray-400">
             {t.clientsTable.noClients}
@@ -142,7 +101,7 @@ export default function ClientsTable({
                   <th className="px-2 sm:px-4 py-2 sm:py-3 text-center w-6 ">
                     <input
                       type="checkbox"
-                      checked={rowSelection?.length === users?.length}
+                      checked={rowSelection?.length === localUsers?.length}
                       onChange={toggleSelectAll}
                       className="cursor-pointer no-print"
                     />
@@ -169,7 +128,7 @@ export default function ClientsTable({
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-200">
-                {users?.map((user) => {
+                {localUsers?.map((user) => {
                   let lastActivity = t.clientsTable.lastActivity.na;
                   try {
                     if (user.updated_at) {
@@ -296,7 +255,9 @@ export default function ClientsTable({
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {getActionLabel(user.last_action)}
+                            {getActionLabel(
+                              user.last_action ? user.last_action : null
+                            )}
                           </span>
                         )}
                       </td>
@@ -337,6 +298,7 @@ export default function ClientsTable({
             setOpenActionModal(false);
             setLoadingClientActions(null);
           }}
+          onActionUpdate={handleActionUpdate}
         />
       )}
 

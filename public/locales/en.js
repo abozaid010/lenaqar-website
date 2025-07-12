@@ -63,6 +63,7 @@ export default {
     title: {
       part1: "Lena is with you",
       part2: "all the time",
+      averageScore: "leads quality",
     },
     subtitle:
       "Mobile app, and website, you can track your work anytime anywhere",
@@ -294,15 +295,6 @@ export default {
     },
   },
   actionForm: {
-    actions: {
-      officeVisit: "Office visit",
-      makeCall: "Make a call",
-      propertyView: "Property view",
-      notInterested: "Not interested",
-      notQualified: "Not qualified",
-      followUpLater: "Follow up later",
-      missingRequirement: "Missing Requirement",
-    },
     commentPlaceholder: "Enter your comment here...",
     submitButton: "Send",
     successMessage: "Action added successfully",

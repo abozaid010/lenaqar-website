@@ -11,7 +11,12 @@ const NOPREFRERED_TIME = [
   "Follow up later",
   "Missing requirement",
 ];
-export default function ActionsModal({ actions, onClose, userId }) {
+export default function ActionsModal({
+  actions,
+  onClose,
+  userId,
+  onActionUpdate,
+}) {
   const { t } = useI18n();
 
   return (
@@ -72,7 +77,11 @@ export default function ActionsModal({ actions, onClose, userId }) {
           </ul>
         )}
 
-        <NewActionForm userId={userId} onSuccess={onClose} />
+        <NewActionForm
+          userId={userId}
+          onSuccess={onClose}
+          onActionUpdate={onActionUpdate}
+        />
       </div>
     </div>
   );

@@ -51,17 +51,6 @@ export async function fetchDevelopers(use = true) {
   }
 }
 
-export async function fetchCitisAndProjects() {
-  try {
-    const response = await axiosInstance.get("/projects/cities-and-districts");
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchcombounds(use = true) {
   try {
     const response = await axiosInstance.get(
@@ -71,6 +60,29 @@ export async function fetchcombounds(use = true) {
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function fetchCitisAndProjects() {
+  try {
+    const response = await axiosInstance.get("/projects/cities-and-districts");
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch units:", error.message);
+
+    return { error: error.message };
+  }
+}
+
+export async function getClientActions(phoneNumber) {
+  try {
+    const response = await axiosInstance.get(`action/${phoneNumber}`);
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
     return { error: error.message };
   }
 }
@@ -131,6 +143,17 @@ export async function updateUnitRent(unit) {
     return response.data;
   } catch (error) {
     console.error("Failed to update unit:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function getClientRequirements(user_id) {
+  try {
+    const response = await axiosInstance.get(`requirements/${user_id}`);
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data:", error.message);
     return { error: error.message };
   }
 }

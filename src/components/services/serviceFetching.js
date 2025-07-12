@@ -110,23 +110,6 @@ export async function resetUnreadMessagesCount(userId) {
   }
 }
 
-export async function fetchUnitsFilter(searchParams, use) {
-  try {
-    const params = {
-      ...JSON.parse(searchParams),
-    };
-
-    const response = await axiosInstance.get(
-      `${use ? "/units/all" : "/public/units"}`,
-      { params }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchDevelopers(use) {
   try {
     const response = await axiosInstance.get(
@@ -165,6 +148,7 @@ export async function getClientDevelopers(client_id) {
     return { error: error.message };
   }
 }
+
 export async function updateDeveloper(developerData, id) {
   try {
     const response = await axiosInstance.put(
@@ -304,32 +288,11 @@ export async function assignSalsePerson(id, additionalProp1) {
   }
 }
 
-export async function getClientActions(phoneNumber) {
-  try {
-    const response = await axiosInstance.get(`action/${phoneNumber}`);
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch data:", error.message);
-    return { error: error.message };
-  }
-}
 export async function getprojects(city, district) {
   try {
     const response = await axiosInstance.get(
       `/projects/get/${city}/${district}`
     );
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch data:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function getClientRequirements(user_id) {
-  try {
-    const response = await axiosInstance.get(`requirements/${user_id}`);
 
     return response.data.data;
   } catch (error) {
