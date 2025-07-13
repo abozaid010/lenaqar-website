@@ -2,6 +2,7 @@
 
 import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, Trash2, X } from "lucide-react";
@@ -18,7 +19,6 @@ export default function UnitsFilter({
   clientId,
   readonly,
   citiesAndDistricts,
-  setUnits = () => {},
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -106,20 +106,6 @@ export default function UnitsFilter({
   useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
   useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
   useOnClickOutside(cityDropdownRef, () => setIsCityDropdownOpen(false));
-
-  const buildingTypes = [
-    { value: "apartment", label: t.basicDetails.buildingTypes.apartment },
-    { value: "villa", label: t.basicDetails.buildingTypes.villa },
-    { value: "townhouse", label: t.basicDetails.buildingTypes.townhouse },
-    { value: "duplex", label: t.basicDetails.buildingTypes.duplex },
-    { value: "penthouse", label: t.basicDetails.buildingTypes.penthouse },
-    { value: "studio", label: t.basicDetails.buildingTypes.studio },
-    { value: "chalet", label: t.basicDetails.buildingTypes.chalet },
-    { value: "office", label: t.basicDetails.buildingTypes.office },
-    { value: "shop", label: t.basicDetails.buildingTypes.shop },
-    { value: "twinhouse", label: t.basicDetails.buildingTypes.twinhouse },
-    { value: "house", label: t.basicDetails.buildingTypes.house },
-  ];
 
   const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
@@ -268,7 +254,7 @@ export default function UnitsFilter({
     if (!filters.property_type || filters.property_type === "all") {
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
-    const type = buildingTypes.find((t) => t.value === filters.property_type);
+    const type = BUILDING_TYPES.find((t) => t.value === filters.property_type);
     return type
       ? type.label
       : t.unitsFilter.allPropertyTypes || "All Property Types";
@@ -543,20 +529,18 @@ export default function UnitsFilter({
               >
                 {t.unitsFilter.allPropertyTypes}
               </div>
-              {[...buildingTypes]
-                .sort((a, b) => a.label.localeCompare(b.label, "ar"))
-                .map((type) => (
-                  <div
-                    key={type.value}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                    onClick={() => {
-                      handleFilterChange("property_type", type.value);
-                      setIsPropertyTypeDropdownOpen(false);
-                    }}
-                  >
-                    {type.label}
-                  </div>
-                ))}
+              {BUILDING_TYPES.map((type) => (
+                <div
+                  key={type.value}
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("property_type", type.value);
+                    setIsPropertyTypeDropdownOpen(false);
+                  }}
+                >
+                  {locale === "ar" ? type.ar_label : type.en_label}
+                </div>
+              ))}
             </div>
           )}
         </div>
@@ -638,7 +622,6 @@ export default function UnitsFilter({
               developers={developers}
               citiesAndDistricts={formattedDataCitiesAndDistricts}
               className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
-              setUnits={setUnits}
             />
           </div>
         )}

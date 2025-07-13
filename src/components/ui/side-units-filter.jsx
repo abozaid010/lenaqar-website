@@ -2,6 +2,7 @@
 
 import FilterCheckboxGroup from "@/components/ui/filter-checkbox-group";
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import PriceRangeSlider from "./price-range-slider";
@@ -15,7 +16,7 @@ export default function SideUnitFilters({
   minPrice = 0,
   maxPrice = 10000000,
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer || "",
@@ -38,20 +39,6 @@ export default function SideUnitFilters({
       max_price: appliedFilters.max_price || "",
     }));
   }, [appliedFilters]);
-
-  const buildingTypes = [
-    { value: "apartment", label: t.basicDetails.buildingTypes.apartment },
-    { value: "villa", label: t.basicDetails.buildingTypes.villa },
-    { value: "townhouse", label: t.basicDetails.buildingTypes.townhouse },
-    { value: "duplex", label: t.basicDetails.buildingTypes.duplex },
-    { value: "penthouse", label: t.basicDetails.buildingTypes.penthouse },
-    { value: "studio", label: t.basicDetails.buildingTypes.studio },
-    { value: "chalet", label: t.basicDetails.buildingTypes.chalet },
-    { value: "office", label: t.basicDetails.buildingTypes.office },
-    { value: "shop", label: t.basicDetails.buildingTypes.shop },
-    { value: "twinhouse", label: t.basicDetails.buildingTypes.twinhouse },
-    { value: "house", label: t.basicDetails.buildingTypes.house },
-  ];
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -113,9 +100,9 @@ export default function SideUnitFilters({
             {/* Property Type Filter */}
             <FilterCheckboxGroup
               title="Property Type"
-              options={buildingTypes.map((type) => ({
+              options={BUILDING_TYPES.map((type) => ({
                 id: type.value,
-                label: type.label.charAt(0).toUpperCase() + type.label.slice(1),
+                label: locale === "ar" ? type.ar_label : type.en_label,
                 value: type.value,
               }))}
               selectedValue={filters.property_type}
