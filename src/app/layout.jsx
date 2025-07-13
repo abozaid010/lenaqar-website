@@ -16,8 +16,53 @@ const cairo = Cairo({
 });
 
 export const metadata = {
-  description: `LENAAI, your AI property consultant.`,
-  title: "LENAAI",
+  title: "LENAAI | AI-Powered Real Estate CRM System",
+  description:
+    "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+  keywords:
+    "real estate CRM, AI sales agent, WhatsApp automation, property management, chatbot for real estate, AI real estate automation",
+  openGraph: {
+    title: "LENAAI | AI-Powered Real Estate CRM System",
+    description:
+      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+    type: "website",
+    locale: "en_US",
+    url: "https://www.lenaai.net/",
+    siteName: "LENAAI",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "LENAAI Real Estate CRM",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LENAAI | AI-Powered Real Estate CRM System",
+    description:
+      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+    images: ["/images/lenaai-twitter-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://www.lenaai.net",
+    // TODO: each language should have its own path
+    languages: {
+      en: "https://www.lenaai.net",
+      ar: "https://www.lenaai.net",
+    },
+  },
 };
 
 export default async function RootLayout({ children }) {
