@@ -3,34 +3,10 @@ import { useI18n } from "@/context/translate-api";
 import { formatCityLabel } from "@/utils/formatters";
 
 const STATIC_CITIES = [
-  "alexandria",
-  "aswan",
-  "asyut",
-  "beheira",
-  "beni suef",
   "cairo",
-  "dakahlia",
-  "damietta",
-  "faiyum",
-  "gharbia",
   "giza",
-  "ismailia",
-  "kafr el sheikh",
-  "luxor",
-  "matrouh",
-  "minya",
-  "monufia",
-  "new administrative capital",
-  "new valley",
   "north coast",
-  "north sinai",
-  "port said",
-  "qalyubia",
-  "qena",
-  "red sea",
-  "sharqia",
-  "sohag",
-  "south sinai",
+  "new administrative capital",
 ];
 
 export default function CitySelect({ value, onChange, error, required }) {
