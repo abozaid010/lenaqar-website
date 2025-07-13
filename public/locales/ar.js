@@ -427,18 +427,6 @@ export default {
     cityFirst: "اختر المدينه اولا",
     selectDistrict: "اختر الحي ",
   },
-  buildingTypes: {
-    apartment: "شقة",
-    villa: "فيلا",
-    townhouse: "تاون هاوس",
-    duplex: "دوبلكس",
-    penthouse: "بنتهاوس",
-    studio: "استوديو",
-    chalet: "شاليه",
-    office: "مكتب",
-    shop: "محل",
-    land: "أرض",
-  },
   purpose: {
     sell: "بيع",
     rent: "إيجار",

@@ -3,18 +3,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientEmail, getClientid } from "./clientCookies";
 
-export async function fetchUnits() {
-  const clientId = await getClientid();
-
-  try {
-    const response = await axiosInstance.get(`/units/by-client/${clientId}`);
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchcombounds(use) {
   try {
     const response = await axiosInstance.get(

@@ -11,7 +11,7 @@ import UnitPageHeader from "../../_components/unit-page-header";
 import { Loader2 } from "lucide-react";
 
 export default function UnitDetailsPageQuery({ unitId, clientId }) {
-  const { unit, hasAccess, isAccessDenied, isInitialLoading, errorMessage } =
+  const { unit, hasAccess, isInitialLoading, errorMessage } =
     useUnitDetailsPageData(unitId);
 
   const { developers, compounds, citiesAndDistricts, isSharedDataLoading } =
@@ -50,26 +50,6 @@ export default function UnitDetailsPageQuery({ unitId, clientId }) {
       </div>
     );
   }
-
-  // Show access denied
-  // if (isAccessDenied || !hasAccess) {
-  //   return (
-  //     <div className="container mx-auto h-full flex items-center justify-center">
-  //       <div className="text-center">
-  //         <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>
-  //         <p className="text-gray-600 mt-2">
-  //           You do not have permission to view this unit.
-  //         </p>
-  //         <Link
-  //           href="/dashboard"
-  //           className="underline text-sm text-blue-700 mt-4 inline-block"
-  //         >
-  //           Go Back to Dashboard
-  //         </Link>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   // Show unit details
   if (hasAccess && unit.data) {

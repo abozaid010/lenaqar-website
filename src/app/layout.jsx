@@ -1,44 +1,70 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
 import { I18nProvider } from "@/context/translate-api";
+import { Cairo, Montserrat } from "next/font/google";
 import { cookies, headers } from "next/headers";
-import { Montserrat , Cairo} from "next/font/google";
-import { getClientid } from "@/components/services/clientCookies";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
+
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-montserrat",
 });
+
 const cairo = Cairo({
-  weight: '500',
-  subsets: ['latin'],
-});
-
-const inter = Inter({ subsets: ["latin"] });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+  weight: "500",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-// const clientId = await getClientid();
-export async function generateMetadata() {
-  const cookieStore = await cookies();
-  const clientName = cookieStore.get("client_info")?.value
-    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
-    : null;
+export const metadata = {
+  title: "LENAAI | AI-Powered Real Estate CRM System",
+  description:
+    "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+  keywords:
+    "real estate CRM, AI sales agent, WhatsApp automation, property management, chatbot for real estate, AI real estate automation",
+  openGraph: {
+    title: "LENAAI | AI-Powered Real Estate CRM System",
+    description:
+      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+    type: "website",
+    locale: "en_US",
+    url: "https://www.lenaai.net/",
+    siteName: "LENAAI",
+    images: [
+      {
+        url: "/images/logo.png",
+        width: 1200,
+        height: 630,
+        alt: "LENAAI Real Estate CRM",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LENAAI | AI-Powered Real Estate CRM System",
+    description:
+      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
+    images: ["/images/lenaai-twitter-image.jpg"],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  alternates: {
+    canonical: "https://www.lenaai.net",
+    // TODO: each language should have its own path
+    languages: {
+      en: "https://www.lenaai.net",
+      ar: "https://www.lenaai.net",
+    },
+  },
+};
 
-  return {
-    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
-    description: `LENAAI, your AI property consultant.`,
-  };
-}
 export default async function RootLayout({ children }) {
   // Get the initial locale from the cookie on the server
   const cookieStore = await cookies();
@@ -72,9 +98,7 @@ export default async function RootLayout({ children }) {
       className={`${montserrat.variable} ${cairo.className}`}
       dir={initialLocale === "ar" ? "rtl" : "ltr"}
     >
-      <body
-        className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}
-      >
+      <body>
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
           {children}

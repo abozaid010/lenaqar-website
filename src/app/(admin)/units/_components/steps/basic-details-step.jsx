@@ -7,6 +7,7 @@ import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import {
   convertArabicToEnglishNumbers,
   formatDistrictLabel,
@@ -169,25 +170,11 @@ export default function BasicDetailsStep({
           onChange={handleChange}
           error={invalidFields.includes("buildingType")}
         >
-          <option value="apartment">
-            {t.basicDetails.buildingTypes.apartment}
-          </option>
-          <option value="villa">{t.basicDetails.buildingTypes.villa}</option>
-          <option value="townhouse">
-            {t.basicDetails.buildingTypes.townhouse}
-          </option>
-          <option value="duplex">{t.basicDetails.buildingTypes.duplex}</option>
-          <option value="penthouse">
-            {t.basicDetails.buildingTypes.penthouse}
-          </option>
-          <option value="studio">{t.basicDetails.buildingTypes.studio}</option>
-          <option value="chalet">{t.basicDetails.buildingTypes.chalet}</option>
-          <option value="office">{t.basicDetails.buildingTypes.office}</option>
-          <option value="shop">{t.basicDetails.buildingTypes.shop}</option>
-          <option value="twinhouse">
-            {t.basicDetails.buildingTypes.twinhouse}
-          </option>
-          <option value="house">{t.basicDetails.buildingTypes.house}</option>
+          {BUILDING_TYPES.map((type) => (
+            <option key={type.value} value={type.value}>
+              {locale === "ar" ? type.label_ar : type.label_en}
+            </option>
+          ))}
         </FormSelect>
 
         {/* City */}
