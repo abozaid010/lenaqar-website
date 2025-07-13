@@ -31,7 +31,6 @@ export function useUnitDetailsPageData(unitId) {
 
     // Access control
     hasAccess: unitQuery.data?.status === true,
-    isAccessDenied: unitQuery.data?.status === false,
 
     // Loading states
     isInitialLoading: unitQuery.isLoading,
