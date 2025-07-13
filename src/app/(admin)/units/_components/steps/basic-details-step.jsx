@@ -25,6 +25,7 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
+  console.log(BUILDING_TYPES);
   const { t, locale } = useI18n();
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
@@ -172,7 +173,7 @@ export default function BasicDetailsStep({
         >
           {BUILDING_TYPES.map((type) => (
             <option key={type.value} value={type.value}>
-              {locale === "ar" ? type.label_ar : type.label_en}
+              {locale === "ar" ? type.ar_label : type.en_label}
             </option>
           ))}
         </FormSelect>
