@@ -1,44 +1,25 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
 import { I18nProvider } from "@/context/translate-api";
+import { Cairo, Montserrat } from "next/font/google";
 import { cookies, headers } from "next/headers";
-import { Montserrat , Cairo} from "next/font/google";
-import { getClientid } from "@/components/services/clientCookies";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
+
 const montserrat = Montserrat({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
   variable: "--font-montserrat",
 });
+
 const cairo = Cairo({
-  weight: '500',
-  subsets: ['latin'],
-});
-
-const inter = Inter({ subsets: ["latin"] });
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+  weight: "500",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-// const clientId = await getClientid();
-export async function generateMetadata() {
-  const cookieStore = await cookies();
-  const clientName = cookieStore.get("client_info")?.value
-    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
-    : null;
+export const metadata = {
+  description: `LENAAI, your AI property consultant.`,
+  title: "LENAAI",
+};
 
-  return {
-    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
-    description: `LENAAI, your AI property consultant.`,
-  };
-}
 export default async function RootLayout({ children }) {
   // Get the initial locale from the cookie on the server
   const cookieStore = await cookies();
@@ -72,9 +53,7 @@ export default async function RootLayout({ children }) {
       className={`${montserrat.variable} ${cairo.className}`}
       dir={initialLocale === "ar" ? "rtl" : "ltr"}
     >
-      <body
-        className={`${inter.className} ${geistSans.variable} ${geistMono.variable}`}
-      >
+      <body>
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
           {children}

@@ -21,7 +21,7 @@ export default async function HomePage() {
 
       <OurResult />
 
-      <div className=" overflow-hidden">
+      <div className="overflow-hidden">
         <DashbordImage />
       </div>
 
