@@ -309,12 +309,6 @@ export const LOCALIZED_DISTRICTS = [
 
   {
     city: "cairo",
-    value: "al rehab",
-    en_label: "Al Rehab City",
-    ar_label: "مدينة الرحاب",
-  },
-  {
-    city: "cairo",
     value: "al shorouk",
     en_label: "Al Shorouk City",
     ar_label: "مدينة الشروق",
@@ -367,12 +361,6 @@ export const LOCALIZED_DISTRICTS = [
     value: "new heliopolis",
     en_label: "New Heliopolis",
     ar_label: "هليوبوليس الجديدة",
-  },
-  {
-    city: "cairo",
-    value: "madinaty",
-    en_label: "Madinaty",
-    ar_label: "مدينتي",
   },
   { city: "cairo", value: "maadi", en_label: "Maadi", ar_label: "المعادي" },
   {
