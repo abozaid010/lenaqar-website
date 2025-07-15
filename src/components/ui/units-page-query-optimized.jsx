@@ -20,7 +20,7 @@ export default function UnitsPageQueryOptimized({
   const searchParamsWithClient = useMemo(
     () => ({
       ...searchParams,
-      client_id: clientId,
+      ...(publicUnits ? {} : { client_id: clientId || "" }),
     }),
     [searchParams, clientId]
   );

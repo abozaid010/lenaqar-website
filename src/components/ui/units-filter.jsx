@@ -317,7 +317,7 @@ export default function UnitsFilter({
             <ChevronDown size={22} className="inline-block mt-1" />
           </button>
 
-          {isCityDropdownOpen && !readonly && (
+          {isCityDropdownOpen && (
             <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
               <div
                 className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"

@@ -1,4 +1,5 @@
 import { I18nProvider } from "@/context/translate-api";
+import TanStackQueryProvider from "@/providers/query-client-provider";
 import { Cairo, Montserrat } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import { Toaster } from "react-hot-toast";
@@ -101,7 +102,7 @@ export default async function RootLayout({ children }) {
       <body>
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
-          {children}
+          <TanStackQueryProvider>{children}</TanStackQueryProvider>
         </I18nProvider>
       </body>
     </html>
