@@ -125,11 +125,8 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
     <div className="container relative">
       <UnitsFilter
         appliedFilters={searchParams}
-        developers={developers}
-        compounds={compounds}
-        clientId={clientId}
         clientName={clientName}
-        citiesAndDistricts={citiesAndDistricts}
+        clientId={clientId}
       />
 
       <div className="flex-1 flex flex-col">

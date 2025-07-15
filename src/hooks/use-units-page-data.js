@@ -32,9 +32,6 @@ export function useUnitsPageData(searchParams) {
       refetch: unitsQuery.refetch,
       isFetching: unitsQuery.isFetching,
     },
-    developersQuery: sharedData.developers,
-    compoundsQuery: sharedData.compounds,
-    citiesQuery: sharedData.citiesAndDistricts,
 
     // Computed states
     isInitialLoading: unitsQuery.isLoading || sharedData.isSharedDataLoading,

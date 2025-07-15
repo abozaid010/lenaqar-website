@@ -6,26 +6,13 @@ import { useRouter } from "next/navigation";
 import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
 
-export default function UnitPageHeader({
-  unit,
-  compounds,
-  developers,
-  citiesAndDistricts,
-  clientId,
-}) {
+export default function UnitPageHeader({ unit, clientId }) {
   const router = useRouter();
   const { t, locale } = useI18n();
+
   const handleBackToUnits = () => {
     router.back();
   };
-  const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-    .filter(([governorate]) => governorate !== "cities")
-    .map(([governorate, districts]) => ({
-      governorate,
-      districts: districts.map((district) => ({
-        district,
-      })),
-    }));
 
   return (
     <div className="py-4 flex justify-between items-between overflow-hidden">
@@ -38,14 +25,7 @@ export default function UnitPageHeader({
       </button>
 
       <div className="flex gap-2">
-        <AddUnitButton
-          isEdit={true}
-          unitData={unit}
-          compounds={compounds}
-          developers={developers}
-          citiesAndDistricts={formattedDataCitiesAndDistricts}
-          clientId={clientId}
-        />
+        <AddUnitButton isEdit={true} unitData={unit} clientId={clientId} />
 
         <DeleteUnitBtn unitId={unit.unitId} />
       </div>

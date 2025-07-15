@@ -10,6 +10,7 @@ import RentalDetailsStep from "./steps/rental-details-step";
 import SaleDetailsStep from "./steps/sale-details-step";
 
 import { useI18n } from "@/context/translate-api";
+import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
@@ -23,12 +24,23 @@ export default function AddUnitModal({
   onClose,
   clientId,
   clientName,
-  developersData,
-  citiesAndDistricts,
 }) {
   // Add the mutation hooks
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
+
+  const sharedData = useAdminSharedData();
+  const rowDevelopers = sharedData.developers.data;
+  const rowCitiesAndDistricts = sharedData.citiesAndDistricts.data;
+
+  const citiesAndDistricts = Object.entries(rowCitiesAndDistricts)
+    .filter(([governorate]) => governorate !== "cities")
+    .map(([governorate, districts]) => ({
+      governorate,
+      districts: districts.map((district) => ({
+        district,
+      })),
+    }));
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -37,7 +49,7 @@ export default function AddUnitModal({
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
-  const [developers, setDevelopers] = useState(developersData || []);
+  const [developers, setDevelopers] = useState(rowDevelopers || []);
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
