@@ -10,12 +10,10 @@ export default function AddUnitButton({
   unitData,
   clientId,
   clientName,
-  compounds,
-  developers,
-  citiesAndDistricts,
 }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
+
   const openModal = () => setIsOpen(true);
   const closeModal = () => setIsOpen(false);
   return (
@@ -48,9 +46,6 @@ export default function AddUnitButton({
           onClose={closeModal}
           clientId={clientId}
           clientName={clientName}
-          compounds={compounds}
-          developersData={developers}
-          citiesAndDistricts={citiesAndDistricts}
         />
       )}
     </>

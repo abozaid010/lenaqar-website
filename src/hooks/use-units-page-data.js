@@ -6,14 +6,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useAdminSharedData } from "./use-admin-shared-data";
 
 // Combined hook for all units page data
-export function useUnitsPageData(searchParams) {
+export function useUnitsPageData(searchParams, publicOnly = false) {
   // Get shared admin data
   const sharedData = useAdminSharedData();
 
   // Get units data
   const unitsQuery = useQuery({
     queryKey: unitKeys.list(searchParams),
-    queryFn: () => fetchUnitsFilter(searchParams),
+    queryFn: () => fetchUnitsFilter(searchParams, publicOnly),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
   });
@@ -32,9 +32,6 @@ export function useUnitsPageData(searchParams) {
       refetch: unitsQuery.refetch,
       isFetching: unitsQuery.isFetching,
     },
-    developersQuery: sharedData.developers,
-    compoundsQuery: sharedData.compounds,
-    citiesQuery: sharedData.citiesAndDistricts,
 
     // Computed states
     isInitialLoading: unitsQuery.isLoading || sharedData.isSharedDataLoading,

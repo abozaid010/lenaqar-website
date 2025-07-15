@@ -3,19 +3,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientEmail, getClientid } from "./clientCookies";
 
-export async function fetchcombounds(use) {
-  try {
-    const response = await axiosInstance.get(
-      `${use ? `/projects/all` : "/public/projects"}`
-    );
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchMyProjects() {
   const clientId = await getClientid();
   try {
@@ -29,6 +16,7 @@ export async function fetchMyProjects() {
     return { error: error.message };
   }
 }
+
 export async function fetchCitisAndProjects() {
   try {
     const response = await axiosInstance.get("/projects/cities-and-districts");
@@ -65,16 +53,6 @@ export async function deleteImage(imageId) {
     return response.data;
   } catch (error) {
     console.error("Failed to delete image:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function fetchUnitById(id) {
-  try {
-    const response = await axiosInstance.get(`/units/details/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch unit by id:", error.message);
     return { error: error.message };
   }
 }
@@ -250,8 +228,6 @@ export async function getChatHistory(userId) {
   }
 }
 export async function getschedual(startDate, endDate) {
-  // const cookieClientId = await getClientid();
-
   try {
     const response = await axiosInstance.get(
       `action/scheduled-actions-by-date?start_date=${startDate}&end_date=${endDate}`
@@ -263,8 +239,6 @@ export async function getschedual(startDate, endDate) {
   }
 }
 export async function assignSalsePerson(id, additionalProp1) {
-  // const cookieClientId = await getClientid();
-
   try {
     const response = await axiosInstance.post(
       `/sales-employees/${id}/assign-task`,

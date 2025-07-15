@@ -3,6 +3,7 @@
 import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { BUILDING_TYPES } from "@/data/constants";
+import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, Trash2, X } from "lucide-react";
@@ -13,13 +14,16 @@ const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({
   appliedFilters,
-  developers = [],
-  compounds,
   clientName,
   clientId,
   readonly,
-  citiesAndDistricts,
 }) {
+  const sharedData = useAdminSharedData();
+  const developers = sharedData.developers.data;
+  const compounds = sharedData.compounds.data;
+  const citiesAndDistricts = sharedData.citiesAndDistricts.data;
+  const cities = citiesAndDistricts?.cities;
+
   const { t, locale } = useI18n();
   const router = useRouter();
 
@@ -32,19 +36,6 @@ export default function UnitsFilter({
     max_price: appliedFilters.max_price || "",
     city: appliedFilters.city || "",
   }));
-
-  const formattedDataCitiesAndDistricts = !readonly
-    ? Object.entries(citiesAndDistricts)
-        .filter(([governorate]) => governorate !== "cities")
-        .map(([governorate, districts]) => ({
-          governorate,
-          districts: districts.map((district) => ({
-            district,
-          })),
-        }))
-    : [];
-
-  const cities = citiesAndDistricts?.cities;
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
@@ -313,53 +304,51 @@ export default function UnitsFilter({
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
         {/* Cities Dropdown */}
-        {!readonly && (
-          <div
-            className="relative w-full md:w-auto md:flex-1 min-w-0"
-            ref={cityDropdownRef}
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={cityDropdownRef}
+        >
+          <button
+            type="button"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
           >
-            <button
-              type="button"
-              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-              onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-            >
-              <span className="truncate">{getSelectedCity()}</span>
-              <ChevronDown size={22} className="inline-block mt-1" />
-            </button>
+            <span className="truncate">{getSelectedCity()}</span>
+            <ChevronDown size={22} className="inline-block mt-1" />
+          </button>
 
-            {isCityDropdownOpen && !readonly && (
-              <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-                <div
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("city", "all");
-                    setIsCityDropdownOpen(false);
-                  }}
-                >
-                  {t.unitsFilter.allCities || "All Cities"}
-                </div>
-                {[...cities]
-                  .sort((a, b) =>
-                    formatCityLabel(a, locale).localeCompare(
-                      formatCityLabel(b, locale)
-                    )
-                  )
-                  .map((city, idx) => (
-                    <div
-                      key={idx}
-                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                      onClick={() => {
-                        handleFilterChange("city", city);
-                        setIsCityDropdownOpen(false);
-                      }}
-                    >
-                      {formatCityLabel(city, locale)}
-                    </div>
-                  ))}
+          {isCityDropdownOpen && (
+            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+              <div
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("city", "all");
+                  setIsCityDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allCities || "All Cities"}
               </div>
-            )}
-          </div>
-        )}
+              {cities
+                .sort((a, b) =>
+                  formatCityLabel(a, locale).localeCompare(
+                    formatCityLabel(b, locale)
+                  )
+                )
+                .map((city, idx) => (
+                  <div
+                    key={idx}
+                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                    onClick={() => {
+                      handleFilterChange("city", city);
+                      setIsCityDropdownOpen(false);
+                    }}
+                  >
+                    {formatCityLabel(city, locale)}
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
 
         {/* Developers Dropdown */}
         <div
@@ -618,9 +607,6 @@ export default function UnitsFilter({
             <AddUnitButton
               clientId={clientId}
               clientName={clientName}
-              compounds={compounds}
-              developers={developers}
-              citiesAndDistricts={formattedDataCitiesAndDistricts}
               className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
             />
           </div>
