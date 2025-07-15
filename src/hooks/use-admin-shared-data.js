@@ -4,7 +4,7 @@ import {
   fetchCitisAndProjects,
   fetchcombounds,
   fetchDevelopers,
-} from "@/components/services/serviceFetching";
+} from "@/utils/api";
 import { cityKeys, compoundKeys, developerKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
