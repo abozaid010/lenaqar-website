@@ -25,7 +25,6 @@ export default function BasicDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  console.log(BUILDING_TYPES);
   const { t, locale } = useI18n();
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
