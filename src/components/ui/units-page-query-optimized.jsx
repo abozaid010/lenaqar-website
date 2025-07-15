@@ -7,7 +7,10 @@ import Cookies from "js-cookie";
 import { Loader2, RotateCcw } from "lucide-react";
 import { useMemo } from "react";
 
-export default function UnitsPageQueryOptimized({ searchParams }) {
+export default function UnitsPageQueryOptimized({
+  searchParams,
+  publicUnits = false,
+}) {
   // Get client data from cookies
   const clientId = Cookies.get("lena-website-client_id");
   const clientInfo = Cookies.get("client_info");
@@ -31,7 +34,7 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
     isInitialLoading,
     hasErrors,
     errorMessage,
-  } = useUnitsPageData(JSON.stringify(searchParamsWithClient));
+  } = useUnitsPageData(JSON.stringify(searchParamsWithClient), publicUnits);
 
   if (isInitialLoading) {
     return (
@@ -127,6 +130,7 @@ export default function UnitsPageQueryOptimized({ searchParams }) {
         appliedFilters={searchParams}
         clientName={clientName}
         clientId={clientId}
+        readonly={publicUnits}
       />
 
       <div className="flex-1 flex flex-col">

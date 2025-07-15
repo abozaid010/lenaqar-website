@@ -1,4 +1,4 @@
-import UnitsPageQueryOptimized from "./_components/units-page-query-optimized";
+import UnitsPageQueryOptimized from "@/components/ui/units-page-query-optimized";
 
 import { cookies } from "next/headers";
 

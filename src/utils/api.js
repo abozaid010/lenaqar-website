@@ -22,14 +22,14 @@ export async function fetchUsersData(searchParams) {
   }
 }
 
-export async function fetchUnitsFilter(searchParams, use = true) {
+export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   try {
     const params = {
       ...JSON.parse(searchParams),
     };
 
     const response = await axiosInstance.get(
-      `${use ? "/units/all" : "/public/units"}`,
+      `${!publicOnly ? "/units/all" : "/public/units"}`,
       { params }
     );
     return response.data;
