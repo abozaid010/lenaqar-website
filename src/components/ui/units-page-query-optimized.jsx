@@ -96,7 +96,7 @@ export default function UnitsPageQueryOptimized({
             />
           </div>
         ) : (
-          <UnitsGrid units={units} />
+          <UnitsGrid units={units} readonly={publicUnits} />
         )}
       </div>
     </div>

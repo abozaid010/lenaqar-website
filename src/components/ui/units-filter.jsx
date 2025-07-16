@@ -255,9 +255,9 @@ export default function UnitsFilter({
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
     const type = BUILDING_TYPES.find((t) => t.value === filters.property_type);
-    return type
-      ? type.label
-      : t.unitsFilter.allPropertyTypes || "All Property Types";
+    return locale === "ar"
+      ? type.ar_label
+      : type.en_label || filters.property_type;
   }
 
   function getSelectedProjectName() {
