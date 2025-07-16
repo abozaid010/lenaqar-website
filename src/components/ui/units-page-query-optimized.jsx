@@ -26,17 +26,12 @@ export default function UnitsPageQueryOptimized({
   );
 
   // Fetch all required data using the combined hook
-  const {
-    units,
-    developers,
-    compounds,
-    citiesAndDistricts,
-    isInitialLoading,
-    hasErrors,
-    errorMessage,
-  } = useUnitsPageData(JSON.stringify(searchParamsWithClient), publicUnits);
+  const { isFetching, units, isLoading, isError } = useUnitsPageData(
+    JSON.stringify(searchParamsWithClient),
+    publicUnits
+  );
 
-  if (isInitialLoading) {
+  if (isLoading) {
     return (
       <div className="container">
         <div className="flex items-center justify-center h-96">
@@ -51,7 +46,7 @@ export default function UnitsPageQueryOptimized({
     );
   }
 
-  if (hasErrors) {
+  if (isError) {
     return (
       <div className="container">
         <div className="flex items-center justify-center h-96">
@@ -76,47 +71,6 @@ export default function UnitsPageQueryOptimized({
                   Retry Units
                 </button>
               )}
-              {developers.isError && (
-                <button
-                  onClick={() => developers.refetch()}
-                  disabled={developers.isFetching}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
-                >
-                  <RotateCcw
-                    size={16}
-                    className={developers.isFetching ? "animate-spin" : ""}
-                  />
-                  Retry Developers
-                </button>
-              )}
-              {compounds.isError && (
-                <button
-                  onClick={() => compounds.refetch()}
-                  disabled={compounds.isFetching}
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
-                >
-                  <RotateCcw
-                    size={16}
-                    className={compounds.isFetching ? "animate-spin" : ""}
-                  />
-                  Retry Compounds
-                </button>
-              )}
-              {citiesAndDistricts.isError && (
-                <button
-                  onClick={() => citiesAndDistricts.refetch()}
-                  disabled={citiesAndDistricts.isFetching}
-                  className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
-                >
-                  <RotateCcw
-                    size={16}
-                    className={
-                      citiesAndDistricts.isFetching ? "animate-spin" : ""
-                    }
-                  />
-                  Retry Cities
-                </button>
-              )}
             </div>
           </div>
         </div>
@@ -134,7 +88,7 @@ export default function UnitsPageQueryOptimized({
       />
 
       <div className="flex-1 flex flex-col">
-        {units.isFetching ? (
+        {isFetching ? (
           <div className="flex items-center justify-center h-full mt-12">
             <Loader2
               size={70}
@@ -142,7 +96,7 @@ export default function UnitsPageQueryOptimized({
             />
           </div>
         ) : (
-          <UnitsGrid units={units} />
+          <UnitsGrid units={units} readonly={publicUnits} />
         )}
       </div>
     </div>

@@ -1,5 +1,4 @@
 import { fetchUnitByIdpublic } from "@/components/services/serviceFetching";
-import ChatBot from "@/components/ui/ChatBot";
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
 
@@ -29,7 +28,7 @@ const Page = async ({ params }) => {
           />
 
           <UnitBasicInfo unit={unit} />
-          <ChatBot />
+          {/* <ChatBot /> */}
         </div>
       </div>
     </>

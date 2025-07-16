@@ -3,7 +3,11 @@
 import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { BUILDING_TYPES } from "@/data/constants";
-import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
+import {
+  useCitiesAndDistricts,
+  useCompounds,
+  useDevelopers,
+} from "@/hooks/use-admin-shared-data";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, Trash2, X } from "lucide-react";
@@ -18,11 +22,16 @@ export default function UnitsFilter({
   clientId,
   readonly,
 }) {
-  const sharedData = useAdminSharedData();
-  const developers = sharedData.developers.data;
-  const compounds = sharedData.compounds.data;
-  const citiesAndDistricts = sharedData.citiesAndDistricts.data;
-  const cities = citiesAndDistricts?.cities;
+  const citiesAndDistricts = useCitiesAndDistricts();
+  const cities = citiesAndDistricts.data?.cities;
+
+  let developers;
+  let compounds;
+
+  if (!readonly) {
+    developers = useDevelopers().data || [];
+    compounds = useCompounds().data || [];
+  }
 
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -246,9 +255,9 @@ export default function UnitsFilter({
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
     const type = BUILDING_TYPES.find((t) => t.value === filters.property_type);
-    return type
-      ? type.label
-      : t.unitsFilter.allPropertyTypes || "All Property Types";
+    return locale === "ar"
+      ? type.ar_label
+      : type.en_label || filters.property_type;
   }
 
   function getSelectedProjectName() {
@@ -350,105 +359,109 @@ export default function UnitsFilter({
           )}
         </div>
 
-        {/* Developers Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={developerDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
+        {/* Developer Dropdown */}
+        {!readonly && (
+          <div
+            className="relative w-full md:w-auto md:flex-1 min-w-0"
+            ref={developerDropdownRef}
           >
-            <span className="truncate">{getSelectedDeveloper()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
+            <button
+              type="button"
+              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+              onClick={() =>
+                setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)
+              }
+            >
+              <span className="truncate">{getSelectedDeveloper()}</span>
+              <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
+            </button>
 
-          {isDeveloperDropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("developer_name", "all");
-                  setIsDeveloperDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allDevelopers}
+            {isDeveloperDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+                <div
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("developer_name", "all");
+                    setIsDeveloperDropdownOpen(false);
+                  }}
+                >
+                  {t.unitsFilter.allDevelopers}
+                </div>
+                {developers
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
+                  .map((d, idx) => (
+                    <div
+                      key={idx}
+                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                      onClick={() => {
+                        handleFilterChange("developer_name", d.name);
+                        setIsDeveloperDropdownOpen(false);
+                      }}
+                    >
+                      {locale === "ar" ? d.ar_name : d.en_name}
+                    </div>
+                  ))}
               </div>
-              {developers
-                ?.slice()
-                .sort((a, b) => {
-                  const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                  const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                  return nameA.trim().localeCompare(nameB.trim(), locale, {
-                    sensitivity: "base",
-                  });
-                })
-                .map((d, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("developer_name", d.name);
-                      setIsDeveloperDropdownOpen(false);
-                    }}
-                  >
-                    {locale === "ar" ? d.ar_name : d.en_name}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Compounds Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={projectDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
+        {!readonly && (
+          <div
+            className="relative w-full md:w-auto md:flex-1 min-w-0"
+            ref={projectDropdownRef}
           >
-            <span className="truncate">{getSelectedProjectName()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
+            <button
+              type="button"
+              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+              onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
+            >
+              <span className="truncate">{getSelectedProjectName()}</span>
+              <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
+            </button>
 
-          {isProjectDropdownOpen && (
-            <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("project_name", "all");
-                  setIsProjectDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allCompounds}
+            {isProjectDropdownOpen && (
+              <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+                <div
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                  onClick={() => {
+                    handleFilterChange("project_name", "all");
+                    setIsProjectDropdownOpen(false);
+                  }}
+                >
+                  {t.unitsFilter.allCompounds}
+                </div>
+                {compounds
+                  .sort((a, b) => {
+                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                    return nameA.trim().localeCompare(nameB.trim(), locale, {
+                      sensitivity: "base",
+                    });
+                  })
+                  .map((c, idx) => (
+                    <div
+                      key={idx}
+                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                      onClick={() => {
+                        handleFilterChange("project_name", c.en_name);
+                        setIsProjectDropdownOpen(false);
+                      }}
+                    >
+                      {locale === "ar" ? c.ar_name : c.en_name}
+                    </div>
+                  ))}
               </div>
-              {compounds
-                ?.slice()
-                .sort((a, b) => {
-                  const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                  const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                  return nameA.trim().localeCompare(nameB.trim(), locale, {
-                    sensitivity: "base",
-                  });
-                })
-                .map((c, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("project_name", c.en_name);
-                      setIsProjectDropdownOpen(false);
-                    }}
-                  >
-                    {locale === "ar" ? c.ar_name : c.en_name}
-                  </div>
-                ))}
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Purpose Dropdown */}
         <div
