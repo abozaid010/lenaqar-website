@@ -1,9 +1,5 @@
 "use client";
 
-import {
-  addCompound,
-  updatecompound,
-} from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
 import FormInput from "@/components/ui/inputs/form-input";
@@ -14,6 +10,7 @@ import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
+import { addCompound, updatecompound } from "@/utils/api";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -216,7 +213,7 @@ export default function AddCompoundDialog({
       if (editMode) {
         res = await updatecompound(submissionData, compoundData.id);
       } else {
-        res = await addCompound(submissionData);
+        res = await addCompound(submissionData, clientId);
       }
 
       if (res.status) {

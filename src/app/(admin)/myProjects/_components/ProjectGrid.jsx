@@ -4,14 +4,11 @@ import { useI18n } from "@/context/translate-api";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
-import {
-  deletePhase,
-  deleteProject,
-} from "@/components/services/serviceFetching";
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import Cookies from "js-cookie";
 import { useState } from "react";

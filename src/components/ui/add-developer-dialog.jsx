@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  addDeveloper,
-  updateDeveloper,
-} from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { useI18n } from "@/context/translate-api";
+import { addDeveloper, updateDeveloper } from "@/utils/api";
 import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -110,7 +107,7 @@ export default function AddDeveloperDialog({
       if (isEdit) {
         res = await updateDeveloper(submittedData, developer.id);
       } else {
-        res = await addDeveloper(submittedData);
+        res = await addDeveloper(submittedData, client_id);
       }
       if (res.code === 200) {
         toast.success(

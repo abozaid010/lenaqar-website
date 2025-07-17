@@ -1,9 +1,7 @@
-import {
-  deleteImage,
-  uploadImages,
-} from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
+import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
+import Cookies from "js-cookie";
 import { Loader2, X } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
@@ -19,6 +17,8 @@ export default function SingleImageUploader({
   setUploading,
   placeholder,
 }) {
+  const clinetId = Cookies.get("lena-website-client_id") || "";
+
   const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(
@@ -65,7 +65,7 @@ export default function SingleImageUploader({
       const formDataToUpload = new FormData();
       formDataToUpload.append("file", compressedFile);
 
-      const res = await uploadImages(formDataToUpload);
+      const res = await uploadImages(formDataToUpload, clinetId);
 
       if (res && res.url) {
         setSelectedImage((prev) => ({ ...(prev || {}), imageId: res.fileId }));
