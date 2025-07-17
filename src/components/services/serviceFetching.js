@@ -28,35 +28,6 @@ export async function fetchCitisAndProjects() {
   }
 }
 
-export async function uploadImages(formData) {
-  const clientId = await getClientid();
-  try {
-    const response = await axiosInstance.post(
-      `/gcs/upload?client_id=${clientId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to upload images:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function deleteImage(imageId) {
-  try {
-    const response = await axiosInstance.delete(`/gcs/${imageId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to delete image:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchUnitByIdpublic(id) {
   try {
     const response = await axiosInstance.get(`/public/unit-details/${id}`, {});
@@ -88,21 +59,6 @@ export async function fetchDevelopers(use) {
   }
 }
 
-export async function addDeveloper(developerData) {
-  const clientId = await getClientid();
-
-  try {
-    const response = await axiosInstance.post(
-      `/developers/create?client_id=${clientId}`,
-      developerData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add developer:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-
 export async function getClientDevelopers(client_id) {
   try {
     const response = await axiosInstance.get(
@@ -112,106 +68,6 @@ export async function getClientDevelopers(client_id) {
   } catch (error) {
     console.error("Failed to fetch developers:", error.message);
     return { error: error.message };
-  }
-}
-
-export async function updateDeveloper(developerData, id) {
-  try {
-    const response = await axiosInstance.put(
-      `/developers/${id}`,
-      developerData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update developer:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-
-export async function deleteDeveloper(id) {
-  try {
-    const response = await axiosInstance.delete(`/developers/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to delete developer:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-
-export async function addNewPhase(phaseData, idProject) {
-  try {
-    const response = await axiosInstance.post(
-      `project-phases/${idProject}/phase-create`,
-      phaseData
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-export async function updatePhase(phaseData, idProject, idPhase) {
-  try {
-    const response = await axiosInstance.put(
-      `/project-phases/${idProject}/phase-update/${idPhase}`,
-      phaseData
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-export async function deletePhase(idProject, idPhase) {
-  try {
-    const response = await axiosInstance.delete(
-      `/project-phases/${idProject}/phase-delete/${idPhase}`
-    );
-
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-
-export async function addCompound(compoundData) {
-  const clientId = await getClientid();
-
-  try {
-    const response = await axiosInstance.post(
-      `/projects/create?client_id=${clientId}`,
-      compoundData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add compound:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-export async function updatecompound(compoundData, projectId) {
-  try {
-    const response = await axiosInstance.patch(
-      `/projects/${projectId}/update-fields`,
-      compoundData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add compound:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
-export async function deleteProject(project_id) {
-  try {
-    const response = await axiosInstance.delete(
-      `/projects/delete/${project_id}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add compound:", error.message);
-    return { error: error.response?.data?.message || error.message };
   }
 }
 
@@ -250,19 +106,6 @@ export async function assignSalsePerson(id, additionalProp1) {
   }
 }
 
-export async function getprojects(city, district) {
-  try {
-    const response = await axiosInstance.get(
-      `/projects/get/${city}/${district}`
-    );
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch data:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function getShareUnitData(unit_id) {
   const clientId = await getClientid();
 
@@ -280,58 +123,8 @@ export async function getShareUnitData(unit_id) {
   }
 }
 
-export async function toggleAutoReply(phoneNumber, client_id, value) {
-  const payload = {
-    phone_number: phoneNumber,
-    client_id: client_id,
-    toggle_ai_auto_reply: value,
-    username: "string", // TODO: Replace with actual username
-    platform: "website",
-  };
-
-  try {
-    await axiosInstance.post("/lenaai-auto-reply", payload);
-
-    return {
-      success: true,
-      message: "Auto-reply toggled successfully",
-    };
-  } catch (e) {
-    return {
-      success: false,
-      message: "Failed to toggle auto-reply",
-    };
-  }
-}
-
-// #### BOOKING API ####
-export async function getAvailableSlots(selectedData) {
-  try {
-    const response = await axiosInstance.get(
-      `/booking/available_slots?selected_date=${selectedData}`
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch available slots:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function createBooking(bookingData) {
-  try {
-    const response = await axiosInstance.post(
-      `/booking/create-meeting`,
-      bookingData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to create booking:", error.message);
-    return { error: error.message };
-  }
-}
-
 // #### Sales API ####
-export async function getSalesData(searchParams) {
+export async function getSalesData() {
   try {
     const response = await axiosInstance.get(
       "sales-employees/list-all-employees"
@@ -351,23 +144,12 @@ export async function createNewEmployee(paylod) {
     return { error: error.message };
   }
 }
-
 export async function editExistingEmployee(paylod) {
   try {
     await axiosInstance.put(
       `sales-employees/update-employee/${paylod.id}`,
       paylod
     );
-  } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function deleteEmployee(id) {
-  try {
-    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
-    return true;
   } catch (error) {
     console.error("Failed to fetch sales data:", error.message);
     return { error: error.message };

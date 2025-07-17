@@ -24,6 +24,7 @@ export default async function ChatPage({ params }) {
 
   const name = initialData.data?.name;
   const phoneNumber = initialData.data?.phone_number || null;
+  const source = initialData.data?.source || "website";
 
   return (
     <div className="flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
@@ -41,7 +42,11 @@ export default async function ChatPage({ params }) {
                 name={name}
                 phoneNumber={phoneNumber}
               />
-              <ToggleReplyType phoneNumber={id} clientID={clientID} />
+              <ToggleReplyType
+                userId={id}
+                clientID={clientID}
+                source={source}
+              />
               <Link
                 href={`/dashboard`}
                 className="text-sm text-gray-500 hover:text-gray-700"

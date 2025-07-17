@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  addNewPhase,
-  updatePhase,
-} from "@/components/services/serviceFetching";
 import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import { useI18n } from "@/context/translate-api";
+import { addNewPhase, updatePhase } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";

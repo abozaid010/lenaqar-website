@@ -1,11 +1,9 @@
 '"use client";';
 
-import {
-  deleteImage,
-  uploadImages,
-} from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
+import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
+import Cookies from "js-cookie";
 import Image from "next/image";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -17,6 +15,8 @@ export default function ImageUploader({
   isUploading,
   setIsUploading,
 }) {
+  const clinetId = Cookies.get("lena-website-client_id") || "";
+
   const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
@@ -99,7 +99,7 @@ export default function ImageUploader({
         const compressedFile = await compressImage(image.file);
         const formDataToUpload = new FormData();
         formDataToUpload.append("file", compressedFile);
-        const res = await uploadImages(formDataToUpload);
+        const res = await uploadImages(formDataToUpload, clinetId);
         setUploadStatus((prev) => ({ ...prev, [image.id]: "success" }));
         successfulUploads.push({
           url: res.url,

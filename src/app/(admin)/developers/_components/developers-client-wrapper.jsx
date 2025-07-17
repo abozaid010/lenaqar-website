@@ -1,9 +1,9 @@
 "use client";
 
-import { deleteDeveloper } from "@/components/services/serviceFetching";
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/context/translate-api";
+import { deleteDeveloper } from "@/utils/api";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";

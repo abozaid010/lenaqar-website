@@ -1,29 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
+import { useI18n } from "@/context/translate-api";
+import { createBooking, getAvailableSlots } from "@/utils/api";
 import {
-  ChevronLeft,
-  ChevronRight,
-  ArrowRight,
-  Check,
-  ArrowLeft,
-} from "lucide-react";
-import {
-  format,
   addMonths,
-  subMonths,
-  startOfMonth,
-  endOfMonth,
   eachDayOfInterval,
-  isSameMonth,
+  endOfMonth,
+  format,
   isBefore,
   isSameDay,
+  isSameMonth,
   parseISO,
+  startOfMonth,
+  subMonths,
 } from "date-fns";
-import { useI18n } from "@/context/translate-api";
-import { Loader2, Globe } from "lucide-react";
-import { createBooking, getAvailableSlots } from "../services/serviceFetching";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Globe,
+  Loader2,
+} from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function CalendarSelector({
