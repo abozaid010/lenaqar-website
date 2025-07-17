@@ -349,3 +349,25 @@ export async function deleteEmployee(id) {
     return { error: error.message };
   }
 }
+
+export async function toggleAutoReply(user_id, client_id, value, source) {
+  const payload = {
+    user_id,
+    client_id,
+    toggle_ai_auto_reply: value,
+    platform: source,
+  };
+
+  try {
+    await axiosInstance.post("/lenaai-auto-reply", payload);
+    return {
+      success: true,
+      message: "Auto-reply toggled successfully",
+    };
+  } catch (e) {
+    return {
+      success: false,
+      message: "Failed to toggle auto-reply",
+    };
+  }
+}

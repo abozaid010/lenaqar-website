@@ -123,30 +123,6 @@ export async function getShareUnitData(unit_id) {
   }
 }
 
-export async function toggleAutoReply(phoneNumber, client_id, value) {
-  const payload = {
-    phone_number: phoneNumber,
-    client_id: client_id,
-    toggle_ai_auto_reply: value,
-    username: "string", // TODO: Replace with actual username
-    platform: "website",
-  };
-
-  try {
-    await axiosInstance.post("/lenaai-auto-reply", payload);
-
-    return {
-      success: true,
-      message: "Auto-reply toggled successfully",
-    };
-  } catch (e) {
-    return {
-      success: false,
-      message: "Failed to toggle auto-reply",
-    };
-  }
-}
-
 // #### Sales API ####
 export async function getSalesData() {
   try {
