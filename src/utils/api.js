@@ -303,13 +303,49 @@ export async function uploadImages(formData, clientId) {
     return { error: error.message };
   }
 }
-
 export async function deleteImage(imageId) {
   try {
     const response = await axiosInstance.delete(`/gcs/${imageId}`);
     return response.data;
   } catch (error) {
     console.error("Failed to delete image:", error.message);
+    return { error: error.message };
+  }
+}
+
+// Bookings CRUD operations //
+export async function getAvailableSlots(selectedData) {
+  try {
+    const response = await axiosInstance.get(
+      `/booking/available_slots?selected_date=${selectedData}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch available slots:", error.message);
+    return { error: error.message };
+  }
+}
+export async function createBooking(bookingData) {
+  try {
+    const response = await axiosInstance.post(
+      `/booking/create-meeting`,
+      bookingData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create booking:", error.message);
+    return { error: error.message };
+  }
+}
+
+// Sales Team CURD Operations //
+// TODO: Get other operation functions from the serviceFetching file and move them to this file
+export async function deleteEmployee(id) {
+  try {
+    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
+    return true;
+  } catch (error) {
+    console.error("Failed to fetch sales data:", error.message);
     return { error: error.message };
   }
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { deleteEmployee } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
+import { deleteEmployee } from "@/utils/api";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
