@@ -17,6 +17,7 @@ export default function BotMessageCard({ message }) {
     crm_link,
     project_phases,
   } = message;
+
   const [fullscreenImg, setFullscreenImg] = useState(null);
   const [swiperImages, setSwiperImages] = useState([]);
   const [showImagesModal, setShowImagesModal] = useState(false);
@@ -46,7 +47,7 @@ export default function BotMessageCard({ message }) {
             )}
           </div>
 
-          {project_data.master_plan.url && (
+          {project_data.master_plan?.url && (
             <Image
               src={project_data.master_plan.url}
               alt="Master Plan"
