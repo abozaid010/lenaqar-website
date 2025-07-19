@@ -3,6 +3,7 @@
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
 import FormInput from "@/components/ui/inputs/form-input";
+import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
 import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
@@ -10,6 +11,7 @@ import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
+import { BUILDING_TYPES } from "@/data/constants";
 import { addCompound, updatecompound } from "@/utils/api";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
@@ -31,6 +33,8 @@ export default function AddCompoundDialog({
   const { t, locale } = useI18n();
 
   const editMode = !!(compoundData && compoundData.id);
+
+  console.log("Compound Data:", compoundData);
 
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -56,6 +60,7 @@ export default function AddCompoundDialog({
     master_plan: compoundData?.master_plan || { url: null, fileId: null },
     client_id: clientId || "",
     images: compoundData?.images || [],
+    properties_types: compoundData?.properties_types || [],
   });
 
   useEffect(() => {
@@ -78,6 +83,7 @@ export default function AddCompoundDialog({
           master_plan: compoundData?.master_plan || { url: null, fileId: null },
           client_id: compoundData.client_id || clientId || "",
           images: compoundData.images || [],
+          properties_types: compoundData.properties_types || [],
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -96,6 +102,7 @@ export default function AddCompoundDialog({
           master_plan: { url: null, fileId: null },
           client_id: clientId || "",
           images: [],
+          properties_types: [],
         });
       }
       setErrors({});
@@ -110,6 +117,7 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: false,
+        properties_types: [],
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -187,6 +195,12 @@ export default function AddCompoundDialog({
     if (!formData.area || Number(formData.area) <= 0) {
       newErrors.area =
         t.formValidation?.areaRequired || "Area must be greater than 0";
+    }
+
+    if (!formData.properties_types || formData.properties_types.length === 0) {
+      newErrors.properties_types =
+        t.formValidation?.propertyTypesRequired ||
+        "At least one property type is required";
     }
 
     setErrors(newErrors);
@@ -433,6 +447,21 @@ export default function AddCompoundDialog({
                 </label>
               </div>
             </div>
+
+            {/* Property Types */}
+            <FormMultiSelect
+              name="properties_types"
+              label={t.formLabels.propertyTypes || "Property Types"}
+              placeholder={
+                locale === "ar" ? "اختر أنواع العقارات" : "Select options"
+              }
+              value={formData.properties_types}
+              onChange={handleChange}
+              options={BUILDING_TYPES}
+              locale={locale}
+              required={true}
+              error={errors.properties_types}
+            />
 
             {/* Developer */}
             <div className="relative">

@@ -957,6 +957,7 @@ export default {
     districtFirst: "select district first",
     selectDistrict: "select district",
     projectImages: "Project Images",
+    propertyTypes: "Property Types",
   },
   buttons: {
     addNew: "Add New",

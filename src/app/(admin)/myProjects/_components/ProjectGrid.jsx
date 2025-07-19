@@ -168,19 +168,21 @@ export default function ProjectList({
 
   return (
     <>
-      <AddCompoundDialog
-        isOpen={showProjectDialog}
-        onClose={() => {
-          setShowProjectDialog(false);
-          setProjectToEdit(null);
-        }}
-        compoundData={projectToEdit}
-        onAdd={handleProject}
-        Egypt_cities={formattedDataCitiesAndDistricts}
-        developers={developersSet}
-        setDevelopers={setDevelopersSet}
-        clientId={clientId}
-      />
+      {showProjectDialog && (
+        <AddCompoundDialog
+          isOpen={showProjectDialog}
+          onClose={() => {
+            setShowProjectDialog(false);
+            setProjectToEdit(null);
+          }}
+          compoundData={projectToEdit}
+          onAdd={handleProject}
+          Egypt_cities={formattedDataCitiesAndDistricts}
+          developers={developersSet}
+          setDevelopers={setDevelopersSet}
+          clientId={clientId}
+        />
+      )}
 
       {projectToDelete || phaseToDelete ? (
         <DeleteConfirmDialog
