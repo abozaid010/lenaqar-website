@@ -46,11 +46,11 @@ export default function PropertyCard({ data }) {
     view,
     finishing,
     totalPrice,
-    compound,
-    clientName,
+    project,
+    unitTitle,
   } = data;
   return (
-    <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-62 h-96">
+    <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-72 h-96">
       <Link
         href={`/units/${unitId}`}
         className="rounded-md bg-gray-100 h-44 overflow-hidden relative"
@@ -79,27 +79,35 @@ export default function PropertyCard({ data }) {
           href={`/units/${unitId}`}
           className="mb-2 line-clamp-1 text-sm font-medium text-gray-800 hover:text-primary hover:underline"
         >
-          {clientName} | {buildingType}{" "}
+          {unitTitle} | {buildingType}{" "}
         </Link>
 
         {/* Property details */}
         <div className="grid grid-cols-2 gap-1.5">
-          <InfoItem icon={<Home size={18} />} label="Floor" value={floor} />
-          <InfoItem icon={<Bed size={18} />} label="Rooms" value={roomsCount} />
+          <InfoItem
+            icon={<Home size={18} />}
+            label="Floor"
+            value={floor ? floor : "N/A"}
+          />
+          <InfoItem
+            icon={<Bed size={18} />}
+            label="Rooms"
+            value={roomsCount ? roomsCount : "N/A"}
+          />
           <InfoItem
             icon={<Bath size={18} />}
             label="Bathrooms"
-            value={bathroomCount}
+            value={bathroomCount ? bathroomCount : "N/A"}
           />
           <InfoItem
             icon={<MapPin size={18} />}
             label="Location"
-            value={`${compound}, ${city}`}
+            value={`${project}, ${city}`}
           />
           <InfoItem
             icon={<Square size={18} />}
             label="Land Area"
-            value={`${landArea} m²`}
+            value={landArea ? `${landArea} m²` : "N/A"}
           />
 
           <InfoItem icon={<Eye size={18} />} label="View" value={view} />
@@ -112,7 +120,7 @@ export default function PropertyCard({ data }) {
           <InfoItem
             icon={<DollarSign size={18} />}
             label="Price"
-            value={`${totalPrice} EGP`}
+            value={totalPrice ? `${totalPrice} EGP` : "N/A"}
           />
         </div>
       </div>
