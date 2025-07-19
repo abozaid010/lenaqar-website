@@ -925,6 +925,7 @@ export default {
     districtFirst: "اختر المنطقة أولاً",
     selectDistrict: "اختر المنطقة",
     projectImages: "صور المشروع",
+    propertyTypes: "أنواع العقارات",
   },
   buttons: {
     addNew: "إضافة جديد",
