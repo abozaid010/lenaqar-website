@@ -46,14 +46,14 @@ export default function BotMessageCard({ message }) {
             )}
           </div>
 
-          {project_data.master_plan && (
+          {project_data.master_plan.url && (
             <Image
-              src={project_data.master_plan}
+              src={project_data.master_plan.url}
               alt="Master Plan"
               width={400}
               height={200}
               className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-              onClick={() => setFullscreenImg(project_data.master_plan)}
+              onClick={() => setFullscreenImg(project_data.master_plan.url)}
               title={t.clickToViewFullscreen}
             />
           )}
