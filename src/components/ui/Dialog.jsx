@@ -39,7 +39,7 @@ export default function Dialog({ isOpen, onClose, title, children, editMode }) {
     >
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[90%] transform transition-all duration-300 ease-in-out"
+        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[93%] transform transition-all duration-300 ease-in-out"
       >
         <div className="flex justify-between items-center p-3 bg-primary">
           <h3 className="text-lg font-medium text-white">{title}</h3>

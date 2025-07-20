@@ -34,7 +34,8 @@ const FormInput = ({
           className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700"}`}
           htmlFor={name}
         >
-          {label} {required && <span className="text-red-500">*</span>}
+          {label}
+          {required && <span className="text-red-500">*</span>}
         </label>
       )}
       <input

@@ -36,19 +36,31 @@ export default function AddPaymentPlanDialog({
   useEffect(() => {
     if (isOpen) {
       if (editMode && existingPlan) {
-        // Load existing data for editing
+        // Load existing data for editing and convert percentages from 0-1 to 0-100
         setFormData({
           name: existingPlan.name || "",
           description: existingPlan.description || "",
-          downpayment_percentage: existingPlan.downpayment_percentage || "",
+          downpayment_percentage: existingPlan.downpayment_percentage
+            ? (existingPlan.downpayment_percentage * 100).toString()
+            : "",
           reservation_amount_percentage:
-            existingPlan.reservation_amount_percentage || "",
+            existingPlan.reservation_amount_percentage
+              ? (existingPlan.reservation_amount_percentage * 100).toString()
+              : "",
           installment_years: existingPlan.installment_years || "",
-          maintenance_fee: existingPlan.maintenance_fee || "",
+          maintenance_fee: existingPlan.maintenance_fee
+            ? (existingPlan.maintenance_fee * 100).toString()
+            : "",
           installment_increasing_percentage:
-            existingPlan.installment_increasing_percentage || "",
+            existingPlan.installment_increasing_percentage
+              ? (
+                  existingPlan.installment_increasing_percentage * 100
+                ).toString()
+              : "",
           extra_payments: {
-            delivery_fee: existingPlan.extra_payments?.delivery_fee || "",
+            delivery_fee: existingPlan.extra_payments?.delivery_fee
+              ? (existingPlan.extra_payments.delivery_fee * 100).toString()
+              : "",
             contract_fee: existingPlan.extra_payments?.contract_fee || "",
           },
         });
@@ -75,9 +87,45 @@ export default function AddPaymentPlanDialog({
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Check if this is a percentage field that needs range validation
+    const percentageFields = [
+      "downpayment_percentage",
+      "reservation_amount_percentage",
+      "maintenance_fee",
+      "installment_increasing_percentage",
+      "extra_payments.delivery_fee",
+    ];
+
+    // Validate percentage inputs to stay within 0-100 range
+    if (percentageFields.includes(name) && value !== "") {
+      const numValue = parseFloat(value);
+      // If the value is not a number or outside the valid range, don't update
+      if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+        // If backspacing to empty or typing a decimal point, allow it
+        if (value === "" || value === "." || value === "0.") {
+          // Allow these values to pass through
+        } else {
+          // Otherwise restrict to valid range
+          return; // Exit without updating state
+        }
+      }
+    }
+
     // Handle nested extra_payments properties
     if (name.startsWith("extra_payments.")) {
       const extraPaymentField = name.split(".")[1];
+
+      // Special handling for percentage fields in extra_payments
+      if (extraPaymentField === "delivery_fee" && value !== "") {
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue < 0 || numValue > 100) {
+          // Allow only empty string, decimal point, or 0.
+          if (value !== "" && value !== "." && value !== "0.") {
+            return; // Exit without updating state
+          }
+        }
+      }
+
       setFormData({
         ...formData,
         extra_payments: {
@@ -111,7 +159,7 @@ export default function AddPaymentPlanDialog({
 
     // Description is optional, no validation needed
 
-    // Validate percentages are between 0 and 1
+    // Validate percentages are between 0 and 100
     const percentageFields = [
       "downpayment_percentage",
       "reservation_amount_percentage",
@@ -121,9 +169,14 @@ export default function AddPaymentPlanDialog({
 
     percentageFields.forEach((field) => {
       const value = parseFloat(formData[field]);
-      if (isNaN(value) || value < 0 || value > 1) {
+      if (isNaN(value)) {
         newErrors[field] =
-          `${field.replace(/_/g, " ")} must be between 0 and 1`;
+          t.formValidation?.percentageRequired ||
+          `${field.replace(/_/g, " ")} is required`;
+      } else if (value < 0 || value > 100) {
+        newErrors[field] =
+          t.formValidation?.percentageInvalid ||
+          `${field.replace(/_/g, " ")} must be between 0 and 100`;
       }
     });
 
@@ -134,9 +187,14 @@ export default function AddPaymentPlanDialog({
       formData.extra_payments.delivery_fee !== ""
     ) {
       const deliveryFee = parseFloat(formData.extra_payments.delivery_fee);
-      if (isNaN(deliveryFee) || deliveryFee < 0 || deliveryFee > 1) {
+      if (isNaN(deliveryFee)) {
         newErrors["extra_payments.delivery_fee"] =
-          "Delivery fee must be between 0 and 1";
+          t.formValidation?.percentageInvalid ||
+          "Delivery fee must be a valid number";
+      } else if (deliveryFee < 0 || deliveryFee > 100) {
+        newErrors["extra_payments.delivery_fee"] =
+          t.formValidation?.percentageInvalid ||
+          "Delivery fee must be between 0 and 100";
       }
     }
 
@@ -165,6 +223,12 @@ export default function AddPaymentPlanDialog({
     }
 
     setErrors(newErrors);
+
+    // Show a single toast error if there are any validation errors
+    if (Object.keys(newErrors).length > 0) {
+      toast.error("Please fix the form errors before submitting");
+    }
+
     return newErrors;
   };
 
@@ -179,18 +243,17 @@ export default function AddPaymentPlanDialog({
     setIsSubmitting(true);
 
     try {
-      // Convert string values to numbers
+      // Convert string values to numbers and convert percentages from 0-100 to 0-1
       const processedData = {
         ...formData,
-        downpayment_percentage: parseFloat(formData.downpayment_percentage),
-        reservation_amount_percentage: parseFloat(
-          formData.reservation_amount_percentage
-        ),
+        downpayment_percentage:
+          parseFloat(formData.downpayment_percentage) / 100,
+        reservation_amount_percentage:
+          parseFloat(formData.reservation_amount_percentage) / 100,
         installment_years: parseInt(formData.installment_years),
-        maintenance_fee: parseFloat(formData.maintenance_fee),
-        installment_increasing_percentage: parseFloat(
-          formData.installment_increasing_percentage
-        ),
+        maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
+        installment_increasing_percentage:
+          parseFloat(formData.installment_increasing_percentage) / 100,
       };
 
       // Handle extra_payments if they exist
@@ -201,9 +264,8 @@ export default function AddPaymentPlanDialog({
           formData.extra_payments.delivery_fee !== undefined &&
           formData.extra_payments.delivery_fee !== ""
         ) {
-          processedData.extra_payments.delivery_fee = parseFloat(
-            formData.extra_payments.delivery_fee
-          );
+          processedData.extra_payments.delivery_fee =
+            parseFloat(formData.extra_payments.delivery_fee) / 100; // Convert from 0-100 to 0-1
         }
 
         if (
@@ -278,7 +340,7 @@ export default function AddPaymentPlanDialog({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1.5">
           <FormInput
             type="number"
             name="downpayment_percentage"
@@ -286,11 +348,16 @@ export default function AddPaymentPlanDialog({
             value={formData.downpayment_percentage}
             onChange={handleChange}
             required
-            placeholder="0.05"
+            placeholder="5"
             min="0"
-            max="1"
-            step="0.01"
+            max="100"
+            step="0.1"
             error={errors.downpayment_percentage}
+            helperText={
+              formData.downpayment_percentage !== ""
+                ? `${formData.downpayment_percentage}%`
+                : ""
+            }
           />
 
           <FormInput
@@ -302,15 +369,20 @@ export default function AddPaymentPlanDialog({
             value={formData.reservation_amount_percentage}
             onChange={handleChange}
             required
-            placeholder="0.05"
+            placeholder="5"
             min="0"
-            max="1"
-            step="0.01"
+            max="100"
+            step="0.1"
             error={errors.reservation_amount_percentage}
+            helperText={
+              formData.reservation_amount_percentage !== ""
+                ? `${formData.reservation_amount_percentage}%`
+                : ""
+            }
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-1.5">
           <FormInput
             type="number"
             name="installment_years"
@@ -330,11 +402,16 @@ export default function AddPaymentPlanDialog({
             value={formData.maintenance_fee}
             onChange={handleChange}
             required
-            placeholder="0.05"
+            placeholder="5"
             min="0"
-            max="1"
-            step="0.01"
+            max="100"
+            step="0.1"
             error={errors.maintenance_fee}
+            helperText={
+              formData.maintenance_fee !== ""
+                ? `${formData.maintenance_fee}%`
+                : ""
+            }
           />
         </div>
 
@@ -350,9 +427,14 @@ export default function AddPaymentPlanDialog({
           required
           placeholder="0"
           min="0"
-          max="1"
-          step="0.01"
+          max="100"
+          step="0.1"
           error={errors.installment_increasing_percentage}
+          helperText={
+            formData.installment_increasing_percentage !== ""
+              ? `${formData.installment_increasing_percentage}%`
+              : ""
+          }
         />
 
         <div className="pt-2 border-t border-gray-100">
@@ -361,18 +443,23 @@ export default function AddPaymentPlanDialog({
             <span className="text-xs text-gray-500">(Optional)</span>
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-1.5">
             <FormInput
               type="number"
               name="extra_payments.delivery_fee"
               label={t.formLabels?.deliveryFee || "Delivery Fee (%)"}
               value={formData.extra_payments.delivery_fee}
               onChange={handleChange}
-              placeholder="0.1"
+              placeholder="10"
               min="0"
-              max="1"
-              step="0.01"
+              max="100"
+              step="0.1"
               error={errors["extra_payments.delivery_fee"]}
+              helperText={
+                formData.extra_payments.delivery_fee !== ""
+                  ? `${formData.extra_payments.delivery_fee}%`
+                  : ""
+              }
             />
 
             <FormInput
