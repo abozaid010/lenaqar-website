@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/context/translate-api";
 import { formatDateForDisplay } from "@/utils/formateDate";
+import { formatCurrency } from "@/utils/formatters";
 import {
   Bath,
   Bed,
@@ -43,7 +44,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
   // Modified DetailItem to only render when value exists
   const DetailItem = ({ icon, label, value }) => {
     // Skip rendering if value is null, undefined, empty string or N/A
-    if (!value || value === "" || value === "N/A") {
+    if (!value || value === "" || value === "N/A" || !isNaN(value)) {
       return null;
     }
 
@@ -154,12 +155,12 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   <DetailItem
                     icon={<DollarSign size={18} className="text-primary" />}
                     label={t.propertyDetails.fields.totalPrice}
-                    value={formattedProperty.totalPrice}
+                    value={formatCurrency(formattedProperty.totalPrice)}
                   />
                   <DetailItem
                     icon={<DollarSign size={18} className="text-primary" />}
                     label={t.propertyDetails.fields.downPayment}
-                    value={formattedProperty.downPayment}
+                    value={formatCurrency(formattedProperty.downPayment)}
                   />
                   <DetailItem
                     icon={<DollarSign size={18} className="text-primary" />}
@@ -167,7 +168,7 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                       t.propertyDetails.fields.serviceCharges ||
                       "Service Charges"
                     }
-                    value={formattedProperty.serviceCharges}
+                    value={formatCurrency(formattedProperty.serviceCharges)}
                   />
                   {formattedProperty.deliveryDate && (
                     <DetailItem
