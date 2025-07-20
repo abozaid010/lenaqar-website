@@ -1,0 +1,140 @@
+"use client";
+
+import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
+import { useI18n } from "@/context/translate-api";
+import { Edit2, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+
+export default function PaymentPlansList({
+  plans = [],
+  onChange,
+  error,
+  required = false,
+}) {
+  const { t } = useI18n();
+
+  const [isAddPlanDialogOpen, setIsAddPlanDialogOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
+
+  const handleOpenAddDialog = () => {
+    setEditingPlan(null);
+    setEditingIndex(null);
+    setIsAddPlanDialogOpen(true);
+  };
+
+  const handleOpenEditDialog = (plan, index) => {
+    setEditingPlan(plan);
+    setEditingIndex(index);
+    setIsAddPlanDialogOpen(true);
+  };
+
+  const handleDeletePlan = (index) => {
+    const newPlans = [...plans];
+    newPlans.splice(index, 1);
+    onChange(newPlans);
+  };
+
+  const handleSavePlan = (plan, isEdit) => {
+    let newPlans;
+
+    if (isEdit) {
+      // Update existing plan
+      newPlans = [...plans];
+      newPlans[editingIndex] = plan;
+    } else {
+      // Add new plan
+      newPlans = [...plans, plan];
+    }
+
+    onChange(newPlans);
+  };
+
+  const formatPercentage = (value) => {
+    return (value * 100).toFixed(1) + "%";
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-center mb-2">
+        <label
+          className={`block text-sm font-medium ${error ? "text-red-500" : "text-gray-700"}`}
+        >
+          {t.formLabels?.paymentPlans || "Payment Plans"}{" "}
+          {required && <span className="text-red-500">*</span>}
+        </label>
+        <button
+          type="button"
+          onClick={handleOpenAddDialog}
+          className="flex items-center text-blue-600 text-sm font-medium"
+        >
+          <Plus size={16} className="mr-1" />
+          {t.buttons?.addNew || "Add Plan"}
+        </button>
+      </div>
+
+      {plans.length === 0 ? (
+        <div
+          className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md p-4 text-center text-gray-500 text-sm`}
+        >
+          {t.noPaymentPlans || "No payment plans added yet"}
+        </div>
+      ) : (
+        <div
+          className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md overflow-hidden`}
+        >
+          <ul className="divide-y divide-gray-200">
+            {plans.map((plan, index) => (
+              <li key={index} className="p-3 hover:bg-gray-50">
+                <div className="flex justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900">{plan.name}</h3>
+                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
+                      <div>
+                        <span className="font-medium">
+                          {t.downPayment || "Down Payment"}:
+                        </span>{" "}
+                        {formatPercentage(plan.downpayment_percentage)}
+                      </div>
+                      <div>
+                        <span className="font-medium">
+                          {t.installmentYears || "Years"}:
+                        </span>{" "}
+                        {plan.installment_years}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditDialog(plan, index)}
+                      className="p-1 text-gray-400 hover:text-blue-500"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeletePlan(index)}
+                      className="p-1 text-gray-400 hover:text-red-500"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+
+      <AddPaymentPlanDialog
+        isOpen={isAddPlanDialogOpen}
+        onClose={() => setIsAddPlanDialogOpen(false)}
+        onSave={handleSavePlan}
+        existingPlan={editingPlan}
+      />
+    </div>
+  );
+}
