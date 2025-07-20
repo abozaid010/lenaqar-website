@@ -256,7 +256,8 @@ export default function ClientsTable({ users }) {
                         ) : (
                           <span className="line-clamp-1">
                             {getActionLabel(
-                              user.last_action ? user.last_action : null
+                              user.last_action ? user.last_action : null,
+                              locale
                             )}
                           </span>
                         )}
