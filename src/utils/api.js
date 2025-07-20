@@ -180,8 +180,7 @@ export async function addCompound(compoundData, clientId) {
     );
     return response.data;
   } catch (error) {
-    console.error("Failed to add compound:", error.message);
-    return { error: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.error_message || error.message };
   }
 }
 export async function updatecompound(compoundData, projectId) {
@@ -192,8 +191,7 @@ export async function updatecompound(compoundData, projectId) {
     );
     return response.data;
   } catch (error) {
-    console.error("Failed to add compound:", error.message);
-    return { error: error.response?.data?.message || error.message };
+    return { error: error.response?.data?.error_message || error.message };
   }
 }
 export async function deleteProject(project_id) {

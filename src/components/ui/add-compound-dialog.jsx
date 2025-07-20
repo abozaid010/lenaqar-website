@@ -34,8 +34,6 @@ export default function AddCompoundDialog({
 
   const editMode = !!(compoundData && compoundData.id);
 
-  console.log("Compound Data:", compoundData);
-
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -238,18 +236,9 @@ export default function AddCompoundDialog({
             : t.compoundAdded || "project added successfully!"
         );
       } else {
-        toast.error(
-          editMode
-            ? "Failed to update compound. Please try again."
-            : "Failed to add compound. Please try again."
-        );
-        setErrors({
-          submit:
-            res.message ||
-            (editMode
-              ? "Failed to update compound. Please try again."
-              : "Failed to add compound. Please try again."),
-        });
+        const errorMessage =
+          res.error || "An error occurred while processing your request.";
+        toast.error(errorMessage);
         return;
       }
 
