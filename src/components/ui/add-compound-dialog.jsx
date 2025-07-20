@@ -7,6 +7,7 @@ import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
 import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
+import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
@@ -34,8 +35,6 @@ export default function AddCompoundDialog({
 
   const editMode = !!(compoundData && compoundData.id);
 
-  console.log("Compound Data:", compoundData);
-
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,6 +60,7 @@ export default function AddCompoundDialog({
     client_id: clientId || "",
     images: compoundData?.images || [],
     properties_types: compoundData?.properties_types || [],
+    payment_plans: compoundData?.payment_plans || [],
   });
 
   useEffect(() => {
@@ -84,6 +84,7 @@ export default function AddCompoundDialog({
           client_id: compoundData.client_id || clientId || "",
           images: compoundData.images || [],
           properties_types: compoundData.properties_types || [],
+          payment_plans: compoundData.payment_plans || [],
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -103,6 +104,7 @@ export default function AddCompoundDialog({
           client_id: clientId || "",
           images: [],
           properties_types: [],
+          payment_plans: [],
         });
       }
       setErrors({});
@@ -118,6 +120,7 @@ export default function AddCompoundDialog({
         area: "",
         gated: false,
         properties_types: [],
+        payment_plans: [],
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -203,6 +206,12 @@ export default function AddCompoundDialog({
         "At least one property type is required";
     }
 
+    if (!formData.payment_plans || formData.payment_plans.length === 0) {
+      newErrors.payment_plans =
+        t.formValidation?.paymentPlansRequired ||
+        "At least one payment plan is required";
+    }
+
     setErrors(newErrors);
     return newErrors;
   };
@@ -238,18 +247,9 @@ export default function AddCompoundDialog({
             : t.compoundAdded || "project added successfully!"
         );
       } else {
-        toast.error(
-          editMode
-            ? "Failed to update compound. Please try again."
-            : "Failed to add compound. Please try again."
-        );
-        setErrors({
-          submit:
-            res.message ||
-            (editMode
-              ? "Failed to update compound. Please try again."
-              : "Failed to add compound. Please try again."),
-        });
+        const errorMessage =
+          res.error || "An error occurred while processing your request.";
+        toast.error(errorMessage);
         return;
       }
 
@@ -268,6 +268,8 @@ export default function AddCompoundDialog({
         google_map_link: "",
         master_plan: { url: null, fileId: null },
         client_id: clientId || "ai",
+        properties_types: [],
+        payment_plans: [],
       });
     } catch (error) {
       toast.error(
@@ -296,6 +298,21 @@ export default function AddCompoundDialog({
         developer_name: newDeveloper.en_name,
       };
     });
+  };
+
+  const handlePaymentPlansChange = (newPlans) => {
+    setFormData((prev) => ({
+      ...prev,
+      payment_plans: newPlans,
+    }));
+
+    // Clear error if any
+    if (errors.payment_plans) {
+      setErrors({
+        ...errors,
+        payment_plans: null,
+      });
+    }
   };
 
   return (
@@ -461,6 +478,14 @@ export default function AddCompoundDialog({
               locale={locale}
               required={true}
               error={errors.properties_types}
+            />
+
+            {/* Payment Plans */}
+            <PaymentPlansList
+              plans={formData.payment_plans}
+              onChange={handlePaymentPlansChange}
+              error={errors.payment_plans}
+              required={true}
             />
 
             {/* Developer */}

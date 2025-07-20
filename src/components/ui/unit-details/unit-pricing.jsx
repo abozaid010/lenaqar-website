@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
+import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
 
 export default function UnitPricing({ unit }) {
@@ -270,11 +271,6 @@ export default function UnitPricing({ unit }) {
 }
 
 // Helper functions
-function formatCurrency(value) {
-  if (!value) return "0";
-  return Number.parseInt(value).toLocaleString();
-}
-
 function formatDate(dateString) {
   if (!dateString) return "N/A";
   const date = new Date(dateString);

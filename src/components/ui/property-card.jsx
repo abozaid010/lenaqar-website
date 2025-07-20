@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
+import { formatCurrency } from "@/utils/formatters";
 import {
   Bath,
   Bed,
@@ -120,7 +121,7 @@ export default function PropertyCard({ data }) {
           <InfoItem
             icon={<DollarSign size={18} />}
             label="Price"
-            value={totalPrice ? `${totalPrice} EGP` : "N/A"}
+            value={totalPrice ? `${formatCurrency(totalPrice)} EGP` : "N/A"}
           />
         </div>
       </div>
