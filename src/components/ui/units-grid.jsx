@@ -60,13 +60,11 @@ export default function UnitsGrid({ units, readonly = false }) {
                     fill
                     src={u.images[0].url || "/images/defaultImage.jpg"}
                     alt={u.name || u.compound || "Property"}
-                    loading="eager"
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.src = "/images/defaultImage.jpg";
                       e.currentTarget.onerror = null;
                     }}
-                    priority={true}
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">

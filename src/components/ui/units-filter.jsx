@@ -16,12 +16,7 @@ import { useRef, useState } from "react";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({
-  appliedFilters,
-  clientName,
-  clientId,
-  readonly,
-}) {
+export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
   const citiesAndDistricts = useCitiesAndDistricts();
   const cities = citiesAndDistricts.data?.cities;
 
@@ -619,7 +614,6 @@ export default function UnitsFilter({
           <div className="w-full md:w-auto flex-shrink-0">
             <AddUnitButton
               clientId={clientId}
-              clientName={clientName}
               className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
             />
           </div>

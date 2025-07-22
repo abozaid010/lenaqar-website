@@ -12,19 +12,16 @@ import SaleDetailsStep from "./steps/sale-details-step";
 import { useI18n } from "@/context/translate-api";
 import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
+import Cookies from "js-cookie";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 
-export default function AddUnitModal({
-  isEdit,
-  unitData,
-  onClose,
-  clientId,
-  clientName,
-}) {
+export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
+  const clientInfo = Cookies.get("client_info");
+  const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
   // Add the mutation hooks
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
@@ -336,6 +333,8 @@ export default function AddUnitModal({
       } else if (formData.purpose === "rent") {
         finalFormData = { ...finalFormData, ...rentFormData };
       }
+
+      console.log("Final Form Data:", finalFormData);
 
       if (!isEdit) {
         // Use TanStack Query mutation for adding
