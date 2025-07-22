@@ -21,7 +21,7 @@ export function useDevelopers() {
 // Hook for fetching compounds
 export function useCompounds(client_id, isPublic = false) {
   return useQuery({
-    queryKey: compoundKeys.lists(),
+    queryKey: compoundKeys.lists(client_id, isPublic),
     queryFn: () => fetchProjects(client_id, isPublic),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
