@@ -1,21 +1,16 @@
 "use client";
 
-import UnitsFilter from "@/components/ui/units-filter";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
-import Cookies from "js-cookie";
-import { Loader2, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
   searchParams,
+  clientId,
   publicUnits = false,
 }) {
-  // Get client data from cookies
-  const clientId = Cookies.get("lena-website-client_id");
-  const clientInfo = Cookies.get("client_info");
-  const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
-
   // Prepare search params with client ID
   const searchParamsWithClient = useMemo(
     () => ({
@@ -31,18 +26,12 @@ export default function UnitsPageQueryOptimized({
     publicUnits
   );
 
-  if (isLoading) {
+  if (isLoading | isFetching) {
     return (
-      <div className="container">
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <Loader2
-              size={70}
-              className="text-center animate-spin text-primary mx-auto mb-4"
-            />
-          </div>
-        </div>
-      </div>
+      <LoadingSpinner
+        message="Loading units data..."
+        containerClassName="flex items-center justify-center h-96"
+      />
     );
   }
 
@@ -79,26 +68,15 @@ export default function UnitsPageQueryOptimized({
   }
 
   return (
-    <div className="container relative">
-      <UnitsFilter
-        appliedFilters={searchParams}
-        clientName={clientName}
-        clientId={clientId}
-        readonly={publicUnits}
-      />
-
-      <div className="flex-1 flex flex-col">
-        {isFetching ? (
-          <div className="flex items-center justify-center h-full mt-12">
-            <Loader2
-              size={70}
-              className="text-center animate-spin text-primary"
-            />
-          </div>
-        ) : (
-          <UnitsGrid units={units} readonly={publicUnits} />
-        )}
-      </div>
+    <div className="flex-1 flex flex-col">
+      {isFetching ? (
+        <LoadingSpinner
+          message="Refreshing units..."
+          containerClassName="flex items-center justify-center h-full mt-12"
+        />
+      ) : (
+        <UnitsGrid units={units} readonly={publicUnits} />
+      )}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useAverageScore } from "@/context/average-score";
 import { useUsersData } from "@/hooks/use-users-data";
-import { Loader2, RotateCcw } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 import { useEffect } from "react";
 import ClientsTable from "./clients-table";
 
@@ -10,14 +11,13 @@ export default function ClientsListQuery({ searchParams }) {
   const { setAverageScore, setLoading } = useAverageScore();
 
   const {
-    data: usersData,
+    data: users,
+    isPending,
     isLoading,
     isError,
     refetch,
     isFetching,
   } = useUsersData(JSON.stringify(searchParams));
-
-  const users = usersData?.data?.users || [];
 
   useEffect(() => {
     setLoading(isLoading);
@@ -33,11 +33,12 @@ export default function ClientsListQuery({ searchParams }) {
     }
   }, [users]);
 
-  if (isLoading) {
+  if (isLoading || isFetching || isPending) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 size={70} className="text-center animate-spin text-primary" />
-      </div>
+      <LoadingSpinner
+        message="Loading clients..."
+        containerClassName="flex items-center justify-center h-full"
+      />
     );
   }
 

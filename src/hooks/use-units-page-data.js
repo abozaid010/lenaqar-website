@@ -4,18 +4,17 @@ import { fetchUnitsFilter } from "@/utils/api";
 import { unitKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
-// Combined hook for all units page data
 export function useUnitsPageData(searchParams, publicOnly = false) {
-  // Fetch units data with search params
   const unitsQuery = useQuery({
-    queryKey: unitKeys.list(searchParams, publicOnly),
+    queryKey: unitKeys.list(searchParams),
     queryFn: () => fetchUnitsFilter(searchParams, publicOnly),
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });
 
+  // TODO: Handle pagination and limit to 24 units
   return {
-    units: unitsQuery.data?.data?.units || [],
+    units: unitsQuery.data?.data?.units.slice(0, 24) || [],
     isLoading: unitsQuery.isLoading,
     error: unitsQuery.error,
     isError: unitsQuery.isError,
