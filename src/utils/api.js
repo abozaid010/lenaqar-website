@@ -39,10 +39,10 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   }
 }
 
-export async function fetchDevelopers(use = true) {
+export async function fetchDevelopers(isPublic = false) {
   try {
     const response = await axiosInstance.get(
-      `${use ? `/developers/` : "/public/developers"}`
+      `${!isPublic ? `/developers/` : "/public/developers"}`
     );
     return response.data.data;
   } catch (error) {
@@ -51,11 +51,15 @@ export async function fetchDevelopers(use = true) {
   }
 }
 
-export async function fetchcombounds(use = true) {
+export async function fetchProjects(client_id, isPublic) {
+  const url = isPublic
+    ? "/public/projects"
+    : client_id
+      ? `/projects/all?client_id=${client_id}`
+      : `/projects/all`;
+
   try {
-    const response = await axiosInstance.get(
-      `${use ? `/projects/all` : "/public/projects"}`
-    );
+    const response = await axiosInstance.get(url);
 
     return response.data.data;
   } catch (error) {

@@ -1,24 +1,11 @@
-import {
-  fetchCitisAndProjects,
-  fetchDevelopers,
-  fetchMyProjects,
-} from "@/components/services/serviceFetching";
-import ProjectGrid from "./_components/ProjectGrid";
+import { cookies } from "next/headers";
+import ProjectsList from "./_components/ProjectsList";
 
-const page = async () => {
-  const [projects, citiesAndDistricts, developers] = await Promise.all([
-    fetchMyProjects(),
-    fetchCitisAndProjects(),
-    fetchDevelopers(),
-  ]);
+const ProjectsPage = async () => {
+  const cookieStore = cookies();
+  const clientId = cookieStore.get("lena-website-client_id")?.value || null;
 
-  return (
-    <ProjectGrid
-      projects={projects}
-      citiesAndDistricts={citiesAndDistricts}
-      developers={developers}
-    />
-  );
+  return <ProjectsList clientId={clientId} />;
 };
 
-export default page;
+export default ProjectsPage;

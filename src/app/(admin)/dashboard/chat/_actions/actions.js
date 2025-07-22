@@ -5,7 +5,7 @@ import axiosInstance from "@/utils/axiosInstance";
 export async function sendNewMessage(prevState, formData) {
   const client_message = formData.get("client_message");
   const userId = formData.get("user_id");
-  const client_id = formData.get("client_id");
+  const client_id = formData.get("lena-website-client_id");
   const timeStamp = new Date().valueOf(); // Get current timestamp
 
   try {

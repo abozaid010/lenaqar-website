@@ -3,31 +3,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientEmail, getClientid } from "./clientCookies";
 
-export async function fetchMyProjects() {
-  const clientId = await getClientid();
-  try {
-    const response = await axiosInstance.get(
-      `/projects/all?client_id=${clientId}`
-    );
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function fetchCitisAndProjects() {
-  try {
-    const response = await axiosInstance.get("/projects/cities-and-districts");
-
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function fetchUnitByIdpublic(id) {
   try {
     const response = await axiosInstance.get(`/public/unit-details/${id}`, {});
@@ -43,18 +18,6 @@ export async function resetUnreadMessagesCount(userId) {
     await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function fetchDevelopers(use) {
-  try {
-    const response = await axiosInstance.get(
-      `${use ? `/developers/` : "/public/developers"}`
-    );
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch developers data:", error.message);
     return { error: error.message };
   }
 }

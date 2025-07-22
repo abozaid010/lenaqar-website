@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
+import { useCompounds } from "@/hooks/use-admin-shared-data";
 import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
@@ -8,10 +9,10 @@ import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
-import Cookies from "js-cookie";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -19,43 +20,33 @@ import "swiper/css/pagination";
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
-export default function ProjectList({
-  projects,
-  citiesAndDistricts,
-  readonly,
-  developers,
-}) {
+export default function ProjectsList({ clientId }) {
+  const { data: compounds, isLoading } = useCompounds(clientId);
   const { t, locale } = useI18n();
-  const clientId = Cookies.get("lena-website-client_id");
-
-  const formattedDataCitiesAndDistricts = !readonly
-    ? Object.entries(citiesAndDistricts)
-        .filter(([governorate]) => governorate !== "cities")
-        .map(([governorate, districts]) => ({
-          governorate,
-          districts: districts.map((district) => ({
-            district,
-          })),
-        }))
-    : [];
 
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [fullScreenImages, setFullScreenImages] = useState([]);
   const [fullScreenMasterPlan, setFullScreenMasterPlan] = useState(null);
 
-  const [developersSet, setDevelopersSet] = useState(developers || []);
+  const [projectList, setProjectList] = useState(compounds || []);
 
-  const [projectList, setProjectList] = useState(projects || []);
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(projects?.[0] || null);
+  const [selectedProject, setSelectedProject] = useState(
+    compounds?.[0] || null
+  );
 
   const [showPhaseDialog, setShowPhaseDialog] = useState(false);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
+
+  useEffect(() => {
+    setProjectList(compounds || []);
+    setSelectedProject(compounds?.[0] || null);
+  }, [isLoading]);
 
   const handleProject = (data) => {
     setProjectList((prev) => {
@@ -177,9 +168,6 @@ export default function ProjectList({
           }}
           compoundData={projectToEdit}
           onAdd={handleProject}
-          Egypt_cities={formattedDataCitiesAndDistricts}
-          developers={developersSet}
-          setDevelopers={setDevelopersSet}
           clientId={clientId}
         />
       )}
@@ -200,16 +188,18 @@ export default function ProjectList({
         />
       ) : null}
 
-      <AddPhaseDialog
-        isOpen={showPhaseDialog}
-        onClose={() => {
-          setShowPhaseDialog(false);
-          setPhaseToEdit(null);
-        }}
-        phaseData={phaseToEdit}
-        onAdd={handlePhase}
-        projectId={selectedProject?.id}
-      />
+      {showPhaseDialog && (
+        <AddPhaseDialog
+          isOpen={showPhaseDialog}
+          onClose={() => {
+            setShowPhaseDialog(false);
+            setPhaseToEdit(null);
+          }}
+          phaseData={phaseToEdit}
+          onAdd={handlePhase}
+          projectId={selectedProject?.id}
+        />
+      )}
 
       <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
         <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -227,7 +217,9 @@ export default function ProjectList({
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">
-            {projectList.length === 0 ? (
+            {isLoading ? (
+              <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
+            ) : projectList.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
@@ -352,7 +344,7 @@ export default function ProjectList({
         {/* Right Panel - Details/Map/etc */}
         {projectList.length > 0 && (
           <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
-            {selectedProject ? (
+            {selectedProject && (
               <>
                 {(selectedProject.master_plan.url ||
                   selectedProject.images?.length > 0) && (
@@ -593,40 +585,19 @@ export default function ProjectList({
                   )}
                 </div>
               </>
-            ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                {projectList.length > 0 ? (
-                  <div className="text-center">
-                    <svg
-                      className="w-12 h-12 text-gray-400 mx-auto mb-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 00-2-2z"
-                      />
-                    </svg>
-                    <p className="text-gray-500">
-                      Select a project to view details
-                    </p>
-                  </div>
-                ) : null}
-              </div>
             )}
           </div>
         )}
       </div>
 
-      <ImageSwiperModal
-        open={showFullScreenSwiper}
-        onClose={() => setShowFullScreenSwiper(false)}
-        images={fullScreenImages}
-        masterPlan={fullScreenMasterPlan}
-      />
+      {showFullScreenSwiper && (
+        <ImageSwiperModal
+          open={showFullScreenSwiper}
+          onClose={() => setShowFullScreenSwiper(false)}
+          images={fullScreenImages}
+          masterPlan={fullScreenMasterPlan}
+        />
+      )}
     </>
   );
 }
