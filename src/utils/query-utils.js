@@ -29,7 +29,11 @@ export const developerKeys = {
 // Query key factory for compounds
 export const compoundKeys = {
   all: ["compounds"],
-  lists: () => [...compoundKeys.all, "list"],
+  lists: (client_id, isPublic) => [
+    ...compoundKeys.all,
+    "list",
+    { client_id, isPublic },
+  ],
 };
 
 // Query key factory for cities and projects
@@ -108,6 +112,49 @@ export function useUnitQueries() {
   };
 }
 
+// Hook to provide query utilities for compounds
+export function useCompoundQueries() {
+  const queryClient = useQueryClient();
+
+  const invalidateCompounds = () => {
+    queryClient.invalidateQueries({ queryKey: compoundKeys.all });
+  };
+
+  const invalidateCompoundsList = (client_id, isPublic) => {
+    if (client_id !== undefined && isPublic !== undefined) {
+      queryClient.invalidateQueries({
+        queryKey: compoundKeys.lists(client_id, isPublic),
+      });
+    } else {
+      queryClient.invalidateQueries({ queryKey: compoundKeys.all });
+    }
+  };
+
+  const refetchCompounds = (client_id, isPublic) => {
+    if (client_id !== undefined && isPublic !== undefined) {
+      queryClient.refetchQueries({
+        queryKey: compoundKeys.lists(client_id, isPublic),
+      });
+    } else {
+      queryClient.refetchQueries({ queryKey: compoundKeys.all });
+    }
+  };
+
+  const prefetchCompounds = (client_id, isPublic) => {
+    queryClient.prefetchQuery({
+      queryKey: compoundKeys.lists(client_id, isPublic),
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    });
+  };
+
+  return {
+    invalidateCompounds,
+    invalidateCompoundsList,
+    refetchCompounds,
+    prefetchCompounds,
+  };
+}
+
 // Helper function to update units in cache after mutations
 export function updateUnitsInCache(queryClient, unitId, updateFn) {
   queryClient.setQueriesData({ queryKey: unitKeys.lists() }, (oldData) => {
@@ -152,4 +199,58 @@ export function removeUnitFromCache(queryClient, unitId) {
       },
     };
   });
+}
+
+// Helper function to update compounds in cache after mutations
+export function updateCompoundsInCache(
+  queryClient,
+  compoundId,
+  updateFn,
+  client_id,
+  isPublic
+) {
+  queryClient.setQueriesData(
+    { queryKey: compoundKeys.lists(client_id, isPublic) },
+    (oldData) => {
+      if (!oldData || !Array.isArray(oldData)) return oldData;
+
+      return oldData.map((compound) =>
+        compound.id === compoundId ? updateFn(compound) : compound
+      );
+    }
+  );
+}
+
+// Helper function to add compound to cache
+export function addCompoundToCache(
+  queryClient,
+  newCompound,
+  client_id,
+  isPublic
+) {
+  queryClient.setQueriesData(
+    { queryKey: compoundKeys.lists(client_id, isPublic) },
+    (oldData) => {
+      if (!oldData || !Array.isArray(oldData)) return [newCompound];
+
+      return [newCompound, ...oldData];
+    }
+  );
+}
+
+// Helper function to remove compound from cache
+export function removeCompoundFromCache(
+  queryClient,
+  compoundId,
+  client_id,
+  isPublic
+) {
+  queryClient.setQueriesData(
+    { queryKey: compoundKeys.lists(client_id, isPublic) },
+    (oldData) => {
+      if (!oldData || !Array.isArray(oldData)) return oldData;
+
+      return oldData.filter((compound) => compound.id !== compoundId);
+    }
+  );
 }

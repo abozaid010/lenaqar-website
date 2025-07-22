@@ -353,11 +353,6 @@ export default function AddPaymentPlanDialog({
             max="100"
             step="0.1"
             error={errors.downpayment_percentage}
-            helperText={
-              formData.downpayment_percentage !== ""
-                ? `${formData.downpayment_percentage}%`
-                : ""
-            }
           />
 
           <FormInput
@@ -374,11 +369,6 @@ export default function AddPaymentPlanDialog({
             max="100"
             step="0.1"
             error={errors.reservation_amount_percentage}
-            helperText={
-              formData.reservation_amount_percentage !== ""
-                ? `${formData.reservation_amount_percentage}%`
-                : ""
-            }
           />
         </div>
 
@@ -407,11 +397,6 @@ export default function AddPaymentPlanDialog({
             max="100"
             step="0.1"
             error={errors.maintenance_fee}
-            helperText={
-              formData.maintenance_fee !== ""
-                ? `${formData.maintenance_fee}%`
-                : ""
-            }
           />
         </div>
 
@@ -430,11 +415,6 @@ export default function AddPaymentPlanDialog({
           max="100"
           step="0.1"
           error={errors.installment_increasing_percentage}
-          helperText={
-            formData.installment_increasing_percentage !== ""
-              ? `${formData.installment_increasing_percentage}%`
-              : ""
-          }
         />
 
         <div className="pt-2 border-t border-gray-100">
@@ -455,11 +435,6 @@ export default function AddPaymentPlanDialog({
               max="100"
               step="0.1"
               error={errors["extra_payments.delivery_fee"]}
-              helperText={
-                formData.extra_payments.delivery_fee !== ""
-                  ? `${formData.extra_payments.delivery_fee}%`
-                  : ""
-              }
             />
 
             <FormInput

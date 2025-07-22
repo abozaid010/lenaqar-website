@@ -13,6 +13,10 @@ import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
 import { BUILDING_TYPES } from "@/data/constants";
+import {
+  useCitiesAndDistricts,
+  useDevelopers,
+} from "@/hooks/use-admin-shared-data";
 import { addCompound, updatecompound } from "@/utils/api";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
@@ -25,12 +29,34 @@ export default function AddCompoundDialog({
   onClose,
   compoundData,
   onAdd = () => {},
-  developers = [],
-  setDevelopers,
-  Egypt_cities,
   defaultCity,
   defaultDistrict,
 }) {
+  const { isLoading: delveloperLoading, data: developersData } =
+    useDevelopers();
+
+  const { isLoading: disctictsLoading, data: rowCitiesAndDistricts } =
+    useCitiesAndDistricts();
+
+  const [developers, setDevelopers] = useState(developersData || []);
+  const [citiesAndDistricts, setCitiesAndDistrictsList] = useState(
+    rowCitiesAndDistricts
+      ? formatCitesAndDistrictData(rowCitiesAndDistricts)
+      : []
+  );
+
+  useEffect(() => {
+    if (developersData) {
+      setDevelopers(developersData);
+    }
+
+    if (rowCitiesAndDistricts) {
+      setCitiesAndDistrictsList(
+        formatCitesAndDistrictData(rowCitiesAndDistricts)
+      );
+    }
+  }, [delveloperLoading, disctictsLoading]);
+
   const { t, locale } = useI18n();
 
   const editMode = !!(compoundData && compoundData.id);
@@ -132,6 +158,19 @@ export default function AddCompoundDialog({
     }
   }, [isOpen, editMode]);
 
+  function formatCitesAndDistrictData(citiesAndDistricts) {
+    const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
+      .filter(([governorate]) => governorate !== "cities")
+      .map(([governorate, districts]) => ({
+        governorate,
+        districts: districts.map((district) => ({
+          district,
+        })),
+      }));
+
+    return formattedDataCitiesAndDistricts;
+  }
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -145,10 +184,19 @@ export default function AddCompoundDialog({
       return;
     }
 
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
+    if (name === "city") {
+      // Reset district when city changes
+      setFormData({
+        ...formData,
+        city: value,
+        district: "", // Reset district when city changes
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === "checkbox" ? checked : value,
+      });
+    }
 
     // Clear error for this field when user types
     if (errors[name]) {
@@ -417,20 +465,22 @@ export default function AddCompoundDialog({
                   ? locale === "ar"
                     ? "الرجاء اختيار المدينة أولاً"
                     : "Please select a city first"
-                  : editMode
-                    ? formData.district
-                    : locale === "ar"
-                      ? t.formLabels?.district
-                      : "Select district"}
+                  : locale === "ar"
+                    ? t.formLabels?.district
+                    : "Select district"}
               </option>
               {formData?.city &&
-                Egypt_cities.find(
-                  (gov) => gov.governorate === formData.city
-                )?.districts.map((dist) => (
-                  <option key={dist.district} value={dist.district}>
-                    {formatDistrictLabel(dist.district, formData.city, locale)}
-                  </option>
-                ))}
+                citiesAndDistricts
+                  .find((gov) => gov.governorate === formData.city)
+                  ?.districts.map((dist) => (
+                    <option key={dist.district} value={dist.district}>
+                      {formatDistrictLabel(
+                        dist.district,
+                        formData.city,
+                        locale
+                      )}
+                    </option>
+                  ))}
             </FormSelect>
 
             {/* Details */}

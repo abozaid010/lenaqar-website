@@ -19,9 +19,7 @@ export default function BasicDetailsStep({
   clientId,
   formData,
   updateFormData,
-  developers,
   citiesAndDistricts,
-  setDevelopers = () => {},
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
@@ -478,24 +476,23 @@ export default function BasicDetailsStep({
       </div>
 
       {/* Add Compound Dialog */}
-      <AddCompoundDialog
-        clientId={clientId}
-        projectId={projectId}
-        setProjectId={setProjectId}
-        isOpen={isAddCompoundDialogOpen}
-        onClose={() => setIsAddCompoundDialogOpen(false)}
-        onAdd={handleAddCompound}
-        developers={developers}
-        setDevelopers={setDevelopers}
-        Egypt_cities={citiesAndDistricts}
-        defaultCity={formData.city}
-        defaultDistrict={formData.district}
-        onProjectsLoaded={(projects) => {
-          if (projects && projects.length > 0) {
-            setDataProject(projects);
-          }
-        }}
-      />
+      {isAddCompoundDialogOpen && (
+        <AddCompoundDialog
+          clientId={clientId}
+          projectId={projectId}
+          setProjectId={setProjectId}
+          isOpen={isAddCompoundDialogOpen}
+          onClose={() => setIsAddCompoundDialogOpen(false)}
+          onAdd={handleAddCompound}
+          defaultCity={formData.city}
+          defaultDistrict={formData.district}
+          onProjectsLoaded={(projects) => {
+            if (projects && projects.length > 0) {
+              setDataProject(projects);
+            }
+          }}
+        />
+      )}
     </>
   );
 }

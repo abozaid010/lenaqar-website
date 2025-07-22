@@ -46,7 +46,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
-  const [developers, setDevelopers] = useState(rowDevelopers || []);
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
@@ -334,8 +333,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
         finalFormData = { ...finalFormData, ...rentFormData };
       }
 
-      console.log("Final Form Data:", finalFormData);
-
       if (!isEdit) {
         // Use TanStack Query mutation for adding
         await addUnitMutation.mutateAsync(finalFormData);
@@ -398,8 +395,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
               clientId={clientId}
               formData={formData}
               updateFormData={updateFormData}
-              developers={developers}
-              setDevelopers={setDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               citiesAndDistricts={citiesAndDistricts}
@@ -430,7 +425,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
             <ImagesStep
               formData={formData}
               updateFormData={updateFormData}
-              developersSet={developers}
+              developersSet={rowDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               isUploading={isUploading}
