@@ -9,7 +9,7 @@ export async function fetchUsersData(searchParams) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      limit: 20,
+      limit: 16,
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, {

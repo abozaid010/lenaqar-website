@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/context/translate-api";
 import { useRouter } from "next/navigation";
 
 export default function ClientsTablePagination({
@@ -8,6 +9,7 @@ export default function ClientsTablePagination({
   disablePrev,
   previousCursor,
 }) {
+  const { t } = useI18n();
   const router = useRouter();
 
   const handlePageChange = (cursor, direction) => {
@@ -27,14 +29,14 @@ export default function ClientsTablePagination({
         disabled={disableNext}
         className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
-        Next
+        {t.next}
       </button>
       <button
         onClick={() => handlePageChange(previousCursor, "backward")}
         disabled={disablePrev}
         className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
-        Previous
+        {t.previous}
       </button>
     </div>
   );
