@@ -8,8 +8,9 @@ import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
+import ClientsTablePagination from "./clients-table-pagination";
 
-export default function ClientsTable({ users }) {
+export default function ClientsTable({ users, pagination }) {
   const { t, locale } = useI18n();
   const router = useRouter();
 
@@ -269,13 +270,13 @@ export default function ClientsTable({ users }) {
             </table>
           </div>
 
-          {/* <div className="flex flex-col mt-4 gap-3  no-print">
+          <div className="flex flex-col mt-4 gap-3  no-print">
             <div className="flex justify-between items-center flex-row-reverse">
               <ClientsTablePagination
-                nextCursor={nextCursor}
-                disableNext={disableNext}
-                previousCursor={previousCursor}
-                disablePrev={disablePrev}
+                nextCursor={pagination?.next_cursor}
+                disableNext={!pagination?.has_more_next}
+                previousCursor={pagination?.prev_cursor}
+                disablePrev={!pagination?.has_more_prev}
               />
 
               {rowSelection.length > 0 && (
@@ -287,7 +288,7 @@ export default function ClientsTable({ users }) {
                 </button>
               )}
             </div>
-          </div> */}
+          </div>
         </>
       )}
 

@@ -9,7 +9,7 @@ export async function fetchUsersData(searchParams) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      limit: 20,
+      limit: 16,
     };
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, {
@@ -26,6 +26,7 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   try {
     const params = {
       ...JSON.parse(searchParams),
+      page_size: 20,
     };
 
     const response = await axiosInstance.get(

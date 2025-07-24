@@ -3,7 +3,7 @@
 import { useI18n } from "@/context/translate-api";
 import { useRouter } from "next/navigation";
 
-export default function ClientsTablePagination({
+export default function UnitsGridPagination({
   disableNext,
   nextCursor,
   disablePrev,
@@ -22,20 +22,20 @@ export default function ClientsTablePagination({
   };
 
   return (
-    <div className="flex gap-1">
-      <button
-        onClick={() => handlePageChange(nextCursor)}
-        disabled={disableNext}
-        className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-      >
-        {t.next}
-      </button>
+    <div className="flex gap-2 justify-center mt-8">
       <button
         onClick={() => handlePageChange(previousCursor)}
         disabled={disablePrev}
-        className="px-4 py-1 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+        className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
       >
         {t.previous}
+      </button>
+      <button
+        onClick={() => handlePageChange(nextCursor)}
+        disabled={disableNext}
+        className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm cursor-pointer font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+      >
+        {t.next}
       </button>
     </div>
   );

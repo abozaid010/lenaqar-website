@@ -18,15 +18,12 @@ export const metadata = {
 export default async function HomePage() {
   const cookieStore = await cookies();
   const client_id = cookieStore.get("lena-website-client_id")?.value;
-  const clientInfo = cookieStore.get("client_info");
-
-  const client_email = JSON.parse(clientInfo?.value)?.email;
 
   return (
     <>
       <HomePageSchema />
 
-      <Header ci={client_id} client_email={client_email} />
+      <Header ci={client_id} />
 
       {/* Hero Section with Title */}
       <HeroSection />

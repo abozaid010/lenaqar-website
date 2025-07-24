@@ -5,12 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { getShareUnitData } from "@/components/services/serviceFetching";
+import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
 import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
 
-export default function UnitsGrid({ units, readonly = false }) {
+export default function UnitsGrid({ units, pagination, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
@@ -165,6 +166,16 @@ export default function UnitsGrid({ units, readonly = false }) {
             </Link>
           ))}
         </div>
+      )}
+
+      {/* Pagination Controls */}
+      {pagination && (
+        <UnitsGridPagination
+          nextCursor={pagination?.next_cursor}
+          disableNext={!pagination?.has_more_next}
+          previousCursor={pagination?.prev_cursor}
+          disablePrev={!pagination?.has_more_prev}
+        />
       )}
 
       {/* ShareModal component with the correct props */}

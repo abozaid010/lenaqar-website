@@ -21,15 +21,15 @@ export default function UnitsPageQueryOptimized({
   );
 
   // Fetch all required data using the combined hook
-  const { isFetching, units, isLoading, isError } = useUnitsPageData(
-    JSON.stringify(searchParamsWithClient),
-    publicUnits
-  );
+  const { isFetching, units, pagination, isLoading, isError, refetch } =
+    useUnitsPageData(JSON.stringify(searchParamsWithClient), publicUnits);
 
   if (isLoading | isFetching) {
     return <LoadingSpinner message="Loading units data..." />;
   }
 
+  console.log("Units data fetched:", units.length);
+  console.log("Pagination data:", pagination);
   if (isError) {
     return (
       <div className="container">
@@ -39,22 +39,20 @@ export default function UnitsPageQueryOptimized({
               Error loading data
             </div>
             <div className="text-gray-600 text-sm mb-4">
-              {errorMessage || "An unexpected error occurred"}
+              An unexpected error occurred
             </div>
             <div className="flex gap-2 justify-center flex-wrap">
-              {units.isError && (
-                <button
-                  onClick={() => units.refetch()}
-                  disabled={units.isFetching}
-                  className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
-                >
-                  <RotateCcw
-                    size={16}
-                    className={units.isFetching ? "animate-spin" : ""}
-                  />
-                  Retry Units
-                </button>
-              )}
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
+              >
+                <RotateCcw
+                  size={16}
+                  className={isFetching ? "animate-spin" : ""}
+                />
+                Retry Units
+              </button>
             </div>
           </div>
         </div>
@@ -70,7 +68,11 @@ export default function UnitsPageQueryOptimized({
           containerClassName="flex items-center justify-center h-full mt-12"
         />
       ) : (
-        <UnitsGrid units={units} readonly={publicUnits} />
+        <UnitsGrid
+          units={units}
+          pagination={pagination}
+          readonly={publicUnits}
+        />
       )}
     </div>
   );

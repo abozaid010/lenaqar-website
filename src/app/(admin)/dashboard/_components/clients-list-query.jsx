@@ -12,6 +12,7 @@ export default function ClientsListQuery({ searchParams }) {
 
   const {
     data: users,
+    pagination,
     isPending,
     isLoading,
     isError,
@@ -21,7 +22,7 @@ export default function ClientsListQuery({ searchParams }) {
 
   useEffect(() => {
     setLoading(isLoading);
-    if (users.length > 0) {
+    if (users && users.length > 0) {
       const totalScore = users.reduce(
         (sum, user) => sum + (user.score || 0),
         0
@@ -65,5 +66,5 @@ export default function ClientsListQuery({ searchParams }) {
     );
   }
 
-  return <ClientsTable users={users} />;
+  return <ClientsTable users={users} pagination={pagination} />;
 }
