@@ -28,8 +28,6 @@ export default function UnitsPageQueryOptimized({
     return <LoadingSpinner message="Loading units data..." />;
   }
 
-  console.log("Units data fetched:", units.length);
-  console.log("Pagination data:", pagination);
   if (isError) {
     return (
       <div className="container">
