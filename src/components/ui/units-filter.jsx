@@ -2,31 +2,27 @@
 
 import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
-import {
-  useCitiesAndDistricts,
-  useCompounds,
-  useDevelopers,
-} from "@/hooks/use-admin-shared-data";
+import { BUILDING_TYPES, STATIC_CITIES } from "@/data/constants";
+import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
+import LoadingSpinner from "./loading-spinner";
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
-  const citiesAndDistricts = useCitiesAndDistricts();
-  const cities = citiesAndDistricts.data?.cities;
-
-  let developers;
-  let compounds;
-
-  if (!readonly) {
-    developers = useDevelopers().data || [];
-    compounds = useCompounds().data || [];
-  }
+export default function UnitsFilter({ appliedFilters, readonly }) {
+  const { data: projectsData, isLoading: projectsLoading } = useCompounds(
+    null,
+    readonly
+  );
+  const { data: developersData, isLoading: developersLoading } = useDevelopers(
+    null,
+    readonly
+  );
+  const [compounds, setCompounds] = useState(projectsData || []);
+  const [developers, setDevelopers] = useState(developersData || []);
 
   const { t, locale } = useI18n();
   const router = useRouter();
@@ -40,6 +36,16 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
     max_price: appliedFilters.max_price || "",
     city: appliedFilters.city || "",
   }));
+
+  useEffect(() => {
+    if (!projectsLoading) {
+      setCompounds(projectsData || []);
+    }
+
+    if (!developersLoading) {
+      setDevelopers(developersData || []);
+    }
+  }, [developersLoading || projectsLoading]);
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
@@ -304,6 +310,7 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
         return value;
     }
   }
+
   return (
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
@@ -332,57 +339,59 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
               >
                 {t.unitsFilter.allCities || "All Cities"}
               </div>
-              {cities
-                .sort((a, b) =>
-                  formatCityLabel(a, locale).localeCompare(
-                    formatCityLabel(b, locale)
-                  )
+              {STATIC_CITIES.sort((a, b) =>
+                formatCityLabel(a, locale).localeCompare(
+                  formatCityLabel(b, locale)
                 )
-                .map((city, idx) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                    onClick={() => {
-                      handleFilterChange("city", city);
-                      setIsCityDropdownOpen(false);
-                    }}
-                  >
-                    {formatCityLabel(city, locale)}
-                  </div>
-                ))}
+              ).map((city, idx) => (
+                <div
+                  key={idx}
+                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
+                  onClick={() => {
+                    handleFilterChange("city", city);
+                    setIsCityDropdownOpen(false);
+                  }}
+                >
+                  {formatCityLabel(city, locale)}
+                </div>
+              ))}
             </div>
           )}
         </div>
 
         {/* Developer Dropdown */}
-        {!readonly && (
-          <div
-            className="relative w-full md:w-auto md:flex-1 min-w-0"
-            ref={developerDropdownRef}
-          >
-            <button
-              type="button"
-              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-              onClick={() =>
-                setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)
-              }
-            >
-              <span className="truncate">{getSelectedDeveloper()}</span>
-              <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-            </button>
 
-            {isDeveloperDropdownOpen && (
-              <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-                <div
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("developer_name", "all");
-                    setIsDeveloperDropdownOpen(false);
-                  }}
-                >
-                  {t.unitsFilter.allDevelopers}
-                </div>
-                {developers
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={developerDropdownRef}
+        >
+          <button
+            type="button"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
+          >
+            <span className="truncate">{getSelectedDeveloper()}</span>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
+          </button>
+
+          {isDeveloperDropdownOpen && (
+            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+              <div
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("developer_name", "all");
+                  setIsDeveloperDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allDevelopers}
+              </div>
+              {developersLoading ? (
+                <LoadingSpinner
+                  size={22}
+                  containerClassName="flex items-center justify-center"
+                />
+              ) : (
+                developers
                   .sort((a, b) => {
                     const nameA = locale === "ar" ? a.ar_name : a.en_name;
                     const nameB = locale === "ar" ? b.ar_name : b.en_name;
@@ -401,39 +410,46 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
                     >
                       {locale === "ar" ? d.ar_name : d.en_name}
                     </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        )}
+                  ))
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Compounds Dropdown */}
-        {!readonly && (
-          <div
-            className="relative w-full md:w-auto md:flex-1 min-w-0"
-            ref={projectDropdownRef}
-          >
-            <button
-              type="button"
-              className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-              onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
-            >
-              <span className="truncate">{getSelectedProjectName()}</span>
-              <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-            </button>
 
-            {isProjectDropdownOpen && (
-              <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-                <div
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("project_name", "all");
-                    setIsProjectDropdownOpen(false);
-                  }}
-                >
-                  {t.unitsFilter.allCompounds}
-                </div>
-                {compounds
+        <div
+          className="relative w-full md:w-auto md:flex-1 min-w-0"
+          ref={projectDropdownRef}
+        >
+          <button
+            type="button"
+            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
+          >
+            <span className="truncate">{getSelectedProjectName()}</span>
+            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
+          </button>
+
+          {isProjectDropdownOpen && (
+            <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
+              <div
+                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
+                onClick={() => {
+                  handleFilterChange("project_name", "all");
+                  setIsProjectDropdownOpen(false);
+                }}
+              >
+                {t.unitsFilter.allCompounds}
+              </div>
+
+              {projectsLoading ? (
+                <LoadingSpinner
+                  size={22}
+                  containerClassName="flex items-center justify-center"
+                />
+              ) : (
+                compounds
                   .sort((a, b) => {
                     const nameA = locale === "ar" ? a.ar_name : a.en_name;
                     const nameB = locale === "ar" ? b.ar_name : b.en_name;
@@ -452,11 +468,11 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
                     >
                       {locale === "ar" ? c.ar_name : c.en_name}
                     </div>
-                  ))}
-              </div>
-            )}
-          </div>
-        )}
+                  ))
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Purpose Dropdown */}
         <div
@@ -612,10 +628,7 @@ export default function UnitsFilter({ appliedFilters, clientId, readonly }) {
 
         {!readonly && (
           <div className="w-full md:w-auto flex-shrink-0">
-            <AddUnitButton
-              clientId={clientId}
-              className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors"
-            />
+            <AddUnitButton className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
           </div>
         )}
       </div>

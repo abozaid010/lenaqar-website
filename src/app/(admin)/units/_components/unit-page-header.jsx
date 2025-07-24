@@ -25,7 +25,7 @@ export default function UnitPageHeader({ unit, clientId }) {
       </button>
 
       <div className="flex gap-2">
-        <AddUnitButton isEdit={true} unitData={unit} clientId={clientId} />
+        <AddUnitButton isEdit={true} unitData={unit} />
 
         <DeleteUnitBtn unitId={unit.unitId} />
       </div>

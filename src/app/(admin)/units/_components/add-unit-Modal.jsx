@@ -19,7 +19,22 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 
-export default function AddUnitModal({ isEdit, unitData, onClose, clientId }) {
+export default function AddUnitModal({ isEdit, unitData, onClose }) {
+  const clientId = Cookies.get("lena-website-client_id") || null;
+
+  if (!clientId) {
+    return (
+      <>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+          <div className="bg-white rounded-md shadow-xl p-6">
+            <h2 className="text-lg font-semibold">Client ID not found</h2>
+            <p>Please ensure you are logged in with a valid client.</p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
   const clientInfo = Cookies.get("client_info");
   const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
   // Add the mutation hooks

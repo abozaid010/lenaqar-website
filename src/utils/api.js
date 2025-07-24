@@ -39,11 +39,15 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   }
 }
 
-export async function fetchDevelopers(isPublic = false) {
+export async function fetchDevelopers(client_id, isPublic = false) {
+  const url = isPublic
+    ? "/public/developers"
+    : client_id
+      ? `/developers/?client_id=${client_id}`
+      : `/developers/`;
+
   try {
-    const response = await axiosInstance.get(
-      `${!isPublic ? `/developers/` : "/public/developers"}`
-    );
+    const response = await axiosInstance.get(url);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);
@@ -58,6 +62,7 @@ export async function fetchProjects(client_id, isPublic) {
       ? `/projects/all?client_id=${client_id}`
       : `/projects/all`;
 
+  console.log("Fetching projects from URL:", url);
   try {
     const response = await axiosInstance.get(url);
 

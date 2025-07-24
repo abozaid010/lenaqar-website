@@ -1,23 +1,9 @@
-import { getClientid } from "@/components/services/clientCookies";
-import { getClientDevelopers } from "@/components/services/serviceFetching";
+import { cookies } from "next/headers";
 import DevelopersClientWrapper from "./_components/developers-client-wrapper";
 
 export default async function DevelopersPage() {
-  const clientId = await getClientid();
-  let developers = [];
+  const cookieStore = await cookies();
+  const clientId = cookieStore.get("lena-website-client_id")?.value || null;
 
-  try {
-    const res = await getClientDevelopers(clientId);
-    developers = res.data;
-  } catch (e) {
-    console.error("Error fetching developers:", e);
-    // Handle error appropriately, e.g., show a toast or log it
-  }
-
-  return (
-    <DevelopersClientWrapper
-      initialDevelopers={developers || []}
-      clientId={clientId}
-    />
-  );
+  return <DevelopersClientWrapper clientId={clientId} />;
 }

@@ -2,21 +2,27 @@
 
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/context/translate-api";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { Pencil, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-export default function DevelopersClientWrapper({
-  initialDevelopers,
-  clientId,
-}) {
+export default function DevelopersClientWrapper({ clientId }) {
+  const { data, isLoading } = useDevelopers(clientId);
   const { t, locale } = useI18n();
-  const [developers, setDevelopers] = useState(initialDevelopers || []);
+  const [developers, setDevelopers] = useState(data || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  useEffect(() => {
+    if (!isLoading && data.length > 0) {
+      setDevelopers(data || []);
+    }
+  }, [isLoading]);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -74,7 +80,9 @@ export default function DevelopersClientWrapper({
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">
-            {developers.length === 0 ? (
+            {isLoading ? (
+              <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
+            ) : developers.length === 0 ? (
               <div className="flex flex-col items-center justify-center p-6">
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                   <svg
@@ -144,15 +152,17 @@ export default function DevelopersClientWrapper({
         </div>
       </div>
 
-      <DeleteConfirmDialog
-        isOpen={showDeleteDialog}
-        onClose={() => setShowDeleteDialog(false)}
-        onConfirm={() => handleDelete(selectedDeveloper.id)}
-        title={t.developerPage.DeleteTitle}
-        message={t.developerPage.deleteMessage}
-        confirmLabel={t.deleteButton}
-        cancelLabel={t.cancelButton}
-      />
+      {showDeleteDialog && selectedDeveloper && (
+        <DeleteConfirmDialog
+          isOpen={showDeleteDialog}
+          onClose={() => setShowDeleteDialog(false)}
+          onConfirm={() => handleDelete(selectedDeveloper.id)}
+          title={t.developerPage.DeleteTitle}
+          message={t.developerPage.deleteMessage}
+          confirmLabel={t.deleteButton}
+          cancelLabel={t.cancelButton}
+        />
+      )}
 
       <AddDeveloperDialog
         client_id={clientId}

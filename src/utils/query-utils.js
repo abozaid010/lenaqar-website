@@ -23,7 +23,11 @@ export const unitKeys = {
 // Query key factory for developers
 export const developerKeys = {
   all: ["developers"],
-  lists: () => [...developerKeys.all, "list"],
+  lists: (client_id, isPublic) => [
+    ...developerKeys.all,
+    "list",
+    { client_id, isPublic },
+  ],
 };
 
 // Query key factory for compounds
