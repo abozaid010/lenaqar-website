@@ -14,6 +14,7 @@ const Layout = async ({ children }) => {
   const clientName = clientInfoCookie
     ? JSON.parse(clientInfoCookie)?.client_name
     : null;
+  const clientEmail = JSON.parse(clientInfoCookie)?.email;
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get("lang")?.value;
@@ -29,7 +30,11 @@ const Layout = async ({ children }) => {
         <Sidebar />
 
         <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-          <Header clientName={clientName} clientID={clientID} />
+          <Header
+            clientName={clientName}
+            clientID={clientID}
+            clientEmail={clientEmail}
+          />
 
           <main className="overflow-y-auto p-3 relative flex-1">
             <Suspense

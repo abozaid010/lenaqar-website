@@ -1,9 +1,9 @@
-import { getClientid } from "@/components/services/clientCookies";
 import {
   getChatHistory,
   resetUnreadMessagesCount,
 } from "@/components/services/serviceFetching";
 import { CircleX } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import ChatClientWrapper from "../_components/chat-client-wrapper";
 import ChatWith from "../_components/Chat_with";
@@ -12,9 +12,10 @@ import NavigationButtons from "./_components/NavigationButtons";
 import ShowRequirementBtn from "./_components/showRequirementBtn";
 
 export default async function ChatPage({ params }) {
+  const cookiesStore = await cookies();
   const { id } = await params;
 
-  const clientID = await getClientid();
+  const clientID = cookiesStore.get("lena-website-client_id");
 
   const initialData = await getChatHistory(id);
 

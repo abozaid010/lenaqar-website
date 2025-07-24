@@ -15,16 +15,3 @@ export const getClientid = async () => {
     return {};
   }
 };
-
-export const getClientEmail = async () => {
-  const cookieStore = await cookies();
-  const clientInfo = cookieStore.get("client_info");
-
-  const email = JSON.parse(clientInfo?.value)?.email;
-
-  if (email) {
-    return email;
-  } else {
-    return false;
-  }
-};

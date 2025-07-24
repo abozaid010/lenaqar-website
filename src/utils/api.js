@@ -378,3 +378,26 @@ export async function toggleAutoReply(user_id, client_id, value, source) {
     };
   }
 }
+
+// Client Profile API //
+export async function getProfileDataByEmail(clientEmail) {
+  try {
+    const response = await axiosInstance.get(
+      `client/profile?email=${clientEmail}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch profile data:", error.message);
+    return { error: error.message };
+  }
+}
+export async function updateProfileData(formData) {
+  try {
+    const response = axiosInstance.patch("/client/update-profile", formData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update profile data:", error.message);
+    return { error: error.message };
+  }
+}
