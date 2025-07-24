@@ -7,14 +7,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   return (
     <div className="container mb-4">
-      <Suspense
-        fallback={
-          <LoadingSpinner
-            message="Loading properties..."
-            containerClassName="flex items-center justify-center h-96"
-          />
-        }
-      >
+      <Suspense fallback={<LoadingSpinner message="Loading properties..." />}>
         <UnitsPageQueryOptimized
           searchParams={searchParams}
           publicUnits={true}

@@ -27,12 +27,7 @@ export default function UnitsPageQueryOptimized({
   );
 
   if (isLoading | isFetching) {
-    return (
-      <LoadingSpinner
-        message="Loading units data..."
-        containerClassName="flex items-center justify-center h-96"
-      />
-    );
+    return <LoadingSpinner message="Loading units data..." />;
   }
 
   if (isError) {

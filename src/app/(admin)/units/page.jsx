@@ -32,11 +32,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         readonly={false}
       />
 
-      <Suspense
-        fallback={
-          <LoadingSpinner containerClassName="flex items-center justify-center h-96" />
-        }
-      >
+      <Suspense fallback={<LoadingSpinner />}>
         <UnitsPageQueryOptimized
           searchParams={searchParams}
           clientId={clientId}

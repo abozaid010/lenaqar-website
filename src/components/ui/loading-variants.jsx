@@ -4,10 +4,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 export function PageLoading({ message = "Loading..." }) {
   return (
     <div className="container mx-auto">
-      <LoadingSpinner
-        message={message}
-        containerClassName="flex items-center justify-center h-96"
-      />
+      <LoadingSpinner message={message} />
     </div>
   );
 }

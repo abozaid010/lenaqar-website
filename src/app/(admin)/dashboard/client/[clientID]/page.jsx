@@ -7,14 +7,7 @@ export default async function ClientPage({ params }) {
   const data = await getProfileData();
 
   return (
-    <Suspense
-      fallback={
-        <LoadingSpinner
-          message="Loading profile..."
-          containerClassName="flex items-center justify-center h-96"
-        />
-      }
-    >
+    <Suspense fallback={<LoadingSpinner message="Loading profile..." />}>
       <ClientInfo data={data.data} />
     </Suspense>
   );
