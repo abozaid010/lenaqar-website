@@ -12,13 +12,14 @@ export function useUnitsPageData(searchParams, publicOnly = false) {
     refetchOnWindowFocus: false,
   });
 
-  // TODO: Handle pagination and limit to 24 units
   return {
-    units: unitsQuery.data?.data?.units.slice(0, 24) || [],
+    units: unitsQuery.data?.data?.units || [],
+    pagination: unitsQuery.data?.data?.pagination || null,
     isLoading: unitsQuery.isLoading,
     error: unitsQuery.error,
     isError: unitsQuery.isError,
     refetch: unitsQuery.refetch,
     isFetching: unitsQuery.isFetching,
+    isPending: unitsQuery.isPending,
   };
 }
