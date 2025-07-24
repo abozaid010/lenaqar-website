@@ -12,14 +12,14 @@ import { useEffect, useRef, useState } from "react";
 import LoadingSpinner from "./loading-spinner";
 const EnumPropertyIntent = ["rent", "sell"];
 
-export default function UnitsFilter({ appliedFilters, readonly }) {
+export default function UnitsFilter({ appliedFilters, isPublic }) {
   const { data: projectsData, isLoading: projectsLoading } = useCompounds(
     null,
-    readonly
+    isPublic
   );
   const { data: developersData, isLoading: developersLoading } = useDevelopers(
     null,
-    readonly
+    isPublic
   );
   const [compounds, setCompounds] = useState(projectsData || []);
   const [developers, setDevelopers] = useState(developersData || []);
@@ -626,7 +626,7 @@ export default function UnitsFilter({ appliedFilters, readonly }) {
           )}
         </div>
 
-        {!readonly && (
+        {!isPublic && (
           <div className="w-full md:w-auto flex-shrink-0">
             <AddUnitButton className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
           </div>

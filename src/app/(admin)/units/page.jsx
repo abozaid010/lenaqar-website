@@ -29,7 +29,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
       <UnitsFilter
         appliedFilters={searchParams}
         clientId={clientId}
-        readonly={false}
+        isPublic={false}
       />
 
       <Suspense fallback={<LoadingSpinner />}>
