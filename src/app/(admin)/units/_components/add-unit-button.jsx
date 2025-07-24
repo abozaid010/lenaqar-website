@@ -5,12 +5,7 @@ import { Edit, Plus } from "lucide-react";
 import { useState } from "react";
 import AddUnitModal from "./add-unit-Modal";
 
-export default function AddUnitButton({
-  isEdit = false,
-  unitData,
-  clientId,
-  clientName,
-}) {
+export default function AddUnitButton({ isEdit = false, unitData }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -44,7 +39,6 @@ export default function AddUnitButton({
           isEdit={isEdit}
           unitData={unitData}
           onClose={closeModal}
-          clientId={clientId}
         />
       )}
     </>

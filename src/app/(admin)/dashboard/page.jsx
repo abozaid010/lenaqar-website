@@ -34,11 +34,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 
           {/* <SearchBar q={searchParams.query} /> */}
 
-          <Suspense
-            fallback={
-              <LoadingSpinner containerClassName="flex items-center justify-center h-96" />
-            }
-          >
+          <Suspense fallback={<LoadingSpinner />}>
             <ClientsListQuery searchParams={searchParams} />
           </Suspense>
         </AverageScoreProvider>

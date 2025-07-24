@@ -11,3 +11,10 @@ export const BUILDING_TYPES = [
   { value: "twinhouse", en_label: "Twinhouse", ar_label: "توين هاوس" },
   { value: "villa", en_label: "Villa", ar_label: "فيلا" },
 ];
+
+export const STATIC_CITIES = [
+  "cairo",
+  "giza",
+  "north coast",
+  "new administrative capital",
+];

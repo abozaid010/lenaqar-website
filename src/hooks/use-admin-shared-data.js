@@ -9,10 +9,10 @@ import { cityKeys, compoundKeys, developerKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
 // Hook for fetching developers
-export function useDevelopers() {
+export function useDevelopers(client_id, isPublic = false) {
   return useQuery({
-    queryKey: developerKeys.lists(),
-    queryFn: fetchDevelopers,
+    queryKey: developerKeys.lists(client_id, isPublic),
+    queryFn: () => fetchDevelopers(client_id, isPublic),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });
@@ -40,7 +40,13 @@ export function useCitiesAndDistricts() {
 
 // Combined hook for all shared admin data
 export function useAdminSharedData(client_id, isPublic = false) {
-  const developersQuery = useDevelopers();
+  console.log(
+    "useAdminSharedData called with client_id:",
+    client_id,
+    "isPublic:",
+    isPublic
+  );
+  const developersQuery = useDevelopers(client_id, isPublic);
   const compoundsQuery = useCompounds(client_id, isPublic);
   const citiesQuery = useCitiesAndDistricts();
 
