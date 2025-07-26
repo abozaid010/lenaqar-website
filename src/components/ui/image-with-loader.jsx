@@ -17,16 +17,19 @@ export default function ImageWithLoader({
   alt,
   className = "",
   onError,
+  onLoadComplete,
   priority = false,
   sizes = "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw",
   showLoadingText = false,
   loadingVariant = "default", // "default", "minimal", "skeleton"
+  forceLoading = false, // Force loading state externally
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
   const handleLoad = () => {
     setIsLoading(false);
+    if (onLoadComplete) onLoadComplete();
   };
 
   const handleError = (e) => {
@@ -113,7 +116,7 @@ export default function ImageWithLoader({
   return (
     <div className="relative w-full h-full overflow-hidden">
       {/* Loading State */}
-      {isLoading && renderLoadingState()}
+      {(isLoading || forceLoading) && renderLoadingState()}
 
       {/* Error State */}
       {hasError && !isLoading && (
@@ -145,7 +148,7 @@ export default function ImageWithLoader({
         src={src}
         alt={alt}
         className={`${className} transition-all duration-500 ease-out transform ${
-          isLoading
+          isLoading || forceLoading
             ? "opacity-0 scale-105"
             : "opacity-100 scale-100 animate-fade-in"
         }`}
