@@ -63,7 +63,6 @@ export async function fetchProjects(client_id, isPublic) {
       ? `/projects/all?client_id=${client_id}`
       : `/projects/all`;
 
-  console.log("Fetching projects from URL:", url);
   try {
     const response = await axiosInstance.get(url);
 
