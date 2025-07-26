@@ -1,9 +1,9 @@
 "use client";
 
 import { getShareUnitData } from "@/components/services/serviceFetching";
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import ShareModal from "@/components/ui/units-share-modal";
-import Image from "next/image";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -49,7 +49,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
         className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
         onClick={() => setIsFullscreen(true)}
       >
-        <Image
+        <ImageWithLoader
           src={images[mainImageIndex].url || "/images/defaultImage.jpg"}
           onError={(e) => {
             e.currentTarget.src = "/images/defaultImage.jpg";
@@ -57,10 +57,9 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
           }}
           priority={true}
           alt={`${unitName}`}
-          loading="eager"
-          fill
-          style={{ objectFit: "fill" }}
-          className="rounded-md transition-transform duration-300 group-hover:scale-[1.02]"
+          className="w-full h-full object-cover rounded-md transition-transform duration-300 group-hover:scale-[1.02]"
+          loadingVariant="default"
+          sizes="(max-width: 768px) 100vw, 50vw"
         />
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-end">
@@ -100,7 +99,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
       {/* Thumbnail swiper */}
       <Swiper
         modules={[Navigation, Thumbs]}
-        spaceBetween={10}
+        spaceBetween={8}
         slidesPerView={4}
         navigation
         watchSlidesProgress
@@ -116,16 +115,17 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
               }`}
               onClick={() => setMainImageIndex(index)}
             >
-              <Image
-                fill
+              <ImageWithLoader
                 src={image.url || "/images/defaultImage.jpg"}
                 onError={(e) => {
                   e.currentTarget.src = "/images/defaultImage.jpg";
                   e.currentTarget.onerror = null;
                 }}
                 alt={`Unit - ${index + 1}`}
-                loading="lazy"
-                style={{ objectFit: "fill" }}
+                className="w-full h-full object-cover"
+                priority={false}
+                loadingVariant="minimal"
+                sizes="120px"
               />
               {mainImageIndex === index && (
                 <div className="absolute inset-0 bg-primary/10 flex items-center justify-center">
