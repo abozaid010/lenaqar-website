@@ -11,11 +11,11 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
 
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { BUILDING_TYPES } from "@/data/constants";
@@ -105,6 +105,7 @@ export default function ProjectsList({ clientId }) {
   const [fullScreenMasterPlan, setFullScreenMasterPlan] = useState(null);
 
   const [projectList, setProjectList] = useState(compounds || []);
+  const [projectImageLoading, setProjectImageLoading] = useState(false);
 
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
@@ -118,6 +119,7 @@ export default function ProjectsList({ clientId }) {
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
+  const [phaseImageLoading, setPhaseImageLoading] = useState(false);
 
   useEffect(() => {
     if (!isLoading && compounds) {
@@ -132,6 +134,25 @@ export default function ProjectsList({ clientId }) {
       setSelectedProject(sorted[0] || null);
     }
   }, [isLoading]);
+
+  // Handle project selection with loading state
+  const handleProjectSelection = (project) => {
+    if (selectedProject?.id !== project.id) {
+      setProjectImageLoading(true);
+      setSelectedProject(project);
+      // Reset phase selection when changing projects
+      setSelectedPhaseIdx(0);
+      setPhaseImageLoading(true);
+    }
+  };
+
+  // Handle phase selection with loading state
+  const handlePhaseSelection = (idx) => {
+    if (selectedPhaseIdx !== idx) {
+      setPhaseImageLoading(true);
+      setSelectedPhaseIdx(idx);
+    }
+  };
 
   const handleProject = (data) => {
     setProjectList((prev) => {
@@ -335,7 +356,7 @@ export default function ProjectsList({ clientId }) {
                         ? "bg-primary text-white"
                         : ""
                     }`}
-                    onClick={() => setSelectedProject(project)}
+                    onClick={() => handleProjectSelection(project)}
                   >
                     <h3
                       className={`font-semibold text-lg ${
@@ -472,16 +493,18 @@ export default function ProjectsList({ clientId }) {
                       setShowFullScreenSwiper(true);
                     }}
                   >
-                    <Image
+                    <ImageWithLoader
                       src={
                         selectedProject.master_plan.url ||
                         selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}
-                      fill
-                      objectFit="cover"
-                      priority
+                      className="w-full h-full object-cover"
+                      priority={true}
+                      loadingVariant="default"
+                      forceLoading={projectImageLoading}
+                      onLoadComplete={() => setProjectImageLoading(false)}
                     />
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
@@ -646,7 +669,7 @@ export default function ProjectsList({ clientId }) {
                   selectedProject.phases.length > 0 ? (
                     <>
                       <div className="h-96 relative overflow-hidden bg-gray-50 group">
-                        <Image
+                        <ImageWithLoader
                           src={
                             selectedProject.phases[selectedPhaseIdx]
                               ?.master_plan.url ||
@@ -663,9 +686,11 @@ export default function ProjectsList({ clientId }) {
                             selectedProject.phases[selectedPhaseIdx]?.name ||
                             "Phase Image"
                           }
-                          fill
-                          objectFit="cover"
-                          priority
+                          className="w-full h-full object-cover"
+                          priority={true}
+                          loadingVariant="default"
+                          forceLoading={phaseImageLoading}
+                          onLoadComplete={() => setPhaseImageLoading(false)}
                         />
 
                         {/* Overlay for indication */}
@@ -769,9 +794,9 @@ export default function ProjectsList({ clientId }) {
                                 ? "ring-2 ring-primary"
                                 : ""
                             }`}
-                            onClick={() => setSelectedPhaseIdx(idx)}
+                            onClick={() => handlePhaseSelection(idx)}
                           >
-                            <Image
+                            <ImageWithLoader
                               src={
                                 phase.master_plan.url ||
                                 (Array.isArray(phase?.images) &&
@@ -780,8 +805,10 @@ export default function ProjectsList({ clientId }) {
                                   : "/images/defaultImage.jpg")
                               }
                               alt={phase.name || "Phase Thumbnail"}
-                              fill
-                              objectFit="cover"
+                              className="w-full h-full object-cover"
+                              priority={false}
+                              loadingVariant="minimal"
+                              showLoadingText={false}
                             />
                             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
                               <div className="text-white text-xs font-semibold line-clamp-1">

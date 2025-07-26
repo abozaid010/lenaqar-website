@@ -1,10 +1,10 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import Image from "next/image";
 import Link from "next/link";
 
 import { getShareUnitData } from "@/components/services/serviceFetching";
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
 import { formatCityLabel } from "@/utils/formatters";
@@ -50,15 +50,14 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
           {units.map((u, idx) => (
             <Link
-              href={` ${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
+              href={`${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
               key={idx}
               className="relative"
             >
               {/* Image Section */}
-              <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg">
+              <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100">
                 {u.images && u.images.length > 0 ? (
-                  <Image
-                    fill
+                  <ImageWithLoader
                     src={u.images[0].url || "/images/defaultImage.jpg"}
                     alt={u.name || u.compound || "Property"}
                     className="w-full h-full object-cover"
@@ -69,7 +68,22 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                   />
                 ) : (
                   <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-400">No image</span>
+                    <div className="text-center text-gray-400">
+                      <svg
+                        className="w-12 h-12 mx-auto mb-2"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                      <span className="text-xs">No image</span>
+                    </div>
                   </div>
                 )}
 

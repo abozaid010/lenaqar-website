@@ -3,9 +3,9 @@ import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 import Cookies from "js-cookie";
 import { Loader2, X } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import ImageWithLoader from "../image-with-loader";
 
 export default function SingleImageUploader({
   label,
@@ -135,13 +135,11 @@ export default function SingleImageUploader({
         {selectedImage || value ? (
           <div className="relative group w-full flex flex-col gap-1 items-center justify-center">
             <div className="relative w-full h-[240px]">
-              <Image
-                fill
-                priority={true}
+              <ImageWithLoader
                 src={selectedImage?.preview || value}
                 alt={`Image ${selectedImage?.name || "uploaded"}`}
-                className="rounded-md"
-                objectFit="cover"
+                className="w-full h-full object-cover rounded-md"
+                priority={true}
               />
 
               {(isUploading || uploading) && (

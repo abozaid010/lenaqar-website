@@ -1,7 +1,7 @@
 "use client";
 
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "swiper/css";
@@ -71,16 +71,16 @@ export default function ImageSwiperModal({
                 key={index}
                 className="flex items-center justify-center"
               >
-                <Image
+                <ImageWithLoader
                   src={image.url || "/images/defaultImage.jpg"}
                   alt={`Project Image ${index + 1}`}
-                  fill
-                  objectFit="contain"
-                  className="bg-stone-100 rounded-lg"
+                  className="w-full h-full object-contain bg-stone-100 rounded-lg"
                   priority={index === 0} // Load first image with priority
+                  loadingVariant="default"
+                  sizes="90vw"
                 />
                 {showMasterPlanLabel && image.isMasterPlan && (
-                  <div className="fixed top-4 left-4 bg-black/60 text-white px-3 py-1 rounded">
+                  <div className="absolute top-4 left-4 bg-black/60 text-white px-3 py-1 rounded z-10">
                     Master Plan
                   </div>
                 )}
