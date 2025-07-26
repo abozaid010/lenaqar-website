@@ -244,8 +244,7 @@ export default function AddCompoundDialog({
     }
 
     if (!formData.area || Number(formData.area) <= 0) {
-      newErrors.area =
-        t.formValidation?.areaRequired || "Area must be greater than 0";
+      newErrors.area = "Area must be greater than 0";
     }
 
     if (!formData.properties_types || formData.properties_types.length === 0) {
@@ -488,7 +487,7 @@ export default function AddCompoundDialog({
               <FormInput
                 type="number"
                 name="area"
-                label={t.formLabels?.area || "Area (m²)"}
+                label={t.formLabels?.area || "Area (fdan)"}
                 value={formData.area}
                 onChange={handleChange}
                 required

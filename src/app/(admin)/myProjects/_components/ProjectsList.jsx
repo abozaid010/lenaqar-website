@@ -2,7 +2,15 @@
 
 import { useI18n } from "@/context/translate-api";
 import { useCompounds } from "@/hooks/use-admin-shared-data";
-import { Clock, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  Clock,
+  CreditCard,
+  Home,
+  Pencil,
+  Plus,
+  Tag,
+  Trash2,
+} from "lucide-react";
 import Image from "next/image";
 
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
@@ -10,6 +18,7 @@ import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { BUILDING_TYPES } from "@/data/constants";
 import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { useEffect, useState } from "react";
@@ -19,6 +28,73 @@ import "swiper/css/pagination";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
+
+const getPropertyTypeLabel = (value, locale) => {
+  const type = BUILDING_TYPES.find((type) => type.value === value);
+  return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
+};
+
+const formatPaymentPlan = (plan, locale) => {
+  if (typeof plan === "string") {
+    return plan;
+  }
+  if (plan && typeof plan === "object") {
+    return plan.name;
+  }
+  return "";
+};
+
+const PropertyTypesBadges = ({ types, locale, maxDisplay = 3 }) => {
+  if (!types || types.length === 0) return null;
+
+  const displayTypes = types.slice(0, maxDisplay);
+  const remainingCount = types.length - maxDisplay;
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      <Home size={16} className="text-blue-600" />
+      {displayTypes.map((type, index) => (
+        <span
+          key={index}
+          className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
+        >
+          {getPropertyTypeLabel(type, locale)}
+        </span>
+      ))}
+      {remainingCount > 0 && (
+        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+          +{remainingCount}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const PaymentPlansBadges = ({ plans, locale, maxDisplay = 2 }) => {
+  if (!plans || plans.length === 0) return null;
+
+  const displayPlans = plans.slice(0, maxDisplay);
+  const remainingCount = plans.length - maxDisplay;
+
+  return (
+    <div className="flex items-center gap-1 flex-wrap">
+      <CreditCard size={16} className="text-green-600" />
+      {displayPlans.map((plan, index) => (
+        <span
+          key={index}
+          className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full"
+        >
+          {formatPaymentPlan(plan, locale)}
+        </span>
+      ))}
+      {remainingCount > 0 && (
+        <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full">
+          +{remainingCount}
+        </span>
+      )}
+    </div>
+  );
+};
 
 export default function ProjectsList({ clientId }) {
   const { data: compounds, isLoading } = useCompounds(clientId);
@@ -44,8 +120,17 @@ export default function ProjectsList({ clientId }) {
   const [phaseToDelete, setPhaseToDelete] = useState(null);
 
   useEffect(() => {
-    setProjectList(compounds || []);
-    setSelectedProject(compounds?.[0] || null);
+    if (!isLoading && compounds) {
+      const sorted = compounds.sort((a, b) => {
+        const nameA = locale === "ar" ? a.ar_name : a.en_name;
+        const nameB = locale === "ar" ? b.ar_name : b.en_name;
+        return nameA.trim().localeCompare(nameB.trim(), locale, {
+          sensitivity: "base",
+        });
+      });
+      setProjectList(sorted);
+      setSelectedProject(sorted[0] || null);
+    }
   }, [isLoading]);
 
   const handleProject = (data) => {
@@ -201,7 +286,7 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col lg:flex-row gap-4 p-3">
+      <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3">
         <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex justify-between items-center">
             <h2 className="text-white text-xl font-semibold">
@@ -242,100 +327,129 @@ export default function ProjectsList({ clientId }) {
               </div>
             ) : (
               <div className="space-y-3 p-4">
-                {projectList
-                  .sort((a, b) => {
-                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                    return nameA.trim().localeCompare(nameB.trim(), locale, {
-                      sensitivity: "base",
-                    });
-                  })
-                  .map((project) => (
-                    <div
-                      key={project.id}
-                      className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                {projectList.map((project) => (
+                  <div
+                    key={project.id}
+                    className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                      selectedProject?.id === project.id
+                        ? "bg-primary text-white"
+                        : ""
+                    }`}
+                    onClick={() => setSelectedProject(project)}
+                  >
+                    <h3
+                      className={`font-semibold text-lg ${
                         selectedProject?.id === project.id
-                          ? "bg-primary text-white"
-                          : ""
+                          ? "text-white"
+                          : "text-gray-800"
                       }`}
-                      onClick={() => setSelectedProject(project)}
                     >
-                      <h3
-                        className={`font-semibold text-lg ${
-                          selectedProject?.id === project.id
-                            ? "text-white"
-                            : "text-gray-800"
-                        }`}
-                      >
-                        {locale === "ar" ? project.ar_name : project.en_name}
-                      </h3>
-                      <div
-                        className={`flex items-center space-x-4 text-sm ${
-                          selectedProject?.id === project.id
-                            ? "text-white"
-                            : "text-gray-600"
-                        }`}
-                      >
-                        <div className="flex items-center">
-                          <svg
-                            className="w-4 h-4 mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                            />
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                            />
-                          </svg>
-                          {formatCityLabel(capitalize(project.city), locale)}
-                        </div>
-                        <div className="flex items-center">
-                          <svg
-                            className="w-4 h-4 mr-1"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                            />
-                          </svg>
-                          {formatDistrictLabel(
-                            capitalize(project.district),
-                            capitalize(project.city),
-                            locale
-                          )}
-                        </div>
-                        <div className="flex-1"></div>
-                        <button
-                          onClick={() => handleEditClick(project)}
-                          className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
-                          title="Edit Project"
+                      {locale === "ar" ? project.ar_name : project.en_name}
+                    </h3>
+                    <div
+                      className={`flex items-center space-x-4 text-sm mb-2 ${
+                        selectedProject?.id === project.id
+                          ? "text-white"
+                          : "text-gray-600"
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
                         >
-                          <Pencil size={16} />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteClick(project, e)}
-                          className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
-                          title="Delete Project"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                          />
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                          />
+                        </svg>
+                        {formatCityLabel(capitalize(project.city), locale)}
                       </div>
+                      <div className="flex items-center">
+                        <svg
+                          className="w-4 h-4 mr-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                          />
+                        </svg>
+                        {formatDistrictLabel(
+                          capitalize(project.district),
+                          capitalize(project.city),
+                          locale
+                        )}
+                      </div>
+                      <div className="flex-1"></div>
+                      <button
+                        onClick={() => handleEditClick(project)}
+                        className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
+                        title="Edit Project"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={(e) => handleDeleteClick(project, e)}
+                        className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
+                        title="Delete Project"
+                      >
+                        <Trash2 size={16} />
+                      </button>
                     </div>
-                  ))}
+
+                    {/* Property Types and Payment Plans */}
+                    <div className="space-y-2">
+                      {project.properties_types &&
+                        project.properties_types.length > 0 && (
+                          <div
+                            className={
+                              selectedProject?.id === project.id
+                                ? "opacity-90"
+                                : ""
+                            }
+                          >
+                            <PropertyTypesBadges
+                              types={project.properties_types}
+                              locale={locale}
+                              maxDisplay={2}
+                            />
+                          </div>
+                        )}
+
+                      {project.payment_plans &&
+                        project.payment_plans.length > 0 && (
+                          <div
+                            className={
+                              selectedProject?.id === project.id
+                                ? "opacity-90"
+                                : ""
+                            }
+                          >
+                            <PaymentPlansBadges
+                              plans={project.payment_plans}
+                              locale={locale}
+                              maxDisplay={2}
+                            />
+                          </div>
+                        )}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -407,6 +521,112 @@ export default function ProjectsList({ clientId }) {
                     <p>{selectedProject.description}</p>
                   </div>
                 )}
+
+                {/* Project Details Section */}
+                <div className="p-4 border-b border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Property Types Section */}
+                    {selectedProject.properties_types &&
+                      selectedProject.properties_types.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-lg text-gray-700 mb-3 flex items-center gap-2">
+                            <Home size={20} className="text-blue-600" />
+                            {t.formLabels?.propertyTypes || "Property Types"}
+                          </h4>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProject.properties_types.map(
+                              (type, index) => (
+                                <span
+                                  key={index}
+                                  className="px-3 py-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm font-medium rounded-lg flex items-center gap-2"
+                                >
+                                  <Tag size={14} />
+                                  {getPropertyTypeLabel(type, locale)}
+                                </span>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                    {/* Payment Plans Section */}
+                    {selectedProject.payment_plans &&
+                      selectedProject.payment_plans.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold text-lg text-gray-700 mb-3 flex items-center gap-2">
+                            <CreditCard size={20} className="text-green-600" />
+                            {t.formLabels?.paymentPlans || "Payment Plans"}
+                          </h4>
+                          <div className="space-y-2">
+                            {selectedProject.payment_plans.map(
+                              (plan, index) => (
+                                <div
+                                  key={index}
+                                  className="px-3 py-2 bg-green-50 border border-green-200 text-green-800 text-sm font-medium rounded-lg"
+                                >
+                                  {formatPaymentPlan(plan, locale)}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      )}
+                  </div>
+
+                  {/* Additional Project Info */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-4 border-t border-gray-100">
+                    {selectedProject.area && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.area}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {t.formLabels?.area}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedProject.gated !== undefined && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.gated
+                            ? locale === "ar"
+                              ? "نعم"
+                              : "Yes"
+                            : locale === "ar"
+                              ? "لا"
+                              : "No"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {t.formLabels?.gatedCommunity || "Gated Community"}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedProject.developer_name && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div
+                          className="text-lg font-bold text-primary max-w-full truncate"
+                          title={selectedProject.developer_name}
+                        >
+                          {selectedProject.developer_name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {t.formLabels?.developer || "Developer"}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedProject.phases && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.phases.length}
+                        </div>
+                        <div className="text-xs text-gray-500">{t.phases}</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
 
                 <div className="bg-primary p-4 flex justify-between items-center">
                   <h4 className="font-semibold text-lg  text-white bg-primary">

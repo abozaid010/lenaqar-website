@@ -40,12 +40,6 @@ export function useCitiesAndDistricts() {
 
 // Combined hook for all shared admin data
 export function useAdminSharedData(client_id, isPublic = false) {
-  console.log(
-    "useAdminSharedData called with client_id:",
-    client_id,
-    "isPublic:",
-    isPublic
-  );
   const developersQuery = useDevelopers(client_id, isPublic);
   const compoundsQuery = useCompounds(client_id, isPublic);
   const citiesQuery = useCitiesAndDistricts();
