@@ -1,10 +1,10 @@
 '"use client";';
 
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 import Cookies from "js-cookie";
-import Image from "next/image";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -171,12 +171,13 @@ export default function ImageUploader({
     return (
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
-          <Image
-            fill
-            priority={true}
+          <ImageWithLoader
             src={image.preview || image.url || "/placeholder.svg"}
             alt={`Image ${image.name}`}
             className="w-full h-full object-cover rounded-md"
+            priority={false}
+            loadingVariant="minimal"
+            sizes="200px"
           />
           {isSelected && uploadStatus[imageId] && (
             <div

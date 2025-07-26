@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -15,6 +14,7 @@ import {
   MapPin,
   Square,
 } from "lucide-react";
+import ImageWithLoader from "./image-with-loader";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -57,20 +57,18 @@ export default function PropertyCard({ data }) {
         className="rounded-md bg-gray-100 h-44 overflow-hidden relative"
       >
         {data.images?.length > 0 && (hoveredImage || data.images[0].url) ? (
-          <Image
+          <ImageWithLoader
             onMouseEnter={handleImageHover}
             onMouseLeave={() => setHoveredImage(null)}
             src={hoveredImage || data.images[0].url}
-            layout="fill"
-            objectFit="cover"
             alt="property_image"
+            className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
           />
         ) : (
-          <Image
+          <ImageWithLoader
             src="/images/property_placeholder.jpg"
-            layout="fill"
-            objectFit="cover"
             alt="property_image"
+            className="w-full h-full object-cover"
           />
         )}
       </Link>
