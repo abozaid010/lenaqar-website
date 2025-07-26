@@ -11,11 +11,11 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
-import Image from "next/image";
 
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
+import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { BUILDING_TYPES } from "@/data/constants";
@@ -472,16 +472,16 @@ export default function ProjectsList({ clientId }) {
                       setShowFullScreenSwiper(true);
                     }}
                   >
-                    <Image
+                    <ImageWithLoader
                       src={
                         selectedProject.master_plan.url ||
                         selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
                       alt={selectedProject.name || "Project Master Plan"}
-                      fill
-                      objectFit="cover"
-                      priority
+                      className="w-full h-full object-cover"
+                      priority={true}
+                      loadingVariant="default"
                     />
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
@@ -646,7 +646,7 @@ export default function ProjectsList({ clientId }) {
                   selectedProject.phases.length > 0 ? (
                     <>
                       <div className="h-96 relative overflow-hidden bg-gray-50 group">
-                        <Image
+                        <ImageWithLoader
                           src={
                             selectedProject.phases[selectedPhaseIdx]
                               ?.master_plan.url ||
@@ -663,9 +663,9 @@ export default function ProjectsList({ clientId }) {
                             selectedProject.phases[selectedPhaseIdx]?.name ||
                             "Phase Image"
                           }
-                          fill
-                          objectFit="cover"
-                          priority
+                          className="w-full h-full object-cover"
+                          priority={true}
+                          loadingVariant="default"
                         />
 
                         {/* Overlay for indication */}
@@ -771,7 +771,7 @@ export default function ProjectsList({ clientId }) {
                             }`}
                             onClick={() => setSelectedPhaseIdx(idx)}
                           >
-                            <Image
+                            <ImageWithLoader
                               src={
                                 phase.master_plan.url ||
                                 (Array.isArray(phase?.images) &&
@@ -780,8 +780,10 @@ export default function ProjectsList({ clientId }) {
                                   : "/images/defaultImage.jpg")
                               }
                               alt={phase.name || "Phase Thumbnail"}
-                              fill
-                              objectFit="cover"
+                              className="w-full h-full object-cover"
+                              priority={false}
+                              loadingVariant="minimal"
+                              showLoadingText={false}
                             />
                             <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
                               <div className="text-white text-xs font-semibold line-clamp-1">
