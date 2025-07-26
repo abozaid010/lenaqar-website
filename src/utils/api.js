@@ -26,7 +26,7 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   try {
     const params = {
       ...JSON.parse(searchParams),
-      page_size: 20,
+      page_size: 16,
     };
 
     const response = await axiosInstance.get(
