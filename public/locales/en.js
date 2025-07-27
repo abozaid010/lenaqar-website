@@ -865,20 +865,6 @@ export default {
     common: {
       na: "N/A",
     },
-    buildingTypesMap: {
-      Notdefined: "Not defined",
-      apartment: "Apartment",
-      villa: "Villa",
-      townhouse: "Townhouse",
-      duplex: "Duplex",
-      penthouse: "Penthouse",
-      studio: "Studio",
-      chalet: "Chalet",
-      office: "Office",
-      shop: "Shop",
-      twinhouse: "Twinhouse",
-      house: "House",
-    },
   },
   common: {
     ProcessingImages: "Processing images...",

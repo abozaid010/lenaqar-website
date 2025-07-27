@@ -1,5 +1,6 @@
 "use client";
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import {
   Bath,
@@ -17,7 +18,7 @@ import {
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
-export default function Uni({ unit }) {
+export default function UnitBasicInfo({ unit }) {
   const { t, locale } = useI18n();
   return (
     <div className="w-full md:w-1/2 xl:w-2/5">
@@ -26,9 +27,9 @@ export default function Uni({ unit }) {
           {t.purpose?.[unit.purpose] || unit.purpose}
         </span>
         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {t.unitDetails?.buildingTypesMap?.[unit.buildingType.toLowerCase()] ||
-            unit.buildingType.charAt(0).toUpperCase() +
-              unit.buildingType.slice(1)}
+          {BUILDING_TYPES.find(
+            (type) => type.value === unit.buildingType.toLowerCase()
+          )?.[locale === "ar" ? "ar_label" : "en_label"] || unit.buildingType}
         </span>
       </div>
 
