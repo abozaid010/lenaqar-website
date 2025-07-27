@@ -240,6 +240,7 @@ export default {
       missingRequirement: "متطلب مفقود",
       blocked: "محظور",
       print: "طباعه",
+      exportExcel: "تصدير إلى Excel",
       onGoingConversion: "محادثه جاريه",
       qualifiedLead: "موجه للشراء",
       noAction: "لا يوجد إجراء",

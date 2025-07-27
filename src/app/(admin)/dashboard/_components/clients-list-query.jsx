@@ -43,6 +43,8 @@ export default function ClientsListQuery({ searchParams }) {
     );
   }
 
+  console.log(users);
+
   if (isError) {
     return (
       <div className="flex items-center justify-center h-full">

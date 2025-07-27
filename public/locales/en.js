@@ -252,6 +252,7 @@ export default {
       missingRequirement: "Missing Requirement",
       blocked: "blocked",
       print: "print",
+      exportExcel: "Export to Excel",
       onGoingConversion: "On Going Conversion",
       qualifiedLead: "Qualified Lead",
       noAction: "No Action",
