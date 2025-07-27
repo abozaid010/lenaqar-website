@@ -107,6 +107,19 @@ export function useExcelExport(searchParams) {
     return filterData;
   };
 
+  function triggerDownload(url, fileName) {
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = true;
+
+    document.body.appendChild(a);
+    a.click();
+
+    // Clean up
+    URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+
   const exportToExcel = (filename = "users_data") => {
     const currentUsers = users || [];
 
@@ -239,8 +252,18 @@ export function useExcelExport(searchParams) {
       const currentDate = new Date().toISOString().split("T")[0];
       const finalFilename = `${filename}_${currentDate}.xlsx`;
 
-      // Write and download the file
-      XLSX.writeFile(workbook, finalFilename);
+      // Create blob and trigger native browser download
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const url = URL.createObjectURL(blob);
+      triggerDownload(url, finalFilename);
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       alert(
