@@ -77,7 +77,10 @@ export function useExcelExport(searchParams) {
       filterData.push({
         [locale === "ar" ? "المرشح" : "Filter"]:
           locale === "ar" ? "الإجراء المطبق" : "Applied Action",
-        [locale === "ar" ? "القيمة" : "Value"]: parsedParams.action,
+        [locale === "ar" ? "القيمة" : "Value"]: getActionLabel(
+          parsedParams.action,
+          locale
+        ),
       });
     } else {
       filterData.push({
