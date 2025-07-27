@@ -123,10 +123,7 @@ export function useExcelExport(searchParams) {
       const formattedData = currentUsers.map(formatUserData);
       const clientsWorksheet = XLSX.utils.json_to_sheet(formattedData);
 
-      console.log("Formatted Data for Excel:", formattedData);
-
       const columnHeaders = Object.keys(formattedData[0]);
-      console.log("Column Headers:", columnHeaders);
 
       // Set specific widths based on column content
       const clientsCols = columnHeaders.map((header) => {

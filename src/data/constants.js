@@ -1,4 +1,5 @@
 export const BUILDING_TYPES = [
+  { value: "Not defined", en_label: "Not defined", ar_label: "غير محدد" },
   { value: "apartment", en_label: "Apartment", ar_label: "شقة" },
   { value: "chalet", en_label: "Chalet", ar_label: "شاليه" },
   { value: "duplex", en_label: "Duplex", ar_label: "دوبلكس" },

@@ -211,14 +211,11 @@ export default function ClientsTable({ users, pagination }) {
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {user.requirement_name &&
-                            user.requirement_name !== "Not defined"
-                              ? BUILDING_TYPES.find(
-                                  (type) => type.value === user.requirement_name
-                                )?.[
-                                  locale === "ar" ? "ar_label" : "en_label"
-                                ] || user.requirement_name
-                              : t.clientsTable.notDefined}
+                            {(user.requirement_name &&
+                              BUILDING_TYPES.find(
+                                (type) => type.value === user.requirement_name
+                              )?.[locale === "ar" ? "ar_label" : "en_label"]) ||
+                              user.requirement_name}
                           </span>
                         )}
                       </td>
