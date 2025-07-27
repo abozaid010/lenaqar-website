@@ -1,9 +1,9 @@
 "use client";
 
-import { getShareUnitData } from "@/components/services/serviceFetching";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import ShareModal from "@/components/ui/units-share-modal";
+import { getShareUnitData } from "@/utils/api";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -83,7 +83,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
         </div>
 
         {/* Share Button */}
-        {!readOnly ? (
+        {!readOnly && (
           <button
             type="button"
             onClick={handleShareClick}
@@ -91,8 +91,6 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
           >
             <img src={shareButton.src} alt="share" />
           </button>
-        ) : (
-          ""
         )}
       </div>
 
@@ -147,12 +145,14 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
       )}
 
       {/* ShareModal component with the correct props */}
-      <ShareModal
-        showModal={showModal}
-        setShowModal={setShowModal}
-        shareData={shareData}
-        loadingShare={loadingShare}
-      />
+      {!readOnly && (
+        <ShareModal
+          showModal={showModal}
+          setShowModal={setShowModal}
+          shareData={shareData}
+          loadingShare={loadingShare}
+        />
+      )}
     </div>
   );
 }

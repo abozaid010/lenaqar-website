@@ -4,7 +4,7 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import Cookies from "js-cookie";
 
 export async function fetchUsersData(searchParams) {
-  const clientId = Cookies.get("lena-website-client_id");
+  const clientId = await getClientid();
 
   try {
     const params = {
@@ -400,4 +400,32 @@ export async function updateProfileData(formData) {
     console.error("Failed to update profile data:", error.message);
     return { error: error.message };
   }
+}
+
+// Share Unit Data API //
+export async function getShareUnitData(unit_id) {
+  const clientId = await getClientid();
+
+  try {
+    const params = {
+      client_id: clientId,
+      unit_id: unit_id,
+    };
+
+    const response = await axiosInstance.get("/shared-links/share", { params });
+    return response.data.data;
+  } catch (error) {
+    console.error("API Error:", error);
+    return { error: error.message };
+  }
+}
+
+// HELPER FUNCTIONS //
+export async function getClientid() {
+  const clientId = Cookies.get("lena-website-client_id");
+  if (!clientId) {
+    console.error("Client ID not found in cookies");
+    return null;
+  }
+  return clientId;
 }
