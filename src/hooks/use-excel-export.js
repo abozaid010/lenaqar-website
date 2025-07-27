@@ -1,6 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import { useUsersData } from "@/hooks/use-users-data";
 import { getActionLabel } from "@/utils/actions";
 import * as XLSX from "xlsx";
@@ -31,7 +32,9 @@ export function useExcelExport(searchParams) {
         user.name || (locale === "ar" ? "عميل جديد" : "New Lead"),
       [t.clientsTable.headers.userNumber]: user.phone_number || "N/A",
       [t.clientsTable.headers.requirements]:
-        user.requirement_name || (locale === "ar" ? "غير محدد" : "Not Defined"),
+        BUILDING_TYPES.find((type) => type.value === user.requirement_name)?.[
+          locale === "ar" ? "ar_label" : "en_label"
+        ] || user.requirement_name,
       [locale === "ar" ? "النقاط" : "Score"]: String(user.score || 0),
       [t.clientsTable.headers.messageCount]: String(user.messages_count || 0),
       [t.clientsTable.headers.action]: getActionLabel(user.last_action, locale),
