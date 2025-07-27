@@ -57,23 +57,6 @@ export async function assignSalsePerson(id, additionalProp1) {
   }
 }
 
-export async function getShareUnitData(unit_id) {
-  const clientId = await getClientid();
-
-  try {
-    const params = {
-      client_id: clientId,
-      unit_id: unit_id,
-    };
-
-    const response = await axiosInstance.get("/shared-links/share", { params });
-    return response.data.data;
-  } catch (error) {
-    console.error("API Error:", error);
-    return { error: error.message };
-  }
-}
-
 // #### Sales API ####
 export async function getSalesData() {
   try {

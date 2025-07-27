@@ -3,10 +3,10 @@
 import { useI18n } from "@/context/translate-api";
 import Link from "next/link";
 
-import { getShareUnitData } from "@/components/services/serviceFetching";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
+import { getShareUnitData } from "@/utils/api";
 import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
