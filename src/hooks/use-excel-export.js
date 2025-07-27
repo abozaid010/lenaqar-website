@@ -110,7 +110,7 @@ export function useExcelExport(searchParams) {
   function triggerDownload(url, fileName) {
     const a = document.createElement("a");
     a.href = url;
-    a.download = true;
+    a.download = fileName;
 
     document.body.appendChild(a);
     a.click();
