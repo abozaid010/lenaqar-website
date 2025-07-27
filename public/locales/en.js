@@ -252,6 +252,7 @@ export default {
       missingRequirement: "Missing Requirement",
       blocked: "blocked",
       print: "print",
+      exportExcel: "Export to Excel",
       onGoingConversion: "On Going Conversion",
       qualifiedLead: "Qualified Lead",
       noAction: "No Action",
@@ -863,20 +864,6 @@ export default {
     },
     common: {
       na: "N/A",
-    },
-    buildingTypesMap: {
-      Notdefined: "Not defined",
-      apartment: "Apartment",
-      villa: "Villa",
-      townhouse: "Townhouse",
-      duplex: "Duplex",
-      penthouse: "Penthouse",
-      studio: "Studio",
-      chalet: "Chalet",
-      office: "Office",
-      shop: "Shop",
-      twinhouse: "Twinhouse",
-      house: "House",
     },
   },
   common: {

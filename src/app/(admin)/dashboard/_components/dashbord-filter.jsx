@@ -1,5 +1,6 @@
 "use client";
 
+import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
 import { useI18n } from "@/context/translate-api";
@@ -182,14 +183,18 @@ export default function DashbordFilter({ appliedFilters }) {
           )}
         </div>
 
-        {/* Improved print button with icon and better styling */}
-        <button
-          onClick={handlePrint}
-          className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
-        >
-          <Printer size={16} />
-          {t.dashboardFilter.actions.print}
-        </button>
+        {/* Action buttons - Print and Export */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handlePrint}
+            className="flex items-center gap-1 px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium"
+          >
+            <Printer size={16} />
+            {t.dashboardFilter.actions.print}
+          </button>
+
+          <ExcelExportButton searchParams={appliedFilters} />
+        </div>
       </div>
 
       <AverageScore />

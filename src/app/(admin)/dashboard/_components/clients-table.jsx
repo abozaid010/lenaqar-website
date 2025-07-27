@@ -2,6 +2,7 @@
 
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
+import { BUILDING_TYPES } from "@/data/constants";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements } from "@/utils/api";
 import { BellDot, Loader2 } from "lucide-react";
@@ -210,12 +211,11 @@ export default function ClientsTable({ users, pagination }) {
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {user.requirement_name &&
-                            user.requirement_name !== "Not defined"
-                              ? t.unitDetails?.buildingTypesMap?.[
-                                  user.requirement_name
-                                ] || user.requirement_name
-                              : t.clientsTable.notDefined}
+                            {(user.requirement_name &&
+                              BUILDING_TYPES.find(
+                                (type) => type.value === user.requirement_name
+                              )?.[locale === "ar" ? "ar_label" : "en_label"]) ||
+                              user.requirement_name}
                           </span>
                         )}
                       </td>
