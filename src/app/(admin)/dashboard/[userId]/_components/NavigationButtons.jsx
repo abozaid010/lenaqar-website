@@ -24,7 +24,7 @@ export default function NavigationButtons({ id }) {
   }, [id]);
 
   const handleNavigation = (id) => {
-    router.push(`/dashboard/chat/${id}`);
+    router.push(`/dashboard/${id}`);
   };
 
   return (

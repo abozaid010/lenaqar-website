@@ -1,24 +1,19 @@
 "use client";
 
-import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { useUnitDetailsPageData } from "@/hooks/use-unit-details-data";
 import Link from "next/link";
 
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
-import UnitPageHeader from "../../_components/unit-page-header";
+import UnitPageHeader from "@/components/ui/unit-forms/unit-page-header";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-export default function UnitDetailsPageQuery({ unitId, clientId }) {
+export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
   const { unit, hasAccess, isInitialLoading, errorMessage } =
-    useUnitDetailsPageData(unitId);
+    useUnitDetailsPageData(unitId, isPublic);
 
-  const { developers, compounds, citiesAndDistricts, isSharedDataLoading } =
-    useAdminSharedData();
-
-  // Show loading state
-  if (isInitialLoading || isSharedDataLoading) {
+  if (isInitialLoading) {
     return (
       <div className="container mx-auto h-full flex items-center justify-center">
         <LoadingSpinner />
@@ -26,7 +21,6 @@ export default function UnitDetailsPageQuery({ unitId, clientId }) {
     );
   }
 
-  // Show error state
   if (errorMessage) {
     return (
       <div className="container mx-auto h-full flex items-center justify-center min-h-[60vh]">
@@ -80,13 +74,7 @@ export default function UnitDetailsPageQuery({ unitId, clientId }) {
   if (hasAccess && unit.data) {
     return (
       <div className="container mx-auto h-full">
-        <UnitPageHeader
-          unit={unit.data}
-          compounds={compounds.data}
-          developers={developers.data}
-          citiesAndDistricts={citiesAndDistricts.data}
-          clientId={clientId}
-        />
+        {!isPublic && <UnitPageHeader unit={unit.data} />}
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
           <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">

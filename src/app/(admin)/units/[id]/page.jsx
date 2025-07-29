@@ -1,7 +1,6 @@
+import UnitDetailsPageQuery from "@/components/ui/unit-details/unit-details-page-query";
 import { cookies } from "next/headers";
-import UnitDetailsPageQuery from "./_components/unit-details-page-query";
 
-// Dynamic metadata
 export async function generateMetadata() {
   const cookieStore = await cookies();
 
@@ -15,12 +14,8 @@ export async function generateMetadata() {
   };
 }
 
-const Page = async ({ params }) => {
+export default async function PrivateUnitDetailsPage({ params }) {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const clientId = cookieStore.get("lena-website-client_id")?.value;
 
-  return <UnitDetailsPageQuery unitId={id} clientId={clientId} />;
-};
-
-export default Page;
+  return <UnitDetailsPageQuery unitId={id} isPublic={false} />;
+}

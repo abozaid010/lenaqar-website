@@ -16,7 +16,7 @@ export const unitKeys = {
   all: ["units"],
   lists: () => [...unitKeys.all, "list"],
   list: (filters) => [...unitKeys.lists(), filters],
-  details: () => [...unitKeys.all, "detail"],
+  details: (id, isPublic) => [...unitKeys.all, "detail", { id, isPublic }],
   detail: (id) => [...unitKeys.details(), id],
 };
 

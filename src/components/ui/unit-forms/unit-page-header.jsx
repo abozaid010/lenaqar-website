@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
 
-export default function UnitPageHeader({ unit, clientId }) {
+export default function UnitPageHeader({ unit }) {
   const router = useRouter();
   const { t, locale } = useI18n();
 

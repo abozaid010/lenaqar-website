@@ -4,7 +4,7 @@ import { useI18n } from "@/context/translate-api";
 import Cookies from "js-cookie";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
-import { sendNewMessage } from "../_actions/actions";
+import { sendNewMessage } from "../../_actions/actions";
 const initialState = {
   success: false,
   message: "",

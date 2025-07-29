@@ -145,12 +145,10 @@ export default function ClientsTable({ users, pagination }) {
 
                   return (
                     <tr
-                      onClick={() =>
-                        router.push(`/dashboard/chat/${user.user_id}`)
-                      }
+                      onClick={() => router.push(`/dashboard/${user.user_id}`)}
                       onKeyDown={(e) =>
                         e.key === "Enter" &&
-                        router.push(`/dashboard/chat/${user.user_id}`)
+                        router.push(`/dashboard/${user.user_id}`)
                       }
                       role="button"
                       tabIndex={0}
