@@ -3,11 +3,11 @@
 import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import BasicDetailsStep from "@/components/ui/unit-forms/basic-details-step";
+import ImagesStep from "@/components/ui/unit-forms/images-step";
+import RentalDetailsStep from "@/components/ui/unit-forms/rental-details-step";
+import SaleDetailsStep from "@/components/ui/unit-forms/sale-details-step";
 import StepIndicator from "./step-indicator";
-import BasicDetailsStep from "./steps/basic-details-step";
-import ImagesStep from "./steps/images-step";
-import RentalDetailsStep from "./steps/rental-details-step";
-import SaleDetailsStep from "./steps/sale-details-step";
 
 import { useI18n } from "@/context/translate-api";
 import { useAdminSharedData } from "@/hooks/use-admin-shared-data";

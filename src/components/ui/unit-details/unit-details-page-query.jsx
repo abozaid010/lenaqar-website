@@ -6,7 +6,7 @@ import Link from "next/link";
 
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
-import UnitPageHeader from "../../../app/(admin)/units/_components/unit-page-header";
+import UnitPageHeader from "@/components/ui/unit-forms/unit-page-header";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 

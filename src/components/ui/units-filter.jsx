@@ -1,6 +1,6 @@
 "use client";
 
-import AddUnitButton from "@/app/(admin)/units/_components/add-unit-button";
+import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { BUILDING_TYPES, STATIC_CITIES } from "@/data/constants";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
