@@ -13,10 +13,10 @@ import ToggleReplyType from "./reply-type";
 import SendNewMessageForm from "./send-new-message";
 import ShowRequirementBtn from "./showRequirementBtn";
 
-export default function ChatClientWrapper({ userId, clientId }) {
+export default function ChatClientWrapper({ userId }) {
   const [chatHistory, setChatHistory] = useState([]);
 
-  const { data, error, isFetching, isPending, isLoading } = useQuery({
+  const { data, error, isLoading } = useQuery({
     queryKey: ["chatHistory", userId],
     queryFn: () => getChatHistory(userId),
     staleTime: 1000 * 60 * 15, // 15 minutes
@@ -79,7 +79,7 @@ export default function ChatClientWrapper({ userId, clientId }) {
           />
           <ToggleReplyType
             userId={userId}
-            clientID={clientId}
+            clientID={data.data.client_id}
             source={data.data.source || null}
           />
           <Link
