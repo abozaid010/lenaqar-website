@@ -5,18 +5,17 @@ import { unitKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
 // Hook for fetching a single unit by ID
-export function useUnitDetails(unitId) {
+export function useUnitDetails(unitId, isPublic) {
   return useQuery({
-    queryKey: unitKeys.detail(unitId),
-    queryFn: () => fetchUnitById(unitId),
+    queryKey: unitKeys.details(unitId, isPublic),
+    queryFn: () => fetchUnitById(unitId, isPublic),
     staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
-    enabled: !!unitId, // Only run if unitId is provided
   });
 }
 
 // Combined hook for unit details page (unit + shared data)
-export function useUnitDetailsPageData(unitId) {
+export function useUnitDetailsPageData(unitId, isPublic = false) {
   const unitQuery = useUnitDetails(unitId);
 
   return {

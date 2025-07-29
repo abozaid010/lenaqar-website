@@ -18,5 +18,5 @@ export async function generateMetadata() {
 export default async function PrivateUnitDetailsPage({ params }) {
   const { id } = await params;
 
-  return <UnitDetailsPageQuery unitId={id} />;
+  return <UnitDetailsPageQuery unitId={id} isPublic={false} />;
 }

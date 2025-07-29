@@ -96,9 +96,10 @@ export async function getClientActions(phoneNumber) {
   }
 }
 
-export async function fetchUnitById(id) {
+export async function fetchUnitById(id, isPublic = false) {
+  const url = isPublic ? `/public/unit-details/${id}` : `/units/details/${id}`;
   try {
-    const response = await axiosInstance.get(`/units/details/${id}`);
+    const response = await axiosInstance.get(url);
     return response.data;
   } catch (error) {
     console.error("Failed to fetch unit by id:", error.message);

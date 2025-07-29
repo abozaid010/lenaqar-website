@@ -10,12 +10,12 @@ import UnitPageHeader from "../../../app/(admin)/units/_components/unit-page-hea
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-export default function UnitDetailsPageQuery({ unitId }) {
+export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
   const { unit, hasAccess, isInitialLoading, errorMessage } =
-    useUnitDetailsPageData(unitId);
+    useUnitDetailsPageData(unitId, isPublic);
 
   const { developers, compounds, citiesAndDistricts, isSharedDataLoading } =
-    useAdminSharedData();
+    useAdminSharedData("", isPublic);
 
   // Show loading state
   if (isInitialLoading || isSharedDataLoading) {
@@ -80,12 +80,14 @@ export default function UnitDetailsPageQuery({ unitId }) {
   if (hasAccess && unit.data) {
     return (
       <div className="container mx-auto h-full">
-        <UnitPageHeader
-          unit={unit.data}
-          compounds={compounds.data}
-          developers={developers.data}
-          citiesAndDistricts={citiesAndDistricts.data}
-        />
+        {!isPublic && (
+          <UnitPageHeader
+            unit={unit.data}
+            compounds={compounds.data}
+            developers={developers.data}
+            citiesAndDistricts={citiesAndDistricts.data}
+          />
+        )}
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
           <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">
