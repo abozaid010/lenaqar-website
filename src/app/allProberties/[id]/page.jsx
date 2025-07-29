@@ -13,7 +13,7 @@ export async function generateMetadata({ params }) {
   };
 }
 
-const Page = async ({ params }) => {
+export default async function PublicUnitDetailsPage({ params }) {
   const { id } = await params;
   const unit = await fetchUnitByIdpublic(id);
 
@@ -33,6 +33,4 @@ const Page = async ({ params }) => {
       </div>
     </>
   );
-};
-
-export default Page;
+}

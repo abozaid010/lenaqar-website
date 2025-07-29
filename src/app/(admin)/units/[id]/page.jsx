@@ -15,10 +15,8 @@ export async function generateMetadata() {
   };
 }
 
-const Page = async ({ params }) => {
+export default async function PrivateUnitDetailsPage({ params }) {
   const { id } = await params;
 
   return <UnitDetailsPageQuery unitId={id} />;
-};
-
-export default Page;
+}
