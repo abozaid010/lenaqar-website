@@ -3,16 +3,6 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "./clientCookies";
 
-export async function fetchUnitByIdpublic(id) {
-  try {
-    const response = await axiosInstance.get(`/public/unit-details/${id}`, {});
-    return response.data.data;
-  } catch (error) {
-    console.error("Failed to fetch unit by id:", error.message);
-    return { error: error.message };
-  }
-}
-
 export async function getschedual(startDate, endDate) {
   try {
     const response = await axiosInstance.get(
