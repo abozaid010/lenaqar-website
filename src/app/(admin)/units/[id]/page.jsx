@@ -1,7 +1,6 @@
 import UnitDetailsPageQuery from "@/components/ui/unit-details/unit-details-page-query";
 import { cookies } from "next/headers";
 
-// Dynamic metadata
 export async function generateMetadata() {
   const cookieStore = await cookies();
 

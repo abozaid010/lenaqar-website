@@ -15,8 +15,8 @@ export function useUnitDetails(unitId, isPublic) {
 }
 
 // Combined hook for unit details page (unit + shared data)
-export function useUnitDetailsPageData(unitId, isPublic = false) {
-  const unitQuery = useUnitDetails(unitId);
+export function useUnitDetailsPageData(unitId, isPublic) {
+  const unitQuery = useUnitDetails(unitId, isPublic);
 
   return {
     unit: {
