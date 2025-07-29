@@ -24,11 +24,11 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 
   return (
     <div className="bg-gray-50 min-h-screen ">
-      <div className="container mx-auto my-3 no-print !px-0">
+      <div className="container my-3 no-print !px-0">
         <PremiumFeatures />
       </div>
 
-      <div className="container mx-auto bg-white rounded-md shadow-sm md:py-6">
+      <div className="container bg-white rounded-md shadow-sm py-4 md:py-6">
         <AverageScoreProvider>
           <DashbordFilter appliedFilters={searchParams} />
 

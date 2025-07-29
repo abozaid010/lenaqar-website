@@ -19,8 +19,10 @@ export default function ExcelExportButton({ searchParams }) {
       className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
       title={t.dashboardFilter.actions.exportExcel}
     >
-      <FileDown size={16} />
-      {t.dashboardFilter.actions.exportExcel}
+      <FileDown size={18} className="shrink-0" />
+      <span className="hidden lg:block">
+        {t.dashboardFilter.actions.exportExcel}
+      </span>
     </button>
   );
 }
