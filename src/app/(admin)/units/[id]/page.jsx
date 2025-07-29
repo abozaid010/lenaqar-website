@@ -17,10 +17,8 @@ export async function generateMetadata() {
 
 const Page = async ({ params }) => {
   const { id } = await params;
-  const cookieStore = await cookies();
-  const clientId = cookieStore.get("lena-website-client_id")?.value;
 
-  return <UnitDetailsPageQuery unitId={id} clientId={clientId} />;
+  return <UnitDetailsPageQuery unitId={id} />;
 };
 
 export default Page;

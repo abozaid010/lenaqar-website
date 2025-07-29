@@ -10,7 +10,7 @@ import UnitPageHeader from "../../../app/(admin)/units/_components/unit-page-hea
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-export default function UnitDetailsPageQuery({ unitId, clientId }) {
+export default function UnitDetailsPageQuery({ unitId }) {
   const { unit, hasAccess, isInitialLoading, errorMessage } =
     useUnitDetailsPageData(unitId);
 
@@ -85,7 +85,6 @@ export default function UnitDetailsPageQuery({ unitId, clientId }) {
           compounds={compounds.data}
           developers={developers.data}
           citiesAndDistricts={citiesAndDistricts.data}
-          clientId={clientId}
         />
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
