@@ -1,5 +1,5 @@
+import UnitDetailsPageQuery from "@/components/ui/unit-details/unit-details-page-query";
 import { cookies } from "next/headers";
-import UnitDetailsPageQuery from "./_components/unit-details-page-query";
 
 // Dynamic metadata
 export async function generateMetadata() {
