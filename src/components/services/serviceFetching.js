@@ -13,27 +13,6 @@ export async function fetchUnitByIdpublic(id) {
   }
 }
 
-export async function resetUnreadMessagesCount(userId) {
-  try {
-    await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
-  } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
-  }
-}
-
-export async function getChatHistory(userId) {
-  const cookieClientId = await getClientid();
-
-  try {
-    const response = await axiosInstance.get(
-      `/messages/messages/${cookieClientId}/${userId}`
-    );
-    return response.data;
-  } catch (error) {
-    return error;
-  }
-}
 export async function getschedual(startDate, endDate) {
   try {
     const response = await axiosInstance.get(

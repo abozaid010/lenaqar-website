@@ -4,7 +4,7 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import Cookies from "js-cookie";
 
 export async function fetchUsersData(searchParams) {
-  const clientId = await getClientid();
+  const clientId = getClientid();
 
   try {
     const params = {
@@ -404,7 +404,7 @@ export async function updateProfileData(formData) {
 
 // Share Unit Data API //
 export async function getShareUnitData(unit_id) {
-  const clientId = await getClientid();
+  const clientId = getClientid();
 
   try {
     const params = {
@@ -420,8 +420,31 @@ export async function getShareUnitData(unit_id) {
   }
 }
 
+// Chat History API //
+export async function resetUnreadMessagesCount(userId) {
+  try {
+    await axiosInstance.post(`/messages/mark-as-read?user_id=${userId}`);
+  } catch (error) {
+    console.error("Failed to fetch users:", error.message);
+    return { error: error.message };
+  }
+}
+
+export async function getChatHistory(userId) {
+  const cookieClientId = getClientid();
+
+  try {
+    const response = await axiosInstance.get(
+      `/messages/messages/${cookieClientId}/${userId}`
+    );
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+}
+
 // HELPER FUNCTIONS //
-export async function getClientid() {
+export function getClientid() {
   const clientId = Cookies.get("lena-website-client_id");
   if (!clientId) {
     console.error("Client ID not found in cookies");
