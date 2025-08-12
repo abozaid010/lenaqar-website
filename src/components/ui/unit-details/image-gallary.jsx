@@ -44,7 +44,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
   };
 
   return (
-    <div className="space-y-2 w-full md:w-1/2 xl:w-2/5">
+    <div className="space-y-2 flex-1">
       <div
         className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
         onClick={() => setIsFullscreen(true)}
