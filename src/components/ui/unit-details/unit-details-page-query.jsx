@@ -5,11 +5,14 @@ import Link from "next/link";
 
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
 import UnitBasicInfo from "@/components/ui/unit-details/unit-basic-info";
+import UnitDetailsChatBot from "@/components/ui/unit-details/unit-details-chatbot";
 import UnitPageHeader from "@/components/ui/unit-forms/unit-page-header";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import Cookies from "js-cookie";
 
 export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
+  const client_id = !isPublic ? Cookies.get("lena-website-client_id") : null;
   const { unit, hasAccess, isInitialLoading, errorMessage } =
     useUnitDetailsPageData(unitId, isPublic);
 
@@ -73,20 +76,31 @@ export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
   // Show unit details
   if (hasAccess && unit.data) {
     return (
-      <div className="container mx-auto h-full">
+      <div className="container h-full">
         {!isPublic && <UnitPageHeader unit={unit.data} />}
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden py-6 p-3">
-          <div className="flex flex-col md:flex-row gap-4 lg:gap-6 xl:gap-14 justify-center">
+        <div className="bg-white rounded-lg shadow-md overflow-hidden p-3 lg:p-6">
+          <div className="flex flex-col md:flex-row gap-4 lg:gap-6 flex-1">
             <ImageGallary
               images={unit.data.images}
               unitName={unit.data.unitTitle}
               unitId={unit.data.unitId}
             />
-
             <UnitBasicInfo unit={unit.data} />
+
+            {/* Desktop ChatBot - Inline */}
+            <div className="hidden xl:block min-w-[360px]">
+              <UnitDetailsChatBot isInline={true} unitId={unitId} />
+            </div>
           </div>
         </div>
+
+        {/* Mobile ChatBot - Floating Button */}
+        <UnitDetailsChatBot
+          isInline={false}
+          unitId={unitId}
+          client_id={client_id}
+        />
       </div>
     );
   }
