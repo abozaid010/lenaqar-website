@@ -9,8 +9,10 @@ import UnitDetailsChatBot from "@/components/ui/unit-details/unit-details-chatbo
 import UnitPageHeader from "@/components/ui/unit-forms/unit-page-header";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import Cookies from "js-cookie";
 
 export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
+  const client_id = !isPublic ? Cookies.get("lena-website-client_id") : null;
   const { unit, hasAccess, isInitialLoading, errorMessage } =
     useUnitDetailsPageData(unitId, isPublic);
 
@@ -94,7 +96,11 @@ export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
         </div>
 
         {/* Mobile ChatBot - Floating Button */}
-        <UnitDetailsChatBot isInline={false} unitId={unitId} />
+        <UnitDetailsChatBot
+          isInline={false}
+          unitId={unitId}
+          client_id={client_id}
+        />
       </div>
     );
   }
