@@ -16,9 +16,9 @@ const UnitDetailsChatBot = ({ isInline = false }) => {
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <Bot size={20} className="text-white" />
+          <div className="flex items-center justify-end w-full space-x-2">
             <h3 className="text-lg font-medium text-white">LenaAI Assistant</h3>
+            <Bot size={20} className="text-white" />
           </div>
         </div>
 
