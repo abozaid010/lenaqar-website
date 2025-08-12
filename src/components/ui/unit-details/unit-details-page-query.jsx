@@ -88,13 +88,13 @@ export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
 
             {/* Desktop ChatBot - Inline */}
             <div className="hidden xl:block min-w-[360px]">
-              <UnitDetailsChatBot isInline={true} />
+              <UnitDetailsChatBot isInline={true} unitId={unitId} />
             </div>
           </div>
         </div>
 
         {/* Mobile ChatBot - Floating Button */}
-        <UnitDetailsChatBot isInline={false} />
+        <UnitDetailsChatBot isInline={false} unitId={unitId} />
       </div>
     );
   }
