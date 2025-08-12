@@ -1,5 +1,5 @@
 "use client";
-import { Bot, X } from "lucide-react";
+import { Bot } from "lucide-react";
 import { useState } from "react";
 
 const UnitDetailsChatBot = ({
@@ -24,16 +24,16 @@ const UnitDetailsChatBot = ({
 
   if (isInline) {
     return (
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center">
+      <div className="bg-white rounded-lg shadow-md overflow-hidden h-full">
+        {/* <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center">
           <div className="flex items-center justify-end w-full space-x-2">
             <h3 className="text-lg font-medium text-white">LenaAI Assistant</h3>
             <Bot size={20} className="text-white" />
           </div>
-        </div>
+        </div> */}
 
         {/* Desktop Inline Chat iFrame */}
-        <div className="h-96 lg:h-[580px]">
+        <div className="h-full">
           <iframe
             src={chatUrl}
             title="LenaAI Chat"
@@ -63,12 +63,13 @@ const UnitDetailsChatBot = ({
       {/* Chat Popup for Mobile */}
       <div
         className={`fixed inset-0 bg-black/50 z-50 xl:hidden ${isChatOpen ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity duration-300`}
+        onClick={toggleChat}
       >
         <div
           className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-2xl transition-transform duration-300 ${isChatOpen ? "translate-y-0" : "translate-y-full"} h-5/6 flex flex-col`}
         >
           {/* Mobile Chat Header */}
-          <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center rounded-t-lg">
+          {/* <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center rounded-t-lg">
             <div className="flex items-center space-x-2">
               <Bot size={24} className="text-white" />
               <h3 className="text-lg font-medium text-white">
@@ -81,7 +82,7 @@ const UnitDetailsChatBot = ({
             >
               <X size={20} />
             </button>
-          </div>
+          </div> */}
 
           {/* Mobile Chat iFrame */}
           <div className="flex-1 overflow-hidden">
