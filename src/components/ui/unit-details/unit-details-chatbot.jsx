@@ -65,7 +65,7 @@ const UnitDetailsChatBot = ({
         className={`fixed inset-0 bg-black/50 z-50 xl:hidden ${isChatOpen ? "opacity-100" : "opacity-0 pointer-events-none"} transition-opacity duration-300`}
       >
         <div
-          className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-2xl transition-transform duration-300 ${isChatOpen ? "translate-y-0" : "translate-y-full"} h-5/6`}
+          className={`fixed bottom-0 left-0 right-0 bg-white rounded-t-lg shadow-2xl transition-transform duration-300 ${isChatOpen ? "translate-y-0" : "translate-y-full"} h-5/6 flex flex-col`}
         >
           {/* Mobile Chat Header */}
           <div className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] p-4 flex justify-between items-center rounded-t-lg">
@@ -84,7 +84,7 @@ const UnitDetailsChatBot = ({
           </div>
 
           {/* Mobile Chat iFrame */}
-          <div className="h-full pb-4">
+          <div className="flex-1 overflow-hidden">
             {isChatOpen && (
               <iframe
                 src={chatUrl}
