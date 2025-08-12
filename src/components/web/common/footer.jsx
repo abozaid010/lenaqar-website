@@ -109,10 +109,10 @@ const Footer = () => {
                         {t.footer.contact.support} :
                       </span>
                       <a
-                        href="tel:01002891933"
+                        href="tel:01020914828"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
                       >
-                        01002891933
+                        01020914828
                       </a>
                     </div>
                   </div>

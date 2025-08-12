@@ -41,9 +41,9 @@ const Header = ({ clientName, clientID, clientEmail }) => {
 
   const sendMessageWhatsApp = () => {
     console.log("WhatsApp message button clicked");
-    // const phoneNumber = "201016080323";
-    // const url = `https://wa.me/${phoneNumber}`;
-    // window.open(url, "_blank");
+    const phoneNumber = "201020914828";
+    const url = `https://wa.me/${phoneNumber}`;
+    window.open(url, "_blank");
   };
 
   const cancelLogout = () => {
