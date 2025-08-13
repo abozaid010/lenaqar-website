@@ -168,7 +168,7 @@ export default function UnitBasicInfo({ unit }) {
       {(unit.owner_name || unit.owner_mobile) && (
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-3 text-slate-800">
-            {t.saleDetails?.ownerDetails || "Owner Information"}
+            {t.steps.ownerDetails || "Owner Information"}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {unit.owner_name && (
