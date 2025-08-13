@@ -13,15 +13,42 @@ import {
   Layers,
   Package,
   Paintbrush,
-  Phone,
   Ruler,
-  User,
 } from "lucide-react";
+import toast from "react-hot-toast";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
 export default function UnitBasicInfo({ unit }) {
   const { t, locale } = useI18n();
+
+  // Function to copy phone number to clipboard
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success("Phone number copied");
+    } catch (err) {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      try {
+        document.execCommand("copy");
+        toast.success("Phone number copied");
+      } catch (err) {
+        toast.error("Failed to copy phone number");
+      }
+      document.body.removeChild(textArea);
+    }
+  };
+
+  const openWhatsApp = (phoneNumber) => {
+    const formattedNumber = phoneNumber.startsWith("0") && `2${phoneNumber}`;
+
+    const whatsappUrl = `https://wa.me/${formattedNumber}`;
+    window.open(whatsappUrl, "_blank");
+  };
 
   return (
     <div className="flex-1">
@@ -166,42 +193,66 @@ export default function UnitBasicInfo({ unit }) {
 
       {/* Owner Details - Only show for brokers when owner info is available */}
       {(unit.owner_name || unit.owner_mobile) && (
-        <div className="mt-6">
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-3 text-slate-800">
-            {t.steps.ownerDetails || "Owner Information"}
+            {t.steps?.ownerDetails || "Owner Information"}
           </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {unit.owner_name && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <User className="h-5 w-5 text-primary shrink-0" />
-                <div>
-                  <span className="text-xs text-gray-500 block">
-                    {t.formLabels.ownerName || "Owner Name"}
-                  </span>
-                  <p className="font-medium text-sm">{unit.owner_name}</p>
-                </div>
-              </div>
-            )}
 
-            {unit.owner_mobile && (
-              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                <Phone className="h-5 w-5 text-primary shrink-0" />
-                <div>
-                  <span className="text-xs text-gray-500 block">
-                    {t.formLabels.ownerPhone || "Owner Mobile"}
-                  </span>
-                  <p className="font-medium text-sm">
-                    <a
-                      href={`tel:+2${unit.owner_mobile}`}
-                      className="text-primary hover:underline"
-                    >
-                      {unit.owner_mobile}
-                    </a>
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
+          {unit.owner_name && unit.owner_mobile ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">{unit.owner_name}</span>
+              <button
+                onClick={() => copyToClipboard(unit.owner_mobile)}
+                className="font-mono text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+                title="Click to copy phone number"
+              >
+                {unit.owner_mobile}
+              </button>
+              <button
+                onClick={() => openWhatsApp(unit.owner_mobile)}
+                className="w-5 h-5 bg-green-500 hover:bg-green-600 rounded flex items-center justify-center transition-colors"
+                title="Open WhatsApp"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-3 h-3 text-white"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
+                </svg>
+              </button>
+            </div>
+          ) : unit.owner_name ? (
+            <div className="text-sm">
+              <span className="font-medium">{unit.owner_name}</span>
+            </div>
+          ) : unit.owner_mobile ? (
+            <div className="flex items-center gap-2 text-sm">
+              <button
+                onClick={() => copyToClipboard(unit.owner_mobile)}
+                className="font-mono text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
+                title="Click to copy phone number"
+              >
+                {unit.owner_mobile}
+              </button>
+              <span className="text-gray-400">:</span>
+              <button
+                onClick={() => openWhatsApp(unit.owner_mobile)}
+                className="w-5 h-5 bg-green-500 hover:bg-green-600 rounded flex items-center justify-center transition-colors"
+                title="Open WhatsApp"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-3 h-3 text-white"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
+                </svg>
+              </button>
+            </div>
+          ) : null}
         </div>
       )}
 
