@@ -13,13 +13,16 @@ import {
   Layers,
   Package,
   Paintbrush,
+  Phone,
   Ruler,
+  User,
 } from "lucide-react";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
 export default function UnitBasicInfo({ unit }) {
   const { t, locale } = useI18n();
+
   return (
     <div className="flex-1">
       <div className="flex items-center gap-2">
@@ -160,6 +163,47 @@ export default function UnitBasicInfo({ unit }) {
           </div>
         )}
       </div>
+
+      {/* Owner Details - Only show for brokers when owner info is available */}
+      {(unit.owner_name || unit.owner_mobile) && (
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-3 text-slate-800">
+            {t.saleDetails?.ownerDetails || "Owner Information"}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {unit.owner_name && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <User className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <span className="text-xs text-gray-500 block">
+                    {t.formLabels.ownerName || "Owner Name"}
+                  </span>
+                  <p className="font-medium text-sm">{unit.owner_name}</p>
+                </div>
+              </div>
+            )}
+
+            {unit.owner_mobile && (
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <Phone className="h-5 w-5 text-primary shrink-0" />
+                <div>
+                  <span className="text-xs text-gray-500 block">
+                    {t.formLabels.ownerPhone || "Owner Mobile"}
+                  </span>
+                  <p className="font-medium text-sm">
+                    <a
+                      href={`tel:+2${unit.owner_mobile}`}
+                      className="text-primary hover:underline"
+                    >
+                      {unit.owner_mobile}
+                    </a>
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Key Features */}
       <div className="mt-5 grid grid-cols-4 gap-x-1.5 gap-y-2 max-w-lg">
