@@ -412,7 +412,7 @@ export default {
     financialDetails: "التفاصيل المالية",
     rentalDetails: "تفاصيل الإيجار",
     imagesInfo: "الصور ومعلومات إضافية",
-    ownerDetails: "تفاصيل المالك",
+    ownerDetails: "بيانات المالك",
   },
   buttons: {
     back: "رجوع",
