@@ -44,17 +44,19 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
   const updateUnitMutation = useUpdateUnit();
 
   const sharedData = useAdminSharedData();
-  const rowDevelopers = sharedData.developers.data;
-  const rowCitiesAndDistricts = sharedData.citiesAndDistricts.data;
+  const rowDevelopers = sharedData.developers.data || [];
+  const rowCitiesAndDistricts = sharedData.citiesAndDistricts.data || {};
 
-  const citiesAndDistricts = Object.entries(rowCitiesAndDistricts)
-    .filter(([governorate]) => governorate !== "cities")
-    .map(([governorate, districts]) => ({
-      governorate,
-      districts: districts.map((district) => ({
-        district,
-      })),
-    }));
+  const citiesAndDistricts = rowCitiesAndDistricts && typeof rowCitiesAndDistricts === 'object' 
+    ? Object.entries(rowCitiesAndDistricts)
+        .filter(([governorate]) => governorate !== "cities")
+        .map(([governorate, districts]) => ({
+          governorate,
+          districts: Array.isArray(districts) ? districts.map((district) => ({
+            district,
+          })) : [],
+        }))
+    : [];
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -227,7 +229,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
         }
 
         // Validate paymentPlans
-        if (SellFormData.paymentPlans.length > 0) {
+        if (Array.isArray(SellFormData.paymentPlans) && SellFormData.paymentPlans.length > 0) {
           SellFormData.paymentPlans.forEach((plan, index) => {
             if (plan.years === "" || plan.years === 0) {
               missingFields.push(`years-${index}`);
@@ -260,18 +262,20 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
             sanitizedData[field] = 0;
           }
         });
-        const sanitizedPaymentPlans = sanitizedData.paymentPlans.map((plan) => {
-          return {
-            years: plan.years === "" ? 0 : plan.years,
-            price: plan.price === "" ? 0 : plan.price,
-            maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
-            downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
-            installment_amount_yearly:
-              plan.installment_amount_yearly === ""
-                ? 0
-                : plan.installment_amount_yearly,
-          };
-        });
+        const sanitizedPaymentPlans = Array.isArray(sanitizedData.paymentPlans) 
+          ? sanitizedData.paymentPlans.map((plan) => {
+              return {
+                years: plan.years === "" ? 0 : plan.years,
+                price: plan.price === "" ? 0 : plan.price,
+                maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
+                downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
+                installment_amount_yearly:
+                  plan.installment_amount_yearly === ""
+                    ? 0
+                    : plan.installment_amount_yearly,
+              };
+            })
+          : [];
 
         setSellFormData((prev) => ({
           ...prev,
