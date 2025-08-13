@@ -37,6 +37,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
 
   const clientInfo = Cookies.get("client_info");
   const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+  const clientType = clientInfo ? JSON.parse(clientInfo)?.client_type : null;
+
   // Add the mutation hooks
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();

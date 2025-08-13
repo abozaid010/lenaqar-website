@@ -37,6 +37,7 @@ export async function loginAction(prevState, formData) {
       email,
       phone_number,
       refresh_token,
+      client_type,
     } = response.data.data;
     const cookieStore = await cookies();
     cookieStore.set("access_token", access_token, {
@@ -52,7 +53,7 @@ export async function loginAction(prevState, formData) {
     cookieStore.set("lena-website-client_id", client_id, { path: "/" });
     cookieStore.set(
       "client_info",
-      JSON.stringify({ email, client_name, phone_number }),
+      JSON.stringify({ email, client_name, phone_number, client_type }),
       { path: "/" }
     );
 
