@@ -37,6 +37,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
 
   const clientInfo = Cookies.get("client_info");
   const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+  const clientType = clientInfo ? JSON.parse(clientInfo)?.client_type : null;
+
   // Add the mutation hooks
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
@@ -90,6 +92,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
     images: unitData?.images || [],
     code: unitData?.code || "",
     model: unitData?.model || "",
+    // Owner details (shown only for brokers)
+    owner_name: unitData?.owner_name || "",
+    owner_mobile: unitData?.owner_mobile || "",
   }));
 
   // specific sell form data
@@ -419,9 +424,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           {currentStep === 2 && formData.purpose === "sell" && (
             <SaleDetailsStep
               formData={SellFormData}
+              commonFormData={formData}
+              clientType={clientType}
               updateFormData={(newData) =>
                 setSellFormData((prev) => ({ ...prev, ...newData }))
               }
+              updateCommonFormData={updateFormData}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
             />
@@ -430,9 +438,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           {currentStep === 2 && formData.purpose === "rent" && (
             <RentalDetailsStep
               formData={rentFormData}
+              commonFormData={formData}
+              clientType={clientType}
               updateFormData={(newData) =>
                 setRentFormData((prev) => ({ ...prev, ...newData }))
               }
+              updateCommonFormData={updateFormData}
             />
           )}
 

@@ -23,7 +23,13 @@ const availableAmenities = [
   "co_alarm",
 ];
 
-export default function RentalDetailsStep({ formData, updateFormData }) {
+export default function RentalDetailsStep({
+  formData,
+  commonFormData,
+  clientType,
+  updateFormData,
+  updateCommonFormData,
+}) {
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t } = useI18n();
 
@@ -57,6 +63,20 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
     } else {
       updateFormData({ [name]: convertArabicToEnglishNumbers(value) });
     }
+  };
+
+  const handleOwnerChange = (e) => {
+    const { name, value } = e.target;
+
+    // For mobile number, ensure it's numeric
+    if (name === "owner_mobile") {
+      const englishValue = String(convertArabicToEnglishNumbers(value));
+      const numericValue = englishValue.replace(/\D/g, "");
+      updateCommonFormData({ [name]: numericValue });
+      return;
+    }
+
+    updateCommonFormData({ [name]: value });
   };
 
   const handlePriceChange = (durationType, field, value) => {
@@ -242,6 +262,35 @@ export default function RentalDetailsStep({ formData, updateFormData }) {
           ))}
         </div>
       </div>
+
+      {/* Owner Details - Only show for brokers */}
+      {clientType === "brocker" && (
+        <div className="mt-6">
+          <h3 className="text-xl font-semibold mb-4 text-slate-800">
+            {t.steps.ownerDetails || "Owner Details"}
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
+            {/* Owner Name */}
+            <FormInput
+              label={t.formLabels.ownerName || "Owner Name"}
+              name="owner_name"
+              value={commonFormData.owner_name}
+              onChange={handleOwnerChange}
+              placeholder="Enter owner name"
+            />
+
+            {/* Owner Mobile */}
+            <FormInput
+              label={t.formLabels.ownerMobile || "Owner Mobile"}
+              name="owner_mobile"
+              value={commonFormData.owner_mobile}
+              onChange={handleOwnerChange}
+              placeholder="01234567890"
+              type="tel"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
