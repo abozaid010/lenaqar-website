@@ -2,6 +2,7 @@
 
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "./clientCookies";
+import { safeMergeParams } from "@/utils/safeJsonParser";
 
 export async function getschedual(startDate, endDate) {
   try {
@@ -77,9 +78,7 @@ export async function fetchMonthData(searchParams) {
   const clientId = await getClientid();
 
   try {
-    const params = {
-      ...JSON.parse(searchParams),
-    };
+    const params = safeMergeParams(searchParams, {});
     const response = await axiosInstance.get(
       `/analysis/v1/dashboard-action-analysis/${clientId}?days=7`,
       { params }

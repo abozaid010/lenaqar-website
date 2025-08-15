@@ -26,6 +26,15 @@ const nextConfig = {
         : []),
     ],
     domains: [process.env.NEXT_PUBLIC_API_DOMAIN, 'api.lenaai.net'],
+    // Add better error handling for images
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
+    // Improve image loading performance
+    minimumCacheTTL: 60,
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   // TODO: i18n configuration in next.config.mjs is unsupported in App Router.
   // i18n: {

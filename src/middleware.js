@@ -1,5 +1,5 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
 const protectedRoutes = [
   "/dashboard",
   "/units",
@@ -10,15 +10,52 @@ const protectedRoutes = [
   "/developers",
 ];
 
-export async function middleware(request, response) {
-  const cookieStore = await cookies();
-  const accessToken = cookieStore.get("access_token")?.value;
-  const refreshToken = cookieStore.get("refresh_token")?.value;
+export function middleware(request) {
+  const { pathname } = request.nextUrl;
 
-  const path = request.nextUrl.pathname;
+  // Handle image requests with proper MIME types
+  if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
+    const response = NextResponse.next();
+    
+    // Set proper cache headers for images
+    response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    
+    // Set proper MIME types for images
+    if (pathname.match(/\.(jpg|jpeg)$/i)) {
+      response.headers.set('Content-Type', 'image/jpeg');
+    } else if (pathname.match(/\.png$/i)) {
+      response.headers.set('Content-Type', 'image/png');
+    } else if (pathname.match(/\.gif$/i)) {
+      response.headers.set('Content-Type', 'image/gif');
+    } else if (pathname.match(/\.webp$/i)) {
+      response.headers.set('Content-Type', 'image/webp');
+    } else if (pathname.match(/\.avif$/i)) {
+      response.headers.set('Content-Type', 'image/avif');
+    } else if (pathname.match(/\.svg$/i)) {
+      response.headers.set('Content-Type', 'image/svg+xml');
+    }
+    
+    return response;
+  }
+
+  // Handle API image requests
+  if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
+    const response = NextResponse.next();
+    
+    // Set CORS headers for image API requests
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    
+    return response;
+  }
+
+  // Get cookies from request headers
+  const accessToken = request.cookies.get("access_token")?.value;
+  const refreshToken = request.cookies.get("refresh_token")?.value;
 
   const isProtectedRoute = protectedRoutes.some((route) =>
-    path.startsWith(route)
+    pathname.startsWith(route)
   );
 
   if (isProtectedRoute) {
@@ -31,7 +68,7 @@ export async function middleware(request, response) {
     }
   }
 
-  if (path === "/" && accessToken) {
+  if (pathname === "/" && accessToken) {
     console.log("Redirecting to dashboard");
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -40,5 +77,14 @@ export async function middleware(request, response) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+  ],
 };

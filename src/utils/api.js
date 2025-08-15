@@ -2,15 +2,13 @@
 
 import { axiosInstance } from "@/lib/axiosInstance";
 import Cookies from "js-cookie";
+import { safeMergeParams } from "./safeJsonParser";
 
 export async function fetchUsersData(searchParams) {
   const clientId = getClientid();
 
   try {
-    const params = {
-      ...JSON.parse(searchParams),
-      limit: 16,
-    };
+    const params = safeMergeParams(searchParams, { limit: 16 });
 
     const response = await axiosInstance.get(`dashboard/${clientId}`, {
       params,
@@ -24,10 +22,7 @@ export async function fetchUsersData(searchParams) {
 
 export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   try {
-    const params = {
-      ...JSON.parse(searchParams),
-      page_size: 16,
-    };
+    const params = safeMergeParams(searchParams, { page_size: 16 });
 
     const response = await axiosInstance.get(
       `${!publicOnly ? "/units/all" : "/public/units"}`,

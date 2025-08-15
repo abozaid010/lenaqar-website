@@ -10,6 +10,7 @@ import { getShareUnitData } from "@/utils/api";
 import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
+import { createSafeImageSource, handleImageError } from "@/utils/imageUtils";
 
 export default function UnitsGrid({ units, pagination, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
@@ -58,11 +59,12 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
               <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100">
                 {u.images && u.images.length > 0 ? (
                   <ImageWithLoader
-                    src={u.images[0].url || "/images/defaultImage.jpg"}
+                    src={createSafeImageSource(u.images[0]?.url, 'property')}
                     alt={u.name || u.compound || "Property"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = "/images/defaultImage.jpg";
+                      const fallbackSrc = handleImageError(e, u.images[0]?.url, 'property');
+                      e.currentTarget.src = fallbackSrc;
                       e.currentTarget.onerror = null;
                     }}
                   />

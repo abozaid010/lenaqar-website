@@ -5,9 +5,12 @@ import { unitKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
 export function useUnitsPageData(searchParams, publicOnly = false) {
+  // Ensure searchParams is always a valid object
+  const safeSearchParams = typeof searchParams === 'string' && searchParams ? searchParams : '{}';
+  
   const unitsQuery = useQuery({
-    queryKey: unitKeys.list(searchParams),
-    queryFn: () => fetchUnitsFilter(searchParams, publicOnly),
+    queryKey: unitKeys.list(safeSearchParams),
+    queryFn: () => fetchUnitsFilter(safeSearchParams, publicOnly),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });

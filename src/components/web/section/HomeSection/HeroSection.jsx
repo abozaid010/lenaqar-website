@@ -46,7 +46,7 @@ const HeroSection = () => {
           src={"/images/web2.jpg"}
           alt={t.heroSection.backgroundAlt}
           fill
-          objectFit="cover"
+          className="object-cover"
           priority={true}
         />
 

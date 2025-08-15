@@ -5,6 +5,7 @@ import { I18nProvider } from "@/context/translate-api";
 import { Suspense } from "react";
 
 import { cookies } from "next/headers";
+import { safeCookieParse } from "@/utils/safeJsonParser";
 
 const Layout = async ({ children }) => {
   // Get the clientID from the cookie on the server then pass it as a prop to the Header component => To avoid hydration issues
@@ -12,9 +13,9 @@ const Layout = async ({ children }) => {
   const clientID = cookieStore.get("lena-website-client_id")?.value;
   const clientInfoCookie = cookieStore.get("client_info")?.value;
   const clientName = clientInfoCookie
-    ? JSON.parse(clientInfoCookie)?.client_name
+    ? safeCookieParse(clientInfoCookie, {})?.client_name
     : null;
-  const clientEmail = JSON.parse(clientInfoCookie)?.email;
+  const clientEmail = safeCookieParse(clientInfoCookie, {})?.email;
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get("lang")?.value;

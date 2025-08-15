@@ -5,9 +5,12 @@ import { userKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 
 export function useUsersData(searchParams) {
+  // Ensure searchParams is always a valid object
+  const safeSearchParams = typeof searchParams === 'string' && searchParams ? searchParams : '{}';
+  
   const unitsQuery = useQuery({
-    queryKey: userKeys.list(searchParams),
-    queryFn: () => fetchUsersData(searchParams),
+    queryKey: userKeys.list(safeSearchParams),
+    queryFn: () => fetchUsersData(safeSearchParams),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });

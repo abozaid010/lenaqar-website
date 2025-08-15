@@ -4,6 +4,7 @@ import { useI18n } from "@/context/translate-api";
 import { ArrowBigLeft, ArrowBigRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { safeStorageParse } from "@/utils/safeJsonParser";
 
 export default function NavigationButtons({ id }) {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function NavigationButtons({ id }) {
   const [prevId, setPrevId] = useState(null);
 
   useEffect(() => {
-    const usersId = JSON.parse(localStorage.getItem("usersId") || "[]");
+    const usersId = safeStorageParse(localStorage.getItem("usersId"), []);
     const currentIndex = usersId.indexOf(id);
     setNextId(
       currentIndex !== -1 && currentIndex < usersId.length - 1

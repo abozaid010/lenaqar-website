@@ -5,6 +5,7 @@ import { BUILDING_TYPES } from "@/data/constants";
 import { useUsersData } from "@/hooks/use-users-data";
 import { getActionLabel } from "@/utils/actions";
 import * as XLSX from "xlsx";
+import { safeJsonParse } from "@/utils/safeJsonParser";
 
 export function useExcelExport(searchParams) {
   const { t, locale } = useI18n();
@@ -46,10 +47,7 @@ export function useExcelExport(searchParams) {
 
   const createFilterInfo = (searchParams) => {
     const filterData = [];
-    const parsedParams =
-      typeof searchParams === "string"
-        ? JSON.parse(searchParams)
-        : searchParams;
+    const parsedParams = safeJsonParse(searchParams, {});
 
     // Date range
     if (parsedParams.start_date) {

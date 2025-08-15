@@ -13,6 +13,7 @@ import "swiper/css/thumbs";
 import { Navigation, Thumbs } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import shareButton from "../../../../public/share.svg";
+import { createSafeImageSource, handleImageError } from "@/utils/imageUtils";
 
 export default function ImageGallary({ images, unitName, unitId, readOnly }) {
   const [showModal, setShowModal] = useState(false);
@@ -50,9 +51,10 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
         onClick={() => setIsFullscreen(true)}
       >
         <ImageWithLoader
-          src={images[mainImageIndex].url || "/images/defaultImage.jpg"}
+          src={createSafeImageSource(images[mainImageIndex]?.url, 'property')}
           onError={(e) => {
-            e.currentTarget.src = "/images/defaultImage.jpg";
+            const fallbackSrc = handleImageError(e, images[mainImageIndex]?.url, 'property');
+            e.currentTarget.src = fallbackSrc;
             e.currentTarget.onerror = null;
           }}
           priority={true}
@@ -114,9 +116,10 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
               onClick={() => setMainImageIndex(index)}
             >
               <ImageWithLoader
-                src={image.url || "/images/defaultImage.jpg"}
+                src={createSafeImageSource(image.url, 'property')}
                 onError={(e) => {
-                  e.currentTarget.src = "/images/defaultImage.jpg";
+                  const fallbackSrc = handleImageError(e, image.url, 'property');
+                  e.currentTarget.src = fallbackSrc;
                   e.currentTarget.onerror = null;
                 }}
                 alt={`Unit - ${index + 1}`}
