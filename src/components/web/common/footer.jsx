@@ -54,7 +54,7 @@ const Footer = () => {
               </Link>
             </div>
             {/* iOS App Store Link - MOVED HERE */}
-            <Link
+            {/* <Link
               href={appStoreLink}
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
               target="_blank"
@@ -65,7 +65,7 @@ const Footer = () => {
               </div>
 
               <span>{t.footer.connect.dowenloadios} </span>
-            </Link>
+            </Link> */}
 
             {/* Google Play Store Link - MOVED HERE */}
             <Link
