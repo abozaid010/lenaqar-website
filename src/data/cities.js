@@ -600,6 +600,42 @@ export const LOCALIZED_DISTRICTS = [
   },
   { city: "suez", value: "faisal", en_label: "Faisal", ar_label: "فيصل" },
   { city: "suez", value: "ataka", en_label: "Ataka", ar_label: "عتاقة" },
+  {
+    city: "suez",
+    value: "suez city el ganayen",
+    en_label: "Suez City (El Ganayen)",
+    ar_label: "الجنائن",
+  },
+  {
+    city: "suez",
+    value: "suez port area",
+    en_label: "Suez Port Area",
+    ar_label: "الميناء",
+  },
+  {
+    city: "suez",
+    value: "petrosuez area",
+    en_label: "PetroSuez Area",
+    ar_label: "منطقة البترول",
+  },
+  {
+    city: "suez",
+    value: "adabiya",
+    en_label: "Adabiya",
+    ar_label: "الأدبية",
+  },
+  {
+    city: "suez",
+    value: "new suez",
+    en_label: "New Suez",
+    ar_label: "السويس الجديدة",
+  },
+  {
+    city: "suez",
+    value: "northwest gulf of suez",
+    en_label: "Northwest Gulf of Suez",
+    ar_label: "شمال غرب خليج السويس",
+  },
 
   { city: "south sinai", value: "dahab", en_label: "Dahab", ar_label: "دهب" },
   { city: "south sinai", value: "taba", en_label: "Taba", ar_label: "طابا" },

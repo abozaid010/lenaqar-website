@@ -18,4 +18,5 @@ export const STATIC_CITIES = [
   "giza",
   "north coast",
   "new administrative capital",
+  "suez"
 ];
