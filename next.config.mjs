@@ -5,6 +5,16 @@ const nextConfig = {
       bodySizeLimit: '5mb',
     },
   },
+  // Add better error handling and performance optimizations
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
+  // Add compression and better caching
+  compress: true,
+  poweredByHeader: false,
   images: {
     remotePatterns: [
       {

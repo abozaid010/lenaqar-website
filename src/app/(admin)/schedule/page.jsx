@@ -3,6 +3,7 @@ import {
   getschedual,
 } from "@/components/services/serviceFetching";
 import Schedual from "./components/Schedual";
+import ErrorBoundary from "@/components/ui/error-boundary";
 
 export const dynamic = "force-dynamic";
 
@@ -21,10 +22,31 @@ sevenDaysLater.setDate(today.getDate() + 7);
 const formattedAfter = sevenDaysLater.toISOString().split("T")[0];
 
 const page = async () => {
-  const data = await getschedual(formattedBefore, formattedAfter);
-  const dataSales = await getSalesData();
+  try {
+    // Run both API calls in parallel for better performance
+    const [data, dataSales] = await Promise.allSettled([
+      getschedual(formattedBefore, formattedAfter),
+      getSalesData()
+    ]);
 
-  return <Schedual data={data} dataSales={dataSales?.data} />;
+    // Handle results safely
+    const scheduleData = data.status === 'fulfilled' ? data.value : [];
+    const salesData = dataSales.status === 'fulfilled' ? dataSales.value?.data : [];
+
+    return (
+      <ErrorBoundary>
+        <Schedual data={scheduleData} dataSales={salesData} />
+      </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error("Error loading schedule page:", error);
+    // Return component with empty data instead of crashing
+    return (
+      <ErrorBoundary>
+        <Schedual data={[]} dataSales={[]} />
+      </ErrorBoundary>
+    );
+  }
 };
 
 export default page;

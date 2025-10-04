@@ -23,6 +23,7 @@ const Schedule = ({ data, dataSales }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
 
@@ -133,6 +134,7 @@ const Schedule = ({ data, dataSales }) => {
 
       setOpenDropdown(null);
     } catch (error) {
+      console.error("Error assigning sales person:", error);
       toast.error(t.schaduall.assignError || "Failed to assign salesperson");
     } finally {
       setLoading(null);

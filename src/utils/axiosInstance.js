@@ -9,6 +9,7 @@ const BASE_URL =
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
+  timeout: 30000, // 30 seconds timeout
   headers: {
     "Content-Type": "application/json",
   },
@@ -33,6 +34,22 @@ axiosInstance.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config;
+
+    // Handle 503 errors with retry logic
+    if (error.response?.status === 503 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      console.log("503 error detected, retrying request...");
+      
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      try {
+        return axiosInstance(originalRequest);
+      } catch (retryError) {
+        console.error("Retry failed:", retryError);
+        throw retryError;
+      }
+    }
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;

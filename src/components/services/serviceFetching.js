@@ -12,7 +12,9 @@ export async function getschedual(startDate, endDate) {
 
     return response.data.data.actions;
   } catch (error) {
-    return error;
+    console.error("Failed to fetch schedule data:", error.message);
+    // Return empty array instead of error to prevent server crashes
+    return [];
   }
 }
 export async function assignSalsePerson(id, additionalProp1) {
@@ -23,7 +25,8 @@ export async function assignSalsePerson(id, additionalProp1) {
     );
     return response.data;
   } catch (error) {
-    return error;
+    console.error("Failed to assign sales person:", error.message);
+    throw error; // Re-throw to handle in component
   }
 }
 
@@ -36,7 +39,8 @@ export async function getSalesData() {
     return response.data;
   } catch (error) {
     console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
+    // Return empty data structure instead of error to prevent server crashes
+    return { data: [] };
   }
 }
 
