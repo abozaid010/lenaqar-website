@@ -2,6 +2,12 @@
  * Image utility functions for handling various image loading scenarios
  */
 
+// Cache for known broken images to avoid repeated failed requests
+const brokenImageCache = new Set();
+
+// Cache for retry attempts per image
+const retryAttempts = new Map();
+
 /**
  * Validates if a URL is a valid image URL
  * @param {string} url - URL to validate
@@ -26,6 +32,91 @@ export function isValidImageUrl(url) {
 }
 
 /**
+ * Checks if an image URL is known to be broken (after retries)
+ * @param {string} url - URL to check
+ * @returns {boolean} - True if the image is known to be broken
+ */
+export function isKnownBrokenImage(url) {
+  if (!url || typeof url !== 'string') return true;
+  
+  // Only check cache - no hardcoded patterns
+  return brokenImageCache.has(url);
+}
+
+/**
+ * Gets the number of retry attempts for an image
+ * @param {string} url - URL to check
+ * @returns {number} - Number of retry attempts
+ */
+export function getRetryAttempts(url) {
+  return retryAttempts.get(url) || 0;
+}
+
+/**
+ * Increments retry attempts for an image
+ * @param {string} url - URL to increment retries for
+ * @returns {number} - New retry count
+ */
+export function incrementRetryAttempts(url) {
+  const current = getRetryAttempts(url);
+  const newCount = current + 1;
+  retryAttempts.set(url, newCount);
+  return newCount;
+}
+
+/**
+ * Checks if an image should be retried
+ * @param {string} url - URL to check
+ * @param {number} maxRetries - Maximum number of retries (default: 2)
+ * @returns {boolean} - True if image should be retried
+ */
+export function shouldRetryImage(url, maxRetries = 2) {
+  return getRetryAttempts(url) < maxRetries;
+}
+
+/**
+ * Marks an image URL as broken to prevent future attempts
+ * @param {string} url - URL to mark as broken
+ */
+export function markImageAsBroken(url) {
+  if (url && typeof url === 'string') {
+    brokenImageCache.add(url);
+  }
+}
+
+/**
+ * Removes an image URL from the broken cache (useful if image gets fixed)
+ * @param {string} url - URL to remove from broken cache
+ */
+export function markImageAsFixed(url) {
+  if (url && typeof url === 'string') {
+    brokenImageCache.delete(url);
+    retryAttempts.delete(url);
+  }
+}
+
+/**
+ * Clears all broken image caches (useful for debugging)
+ */
+export function clearBrokenImageCache() {
+  brokenImageCache.clear();
+  retryAttempts.clear();
+}
+
+/**
+ * Gets debug information about broken images and retry attempts
+ * @returns {object} - Debug information
+ */
+export function getImageDebugInfo() {
+  return {
+    brokenImages: Array.from(brokenImageCache),
+    retryAttempts: Object.fromEntries(retryAttempts),
+    totalBrokenImages: brokenImageCache.size,
+    totalRetryAttempts: retryAttempts.size
+  };
+}
+
+/**
  * Gets the appropriate fallback image based on context
  * @param {string} context - Image context (e.g., 'property', 'user', 'logo')
  * @returns {string} - Fallback image path
@@ -44,7 +135,7 @@ export function getFallbackImage(context = 'default') {
 }
 
 /**
- * Creates a safe image source with fallbacks
+ * Creates a safe image source with fallbacks and retry logic
  * @param {string|string[]} sources - Primary image source(s)
  * @param {string} context - Image context for fallback selection
  * @returns {string} - Safe image source
@@ -55,13 +146,17 @@ export function createSafeImageSource(sources, context = 'default') {
   // If sources is an array, use the first valid one
   if (Array.isArray(sources)) {
     for (const source of sources) {
-      if (isValidImageUrl(source)) return source;
+      if (isValidImageUrl(source) && shouldRetryImage(source)) {
+        return source;
+      }
     }
     return getFallbackImage(context);
   }
   
   // If sources is a string, validate it
-  if (isValidImageUrl(sources)) return sources;
+  if (isValidImageUrl(sources) && shouldRetryImage(sources)) {
+    return sources;
+  }
   
   return getFallbackImage(context);
 }
@@ -73,18 +168,45 @@ export function createSafeImageSource(sources, context = 'default') {
  */
 export function preloadImage(src) {
   return new Promise((resolve) => {
-    if (!isValidImageUrl(src)) {
+    if (!isValidImageUrl(src) || isKnownBrokenImage(src)) {
       resolve(false);
       return;
     }
     
     const img = new Image();
-    img.onload = () => resolve(true);
-    img.onerror = () => resolve(false);
+    img.onload = () => {
+      // Reset retry count on successful load
+      retryAttempts.delete(src);
+      resolve(true);
+    };
+    img.onerror = () => {
+      const retryCount = incrementRetryAttempts(src);
+      if (shouldRetryImage(src)) {
+        // Retry the image
+        setTimeout(() => {
+          preloadImage(src).then(resolve);
+        }, 1000); // Wait 1 second before retry
+      } else {
+        // Mark as broken after max retries
+        markImageAsBroken(src);
+        resolve(false);
+      }
+    };
     img.src = src;
     
     // Timeout after 5 seconds
-    setTimeout(() => resolve(false), 5000);
+    setTimeout(() => {
+      const retryCount = incrementRetryAttempts(src);
+      if (shouldRetryImage(src)) {
+        // Retry on timeout
+        setTimeout(() => {
+          preloadImage(src).then(resolve);
+        }, 1000);
+      } else {
+        markImageAsBroken(src);
+        resolve(false);
+      }
+    }, 5000);
   });
 }
 
@@ -112,6 +234,39 @@ export async function batchPreloadImages(sources) {
 }
 
 /**
+ * Filters out known broken images from an array (after retries)
+ * @param {string[]} sources - Array of image sources
+ * @returns {string[]} - Array with broken images removed
+ */
+export function filterValidImages(sources) {
+  if (!Array.isArray(sources)) return [];
+  
+  return sources.filter(src => {
+    return isValidImageUrl(src) && !isKnownBrokenImage(src);
+  });
+}
+
+/**
+ * Gets the first valid image from an array, with fallback
+ * @param {string[]} sources - Array of image sources
+ * @param {string} context - Image context for fallback selection
+ * @returns {string} - First valid image or fallback
+ */
+export function getFirstValidImage(sources, context = 'default') {
+  if (!Array.isArray(sources) || sources.length === 0) {
+    return getFallbackImage(context);
+  }
+  
+  const validImages = filterValidImages(sources);
+  
+  if (validImages.length > 0) {
+    return validImages[0];
+  }
+  
+  return getFallbackImage(context);
+}
+
+/**
  * Creates a responsive image source set
  * @param {string} baseUrl - Base image URL
  * @param {number[]} widths - Array of widths
@@ -126,24 +281,36 @@ export function createResponsiveSrcSet(baseUrl, widths = [640, 750, 828, 1080, 1
 }
 
 /**
- * Handles image loading errors with intelligent fallbacks
+ * Handles image loading errors with retry logic
  * @param {Error} error - Image loading error
  * @param {string} originalSrc - Original image source
  * @param {string} context - Image context
- * @returns {string} - Fallback image source
+ * @returns {string} - Fallback image source or retry the same image
  */
 export function handleImageError(error, originalSrc, context = 'default') {
-  console.warn(`Image loading failed for ${originalSrc}:`, error.message);
+  const retryCount = incrementRetryAttempts(originalSrc);
+  
+  console.warn(`Image loading failed for ${originalSrc} (attempt ${retryCount}):`, error?.message || 'Unknown error');
   
   // Log the error for debugging
   if (process.env.NODE_ENV === 'development') {
     console.error('Image error details:', {
       src: originalSrc,
-      error: error.message,
+      error: error?.message || 'Unknown error',
       context,
+      retryAttempt: retryCount,
       timestamp: new Date().toISOString()
     });
   }
   
+  // If we haven't exceeded max retries, return the original src to retry
+  if (shouldRetryImage(originalSrc)) {
+    console.log(`Retrying image ${originalSrc} (attempt ${retryCount + 1})`);
+    return originalSrc;
+  }
+  
+  // After max retries, mark as broken and return fallback
+  markImageAsBroken(originalSrc);
+  console.log(`Image ${originalSrc} marked as broken after ${retryCount} attempts`);
   return getFallbackImage(context);
 }

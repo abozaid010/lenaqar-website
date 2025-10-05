@@ -10,7 +10,7 @@ import { getShareUnitData } from "@/utils/api";
 import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
-import { createSafeImageSource, handleImageError } from "@/utils/imageUtils";
+import { createSafeImageSource, handleImageError, getFirstValidImage } from "@/utils/imageUtils";
 
 export default function UnitsGrid({ units, pagination, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
@@ -59,13 +59,16 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
               <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100">
                 {u.images && u.images.length > 0 ? (
                   <ImageWithLoader
-                    src={createSafeImageSource(u.images[0]?.url, 'property')}
+                    src={getFirstValidImage(u.images.map(img => img?.url), 'property')}
                     alt={u.name || u.compound || "Property"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      const fallbackSrc = handleImageError(e, u.images[0]?.url, 'property');
-                      e.currentTarget.src = fallbackSrc;
-                      e.currentTarget.onerror = null;
+                      const originalSrc = u.images[0]?.url;
+                      const fallbackSrc = handleImageError(e, originalSrc, 'property');
+                      if (fallbackSrc !== originalSrc) {
+                        e.currentTarget.src = fallbackSrc;
+                        e.currentTarget.onerror = null;
+                      }
                     }}
                   />
                 ) : (

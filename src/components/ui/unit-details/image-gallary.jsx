@@ -13,7 +13,7 @@ import "swiper/css/thumbs";
 import { Navigation, Thumbs } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import shareButton from "../../../../public/share.svg";
-import { createSafeImageSource, handleImageError } from "@/utils/imageUtils";
+import { createSafeImageSource, handleImageError, getFirstValidImage, filterValidImages } from "@/utils/imageUtils";
 
 export default function ImageGallary({ images, unitName, unitId, readOnly }) {
   const [showModal, setShowModal] = useState(false);
@@ -22,6 +22,10 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
 
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Filter out broken images to prevent repeated failed requests
+  const validImages = filterValidImages(images?.map(img => img?.url) || []);
+  const hasValidImages = validImages.length > 0;
 
   const handleShareClick = async (e) => {
     if (!unitId) {
@@ -51,11 +55,14 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
         onClick={() => setIsFullscreen(true)}
       >
         <ImageWithLoader
-          src={createSafeImageSource(images[mainImageIndex]?.url, 'property')}
+          src={hasValidImages ? validImages[mainImageIndex] || validImages[0] : getFirstValidImage(images?.map(img => img?.url) || [], 'property')}
           onError={(e) => {
-            const fallbackSrc = handleImageError(e, images[mainImageIndex]?.url, 'property');
-            e.currentTarget.src = fallbackSrc;
-            e.currentTarget.onerror = null;
+            const originalSrc = hasValidImages ? validImages[mainImageIndex] || validImages[0] : images[mainImageIndex]?.url;
+            const fallbackSrc = handleImageError(e, originalSrc, 'property');
+            if (fallbackSrc !== originalSrc) {
+              e.currentTarget.src = fallbackSrc;
+              e.currentTarget.onerror = null;
+            }
           }}
           priority={true}
           alt={`${unitName}`}
@@ -105,7 +112,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
         watchSlidesProgress
         className="swiper-thumbs"
       >
-        {images.map((image, index) => (
+        {validImages.map((imageUrl, index) => (
           <SwiperSlide key={index}>
             <div
               className={`relative h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 ${
@@ -116,11 +123,14 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
               onClick={() => setMainImageIndex(index)}
             >
               <ImageWithLoader
-                src={createSafeImageSource(image.url, 'property')}
+                src={imageUrl}
                 onError={(e) => {
-                  const fallbackSrc = handleImageError(e, image.url, 'property');
-                  e.currentTarget.src = fallbackSrc;
-                  e.currentTarget.onerror = null;
+                  const originalSrc = imageUrl;
+                  const fallbackSrc = handleImageError(e, originalSrc, 'property');
+                  if (fallbackSrc !== originalSrc) {
+                    e.currentTarget.src = fallbackSrc;
+                    e.currentTarget.onerror = null;
+                  }
                 }}
                 alt={`Unit - ${index + 1}`}
                 className="w-full h-full object-cover"
@@ -139,11 +149,11 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
       </Swiper>
 
       {/* Enhanced Fullscreen Gallery Modal */}
-      {images.length > 0 && (
+      {hasValidImages && (
         <ImageSwiperModal
           open={isFullscreen}
           onClose={() => setIsFullscreen(false)}
-          images={images}
+          images={validImages.map(url => ({ url }))}
         />
       )}
 

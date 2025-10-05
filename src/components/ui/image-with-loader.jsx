@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { markImageAsBroken, incrementRetryAttempts, shouldRetryImage } from "@/utils/imageUtils";
 
 /**
  * Professional Image Loading Component with advanced loading states
@@ -33,8 +34,25 @@ export default function ImageWithLoader({
   };
 
   const handleError = (e) => {
-    setIsLoading(false);
-    setHasError(true);
+    const retryCount = incrementRetryAttempts(src);
+    
+    if (shouldRetryImage(src)) {
+      // Retry the image after a short delay
+      console.log(`Retrying image ${src} (attempt ${retryCount + 1})`);
+      setTimeout(() => {
+        setIsLoading(true);
+        setHasError(false);
+        // Force re-render by updating the src
+        e.currentTarget.src = src + '?retry=' + retryCount;
+      }, 1000);
+    } else {
+      // After max retries, mark as broken and show error
+      setIsLoading(false);
+      setHasError(true);
+      markImageAsBroken(src);
+      console.log(`Image ${src} marked as broken after ${retryCount} attempts`);
+    }
+    
     if (onError) onError(e);
   };
 
