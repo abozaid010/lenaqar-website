@@ -47,6 +47,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
   const rowDevelopers = sharedData.developers.data || [];
   const rowCitiesAndDistricts = sharedData.citiesAndDistricts.data || {};
 
+  // Debug logging for troubleshooting
+  console.log("🔍 DEBUG - Add Unit Modal:");
+  console.log("📊 Shared Data:", sharedData);
+  console.log("🏙️ Raw Cities and Districts:", rowCitiesAndDistricts);
+  console.log("⏳ Cities Loading:", sharedData.citiesAndDistricts.isLoading);
+  console.log("❌ Cities Error:", sharedData.citiesAndDistricts.error);
+  console.log("🔄 Cities Fetching:", sharedData.citiesAndDistricts.isFetching);
+
   const citiesAndDistricts = rowCitiesAndDistricts && typeof rowCitiesAndDistricts === 'object' 
     ? Object.entries(rowCitiesAndDistricts)
         .filter(([governorate]) => governorate !== "cities")
@@ -57,6 +65,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           })) : [],
         }))
     : [];
+
+  console.log("🏘️ Processed Cities and Districts:", citiesAndDistricts);
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -377,6 +387,48 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
   };
 
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
+
+  // Add loading and error states to the modal
+  if (sharedData.isSharedDataLoading) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-lg">Loading form data...</span>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  if (sharedData.hasSharedDataErrors) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full">
+          <h2 className="text-lg font-semibold text-red-600 mb-2">Error Loading Data</h2>
+          <p className="text-gray-600 mb-4">{sharedData.sharedDataErrorMessage}</p>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => sharedData.citiesAndDistricts.refetch()} 
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Retry
+            </button>
+            <button 
+              onClick={onClose} 
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
       <div

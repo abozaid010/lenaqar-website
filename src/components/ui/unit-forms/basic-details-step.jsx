@@ -24,6 +24,14 @@ export default function BasicDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t, locale } = useI18n();
+
+  // Debug logging for district selection
+  console.log("🔍 DEBUG - Basic Details Step:");
+  console.log("🏙️ Cities and Districts:", citiesAndDistricts);
+  console.log("📍 Selected City:", formData.city);
+  console.log("🏘️ Available Districts for city:", 
+    formData.city ? citiesAndDistricts?.find((gov) => gov.governorate === formData.city)?.districts : "No city selected"
+  );
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -198,15 +206,24 @@ export default function BasicDetailsStep({
               ? t.formLabels.selectDistrict
               : t.formLabels.cityFirst}
           </option>
-          {formData?.city &&
+          {formData?.city && citiesAndDistricts?.length > 0 ? (
             citiesAndDistricts
               ?.find((gov) => gov.governorate === formData.city)
-              ?.districts.sort((a, b) => a.district.localeCompare(b.district))
+              ?.districts?.sort((a, b) => a.district.localeCompare(b.district))
               .map((dist) => (
                 <option key={dist.district} value={dist.district}>
                   {formatDistrictLabel(dist.district, formData.city, locale)}
                 </option>
-              ))}
+              )) || (
+                <option disabled value="">
+                  No districts found for {formData.city}
+                </option>
+              )
+          ) : formData.city ? (
+            <option disabled value="">
+              Loading districts...
+            </option>
+          ) : null}
         </FormSelect>
 
         {/* Project */}
