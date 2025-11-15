@@ -6,10 +6,11 @@ import { BUILDING_TYPES, STATIC_CITIES } from "@/data/constants";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
-import { ChevronDown, Trash2, X } from "lucide-react";
+import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LoadingSpinner from "./loading-spinner";
+import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({ appliedFilters, isPublic }) {
@@ -54,6 +55,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = [];
     if (filters.developer_name) {
@@ -627,8 +629,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
 
         {!isPublic && (
-          <div className="w-full md:w-auto flex-shrink-0">
-            <AddUnitButton className="w-full md:w-auto text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2">
+            <button
+              onClick={() => setIsUploadDialogOpen(true)}
+              className="flex-1 md:flex-initial px-[16px] py-[10px] h-[40px] bg-green-600 hover:bg-green-700 text-white rounded-[5px] flex items-center justify-center gap-2 transition-colors text-sm"
+            >
+              <FileSpreadsheet size={18} />
+              <span className="hidden sm:inline">
+                {t.uploadExcel?.button || "Upload Excel"}
+              </span>
+            </button>
+            <AddUnitButton className="flex-1 md:flex-initial text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
           </div>
         )}
       </div>
@@ -677,6 +688,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </button>
         </div>
       )}
+
+      {/* Upload Excel Dialog */}
+      <UploadUnitsExcelDialog
+        isOpen={isUploadDialogOpen}
+        onClose={() => setIsUploadDialogOpen(false)}
+      />
     </div>
   );
 }
