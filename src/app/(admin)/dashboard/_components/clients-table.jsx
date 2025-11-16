@@ -26,8 +26,6 @@ export default function ClientsTable({ users, pagination }) {
 
   useEffect(() => {
     if (users) {
-      const usersId = users.map((user) => user.user_id);
-      localStorage.setItem("usersId", JSON.stringify(usersId));
       setLocalUsers(users);
     }
   }, [users]);
@@ -122,6 +120,9 @@ export default function ClientsTable({ users, pagination }) {
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap hidden md:table-cell">
                     {t.clientsTable.headers.messageCount}
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                    {t.clientsTable.headers.campaign}
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
                     {t.clientsTable.headers.action}
@@ -236,6 +237,44 @@ export default function ClientsTable({ users, pagination }) {
                             </div>
                           )}
                         </span>
+                      </td>
+
+                      <td className="px-2 py-2 text-center whitespace-nowrap">
+                        {user?.campaign_ids && user.campaign_ids.length > 0 ? (
+                          <div className="inline-flex flex-col items-center gap-1 justify-center">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
+                              {user.campaign_ids[0]}
+                            </span>
+                            {user.campaign_ids.length > 1 && (
+                              <div className="inline-flex items-center gap-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
+                                  {user.campaign_ids[1]}
+                                </span>
+                                {user.campaign_ids.length > 2 && (
+                                  <div className="relative group">
+                                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold cursor-help">
+                                      +{user.campaign_ids.length - 2}
+                                    </span>
+                                    <div className="absolute z-50 invisible group-hover:visible bg-gray-900 text-white text-xs rounded py-2 px-3 bottom-full left-1/2 transform -translate-x-1/2 mb-2 whitespace-nowrap shadow-lg">
+                                      <div className="flex flex-col gap-1">
+                                        {user.campaign_ids
+                                          .slice(2)
+                                          .map((campaign, index) => (
+                                            <span key={index}>{campaign}</span>
+                                          ))}
+                                      </div>
+                                      <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                        <div className="border-4 border-transparent border-t-gray-900"></div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">-</span>
+                        )}
                       </td>
 
                       <td

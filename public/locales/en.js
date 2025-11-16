@@ -265,6 +265,11 @@ export default {
       cancel: "Cancel",
       apply: "Apply",
     },
+    campaigns: {
+      label: "Campaigns",
+      allCampaigns: "All Campaigns",
+      selected: "{count} selected",
+    },
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
     ADD: "Add New Lead",
@@ -280,6 +285,7 @@ export default {
       date: "Date",
       requirements: "Requirements",
       messageCount: "Messages Count",
+      campaign: "Campaign",
       action: "Action",
     },
     newLead: "New Lead",
@@ -1048,5 +1054,32 @@ export default {
     projectEnName: "Enter project Name In English",
     projectDescription:
       "Add area, delivery, unit types and pyament plan about this project.",
+  },
+  clientInfo: {
+    email: "Email",
+    phoneNumber: "Phone Number",
+    clientName: "Client Name",
+    pricePercentage: "Price Percentage",
+    accurateQueriesLevel: "Accurate Queries Level",
+    saveChanges: "Save Changes",
+    saving: "Saving...",
+    profileUpdated: "Profile updated successfully",
+    accuracyLevels: {
+      exactMatch: {
+        title: "Exact Match",
+        description:
+          "Search returns only units that exactly match the user's input. No tolerance for rooms or area.",
+      },
+      accurate: {
+        title: "Accurate",
+        description:
+          "Allows slight flexibility: up to +1 room and +10 sqm above the user's requirements.",
+      },
+      flexible: {
+        title: "Flexible",
+        description:
+          "More tolerant search: up to +2 rooms and +20 sqm above the user's input for broader results.",
+      },
+    },
   },
 };
