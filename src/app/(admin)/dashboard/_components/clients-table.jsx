@@ -26,8 +26,6 @@ export default function ClientsTable({ users, pagination }) {
 
   useEffect(() => {
     if (users) {
-      const usersId = users.map((user) => user.user_id);
-      localStorage.setItem("usersId", JSON.stringify(usersId));
       setLocalUsers(users);
     }
   }, [users]);

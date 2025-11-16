@@ -29,10 +29,19 @@ export default function ClientsListQuery({ searchParams }) {
       );
       const averageScore = totalScore / users.length;
       setAverageScore(averageScore);
+
+      // Extract and store unique campaign IDs
+      const allCampaignIds = users.flatMap((user) => user.campaign_ids || []);
+      const uniqueCampaignIds = [...new Set(allCampaignIds)].sort();
+      localStorage.setItem("campaignIds", JSON.stringify(uniqueCampaignIds));
+
+      // Store user IDs
+      const usersId = users.map((user) => user.user_id);
+      localStorage.setItem("usersId", JSON.stringify(usersId));
     } else {
       setAverageScore(null);
     }
-  }, [users]);
+  }, [users, isLoading, setAverageScore, setLoading]);
 
   if (isLoading || isFetching || isPending) {
     return (
