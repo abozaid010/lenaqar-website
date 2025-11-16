@@ -3,12 +3,14 @@
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { getProfileDataByEmail, updateProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useI18n } from "@/context/translate-api";
 
 export default function ClientInfo({ client_email }) {
+  const { t } = useI18n();
   const { data, isLoading } = useQuery({
     queryKey: ["clientData" + client_email],
     queryFn: () => getProfileDataByEmail(client_email),
@@ -22,6 +24,7 @@ export default function ClientInfo({ client_email }) {
     phone_number: data?.data?.phone_number,
     email: data?.data?.email,
     price_percentage: data?.data?.price_percentage || 0,
+    accurate_queries_level: data?.data?.accurate_queries_level || 0,
   });
   const [isChanged, setIsChanged] = useState(false);
 
@@ -30,6 +33,7 @@ export default function ClientInfo({ client_email }) {
       phone_number: data?.data?.phone_number,
       email: data?.data?.email,
       price_percentage: data?.data?.price_percentage || 0,
+      accurate_queries_level: data?.data?.accurate_queries_level || 0,
     });
   }, [isLoading]);
 
@@ -53,7 +57,8 @@ export default function ClientInfo({ client_email }) {
     try {
       setLoadingSubmit(true);
       await updateProfileData(formData);
-      toast.success("Profile updated successfully");
+      toast.success(t.clientInfo.profileUpdated);
+      setIsChanged(false);
       setTimeout(() => {
         router.refresh();
       }, 500);
@@ -73,7 +78,7 @@ export default function ClientInfo({ client_email }) {
           className="client-info-form flex flex-col gap-4 max-w-md mx-auto p-6 bg-white rounded-lg shadow mt-6"
         >
           <label className="flex flex-col text-gray-600 mb-1">
-            Email:
+            {t.clientInfo.email}:
             <div className="relative">
               <input
                 type="email"
@@ -86,7 +91,7 @@ export default function ClientInfo({ client_email }) {
             </div>
           </label>
           <label className="flex flex-col text-gray-600 mb-1">
-            Phone Number:
+            {t.clientInfo.phoneNumber}:
             <div className="relative">
               <input
                 type="text"
@@ -98,7 +103,7 @@ export default function ClientInfo({ client_email }) {
             </div>
           </label>
           <label className="flex flex-col text-gray-600 mb-1">
-            Client Name:
+            {t.clientInfo.clientName}:
             <div className="relative">
               <input
                 type="text"
@@ -111,7 +116,7 @@ export default function ClientInfo({ client_email }) {
           </label>
 
           <label className="flex flex-col font-medium text-gray-700 mb-2">
-            Price Percentage:
+            {t.clientInfo.pricePercentage}:
             <div className="relative mt-1">
               <input
                 type="number"
@@ -130,6 +135,68 @@ export default function ClientInfo({ client_email }) {
             </div>
           </label>
 
+          <label className="flex flex-col font-medium text-gray-700 mb-2">
+            {t.clientInfo.accurateQueriesLevel}:
+            <div className="mt-2 space-y-3">
+              <label className="flex items-start gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <input
+                  type="radio"
+                  name="accurate_queries_level"
+                  value={0}
+                  checked={formData.accurate_queries_level == 0}
+                  onChange={handleChange}
+                  className="mt-1.5 mr-3"
+                />
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {t.clientInfo.accuracyLevels.exactMatch.title}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {t.clientInfo.accuracyLevels.exactMatch.description}
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <input
+                  type="radio"
+                  name="accurate_queries_level"
+                  value={1}
+                  checked={formData.accurate_queries_level == 1}
+                  onChange={handleChange}
+                  className="mt-1.5 mr-3"
+                />
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {t.clientInfo.accuracyLevels.accurate.title}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {t.clientInfo.accuracyLevels.accurate.description}
+                  </p>
+                </div>
+              </label>
+
+              <label className="flex items-start gap-2 p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                <input
+                  type="radio"
+                  name="accurate_queries_level"
+                  value={2}
+                  checked={formData.accurate_queries_level == 2}
+                  onChange={handleChange}
+                  className="mt-1.5 mr-3"
+                />
+                <div>
+                  <div className="font-semibold text-gray-900">
+                    {t.clientInfo.accuracyLevels.flexible.title}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {t.clientInfo.accuracyLevels.flexible.description}
+                  </p>
+                </div>
+              </label>
+            </div>
+          </label>
+
           {isChanged && (
             <button
               disabled={loadingSubmit}
@@ -138,10 +205,10 @@ export default function ClientInfo({ client_email }) {
               {loadingSubmit ? (
                 <div className="flex items-center justify-center">
                   <Loader2 className="animate-spin" />
-                  <span className="ml-2">Saving...</span>
+                  <span className="ml-2">{t.clientInfo.saving}</span>
                 </div>
               ) : (
-                "Save Changes"
+                t.clientInfo.saveChanges
               )}
             </button>
           )}
