@@ -27,8 +27,25 @@ jobs:
             set -Eeuo pipefail
             cd ~/lenaai-website
 
-            echo "📥 Pulling latest changes..."
+            echo "🔧 Fixing git permissions and removing stale lock files..."
+            # Remove any stale git lock files that might prevent git operations
+            rm -f .git/config.lock .git/index.lock .git/refs/heads/main.lock 2>/dev/null || true
+            
+            # Ensure correct ownership of .git directory (if we have permissions)
+            CURRENT_USER=$(whoami)
+            chown -R $CURRENT_USER:$CURRENT_USER .git 2>/dev/null || true
+            
+            # Fix permissions on .git directory to ensure it's writable
+            chmod -R u+rw .git 2>/dev/null || true
+            
+            # Verify git is working
+            git status >/dev/null 2>&1 || {
+              echo "⚠️  Git status check failed, attempting to fix..."
+              # If git status fails, try to reset the repository state
+              git reset --hard HEAD 2>/dev/null || true
+            }
 
+            echo "📥 Pulling latest changes..."
             git config pull.rebase false
             git pull origin main --no-rebase
             echo "🧹 Stopping old container if exists..."
