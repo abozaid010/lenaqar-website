@@ -17,6 +17,7 @@ const cairo = Cairo({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net"),
   title: "LENAAI | AI-Powered Real Estate CRM System",
   description:
     "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
