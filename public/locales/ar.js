@@ -253,6 +253,11 @@ export default {
       cancel: "إلغاء",
       apply: "تطبيق",
     },
+    campaigns: {
+      label: "الحملات",
+      allCampaigns: "كل الحملات",
+      selected: "{count} محدد",
+    },
     whatsappButton: " عملاء واتساب",
     premuim: "ميزة مدفوعة",
     ADD: "اضافة عميل  جديد",

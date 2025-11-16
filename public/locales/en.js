@@ -265,6 +265,11 @@ export default {
       cancel: "Cancel",
       apply: "Apply",
     },
+    campaigns: {
+      label: "Campaigns",
+      allCampaigns: "All Campaigns",
+      selected: "{count} selected",
+    },
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
     ADD: "Add New Lead",
