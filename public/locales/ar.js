@@ -298,6 +298,7 @@ export default {
       date: "التاريخ",
       requirements: "المتطلبات",
       messageCount: "عدد الرسائل",
+      campaign: "الحملة",
       action: "الإجراء",
     },
     newLead: "عميل جديد",
@@ -1074,5 +1075,32 @@ export default {
     projectEnName: "أدخل اسم المشروع بالإنجليزية",
     projectDescription:
       "برجاء اضافة تفاصيل المشروع وخطط السداد ومواعيد الاستلام  وجودة المشروع",
+  },
+  clientInfo: {
+    email: "البريد الإلكتروني",
+    phoneNumber: "رقم الهاتف",
+    clientName: "اسم العميل",
+    pricePercentage: "نسبة السعر",
+    accurateQueriesLevel: "مستوى دقة الاستعلامات",
+    saveChanges: "حفظ التغييرات",
+    saving: "جاري الحفظ...",
+    profileUpdated: "تم تحديث الملف الشخصي بنجاح",
+    accuracyLevels: {
+      exactMatch: {
+        title: "مطابقة تامة",
+        description:
+          "البحث يعرض فقط الوحدات التي تطابق تماماً مدخلات المستخدم. لا يوجد تسامح في عدد الغرف أو المساحة.",
+      },
+      accurate: {
+        title: "دقيق",
+        description:
+          "يسمح بمرونة بسيطة: حتى +1 غرفة و +10 متر مربع أعلى من متطلبات المستخدم.",
+      },
+      flexible: {
+        title: "مرن",
+        description:
+          "بحث أكثر تسامحاً: حتى +2 غرفة و +20 متر مربع أعلى من مدخلات المستخدم للحصول على نتائج أوسع.",
+      },
+    },
   },
 };
