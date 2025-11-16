@@ -1,0 +1,658 @@
+"use client";
+
+import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
+import { v4 as uuidv4 } from "uuid";
+import {
+  Upload,
+  X,
+  AlertCircle,
+  CheckCircle,
+  XCircle,
+  Loader2,
+} from "lucide-react";
+import { useRef, useState } from "react";
+import * as XLSX from "xlsx";
+
+export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
+  const { t } = useI18n();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [parsedData, setParsedData] = useState(null);
+  const [error, setError] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState([]);
+  const fileInputRef = useRef(null);
+
+  const clientId = Cookies.get("lena-website-client_id") || null;
+  const clientInfo = Cookies.get("client_info");
+  const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+
+  if (!isOpen) return null;
+
+  const parseExcelFile = async (file) => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array" });
+      const sheetName = workbook.SheetNames[0];
+
+      if (!sheetName) {
+        throw new Error(
+          "No worksheet found in the Excel file. Please ensure your file contains at least one worksheet."
+        );
+      }
+
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+      if (jsonData.length < 2) {
+        throw new Error(
+          "Excel file must contain headers and at least one data row."
+        );
+      }
+
+      const headers = jsonData[0];
+
+      const rows = jsonData.slice(1).filter((row) => {
+        // Filter out completely empty rows
+        return row.some(
+          (cell) => cell !== undefined && cell !== null && cell !== ""
+        );
+      });
+
+      // Transform rows to structured JSON
+      const units = rows.map((row) => {
+        const unit = {};
+
+        // Map each column to the unit object
+        headers.forEach((header, colIndex) => {
+          const value = row[colIndex];
+
+          // Skip empty values
+          if (value === undefined || value === null || value === "") {
+            return;
+          }
+
+          unit[header] = value;
+        });
+
+        return unit;
+      });
+
+      // Transform to final structure with payment plans
+      const transformedUnits = units.map((unit) => {
+        const transformed = {
+          // Basic details
+          clientId: clientId,
+          clientName: clientName,
+          country: "Egypt",
+          dataSource: "website",
+          purpose: "sell",
+          unitId: uuidv4(),
+          // sheet data
+          buildingType: unit.buildingType || "",
+          project: unit.project || "",
+          project_ar: unit.project_ar || "",
+          view: unit.view || "",
+          phase: unit.phase || "",
+          city: unit.city || "",
+          district: unit.district || "",
+          developer: unit.developer || "",
+          unitTitle: unit.unitTitle || "",
+          deliveryStatus: unit.deliveryStatus || "",
+          bathroomCount: unit.bathroomCount ? Number(unit.bathroomCount) : 0,
+          floor: unit.floor ? Number(unit.floor) : 0,
+          roomsCount: unit.roomsCount ? unit.roomsCount : "",
+          landArea: unit.landArea ? Number(unit.landArea) : 0,
+          gardenSize: unit.gardenSize ? Number(unit.gardenSize) : 0,
+          finishing: unit.finishing || "",
+          furnishing: unit.furnishing || "",
+          garageArea: unit.garageArea ? Number(unit.garageArea) : 0,
+          images: unit.images
+            ? unit.images.split(",").map((img) => ({
+                url: img.trim(),
+                fileId: img.split("/").pop(),
+              }))
+            : [],
+          code: unit.code || "",
+          model: unit.model || "",
+          downPayment: unit.downPayment ? Number(unit.downPayment) : 0,
+          totalPrice: unit.totalPrice ? Number(unit.totalPrice) : 0,
+          deliveryDate: unit.deliveryDate || "",
+          paymentPlans: [],
+          // Owner details (shown only for brokers)
+          owner_name: unit.owner_name || "",
+          owner_mobile: unit.owner_mobile || "",
+        };
+
+        // Extract payment plans dynamically
+        // Collect all payment plan numbers that exist in the unit data
+        const paymentPlanNumbers = new Set();
+        Object.keys(unit).forEach((key) => {
+          const match = key.match(/^pp(\d+)_/);
+          if (match) {
+            paymentPlanNumbers.add(parseInt(match[1]));
+          }
+        });
+
+        // Process each payment plan number found
+        paymentPlanNumbers.forEach((planNumber) => {
+          const prefix = `pp${planNumber}_`;
+          const years = planNumber; // Determine years from plan number (pp1 = 1 year, pp2 = 2 years, etc.)
+          const price = unit[`${prefix}price`];
+          const maintenance = unit[`${prefix}maintenance`];
+          const downPayment = unit[`${prefix}downPayment`];
+          const installmentAmount = unit[`${prefix}installment_amount_yearly`];
+
+          // Check if all required fields exist for this payment plan
+          // Required: price, downPayment, installment_amount_yearly
+          // Optional: maintenance
+          const hasRequiredFields = price && downPayment && installmentAmount;
+
+          if (hasRequiredFields) {
+            transformed.paymentPlans.push({
+              years: years,
+              price: Number(price),
+              maintenance: maintenance ? Number(maintenance) : 0,
+              downPayment: Number(downPayment),
+              installment_amount_yearly: Number(installmentAmount),
+            });
+          }
+        });
+
+        console.log("Transformed Unit:", transformed);
+        return transformed;
+      });
+
+      setParsedData({
+        headers,
+        rows,
+        units: transformedUnits,
+        summary: {
+          totalUnits: transformedUnits.length,
+          worksheetName: sheetName,
+        },
+      });
+
+      setIsProcessing(false);
+    } catch (err) {
+      console.error("Error parsing Excel file:", err);
+      setError(err.message || "Failed to parse Excel file");
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+      if (
+        validTypes.includes(file.type) ||
+        file.name.endsWith(".xlsx") ||
+        file.name.endsWith(".xls")
+      ) {
+        setSelectedFile(file);
+        setParsedData(null);
+        setError(null);
+
+        parseExcelFile(file);
+      } else {
+        alert(
+          t.uploadExcel?.invalidFileType ||
+            "Please select a valid Excel file (.xlsx or .xls)"
+        );
+      }
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setParsedData(null);
+    setError(null);
+    setUploadStatus([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedFile || !parsedData) {
+      alert(t.uploadExcel?.noFileSelected || "Please select a file first");
+      return;
+    }
+
+    setIsUploading(true);
+    setUploadStatus([]);
+
+    const initialStatus = parsedData.units.map((unit, index) => ({
+      index,
+      unitTitle: unit.unitTitle || unit.code || `Unit ${index + 1}`,
+      status: "pending", // pending, uploading, success, failed
+      error: null,
+    }));
+    setUploadStatus(initialStatus);
+
+    for (let i = 0; i < parsedData.units.length; i++) {
+      // Update status to uploading
+      setUploadStatus((prev) =>
+        prev.map((item) =>
+          item.index === i ? { ...item, status: "uploading" } : item
+        )
+      );
+
+      try {
+        // TODO: Replace with actual API call
+
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Simulate random success/failure
+        const isSuccess = Math.random() > 0.5; // 50% success rate for demo
+
+        if (isSuccess) {
+          setUploadStatus((prev) =>
+            prev.map((item) =>
+              item.index === i ? { ...item, status: "success" } : item
+            )
+          );
+        } else {
+          throw new Error("Failed to create unit");
+        }
+      } catch (err) {
+        setUploadStatus((prev) =>
+          prev.map((item) =>
+            item.index === i
+              ? { ...item, status: "failed", error: err.message }
+              : item
+          )
+        );
+      }
+    }
+
+    setIsUploading(false);
+
+    // Check if all uploads were successful
+    const allSuccess = initialStatus.every((s) => s.status === "success");
+    if (allSuccess) {
+      // close dialog after successful upload
+      // onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
+      <div className="bg-white rounded-lg shadow-xl max-w-[85%] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between py-4 px-6 border-b">
+          <h2 className="text-xl font-semibold text-gray-800">
+            {t.uploadExcel?.title || "Upload Units Excel Sheet"}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-6 flex-1 overflow-y-auto">
+          <div className="space-y-6">
+            {/* Upload Area */}
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+
+              {!selectedFile ? (
+                <div className="space-y-4">
+                  <div className="flex justify-center">
+                    <Upload size={48} className="text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-gray-600 mb-2">
+                      {t.uploadExcel?.dragDrop ||
+                        "Drag and drop your Excel file here, or"}
+                    </p>
+                    <button
+                      onClick={handleUploadClick}
+                      className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                    >
+                      {t.uploadExcel?.browseFiles || "Browse Files"}
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {t.uploadExcel?.supportedFormats ||
+                      "Supported formats: .xlsx, .xls"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-center gap-4">
+                    <div className="flex items-center gap-3 bg-gray-100 rounded-lg px-4 py-3">
+                      <Upload size={24} className="text-primary" />
+                      <span className="text-gray-700 font-medium">
+                        {selectedFile.name}
+                      </span>
+                      <button
+                        onClick={handleRemoveFile}
+                        className="text-gray-500 hover:text-red-500 transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600">
+                    {t.uploadExcel?.fileSize || "File size"}:{" "}
+                    {(selectedFile.size / 1024).toFixed(2)} KB
+                  </p>
+                  <button
+                    onClick={handleUploadClick}
+                    className="px-4 py-2 text-sm text-primary hover:underline"
+                  >
+                    {t.uploadExcel?.changeFile || "Change File"}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Instructions */}
+            {!parsedData && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-semibold text-gray-800 mb-2">
+                  {t.uploadExcel?.instructions || "Instructions:"}
+                </h3>
+                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+                  <li>
+                    {t.uploadExcel?.instruction1 ||
+                      "Upload an Excel file with unit data in the first worksheet"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction2 ||
+                      "First row must contain column headers (buildingType, project, city, etc.)"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction3 ||
+                      "Payment plans: Use pp1_, pp2_, pp3_ prefixes where the number represents years (e.g., pp2_ means 2-year plan)"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction4 ||
+                      "Required fields for each payment plan: price, downPayment, installment_amount_yearly"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction5 ||
+                      "Images: Provide comma-separated URLs in format: https://api.lenaai.net/images/file_id"}
+                  </li>
+                </ul>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                <AlertCircle
+                  className="text-red-500 flex-shrink-0 mt-0.5"
+                  size={20}
+                />
+                <div>
+                  <h3 className="font-semibold text-red-800 mb-1">
+                    {t.uploadExcel?.error || "Error"}
+                  </h3>
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Processing State */}
+            {isProcessing && (
+              <div className="flex items-center justify-center py-8">
+                <div className="flex flex-col items-center gap-3">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                  <p className="text-gray-600">
+                    {t.uploadExcel?.processing || "Processing file..."}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Preview Table */}
+            {parsedData && !isProcessing && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-800">
+                    {t.uploadExcel?.preview || "Preview"} (
+                    {parsedData.summary.totalUnits}{" "}
+                    {t.uploadExcel?.units || "units"})
+                  </h3>
+                  <span className="text-sm text-gray-600">
+                    {t.uploadExcel?.worksheet || "Worksheet"}:{" "}
+                    {parsedData.summary.worksheetName}
+                  </span>
+                </div>
+
+                <div className="border rounded-lg overflow-hidden" dir="ltr">
+                  <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
+                            #
+                          </th>
+                          {parsedData.headers.map((header, idx) => (
+                            <th
+                              key={idx}
+                              className="px-3 py-2 text-left font-semibold text-gray-700 border-b whitespace-nowrap"
+                            >
+                              {header}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {parsedData.rows.map((row, rowIndex) => (
+                          <tr
+                            key={rowIndex}
+                            className={
+                              rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                            }
+                          >
+                            <td className="px-3 py-2 text-gray-600 border-b font-medium">
+                              {rowIndex + 1}
+                            </td>
+                            {parsedData.headers.map((_, colIndex) => (
+                              <td
+                                key={colIndex}
+                                className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
+                              >
+                                {row[colIndex] !== undefined &&
+                                row[colIndex] !== null &&
+                                row[colIndex] !== ""
+                                  ? String(row[colIndex])
+                                  : "-"}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Parsed JSON Preview (Collapsible) */}
+                <details className="border rounded-lg">
+                  <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-gray-700">
+                    {t.uploadExcel?.viewJson || "View Parsed JSON"} (
+                    {parsedData.units.length} {t.uploadExcel?.units || "units"})
+                  </summary>
+                  <div
+                    className="p-4 bg-gray-50 max-h-[300px] overflow-auto"
+                    dir="ltr"
+                  >
+                    <pre className="text-xs text-gray-800 whitespace-pre-wrap">
+                      {JSON.stringify(parsedData.units, null, 2)}
+                    </pre>
+                  </div>
+                </details>
+              </div>
+            )}
+
+            {/* Upload Status */}
+            {uploadStatus.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold text-gray-800">
+                    {t.uploadExcel?.uploadProgress || "Upload Progress"}
+                  </h3>
+                  <span className="text-sm text-gray-600">
+                    {uploadStatus.filter((s) => s.status === "success").length}{" "}
+                    / {uploadStatus.length}{" "}
+                    {t.uploadExcel?.completed || "completed"}
+                  </span>
+                </div>
+
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {uploadStatus.map((item) => (
+                      <div
+                        key={item.index}
+                        className={`flex items-center justify-between px-4 py-3 border-b last:border-b-0 ${
+                          item.status === "success"
+                            ? "bg-green-50"
+                            : item.status === "failed"
+                              ? "bg-red-50"
+                              : item.status === "uploading"
+                                ? "bg-blue-50"
+                                : "bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <span className="text-sm font-medium text-gray-600 flex-shrink-0">
+                            #{item.index + 1}
+                          </span>
+                          <span className="text-sm text-gray-700 truncate">
+                            {item.unitTitle}
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {item.status === "pending" && (
+                            <span className="text-xs text-gray-500">
+                              {t.uploadExcel?.pending || "Pending"}
+                            </span>
+                          )}
+                          {item.status === "uploading" && (
+                            <>
+                              <Loader2
+                                className="animate-spin text-blue-600"
+                                size={18}
+                              />
+                              <span className="text-xs text-blue-600">
+                                {t.uploadExcel?.uploading || "Uploading..."}
+                              </span>
+                            </>
+                          )}
+                          {item.status === "success" && (
+                            <>
+                              <CheckCircle
+                                className="text-green-600"
+                                size={18}
+                              />
+                              <span className="text-xs text-green-600">
+                                {t.uploadExcel?.success || "Success"}
+                              </span>
+                            </>
+                          )}
+                          {item.status === "failed" && (
+                            <>
+                              <XCircle className="text-red-600" size={18} />
+                              <span className="text-xs text-red-600">
+                                {t.uploadExcel?.failed || "Failed"}
+                              </span>
+                              {item.error && (
+                                <span className="text-xs text-red-500 ml-2">
+                                  ({item.error})
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Summary Stats */}
+                {!isUploading && uploadStatus.length > 0 && (
+                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="text-green-600" size={20} />
+                      <span className="text-sm font-medium text-gray-700">
+                        {
+                          uploadStatus.filter((s) => s.status === "success")
+                            .length
+                        }{" "}
+                        {t.uploadExcel?.successful || "Successful"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <XCircle className="text-red-600" size={20} />
+                      <span className="text-sm font-medium text-gray-700">
+                        {
+                          uploadStatus.filter((s) => s.status === "failed")
+                            .length
+                        }{" "}
+                        {t.uploadExcel?.failed || "Failed"}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t bg-gray-50">
+          <button
+            onClick={onClose}
+            disabled={isUploading}
+            className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${
+              isUploading ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {t.uploadExcel?.cancel || "Cancel"}
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={
+              !selectedFile || !parsedData || isProcessing || isUploading
+            }
+            className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${
+              !selectedFile || !parsedData || isProcessing || isUploading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:opacity-90"
+            }`}
+          >
+            {isUploading && <Loader2 className="animate-spin" size={18} />}
+            {isUploading
+              ? t.uploadExcel?.uploading || "Uploading..."
+              : t.uploadExcel?.upload || "Upload"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
