@@ -10,9 +10,19 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Download,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
+import { useAddUnit } from "@/hooks/use-unit-mutations";
+import { useUnitsPageData } from "@/hooks/use-units-page-data";
+
+const downloadTemplateFile = () => {
+  const link = document.createElement("a");
+  link.href = "/unit_upload_template.xlsx";
+  link.download = "unit_upload_template.xlsx";
+  link.click();
+};
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
@@ -27,6 +37,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const clientId = Cookies.get("lena-website-client_id") || null;
   const clientInfo = Cookies.get("client_info");
   const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+
+  const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
   if (!isOpen) return null;
 
@@ -162,7 +174,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           }
         });
 
-        console.log("Transformed Unit:", transformed);
         return transformed;
       });
 
@@ -235,57 +246,67 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
+      unitId: unit.unitId, // Store unitId for matching with inserted_ids
       unitTitle: unit.unitTitle || unit.code || `Unit ${index + 1}`,
-      status: "pending", // pending, uploading, success, failed
+      status: "uploading", // Start all as uploading since we send them together
       error: null,
     }));
     setUploadStatus(initialStatus);
 
-    for (let i = 0; i < parsedData.units.length; i++) {
-      // Update status to uploading
-      setUploadStatus((prev) =>
-        prev.map((item) =>
-          item.index === i ? { ...item, status: "uploading" } : item
-        )
-      );
+    try {
+      // Send all units in a single request
+      const response = await addUnitViaExcel(parsedData.units);
 
-      try {
-        // TODO: Replace with actual API call
+      console.log("Upload response:", response);
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Check if the upload was successful
+      if (response?.status && response?.data?.inserted_ids) {
+        const insertedIds = response.data.inserted_ids;
+        const totalSent = parsedData.units.length;
+        const totalInserted = insertedIds.length;
 
-        // Simulate random success/failure
-        const isSuccess = Math.random() > 0.5; // 50% success rate for demo
-
-        if (isSuccess) {
-          setUploadStatus((prev) =>
-            prev.map((item) =>
-              item.index === i ? { ...item, status: "success" } : item
-            )
-          );
-        } else {
-          throw new Error("Failed to create unit");
-        }
-      } catch (err) {
+        // Mark units based on whether their unitId is in inserted_ids
         setUploadStatus((prev) =>
-          prev.map((item) =>
-            item.index === i
-              ? { ...item, status: "failed", error: err.message }
-              : item
-          )
+          prev.map((item) => {
+            const wasInserted = insertedIds.includes(item.unitId);
+            return {
+              ...item,
+              status: wasInserted ? "success" : "failed",
+              error: wasInserted
+                ? null
+                : "Unit was rejected by the server (validation failed or duplicate)",
+            };
+          })
+        );
+
+        if (totalInserted === totalSent) {
+          setTimeout(() => {
+            onClose();
+          }, 1500);
+        }
+      } else {
+        // If response doesn't indicate success, mark all as failed
+        setUploadStatus((prev) =>
+          prev.map((item) => ({
+            ...item,
+            status: "failed",
+            error: response?.error_message || "Upload failed",
+          }))
         );
       }
+    } catch (err) {
+      console.error("Upload error:", err);
+      // Mark all units as failed on error
+      setUploadStatus((prev) =>
+        prev.map((item) => ({
+          ...item,
+          status: "failed",
+          error: err.message || "Failed to upload units",
+        }))
+      );
     }
 
     setIsUploading(false);
-
-    // Check if all uploads were successful
-    const allSuccess = initialStatus.every((s) => s.status === "success");
-    if (allSuccess) {
-      // close dialog after successful upload
-      // onClose();
-    }
   };
 
   return (
@@ -327,12 +348,21 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       {t.uploadExcel?.dragDrop ||
                         "Drag and drop your Excel file here, or"}
                     </p>
-                    <button
-                      onClick={handleUploadClick}
-                      className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
-                    >
-                      {t.uploadExcel?.browseFiles || "Browse Files"}
-                    </button>
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={handleUploadClick}
+                        className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                      >
+                        {t.uploadExcel?.browseFiles || "Browse Files"}
+                      </button>
+                      <button
+                        onClick={downloadTemplateFile}
+                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:opacity-90 transition-opacity flex items-center gap-2"
+                      >
+                        <Download size={18} />
+                        {t.uploadExcel?.downloadTemplate || "Download Template"}
+                      </button>
+                    </div>
                   </div>
                   <p className="text-sm text-gray-500">
                     {t.uploadExcel?.supportedFormats ||

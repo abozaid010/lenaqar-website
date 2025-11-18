@@ -122,6 +122,19 @@ export async function addUnitRent(unitData) {
   }
 }
 
+export async function addUnitSaleViaExcel(formData) {
+  try {
+    const response = await axiosInstance.post(
+      `/units/v1/import_units`,
+      formData
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to add units via excel:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
 export async function deleteUnit(id) {
   try {
     const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);

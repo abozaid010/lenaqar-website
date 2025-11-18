@@ -3,6 +3,7 @@
 import {
   addUnit,
   addUnitRent,
+  addUnitSaleViaExcel,
   deleteUnit,
   updateUnit,
   updateUnitRent,
@@ -16,36 +17,37 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 // Hook for adding a new unit
-export function useAddUnit() {
+export function useAddUnit(fromExcel = false) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (formData) => {
       let res;
-      if (formData.purpose === "sell") {
+      if (formData.purpose === "sell" && !fromExcel) {
         res = await addUnit(formData);
-      } else if (formData.purpose === "rent") {
+      } else if (formData.purpose === "rent" && !fromExcel) {
         res = await addUnitRent(formData);
+      } else if (fromExcel) {
+        res = await addUnitSaleViaExcel(formData);
       }
 
       if (!res || !res.status) {
         throw new Error("Failed to add unit");
       }
 
-      return formData;
+      // Return the full response for Excel uploads to access inserted_ids
+      return fromExcel ? res : formData;
     },
     onMutate: async (formData) => {
-      // Cancel any outgoing refetches
+      if (fromExcel) return;
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
       const previousUnits = queryClient.getQueriesData({
         queryKey: unitKeys.all,
       });
 
-      // Optimistically add the new unit to the cache
       const optimisticUnit = {
         ...formData,
-        // Mark as optimistic for potential rollback
         _isOptimistic: true,
       };
 
@@ -55,7 +57,7 @@ export function useAddUnit() {
       return { previousUnits, optimisticUnit };
     },
     onSuccess: (data, variables, context) => {
-      // // Replace the optimistic unit with the real data
+      // // Replace the optimistic unit with the real data => the server ONLY returns status
       // if (context?.optimisticUnit && data) {
       //   updateUnitsInCache(queryClient, context.optimisticUnit.unitId, () => ({
       //     ...data,
@@ -63,11 +65,9 @@ export function useAddUnit() {
       //   }));
       // }
 
-      // Invalidate to ensure data consistency
       queryClient.invalidateQueries({ queryKey: unitKeys.all });
     },
     onError: (err, variables, context) => {
-      // If the mutation fails, use the context to roll back
       if (context?.previousUnits) {
         context.previousUnits.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);

@@ -401,6 +401,7 @@ export default {
     title: "Upload Units Excel Sheet",
     dragDrop: "Drag and drop your Excel file here, or",
     browseFiles: "Browse Files",
+    downloadTemplate: "Download Template",
     supportedFormats: "Supported formats: .xlsx, .xls",
     fileSize: "File size",
     changeFile: "Change File",
