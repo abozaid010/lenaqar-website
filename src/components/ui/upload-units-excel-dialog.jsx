@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
+import { useAddUnit } from "@/hooks/use-unit-mutations";
 
 const downloadTemplateFile = () => {
   const link = document.createElement("a");
@@ -35,6 +36,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const clientId = Cookies.get("lena-website-client_id") || null;
   const clientInfo = Cookies.get("client_info");
   const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+
+  const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
   if (!isOpen) return null;
 
@@ -170,7 +173,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           }
         });
 
-        console.log("Transformed Unit:", transformed);
         return transformed;
       });
 
@@ -258,22 +260,21 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       );
 
       try {
-        // TODO: Replace with actual API call
+        await addUnitViaExcel([parsedData.units[i]]);
 
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Simulate random success/failure
-        const isSuccess = Math.random() > 0.5; // 50% success rate for demo
-
-        if (isSuccess) {
+        console.log("Upload result:", isError);
+        if (!isError) {
           setUploadStatus((prev) =>
             prev.map((item) =>
               item.index === i ? { ...item, status: "success" } : item
             )
           );
         } else {
-          throw new Error("Failed to create unit");
+          setUploadStatus((prev) =>
+            prev.map((item) =>
+              item.index === i ? { ...item, status: "failed" } : item
+            )
+          );
         }
       } catch (err) {
         setUploadStatus((prev) =>
@@ -284,6 +285,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           )
         );
       }
+
+      await new Promise((res) => setTimeout(res, 500)); // small delay to visualize upload steps
     }
 
     setIsUploading(false);
