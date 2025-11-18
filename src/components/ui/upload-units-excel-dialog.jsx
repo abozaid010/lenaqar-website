@@ -10,9 +10,17 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Download,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
+
+const downloadTemplateFile = () => {
+  const link = document.createElement("a");
+  link.href = "/unit_upload_template.xlsx";
+  link.download = "unit_upload_template.xlsx";
+  link.click();
+};
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
@@ -327,12 +335,21 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       {t.uploadExcel?.dragDrop ||
                         "Drag and drop your Excel file here, or"}
                     </p>
-                    <button
-                      onClick={handleUploadClick}
-                      className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
-                    >
-                      {t.uploadExcel?.browseFiles || "Browse Files"}
-                    </button>
+                    <div className="flex items-center justify-center gap-3">
+                      <button
+                        onClick={handleUploadClick}
+                        className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                      >
+                        {t.uploadExcel?.browseFiles || "Browse Files"}
+                      </button>
+                      <button
+                        onClick={downloadTemplateFile}
+                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:opacity-90 transition-opacity flex items-center gap-2"
+                      >
+                        <Download size={18} />
+                        {t.uploadExcel?.downloadTemplate || "Download Template"}
+                      </button>
+                    </div>
                   </div>
                   <p className="text-sm text-gray-500">
                     {t.uploadExcel?.supportedFormats ||
