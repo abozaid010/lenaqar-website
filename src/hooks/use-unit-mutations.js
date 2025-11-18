@@ -25,9 +25,9 @@ export function useAddUnit(fromExcel = false) {
       let res;
       if (formData.purpose === "sell" && !fromExcel) {
         res = await addUnit(formData);
-      } else if (formData.purpose === "rent") {
+      } else if (formData.purpose === "rent" && !fromExcel) {
         res = await addUnitRent(formData);
-      } else if (formData[0].purpose === "sell" && fromExcel) {
+      } else if (fromExcel) {
         res = await addUnitSaleViaExcel(formData);
       }
 
@@ -35,28 +35,21 @@ export function useAddUnit(fromExcel = false) {
         throw new Error("Failed to add unit");
       }
 
-      return formData;
+      // Return the full response for Excel uploads to access inserted_ids
+      return fromExcel ? res : formData;
     },
     onMutate: async (formData) => {
+      if (fromExcel) return;
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
       const previousUnits = queryClient.getQueriesData({
         queryKey: unitKeys.all,
       });
 
-      let optimisticUnit;
-
-      if (fromExcel) {
-        optimisticUnit = {
-          ...formData[0],
-          _isOptimistic: true,
-        };
-      } else {
-        optimisticUnit = {
-          ...formData,
-          _isOptimistic: true,
-        };
-      }
+      const optimisticUnit = {
+        ...formData,
+        _isOptimistic: true,
+      };
 
       addUnitToCache(queryClient, optimisticUnit);
 

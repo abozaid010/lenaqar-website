@@ -15,6 +15,7 @@ import {
 import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
+import { useUnitsPageData } from "@/hooks/use-units-page-data";
 
 const downloadTemplateFile = () => {
   const link = document.createElement("a");
@@ -245,58 +246,67 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
+      unitId: unit.unitId, // Store unitId for matching with inserted_ids
       unitTitle: unit.unitTitle || unit.code || `Unit ${index + 1}`,
-      status: "pending", // pending, uploading, success, failed
+      status: "uploading", // Start all as uploading since we send them together
       error: null,
     }));
     setUploadStatus(initialStatus);
 
-    for (let i = 0; i < parsedData.units.length; i++) {
-      // Update status to uploading
-      setUploadStatus((prev) =>
-        prev.map((item) =>
-          item.index === i ? { ...item, status: "uploading" } : item
-        )
-      );
+    try {
+      // Send all units in a single request
+      const response = await addUnitViaExcel(parsedData.units);
 
-      try {
-        await addUnitViaExcel([parsedData.units[i]]);
+      console.log("Upload response:", response);
 
-        console.log("Upload result:", isError);
-        if (!isError) {
-          setUploadStatus((prev) =>
-            prev.map((item) =>
-              item.index === i ? { ...item, status: "success" } : item
-            )
-          );
-        } else {
-          setUploadStatus((prev) =>
-            prev.map((item) =>
-              item.index === i ? { ...item, status: "failed" } : item
-            )
-          );
-        }
-      } catch (err) {
+      // Check if the upload was successful
+      if (response?.status && response?.data?.inserted_ids) {
+        const insertedIds = response.data.inserted_ids;
+        const totalSent = parsedData.units.length;
+        const totalInserted = insertedIds.length;
+
+        // Mark units based on whether their unitId is in inserted_ids
         setUploadStatus((prev) =>
-          prev.map((item) =>
-            item.index === i
-              ? { ...item, status: "failed", error: err.message }
-              : item
-          )
+          prev.map((item) => {
+            const wasInserted = insertedIds.includes(item.unitId);
+            return {
+              ...item,
+              status: wasInserted ? "success" : "failed",
+              error: wasInserted
+                ? null
+                : "Unit was rejected by the server (validation failed or duplicate)",
+            };
+          })
+        );
+
+        if (totalInserted === totalSent) {
+          setTimeout(() => {
+            onClose();
+          }, 1500);
+        }
+      } else {
+        // If response doesn't indicate success, mark all as failed
+        setUploadStatus((prev) =>
+          prev.map((item) => ({
+            ...item,
+            status: "failed",
+            error: response?.error_message || "Upload failed",
+          }))
         );
       }
-
-      await new Promise((res) => setTimeout(res, 500)); // small delay to visualize upload steps
+    } catch (err) {
+      console.error("Upload error:", err);
+      // Mark all units as failed on error
+      setUploadStatus((prev) =>
+        prev.map((item) => ({
+          ...item,
+          status: "failed",
+          error: err.message || "Failed to upload units",
+        }))
+      );
     }
 
     setIsUploading(false);
-
-    // Check if all uploads were successful
-    const allSuccess = initialStatus.every((s) => s.status === "success");
-    if (allSuccess) {
-      // close dialog after successful upload
-      // onClose();
-    }
   };
 
   return (
