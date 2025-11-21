@@ -417,7 +417,7 @@ export default {
     button: "رفع ملف إكسل",
     title: "رفع ملف إكسل للوحدات",
     dragDrop: "اسحب وأفلت ملف الإكسل هنا، أو",
-    browseFiles: "تصفح الملفات",
+    browseFiles: "رفع الوحدات",
     downloadTemplate: "تحميل النموذج",
     supportedFormats: "الصيغ المدعومة: .xlsx, .xls",
     fileSize: "حجم الملف",

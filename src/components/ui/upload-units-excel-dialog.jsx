@@ -106,12 +106,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           // sheet data
           buildingType: unit.buildingType || "",
           project: unit.project || "",
-          project_ar: unit.project_ar || "",
+          // project_ar: unit.project_ar || "",
           view: unit.view || "",
-          phase: unit.phase || "",
-          city: unit.city || "",
-          district: unit.district || "",
-          developer: unit.developer || "",
+          // phase: unit.phase || "",
+          // city: unit.city || "",
+          // district: unit.district || "",
+          // developer: unit.developer || "",
           unitTitle: unit.unitTitle || "",
           deliveryStatus: unit.deliveryStatus || "",
           bathroomCount: unit.bathroomCount ? Number(unit.bathroomCount) : 0,
@@ -128,51 +128,51 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                 fileId: img.split("/").pop(),
               }))
             : [],
-          code: unit.code || "",
+          // code: unit.code || "",
           model: unit.model || "",
           downPayment: unit.downPayment ? Number(unit.downPayment) : 0,
           totalPrice: unit.totalPrice ? Number(unit.totalPrice) : 0,
           deliveryDate: unit.deliveryDate || "",
-          paymentPlans: [],
-          // Owner details (shown only for brokers)
-          owner_name: unit.owner_name || "",
-          owner_mobile: unit.owner_mobile || "",
+          // paymentPlans: [],
+          // // Owner details (shown only for brokers)
+          // owner_name: unit.owner_name || "",
+          // owner_mobile: unit.owner_mobile || "",
         };
 
-        // Extract payment plans dynamically
+        // ### Extract payment plans dynamically ### //
         // Collect all payment plan numbers that exist in the unit data
-        const paymentPlanNumbers = new Set();
-        Object.keys(unit).forEach((key) => {
-          const match = key.match(/^pp(\d+)_/);
-          if (match) {
-            paymentPlanNumbers.add(parseInt(match[1]));
-          }
-        });
+        // const paymentPlanNumbers = new Set();
+        // Object.keys(unit).forEach((key) => {
+        //   const match = key.match(/^pp(\d+)_/);
+        //   if (match) {
+        //     paymentPlanNumbers.add(parseInt(match[1]));
+        //   }
+        // });
 
         // Process each payment plan number found
-        paymentPlanNumbers.forEach((planNumber) => {
-          const prefix = `pp${planNumber}_`;
-          const years = planNumber; // Determine years from plan number (pp1 = 1 year, pp2 = 2 years, etc.)
-          const price = unit[`${prefix}price`];
-          const maintenance = unit[`${prefix}maintenance`];
-          const downPayment = unit[`${prefix}downPayment`];
-          const installmentAmount = unit[`${prefix}installment_amount_yearly`];
+        // paymentPlanNumbers.forEach((planNumber) => {
+        //   const prefix = `pp${planNumber}_`;
+        //   const years = planNumber; // Determine years from plan number (pp1 = 1 year, pp2 = 2 years, etc.)
+        //   const price = unit[`${prefix}price`];
+        //   const maintenance = unit[`${prefix}maintenance`];
+        //   const downPayment = unit[`${prefix}downPayment`];
+        //   const installmentAmount = unit[`${prefix}installment_amount_yearly`];
 
-          // Check if all required fields exist for this payment plan
-          // Required: price, downPayment, installment_amount_yearly
-          // Optional: maintenance
-          const hasRequiredFields = price && downPayment && installmentAmount;
+        //   // Check if all required fields exist for this payment plan
+        //   // Required: price, downPayment, installment_amount_yearly
+        //   // Optional: maintenance
+        //   const hasRequiredFields = price && downPayment && installmentAmount;
 
-          if (hasRequiredFields) {
-            transformed.paymentPlans.push({
-              years: years,
-              price: Number(price),
-              maintenance: maintenance ? Number(maintenance) : 0,
-              downPayment: Number(downPayment),
-              installment_amount_yearly: Number(installmentAmount),
-            });
-          }
-        });
+        //   if (hasRequiredFields) {
+        //     transformed.paymentPlans.push({
+        //       years: years,
+        //       price: Number(price),
+        //       maintenance: maintenance ? Number(maintenance) : 0,
+        //       downPayment: Number(downPayment),
+        //       installment_amount_yearly: Number(installmentAmount),
+        //     });
+        //   }
+        // });
 
         return transformed;
       });
@@ -414,14 +414,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     {t.uploadExcel?.instruction2 ||
                       "First row must contain column headers (buildingType, project, city, etc.)"}
                   </li>
-                  <li>
+                  {/* <li>
                     {t.uploadExcel?.instruction3 ||
                       "Payment plans: Use pp1_, pp2_, pp3_ prefixes where the number represents years (e.g., pp2_ means 2-year plan)"}
-                  </li>
-                  <li>
+                  </li> */}
+                  {/* <li>
                     {t.uploadExcel?.instruction4 ||
                       "Required fields for each payment plan: price, downPayment, installment_amount_yearly"}
-                  </li>
+                  </li> */}
                   <li>
                     {t.uploadExcel?.instruction5 ||
                       "Images: Provide comma-separated URLs in format: https://api.lenaai.net/images/file_id"}
