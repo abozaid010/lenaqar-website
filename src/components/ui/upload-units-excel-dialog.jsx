@@ -113,7 +113,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           // district: unit.district || "",
           // developer: unit.developer || "",
           unitTitle: unit.unitTitle || "",
-          deliveryStatus: unit.deliveryStatus || "",
+          // deliveryStatus: unit.deliveryStatus || "",
           bathroomCount: unit.bathroomCount ? Number(unit.bathroomCount) : 0,
           floor: unit.floor ? Number(unit.floor) : 0,
           roomsCount: unit.roomsCount ? unit.roomsCount : "",
@@ -260,26 +260,47 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       console.log("Upload response:", response);
 
       // Check if the upload was successful
-      if (response?.status && response?.data?.inserted_ids) {
-        const insertedIds = response.data.inserted_ids;
+      if (response?.status && response?.data) {
+        const insertedIds = response.data.inserted_ids || [];
+        const failedUnits = response.data.failed_units || [];
         const totalSent = parsedData.units.length;
         const totalInserted = insertedIds.length;
 
-        // Mark units based on whether their unitId is in inserted_ids
+        // Create a map of failed units for quick lookup
+        const failedUnitsMap = new Map(
+          failedUnits.map((failed) => [failed.unit_id, failed.error_message])
+        );
+
         setUploadStatus((prev) =>
           prev.map((item) => {
             const wasInserted = insertedIds.includes(item.unitId);
-            return {
-              ...item,
-              status: wasInserted ? "success" : "failed",
-              error: wasInserted
-                ? null
-                : "Unit was rejected by the server (validation failed or duplicate)",
-            };
+            const failureReason = failedUnitsMap.get(item.unitId);
+
+            if (wasInserted) {
+              return {
+                ...item,
+                status: "success",
+                error: null,
+              };
+            } else if (failureReason) {
+              return {
+                ...item,
+                status: "failed",
+                error: failureReason,
+              };
+            } else {
+              // Fallback for units not in either list
+              return {
+                ...item,
+                status: "failed",
+                error: "Unit was rejected by the server",
+              };
+            }
           })
         );
 
-        if (totalInserted === totalSent) {
+        // Only auto-close if all units succeeded
+        if (totalInserted === totalSent && failedUnits.length === 0) {
           setTimeout(() => {
             onClose();
           }, 1500);
