@@ -96,7 +96,7 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
           <button
             type="button"
             onClick={handleShareClick}
-            className="absolute top-3 left-2 cursor-pointer p-2.5  "
+            className="absolute top-3 left-2 cursor-pointer p-2.5"
           >
             <img src={shareButton.src} alt="share" />
           </button>

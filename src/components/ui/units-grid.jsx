@@ -98,7 +98,7 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     <button
                       type="button"
                       onClick={(e) => handleShareClick(u.unitId, e)}
-                      className="absolute  top-2 right-5 cursor-pointer   group"
+                      className="absolute top-2 right-5 cursor-pointer group"
                     >
                       <img src={shareButton.src} alt="share" />
                     </button>
