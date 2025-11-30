@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import ActionsModal from "./actions-modal";
 import ClientsTablePagination from "./clients-table-pagination";
+import EmptyStateVideo from "@/components/ui/empty-state-video";
 
 export default function ClientsTable({ users, pagination }) {
   const { t, locale } = useI18n();
@@ -87,11 +88,10 @@ export default function ClientsTable({ users, pagination }) {
   return (
     <>
       {localUsers?.length === 0 ? (
-        <div>
-          <div className="text-center font-medium text-xl mt-5 text-gray-400">
-            {t.clientsTable.noClients}
-          </div>
-        </div>
+        // <div className="text-center font-medium text-xl mt-5 text-gray-400">
+        //   {t.clientsTable.noClients}
+        // </div>
+        <EmptyStateVideo variant="dashboard" autoPlay showControls loop />
       ) : (
         <>
           <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory ">

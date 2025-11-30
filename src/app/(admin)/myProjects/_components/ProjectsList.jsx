@@ -26,6 +26,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
+import EmptyStateVideo from "@/components/ui/empty-state-video";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -338,26 +339,27 @@ export default function ProjectsList({ clientId }) {
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : projectList.length === 0 ? (
-              <div className="flex flex-col items-center justify-center p-6">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <svg
-                    className="w-8 h-8 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2M7 7h10"
-                    />
-                  </svg>
-                </div>
-                <p className="text-center font-medium text-xl text-gray-400">
-                  {t.projectUndfined}
-                </p>
-              </div>
+              // <div className="flex flex-col items-center justify-center p-6">
+              //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              //     <svg
+              //       className="w-8 h-8 text-gray-400"
+              //       fill="none"
+              //       stroke="currentColor"
+              //       viewBox="0 0 24 24"
+              //     >
+              //       <path
+              //         strokeLinecap="round"
+              //         strokeLinejoin="round"
+              //         strokeWidth={2}
+              //         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2H7a2 2 0 00-2 2v2M7 7h10"
+              //       />
+              //     </svg>
+              //   </div>
+              //   <p className="text-center font-medium text-xl text-gray-400">
+              //     {t.projectUndfined}
+              //   </p>
+              // </div>
+              <EmptyStateVideo variant="projects" autoPlay showControls loop />
             ) : (
               <div className="space-y-3 p-4">
                 {projectList.map((project) => (
