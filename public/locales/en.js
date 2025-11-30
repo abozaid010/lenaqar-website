@@ -1049,6 +1049,77 @@ export default {
     editDeveloper: "Edit Developer",
     addDeveloper: "Add New Developer",
     NoDevelopers: "No developers found.",
+    instructions: "How to manage developers",
+  },
+  videoInstructions: {
+    tooltips: {
+      team: "How to manage team members",
+      units: "How to manage units",
+      developers: "How to manage developers",
+      projects: "How to manage projects",
+      analytics: "How to use analytics",
+      schedule: "How to manage schedule",
+    },
+    titles: {
+      team: "How to Manage Team Members",
+      units: "How to Manage Units",
+      developers: "How to Manage Developers",
+      projects: "How to Manage Projects",
+      analytics: "Understanding Analytics",
+      schedule: "How to Manage Schedule",
+    },
+    descriptions: {
+      team: "Watch this quick guide to learn how to add and manage your team members.",
+      units:
+        "Learn how to add and manage property units in this video tutorial.",
+      developers:
+        "Watch this video to understand how to add developers to your platform.",
+      projects:
+        "Get started with creating your first project by watching this guide.",
+      analytics: "Learn how to track and analyze your data in this tutorial.",
+      schedule:
+        "Watch this video to learn how to manage your schedule effectively.",
+    },
+    emptyState: {
+      team: {
+        title: "No Team Members Yet",
+        description:
+          "Watch this quick guide to learn how to add and manage your team members.",
+      },
+      units: {
+        title: "No Units Available",
+        description:
+          "Learn how to add and manage property units in this video tutorial.",
+      },
+      developers: {
+        title: "No Developers Found",
+        description:
+          "Watch this video to understand how to add developers to your platform.",
+      },
+      projects: {
+        title: "No Projects Yet",
+        description:
+          "Get started with creating your first project by watching this guide.",
+      },
+      analytics: {
+        title: "No Analytics Data",
+        description:
+          "Learn how to track and analyze your data in this tutorial.",
+      },
+      schedule: {
+        title: "No Schedule Items",
+        description:
+          "Watch this video to learn how to manage your schedule effectively.",
+      },
+      default: {
+        title: "No Data Available",
+        description: "There's nothing to display at the moment.",
+      },
+    },
+    dialog: {
+      gotIt: "Got it!",
+      readyToStart: "Ready to get started? Add your first",
+    },
   },
   placeholders: {
     projectArName: "Enter project Name In Arabic",
