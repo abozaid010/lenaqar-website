@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import AddNewMember from "./add-new-member";
+import EmptyStateVideo from "@/components/ui/empty-state-video";
 
 export default function TeamTable({ data }) {
   const router = useRouter();
@@ -32,9 +33,7 @@ export default function TeamTable({ data }) {
   return (
     <div>
       {!data || data.length === 0 ? (
-        <div className="text-center w-full font-medium text-xl md:text-2xl text-gray-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {t.team.noMembers}
-        </div>
+        <EmptyStateVideo variant="team" autoPlay muted showControls loop />
       ) : (
         <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory mt-6">
           <table className="min-w-full divide-y divide-gray-200">

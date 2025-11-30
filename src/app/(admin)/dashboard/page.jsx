@@ -6,6 +6,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { AverageScoreProvider } from "@/context/average-score";
 import { cookies } from "next/headers";
 import PremiumFeatures from "./_components/premuim-features";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -30,7 +31,16 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
 
       <div className="container bg-white rounded-md shadow-sm py-4 md:py-6">
         <AverageScoreProvider>
-          <DashbordFilter appliedFilters={searchParams} />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex-1">
+              <DashbordFilter appliedFilters={searchParams} />
+            </div>
+            <VideoInstructionsDialog
+              variant="analytics"
+              iconSize="md"
+              tooltipText="How to use analytics"
+            />
+          </div>
 
           {/* <SearchBar q={searchParams.query} /> */}
 
