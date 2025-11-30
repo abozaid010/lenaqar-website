@@ -3,47 +3,7 @@
 import { useState } from "react";
 import { Info, X } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
-
-const VIDEO_MAP = {
-  team: "YyAuFiIv-V4",
-  units: "YyAuFiIv-V4",
-  developers: "YyAuFiIv-V4",
-  projects: "YyAuFiIv-V4",
-  analytics: "YyAuFiIv-V4",
-  schedule: "YyAuFiIv-V4",
-};
-
-const INSTRUCTION_MESSAGES = {
-  team: {
-    title: "How to Manage Team Members",
-    description:
-      "Watch this quick guide to learn how to add and manage your team members.",
-  },
-  units: {
-    title: "How to Manage Units",
-    description:
-      "Learn how to add and manage property units in this video tutorial.",
-  },
-  developers: {
-    title: "How to Manage Developers",
-    description:
-      "Watch this video to understand how to add developers to your platform.",
-  },
-  projects: {
-    title: "How to Manage Projects",
-    description:
-      "Get started with creating your first project by watching this guide.",
-  },
-  analytics: {
-    title: "Understanding Analytics",
-    description: "Learn how to track and analyze your data in this tutorial.",
-  },
-  schedule: {
-    title: "How to Manage Schedule",
-    description:
-      "Watch this video to learn how to manage your schedule effectively.",
-  },
-};
+import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
 
 /**
  * VideoInstructionsDialog Component
@@ -98,7 +58,7 @@ export default function VideoInstructionsDialog({
     return null;
   }
 
-  const content = INSTRUCTION_MESSAGES[variant];
+  const content = DEFAULT_MESSAGES[variant];
   const displayTitle =
     title ||
     t.videoInstructions?.titles?.[variant] ||
