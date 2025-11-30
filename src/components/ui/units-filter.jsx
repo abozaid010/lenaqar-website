@@ -7,6 +7,7 @@ import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LoadingSpinner from "./loading-spinner";
@@ -629,7 +630,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
 
         {!isPublic && (
-          <div className="w-full md:w-auto flex-shrink-0 flex gap-2">
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
               onClick={() => setIsUploadDialogOpen(true)}
               className="flex-1 md:flex-initial px-[16px] py-[10px] h-[40px] bg-green-600 hover:bg-green-700 text-white rounded-[5px] flex items-center justify-center gap-2 transition-colors text-sm"
@@ -640,6 +641,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               </span>
             </button>
             <AddUnitButton className="flex-1 md:flex-initial text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
+            <VideoInstructionsDialog
+              variant="units"
+              iconSize="lg"
+              tooltipText={t.unitsFilter?.instructions || "How to manage units"}
+            />
           </div>
         )}
       </div>

@@ -9,6 +9,7 @@ import { ChevronDown, Printer, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AverageScore from "./average-score";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
 const formatDate = (date) => {
   const isoString = date.toISOString();
@@ -331,7 +332,15 @@ export default function DashbordFilter({ appliedFilters }) {
         </div>
       </div>
 
-      <AverageScore />
+      <div className="flex">
+        <AverageScore />
+        <VideoInstructionsDialog
+          variant="dashboard"
+          iconSize="md"
+          tooltipText="How to use the Dashboard"
+          className="p-0"
+        />
+      </div>
     </div>
   );
 }

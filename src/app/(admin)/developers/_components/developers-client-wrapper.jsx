@@ -7,6 +7,7 @@ import { useI18n } from "@/context/translate-api";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { Pencil, Plus, Trash2 } from "lucide-react";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -70,13 +71,24 @@ export default function DevelopersClientWrapper({ clientId }) {
             <h2 className="text-white text-xl font-semibold">
               {t.sidebar.developers}
             </h2>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              <Plus size={20} />
-              <span> {t.developerPage.addDeveloper}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+              >
+                <Plus size={20} />
+                <span> {t.developerPage.addDeveloper}</span>
+              </button>
+              <VideoInstructionsDialog
+                variant="developers"
+                iconSize="lg"
+                iconClassName="hover:bg-white/20"
+                svgClassName="text-white"
+                tooltipText={
+                  t.developerPage?.instructions || "How to manage developers"
+                }
+              />
+            </div>
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">

@@ -11,6 +11,7 @@ import {
   Tag,
   Trash2,
 } from "lucide-react";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
@@ -313,13 +314,24 @@ export default function ProjectsList({ clientId }) {
             <h2 className="text-white text-xl font-semibold">
               {t.sidebar.myProjects}
             </h2>
-            <button
-              onClick={() => setShowProjectDialog(true)}
-              className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-            >
-              <Plus size={20} />
-              <span> {t.addNewProject}</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowProjectDialog(true)}
+                className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+              >
+                <Plus size={20} />
+                <span> {t.addNewProject}</span>
+              </button>
+              <VideoInstructionsDialog
+                variant="projects"
+                iconSize="lg"
+                iconClassName="hover:bg-white/20"
+                svgClassName="text-white"
+                tooltipText={
+                  t.projectsPage?.instructions || "How to manage projects"
+                }
+              />
+            </div>
           </div>
 
           <div className="max-h-[80vh] overflow-y-auto">

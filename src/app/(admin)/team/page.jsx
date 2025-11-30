@@ -3,10 +3,13 @@ import AddNewMember from "./_components/add-new-member";
 import TeamTable from "./_components/team-table";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 export async function generateMetadata() {
   const cookieStore = await cookies();
   const clientInfoCookie = cookieStore.get("client_info")?.value;
-  const clientName = clientInfoCookie ? JSON.parse(clientInfoCookie)?.client_name : null;
+  const clientName = clientInfoCookie
+    ? JSON.parse(clientInfoCookie)?.client_name
+    : null;
 
   return {
     title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
@@ -25,7 +28,16 @@ export default async function TeamPage() {
     <div className="container mx-auto h-full">
       {hasAccess ? (
         <div className="flex flex-col h-full">
-          <AddNewMember />
+          <div className="flex items-center justify-between gap-4">
+            <AddNewMember />
+            {data && data.data && data.data.length > 0 && (
+              <VideoInstructionsDialog
+                variant="team"
+                iconSize="md"
+                tooltipText="How to manage team members"
+              />
+            )}
+          </div>
 
           <div className="flex-1 relative">
             <TeamTable data={data.data} />
