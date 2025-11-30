@@ -1,10 +1,10 @@
 // Mapping of variants to YouTube video IDs
 export const VIDEO_MAP = {
-  team: "YyAuFiIv-V4",
-  units: "YyAuFiIv-V4",
-  developers: "YyAuFiIv-V4",
-  projects: "YyAuFiIv-V4",
-  dashboard: "YyAuFiIv-V4",
+  team: "1KmsdeLDM-c",
+  units: "1KmsdeLDM-c",
+  developers: "1KmsdeLDM-c",
+  projects: "1KmsdeLDM-c",
+  dashboard: "1KmsdeLDM-c",
 };
 
 // Default fallback messages (English)

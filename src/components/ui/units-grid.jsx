@@ -10,7 +10,12 @@ import { getShareUnitData } from "@/utils/api";
 import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
-import { createSafeImageSource, handleImageError, getFirstValidImage } from "@/utils/imageUtils";
+import {
+  createSafeImageSource,
+  handleImageError,
+  getFirstValidImage,
+} from "@/utils/imageUtils";
+import EmptyStateVideo from "./empty-state-video";
 
 export default function UnitsGrid({ units, pagination, readonly = false }) {
   const [showModal, setShowModal] = useState(false);
@@ -44,9 +49,7 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
   return (
     <>
       {units.length === 0 ? (
-        <div className="text-center font-medium text-xl mt-5 text-gray-400 ">
-          No units found.
-        </div>
+        <EmptyStateVideo variant="units" autoPlay showControls loop />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
           {units.map((u, idx) => (
@@ -59,12 +62,19 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
               <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100">
                 {u.images && u.images.length > 0 ? (
                   <ImageWithLoader
-                    src={getFirstValidImage(u.images.map(img => img?.url), 'property')}
+                    src={getFirstValidImage(
+                      u.images.map((img) => img?.url),
+                      "property"
+                    )}
                     alt={u.name || u.compound || "Property"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const originalSrc = u.images[0]?.url;
-                      const fallbackSrc = handleImageError(e, originalSrc, 'property');
+                      const fallbackSrc = handleImageError(
+                        e,
+                        originalSrc,
+                        "property"
+                      );
                       if (fallbackSrc !== originalSrc) {
                         e.currentTarget.src = fallbackSrc;
                         e.currentTarget.onerror = null;
