@@ -147,7 +147,7 @@ export default function VideoInstructionsDialog({
           onClick={handleClose}
         >
           <div
-            className="relative bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
