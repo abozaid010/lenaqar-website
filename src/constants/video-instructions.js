@@ -4,6 +4,7 @@ export const VIDEO_MAP = {
   units: "YyAuFiIv-V4",
   developers: "YyAuFiIv-V4",
   projects: "YyAuFiIv-V4",
+  dashboard: "YyAuFiIv-V4",
 };
 
 // Default fallback messages (English)

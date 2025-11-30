@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Info, X } from "lucide-react";
+import { Info, X, Youtube, YoutubeIcon } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
 
@@ -130,7 +130,7 @@ export default function VideoInstructionsDialog({
         className={`inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors group relative ${iconClassName}`}
         aria-label={displayTooltip}
       >
-        <Info
+        <Youtube
           className={`${iconSizes[iconSize]} text-primary group-hover:text-primary-dark ${svgClassName}`}
         />
 

@@ -643,7 +643,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             <AddUnitButton className="flex-1 md:flex-initial text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
             <VideoInstructionsDialog
               variant="units"
-              iconSize="md"
+              iconSize="lg"
               tooltipText={t.unitsFilter?.instructions || "How to manage units"}
             />
           </div>

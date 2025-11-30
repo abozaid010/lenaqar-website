@@ -35,11 +35,6 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
             <div className="flex-1">
               <DashbordFilter appliedFilters={searchParams} />
             </div>
-            <VideoInstructionsDialog
-              variant="analytics"
-              iconSize="md"
-              tooltipText="How to use analytics"
-            />
           </div>
 
           {/* <SearchBar q={searchParams.query} /> */}
