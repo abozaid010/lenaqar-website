@@ -124,15 +124,27 @@ export default function VideoInstructionsDialog({
 
   return (
     <>
-      {/* Info Icon Button */}
+      {/* YouTube Icon Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className={`inline-flex items-center justify-center p-2 rounded-full hover:bg-gray-100 transition-colors group relative ${iconClassName}`}
+        className={`inline-flex items-center justify-center transition-colors group relative ${iconClassName}`}
         aria-label={displayTooltip}
       >
-        <Youtube
-          className={`${iconSizes[iconSize]} text-primary group-hover:text-primary-dark ${svgClassName}`}
-        />
+        <span className={`block`} style={{ width: "2.5rem", height: "2.5rem" }}>
+          <svg
+            viewBox="0 0 32 32"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-full"
+          >
+            <rect width="32" height="32" rx="8" fill="#fff" />
+            <path
+              d="M27.5 10.5c-.3-1.1-1.2-2-2.3-2.2C23.1 8 16 8 16 8s-7.1 0-9.2.3c-1.1.2-2 1.1-2.3 2.2C4 12.6 4 16 4 16s0 3.4.5 5.5c.3 1.1 1.2 2 2.3 2.2C8.9 24 16 24 16 24s7.1 0 9.2-.3c1.1-.2 2-1.1 2.3-2.2.5-2.1.5-5.5.5-5.5s0-3.4-.5-5.5z"
+              fill="#FF0000"
+            />
+            <path d="M13 20l7-4-7-4v8z" fill="#fff" />
+          </svg>
+        </span>
 
         {/* Tooltip */}
         <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
