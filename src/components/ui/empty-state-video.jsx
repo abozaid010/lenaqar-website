@@ -32,7 +32,7 @@ export default function EmptyStateVideo({
   title,
   description,
   autoPlay = false,
-  muted = true,
+  muted = false,
   showControls = false,
   loop = false,
   showRelatedVideos = false,

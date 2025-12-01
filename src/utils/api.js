@@ -13,10 +13,27 @@ export async function fetchUsersData(searchParams) {
     const response = await axiosInstance.get(`dashboard/${clientId}`, {
       params,
     });
+
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    // Validate that users is an array
+    if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
+      throw new Error("Expected users array but received invalid data format");
+    }
+
+    // Validate pagination exists (optional but good to check)
+    if (response.data.data.pagination === undefined) {
+      console.warn("Pagination data missing in response");
+    }
+
     return response.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
   }
 }
 
@@ -28,10 +45,27 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
       `${!publicOnly ? "/units/all" : "/public/units"}`,
       { params }
     );
+
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    // Validate that units is an array
+    if (!response.data.data.units || !Array.isArray(response.data.data.units)) {
+      throw new Error("Expected units array but received invalid data format");
+    }
+
+    // Validate pagination exists (optional but good to check)
+    if (response.data.data.pagination === undefined) {
+      console.warn("Pagination data missing in response");
+    }
+
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch users:", error.message);
-    return { error: error.message };
+    console.error("Failed to fetch units:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
   }
 }
 
@@ -46,17 +80,29 @@ export async function fetchDevelopers(client_id, isPublic = false) {
     const response = await axiosInstance.get(url);
 
     // Validate response data structure
-    if (!response.data || !response.data.data) {
-      throw new Error("Invalid response format from server");
+    if (!response.data) {
+      throw new Error("Invalid response format from server: missing response.data");
     }
 
-    // Ensure data is an array
-    const data = response.data.data;
-    if (!Array.isArray(data)) {
-      throw new Error("Expected array but received invalid data format");
+    // Check if data is directly an array (response.data is array)
+    if (Array.isArray(response.data)) {
+      return response.data;
     }
 
-    return data;
+    // Check if data is nested (response.data.data is array)
+    if (response.data.data) {
+      if (!Array.isArray(response.data.data)) {
+        throw new Error(
+          `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+        );
+      }
+      return response.data.data;
+    }
+
+    // If neither structure matches, throw error
+    throw new Error(
+      `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);
     // Re-throw the error so TanStack Query can handle it properly
@@ -75,17 +121,29 @@ export async function fetchProjects(client_id, isPublic) {
     const response = await axiosInstance.get(url);
 
     // Validate response data structure
-    if (!response.data || !response.data.data) {
-      throw new Error("Invalid response format from server");
+    if (!response.data) {
+      throw new Error("Invalid response format from server: missing response.data");
     }
 
-    // Ensure data is an array
-    const data = response.data.data;
-    if (!Array.isArray(data)) {
-      throw new Error("Expected array but received invalid data format");
+    // Check if data is directly an array (response.data is array)
+    if (Array.isArray(response.data)) {
+      return response.data;
     }
 
-    return data;
+    // Check if data is nested (response.data.data is array)
+    if (response.data.data) {
+      if (!Array.isArray(response.data.data)) {
+        throw new Error(
+          `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+        );
+      }
+      return response.data.data;
+    }
+
+    // If neither structure matches, throw error
+    throw new Error(
+      `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
   } catch (error) {
     console.error("Failed to fetch projects:", error.message);
     // Re-throw the error so TanStack Query can handle it properly

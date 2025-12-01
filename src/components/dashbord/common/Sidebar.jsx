@@ -8,22 +8,37 @@ import {
   Home,
   LayoutDashboard,
   Users2,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useTransition } from "react";
 
 import { useI18n } from "@/context/translate-api";
 
 const Sidebar = () => {
   const { t } = useI18n();
+  const router = useRouter();
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
+  const [pendingPath, setPendingPath] = useState(null);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
+  
+  // Handle navigation with optimistic UI
+  const handleNavigation = (href, e) => {
+    e.preventDefault();
+    setPendingPath(href); // Immediate visual feedback
+    
+    startTransition(() => {
+      router.push(href);
+      // Pending state will be cleared by useEffect when pathname changes
+    });
+  };
 
   const isLinkActive = (path) => {
     if (path === "/dashboard" && pathname === "/dashboard") return true;
@@ -38,7 +53,11 @@ const Sidebar = () => {
     if (isOpen) {
       setIsOpen(false);
     }
-  }, [pathname]);
+    // Clear pending state when pathname changes (navigation completed)
+    if (pendingPath && pathname === pendingPath) {
+      setPendingPath(null);
+    }
+  }, [pathname, isOpen, pendingPath]);
 
   return (
     <>
@@ -74,7 +93,10 @@ const Sidebar = () => {
                 {t.sidebar.logoutConfirm.cancel}
               </button>
               <button
-                onClick={confirmLogout}
+                onClick={() => {
+                  // Logout functionality should be handled in Header component
+                  setShowLogoutConfirm(false);
+                }}
                 className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
               >
                 {t.sidebar.logoutConfirm.confirm}
@@ -106,85 +128,121 @@ const Sidebar = () => {
         <div className="flex-1 ">
           <Link
             href="/dashboard"
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
-              isLinkActive("/dashboard")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/dashboard", e)}
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/dashboard") || pendingPath === "/dashboard"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/dashboard" ? "opacity-70" : ""}`}
           >
             <LayoutDashboard className="h-5 w-5 mr-3" />
             <span>{t.sidebar.dashboard}</span>
+            {isPending && pendingPath === "/dashboard" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
 
           <Link
             href="/schedule"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/schedule")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/schedule", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/schedule") || pendingPath === "/schedule"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/schedule" ? "opacity-70" : ""}`}
           >
             <Calendar className="h-5 w-5 mr-3" />
             <span>{t.sidebar.schedule || "Schedule"}</span>
+            {isPending && pendingPath === "/schedule" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
 
           <Link
             href="/analytics"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/analytics")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/analytics", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/analytics") || pendingPath === "/analytics"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/analytics" ? "opacity-70" : ""}`}
           >
             <BarChart2 className="h-5 w-5 mr-3" />
             <span>{t.sidebar.analytics}</span>
+            {isPending && pendingPath === "/analytics" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
 
           <Link
             href="/units"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/units")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/units", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/units") || pendingPath === "/units"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/units" ? "opacity-70" : ""}`}
           >
             <Home className="h-5 w-5 mr-3" />
             <span>{t.sidebar.units}</span>
+            {isPending && pendingPath === "/units" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
 
           <Link
             href="/team"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/team")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/team", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/team") || pendingPath === "/team"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/team" ? "opacity-70" : ""}`}
           >
             <Users2 className="h-5 w-5 mr-3" />
             <span>{t.sidebar.team}</span>
+            {isPending && pendingPath === "/team" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
+          
           <Link
             href="/myProjects"
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors ${
-              isLinkActive("/myProjects")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/myProjects", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/myProjects") || pendingPath === "/myProjects"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/myProjects" ? "opacity-70" : ""}`}
           >
             <FolderKanban className="h-5 w-5 mr-3" />
             <span>{t.sidebar.myProjects}</span>
+            {isPending && pendingPath === "/myProjects" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
 
           <Link
             href="/developers"
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors ${
-              isLinkActive("/developers")
+            prefetch={true}
+            onClick={(e) => handleNavigation("/developers", e)}
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/developers") || pendingPath === "/developers"
                 ? "bg-primary text-white"
                 : "text-gray-700 hover:bg-gray-100"
-            }`}
+            } ${isPending && pendingPath === "/developers" ? "opacity-70" : ""}`}
           >
             <LayoutDashboard className="h-5 w-5 mr-3" />
             <span>{t.sidebar.developers}</span>
+            {isPending && pendingPath === "/developers" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
           </Link>
         </div>
       </div>
