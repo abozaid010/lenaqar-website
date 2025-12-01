@@ -33,7 +33,7 @@ export default function AddCompoundDialog({
   defaultDistrict,
 }) {
   const { isLoading: delveloperLoading, data: developersData } =
-    useDevelopers();
+    useDevelopers(clientId);
 
   const { isLoading: disctictsLoading, data: rowCitiesAndDistricts } =
     useCitiesAndDistricts();

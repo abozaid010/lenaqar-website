@@ -3,11 +3,12 @@
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { getProfileDataByEmail, updateProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, ChevronDown } from "lucide-react";
+import { Loader2, ChevronDown, Copy, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import Cookies from "js-cookie";
 
 export default function ClientInfo({ client_email }) {
   const { t } = useI18n();
@@ -27,6 +28,10 @@ export default function ClientInfo({ client_email }) {
     accurate_queries_level: data?.data?.accurate_queries_level || 0,
   });
   const [isChanged, setIsChanged] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const clientId = Cookies.get("lena-website-client_id");
+  const shareableLink = clientId ? `https://chat.lenaai.net/${clientId}` : "";
 
   useEffect(() => {
     setFormData({
@@ -36,6 +41,40 @@ export default function ClientInfo({ client_email }) {
       accurate_queries_level: data?.data?.accurate_queries_level || 0,
     });
   }, [isLoading]);
+
+  const handleCopyLink = async () => {
+    if (!shareableLink) return;
+    
+    try {
+      await navigator.clipboard.writeText(shareableLink);
+      setCopied(true);
+      toast.success(t.clientInfo.linkCopied);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error(t.clientInfo.copyFailed || "Failed to copy link");
+    }
+  };
+
+  const handleShareLink = async () => {
+    if (!shareableLink) return;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "LenaAI Chat Link",
+          text: "Check out my LenaAI chat link",
+          url: shareableLink,
+        });
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          toast.error(t.clientInfo.shareFailed || "Failed to share link");
+        }
+      }
+    } else {
+      // Fallback: copy to clipboard if Web Share API is not available
+      handleCopyLink();
+    }
+  };
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -77,6 +116,35 @@ export default function ClientInfo({ client_email }) {
           onSubmit={handleSubmit}
           className="client-info-form flex flex-col gap-4 max-w-md mx-auto p-6 bg-white rounded-lg shadow mt-6"
         >
+          <label className="flex flex-col text-gray-600 mb-1">
+            {t.clientInfo.shareableLink}:
+            <div className="relative mt-2 flex items-center gap-2">
+              <input
+                type="text"
+                disabled={true}
+                readOnly={true}
+                value={shareableLink}
+                className="flex-1 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200"
+              />
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors flex items-center justify-center"
+                title={t.clientInfo.copyLink || "Copy link"}
+              >
+                <Copy className={`h-4 w-4 ${copied ? "text-green-600" : "text-gray-600"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={handleShareLink}
+                className="p-2 border border-gray-300 rounded hover:bg-gray-100 transition-colors flex items-center justify-center"
+                title={t.clientInfo.shareLink || "Share link"}
+              >
+                <Share2 className="h-4 w-4 text-gray-600" />
+              </button>
+            </div>
+          </label>
+
           <label className="flex flex-col text-gray-600 mb-1">
             {t.clientInfo.email}:
             <div className="relative">
