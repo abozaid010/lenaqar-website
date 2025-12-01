@@ -2,8 +2,8 @@
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
+import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
-import { RotateCcw } from "lucide-react";
 import { useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -21,7 +21,7 @@ export default function UnitsPageQueryOptimized({
   );
 
   // Fetch all required data using the combined hook
-  const { isFetching, units, pagination, isLoading, isError, refetch } =
+  const { isFetching, units, pagination, isLoading, isError, error, refetch } =
     useUnitsPageData(JSON.stringify(searchParamsWithClient), publicUnits);
 
   if (isLoading | isFetching) {
@@ -31,29 +31,14 @@ export default function UnitsPageQueryOptimized({
   if (isError) {
     return (
       <div className="container">
-        <div className="flex items-center justify-center h-96">
-          <div className="text-center">
-            <div className="text-red-500 text-lg font-medium mb-2">
-              Error loading data
-            </div>
-            <div className="text-gray-600 text-sm mb-4">
-              An unexpected error occurred
-            </div>
-            <div className="flex gap-2 justify-center flex-wrap">
-              <button
-                onClick={() => refetch()}
-                disabled={isFetching}
-                className="px-4 py-2 bg-primary text-white rounded-md hover:opacity-95 disabled:opacity-50 flex items-center gap-2"
-              >
-                <RotateCcw
-                  size={16}
-                  className={isFetching ? "animate-spin" : ""}
-                />
-                Retry Units
-              </button>
-            </div>
-          </div>
-        </div>
+        <QueryErrorState
+          error={error}
+          refetch={refetch}
+          isFetching={isFetching}
+          title="Error loading units"
+          message="Failed to load units data. Please try again."
+          retryLabel="Retry Units"
+        />
       </div>
     );
   }

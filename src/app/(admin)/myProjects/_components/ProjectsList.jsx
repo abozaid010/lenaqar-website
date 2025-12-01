@@ -27,6 +27,7 @@ import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
+import QueryErrorState from "@/components/ui/query-error-state";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -99,7 +100,14 @@ const PaymentPlansBadges = ({ plans, locale, maxDisplay = 2 }) => {
 };
 
 export default function ProjectsList({ clientId }) {
-  const { data: compounds, isLoading } = useCompounds(clientId);
+  const {
+    data: compounds,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useCompounds(clientId);
   const { t, locale } = useI18n();
 
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
@@ -124,7 +132,13 @@ export default function ProjectsList({ clientId }) {
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && compounds) {
+    if (!isLoading && !isError && compounds) {
+      // Validate that compounds is an array
+      if (!Array.isArray(compounds)) {
+        console.error("Compounds data is not an array:", compounds);
+        return;
+      }
+
       const sorted = compounds.sort((a, b) => {
         const nameA = locale === "ar" ? a.ar_name : a.en_name;
         const nameB = locale === "ar" ? b.ar_name : b.en_name;
@@ -135,7 +149,7 @@ export default function ProjectsList({ clientId }) {
       setProjectList(sorted);
       setSelectedProject(sorted[0] || null);
     }
-  }, [isLoading]);
+  }, [isLoading, isError, compounds, locale]);
 
   // Handle project selection with loading state
   const handleProjectSelection = (project) => {
@@ -338,6 +352,18 @@ export default function ProjectsList({ clientId }) {
           <div className="max-h-[80vh] overflow-y-auto">
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
+            ) : isError ? (
+              <QueryErrorState
+                error={error}
+                refetch={refetch}
+                isFetching={isFetching}
+                title={t.projectsPage?.errorTitle || "Error loading projects"}
+                message={
+                  t.projectsPage?.errorMessage ||
+                  "Failed to load projects. Please try again."
+                }
+                retryLabel={t.projectsPage?.retryLabel || "Retry"}
+              />
             ) : projectList.length === 0 ? (
               // <div className="flex flex-col items-center justify-center p-6">
               //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">

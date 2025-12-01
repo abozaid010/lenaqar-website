@@ -11,9 +11,17 @@ import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
+import QueryErrorState from "@/components/ui/query-error-state";
 
 export default function DevelopersClientWrapper({ clientId }) {
-  const { data, isLoading } = useDevelopers(clientId);
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useDevelopers(clientId);
   const { t, locale } = useI18n();
   const [developers, setDevelopers] = useState(data || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
@@ -21,10 +29,15 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && data.length > 0) {
-      setDevelopers(data || []);
+    if (!isLoading && !isError && data) {
+      // Validate that data is an array
+      if (!Array.isArray(data)) {
+        console.error("Developers data is not an array:", data);
+        return;
+      }
+      setDevelopers(data);
     }
-  }, [isLoading]);
+  }, [isLoading, isError, data]);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -95,6 +108,18 @@ export default function DevelopersClientWrapper({ clientId }) {
           <div className="max-h-[80vh] overflow-y-auto">
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
+            ) : isError ? (
+              <QueryErrorState
+                error={error}
+                refetch={refetch}
+                isFetching={isFetching}
+                title={t.developerPage?.errorTitle || "Error loading developers"}
+                message={
+                  t.developerPage?.errorMessage ||
+                  "Failed to load developers. Please try again."
+                }
+                retryLabel={t.developerPage?.retryLabel || "Retry"}
+              />
             ) : developers.length === 0 ? (
               // <div className="flex flex-col items-center justify-center p-6">
               //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">

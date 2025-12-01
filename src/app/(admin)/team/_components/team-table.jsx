@@ -33,7 +33,7 @@ export default function TeamTable({ data }) {
   return (
     <div>
       {!data || data.length === 0 ? (
-        <EmptyStateVideo variant="team" autoPlay muted showControls loop />
+        <EmptyStateVideo variant="team" autoPlay showControls loop />
       ) : (
         <div className="border border-gray-200 sm:rounded-lg scroll-snap-x-mandatory mt-6">
           <table className="min-w-full divide-y divide-gray-200">

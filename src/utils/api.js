@@ -44,10 +44,23 @@ export async function fetchDevelopers(client_id, isPublic = false) {
 
   try {
     const response = await axiosInstance.get(url);
-    return response.data.data;
+
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    // Ensure data is an array
+    const data = response.data.data;
+    if (!Array.isArray(data)) {
+      throw new Error("Expected array but received invalid data format");
+    }
+
+    return data;
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);
-    return { error: error.message };
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
   }
 }
 
@@ -61,10 +74,22 @@ export async function fetchProjects(client_id, isPublic) {
   try {
     const response = await axiosInstance.get(url);
 
-    return response.data.data;
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    // Ensure data is an array
+    const data = response.data.data;
+    if (!Array.isArray(data)) {
+      throw new Error("Expected array but received invalid data format");
+    }
+
+    return data;
   } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-    return { error: error.message };
+    console.error("Failed to fetch projects:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
   }
 }
 
