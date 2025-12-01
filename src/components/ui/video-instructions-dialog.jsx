@@ -159,54 +159,31 @@ export default function VideoInstructionsDialog({
           onClick={handleClose}
         >
           <div
-            className="relative bg-white rounded-lg shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-lg shadow-2xl w-full max-w-7xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="sticky top-0 z-10 flex items-center justify-between p-4 border-b border-gray-200 bg-white">
-              <div className="flex-1 pr-8">
-                <h2 className="text-xl font-semibold text-gray-900">
-                  {displayTitle}
-                </h2>
-                {displayDescription && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    {displayDescription}
-                  </p>
-                )}
-              </div>
+            {/* Video Content with Close Button Overlay */}
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-lg bg-gray-100">
+              {/* Close Button Overlay */}
               <button
                 onClick={handleClose}
-                className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="absolute top-8 rtl:left-8 ltr:right-8 z-20 flex-shrink-0 p-2 rounded-full hover:bg-white/20 transition-colors"
                 aria-label="Close dialog"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-8 h-8 text-white drop-shadow-lg" />
               </button>
-            </div>
 
-            {/* Video Content */}
-            <div className="p-6">
-              <div className="w-full aspect-video rounded-lg overflow-hidden shadow-lg bg-gray-100">
-                <iframe
-                  src={getYouTubeEmbedUrl()}
-                  title={displayTitle}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  className="w-full h-full"
-                  style={{ border: 0 }}
-                  loading="lazy"
-                />
-              </div>
-            </div>
-
-            {/* Footer (optional) */}
-            <div className="p-4 border-t border-gray-200 bg-gray-50">
-              <button
-                onClick={handleClose}
-                className="w-full sm:w-auto px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors"
-              >
-                {t.videoInstructions?.dialog?.gotIt || "Got it!"}
-              </button>
+              {/* Video iframe */}
+              <iframe
+                src={getYouTubeEmbedUrl()}
+                title={displayTitle}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                referrerPolicy="strict-origin-when-cross-origin"
+                className="w-full h-full"
+                style={{ border: 0 }}
+                loading="lazy"
+              />
             </div>
           </div>
         </div>
