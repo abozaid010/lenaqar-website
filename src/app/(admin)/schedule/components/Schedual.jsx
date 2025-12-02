@@ -210,7 +210,7 @@ const Schedule = ({ data, dataSales }) => {
               ) : (
                 filteredData?.map((appointment, index) => (
                   <div
-                    key={appointment.id}
+                    key={appointment.id + index}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
                   >
                     <div className="p-6">
@@ -258,8 +258,8 @@ const Schedule = ({ data, dataSales }) => {
                           >
                             {appointment.assigned_sales ? (
                               <div className="flex items-center gap-2">
-                                {appointment?.assigned_sales.map((e) => (
-                                  <span>{e.name}</span>
+                                {appointment?.assigned_sales.map((e, i) => (
+                                  <span key={e.id || i}>{e.name}</span>
                                 ))}
                               </div>
                             ) : (
