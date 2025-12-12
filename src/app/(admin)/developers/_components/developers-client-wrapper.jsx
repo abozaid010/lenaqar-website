@@ -3,9 +3,11 @@
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import ReusableSearchInput from "@/components/ui/reusable-search-input";
 import { useI18n } from "@/context/translate-api";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
+import { filterBySearchQuery } from "@/utils/search-utils";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useEffect, useState } from "react";
@@ -27,6 +29,7 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!isLoading && !isError && data) {
@@ -35,9 +38,15 @@ export default function DevelopersClientWrapper({ clientId }) {
         console.error("Developers data is not an array:", data);
         return;
       }
-      setDevelopers(data);
+
+      // Filter by search query if provided
+      const filtered = searchQuery
+        ? filterBySearchQuery(data, searchQuery, ["ar_name", "en_name"])
+        : data;
+
+      setDevelopers(filtered);
     }
-  }, [isLoading, isError, data]);
+  }, [isLoading, isError, data, searchQuery]);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -81,27 +90,38 @@ export default function DevelopersClientWrapper({ clientId }) {
     <>
       <div className="bg-gray-50 p-3 max-w-4xl">
         <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-primary p-4 flex justify-between items-center">
-            <h2 className="text-white text-xl font-semibold">
-              {t.sidebar.developers}
-            </h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsOpen(true)}
-                className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-              >
-                <Plus size={20} />
-                <span> {t.developerPage.addDeveloper}</span>
-              </button>
-              <VideoInstructionsDialog
-                variant="developers"
-                iconSize="lg"
-                iconClassName="hover:bg-white/20"
-                svgClassName="text-white"
-                tooltipText={
-                  t.developerPage?.instructions || "How to manage developers"
-                }
-              />
+          <div className="bg-primary p-4 flex flex-col gap-3">
+            <div className="flex justify-between items-center gap-3 flex-wrap">
+              <h2 className="text-white text-xl font-semibold">
+                {t.sidebar.developers}
+              </h2>
+              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
+                <ReusableSearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
+                  variant="white"
+                  className="w-full"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  <Plus size={20} />
+                  <span> {t.developerPage.addDeveloper}</span>
+                </button>
+                <VideoInstructionsDialog
+                  variant="developers"
+                  iconSize="lg"
+                  iconClassName="hover:bg-white/20"
+                  svgClassName="text-white"
+                  tooltipText={
+                    t.developerPage?.instructions || "How to manage developers"
+                  }
+                />
+              </div>
             </div>
           </div>
 

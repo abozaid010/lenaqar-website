@@ -19,9 +19,11 @@ import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import ReusableSearchInput from "@/components/ui/reusable-search-input";
 import { BUILDING_TYPES } from "@/data/constants";
 import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
+import { filterBySearchQuery } from "@/utils/search-utils";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -130,6 +132,7 @@ export default function ProjectsList({ clientId }) {
   const [phaseToEdit, setPhaseToEdit] = useState(null);
   const [phaseToDelete, setPhaseToDelete] = useState(null);
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!isLoading && !isError && compounds) {
@@ -139,17 +142,42 @@ export default function ProjectsList({ clientId }) {
         return;
       }
 
-      const sorted = compounds.sort((a, b) => {
+      // Sort compounds
+      const sorted = [...compounds].sort((a, b) => {
         const nameA = locale === "ar" ? a.ar_name : a.en_name;
         const nameB = locale === "ar" ? b.ar_name : b.en_name;
         return nameA.trim().localeCompare(nameB.trim(), locale, {
           sensitivity: "base",
         });
       });
-      setProjectList(sorted);
-      setSelectedProject(sorted[0] || null);
+
+      // Filter by search query if provided
+      const filtered = searchQuery
+        ? filterBySearchQuery(sorted, searchQuery, ["ar_name", "en_name"])
+        : sorted;
+
+      setProjectList(filtered);
+      
+      // Set initial selected project if none is selected
+      if (!selectedProject && filtered.length > 0) {
+        setSelectedProject(filtered[0]);
+      }
     }
-  }, [isLoading, isError, compounds, locale]);
+  }, [isLoading, isError, compounds, locale, searchQuery]);
+
+  // Update selected project if it's not in the filtered list
+  useEffect(() => {
+    if (projectList.length > 0 && selectedProject) {
+      const isSelectedInList = projectList.some(
+        (p) => p.id === selectedProject.id
+      );
+      if (!isSelectedInList) {
+        setSelectedProject(projectList[0]);
+      }
+    } else if (projectList.length === 0) {
+      setSelectedProject(null);
+    }
+  }, [projectList, selectedProject]);
 
   // Handle project selection with loading state
   const handleProjectSelection = (project) => {
@@ -325,27 +353,38 @@ export default function ProjectsList({ clientId }) {
 
       <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3">
         <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-primary p-4 flex justify-between items-center">
-            <h2 className="text-white text-xl font-semibold">
-              {t.sidebar.myProjects}
-            </h2>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setShowProjectDialog(true)}
-                className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-              >
-                <Plus size={20} />
-                <span> {t.addNewProject}</span>
-              </button>
-              <VideoInstructionsDialog
-                variant="projects"
-                iconSize="lg"
-                iconClassName="hover:bg-white/20"
-                svgClassName="text-white"
-                tooltipText={
-                  t.projectsPage?.instructions || "How to manage projects"
-                }
-              />
+          <div className="bg-primary p-4 flex flex-col gap-3">
+            <div className="flex justify-between items-center gap-3 flex-wrap">
+              <h2 className="text-white text-xl font-semibold">
+                {t.sidebar.myProjects}
+              </h2>
+              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
+                <ReusableSearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder={t.projectsPage?.searchPlaceholder || "Search projects..."}
+                  variant="white"
+                  className="w-full"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowProjectDialog(true)}
+                  className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                >
+                  <Plus size={20} />
+                  <span> {t.addNewProject}</span>
+                </button>
+                <VideoInstructionsDialog
+                  variant="projects"
+                  iconSize="lg"
+                  iconClassName="hover:bg-white/20"
+                  svgClassName="text-white"
+                  tooltipText={
+                    t.projectsPage?.instructions || "How to manage projects"
+                  }
+                />
+              </div>
             </div>
           </div>
 
