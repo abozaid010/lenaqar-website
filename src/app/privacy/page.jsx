@@ -1,11 +1,41 @@
+import { SITE_URL } from "../metadata";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+
 export const metadata = {
-  description: "LENAAI, your ai property consultant",
-  title: "Privacy Policy",
+  title: "Privacy Policy - LENAAI AI CRM",
+  description:
+    "LENAAI Privacy Policy - Learn how we collect, use, and protect your information when using our AI-powered real estate CRM platform and AI Sales Agent.",
+  keywords: ["privacy policy", "data protection", "LENAAI privacy", "real estate CRM privacy"],
+  openGraph: {
+    title: "Privacy Policy | LENAAI",
+    description:
+      "Learn how LENAAI collects, uses, and protects your information when using our AI-powered real estate CRM platform.",
+    url: `${SITE_URL}/privacy`,
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "Privacy Policy | LENAAI",
+    description:
+      "Learn how LENAAI collects, uses, and protects your information.",
+  },
+  alternates: {
+    canonical: `${SITE_URL}/privacy`,
+  },
 };
 
 export default function PrivacyPage() {
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <>
+      <BreadcrumbSchema
+        items={[
+          {
+            name: "Privacy Policy",
+            url: `${SITE_URL}/privacy`,
+          },
+        ]}
+      />
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
       <h1 className="text-3xl font-bold text-[#030250] mb-4">Privacy Policy</h1>
 
       <p className="text-[#3926A7] mb-6">Effective Date: Fab 1, 2025</p>
@@ -165,5 +195,6 @@ export default function PrivacyPage() {
         </p>
       </section>
     </div>
+    </>
   );
 }

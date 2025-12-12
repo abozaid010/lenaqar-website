@@ -4,6 +4,9 @@ import TeamTable from "./_components/team-table";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import { SITE_URL } from "../../metadata";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+
 export async function generateMetadata() {
   const cookieStore = await cookies();
   const clientInfoCookie = cookieStore.get("client_info")?.value;
@@ -12,8 +15,31 @@ export async function generateMetadata() {
     : null;
 
   return {
-    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
-    description: `LENAAI, your AI property consultant.`,
+    title: clientName
+      ? `Team Management - ${clientName} | LENAAI AI CRM`
+      : "Team Management - LENAAI AI CRM",
+    description:
+      "Manage your real estate sales team, assign team members, and track performance with LENAAI's AI-powered CRM platform.",
+    keywords: [
+      "team management",
+      "sales team",
+      "real estate team",
+      "AI CRM team",
+    ],
+    openGraph: {
+      title: "Team Management - LENAAI AI CRM",
+      description:
+        "Manage your real estate sales team with LENAAI's AI-powered CRM.",
+      url: `${SITE_URL}/team`,
+      type: "website",
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/team`,
+    },
   };
 }
 export default async function TeamPage() {
@@ -25,7 +51,16 @@ export default async function TeamPage() {
   }
 
   return (
-    <div className="container mx-auto h-full">
+    <>
+      <BreadcrumbSchema
+        items={[
+          {
+            name: "Team",
+            url: `${SITE_URL}/team`,
+          },
+        ]}
+      />
+      <div className="container mx-auto h-full">
       {hasAccess ? (
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between gap-4">
@@ -58,5 +93,6 @@ export default async function TeamPage() {
         </div>
       )}
     </div>
+    </>
   );
 }

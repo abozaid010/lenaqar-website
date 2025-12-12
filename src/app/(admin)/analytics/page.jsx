@@ -4,6 +4,9 @@ import {
   fetchMonthData,
   userAnalytics,
 } from "@/components/services/serviceFetching";
+import { SITE_URL } from "../../metadata";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+
 export async function generateMetadata() {
   const cookieStore = await cookies();
 
@@ -12,8 +15,33 @@ export async function generateMetadata() {
     : null;
 
   return {
-    title: clientName ? `LENAAI | ${clientName}` : "LENAAI",
-    description: `LENAAI, your AI property consultant.`,
+    title: clientName
+      ? `Analytics - ${clientName} | LENAAI AI CRM`
+      : "Analytics - LENAAI AI CRM",
+    description:
+      "View comprehensive analytics and insights for your real estate business. Track sales performance, marketing campaigns, and client engagement metrics.",
+    keywords: [
+      "real estate analytics",
+      "sales analytics",
+      "marketing analytics",
+      "CRM analytics",
+      "AI analytics",
+      "business insights",
+    ],
+    openGraph: {
+      title: "Analytics - LENAAI AI CRM",
+      description:
+        "View comprehensive analytics and insights for your real estate business powered by AI.",
+      url: `${SITE_URL}/analytics`,
+      type: "website",
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/analytics`,
+    },
   };
 }
 const page = async ({ searchParams: rawSearchParams }) => {
@@ -24,13 +52,23 @@ const page = async ({ searchParams: rawSearchParams }) => {
   ]);
 
   return (
-    <div>
-      <Analytics
-        data={data}
-        datamonth={datamonth}
-        appliedFilters={searchParams}
+    <>
+      <BreadcrumbSchema
+        items={[
+          {
+            name: "Analytics",
+            url: `${SITE_URL}/analytics`,
+          },
+        ]}
       />
-    </div>
+      <div>
+        <Analytics
+          data={data}
+          datamonth={datamonth}
+          appliedFilters={searchParams}
+        />
+      </div>
+    </>
   );
 };
 

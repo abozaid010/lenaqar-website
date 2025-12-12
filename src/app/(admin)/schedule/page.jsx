@@ -4,8 +4,47 @@ import {
 } from "@/components/services/serviceFetching";
 import Schedual from "./components/Schedual";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import { SITE_URL } from "../../metadata";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata() {
+  const cookieStore = await cookies();
+  const clientName = cookieStore.get("client_info")?.value
+    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+    : null;
+
+  return {
+    title: clientName
+      ? `Schedule - ${clientName} | LENAAI AI CRM`
+      : "Schedule - LENAAI AI CRM",
+    description:
+      "Manage meetings, appointments, and schedule follow-ups with clients. Organize your real estate sales calendar with LENAAI's AI-powered CRM.",
+    keywords: [
+      "meeting scheduler",
+      "appointment management",
+      "calendar",
+      "real estate schedule",
+      "AI CRM schedule",
+    ],
+    openGraph: {
+      title: "Schedule - LENAAI AI CRM",
+      description:
+        "Manage meetings and appointments with LENAAI's AI-powered CRM platform.",
+      url: `${SITE_URL}/schedule`,
+      type: "website",
+    },
+    robots: {
+      index: false,
+      follow: false,
+    },
+    alternates: {
+      canonical: `${SITE_URL}/schedule`,
+    },
+  };
+}
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
@@ -34,17 +73,37 @@ const page = async () => {
     const salesData = dataSales.status === 'fulfilled' ? dataSales.value?.data : [];
 
     return (
-      <ErrorBoundary>
-        <Schedual data={scheduleData} dataSales={salesData} />
-      </ErrorBoundary>
+      <>
+        <BreadcrumbSchema
+          items={[
+            {
+              name: "Schedule",
+              url: `${SITE_URL}/schedule`,
+            },
+          ]}
+        />
+        <ErrorBoundary>
+          <Schedual data={scheduleData} dataSales={salesData} />
+        </ErrorBoundary>
+      </>
     );
   } catch (error) {
     console.error("Error loading schedule page:", error);
     // Return component with empty data instead of crashing
     return (
-      <ErrorBoundary>
-        <Schedual data={[]} dataSales={[]} />
-      </ErrorBoundary>
+      <>
+        <BreadcrumbSchema
+          items={[
+            {
+              name: "Schedule",
+              url: `${SITE_URL}/schedule`,
+            },
+          ]}
+        />
+        <ErrorBoundary>
+          <Schedual data={[]} dataSales={[]} />
+        </ErrorBoundary>
+      </>
     );
   }
 };

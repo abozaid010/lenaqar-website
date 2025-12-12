@@ -4,6 +4,10 @@ import { Cairo, Montserrat } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
+import { defaultMetadata } from "./metadata";
+import OrganizationSchema from "@/components/schema/OrganizationSchema";
+import LocalBusinessSchema from "@/components/schema/LocalBusinessSchema";
+import WebSiteSchema from "@/components/schema/WebSiteSchema";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -16,56 +20,7 @@ const cairo = Cairo({
   subsets: ["latin"],
 });
 
-export const metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net"),
-  title: "LENAAI | AI-Powered Real Estate CRM System",
-  description:
-    "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
-  keywords:
-    "real estate CRM, AI sales agent, WhatsApp automation, property management, chatbot for real estate, AI real estate automation",
-  openGraph: {
-    title: "LENAAI | AI-Powered Real Estate CRM System",
-    description:
-      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
-    type: "website",
-    locale: "en_US",
-    url: "https://www.lenaai.net/",
-    siteName: "LENAAI",
-    images: [
-      {
-        url: "/images/logo.png",
-        width: 1200,
-        height: 630,
-        alt: "LENAAI Real Estate CRM",
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "LENAAI | AI-Powered Real Estate CRM System",
-    description:
-      "Streamline your real estate business with LENAAI's AI-powered CRM. Automate WhatsApp communications, boost sales, and enhance client relationships.",
-    images: ["/images/lenaai-twitter-image.jpg"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  alternates: {
-    canonical: "https://www.lenaai.net",
-    // TODO: each language should have its own path
-    languages: {
-      en: "https://www.lenaai.net",
-      ar: "https://www.lenaai.net",
-    },
-  },
-};
+export const metadata = defaultMetadata;
 
 export default async function RootLayout({ children }) {
   // Get the initial locale from the cookie on the server
@@ -101,6 +56,9 @@ export default async function RootLayout({ children }) {
       dir={initialLocale === "ar" ? "rtl" : "ltr"}
     >
       <body>
+        <OrganizationSchema />
+        <LocalBusinessSchema />
+        <WebSiteSchema />
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
           <TanStackQueryProvider>{children}</TanStackQueryProvider>

@@ -6,7 +6,9 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "lint:seo": "node scripts/check-seo.js",
+    "lint:all": "npm run lint && npm run lint:seo"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.81.5",
@@ -28,6 +30,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "@types/node": "25.0.1",
+    "@types/react": "19.2.7",
     "eslint": "^9",
     "eslint-config-next": "15.2.4",
     "prettier": "^3.5.3",

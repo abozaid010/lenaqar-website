@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running SEO checks..."
+npm run lint:seo
+
+if [ $? -ne 0 ]; then
+  echo "❌ SEO checks failed. Please fix the errors before committing."
+  exit 1
+fi
+
+echo "✅ SEO checks passed!"
+

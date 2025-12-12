@@ -19,6 +19,36 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## SEO & Quality Assurance
+
+### Running SEO Checks
+
+Before committing, ensure all pages meet SEO requirements:
+
+```bash
+npm run lint:seo
+```
+
+This validates:
+- All pages have required metadata (title, description, openGraph, canonical)
+- No duplicate titles
+- Images have alt text
+- Descriptions are optimal length
+
+### Combined Linting
+
+Run both ESLint and SEO checks:
+
+```bash
+npm run lint:all
+```
+
+### SEO Rules
+
+See [SEO_RULES.md](./SEO_RULES.md) for complete SEO guidelines and requirements.
+
+**Core Value Proposition**: LenaAI is like ChatGPT for real estate — an autonomous AI sales agent that talks to customers, recommends properties, shows master plans, explains payment plans, qualifies leads, scores clients, and closes sales.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

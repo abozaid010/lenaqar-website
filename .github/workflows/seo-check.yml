@@ -1,0 +1,45 @@
+name: SEO Audit
+
+on:
+  pull_request:
+    branches: [main, master, develop]
+  push:
+    branches: [main, master, develop]
+
+jobs:
+  seo-audit:
+    name: SEO Metadata Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: false
+
+      - name: Run SEO Check
+        run: npm run lint:seo
+        continue-on-error: false
+        env:
+          NEXT_PUBLIC_SITE_URL: https://www.lenaai.net
+
+      - name: SEO Check Summary
+        if: always()
+        run: |
+          echo "## SEO Audit Results" >> $GITHUB_STEP_SUMMARY
+          npm run lint:seo 2>&1 | tee seo-output.txt
+          echo "\n### Full Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat seo-output.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
