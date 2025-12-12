@@ -22,7 +22,7 @@ export default {
       confirm: "Logout",
     },
     logoutSuccess: "Logout Successful",
-    sendMessage: "support",
+    sendMessage: "Chat with us",
   },
   welcome: "Welcome",
   dashboard: "Dashboard",

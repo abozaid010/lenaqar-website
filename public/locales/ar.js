@@ -20,7 +20,7 @@ export default {
       confirm: "تسجيل الخروج",
     },
     logoutSuccess: "تم تسجيل الخروج بنجاح",
-    sendMessage: " خدمة العملاء",
+    sendMessage: "تواصل معنا",
   },
   welcome: "مرحبا",
   dashboard: "لوحة التحكم",
