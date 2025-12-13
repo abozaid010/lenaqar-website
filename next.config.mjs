@@ -35,7 +35,8 @@ const nextConfig = {
           }]
         : []),
     ],
-    domains: [process.env.NEXT_PUBLIC_API_DOMAIN, 'api.lenaai.net'],
+    // Note: 'domains' is deprecated in Next.js 13+, using remotePatterns instead
+    // domains: [process.env.NEXT_PUBLIC_API_DOMAIN, 'api.lenaai.net'],
     // Add better error handling for images
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

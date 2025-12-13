@@ -11,8 +11,13 @@ RUN npm ci
 # Copy project files
 COPY . .
 
-# Build the project
-RUN npm run build
+# Build the project with increased memory limit
+# Next.js builds can be memory-intensive, especially with large apps
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build with verbose output to help debug issues
+RUN npm run build || (echo "Build failed with exit code $?" && exit 1)
 
 # Expose port
 EXPOSE 3000
