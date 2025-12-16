@@ -107,7 +107,7 @@ export default function AddDeveloperDialog({
       if (isEdit) {
         res = await updateDeveloper(submittedData, developer.id);
       } else {
-        res = await addDeveloper(submittedData, client_id);
+        res = await addDeveloper(submittedData);
       }
       if (res.code === 200) {
         toast.success(

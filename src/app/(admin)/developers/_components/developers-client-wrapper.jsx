@@ -1,6 +1,7 @@
 "use client";
 
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
+import ImportDevelopersDialog from "@/components/ui/import-developers-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
@@ -28,6 +29,7 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [developers, setDevelopers] = useState(data || []);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -86,6 +88,23 @@ export default function DevelopersClientWrapper({ clientId }) {
     }
   };
 
+  const handleImported = async () => {
+    try {
+      await refetch();
+      toast.success(
+        t.developerPage?.importSuccess ||
+          "Developers imported successfully."
+      );
+      setSearchQuery("");
+    } catch (error) {
+      console.error("Error refetching developers after import:", error);
+      toast.error(
+        t.developerPage?.importRefetchError ||
+          "Imported, but failed to refresh developers list. Please reload the page."
+      );
+    }
+  };
+
   return (
     <>
       <div className="bg-gray-50 p-3 max-w-4xl">
@@ -110,7 +129,14 @@ export default function DevelopersClientWrapper({ clientId }) {
                   className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   <Plus size={20} />
-                  <span> {t.developerPage.addDeveloper}</span>
+                  <span>{t.developerPage.addDeveloper}</span>
+                </button>
+                <button
+                  onClick={() => setIsImportOpen(true)}
+                  className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
+                >
+                  <Plus size={20} />
+                  <span>{t.developerPage?.importButton || "Import"}</span>
                 </button>
                 <VideoInstructionsDialog
                   variant="developers"
@@ -175,7 +201,7 @@ export default function DevelopersClientWrapper({ clientId }) {
                     className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer flex justify-between items-start gap-4"
                   >
                     <div>
-                      <h3 className="font-semibold text-lg">
+                      <h3 className="font-semibold text-lg" style={{ color: '#030250' }}>
                         {locale === "ar" ? d.ar_name : d.en_name}
                       </h3>
 
@@ -238,6 +264,14 @@ export default function DevelopersClientWrapper({ clientId }) {
         onAdd={handleAdd}
         onEdit={handleEdit}
         developer={selectedDeveloper}
+      />
+
+      <ImportDevelopersDialog
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        clientId={clientId}
+        onImported={handleImported}
+        existingDeveloperIds={developers.map((d) => d.id)}
       />
     </>
   );

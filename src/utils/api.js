@@ -69,12 +69,8 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   }
 }
 
-export async function fetchDevelopers(client_id, isPublic = false) {
-  const url = isPublic
-    ? "/public/developers"
-    : client_id
-      ? `/developers/?client_id=${client_id}`
-      : `/developers/`;
+export async function fetchDevelopers(isPublic = false) {
+  const url = isPublic ? "/public/developers" : "/developers/";
 
   try {
     const response = await axiosInstance.get(url);
@@ -110,12 +106,8 @@ export async function fetchDevelopers(client_id, isPublic = false) {
   }
 }
 
-export async function fetchProjects(client_id, isPublic) {
-  const url = isPublic
-    ? "/public/projects"
-    : client_id
-      ? `/projects/all?client_id=${client_id}`
-      : `/projects/all`;
+export async function fetchProjects(isPublic = false) {
+  const url = isPublic ? "/public/projects" : "/projects/all";
 
   try {
     const response = await axiosInstance.get(url);
@@ -272,11 +264,10 @@ export async function getprojects(city, district) {
     return { error: error.message };
   }
 }
-export async function addCompound(compoundData, clientId) {
-  // TODO: Cleint ID should be getted from the authantication token
+export async function addCompound(compoundData) {
   try {
     const response = await axiosInstance.post(
-      `/projects/create?client_id=${clientId}`,
+      `/projects/create`,
       compoundData
     );
     return response.data;
@@ -348,11 +339,10 @@ export async function updatePhase(phaseData, idProject, idPhase) {
 }
 
 // Developers CRUD operations //
-export async function addDeveloper(developerData, clientId) {
-  // TODO: Cleint ID should be getted from the authantication token
+export async function addDeveloper(developerData) {
   try {
     const response = await axiosInstance.post(
-      `/developers/create?client_id=${clientId}`,
+      `/developers/create`,
       developerData
     );
     return response.data;
@@ -379,6 +369,32 @@ export async function deleteDeveloper(id) {
     return response.data;
   } catch (error) {
     console.error("Failed to delete developer:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
+export async function importDevelopers(developers) {
+  try {
+    const response = await axiosInstance.post(
+      `/developers/import_developers`,
+      developers
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to import developers:", error.message);
+    return { error: error.response?.data?.message || error.message };
+  }
+}
+
+export async function importProjects(projects) {
+  try {
+    const response = await axiosInstance.post(
+      `/projects/import_projects`,
+      projects
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to import projects:", error.message);
     return { error: error.response?.data?.message || error.message };
   }
 }

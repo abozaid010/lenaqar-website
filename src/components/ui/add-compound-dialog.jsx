@@ -287,7 +287,7 @@ export default function AddCompoundDialog({
       if (editMode) {
         res = await updatecompound(submissionData, compoundData.id);
       } else {
-        res = await addCompound(submissionData, clientId);
+        res = await addCompound(submissionData);
       }
 
       if (res.status) {

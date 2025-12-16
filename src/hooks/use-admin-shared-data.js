@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 export function useDevelopers(client_id, isPublic = false) {
   return useQuery({
     queryKey: developerKeys.lists(client_id, isPublic),
-    queryFn: () => fetchDevelopers(client_id, isPublic),
+    queryFn: () => fetchDevelopers(isPublic),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });
@@ -22,7 +22,7 @@ export function useDevelopers(client_id, isPublic = false) {
 export function useCompounds(client_id, isPublic = false) {
   return useQuery({
     queryKey: compoundKeys.lists(client_id, isPublic),
-    queryFn: () => fetchProjects(client_id, isPublic),
+    queryFn: () => fetchProjects(isPublic),
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });

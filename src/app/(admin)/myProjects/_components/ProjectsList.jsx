@@ -18,6 +18,7 @@ import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import ImportProjectsDialog from "@/components/ui/import-projects-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
 import { BUILDING_TYPES } from "@/data/constants";
@@ -133,6 +134,7 @@ export default function ProjectsList({ clientId }) {
   const [phaseToDelete, setPhaseToDelete] = useState(null);
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isError && compounds) {
@@ -307,6 +309,23 @@ export default function ProjectsList({ clientId }) {
     }
   };
 
+  const handleImported = async () => {
+    try {
+      await refetch();
+      toast.success(
+        t.projectPage?.importSuccess ||
+          "Projects imported successfully."
+      );
+      setSearchQuery("");
+    } catch (error) {
+      console.error("Error refetching projects after import:", error);
+      toast.error(
+        t.projectPage?.importRefetchError ||
+          "Failed to refresh projects list."
+      );
+    }
+  };
+
   return (
     <>
       {showProjectDialog && (
@@ -362,7 +381,7 @@ export default function ProjectsList({ clientId }) {
                 <ReusableSearchInput
                   value={searchQuery}
                   onChange={setSearchQuery}
-                  placeholder={t.projectsPage?.searchPlaceholder || "Search projects..."}
+                  placeholder={t.projectPage?.searchPlaceholder || "Search projects..."}
                   variant="white"
                   className="w-full"
                 />
@@ -373,7 +392,14 @@ export default function ProjectsList({ clientId }) {
                   className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
                 >
                   <Plus size={20} />
-                  <span> {t.addNewProject}</span>
+                  <span>{t.projectPage?.add || t.addNewProject || "Add"}</span>
+                </button>
+                <button
+                  onClick={() => setIsImportOpen(true)}
+                  className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
+                >
+                  <Plus size={20} />
+                  <span>{t.projectPage?.importButton || "Import"}</span>
                 </button>
                 <VideoInstructionsDialog
                   variant="projects"
@@ -924,6 +950,14 @@ export default function ProjectsList({ clientId }) {
           masterPlan={fullScreenMasterPlan}
         />
       )}
+
+      <ImportProjectsDialog
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        clientId={clientId}
+        onImported={handleImported}
+        existingProjectIds={projectList.map((p) => p.id)}
+      />
     </>
   );
 }

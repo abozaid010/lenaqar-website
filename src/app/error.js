@@ -13,13 +13,13 @@ export default function Error({ error }) {
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-100 text-center px-4">
 
-            <InfoIcon color='red' size={80} className='mb-6' />
+            <InfoIcon color='yellow' size={60} className='mb-6' />
 
             <h2 className="text-2xl font-bold text-gray-800 mb-4">
                 We are upgrading our service
             </h2>
             <p className="text-gray-600 mb-6">
-                We’ll be back live soon. Please check back later.
+                We are running some maintenance on our system. Please click reload to try again.
             </p>
 
             {/* Button to Home */}

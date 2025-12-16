@@ -48,7 +48,7 @@ export default function LoginForm() {
             setFormData({ ...formData, user_name: e.target.value })
           }
           required
-          className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+          className="w-full px-4 py-2 rounded-lg border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
           placeholder={t.login.usernamePlaceholder}
         />
       </div>
@@ -69,7 +69,7 @@ export default function LoginForm() {
             setFormData({ ...formData, password: e.target.value })
           }
           required
-          className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+          className="w-full px-4 py-2 rounded-lg border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
           placeholder={t.login.passwordPlaceholder}
         />
       </div>
