@@ -33,6 +33,7 @@ export default function ImportDevelopersDialog({
         ar_name: dev.ar_name,
         en_name: dev.en_name,
         description: dev.description || "",
+        ar_description: dev.ar_description || "",
         logo: dev.logo || "",
         client_id: dev.client_id || "public",
       })) || [];
@@ -93,9 +94,9 @@ export default function ImportDevelopersDialog({
               </span>
             )}
           </div>
-          {dev.description && (
+          {(locale === "ar" ? dev.ar_description : dev.description) && (
             <p className="mt-1 text-xs sm:text-sm text-gray-700 whitespace-pre-line break-words">
-              {dev.description}
+              {locale === "ar" ? dev.ar_description : dev.description}
             </p>
           )}
         </div>
@@ -150,7 +151,7 @@ export default function ImportDevelopersDialog({
       items={allDevelopers}
       existingItemIds={existingDeveloperIds}
       renderItem={renderDeveloper}
-      searchFields={["ar_name", "en_name", "description"]}
+      searchFields={["ar_name", "en_name", "description", "ar_description"]}
       config={config}
       isLoading={isLoading}
       isError={isError}

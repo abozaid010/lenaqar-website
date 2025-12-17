@@ -108,9 +108,9 @@ export default function ImportProjectsDialog({
               </span>
             )}
           </div>
-          {project.description && (
-            <p className="mt-1 text-xs sm:text-sm text-gray-700 line-clamp-2 break-words">
-              {project.description}
+          {(locale === "ar" ? project.ar_description : project.description) && (
+            <p className="mt-1 text-xs sm:text-sm text-gray-700 whitespace-pre-line break-words">
+              {locale === "ar" ? project.ar_description : project.description}
             </p>
           )}
         </div>
@@ -165,7 +165,7 @@ export default function ImportProjectsDialog({
       items={allProjects}
       existingItemIds={existingProjectIds}
       renderItem={renderProject}
-      searchFields={["ar_name", "en_name", "description"]}
+      searchFields={["ar_name", "en_name", "description", "ar_description"]}
       config={config}
       isLoading={isLoading}
       isError={isError}
