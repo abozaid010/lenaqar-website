@@ -46,7 +46,7 @@ const FormInput = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`block w-full rounded-md border py-1 px-2 focus:outline-none focus:ring-1 bg-white appearance-none ${
+        className={`block w-full rounded-md border py-1 px-2 focus:outline-none focus:ring-1 bg-white text-gray-900 appearance-none ${
           error
             ? "border-red-500 ring-red-500"
             : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"

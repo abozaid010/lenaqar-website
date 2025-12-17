@@ -326,7 +326,7 @@ export default function AddPaymentPlanDialog({
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className={`block w-full rounded-md border py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
               errors.description ? "border-red-500" : "border-gray-300"
             }`}
             placeholder={

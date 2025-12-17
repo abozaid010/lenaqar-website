@@ -26,19 +26,56 @@ export default function ClientInfo({ client_email }) {
     email: data?.data?.email,
     price_percentage: data?.data?.price_percentage || 0,
     accurate_queries_level: data?.data?.accurate_queries_level || 0,
+    chatbot_welcome_message: data?.data?.chatbot_welcome_message || "",
+    chatbot_initial_suggestions: data?.data?.chatbot_initial_suggestions || ["", ""],
   });
   const [isChanged, setIsChanged] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Helper function to count words
+  const countWords = (text) => {
+    if (!text || !text.trim()) return 0;
+    return text.trim().split(/\s+/).filter(word => word.length > 0).length;
+  };
+
+  // Helper function to normalize data for comparison
+  const normalizeDataForComparison = (data) => {
+    if (!data) return {};
+    const normalized = { ...data };
+    // Normalize chatbot_initial_suggestions to array format
+    if (normalized.chatbot_initial_suggestions) {
+      if (Array.isArray(normalized.chatbot_initial_suggestions)) {
+        normalized.chatbot_initial_suggestions = [
+          normalized.chatbot_initial_suggestions[0] || "",
+          normalized.chatbot_initial_suggestions[1] || "",
+        ];
+      } else {
+        normalized.chatbot_initial_suggestions = ["", ""];
+      }
+    } else {
+      normalized.chatbot_initial_suggestions = ["", ""];
+    }
+    if (!normalized.chatbot_welcome_message) {
+      normalized.chatbot_welcome_message = "";
+    }
+    return normalized;
+  };
 
   const clientId = Cookies.get("lena-website-client_id");
   const shareableLink = clientId ? `https://chat.lenaai.net/${clientId}` : "";
 
   useEffect(() => {
+    const suggestions = data?.data?.chatbot_initial_suggestions || [];
     setFormData({
       phone_number: data?.data?.phone_number,
       email: data?.data?.email,
       price_percentage: data?.data?.price_percentage || 0,
       accurate_queries_level: data?.data?.accurate_queries_level || 0,
+      chatbot_welcome_message: data?.data?.chatbot_welcome_message || "",
+      chatbot_initial_suggestions: [
+        suggestions[0] || "",
+        suggestions[1] || "",
+      ],
     });
   }, [isLoading]);
 
@@ -84,9 +121,41 @@ export default function ClientInfo({ client_email }) {
       return;
     }
 
+    // Handle welcome message word limit (50 words)
+    if (name === "chatbot_welcome_message") {
+      const wordCount = countWords(value);
+      if (wordCount > 50) {
+        toast.error(t.clientInfo.welcomeMessageWordLimit || "Welcome message cannot exceed 50 words");
+        return;
+      }
+    }
+
+    // Handle initial suggestions word limit (20 words each)
+    if (name.startsWith("chatbot_initial_suggestions_")) {
+      const index = parseInt(name.split("_")[3]);
+      const wordCount = countWords(value);
+      if (wordCount > 20) {
+        toast.error(t.clientInfo.suggestionWordLimit || "Each suggested question cannot exceed 20 words");
+        return;
+      }
+      setFormData((prev) => {
+        const updated = {
+          ...prev,
+          chatbot_initial_suggestions: prev.chatbot_initial_suggestions.map((item, i) =>
+            i === index ? value : item
+          ),
+        };
+        const normalizedData = normalizeDataForComparison(data?.data);
+        setIsChanged(JSON.stringify(updated) !== JSON.stringify(normalizedData));
+        return updated;
+      });
+      return;
+    }
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      setIsChanged(JSON.stringify(updated) !== JSON.stringify(data.data));
+      const normalizedData = normalizeDataForComparison(data?.data);
+      setIsChanged(JSON.stringify(updated) !== JSON.stringify(normalizedData));
       return updated;
     });
   }
@@ -95,7 +164,14 @@ export default function ClientInfo({ client_email }) {
     e.preventDefault();
     try {
       setLoadingSubmit(true);
-      await updateProfileData(formData);
+      // Format data for API: filter out empty suggestions
+      const submitData = {
+        ...formData,
+        chatbot_initial_suggestions: formData.chatbot_initial_suggestions.filter(
+          (suggestion) => suggestion.trim().length > 0
+        ),
+      };
+      await updateProfileData(submitData);
       toast.success(t.clientInfo.profileUpdated);
       setIsChanged(false);
       setTimeout(() => {
@@ -180,6 +256,58 @@ export default function ClientInfo({ client_email }) {
                 value={data.data?.client_name}
                 className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 disabled:bg-gray-200 w-full"
               />
+            </div>
+          </label>
+
+          <label className="flex flex-col text-gray-600 mb-1">
+            {t.clientInfo.welcomeMessage}:
+            <div className="relative">
+              <textarea
+                name="chatbot_welcome_message"
+                value={formData.chatbot_welcome_message || ""}
+                onChange={handleChange}
+                rows={3}
+                maxLength={500}
+                className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full resize-y"
+                placeholder={t.clientInfo.welcomeMessagePlaceholder || "Enter welcome message (max 50 words)"}
+              />
+              <div className="text-xs text-gray-500 mt-1">
+                {countWords(formData.chatbot_welcome_message || "")} / 50 {t.clientInfo.words || "words"}
+              </div>
+            </div>
+          </label>
+
+          <label className="flex flex-col text-gray-600 mb-1">
+            {t.clientInfo.initialSuggestions}:
+            <div className="relative mt-2 space-y-2">
+              <div>
+                <input
+                  type="text"
+                  name="chatbot_initial_suggestions_0"
+                  value={formData.chatbot_initial_suggestions?.[0] || ""}
+                  onChange={handleChange}
+                  maxLength={200}
+                  className="w-full p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder={t.clientInfo.suggestionPlaceholder || "First suggested question (max 20 words)"}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  {countWords(formData.chatbot_initial_suggestions?.[0] || "")} / 20 {t.clientInfo.words || "words"}
+                </div>
+              </div>
+              <div>
+                <input
+                  type="text"
+                  name="chatbot_initial_suggestions_1"
+                  value={formData.chatbot_initial_suggestions?.[1] || ""}
+                  onChange={handleChange}
+                  maxLength={200}
+                  className="w-full p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder={t.clientInfo.suggestionPlaceholder || "Second suggested question (max 20 words)"}
+                />
+                <div className="text-xs text-gray-500 mt-1">
+                  {countWords(formData.chatbot_initial_suggestions?.[1] || "")} / 20 {t.clientInfo.words || "words"}
+                </div>
+              </div>
             </div>
           </label>
 

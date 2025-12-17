@@ -193,7 +193,7 @@ export default function AddPhseDilog({
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder={
                 t.formLabels?.descriptionPlaceholder ||
                 "Enter phase description..."
