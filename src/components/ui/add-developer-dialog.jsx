@@ -24,23 +24,47 @@ export default function AddDeveloperDialog({
   };
 
   const [missingLang, setMissingLang] = useState(null);
-  const [formData, setFormData] = useState(
-    developer
-      ? { ...developer }
-      : {
-          id: uuidv4(),
-          name: "",
-          en_name: "",
-          ar_name: "",
-          description: "",
-          logo: "",
-          client_id: getClientId(),
-        }
-  );
+  // Initialize with default values, will be updated by useEffect when developer prop changes
+  const [formData, setFormData] = useState({
+    id: uuidv4(),
+    name: "",
+    en_name: "",
+    ar_name: "",
+    description: "",
+    ar_description: "",
+    logo: "",
+    website: "",
+    sales_email: "",
+    sales_phone: "",
+    whatsapp: "",
+    instagram: "",
+    linkedin: "",
+    facebook: "",
+    founded_year: "",
+    client_id: getClientId(),
+  });
 
   useEffect(() => {
     if (developer) {
-      setFormData({ ...developer });
+      // Merge developer data with default values to ensure all fields are present
+      setFormData({
+        id: developer.id || uuidv4(),
+        name: developer.name || "",
+        en_name: developer.en_name || "",
+        ar_name: developer.ar_name || "",
+        description: developer.description || "",
+        ar_description: developer.ar_description || "",
+        logo: developer.logo || "",
+        website: developer.website || "",
+        sales_email: developer.sales_email || "",
+        sales_phone: developer.sales_phone || "",
+        whatsapp: developer.whatsapp || "",
+        instagram: developer.instagram || "",
+        linkedin: developer.linkedin || "",
+        facebook: developer.facebook || "",
+        founded_year: developer.founded_year ? String(developer.founded_year) : "",
+        client_id: developer.client_id || getClientId(),
+      });
     } else {
       setFormData({
         id: uuidv4(),
@@ -48,7 +72,16 @@ export default function AddDeveloperDialog({
         en_name: "",
         ar_name: "",
         description: "",
+        ar_description: "",
         logo: "",
+        website: "",
+        sales_email: "",
+        sales_phone: "",
+        whatsapp: "",
+        instagram: "",
+        linkedin: "",
+        facebook: "",
+        founded_year: "",
         client_id: getClientId(),
       });
       setErrors({});
@@ -93,7 +126,37 @@ export default function AddDeveloperDialog({
       return;
     }
 
+    // Optional field validations
+    // Email validation
+    if (formData.sales_email && formData.sales_email.trim() !== "") {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.sales_email)) {
+        newErrors.sales_email = t.errors?.invalidEmail || "Invalid email format";
+      }
+    }
+
+    // URL validation
+    const urlFields = ["website", "instagram", "linkedin", "facebook"];
+    urlFields.forEach((field) => {
+      if (formData[field] && formData[field].trim() !== "") {
+        try {
+          new URL(formData[field]);
+        } catch {
+          newErrors[field] = t.errors?.invalidUrl || "Invalid URL format";
+        }
+      }
+    });
+
+    // Year validation
+    if (formData.founded_year && formData.founded_year !== "") {
+      const year = parseInt(formData.founded_year);
+      if (isNaN(year) || year < 1800 || year > 2100) {
+        newErrors.founded_year = t.errors?.invalidYear || "Year must be between 1800 and 2100";
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
@@ -139,35 +202,198 @@ export default function AddDeveloperDialog({
         isEdit ? t.developerPage.editDeveloper : t.developerPage.addDeveloper
       }
     >
-      <div className="space-y-2">
-        <MultiLangInput
-          label={t.DeveloperName}
-          required
-          arValue={formData.ar_name}
-          enValue={formData.en_name}
-          onChange={handleChange}
-          placeholders={{
-            ar: t.placeholders?.developerArName || "اسم المطور (العربية)",
-            en: t.placeholders?.developerEnName || "Developer Name (English)",
-          }}
-          errors={{
-            ar_name: errors.ar_name,
-            en_name: errors.en_name,
-          }}
-          missingLang={missingLang}
-        />
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            {t.formLabels?.description}
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
+      <div className="space-y-4">
+        {/* Basic Information */}
+        <div className="space-y-2">
+          <MultiLangInput
+            label={t.DeveloperName}
+            required
+            arValue={formData.ar_name}
+            enValue={formData.en_name}
             onChange={handleChange}
-            rows={3}
-            className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholders={{
+              ar: t.placeholders?.developerArName || "اسم المطور (العربية)",
+              en: t.placeholders?.developerEnName || "Developer Name (English)",
+            }}
+            errors={{
+              ar_name: errors.ar_name,
+              en_name: errors.en_name,
+            }}
+            missingLang={missingLang}
           />
+        </div>
+
+        {/* Descriptions */}
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.description || "Description"} ({t.common?.english || "English"})
+            </label>
+            <textarea
+              name="description"
+              value={formData.description || ""}
+              onChange={handleChange}
+              rows={4}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.placeholders?.description || "Enter description in English"}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"})
+            </label>
+            <textarea
+              name="ar_description"
+              value={formData.ar_description || ""}
+              onChange={handleChange}
+              rows={4}
+              dir="rtl"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.placeholders?.arDescription || "أدخل الوصف بالعربية"}
+            />
+          </div>
+        </div>
+
+        {/* Contact Information */}
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.salesEmail || "Sales Email"}
+            </label>
+            <input
+              type="email"
+              name="sales_email"
+              value={formData.sales_email || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.placeholders?.email || "example@email.com"}
+            />
+            {errors.sales_email && (
+              <p className="text-xs text-red-500 mt-1">{errors.sales_email}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.salesPhone || "Sales Phone"}
+            </label>
+            <input
+              type="tel"
+              name="sales_phone"
+              value={formData.sales_phone || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.placeholders?.phone || "Phone number"}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              WhatsApp
+            </label>
+            <input
+              type="text"
+              name="whatsapp"
+              value={formData.whatsapp || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder={t.placeholders?.whatsapp || "WhatsApp number"}
+            />
+          </div>
+        </div>
+
+        {/* Social Media & Web */}
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.website || "Website"}
+            </label>
+            <input
+              type="url"
+              name="website"
+              value={formData.website || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://example.com"
+            />
+            {errors.website && (
+              <p className="text-xs text-red-500 mt-1">{errors.website}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Instagram
+            </label>
+            <input
+              type="url"
+              name="instagram"
+              value={formData.instagram || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://instagram.com/username"
+            />
+            {errors.instagram && (
+              <p className="text-xs text-red-500 mt-1">{errors.instagram}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              LinkedIn
+            </label>
+            <input
+              type="url"
+              name="linkedin"
+              value={formData.linkedin || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://linkedin.com/company/name"
+            />
+            {errors.linkedin && (
+              <p className="text-xs text-red-500 mt-1">{errors.linkedin}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Facebook
+            </label>
+            <input
+              type="url"
+              name="facebook"
+              value={formData.facebook || ""}
+              onChange={handleChange}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://facebook.com/username"
+            />
+            {errors.facebook && (
+              <p className="text-xs text-red-500 mt-1">{errors.facebook}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Additional Information */}
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.foundedYear || "Founded Year"}
+            </label>
+            <input
+              type="number"
+              name="founded_year"
+              value={formData.founded_year || ""}
+              onChange={handleChange}
+              min="1800"
+              max="2100"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="e.g., 2015"
+            />
+            {errors.founded_year && (
+              <p className="text-xs text-red-500 mt-1">{errors.founded_year}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end space-x-2 pt-4">

@@ -74,33 +74,31 @@ export async function fetchDevelopers(isPublic = false) {
 
   try {
     const response = await axiosInstance.get(url);
-
     // Validate response data structure
     if (!response.data) {
       throw new Error("Invalid response format from server: missing response.data");
     }
 
+    let developersData;
+
     // Check if data is directly an array (response.data is array)
     if (Array.isArray(response.data)) {
-      return response.data;
+      developersData = response.data;
+    } else if (response.data.data && Array.isArray(response.data.data)) {
+      // Check if data is nested (response.data.data is array)
+      developersData = response.data.data;
+    } else {
+      // If neither structure matches, throw error
+      throw new Error(
+        `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+      );
     }
 
-    // Check if data is nested (response.data.data is array)
-    if (response.data.data) {
-      if (!Array.isArray(response.data.data)) {
-        throw new Error(
-          `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
-        );
-      }
-      return response.data.data;
-    }
-
-    // If neither structure matches, throw error
-    throw new Error(
-      `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
-    );
+    // console.log("=== API Response Data ===", developersData);
+    return developersData;
   } catch (error) {
     console.error("Failed to fetch developers data:", error.message);
+    console.error("Error details:", error);
     // Re-throw the error so TanStack Query can handle it properly
     throw error;
   }
