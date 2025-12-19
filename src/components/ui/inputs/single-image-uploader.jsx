@@ -1,7 +1,7 @@
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
-import { getMaxSizeBytes, getMaxSizeMB } from "@/config/imageUpload";
+import { getMaxSizeBytes, getMaxSizeMB, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
 import Cookies from "js-cookie";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -47,8 +47,8 @@ export default function SingleImageUploader({
       toast.error(`File size exceeds ${maxSizeMB}MB. Please select a smaller file.`);
       return;
     }
-    if (file && !["image/jpeg", "image/png"].includes(file.type)) {
-      toast.error("Invalid file type. Please select a JPEG or PNG image.");
+    if (file && !isSupportedImageFile(file)) {
+      toast.error(t?.invalidFileType || "Invalid file type. Please select a JPEG, PNG, or WEBP image.");
       return;
     }
 
@@ -120,7 +120,7 @@ export default function SingleImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg, image/png"
+        accept={SUPPORTED_IMAGE_ACCEPT}
         onChange={handleFileSelect}
         className="hidden"
         disabled={disabled || isUploading || uploading}

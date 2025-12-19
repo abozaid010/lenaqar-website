@@ -153,11 +153,16 @@ export async function fetchCitisAndProjects() {
   try {
     const response = await axiosInstance.get("/projects/cities-and-districts");
 
+    // Validate response structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server: missing response.data.data");
+    }
+
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch units:", error.message);
-
-    return { error: error.message };
+    console.error("Failed to fetch cities and districts:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
   }
 }
 

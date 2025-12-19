@@ -9,6 +9,30 @@
 export const NORMAL_IMAGE_MAX_SIZE_MB = 6;
 export const MASTER_PLAN_IMAGE_MAX_SIZE_MB = 10;
 
+// Supported image MIME types
+export const SUPPORTED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+// Accept attribute value for file inputs
+export const SUPPORTED_IMAGE_ACCEPT = 'image/jpeg, image/png, image/webp';
+
+/**
+ * Check if a MIME type is a supported image type
+ * @param {string} mimeType - MIME type to check
+ * @returns {boolean} True if supported
+ */
+export const isSupportedImageMime = (mimeType) => {
+  return SUPPORTED_IMAGE_MIME_TYPES.includes(mimeType);
+};
+
+/**
+ * Check if a file is a supported image type
+ * @param {File} file - File object to check
+ * @returns {boolean} True if supported
+ */
+export const isSupportedImageFile = (file) => {
+  return file && isSupportedImageMime(file.type);
+};
+
 /**
  * Get the maximum file size in bytes for the given image type
  * @param {string} type - Image type: 'normal' | 'masterPlan' (default: 'normal')

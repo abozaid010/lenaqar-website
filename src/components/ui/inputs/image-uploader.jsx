@@ -4,7 +4,7 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
-import { getMaxSizeBytes } from "@/config/imageUpload";
+import { getMaxSizeBytes, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
 import Cookies from "js-cookie";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -63,7 +63,7 @@ export default function ImageUploader({
     const newSelectedImages = [];
     const newUploadStatus = { ...uploadStatus };
     for (const file of Array.from(files)) {
-      if (!file.type.match("image/jpeg") && !file.type.match("image/png")) {
+      if (!isSupportedImageFile(file)) {
         toast.error(t.invalidFileType);
         continue;
       }
@@ -317,7 +317,7 @@ export default function ImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg, image/png"
+        accept={SUPPORTED_IMAGE_ACCEPT}
         multiple
         onChange={handleFileSelect}
         className="hidden"

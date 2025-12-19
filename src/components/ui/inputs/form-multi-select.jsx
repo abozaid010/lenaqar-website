@@ -85,7 +85,7 @@ const FormMultiSelect = ({
       <div className="relative">
         <button
           type="button"
-          className={`block w-full rounded-md border py-1 px-2 bg-white focus:outline-none focus:ring-1 appearance-none text-left ${
+          className={`block w-full rounded-md border py-1 px-2 bg-white text-gray-900 focus:outline-none focus:ring-1 appearance-none text-left ${
             error
               ? "border-red-500 ring-red-500 text-red-500"
               : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"

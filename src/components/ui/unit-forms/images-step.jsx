@@ -71,7 +71,7 @@ export default function ImagesStep({
               name="furnishing"
               value={formData.furnishing}
               onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+              className={`block w-full rounded-md border py-1 px-3 bg-white text-gray-900 focus:outline-none focus:ring-1 appearance-none ${
                 invalidFields.includes("furnishing")
                   ? "border-red-500 ring-red-500"
                   : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -116,7 +116,7 @@ export default function ImagesStep({
                 name="developer"
                 value={formData.developer}
                 onChange={handleChange}
-                className={`block w-full rounded-md border py-1 px-3 bg-white focus:outline-none focus:ring-1 appearance-none ${
+                className={`block w-full rounded-md border py-1 px-3 bg-white text-gray-900 focus:outline-none focus:ring-1 appearance-none ${
                   invalidFields.includes("developer")
                     ? "border-red-500 ring-red-500"
                     : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"

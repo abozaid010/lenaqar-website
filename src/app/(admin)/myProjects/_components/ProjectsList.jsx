@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useCompounds } from "@/hooks/use-admin-shared-data";
+import { useCompounds, useCitiesAndDistricts } from "@/hooks/use-admin-shared-data";
 import {
   Clock,
   CreditCard,
@@ -10,6 +10,8 @@ import {
   Plus,
   Tag,
   Trash2,
+  ChevronDown,
+  X,
 } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
@@ -25,7 +27,7 @@ import { BUILDING_TYPES } from "@/data/constants";
 import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { filterBySearchQuery } from "@/utils/search-utils";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -111,6 +113,11 @@ export default function ProjectsList({ clientId }) {
     refetch,
     isFetching,
   } = useCompounds(clientId);
+  const {
+    data: citiesData,
+    isLoading: citiesLoading,
+    isError: citiesError,
+  } = useCitiesAndDistricts();
   const { t, locale } = useI18n();
 
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
@@ -135,6 +142,18 @@ export default function ProjectsList({ clientId }) {
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
+  
+  // City filter state
+  const cities = citiesData?.cities || [];
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
+
+  // Initialize selectedCities with all cities when cities data loads
+  useEffect(() => {
+    if (cities.length > 0 && selectedCities.length === 0) {
+      setSelectedCities([...cities]);
+    }
+  }, [cities, selectedCities.length]);
 
   useEffect(() => {
     if (!isLoading && !isError && compounds) {
@@ -162,10 +181,21 @@ export default function ProjectsList({ clientId }) {
         });
       });
 
+      // Filter by city if cities are selected
+      let cityFiltered = sorted;
+      if (selectedCities.length > 0 && selectedCities.length < cities.length) {
+        cityFiltered = sorted.filter((project) => {
+          const projectCity = project.city?.toLowerCase() || "";
+          return selectedCities.some(
+            (city) => city.toLowerCase() === projectCity
+          );
+        });
+      }
+
       // Filter by search query if provided
       const filtered = searchQuery
-        ? filterBySearchQuery(sorted, searchQuery, ["ar_name", "en_name"])
-        : sorted;
+        ? filterBySearchQuery(cityFiltered, searchQuery, ["ar_name", "en_name"])
+        : cityFiltered;
 
       setProjectList(filtered);
       
@@ -174,7 +204,7 @@ export default function ProjectsList({ clientId }) {
         setSelectedProject(filtered[0]);
       }
     }
-  }, [isLoading, isError, compounds, locale, searchQuery]);
+  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, cities]);
 
   // Update selected project if it's not in the filtered list
   useEffect(() => {
@@ -335,6 +365,54 @@ export default function ProjectsList({ clientId }) {
     }
   };
 
+  // City filter handlers
+  const cityFilterRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        cityFilterRef.current &&
+        !cityFilterRef.current.contains(event.target)
+      ) {
+        setIsCityFilterOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleCityToggle = (city) => {
+    if (selectedCities.includes(city)) {
+      setSelectedCities(selectedCities.filter((c) => c !== city));
+    } else {
+      setSelectedCities([...selectedCities, city]);
+    }
+  };
+
+  const handleSelectAllCities = () => {
+    if (selectedCities.length === cities.length) {
+      setSelectedCities([]);
+    } else {
+      setSelectedCities([...cities]);
+    }
+  };
+
+  const getCityFilterDisplayText = () => {
+    if (selectedCities.length === 0) {
+      return locale === "ar" ? "جميع المدن" : "All Cities";
+    }
+    if (selectedCities.length === cities.length) {
+      return locale === "ar" ? "جميع المدن" : "All Cities";
+    }
+    if (selectedCities.length === 1) {
+      return formatCityLabel(capitalize(selectedCities[0]), locale);
+    }
+    return locale === "ar"
+      ? `${selectedCities.length} مدن`
+      : `${selectedCities.length} Cities`;
+  };
+
   return (
     <>
       {showProjectDialog && (
@@ -394,6 +472,70 @@ export default function ProjectsList({ clientId }) {
                   variant="white"
                   className="w-full"
                 />
+                {/* City Filter */}
+                {cities.length > 0 && (
+                  <div className="relative" ref={cityFilterRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsCityFilterOpen(!isCityFilterOpen)}
+                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[150px] justify-between"
+                    >
+                      <span className="text-sm font-medium truncate">
+                        {getCityFilterDisplayText()}
+                      </span>
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform ${
+                          isCityFilterOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {isCityFilterOpen && (
+                      <div className="absolute z-50 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                        <div className="p-3 border-b border-gray-200 sticky top-0 bg-white">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-sm font-semibold text-gray-700">
+                              {locale === "ar" ? "تصفية حسب المدينة" : "Filter by City"}
+                            </h3>
+                            <button
+                              onClick={handleSelectAllCities}
+                              className="text-xs text-primary hover:underline"
+                            >
+                              {selectedCities.length === cities.length
+                                ? locale === "ar"
+                                  ? "إلغاء الكل"
+                                  : "Clear All"
+                                : locale === "ar"
+                                ? "تحديد الكل"
+                                : "Select All"}
+                            </button>
+                          </div>
+                        </div>
+                        <div className="p-2">
+                          {cities.map((city) => {
+                            const isSelected = selectedCities.includes(city);
+                            return (
+                              <label
+                                key={city}
+                                className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleCityToggle(city)}
+                                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                />
+                                <span className="text-sm text-gray-700 flex-1">
+                                  {formatCityLabel(capitalize(city), locale)}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
