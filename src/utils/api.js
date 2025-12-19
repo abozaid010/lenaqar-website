@@ -93,7 +93,15 @@ export async function fetchDevelopers(isPublic = false) {
         `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
       );
     }
-
+    // Sort developersData by name according to app language: ar_name if Arabic, else en_name
+    const lang = typeof window !== "undefined" && window.localStorage
+      ? window.localStorage.getItem("lang")
+      : "en";
+    developersData.sort((a, b) => {
+      const nameA = (lang === "ar" ? a.ar_name : a.en_name) || "";
+      const nameB = (lang === "ar" ? b.ar_name : b.en_name) || "";
+      return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", { sensitivity: "base" });
+    });
     // console.log("=== API Response Data ===", developersData);
     return developersData;
   } catch (error) {
