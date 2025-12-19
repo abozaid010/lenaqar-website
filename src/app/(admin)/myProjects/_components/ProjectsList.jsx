@@ -146,9 +146,18 @@ export default function ProjectsList({ clientId }) {
 
       // Sort compounds
       const sorted = [...compounds].sort((a, b) => {
-        const nameA = locale === "ar" ? a.ar_name : a.en_name;
-        const nameB = locale === "ar" ? b.ar_name : b.en_name;
-        return nameA.trim().localeCompare(nameB.trim(), locale, {
+        const rawA =
+          (locale === "ar" ? a?.ar_name : a?.en_name) ??
+          (locale === "ar" ? a?.en_name : a?.ar_name) ??
+          "";
+        const rawB =
+          (locale === "ar" ? b?.ar_name : b?.en_name) ??
+          (locale === "ar" ? b?.en_name : b?.ar_name) ??
+          "";
+
+        const nameA = String(rawA).trim();
+        const nameB = String(rawB).trim();
+        return nameA.localeCompare(nameB, locale, {
           sensitivity: "base",
         });
       });
@@ -470,7 +479,9 @@ export default function ProjectsList({ clientId }) {
                           : "text-gray-800"
                       }`}
                     >
-                      {locale === "ar" ? project.ar_name : project.en_name}
+                      {(locale === "ar"
+                        ? project?.ar_name ?? project?.en_name
+                        : project?.en_name ?? project?.ar_name) ?? ""}
                     </h3>
                     <div
                       className={`flex items-center space-x-4 text-sm mb-2 ${
