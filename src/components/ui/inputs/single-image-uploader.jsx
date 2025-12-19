@@ -1,6 +1,7 @@
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
+import { getMaxSizeBytes, getMaxSizeMB } from "@/config/imageUpload";
 import Cookies from "js-cookie";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -16,6 +17,7 @@ export default function SingleImageUploader({
   uploading = false,
   setUploading,
   placeholder,
+  imageType = 'normal', // 'normal' | 'masterPlan'
 }) {
   const clinetId = Cookies.get("lena-website-client_id") || "";
 
@@ -38,8 +40,11 @@ export default function SingleImageUploader({
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
 
-    if (file && file.size > 5 * 1024 * 1024) {
-      toast.error("File size exceeds 5MB. Please select a smaller file.");
+    const maxSizeBytes = getMaxSizeBytes(imageType);
+    const maxSizeMB = getMaxSizeMB(imageType);
+
+    if (file && file.size > maxSizeBytes) {
+      toast.error(`File size exceeds ${maxSizeMB}MB. Please select a smaller file.`);
       return;
     }
     if (file && !["image/jpeg", "image/png"].includes(file.type)) {
@@ -209,7 +214,7 @@ export default function SingleImageUploader({
             </p>
             <p className="text-xs text-gray-500">
               {t?.formLabels?.supportedFormats ||
-                "Supported formats: JPG or PNG (Max 5MB each)"}
+                `Supported formats: JPG or PNG (Max ${getMaxSizeMB(imageType)}MB each)`}
             </p>
           </div>
         )}

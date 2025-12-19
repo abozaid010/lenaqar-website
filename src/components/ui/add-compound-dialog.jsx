@@ -615,6 +615,7 @@ export default function AddCompoundDialog({
               disabled={isMasterPlanUploading || isSubmitting}
               isUploading={isMasterPlanUploading}
               setIsUploading={setIsMasterPlanUploading}
+              imageType="masterPlan"
             />
 
             {/* Project Images */}

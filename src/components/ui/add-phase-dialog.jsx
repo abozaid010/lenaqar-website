@@ -215,6 +215,7 @@ export default function AddPhseDilog({
             disabled={isMasterPlanUploading || isSubmitting}
             isUploading={isMasterPlanUploading}
             setIsUploading={setIsMasterPlanUploading}
+            imageType="masterPlan"
           />
 
           {/* Phase Images */}

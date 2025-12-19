@@ -1,8 +1,10 @@
+import { getSizeLimitForServer } from './src/config/imageUpload.js';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: '5mb',
+      bodySizeLimit: getSizeLimitForServer(),
     },
   },
   // Add better error handling and performance optimizations

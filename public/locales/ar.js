@@ -721,7 +721,7 @@ export default {
   maximum: "الحد الأقصى",
   clickOrDragAndDrop: "انقر أو اسحب وأفلت الصور هنا",
   supportedFormats:
-    "الصيغ المدعومة: JPG، PNG (الحد الأقصى 5 ميجابايت لكل صورة)",
+    "الصيغ المدعومة: JPG، PNG (الحد الأقصى 10 ميجابايت لكل صورة)",
   uploading: "جارٍ التحميل...",
   upload: "تحميل",
   selectedImage: "صورة محددة",
@@ -942,7 +942,7 @@ export default {
     selectedImage: "الصورة المختارة",
     dragDropImage: "انقر أو اسحب وأفلت صورة هنا",
     supportedFormats:
-      "الصيغ المدعومة: JPG، PNG (الحد الأقصى 5 ميجابايت لكل منها)",
+      "الصيغ المدعومة: JPG، PNG (الحد الأقصى 10 ميجابايت لكل منها)",
     unitTitle: "عنوان الوحدة",
     buildingType: "نوع المبنى",
     purpose: "الغرض",

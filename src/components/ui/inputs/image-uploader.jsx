@@ -4,6 +4,7 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
+import { getMaxSizeBytes } from "@/config/imageUpload";
 import Cookies from "js-cookie";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -66,7 +67,7 @@ export default function ImageUploader({
         toast.error(t.invalidFileType);
         continue;
       }
-      if (file.size > 5 * 1024 * 1024) {
+      if (file.size > getMaxSizeBytes('normal')) {
         toast.error(`${file.name}_${t.fileSizeExceeds}`);
         continue;
       }
