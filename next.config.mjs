@@ -1,4 +1,5 @@
-import { getSizeLimitForServer } from './src/config/imageUpload.js';
+import pkg from './src/config/imageUpload.js';
+const { getSizeLimitForServer } = pkg;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
