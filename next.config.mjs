@@ -1,11 +1,10 @@
-import pkg from './src/config/imageUpload.js';
-const { getSizeLimitForServer } = pkg;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
     serverActions: {
-      bodySizeLimit: getSizeLimitForServer(),
+      // Body size limit for server actions (matches max image upload size in src/config/imageUpload.js)
+      bodySizeLimit: '10mb',
     },
   },
   // Add better error handling and performance optimizations
