@@ -223,10 +223,10 @@ export default function AddCompoundDialog({
     if (!formData.description.trim()) {
       newErrors.description =
         t.formValidation?.descriptionRequired || "Description is required";
-    } else if (formData.description.trim().length < 300) {
+    } else if (formData.description.trim().length < 30) {
       newErrors.description =
         t.formValidation?.descriptionMinLength ||
-        "Description must be at least 300 characters";
+        "Description must be at least 30 characters";
     } else if (formData.description.trim().length > 1200) {
       newErrors.description =
         t.formValidation?.descriptionMaxLength ||
@@ -407,7 +407,7 @@ export default function AddCompoundDialog({
                 {t.formLabels?.description || "Description"}{" "}
                 <span className="text-red-500">*</span>
                 <span className="text-xs text-gray-500 ml-2">
-                  ({formData.description.length}/300-1200)
+                  ({formData.description.length}/30-1200)
                 </span>
               </label>
               <textarea
