@@ -7,18 +7,23 @@ import { safeMergeParams } from "./safeJsonParser";
 export async function fetchUsersData(searchParams) {
 
   try {
-    const params = safeMergeParams(searchParams, { limit: 16 });
+    const params = safeMergeParams(searchParams, { limit: 20 });
 
     const response = await axiosInstance.get(`messages/all`, {
       params,
     });
 
-    // Validate that users is an array
-    if (!response.data.users) {
-      throw new Error("Expected users array but received invalid data format");
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
     }
 
-    return response.data;
+    // Validate that users is an array
+    if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
+      throw new Error("Expected users array but received invalid data format");
+    }
+    console.log("=== API Response Data ===", response.data.data);
+    return response.data.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
     // Re-throw the error so TanStack Query can handle it properly
