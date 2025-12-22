@@ -26,7 +26,7 @@ export default function BotMessageCard({ message }) {
   const { t } = useI18n();
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
-      {bot_response && <div className="text-sm">{bot_response}</div>}
+      {bot_response && <div className="text-sm text-primary">{bot_response}</div>}
 
       {propertiesItems?.length > 0 &&
         propertiesItems.map((itm, idx) => (
