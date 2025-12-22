@@ -16,8 +16,8 @@ export function useUsersData(searchParams) {
   });
 
   return {
-    data: unitsQuery.data?.data?.users || [],
-    pagination: unitsQuery.data?.data?.pagination || null,
+    data: unitsQuery.data?.users || [],
+    pagination: unitsQuery.data?.pagination || null,
     isLoading: unitsQuery.isLoading,
     isError: unitsQuery.isError,
     error: unitsQuery.error,

@@ -5,28 +5,17 @@ import Cookies from "js-cookie";
 import { safeMergeParams } from "./safeJsonParser";
 
 export async function fetchUsersData(searchParams) {
-  const clientId = getClientid();
 
   try {
     const params = safeMergeParams(searchParams, { limit: 16 });
 
-    const response = await axiosInstance.get(`dashboard/${clientId}`, {
+    const response = await axiosInstance.get(`messages/all`, {
       params,
     });
 
-    // Validate response data structure
-    if (!response.data || !response.data.data) {
-      throw new Error("Invalid response format from server");
-    }
-
     // Validate that users is an array
-    if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
+    if (!response.data.users) {
       throw new Error("Expected users array but received invalid data format");
-    }
-
-    // Validate pagination exists (optional but good to check)
-    if (response.data.data.pagination === undefined) {
-      console.warn("Pagination data missing in response");
     }
 
     return response.data;
@@ -550,11 +539,9 @@ export async function resetUnreadMessagesCount(userId) {
 }
 
 export async function getChatHistory(userId) {
-  const cookieClientId = getClientid();
-
   try {
     const response = await axiosInstance.get(
-      `/messages/messages/${cookieClientId}/${userId}`
+      `/messages/conversation/${userId}`
     );
     return response.data;
   } catch (error) {
