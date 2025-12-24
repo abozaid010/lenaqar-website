@@ -16,6 +16,11 @@ import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import {
+  VALIDATED_KEYS,
+  excelFieldMapper,
+  createHeaderMapping,
+} from "@/utils/excel-field-mapper";
 
 const downloadTemplateFile = () => {
   const link = document.createElement("a");
@@ -23,6 +28,7 @@ const downloadTemplateFile = () => {
   link.download = "unit_upload_template.xlsx";
   link.click();
 };
+
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
@@ -32,6 +38,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState([]);
+  const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
+  const [missingColumns, setMissingColumns] = useState([]);
   const fileInputRef = useRef(null);
 
   const clientId = Cookies.get("lena-website-client_id") || null;
@@ -74,11 +82,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       });
 
-      // Transform rows to structured JSON
+      // Create header mapping to canonical keys
+      const headerMapping = createHeaderMapping(headers);
+
+      // Transform rows to structured JSON using canonical keys
       const units = rows.map((row) => {
         const unit = {};
 
-        // Map each column to the unit object
+        // Map each column to the unit object using canonical keys
         headers.forEach((header, colIndex) => {
           const value = row[colIndex];
 
@@ -87,7 +98,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             return;
           }
 
-          unit[header] = value;
+          // Use canonical key if mapping exists, otherwise use original header
+          const canonicalKey = headerMapping[header] || header;
+          unit[canonicalKey] = value;
         });
 
         return unit;
@@ -179,6 +192,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
       setParsedData({
         headers,
+        headerMapping, // Store mapping for validation and preview
         rows,
         units: transformedUnits,
         summary: {
@@ -235,9 +249,25 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     }
   };
 
+  const getMissingColumns = () => {
+    if (!parsedData) return [];
+    const headers = parsedData.headers || [];
+    
+    // Use the utility class to get missing keys
+    return excelFieldMapper.getMissingKeys(headers, VALIDATED_KEYS);
+  };
+
   const handleSubmit = async () => {
     if (!selectedFile || !parsedData) {
       alert(t.uploadExcel?.noFileSelected || "Please select a file first");
+      return;
+    }
+
+    // Check for missing columns
+    const missing = getMissingColumns();
+    if (missing.length > 0) {
+      setMissingColumns(missing);
+      setShowMissingColumnsWarning(true);
       return;
     }
 
@@ -360,7 +390,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               />
 
               {!selectedFile ? (
-                <div className="space-y-4">
+                <div 
+                  onClick={handleUploadClick}
+                  className="space-y-4 cursor-pointer"
+                >
                   <div className="flex justify-center">
                     <Upload size={48} className="text-gray-400" />
                   </div>
@@ -372,12 +405,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="flex items-center justify-center gap-3">
                       <button
                         onClick={handleUploadClick}
-                        className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                        className="px-12 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
                       >
                         {t.uploadExcel?.browseFiles || "Browse Files"}
                       </button>
                       <button
-                        onClick={downloadTemplateFile}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadTemplateFile();
+                        }}
                         className="px-6 py-2 bg-green-600 text-white rounded-md hover:opacity-90 transition-opacity flex items-center gap-2"
                       >
                         <Download size={18} />
@@ -480,19 +516,65 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             )}
 
             {/* Preview Table */}
-            {parsedData && !isProcessing && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-800">
-                    {t.uploadExcel?.preview || "Preview"} (
-                    {parsedData.summary.totalUnits}{" "}
-                    {t.uploadExcel?.units || "units"})
-                  </h3>
-                  <span className="text-sm text-gray-600">
-                    {t.uploadExcel?.worksheet || "Worksheet"}:{" "}
-                    {parsedData.summary.worksheetName}
-                  </span>
-                </div>
+            {parsedData && !isProcessing && (() => {
+              const headers = parsedData.headers || [];
+              const headerMapping = parsedData.headerMapping || {};
+              
+              // Get matched canonical keys
+              const matchedKeys = new Set(Object.values(headerMapping));
+              const foundKeys = VALIDATED_KEYS.filter((key) => matchedKeys.has(key));
+              const notFoundKeys = VALIDATED_KEYS.filter((key) => !matchedKeys.has(key));
+              
+              // Create reverse mapping: canonicalKey -> array of headers that matched it
+              const keyToHeaders = excelFieldMapper.createReverseMapping(headerMapping);
+
+              return (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        {t.uploadExcel?.preview || "Preview"} (
+                        {parsedData.summary.totalUnits}{" "}
+                        {t.uploadExcel?.units || "units"})
+                      </h3>
+                      <div className="space-y-1 mt-1">
+                        {foundKeys.length > 0 && (
+                          <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <CheckCircle className="text-green-600" size={14} />
+                              <span>Found:</span>
+                            </span>
+                            <span className="flex flex-wrap gap-x-2">
+                              {foundKeys.map((key) => {
+                                const matchedHeaders = keyToHeaders[key] || [];
+                                const displayText = matchedHeaders.length > 0
+                                  ? `${key} (from: ${matchedHeaders.join(", ")})`
+                                  : key;
+                                return (
+                                  <span key={key} className="whitespace-nowrap">
+                                    {displayText}
+                                  </span>
+                                );
+                              })}
+                            </span>
+                          </div>
+                        )}
+                        {notFoundKeys.length > 0 && (
+                          <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <XCircle className="text-red-600" size={14} />
+                              <span>Not found:</span>
+                            </span>
+                            <span>{notFoundKeys.join(", ")}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {t.uploadExcel?.worksheet || "Worksheet"}:{" "}
+                      {parsedData.summary.worksheetName}
+                    </span>
+                  </div>
 
                 <div className="border rounded-lg overflow-hidden" dir="ltr">
                   <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
@@ -557,8 +639,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </pre>
                   </div>
                 </details>
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {/* Upload Status */}
             {uploadStatus.length > 0 && (
@@ -704,6 +787,48 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Missing Columns Warning Dialog */}
+      {showMissingColumnsWarning && (
+        <div className="fixed inset-0 z-[101] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between py-4 px-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {t.uploadExcel?.title || "Upload Units Excel Sheet"}
+              </h3>
+              <button
+                onClick={() => setShowMissingColumnsWarning(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-700 mb-4">
+                {t.uploadExcel?.missingColumnsWarning || "Make sure sheet contains these missing values before you upload:"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {missingColumns.map((key) => (
+                  <span
+                    key={key}
+                    className="px-3 py-1 bg-red-50 text-red-700 rounded-md text-sm font-medium"
+                  >
+                    {key}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-end px-6 py-4 border-t bg-gray-50">
+              <button
+                onClick={() => setShowMissingColumnsWarning(false)}
+                className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                {t.uploadExcel?.gotIt || "Got it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

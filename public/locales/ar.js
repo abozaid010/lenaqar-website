@@ -449,6 +449,8 @@ export default {
     success: "نجح",
     failed: "فشل",
     successful: "ناجح",
+    missingColumnsWarning: "تأكد من أن الورقة تحتوي على هذه القيم المفقودة قبل الرفع:",
+    gotIt: "حسناً",
   },
   steps: {
     basicDetails: "التفاصيل الأساسية",
