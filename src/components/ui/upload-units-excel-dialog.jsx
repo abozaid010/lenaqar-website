@@ -24,6 +24,25 @@ const downloadTemplateFile = () => {
   link.click();
 };
 
+const VALIDATED_KEYS = [
+  "buildingType",
+  "project",
+  "view",
+  "unitTitle",
+  "bathroomCount",
+  "floor",
+  "roomsCount",
+  "landArea",
+  "gardenSize",
+  "finishing",
+  "furnishing",
+  "garageArea",
+  "model",
+  "downPayment",
+  "totalPrice",
+  "deliveryDate",
+];
+
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
   const [selectedFile, setSelectedFile] = useState(null);
@@ -480,19 +499,56 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             )}
 
             {/* Preview Table */}
-            {parsedData && !isProcessing && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-800">
-                    {t.uploadExcel?.preview || "Preview"} (
-                    {parsedData.summary.totalUnits}{" "}
-                    {t.uploadExcel?.units || "units"})
-                  </h3>
-                  <span className="text-sm text-gray-600">
-                    {t.uploadExcel?.worksheet || "Worksheet"}:{" "}
-                    {parsedData.summary.worksheetName}
-                  </span>
-                </div>
+            {parsedData && !isProcessing && (() => {
+              const headers = parsedData.headers || [];
+              // Convert headers to lowercase for case-insensitive comparison
+              const headersLower = headers.map((h) => String(h).toLowerCase().trim());
+              
+              const foundKeys = VALIDATED_KEYS.filter((key) => {
+                const keyLower = key.toLowerCase();
+                return headersLower.includes(keyLower);
+              });
+              
+              const notFoundKeys = VALIDATED_KEYS.filter((key) => {
+                const keyLower = key.toLowerCase();
+                return !headersLower.includes(keyLower);
+              });
+
+              return (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold text-gray-800">
+                        {t.uploadExcel?.preview || "Preview"} (
+                        {parsedData.summary.totalUnits}{" "}
+                        {t.uploadExcel?.units || "units"})
+                      </h3>
+                      <div className="space-y-1 mt-1">
+                        {foundKeys.length > 0 && (
+                          <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <CheckCircle className="text-green-600" size={14} />
+                              <span>Found:</span>
+                            </span>
+                            <span>{foundKeys.join(", ")}</span>
+                          </div>
+                        )}
+                        {notFoundKeys.length > 0 && (
+                          <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <XCircle className="text-red-600" size={14} />
+                              <span>Not found:</span>
+                            </span>
+                            <span>{notFoundKeys.join(", ")}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {t.uploadExcel?.worksheet || "Worksheet"}:{" "}
+                      {parsedData.summary.worksheetName}
+                    </span>
+                  </div>
 
                 <div className="border rounded-lg overflow-hidden" dir="ltr">
                   <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
@@ -557,8 +613,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </pre>
                   </div>
                 </details>
-              </div>
-            )}
+                </div>
+              );
+            })()}
 
             {/* Upload Status */}
             {uploadStatus.length > 0 && (
