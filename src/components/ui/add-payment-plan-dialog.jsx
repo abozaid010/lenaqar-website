@@ -26,11 +26,8 @@ export default function AddPaymentPlanDialog({
     reservation_amount_percentage: "",
     installment_years: "",
     maintenance_fee: "",
-    installment_increasing_percentage: "",
-    extra_payments: {
-      delivery_fee: "",
-      contract_fee: "",
-    },
+    installment_increasing_percentage: "0",
+    is_default: false,
   });
 
   useEffect(() => {
@@ -52,17 +49,13 @@ export default function AddPaymentPlanDialog({
             ? (existingPlan.maintenance_fee * 100).toString()
             : "",
           installment_increasing_percentage:
-            existingPlan.installment_increasing_percentage
+            existingPlan.installment_increasing_percentage !== undefined &&
+            existingPlan.installment_increasing_percentage !== null
               ? (
                   existingPlan.installment_increasing_percentage * 100
                 ).toString()
-              : "",
-          extra_payments: {
-            delivery_fee: existingPlan.extra_payments?.delivery_fee
-              ? (existingPlan.extra_payments.delivery_fee * 100).toString()
-              : "",
-            contract_fee: existingPlan.extra_payments?.contract_fee || "",
-          },
+              : "0",
+          is_default: existingPlan.is_default || false,
         });
       } else {
         // Reset form with empty values for all fields
@@ -73,11 +66,8 @@ export default function AddPaymentPlanDialog({
           reservation_amount_percentage: "",
           installment_years: "",
           maintenance_fee: "",
-          installment_increasing_percentage: "",
-          extra_payments: {
-            delivery_fee: "",
-            contract_fee: "",
-          },
+          installment_increasing_percentage: "0",
+          is_default: false,
         });
       }
       setErrors({});
@@ -85,7 +75,7 @@ export default function AddPaymentPlanDialog({
   }, [isOpen, editMode, existingPlan]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     // Check if this is a percentage field that needs range validation
     const percentageFields = [
@@ -93,7 +83,6 @@ export default function AddPaymentPlanDialog({
       "reservation_amount_percentage",
       "maintenance_fee",
       "installment_increasing_percentage",
-      "extra_payments.delivery_fee",
     ];
 
     // Validate percentage inputs to stay within 0-100 range
@@ -111,35 +100,11 @@ export default function AddPaymentPlanDialog({
       }
     }
 
-    // Handle nested extra_payments properties
-    if (name.startsWith("extra_payments.")) {
-      const extraPaymentField = name.split(".")[1];
-
-      // Special handling for percentage fields in extra_payments
-      if (extraPaymentField === "delivery_fee" && value !== "") {
-        const numValue = parseFloat(value);
-        if (isNaN(numValue) || numValue < 0 || numValue > 100) {
-          // Allow only empty string, decimal point, or 0.
-          if (value !== "" && value !== "." && value !== "0.") {
-            return; // Exit without updating state
-          }
-        }
-      }
-
-      setFormData({
-        ...formData,
-        extra_payments: {
-          ...formData.extra_payments,
-          [extraPaymentField]: value,
-        },
-      });
-    } else {
-      // Handle regular fields
-      setFormData({
-        ...formData,
-        [name]: value,
-      });
-    }
+    // Handle regular fields (including checkbox for is_default)
+    setFormData({
+      ...formData,
+      [name]: type === "checkbox" ? checked : value,
+    });
 
     // Clear error for this field when user types
     if (errors[name]) {
@@ -180,37 +145,6 @@ export default function AddPaymentPlanDialog({
       }
     });
 
-    // Validate delivery fee percentage only if provided
-    if (
-      formData.extra_payments &&
-      formData.extra_payments.delivery_fee !== undefined &&
-      formData.extra_payments.delivery_fee !== ""
-    ) {
-      const deliveryFee = parseFloat(formData.extra_payments.delivery_fee);
-      if (isNaN(deliveryFee)) {
-        newErrors["extra_payments.delivery_fee"] =
-          t.formValidation?.percentageInvalid ||
-          "Delivery fee must be a valid number";
-      } else if (deliveryFee < 0 || deliveryFee > 100) {
-        newErrors["extra_payments.delivery_fee"] =
-          t.formValidation?.percentageInvalid ||
-          "Delivery fee must be between 0 and 100";
-      }
-    }
-
-    // Validate contract fee is a positive number only if provided
-    if (
-      formData.extra_payments &&
-      formData.extra_payments.contract_fee !== undefined &&
-      formData.extra_payments.contract_fee !== ""
-    ) {
-      const contractFee = parseFloat(formData.extra_payments.contract_fee);
-      if (isNaN(contractFee) || contractFee < 0) {
-        newErrors["extra_payments.contract_fee"] =
-          "Contract fee must be a positive number";
-      }
-    }
-
     // Validate installment years is a positive integer
     const installmentYears = parseInt(formData.installment_years);
     if (
@@ -245,7 +179,8 @@ export default function AddPaymentPlanDialog({
     try {
       // Convert string values to numbers and convert percentages from 0-100 to 0-1
       const processedData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
         reservation_amount_percentage:
@@ -253,30 +188,12 @@ export default function AddPaymentPlanDialog({
         installment_years: parseInt(formData.installment_years),
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
         installment_increasing_percentage:
-          parseFloat(formData.installment_increasing_percentage) / 100,
+          formData.installment_increasing_percentage === "" ||
+          isNaN(parseFloat(formData.installment_increasing_percentage))
+            ? 0
+            : parseFloat(formData.installment_increasing_percentage) / 100,
+        is_default: formData.is_default,
       };
-
-      // Handle extra_payments if they exist
-      if (formData.extra_payments) {
-        processedData.extra_payments = {};
-
-        if (
-          formData.extra_payments.delivery_fee !== undefined &&
-          formData.extra_payments.delivery_fee !== ""
-        ) {
-          processedData.extra_payments.delivery_fee =
-            parseFloat(formData.extra_payments.delivery_fee) / 100; // Convert from 0-100 to 0-1
-        }
-
-        if (
-          formData.extra_payments.contract_fee !== undefined &&
-          formData.extra_payments.contract_fee !== ""
-        ) {
-          processedData.extra_payments.contract_fee = parseFloat(
-            formData.extra_payments.contract_fee
-          );
-        }
-      }
 
       onSave(processedData, editMode);
       onClose();
@@ -407,7 +324,7 @@ export default function AddPaymentPlanDialog({
             t.formLabels?.installmentIncreaseRate ||
             "Annual Installment Increase Rate (%)"
           }
-          value={formData.installment_increasing_percentage}
+          value={formData.installment_increasing_percentage || "0"}
           onChange={handleChange}
           required
           placeholder="0"
@@ -418,35 +335,21 @@ export default function AddPaymentPlanDialog({
         />
 
         <div className="pt-2 border-t border-gray-100">
-          <h3 className="text-sm font-medium mb-2">
-            {t.formLabels?.extraPayments || "Extra Payments"}{" "}
-            <span className="text-xs text-gray-500">(Optional)</span>
-          </h3>
-
-          <div className="grid grid-cols-2 gap-1.5">
-            <FormInput
-              type="number"
-              name="extra_payments.delivery_fee"
-              label={t.formLabels?.deliveryFee || "Delivery Fee (%)"}
-              value={formData.extra_payments.delivery_fee}
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="is_default"
+              name="is_default"
+              checked={formData.is_default}
               onChange={handleChange}
-              placeholder="10"
-              min="0"
-              max="100"
-              step="0.1"
-              error={errors["extra_payments.delivery_fee"]}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-
-            <FormInput
-              type="number"
-              name="extra_payments.contract_fee"
-              label={t.formLabels?.contractFee || "Contract Fee (EGP)"}
-              value={formData.extra_payments.contract_fee}
-              onChange={handleChange}
-              placeholder="5000"
-              min="0"
-              error={errors["extra_payments.contract_fee"]}
-            />
+            <label
+              htmlFor="is_default"
+              className="block text-sm font-medium text-gray-700"
+            >
+              {t.formLabels?.defaultPaymentPlan || "Set as Default Payment Plan"}
+            </label>
           </div>
         </div>
 

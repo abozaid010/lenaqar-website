@@ -47,6 +47,21 @@ export default function PaymentPlansList({
       newPlans = [...plans, plan];
     }
 
+    // Ensure only one payment plan can be default at a time
+    if (plan.is_default === true) {
+      newPlans = newPlans.map((p, index) => {
+        // If this is the plan being saved, keep its is_default value
+        if (isEdit && index === editingIndex) {
+          return p;
+        }
+        if (!isEdit && index === newPlans.length - 1) {
+          return p;
+        }
+        // Otherwise, set is_default to false
+        return { ...p, is_default: false };
+      });
+    }
+
     onChange(newPlans);
   };
 
