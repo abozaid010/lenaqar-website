@@ -26,7 +26,7 @@ export default function AddPaymentPlanDialog({
     reservation_amount_percentage: "",
     installment_years: "",
     maintenance_fee: "",
-    installment_increasing_percentage: "0",
+    cache_discount: "0",
     is_default: false,
   });
 
@@ -48,12 +48,10 @@ export default function AddPaymentPlanDialog({
           maintenance_fee: existingPlan.maintenance_fee
             ? (existingPlan.maintenance_fee * 100).toString()
             : "",
-          installment_increasing_percentage:
-            existingPlan.installment_increasing_percentage !== undefined &&
-            existingPlan.installment_increasing_percentage !== null
-              ? (
-                  existingPlan.installment_increasing_percentage * 100
-                ).toString()
+          cache_discount:
+            existingPlan.cache_discount !== undefined &&
+            existingPlan.cache_discount !== null
+              ? (existingPlan.cache_discount * 100).toString()
               : "0",
           is_default: existingPlan.is_default || false,
         });
@@ -66,7 +64,7 @@ export default function AddPaymentPlanDialog({
           reservation_amount_percentage: "",
           installment_years: "",
           maintenance_fee: "",
-          installment_increasing_percentage: "0",
+          cache_discount: "0",
           is_default: false,
         });
       }
@@ -82,7 +80,7 @@ export default function AddPaymentPlanDialog({
       "downpayment_percentage",
       "reservation_amount_percentage",
       "maintenance_fee",
-      "installment_increasing_percentage",
+      "cache_discount",
     ];
 
     // Validate percentage inputs to stay within 0-100 range
@@ -129,7 +127,7 @@ export default function AddPaymentPlanDialog({
       "downpayment_percentage",
       "reservation_amount_percentage",
       "maintenance_fee",
-      "installment_increasing_percentage",
+      "cache_discount",
     ];
 
     percentageFields.forEach((field) => {
@@ -187,13 +185,18 @@ export default function AddPaymentPlanDialog({
           parseFloat(formData.reservation_amount_percentage) / 100,
         installment_years: parseInt(formData.installment_years),
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
-        installment_increasing_percentage:
-          formData.installment_increasing_percentage === "" ||
-          isNaN(parseFloat(formData.installment_increasing_percentage))
+        cache_discount:
+          formData.cache_discount === "" ||
+          isNaN(parseFloat(formData.cache_discount))
             ? 0
-            : parseFloat(formData.installment_increasing_percentage) / 100,
+            : parseFloat(formData.cache_discount) / 100,
         is_default: formData.is_default,
       };
+
+      // Add updated_at when updating a payment plan
+      if (editMode) {
+        processedData.updated_at = new Date().toISOString();
+      }
 
       onSave(processedData, editMode);
       onClose();
@@ -319,19 +322,19 @@ export default function AddPaymentPlanDialog({
 
         <FormInput
           type="number"
-          name="installment_increasing_percentage"
+          name="cache_discount"
           label={
-            t.formLabels?.installmentIncreaseRate ||
-            "Annual Installment Increase Rate (%)"
+            t.formLabels?.cacheDiscount ||
+            "Cache Discount (%)"
           }
-          value={formData.installment_increasing_percentage || "0"}
+          value={formData.cache_discount || "0"}
           onChange={handleChange}
           required
           placeholder="0"
           min="0"
           max="100"
           step="0.1"
-          error={errors.installment_increasing_percentage}
+          error={errors.cache_discount}
         />
 
         <div className="pt-2 border-t border-gray-100">
