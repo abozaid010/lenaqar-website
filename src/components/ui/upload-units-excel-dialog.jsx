@@ -16,6 +16,11 @@ import { useRef, useState } from "react";
 import * as XLSX from "xlsx";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import {
+  VALIDATED_KEYS,
+  excelFieldMapper,
+  createHeaderMapping,
+} from "@/utils/excel-field-mapper";
 
 const downloadTemplateFile = () => {
   const link = document.createElement("a");
@@ -24,24 +29,6 @@ const downloadTemplateFile = () => {
   link.click();
 };
 
-const VALIDATED_KEYS = [
-  "buildingType",
-  "project",
-  "view",
-  "unitTitle",
-  "bathroomCount",
-  "floor",
-  "roomsCount",
-  "landArea",
-  "gardenSize",
-  "finishing",
-  "furnishing",
-  "garageArea",
-  "model",
-  "downPayment",
-  "totalPrice",
-  "deliveryDate",
-];
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
@@ -95,11 +82,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       });
 
-      // Transform rows to structured JSON
+      // Create header mapping to canonical keys
+      const headerMapping = createHeaderMapping(headers);
+
+      // Transform rows to structured JSON using canonical keys
       const units = rows.map((row) => {
         const unit = {};
 
-        // Map each column to the unit object
+        // Map each column to the unit object using canonical keys
         headers.forEach((header, colIndex) => {
           const value = row[colIndex];
 
@@ -108,7 +98,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             return;
           }
 
-          unit[header] = value;
+          // Use canonical key if mapping exists, otherwise use original header
+          const canonicalKey = headerMapping[header] || header;
+          unit[canonicalKey] = value;
         });
 
         return unit;
@@ -200,6 +192,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
       setParsedData({
         headers,
+        headerMapping, // Store mapping for validation and preview
         rows,
         units: transformedUnits,
         summary: {
@@ -259,12 +252,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const getMissingColumns = () => {
     if (!parsedData) return [];
     const headers = parsedData.headers || [];
-    const headersLower = headers.map((h) => String(h).toLowerCase().trim());
     
-    return VALIDATED_KEYS.filter((key) => {
-      const keyLower = key.toLowerCase();
-      return !headersLower.includes(keyLower);
-    });
+    // Use the utility class to get missing keys
+    return excelFieldMapper.getMissingKeys(headers, VALIDATED_KEYS);
   };
 
   const handleSubmit = async () => {
@@ -522,18 +512,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             {/* Preview Table */}
             {parsedData && !isProcessing && (() => {
               const headers = parsedData.headers || [];
-              // Convert headers to lowercase for case-insensitive comparison
-              const headersLower = headers.map((h) => String(h).toLowerCase().trim());
+              const headerMapping = parsedData.headerMapping || {};
               
-              const foundKeys = VALIDATED_KEYS.filter((key) => {
-                const keyLower = key.toLowerCase();
-                return headersLower.includes(keyLower);
-              });
+              // Get matched canonical keys
+              const matchedKeys = new Set(Object.values(headerMapping));
+              const foundKeys = VALIDATED_KEYS.filter((key) => matchedKeys.has(key));
+              const notFoundKeys = VALIDATED_KEYS.filter((key) => !matchedKeys.has(key));
               
-              const notFoundKeys = VALIDATED_KEYS.filter((key) => {
-                const keyLower = key.toLowerCase();
-                return !headersLower.includes(keyLower);
-              });
+              // Create reverse mapping: canonicalKey -> array of headers that matched it
+              const keyToHeaders = excelFieldMapper.createReverseMapping(headerMapping);
 
               return (
                 <div className="space-y-4">
@@ -551,7 +538,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               <CheckCircle className="text-green-600" size={14} />
                               <span>Found:</span>
                             </span>
-                            <span>{foundKeys.join(", ")}</span>
+                            <span className="flex flex-wrap gap-x-2">
+                              {foundKeys.map((key) => {
+                                const matchedHeaders = keyToHeaders[key] || [];
+                                const displayText = matchedHeaders.length > 0
+                                  ? `${key} (from: ${matchedHeaders.join(", ")})`
+                                  : key;
+                                return (
+                                  <span key={key} className="whitespace-nowrap">
+                                    {displayText}
+                                  </span>
+                                );
+                              })}
+                            </span>
                           </div>
                         )}
                         {notFoundKeys.length > 0 && (
