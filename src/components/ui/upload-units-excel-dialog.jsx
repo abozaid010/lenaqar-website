@@ -51,6 +51,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState([]);
+  const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
+  const [missingColumns, setMissingColumns] = useState([]);
   const fileInputRef = useRef(null);
 
   const clientId = Cookies.get("lena-website-client_id") || null;
@@ -254,9 +256,28 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     }
   };
 
+  const getMissingColumns = () => {
+    if (!parsedData) return [];
+    const headers = parsedData.headers || [];
+    const headersLower = headers.map((h) => String(h).toLowerCase().trim());
+    
+    return VALIDATED_KEYS.filter((key) => {
+      const keyLower = key.toLowerCase();
+      return !headersLower.includes(keyLower);
+    });
+  };
+
   const handleSubmit = async () => {
     if (!selectedFile || !parsedData) {
       alert(t.uploadExcel?.noFileSelected || "Please select a file first");
+      return;
+    }
+
+    // Check for missing columns
+    const missing = getMissingColumns();
+    if (missing.length > 0) {
+      setMissingColumns(missing);
+      setShowMissingColumnsWarning(true);
       return;
     }
 
@@ -761,6 +782,48 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           </button>
         </div>
       </div>
+
+      {/* Missing Columns Warning Dialog */}
+      {showMissingColumnsWarning && (
+        <div className="fixed inset-0 z-[101] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between py-4 px-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-800">
+                {t.uploadExcel?.title || "Upload Units Excel Sheet"}
+              </h3>
+              <button
+                onClick={() => setShowMissingColumnsWarning(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-gray-700 mb-4">
+                {t.uploadExcel?.missingColumnsWarning || "Make sure sheet contains these missing values before you upload:"}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {missingColumns.map((key) => (
+                  <span
+                    key={key}
+                    className="px-3 py-1 bg-red-50 text-red-700 rounded-md text-sm font-medium"
+                  >
+                    {key}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center justify-end px-6 py-4 border-t bg-gray-50">
+              <button
+                onClick={() => setShowMissingColumnsWarning(false)}
+                className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                {t.uploadExcel?.gotIt || "Got it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -432,6 +432,8 @@ export default {
     success: "Success",
     failed: "Failed",
     successful: "Successful",
+    missingColumnsWarning: "Make sure sheet contains these missing values before you upload:",
+    gotIt: "Got it",
   },
   steps: {
     basicDetails: "Basic Details",
