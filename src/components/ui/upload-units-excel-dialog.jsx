@@ -390,7 +390,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               />
 
               {!selectedFile ? (
-                <div className="space-y-4">
+                <div 
+                  onClick={handleUploadClick}
+                  className="space-y-4 cursor-pointer"
+                >
                   <div className="flex justify-center">
                     <Upload size={48} className="text-gray-400" />
                   </div>
@@ -402,12 +405,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="flex items-center justify-center gap-3">
                       <button
                         onClick={handleUploadClick}
-                        className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                        className="px-12 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
                       >
                         {t.uploadExcel?.browseFiles || "Browse Files"}
                       </button>
                       <button
-                        onClick={downloadTemplateFile}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadTemplateFile();
+                        }}
                         className="px-6 py-2 bg-green-600 text-white rounded-md hover:opacity-90 transition-opacity flex items-center gap-2"
                       >
                         <Download size={18} />
