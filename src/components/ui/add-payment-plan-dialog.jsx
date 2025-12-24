@@ -27,9 +27,9 @@ export default function AddPaymentPlanDialog({
     installment_years: "",
     maintenance_fee: "",
     installment_increasing_percentage: "",
+    is_default: false,
     extra_payments: {
       delivery_fee: "",
-      contract_fee: "",
     },
   });
 
@@ -57,11 +57,11 @@ export default function AddPaymentPlanDialog({
                   existingPlan.installment_increasing_percentage * 100
                 ).toString()
               : "",
+          is_default: existingPlan.is_default || false,
           extra_payments: {
             delivery_fee: existingPlan.extra_payments?.delivery_fee
               ? (existingPlan.extra_payments.delivery_fee * 100).toString()
               : "",
-            contract_fee: existingPlan.extra_payments?.contract_fee || "",
           },
         });
       } else {
@@ -74,9 +74,9 @@ export default function AddPaymentPlanDialog({
           installment_years: "",
           maintenance_fee: "",
           installment_increasing_percentage: "",
+          is_default: false,
           extra_payments: {
             delivery_fee: "",
-            contract_fee: "",
           },
         });
       }
@@ -85,7 +85,7 @@ export default function AddPaymentPlanDialog({
   }, [isOpen, editMode, existingPlan]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     // Check if this is a percentage field that needs range validation
     const percentageFields = [
@@ -134,10 +134,10 @@ export default function AddPaymentPlanDialog({
         },
       });
     } else {
-      // Handle regular fields
+      // Handle regular fields (including checkbox for is_default)
       setFormData({
         ...formData,
-        [name]: value,
+        [name]: type === "checkbox" ? checked : value,
       });
     }
 
@@ -198,19 +198,6 @@ export default function AddPaymentPlanDialog({
       }
     }
 
-    // Validate contract fee is a positive number only if provided
-    if (
-      formData.extra_payments &&
-      formData.extra_payments.contract_fee !== undefined &&
-      formData.extra_payments.contract_fee !== ""
-    ) {
-      const contractFee = parseFloat(formData.extra_payments.contract_fee);
-      if (isNaN(contractFee) || contractFee < 0) {
-        newErrors["extra_payments.contract_fee"] =
-          "Contract fee must be a positive number";
-      }
-    }
-
     // Validate installment years is a positive integer
     const installmentYears = parseInt(formData.installment_years);
     if (
@@ -267,16 +254,10 @@ export default function AddPaymentPlanDialog({
           processedData.extra_payments.delivery_fee =
             parseFloat(formData.extra_payments.delivery_fee) / 100; // Convert from 0-100 to 0-1
         }
-
-        if (
-          formData.extra_payments.contract_fee !== undefined &&
-          formData.extra_payments.contract_fee !== ""
-        ) {
-          processedData.extra_payments.contract_fee = parseFloat(
-            formData.extra_payments.contract_fee
-          );
-        }
       }
+
+      // Include is_default in processedData
+      processedData.is_default = formData.is_default;
 
       onSave(processedData, editMode);
       onClose();
@@ -436,17 +417,25 @@ export default function AddPaymentPlanDialog({
               step="0.1"
               error={errors["extra_payments.delivery_fee"]}
             />
+          </div>
+        </div>
 
-            <FormInput
-              type="number"
-              name="extra_payments.contract_fee"
-              label={t.formLabels?.contractFee || "Contract Fee (EGP)"}
-              value={formData.extra_payments.contract_fee}
+        <div className="pt-2 border-t border-gray-100">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="is_default"
+              name="is_default"
+              checked={formData.is_default}
               onChange={handleChange}
-              placeholder="5000"
-              min="0"
-              error={errors["extra_payments.contract_fee"]}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
+            <label
+              htmlFor="is_default"
+              className="block text-sm font-medium text-gray-700"
+            >
+              {t.formLabels?.defaultPaymentPlan || "Set as Default Payment Plan"}
+            </label>
           </div>
         </div>
 
