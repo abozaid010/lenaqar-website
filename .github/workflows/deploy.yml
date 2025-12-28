@@ -1,4 +1,4 @@
-name: Auto Deploy to GCP
+name: Auto Deploy to GCP (Secure IAP)
 
 on:
   push:
@@ -8,44 +8,28 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
-        run: |
-          echo "${{ secrets.GCP_SSH_PRIVATE_KEY }}" > github_key
-          chmod 600 github_key
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Deploy to GCP VM
-        env:
-          GCP_VM_IP: ${{ secrets.GCP_VM_IP }}
-          GCP_SSH_USER: ${{ secrets.GCP_SSH_USER }}
         run: |
-          ssh -o StrictHostKeyChecking=no -i github_key $GCP_SSH_USER@$GCP_VM_IP << 'EOF'
-            set -Eeuo pipefail
-            cd ~/lenaai-website
+          echo "🔐 Deploying lenaAI-website via secure IAP tunnel..."
 
-            echo "📥 Pulling latest changes..."
-
-            git config pull.rebase false
-            git pull origin main --no-rebase
-            echo "🧹 Stopping old container if exists..."
-            docker rm -f lenaai_nextjs_app || true
-
-            echo "🔧 Ensure shared Docker network exists..."
-            docker network inspect lenaai_network >/dev/null 2>&1 || \
-              docker network create lenaai_network
-
-            echo "🔨 Building the new image..."
-            docker build -t lenaai_nextjs_app .
-
-            echo "🚀 Running new container in lenaai_network..."
-            docker run -d \
-              --restart=always \
-              --name lenaai_nextjs_app \
-              --network lenaai_network \
-              -p 3002:3000 \
-              lenaai_nextjs_app
-          EOF
+          gcloud compute ssh frankfurt-mig-regional-85p8 \
+            --zone=europe-west3-a \
+            --tunnel-through-iap \
+            --command='bash ~/lenaai-website/.deploy/deploy.sh'
