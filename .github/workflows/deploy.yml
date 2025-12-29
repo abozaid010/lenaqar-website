@@ -28,8 +28,38 @@ jobs:
       - name: Deploy to GCP VM
         run: |
           echo "🔐 Deploying lenaAI-website via secure IAP tunnel..."
-
+          
+          # Ensure latest code is present on the VM under the SSH user's home,
+          # then run the deployment script inside the repository.
           gcloud compute ssh frankfurt-mig-regional-85p8 \
             --zone=europe-west3-a \
             --tunnel-through-iap \
-            --command='bash ~/lenaai-website/.deploy/deploy.sh'
+            --command='
+              set -Eeuo pipefail
+              trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
+
+              REPO_PATH="$HOME/lenaai-website"
+              REPO_URL="git@github.com:Lenaai-net/lenaai-website.git"
+
+              echo "🏠 HOME on VM: $HOME"
+              echo "📁 Using repository path: $REPO_PATH"
+
+              if [ -d "$REPO_PATH/.git" ]; then
+                cd "$REPO_PATH"
+                git config --global --add safe.directory "$REPO_PATH" || true
+                git pull origin main || echo "Git pull failed, continuing with existing code..."
+              else
+                if [ -d "$REPO_PATH" ]; then
+                  echo "⚠️ Directory $REPO_PATH exists but is not a git repo, removing..."
+                  rm -rf "$REPO_PATH"
+                fi
+                echo "📦 Cloning repository..."
+                mkdir -p "$(dirname "$REPO_PATH")"
+                git clone "$REPO_URL" "$REPO_PATH" || {
+                  echo "❌ Failed to clone repository"
+                  echo "   Make sure SSH keys are configured for git access"
+                  exit 1
+                }
+              fi
+              bash "$REPO_PATH/.deploy/deploy.sh"
+            '
