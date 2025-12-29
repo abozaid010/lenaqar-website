@@ -119,9 +119,19 @@ Workload Identity Federation eliminates the need to store service account keys.
    gcloud projects add-iam-policy-binding $PROJECT_ID \
      --member="serviceAccount:github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com" \
      --role="roles/iap.tunnelResourceAccessor"
+   
+   # IMPORTANT: Grant service account permission to get its own access tokens
+   # This is required for gcloud compute ssh to work with WIF
+   gcloud iam service-accounts add-iam-policy-binding \
+     github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com \
+     --project=$PROJECT_ID \
+     --member="serviceAccount:github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com" \
+     --role="roles/iam.serviceAccountTokenCreator"
    ```
    
-   **Note:** These commands are idempotent - they won't create duplicates if permissions already exist.
+   **Note:** 
+   - These commands are idempotent - they won't create duplicates if permissions already exist
+   - The `serviceAccountTokenCreator` role allows the service account to get access tokens for itself, which is required when using `gcloud compute ssh` with WIF
 
 6. **Allow GitHub Actions to Impersonate Service Account:**
    ```bash
@@ -276,6 +286,36 @@ Error: google-github-actions/auth failed with: failed to generate Google Cloud f
 4. Update the `WIF_PROVIDER` secret in GitHub with the new provider path if you changed the provider name.
    
 5. **Recommended approach:** Use subject-based matching (`assertion.sub.startsWith()`) instead of repository_owner claims, as it's more reliable and works consistently across all GitHub Actions scenarios.
+
+### Error: "Permission 'iam.serviceAccounts.getAccessToken' denied"
+
+**Cause:** The service account doesn't have permission to get access tokens for itself, which is required when using `gcloud compute ssh` with Workload Identity Federation.
+
+**Symptoms:**
+```
+ERROR: (gcloud.compute.ssh) There was a problem refreshing your current auth tokens: 
+('Unable to acquire impersonated credentials', '{"error": {"code": 403, "message": 
+"Permission \'iam.serviceAccounts.getAccessToken\' denied on resource..."}}')
+```
+
+**Solution:**
+Grant the service account permission to get its own access tokens:
+
+```bash
+PROJECT_ID=chat-history-449709
+
+gcloud iam service-accounts add-iam-policy-binding \
+  github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com \
+  --project=$PROJECT_ID \
+  --member="serviceAccount:github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
+**Why this is needed:**
+- When using WIF, GitHub Actions authenticates as the service account
+- When `gcloud compute ssh` runs, it needs to get access tokens for that service account
+- The `serviceAccountTokenCreator` role allows the service account to get tokens for itself
+- This is safe because it can only get tokens for itself, not other service accounts
 
 ## Security Best Practices
 
