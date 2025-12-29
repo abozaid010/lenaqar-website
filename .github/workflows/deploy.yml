@@ -35,7 +35,7 @@ jobs:
           
           # Ensure latest code is present on the VM under the SSH user's home,
           # then run the deployment script inside the repository.
-          gcloud compute ssh frankfurt-mig-regional-85p8 \
+          gcloud compute ssh fresh-fr-vm \
             --zone=europe-west3-a \
             --tunnel-through-iap \
             --command='
