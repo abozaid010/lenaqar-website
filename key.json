@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "chat-history-449709",
+  "private_key_id": "46225b67311460eaed3632a63070ff9c830f1f73",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDAhbpp0DjXq9vw\nMbxIw2tf7KCu4lnHo2nzWAjnrEbP8bCtSJvi6ndD55BowyU/2CiMaZs6ayWvkPbq\ncHkCK+wRpnyAmHFengZgLhAyJLAlKxKzu2PRbHSbsBz71ryoTAuaPJXxR5Z1riQg\nQX4vzkZ389BCYg7hV1xz5P0kROe5o4R38d++Rn1Pz9ZPYnmb1ICpMrljVsYH52lA\nlih7Ur3Cc/7Bd2L+MiY6UzR2WEjQDJcTbA+WJI762K51VBiN5zwRR9V/YERE2t6z\ndqzSsMnSvs2nr056mA1G5MyGlUJATcp8xodCKRn7WYducpygGp74EqXMU7BZlyqx\nHiVuIAM1AgMBAAECggEAMKZaafzNMGrkZDkdPEHts0rHfAoE5/b6ghy/+1NEfa20\nmMVdZyUayFUO3/pYQl7sODdDm6qR1mDKlImhepQAzqEEmzZqh59lOw7I1vMAdBQD\nYNm8qqI+gU0qtdUYzWqSEAK5XURa2BgOVvxV19zHX+6DtRK0cesymLLH6U9kQzuH\nNup0K/gU4eDZELoDIe+LsaZ1Jw2Som1q0/HWAaG25EOwv3lJmW+rB+jDqHypkqZN\nd/rsuKFwVJusOiJz7+3zyIQrHWOfExvlbBmxUcuX1DHtuMMoErq4QJam2IZfTudF\nuuv/xf/Dgxejb3aeQEwWTPjlvk+xnfaqY45o00R8bQKBgQD0kLttRz/CbTNvLid4\npkYR22Gh9Ys/+pOrO1V3+dyaBJlEAM/8FRIQKaKyqrhko43OPu6WQ9AzUHZmG/9i\nnmBqKiMUC28IoNaPIqb4UF3DSIp5uN7RPApzPXcP1dKKm9zx3yN+Sznif5J0JQNZ\n1AGe9qq/vYCWZNJYek1RDr4TbwKBgQDJhhRoQZGPhq+19O04o8Xm4POQ3+Ebm7XB\n7QEYk8SglK5Fp9fgjc+O6C1eNQsPi00VzniMJA+twyXIVChMeak74DAvUdyLAZmc\nh/e0NTSoCGw5rKvnFknJqH41Zjf/81xDApzbRVBM8QJBgTTNnIc00xcyYuTZKVZO\nclj+RM4xmwKBgG8nIKhIC6h4LTpIxdPF7m7LQJJ1oPZRErBuZSgEPckacfZAUEcH\n5I/H/JQrl2bWFus4GwPcilHoLge2jdnqlXNq90py7+ICB8JCQ5T0IclRvO4ZoduC\n6FT8CJL/4ZLxx/d+LQmHcyWISa3T7LP08U+oWG6Q2FKCPD/ORjmi86ytAoGBALO3\nU8mp97KkbVx6gXdKbjm4kN25Ghox4YSA5MJTPT3regL6bMWAEgKiwZrK+QMyulrh\nF5X6rtTKPI6LpqiUsryH8NCyU1jP43q5sshNzpivcjx45ZCeys0A6xSaBQTHtZa4\n5MOS68rB/74FCN74YYdVXNF9ahLUD3jD9uNC3xNTAoGBALFewnBoovQ9yV+DIJG0\nKCm9E2JAKpDEUhKD7J3P/NblLudP4dLGY38GP13kWp5w/4Pryi/GA8YenLiMUCW7\n2dJ/Z7BEPibhZ0AL9si/z6WCroH8KQ2xlE5brOtcdCyqQwruqv+CjUK3U4DC6KwF\nzjD4tHdyjWMVQDgT01jiyO/F\n-----END PRIVATE KEY-----\n",
+  "client_email": "github-actions-deploy@chat-history-449709.iam.gserviceaccount.com",
+  "client_id": "115889148896746602187",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/github-actions-deploy%40chat-history-449709.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
