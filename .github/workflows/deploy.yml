@@ -20,7 +20,11 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          # Using Workload Identity Federation (more secure, no keys to manage)
+          # Make sure WIF_PROVIDER and WIF_SERVICE_ACCOUNT secrets are set in GitHub
+          # See .deploy/SETUP_GCP_AUTH.md for detailed setup instructions
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
@@ -39,7 +43,7 @@ jobs:
               trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
 
               REPO_PATH="$HOME/lenaai-website"
-              REPO_URL="git@github.com:Lenaai-net/lenaai-website.git"
+              REPO_URL="git@github.com:abozaid010/lenaai-website.git"
 
               echo "🏠 HOME on VM: $HOME"
               echo "📁 Using repository path: $REPO_PATH"
