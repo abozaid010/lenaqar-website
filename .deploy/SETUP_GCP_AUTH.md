@@ -74,7 +74,8 @@ Workload Identity Federation eliminates the need to store service account keys.
 
 3. **Create Workload Identity Provider:**
    ```bash
-   gcloud iam workload-identity-pools providers create-oidc github-provider \
+   # If github-provider already exists (even in DELETED state), use a different name like github-provider-v2
+   gcloud iam workload-identity-pools providers create-oidc github-provider-v2 \
      --project=$PROJECT_ID \
      --location="global" \
      --workload-identity-pool="github-actions-pool" \
@@ -89,6 +90,7 @@ Workload Identity Federation eliminates the need to store service account keys.
    - Owner: `abozaid010`, Repository: `lenaai-website`
    - The `--attribute-condition` is required and must reference the mapped attributes (`repository_owner` and `repository`)
    - This restricts access to only your specific repository
+   - **Current provider name:** `github-provider-v2` (use this in step 7)
 
 4. **Create Service Account (or verify if it exists):**
    ```bash
@@ -144,10 +146,14 @@ Workload Identity Federation eliminates the need to store service account keys.
    # Get your project number
    PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
    
-   # Display the values to copy
-   echo "WIF_PROVIDER: projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider"
+   # Display the values to copy (use github-provider-v2 if that's what you created)
+   echo "WIF_PROVIDER: projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider-v2"
    echo "WIF_SERVICE_ACCOUNT: github-actions-deploy@${PROJECT_ID}.iam.gserviceaccount.com"
    ```
+   
+   **Current values (update these in GitHub secrets):**
+   - `WIF_PROVIDER`: `projects/1038492270338/locations/global/workloadIdentityPools/github-actions-pool/providers/github-provider-v2`
+   - `WIF_SERVICE_ACCOUNT`: `github-actions-deploy@chat-history-449709.iam.gserviceaccount.com`
    
    Then go to your GitHub repository:
    - Navigate to: **Settings** → **Secrets and variables** → **Actions**
@@ -218,6 +224,53 @@ Workload Identity Federation eliminates the need to store service account keys.
 1. Ensure the service account has the correct roles
 2. Check that IAP is enabled for your VM
 3. Verify the VM's firewall rules allow IAP traffic
+
+### Error: "The given credential is rejected by the attribute condition"
+
+**Cause:** The Workload Identity Provider's attribute condition doesn't match your GitHub repository.
+
+**Symptoms:**
+```
+Error: google-github-actions/auth failed with: failed to generate Google Cloud federated token: 
+{"error":"unauthorized_client","error_description":"The given credential is rejected by the attribute condition."}
+```
+
+**Solution:**
+1. Verify your repository owner and name match the attribute condition:
+   ```bash
+   # Check current provider configuration
+   gcloud iam workload-identity-pools providers describe github-provider-v2 \
+     --project=chat-history-449709 \
+     --location=global \
+     --workload-identity-pool=github-actions-pool \
+     --format="yaml(attributeCondition)"
+   ```
+
+2. The attribute condition should match your repository:
+   - Repository: `https://github.com/abozaid010/lenaai-website`
+   - Condition should be: `assertion.repository_owner=='abozaid010' && assertion.repository=='lenaai-website'`
+
+3. If the condition is wrong, you need to recreate the provider (providers can't be updated, only deleted and recreated):
+   ```bash
+   # Delete old provider (if needed)
+   gcloud iam workload-identity-pools providers delete github-provider-v2 \
+     --project=chat-history-449709 \
+     --location=global \
+     --workload-identity-pool=github-actions-pool \
+     --quiet
+   
+   # Wait a few seconds, then create new one with correct condition
+   gcloud iam workload-identity-pools providers create-oidc github-provider-v2 \
+     --project=chat-history-449709 \
+     --location=global \
+     --workload-identity-pool=github-actions-pool \
+     --display-name="GitHub Provider" \
+     --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.repository_owner=assertion.repository_owner" \
+     --attribute-condition="assertion.repository_owner=='abozaid010' && assertion.repository=='lenaai-website'" \
+     --issuer-uri="https://token.actions.githubusercontent.com"
+   ```
+
+4. Update the `WIF_PROVIDER` secret in GitHub with the new provider path if you changed the provider name.
 
 ## Security Best Practices
 
