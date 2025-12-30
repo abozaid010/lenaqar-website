@@ -25,8 +25,7 @@ jobs:
           # See .deploy/SETUP_GCP_AUTH.md for detailed setup instructions
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-          create_credentials_file: true
-          token_format: 'access_token'
+
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
