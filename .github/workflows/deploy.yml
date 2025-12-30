@@ -20,11 +20,10 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-          # Using Workload Identity Federation (more secure, no keys to manage)
-          # Make sure WIF_PROVIDER and WIF_SERVICE_ACCOUNT secrets are set in GitHub
-          # See .deploy/SETUP_GCP_AUTH.md for detailed setup instructions
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+            credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+          # workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          # service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
 
       - name: Set up Cloud SDK
