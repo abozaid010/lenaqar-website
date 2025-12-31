@@ -64,8 +64,8 @@ export async function loginAction(prevState, formData) {
     // Set secure cookie options
     const cookieOptions = {
       path: "/",
-      secure: process.env.NODE_ENV === "production",
-      httpOnly: true,
+      secure:  true,
+      httpOnly: false,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7 // 7 days
     };
@@ -75,16 +75,21 @@ export async function loginAction(prevState, formData) {
     // Set cookies with secure options
     cookieStore.set("access_token", access_token, {
       ...cookieOptions,
+      httpOnly: false, 
       maxAge: 60 * 60 // 1 hour for access token
     });
 
     cookieStore.set("refresh_token", refresh_token, {
       ...cookieOptions,
-      httpOnly: true
+      httpOnly: false
     });
 
     // Set other client info
-    cookieStore.set("lena-website-client_id", client_id, cookieOptions);
+    cookieStore.set("lena-website-client_id", client_id, {
+      ...cookieOptions,
+      httpOnly: false 
+    });
+    
     cookieStore.set(
       "client_info",
       JSON.stringify({
@@ -93,7 +98,10 @@ export async function loginAction(prevState, formData) {
         phone_number,
         client_type
       }),
-      cookieOptions
+      {
+        ...cookieOptions,
+        httpOnly: false // Allow client-side access
+      }
     );
 
     return {
