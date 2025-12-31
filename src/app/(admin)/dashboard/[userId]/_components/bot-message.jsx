@@ -4,7 +4,7 @@ import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
 import { formatTimestamp } from "@/utils/formateDate";
-import Image from "next/image";
+import SafeImage from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -48,7 +48,7 @@ export default function BotMessageCard({ message }) {
           </div>
 
           {project_data.master_plan?.url && (
-            <Image
+            <SafeImage
               src={project_data.master_plan.url}
               alt="Master Plan"
               width={400}
@@ -66,7 +66,7 @@ export default function BotMessageCard({ message }) {
               <div className="flex flex-wrap gap-2 relative">
                 {project_data.images.slice(0, 4).map((img, idx) => (
                   <div key={img.fileId || idx} className="relative">
-                    <Image
+                    <SafeImage
                       src={img.url}
                       alt={`Project Image ${idx + 1}`}
                       width={80}
@@ -151,7 +151,7 @@ export default function BotMessageCard({ message }) {
                   )}
                 </div>
                 {phase.master_plan && (
-                  <Image
+                  <SafeImage
                     src={phase.master_plan}
                     alt="Master Plan"
                     width={400}
@@ -168,7 +168,7 @@ export default function BotMessageCard({ message }) {
                     <div className="flex flex-wrap gap-2 relative">
                       {phase.images.slice(0, 4).map((img, idx) => (
                         <div key={img.fileId || idx} className="relative">
-                          <Image
+                          <SafeImage
                             src={img.url}
                             alt={`Phase Image ${idx + 1}`}
                             width={80}
@@ -209,7 +209,7 @@ export default function BotMessageCard({ message }) {
           >
             ×
           </button>
-          <Image
+          <SafeImage
             src={fullscreenImg}
             alt="Fullscreen"
             width={900}
