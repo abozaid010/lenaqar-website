@@ -61,8 +61,8 @@ export default function ClientInfo({ client_email }) {
     return normalized;
   };
 
-  const clientId = LenaCookiesManager.getClientId();
-  const shareableLink = clientId ? `https://chat.lenaai.net/${clientId}` : "";
+  const clientId = data?.data?.client_id || LenaCookiesManager.getClientId();
+  const shareableLink = clientId ? `https://chat.lenaai.net/?client=${clientId}` : "";
 
   useEffect(() => {
     const suggestions = data?.data?.chatbot_initial_suggestions || [];
