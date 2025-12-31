@@ -3,6 +3,7 @@ import Sidebar from "@/components/dashbord/common/Sidebar";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { I18nProvider } from "@/context/translate-api";
 import { Suspense } from "react";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -10,15 +11,15 @@ import { safeCookieParse } from "@/utils/safeJsonParser";
 const Layout = async ({ children }) => {
   // Get the clientID from the cookie on the server then pass it as a prop to the Header component => To avoid hydration issues
   const cookieStore = await cookies();
-  const clientID = cookieStore.get("lena-website-client_id")?.value;
-  const clientInfoCookie = cookieStore.get("client_info")?.value;
+  const clientID = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
+  const clientInfoCookie = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value;
   const clientName = clientInfoCookie
     ? safeCookieParse(clientInfoCookie, {})?.client_name
     : null;
   const clientEmail = safeCookieParse(clientInfoCookie, {})?.email;
 
   // Get the initial locale from the cookie
-  const langCookie = cookieStore.get("lang")?.value;
+  const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;
   const supportedLocales = ["en", "ar"];
   const defaultLocale = "ar";
   const initialLocale = supportedLocales.includes(langCookie)

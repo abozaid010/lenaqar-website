@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { v4 as uuidv4 } from "uuid";
 import {
   Upload,
@@ -42,9 +42,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [missingColumns, setMissingColumns] = useState([]);
   const fileInputRef = useRef(null);
 
-  const clientId = Cookies.get("lena-website-client_id") || null;
-  const clientInfo = Cookies.get("client_info");
-  const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
+  const clientId = LenaCookiesManager.getClientId() || null;
+  const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
@@ -137,9 +136,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           garageArea: unit.garageArea ? Number(unit.garageArea) : 0,
           images: unit.images
             ? unit.images.split(",").map((img) => ({
-                url: img.trim(),
-                fileId: img.split("/").pop(),
-              }))
+              url: img.trim(),
+              fileId: img.split("/").pop(),
+            }))
             : [],
           // code: unit.code || "",
           model: unit.model || "",
@@ -229,7 +228,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       } else {
         alert(
           t.uploadExcel?.invalidFileType ||
-            "Please select a valid Excel file (.xlsx or .xls)"
+          "Please select a valid Excel file (.xlsx or .xls)"
         );
       }
     }
@@ -252,7 +251,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const getMissingColumns = () => {
     if (!parsedData) return [];
     const headers = parsedData.headers || [];
-    
+
     // Use the utility class to get missing keys
     return excelFieldMapper.getMissingKeys(headers, VALIDATED_KEYS);
   };
@@ -390,7 +389,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               />
 
               {!selectedFile ? (
-                <div 
+                <div
                   onClick={handleUploadClick}
                   className="space-y-4 cursor-pointer"
                 >
@@ -519,12 +518,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             {parsedData && !isProcessing && (() => {
               const headers = parsedData.headers || [];
               const headerMapping = parsedData.headerMapping || {};
-              
+
               // Get matched canonical keys
               const matchedKeys = new Set(Object.values(headerMapping));
               const foundKeys = VALIDATED_KEYS.filter((key) => matchedKeys.has(key));
               const notFoundKeys = VALIDATED_KEYS.filter((key) => !matchedKeys.has(key));
-              
+
               // Create reverse mapping: canonicalKey -> array of headers that matched it
               const keyToHeaders = excelFieldMapper.createReverseMapping(headerMapping);
 
@@ -576,69 +575,69 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </span>
                   </div>
 
-                <div className="border rounded-lg overflow-hidden" dir="ltr">
-                  <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-100 sticky top-0 z-10">
-                        <tr>
-                          <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
-                            #
-                          </th>
-                          {parsedData.headers.map((header, idx) => (
-                            <th
-                              key={idx}
-                              className="px-3 py-2 text-left font-semibold text-gray-700 border-b whitespace-nowrap"
-                            >
-                              {header}
+                  <div className="border rounded-lg overflow-hidden" dir="ltr">
+                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-100 sticky top-0 z-10">
+                          <tr>
+                            <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
+                              #
                             </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {parsedData.rows.map((row, rowIndex) => (
-                          <tr
-                            key={rowIndex}
-                            className={
-                              rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                            }
-                          >
-                            <td className="px-3 py-2 text-gray-600 border-b font-medium">
-                              {rowIndex + 1}
-                            </td>
-                            {parsedData.headers.map((_, colIndex) => (
-                              <td
-                                key={colIndex}
-                                className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
+                            {parsedData.headers.map((header, idx) => (
+                              <th
+                                key={idx}
+                                className="px-3 py-2 text-left font-semibold text-gray-700 border-b whitespace-nowrap"
                               >
-                                {row[colIndex] !== undefined &&
-                                row[colIndex] !== null &&
-                                row[colIndex] !== ""
-                                  ? String(row[colIndex])
-                                  : "-"}
-                              </td>
+                                {header}
+                              </th>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {parsedData.rows.map((row, rowIndex) => (
+                            <tr
+                              key={rowIndex}
+                              className={
+                                rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                              }
+                            >
+                              <td className="px-3 py-2 text-gray-600 border-b font-medium">
+                                {rowIndex + 1}
+                              </td>
+                              {parsedData.headers.map((_, colIndex) => (
+                                <td
+                                  key={colIndex}
+                                  className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
+                                >
+                                  {row[colIndex] !== undefined &&
+                                    row[colIndex] !== null &&
+                                    row[colIndex] !== ""
+                                    ? String(row[colIndex])
+                                    : "-"}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
-                </div>
 
-                {/* Parsed JSON Preview (Collapsible) */}
-                <details className="border rounded-lg">
-                  <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-gray-700">
-                    {t.uploadExcel?.viewJson || "View Parsed JSON"} (
-                    {parsedData.units.length} {t.uploadExcel?.units || "units"})
-                  </summary>
-                  <div
-                    className="p-4 bg-gray-50 max-h-[300px] overflow-auto"
-                    dir="ltr"
-                  >
-                    <pre className="text-xs text-gray-800 whitespace-pre-wrap">
-                      {JSON.stringify(parsedData.units, null, 2)}
-                    </pre>
-                  </div>
-                </details>
+                  {/* Parsed JSON Preview (Collapsible) */}
+                  <details className="border rounded-lg">
+                    <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-gray-700">
+                      {t.uploadExcel?.viewJson || "View Parsed JSON"} (
+                      {parsedData.units.length} {t.uploadExcel?.units || "units"})
+                    </summary>
+                    <div
+                      className="p-4 bg-gray-50 max-h-[300px] overflow-auto"
+                      dir="ltr"
+                    >
+                      <pre className="text-xs text-gray-800 whitespace-pre-wrap">
+                        {JSON.stringify(parsedData.units, null, 2)}
+                      </pre>
+                    </div>
+                  </details>
                 </div>
               );
             })()}
@@ -662,15 +661,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     {uploadStatus.map((item) => (
                       <div
                         key={item.index}
-                        className={`flex items-center justify-between px-4 py-3 border-b last:border-b-0 ${
-                          item.status === "success"
+                        className={`flex items-center justify-between px-4 py-3 border-b last:border-b-0 ${item.status === "success"
                             ? "bg-green-50"
                             : item.status === "failed"
                               ? "bg-red-50"
                               : item.status === "uploading"
                                 ? "bg-blue-50"
                                 : "bg-gray-50"
-                        }`}
+                          }`}
                       >
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <span className="text-sm font-medium text-gray-600 flex-shrink-0">
@@ -763,9 +761,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           <button
             onClick={onClose}
             disabled={isUploading}
-            className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${
-              isUploading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
           >
             {t.uploadExcel?.cancel || "Cancel"}
           </button>
@@ -774,11 +771,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             disabled={
               !selectedFile || !parsedData || isProcessing || isUploading
             }
-            className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${
-              !selectedFile || !parsedData || isProcessing || isUploading
+            className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
                 ? "opacity-50 cursor-not-allowed"
                 : "hover:opacity-90"
-            }`}
+              }`}
           >
             {isUploading && <Loader2 className="animate-spin" size={18} />}
             {isUploading

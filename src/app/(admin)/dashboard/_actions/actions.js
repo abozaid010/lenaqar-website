@@ -3,6 +3,7 @@
 import { getClientid } from "@/components/services/clientCookies";
 import axiosInstance from "@/utils/axiosInstance";
 import { revalidatePath } from "next/cache";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 export async function addNewAction(prevState, formData) {
   const clientId = await getClientid();
@@ -57,7 +58,7 @@ export async function addNewAction(prevState, formData) {
 export async function sendNewMessage(prevState, formData) {
   const client_message = formData.get("client_message");
   const userId = formData.get("user_id");
-  const client_id = formData.get("lena-website-client_id");
+  const client_id = formData.get(COOKIE_KEYS.CLIENT_ID);
   const timeStamp = new Date().valueOf(); // Get current timestamp
 
   try {

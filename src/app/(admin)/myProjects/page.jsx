@@ -30,9 +30,11 @@ export const metadata = {
   },
 };
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+
 export default async function ProjectsPage() {
   const cookieStore = await cookies();
-  const clientId = cookieStore.get("lena-website-client_id")?.value || null;
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
 
   return (
     <>

@@ -12,7 +12,7 @@ import StepIndicator from "./step-indicator";
 import { useI18n } from "@/context/translate-api";
 import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ArrowLeft, ArrowRight, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 
 export default function AddUnitModal({ isEdit, unitData, onClose }) {
-  const clientId = Cookies.get("lena-website-client_id") || null;
+  const clientId = LenaCookiesManager.getClientId() || null;
 
   if (!clientId) {
     return (
@@ -35,9 +35,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
     );
   }
 
-  const clientInfo = Cookies.get("client_info");
-  const clientName = clientInfo ? JSON.parse(clientInfo)?.client_name : null;
-  const clientType = clientInfo ? JSON.parse(clientInfo)?.client_type : null;
+  const clientInfo = LenaCookiesManager.getClientInfo();
+  const clientName = clientInfo?.client_name;
+  const clientType = clientInfo?.client_type;
 
   // Add the mutation hooks
   const addUnitMutation = useAddUnit();
@@ -55,15 +55,15 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
   console.log("❌ Cities Error:", sharedData.citiesAndDistricts.error);
   console.log("🔄 Cities Fetching:", sharedData.citiesAndDistricts.isFetching);
 
-  const citiesAndDistricts = rowCitiesAndDistricts && typeof rowCitiesAndDistricts === 'object' 
+  const citiesAndDistricts = rowCitiesAndDistricts && typeof rowCitiesAndDistricts === 'object'
     ? Object.entries(rowCitiesAndDistricts)
-        .filter(([governorate]) => governorate !== "cities")
-        .map(([governorate, districts]) => ({
-          governorate,
-          districts: Array.isArray(districts) ? districts.map((district) => ({
-            district,
-          })) : [],
-        }))
+      .filter(([governorate]) => governorate !== "cities")
+      .map(([governorate, districts]) => ({
+        governorate,
+        districts: Array.isArray(districts) ? districts.map((district) => ({
+          district,
+        })) : [],
+      }))
     : [];
 
   console.log("🏘️ Processed Cities and Districts:", citiesAndDistricts);
@@ -231,7 +231,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           missingFields.push("deliveryDate");
           toast.error(
             t.saleDetails.deleveryError ||
-              "Delivery date must be between 30 years ago and 10 years from now",
+            "Delivery date must be between 30 years ago and 10 years from now",
             {
               duration: 5000,
             }
@@ -272,19 +272,19 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
             sanitizedData[field] = 0;
           }
         });
-        const sanitizedPaymentPlans = Array.isArray(sanitizedData.paymentPlans) 
+        const sanitizedPaymentPlans = Array.isArray(sanitizedData.paymentPlans)
           ? sanitizedData.paymentPlans.map((plan) => {
-              return {
-                years: plan.years === "" ? 0 : plan.years,
-                price: plan.price === "" ? 0 : plan.price,
-                maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
-                downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
-                installment_amount_yearly:
-                  plan.installment_amount_yearly === ""
-                    ? 0
-                    : plan.installment_amount_yearly,
-              };
-            })
+            return {
+              years: plan.years === "" ? 0 : plan.years,
+              price: plan.price === "" ? 0 : plan.price,
+              maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
+              downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
+              installment_amount_yearly:
+                plan.installment_amount_yearly === ""
+                  ? 0
+                  : plan.installment_amount_yearly,
+            };
+          })
           : [];
 
         setSellFormData((prev) => ({
@@ -410,14 +410,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           <h2 className="text-lg font-semibold text-red-600 mb-2">Error Loading Data</h2>
           <p className="text-gray-600 mb-4">{sharedData.sharedDataErrorMessage}</p>
           <div className="flex gap-2">
-            <button 
-              onClick={() => sharedData.citiesAndDistricts.refetch()} 
+            <button
+              onClick={() => sharedData.citiesAndDistricts.refetch()}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Retry
             </button>
-            <button 
-              onClick={onClose} 
+            <button
+              onClick={onClose}
               className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
               Close

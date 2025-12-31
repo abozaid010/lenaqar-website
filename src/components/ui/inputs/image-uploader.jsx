@@ -5,18 +5,18 @@ import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 import { getMaxSizeBytes, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ImageUploader({
   maxImages = 8,
   initialImages = [],
-  onImagesChange = () => {},
+  onImagesChange = () => { },
   isUploading,
   setIsUploading,
 }) {
-  const clinetId = Cookies.get("lena-website-client_id") || "";
+  const clinetId = LenaCookiesManager.getClientId() || "";
 
   const { t } = useI18n();
   const fileInputRef = useRef(null);
@@ -182,15 +182,14 @@ export default function ImageUploader({
           />
           {isSelected && uploadStatus[imageId] && (
             <div
-              className={`absolute inset-0 flex items-center justify-center rounded-md ${
-                uploadStatus[imageId] === "compressing"
+              className={`absolute inset-0 flex items-center justify-center rounded-md ${uploadStatus[imageId] === "compressing"
                   ? "bg-yellow-500/50"
                   : uploadStatus[imageId] === "uploading"
                     ? "bg-black/50"
                     : uploadStatus[imageId] === "success"
                       ? "bg-green-500/50"
                       : "bg-red-500/50"
-              }`}
+                }`}
             >
               {uploadStatus[imageId] === "uploading" && (
                 <svg

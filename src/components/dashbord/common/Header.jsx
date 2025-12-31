@@ -1,8 +1,9 @@
 "use client";
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -52,10 +53,11 @@ const Header = ({ clientName, clientID, clientEmail }) => {
 
   const confirmLogout = async () => {
     try {
-      // Remove cookies first
-      Cookies.remove("lena-website-client_id");
-      Cookies.remove("access_token");
-      Cookies.remove("refresh_token");
+      // Remove cookies
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
+      LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 
       // Wait a brief moment to ensure cookies are cleared
       await new Promise((resolve) => setTimeout(resolve, 100));

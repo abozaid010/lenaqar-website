@@ -1,20 +1,20 @@
 "use client";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { getProfileDataByEmail, updateProfileData } from "@/utils/api";
+import { getProfileData, updateProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ChevronDown, Copy, Share2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 export default function ClientInfo({ client_email }) {
   const { t } = useI18n();
   const { data, isLoading } = useQuery({
-    queryKey: ["clientData" + client_email],
-    queryFn: () => getProfileDataByEmail(client_email),
+    queryKey: ["clientData"],
+    queryFn: getProfileData,
     staleTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: false,
   });
@@ -61,7 +61,7 @@ export default function ClientInfo({ client_email }) {
     return normalized;
   };
 
-  const clientId = Cookies.get("lena-website-client_id");
+  const clientId = LenaCookiesManager.getClientId();
   const shareableLink = clientId ? `https://chat.lenaai.net/${clientId}` : "";
 
   useEffect(() => {
@@ -81,7 +81,7 @@ export default function ClientInfo({ client_email }) {
 
   const handleCopyLink = async () => {
     if (!shareableLink) return;
-    
+
     try {
       await navigator.clipboard.writeText(shareableLink);
       setCopied(true);

@@ -7,11 +7,13 @@ import { Suspense } from "react";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+
 export async function generateMetadata() {
   const cookieStore = await cookies();
 
-  const clientName = cookieStore.get("client_info")?.value
-    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+  const clientName = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value
+    ? JSON.parse(cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value)?.client_name
     : null;
 
   return {
@@ -49,7 +51,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
 
   const cookieStore = await cookies();
 
-  const clientId = cookieStore.get("lena-website-client_id")?.value || "";
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || "";
 
   return (
     <>
@@ -62,19 +64,19 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         ]}
       />
       <div className="container relative">
-      <UnitsFilter
-        appliedFilters={searchParams}
-        clientId={clientId}
-        isPublic={false}
-      />
-
-      <Suspense fallback={<LoadingSpinner />}>
-        <UnitsPageQueryOptimized
-          searchParams={searchParams}
+        <UnitsFilter
+          appliedFilters={searchParams}
           clientId={clientId}
+          isPublic={false}
         />
-      </Suspense>
-    </div>
+
+        <Suspense fallback={<LoadingSpinner />}>
+          <UnitsPageQueryOptimized
+            searchParams={searchParams}
+            clientId={clientId}
+          />
+        </Suspense>
+      </div>
     </>
   );
 }

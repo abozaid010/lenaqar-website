@@ -1,3 +1,4 @@
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { NextResponse } from "next/server";
 
 const protectedRoutes = [
@@ -16,10 +17,10 @@ export function middleware(request) {
   // Handle image requests with proper MIME types
   if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
     const response = NextResponse.next();
-    
+
     // Set proper cache headers for images
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-    
+
     // Set proper MIME types for images
     if (pathname.match(/\.(jpg|jpeg)$/i)) {
       response.headers.set('Content-Type', 'image/jpeg');
@@ -34,25 +35,25 @@ export function middleware(request) {
     } else if (pathname.match(/\.svg$/i)) {
       response.headers.set('Content-Type', 'image/svg+xml');
     }
-    
+
     return response;
   }
 
   // Handle API image requests
   if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
     const response = NextResponse.next();
-    
+
     // Set CORS headers for image API requests
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-    
+
     return response;
   }
 
   // Get cookies from request headers
-  const accessToken = request.cookies.get("access_token")?.value;
-  const refreshToken = request.cookies.get("refresh_token")?.value;
+  const accessToken = request.cookies.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+  const refreshToken = request.cookies.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
 
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
@@ -61,9 +62,9 @@ export function middleware(request) {
   if (isProtectedRoute) {
     if (!accessToken || !refreshToken) {
       const response = NextResponse.redirect(new URL("/login", request.url));
-      response.cookies.delete("access_token");
-      response.cookies.delete("refresh_token");
-      response.cookies.delete("lena-website-client_id");
+      response.cookies.delete(COOKIE_KEYS.ACCESS_TOKEN);
+      response.cookies.delete(COOKIE_KEYS.REFRESH_TOKEN);
+      response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
       return response;
     }
   }

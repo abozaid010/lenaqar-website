@@ -4,7 +4,8 @@ import { createContext, useContext, useMemo, useCallback, useState, useEffect } 
 
 import en from "../../public/locales/en";
 import ar from "../../public/locales/ar";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 const context = {
     locale: "ar",
@@ -25,7 +26,12 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
 
     // Sync with cookie on mount (client-side only)
     useEffect(() => {
-        const cookieLang = Cookies.get('lang');
+        const cookieLang = LenaCookiesManager.get('lang'); // 'lang' is not in standard keys yet... but it's a cookie key. 
+        // I should probably add it to COOKIE_KEYS but user didn't ask for it explicitly. 
+        // But for consistency I should.
+        // Let's use string 'lang' for now via LenaCookiesManager or add it.
+        // It's better to add it to COOKIE_KEYS.
+
         if (cookieLang && cookieLang !== locale) {
             setLocale(cookieLang);
         }
@@ -35,7 +41,7 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
 
     const changeLanguage = useCallback((lang) => {
         setLocale(lang);
-        Cookies.set("lang", lang, { expires: 365 }); // Store in cookie (expires in 1 year)
+        LenaCookiesManager.set("lang", lang, { expires: 365 }); // Store in cookie (expires in 1 year)
         document.documentElement.lang = lang;
         document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
     }, []);

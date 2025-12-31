@@ -1,7 +1,6 @@
 "use client";
 
 import { axiosInstance } from "@/lib/axiosInstance";
-import Cookies from "js-cookie";
 import { safeMergeParams } from "./safeJsonParser";
 
 // Auth API
@@ -10,7 +9,7 @@ export async function loginUser(credentials) {
   params.append('grant_type', 'password');
   params.append('username', credentials.email);
   params.append('password', credentials.password);
-  
+
   const response = await axiosInstance.post("client/login", params, {
     headers: {
       'Accept': 'application/json',
@@ -515,10 +514,11 @@ export async function toggleAutoReply(user_id, client_id, value, source) {
 }
 
 // Client Profile API //
-export async function getProfileDataByEmail(clientEmail) {
+// Client Profile API //
+export async function getProfileData() {
   try {
     const response = await axiosInstance.get(
-      `client/profile?email=${clientEmail}`
+      `client/v1/profile`
     );
 
     return response.data;
@@ -576,9 +576,11 @@ export async function getChatHistory(userId) {
   }
 }
 
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+
 // HELPER FUNCTIONS //
 export function getClientid() {
-  const clientId = Cookies.get("lena-website-client_id");
+  const clientId = LenaCookiesManager.getClientId();
   if (!clientId) {
     console.error("Client ID not found in cookies");
     return null;
