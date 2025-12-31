@@ -141,7 +141,7 @@ export default function UnitPricing({ unit }) {
                           {t.saleDetails.maintenance}:
                         </span>
                         <span className="font-bold text-blue-700">
-                          {formatCurrency(p.maintenance)} EGP
+                          {formatCurrency(p.maintenance || 0)} EGP
                         </span>
                       </div>
                     ) : null}
@@ -155,7 +155,7 @@ export default function UnitPricing({ unit }) {
         <div className="max-w-sm">
           {/* Rental Duration Tabs */}
           <div className="flex border-b border-gray-200 mb-4">
-            {Object.keys(unit.rentDurationType).map((duration) => (
+            {Object.keys(unit.rentDurationType || {}).map((duration) => (
               <button
                 key={duration}
                 className={`py-2 px-4 text-sm font-medium ${
