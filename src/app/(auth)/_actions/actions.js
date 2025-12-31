@@ -41,13 +41,18 @@ export async function loginAction(prevState, formData) {
     }
 
     // Extract response data
+    // The API might return user data directly in response.data or nested in a 'user' object
+    const data = response.data || {};
+
+    // Check if data is directly in the response or nested
+    const userData = data.user || data;
+
     const {
       access_token,
       refresh_token,
       expires_in,
-      token_type = 'Bearer',
-      user = {}
-    } = response.data || {};
+      token_type = 'Bearer'
+    } = data; // tokens seem to be at top level usually, but checking both levels for user info
 
     const {
       client_id,
@@ -55,7 +60,7 @@ export async function loginAction(prevState, formData) {
       email: userEmail,
       phone_number,
       client_type,
-    } = user || {};
+    } = userData;
 
     // Validate required fields
     if (!access_token || !refresh_token) {
