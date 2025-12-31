@@ -84,7 +84,7 @@ export async function loginAction(prevState, formData) {
     });
 
     // Set other client info
-    cookieStore.set("client_id", client_id, cookieOptions);
+    cookieStore.set("lena-website-client_id", client_id, cookieOptions);
     cookieStore.set(
       "client_info",
       JSON.stringify({
