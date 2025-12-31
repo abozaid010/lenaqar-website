@@ -70,7 +70,7 @@ export async function loginAction(prevState, formData) {
       maxAge: 60 * 60 * 24 * 7 // 7 days
     };
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     // Set cookies with secure options
     cookieStore.set("access_token", access_token, {

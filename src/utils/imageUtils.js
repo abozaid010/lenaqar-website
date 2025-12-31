@@ -32,6 +32,34 @@ export function isValidImageUrl(url) {
 }
 
 /**
+ * Checks if the hostname is configured in Next.js images config
+ * @param {string} url - URL to check
+ * @returns {boolean} - True if hostname is configured or internal
+ */
+export function isConfiguredHostname(url) {
+  if (!url || typeof url !== 'string') return false;
+  
+  // Data URLs and relative paths are always allowed
+  if (url.startsWith('data:') || url.startsWith('/')) return true;
+  
+  try {
+    const { hostname } = new URL(url);
+    const allowed = [
+      'ik.imagekit.io',
+      'api.lenaai.net',
+      process.env.NEXT_PUBLIC_API_DOMAIN,
+    ].filter(Boolean);
+    
+    return allowed.some(allowedHost => {
+      // Exact match or subdomain match
+      return hostname === allowedHost || hostname.endsWith('.' + allowedHost);
+    });
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks if an image URL is known to be broken (after retries)
  * @param {string} url - URL to check
  * @returns {boolean} - True if the image is known to be broken

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { isConfiguredHostname } from "@/utils/imageUtils";
 
 /**
  * Robust Image Component with comprehensive error handling
@@ -69,8 +70,8 @@ export default function RobustImage({
     if (onError) onError(e);
   };
 
-  // If the original src is invalid, start with fallback
-  if (!src || src === 'undefined' || src === 'null' || src === '') {
+  // If the original src is invalid or has unconfigured hostname, start with fallback
+  if (!src || src === 'undefined' || src === 'null' || src === '' || !isConfiguredHostname(src)) {
     if (currentSrc !== fallbackSrc) {
       setCurrentSrc(fallbackSrc);
     }

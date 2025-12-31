@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { markImageAsBroken, incrementRetryAttempts, shouldRetryImage } from "@/utils/imageUtils";
+import { markImageAsBroken, incrementRetryAttempts, shouldRetryImage, isConfiguredHostname } from "@/utils/imageUtils";
 
 /**
  * Professional Image Loading Component with advanced loading states
@@ -25,8 +25,9 @@ export default function ImageWithLoader({
   loadingVariant = "default", // "default", "minimal", "skeleton"
   forceLoading = false, // Force loading state externally
 }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const isConfigured = isConfiguredHostname(src);
+  const [isLoading, setIsLoading] = useState(isConfigured);
+  const [hasError, setHasError] = useState(!isConfigured);
 
   const handleLoad = () => {
     setIsLoading(false);
@@ -161,20 +162,22 @@ export default function ImageWithLoader({
       )}
 
       {/* Actual Image with smooth transition */}
-      <Image
-        fill
-        src={src}
-        alt={alt}
-        className={`${className} transition-all duration-500 ease-out transform ${
-          isLoading || forceLoading
-            ? "opacity-0 scale-105"
-            : "opacity-100 scale-100 animate-fade-in"
-        }`}
-        onLoad={handleLoad}
-        onError={handleError}
-        priority={priority}
-        sizes={sizes}
-      />
+      {isConfigured && (
+        <Image
+          fill
+          src={src}
+          alt={alt}
+          className={`${className} transition-all duration-500 ease-out transform ${
+            isLoading || forceLoading
+              ? "opacity-0 scale-105"
+              : "opacity-100 scale-100 animate-fade-in"
+          }`}
+          onLoad={handleLoad}
+          onError={handleError}
+          priority={priority}
+          sizes={sizes}
+        />
+      )}
     </div>
   );
 }
