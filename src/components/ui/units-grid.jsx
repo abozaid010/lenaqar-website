@@ -54,7 +54,7 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
           {units.map((u, idx) => (
             <Link
-              href={`${readonly ? "/allProberties/" : "/units/"}${u.unitId}`}
+              href={readonly ? `/allProberties/${u.unitId}` : `/units/${u.unitId}`}
               key={idx}
               className="relative"
             >
