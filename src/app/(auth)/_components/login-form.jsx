@@ -17,7 +17,7 @@ export default function LoginForm() {
   const router = useRouter();
   const [state, action, pending] = useActionState(loginAction, initialState);
   const [formData, setFormData] = useState({
-    user_name: "",
+    email: "",
     password: "",
   });
 
@@ -40,12 +40,12 @@ export default function LoginForm() {
           {t.login.usernameLabel}
         </label>
         <input
-          id="username"
+          id="email"
           name="email"
-          type="text"
-          value={formData.user_name}
+          type="email"
+          value={formData.email}
           onChange={(e) =>
-            setFormData({ ...formData, user_name: e.target.value })
+            setFormData({ ...formData, email: e.target.value })
           }
           required
           className="w-full px-4 py-2 rounded-lg border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"

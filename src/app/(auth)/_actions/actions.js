@@ -1,83 +1,135 @@
 "use server";
 
-import axiosInstance from "@/utils/axiosInstance";
 import { cookies } from "next/headers";
+import { loginUser } from "@/utils/server-api";
 
 export async function loginAction(prevState, formData) {
-  const clientEmail = formData.get("email");
-  const password = formData.get("password");
+  // Input validation and sanitization
+  const email = String(formData.get("email") || "").trim();
+  const password = String(formData.get("password") || "");
 
-  // TODO: frontend validation to eliminate unnecessary server calls
-  // const isValidPassword = passwordValidation(password);
-  // if (!isValidPassword) {
-  //     return {
-  //         success: false,
-  //         message: "Invalid password format",
-  //         errors: {
-  //             password: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, and one number.",
-  //         },
-  //     };
-  // }
+  // Basic validation
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Email and password are required"
+    };
+  }
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return {
+      success: false,
+      message: "Please enter a valid email address"
+    };
+  }
 
   try {
-    const payload = {
-      username: clientEmail,
-      password: password,
-    };
-    const response = await axiosInstance.post("/client/login", payload, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded", // Specifies that the request body is encoded as application/x-www-form-urlencoded.
-      },
+    // Call the centralized API function
+    const response = await loginUser({
+      email,
+      password
     });
+    // Handle non-successful responses
+    if (!response.status) {
+      return {
+        success: false,
+        message: response.message || "Login failed. Please check your credentials."
+      };
+    }
 
+    // Extract response data
     const {
       access_token,
+      refresh_token,
+      expires_in,
+      token_type = 'Bearer',
+      user = {}
+    } = response.data || {};
+
+    const {
       client_id,
       client_name,
-      email,
+      email: userEmail,
       phone_number,
-      refresh_token,
       client_type,
-    } = response.data.data;
-    const cookieStore = await cookies();
+    } = user || {};
+
+    // Validate required fields
+    if (!access_token || !refresh_token) {
+      throw new Error("Invalid response from server");
+    }
+
+    // Set secure cookie options
+    const cookieOptions = {
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+      httpOnly: true,
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7 // 7 days
+    };
+
+    const cookieStore = cookies();
+
+    // Set cookies with secure options
     cookieStore.set("access_token", access_token, {
-      path: "/",
-      secure: true,
-      httpOnly: false,
+      ...cookieOptions,
+      maxAge: 60 * 60 // 1 hour for access token
     });
+
     cookieStore.set("refresh_token", refresh_token, {
-      path: "/",
-      secure: true,
-      httpOnly: false,
+      ...cookieOptions,
+      httpOnly: true
     });
-    cookieStore.set("lena-website-client_id", client_id, { path: "/" });
+
+    // Set other client info
+    cookieStore.set("client_id", client_id, cookieOptions);
     cookieStore.set(
       "client_info",
-      JSON.stringify({ email, client_name, phone_number, client_type }),
-      { path: "/" }
+      JSON.stringify({
+        email: userEmail,
+        client_name,
+        phone_number,
+        client_type
+      }),
+      cookieOptions
     );
 
     return {
       success: true,
-      message: "Login successful",
+      message: "Login successful"
     };
+
   } catch (error) {
-    console.error("Login failed:", error.message);
+    let errorMessage = "An error occurred during login";
+
+    if (error.name === 'AbortError') {
+      errorMessage = "Request timed out. Please try again.";
+    } else if (error.response) {
+      // Handle different HTTP error statuses
+      switch (error.response.status) {
+        case 401:
+          errorMessage = "Invalid email or password";
+          break;
+        case 429:
+          errorMessage = "Too many attempts. Please try again later.";
+          break;
+        case 500:
+          errorMessage = "Server error. Please try again later.";
+          break;
+        default:
+          errorMessage = error.response.data?.message || "Login failed";
+      }
+    } else if (error.request) {
+      errorMessage = "Unable to connect to the server. Please check your connection.";
+    }
+
+    console.error('Login error:', error.message);
+
     return {
       success: false,
-      message: "Login failed. Please check your credentials.",
+      message: errorMessage
     };
   }
 }
-
-const passwordValidation = (password) => {
-  /**
-   * Password must contain:
-   * - At least 8 characters
-   * - At least one uppercase letter
-   * - At least one lowercase letter
-   * - At least one number
-   */
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/;
-  return passwordRegex.test(password);
-};

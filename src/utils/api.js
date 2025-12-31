@@ -4,6 +4,28 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import Cookies from "js-cookie";
 import { safeMergeParams } from "./safeJsonParser";
 
+// Auth API
+export async function loginUser(credentials) {
+  const params = new URLSearchParams();
+  params.append('grant_type', 'password');
+  params.append('username', credentials.email);
+  params.append('password', credentials.password);
+  
+  const response = await axiosInstance.post("client/login", params, {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    validateStatus: status => status >= 200 && status < 500
+  });
+
+  if (!response.data) {
+    throw new Error("No data received from server");
+  }
+
+  return response.data;
+}
+
 export async function fetchUsersData(searchParams) {
 
   try {
