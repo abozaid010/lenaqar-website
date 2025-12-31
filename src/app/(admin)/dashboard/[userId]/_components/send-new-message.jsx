@@ -1,7 +1,8 @@
 "use client";
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import { sendNewMessage } from "../../_actions/actions";
@@ -14,7 +15,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
   const [state, action, pending] = useActionState(sendNewMessage, initialState);
   const [message, setMessage] = useState("");
   const { t } = useI18n();
-  const client_id = Cookies.get("lena-website-client_id");
+  const client_id = LenaCookiesManager.getClientId();
 
   const [formData, setFormData] = useState({
     client_message: "",
@@ -42,7 +43,7 @@ export default function SendNewMessageForm({ userId, onNewMessage }) {
       action={action}
     >
       <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name="client_id" value={client_id} />
+      <input type="hidden" name={COOKIE_KEYS.CLIENT_ID} value={client_id} />
 
       <input
         type="text"

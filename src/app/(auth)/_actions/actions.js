@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { loginUser } from "@/utils/server-api";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 export async function loginAction(prevState, formData) {
   // Input validation and sanitization
@@ -40,13 +41,18 @@ export async function loginAction(prevState, formData) {
     }
 
     // Extract response data
+    // The API might return user data directly in response.data or nested in a 'user' object
+    const data = response.data || {};
+
+    // Check if data is directly in the response or nested
+    const userData = data.user || data;
+
     const {
       access_token,
       refresh_token,
       expires_in,
-      token_type = 'Bearer',
-      user = {}
-    } = response.data || {};
+      token_type = 'Bearer'
+    } = data; // tokens seem to be at top level usually, but checking both levels for user info
 
     const {
       client_id,
@@ -54,7 +60,7 @@ export async function loginAction(prevState, formData) {
       email: userEmail,
       phone_number,
       client_type,
-    } = user || {};
+    } = userData;
 
     // Validate required fields
     if (!access_token || !refresh_token) {
@@ -64,7 +70,7 @@ export async function loginAction(prevState, formData) {
     // Set secure cookie options
     const cookieOptions = {
       path: "/",
-      secure:  true,
+      secure: true,
       httpOnly: false,
       sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7 // 7 days
@@ -73,25 +79,25 @@ export async function loginAction(prevState, formData) {
     const cookieStore = await cookies();
 
     // Set cookies with secure options
-    cookieStore.set("access_token", access_token, {
+    cookieStore.set(COOKIE_KEYS.ACCESS_TOKEN, access_token, {
       ...cookieOptions,
-      httpOnly: false, 
+      httpOnly: false,
       maxAge: 60 * 60 // 1 hour for access token
     });
 
-    cookieStore.set("refresh_token", refresh_token, {
+    cookieStore.set(COOKIE_KEYS.REFRESH_TOKEN, refresh_token, {
       ...cookieOptions,
       httpOnly: false
     });
 
     // Set other client info
-    cookieStore.set("lena-website-client_id", client_id, {
+    cookieStore.set(COOKIE_KEYS.CLIENT_ID, client_id, {
       ...cookieOptions,
-      httpOnly: false 
+      httpOnly: false
     });
-    
+
     cookieStore.set(
-      "client_info",
+      COOKIE_KEYS.CLIENT_INFO,
       JSON.stringify({
         email: userEmail,
         client_name,

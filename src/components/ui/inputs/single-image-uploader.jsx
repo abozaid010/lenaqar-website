@@ -2,7 +2,7 @@ import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 import { getMaxSizeBytes, getMaxSizeMB, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -19,7 +19,7 @@ export default function SingleImageUploader({
   placeholder,
   imageType = 'normal', // 'normal' | 'masterPlan'
 }) {
-  const clinetId = Cookies.get("lena-website-client_id") || "";
+  const clinetId = LenaCookiesManager.getClientId() || "";
 
   const { t } = useI18n();
   const fileInputRef = useRef(null);

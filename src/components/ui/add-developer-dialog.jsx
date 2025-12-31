@@ -4,7 +4,7 @@ import Dialog from "@/components/ui/Dialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { useI18n } from "@/context/translate-api";
 import { addDeveloper, updateDeveloper } from "@/utils/api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,7 +20,7 @@ export default function AddDeveloperDialog({
   const isEdit = !!developer;
 
   const getClientId = () => {
-    return client_id || Cookies.get("lena-website-client_id") || "";
+    return client_id || LenaCookiesManager.getClientId() || "";
   };
 
   const [missingLang, setMissingLang] = useState(null);
@@ -408,11 +408,10 @@ export default function AddDeveloperDialog({
             type="submit"
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              isSubmitting
+            className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${isSubmitting
                 ? "pointer-events-none opacity-80"
                 : "hover:bg-primary/90"
-            }`}
+              }`}
           >
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">

@@ -1,10 +1,14 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-const BASE_URL =
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://api.lenaai.net";
+const getBaseUrl = () => {
+  const url = process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://api.lenaai.net";
+  return url.startsWith("http") ? url : `https://${url}`;
+};
+
+const BASE_URL = getBaseUrl();
 
 export async function POST() {
   try {
@@ -19,11 +23,11 @@ export async function POST() {
     }
 
     // Make server-to-server request (no CORS issues)
-    const response = await fetch(`${BASE_URL}/client/refresh-token`, {
+    // Make server-to-server request (no CORS issues)
+    const response = await fetch(`${BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Cookie: `refresh_token=${refreshToken}`,
+        "Accept": "application/json",
       },
     });
 

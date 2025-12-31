@@ -1,8 +1,9 @@
 "use client";
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { useI18n } from "@/context/translate-api";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -52,10 +53,11 @@ const Header = ({ clientName, clientID, clientEmail }) => {
 
   const confirmLogout = async () => {
     try {
-      // Remove cookies first
-      Cookies.remove("lena-website-client_id");
-      Cookies.remove("access_token");
-      Cookies.remove("refresh_token");
+      // Remove cookies
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
+      LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 
       // Wait a brief moment to ensure cookies are cleared
       await new Promise((resolve) => setTimeout(resolve, 100));
@@ -68,6 +70,8 @@ const Header = ({ clientName, clientID, clientEmail }) => {
       window.location.href = "/";
     }
   };
+
+  const visibleClientId = clientID || LenaCookiesManager.getClientId();
 
   return (
     <header className="bg-white shadow-sm p-4 flex justify-between lg:justify-end items-center no-print">
@@ -125,13 +129,23 @@ const Header = ({ clientName, clientID, clientEmail }) => {
             <div
               className={`absolute mt-2 ${locale === "ar" ? "left-0" : "right-0"} w-52 bg-white rounded-lg shadow-xl z-50 border border-gray-200 overflow-hidden`}
             >
-              <Link
-                href={`/${clientEmail}`}
-                className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3"
-              >
-                <Settings className="h-4 w-4" />
-                {t.header.userMenu.settings}
-              </Link>
+              {visibleClientId ? (
+                <Link
+                  href={`/${visibleClientId}`}
+                  className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3"
+                >
+                  <Settings className="h-4 w-4" />
+                  {t.header.userMenu.settings}
+                </Link>
+              ) : (
+                <button
+                  onClick={() => toast.error("Please login again to view settings")}
+                  className="text-base w-full font-medium text-gray-900 hover:bg-gray-200 py-2 px-4 flex items-center gap-3 text-left"
+                >
+                  <Settings className="h-4 w-4" />
+                  {t.header.userMenu.settings}
+                </button>
+              )}
 
               <button
                 onClick={handleLogout}

@@ -1,7 +1,8 @@
 "use client";
 
 import axios from "axios";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "./LenaCookiesManager";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 const BASE_URL = "https://api.lenaai.net"; // Force public URL for client-side requests
 
@@ -14,7 +15,8 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   if (!config.headers.Authorization) {
-    const token = Cookies.get("access_token");
+    const token = LenaCookiesManager.getAccessToken(); // Use helper or generic get(COOKIE_KEYS.ACCESS_TOKEN)
+    // Helper is cleaner: LenaCookiesManager.getAccessToken()
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -57,8 +59,8 @@ axiosInstance.interceptors.response.use(
         console.error("Failed to refresh token:", refreshError.message);
 
         // Redirect to login on refresh failure
-        Cookies.remove("access_token");
-        Cookies.remove("refresh_token");
+        LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
+        LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
         window.location.href = "/login";
       }
     }

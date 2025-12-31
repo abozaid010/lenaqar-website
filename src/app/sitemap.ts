@@ -8,8 +8,11 @@ const MAIN_SITE_URL = SITE_URL;
 // These are the properties that the AI agent talks about, recommends, shows master plans and payment plans for
 async function getPublicUnits() {
   try {
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.lenaai.net';
+    const apiUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
+
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.lenaai.net'}/public/units?limit=1000`,
+      `${apiUrl}/public/units?limit=1000`,
       {
         next: { revalidate: 3600 }, // Revalidate every hour
       }
@@ -26,7 +29,7 @@ async function getPublicUnits() {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
-  
+
   // Fetch dynamic data for properties/units
   const units = await getPublicUnits();
 
@@ -64,10 +67,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Limited to 5000 most recent/important units to keep sitemap manageable
   const unitPages: MetadataRoute.Sitemap = units.slice(0, 5000).map((unit: any) => ({
     url: `${MAIN_SITE_URL}/allProberties/${unit.id || unit.unitId}`,
-    lastModified: unit.updatedAt 
-      ? new Date(unit.updatedAt) 
-      : unit.createdAt 
-        ? new Date(unit.createdAt) 
+    lastModified: unit.updatedAt
+      ? new Date(unit.updatedAt)
+      : unit.createdAt
+        ? new Date(unit.createdAt)
         : now,
     changeFrequency: 'daily' as const,
     priority: 0.6,

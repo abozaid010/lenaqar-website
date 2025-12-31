@@ -35,11 +35,13 @@ export const metadata = {
   },
 };
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+
 export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
   const cookieStore = await cookies();
 
-  const clientId = cookieStore.get("lena-website-client_id")?.value || "";
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || "";
 
   return (
     <>
@@ -52,19 +54,19 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         ]}
       />
       <div className="container mb-4">
-      <UnitsFilter
-        appliedFilters={searchParams}
-        clientId={clientId}
-        isPublic={true}
-      />
-
-      <Suspense fallback={<LoadingSpinner message="Loading properties..." />}>
-        <UnitsPageQueryOptimized
-          searchParams={searchParams}
-          publicUnits={true}
+        <UnitsFilter
+          appliedFilters={searchParams}
+          clientId={clientId}
+          isPublic={true}
         />
-      </Suspense>
-    </div>
+
+        <Suspense fallback={<LoadingSpinner message="Loading properties..." />}>
+          <UnitsPageQueryOptimized
+            searchParams={searchParams}
+            publicUnits={true}
+          />
+        </Suspense>
+      </div>
     </>
   );
 }

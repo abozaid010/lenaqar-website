@@ -87,9 +87,11 @@ export const metadata = {
   },
 };
 
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+
 export default async function HomePage() {
   const cookieStore = await cookies();
-  const client_id = cookieStore.get("lena-website-client_id")?.value;
+  const client_id = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
 
   return (
     <>

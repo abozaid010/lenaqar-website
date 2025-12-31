@@ -3,13 +3,15 @@ import { cookies } from "next/headers";
 import { SITE_URL } from "../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import UnitSchema from "@/components/schema/UnitSchema";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+//...
 import axiosInstance from "@/utils/axiosInstance";
 
 async function fetchUnitData(id) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
-    
+    const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+
     const response = await axiosInstance.get(`/units/details/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -25,15 +27,15 @@ export async function generateMetadata({ params }) {
   const cookieStore = await cookies();
   const unit = await fetchUnitData(id);
 
-  const clientName = cookieStore.get("client_info")?.value
-    ? JSON.parse(cookieStore.get("client_info")?.value)?.client_name
+  const clientName = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value
+    ? JSON.parse(cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value)?.client_name
     : null;
 
   const title = unit?.unitTitle
     ? `${unit.unitTitle} - Admin Unit Details | LENAAI AI CRM`
     : clientName
-    ? `Admin Unit Details - ${clientName} | LENAAI AI CRM`
-    : "Admin Unit Details - AI CRM | LENAAI";
+      ? `Admin Unit Details - ${clientName} | LENAAI AI CRM`
+      : "Admin Unit Details - AI CRM | LENAAI";
   const description = unit
     ? `${unit.unitTitle || "Property"} - ${unit.area || ""} sqm, ${unit.rooms || ""} rooms. Manage and view unit details in LENAAI's AI-powered CRM platform. Track how the AI Sales Agent presents this property to clients.`
     : "View and manage unit details in LENAAI's AI-powered CRM platform. Track property information and how the AI Sales Agent engages with clients about this unit.";

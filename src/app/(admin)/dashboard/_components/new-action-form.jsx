@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/context/translate-api";
 import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
-import Cookies from "js-cookie";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -16,7 +16,7 @@ const initialState = {
 export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
   const { t, locale } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
-  const clientId = Cookies.get("lena-website-client_id");
+  const clientId = LenaCookiesManager.getClientId();
 
   // Get actions suitable for the action form (excluding "all" and null values)
   const ACTIONS = USER_ACTIONS.filter(
