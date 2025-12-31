@@ -23,11 +23,11 @@ export async function POST() {
     }
 
     // Make server-to-server request (no CORS issues)
-    const response = await fetch(`${BASE_URL}/client/refresh-token`, {
+    // Make server-to-server request (no CORS issues)
+    const response = await fetch(`${BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Cookie: `refresh_token=${refreshToken}`,
+        "Accept": "application/json",
       },
     });
 

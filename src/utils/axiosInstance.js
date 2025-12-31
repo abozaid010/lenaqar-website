@@ -39,10 +39,10 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 503 && !originalRequest._retry) {
       originalRequest._retry = true;
       console.log("503 error detected, retrying request...");
-      
+
       // Wait before retry (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       try {
         return axiosInstance(originalRequest);
       } catch (retryError) {
@@ -67,12 +67,11 @@ axiosInstance.interceptors.response.use(
 
         // Call external API directly to refresh the token
         const refreshResponse = await axios.post(
-          `${BASE_URL}/client/refresh-token`,
+          `${BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
           {},
           {
             headers: {
-              "Content-Type": "application/json",
-              Cookie: `refresh_token=${refreshToken}`,
+              "Accept": "application/json",
             },
           }
         );
