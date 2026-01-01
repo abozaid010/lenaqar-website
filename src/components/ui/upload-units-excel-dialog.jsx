@@ -21,6 +21,10 @@ import {
   excelFieldMapper,
   createHeaderMapping,
 } from "@/utils/excel-field-mapper";
+import {
+  excelTemplateColumns,
+  excelTemplateExampleRow,
+} from "@/constants/excel-template-example";
 
 const downloadTemplateFile = () => {
   const link = document.createElement("a");
@@ -389,37 +393,57 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               />
 
               {!selectedFile ? (
-                <div
-                  onClick={handleUploadClick}
-                  className="space-y-4 cursor-pointer"
-                >
-                  <div className="flex justify-center">
-                    <Upload size={48} className="text-gray-400" />
+                <div className="space-y-6">
+                  {/* Example Table */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse" dir="ltr">
+                      <thead>
+                        <tr className="bg-gray-100">
+                          {excelTemplateColumns.map((column) => (
+                            <th
+                              key={column.key}
+                              className="px-4 py-2 text-left font-semibold text-gray-700 border border-gray-300"
+                            >
+                              {column.label}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr className="bg-white">
+                          {excelTemplateColumns.map((column) => (
+                            <td
+                              key={column.key}
+                              className="px-4 py-2 text-gray-700 border border-gray-300"
+                            >
+                              {excelTemplateExampleRow[column.key] || "-"}
+                            </td>
+                          ))}
+                        </tr>
+                      </tbody>
+                    </table>
                   </div>
-                  <div>
-                    <p className="text-gray-600 mb-2">
-                      {t.uploadExcel?.dragDrop ||
-                        "Drag and drop your Excel file here, or"}
-                    </p>
-                    <div className="flex items-center justify-center gap-3">
-                      <button
-                        onClick={handleUploadClick}
-                        className="px-12 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
-                      >
-                        {t.uploadExcel?.browseFiles || "Browse Files"}
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadTemplateFile();
-                        }}
-                        className="px-6 py-2 bg-green-600 text-white rounded-md hover:opacity-90 transition-opacity flex items-center gap-2"
-                      >
-                        <Download size={18} />
-                        {t.uploadExcel?.downloadTemplate || "Download Template"}
-                      </button>
-                    </div>
+
+                  {/* Buttons */}
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        downloadTemplateFile();
+                      }}
+                      className="px-6 py-2 text-primary hover:underline transition-all flex items-center gap-2"
+                    >
+                      <Download size={18} />
+                      {t.uploadExcel?.downloadTemplate || "Download Template"}
+                    </button>
+                    <button
+                      onClick={handleUploadClick}
+                      className="px-12 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                    >
+                      {t.uploadExcel?.browseFiles || "Upload"}
+                    </button>
                   </div>
+
                   <p className="text-sm text-gray-500">
                     {t.uploadExcel?.supportedFormats ||
                       "Supported formats: .xlsx, .xls"}
