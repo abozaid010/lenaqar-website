@@ -44,6 +44,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [uploadStatus, setUploadStatus] = useState([]);
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
   const [missingColumns, setMissingColumns] = useState([]);
+  const [manualHeaderMapping, setManualHeaderMapping] = useState({});
   const fileInputRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
@@ -53,7 +54,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const parseExcelFile = async (file) => {
+  const parseExcelFile = async (file, useManualMapping = false) => {
     setIsProcessing(true);
     setError(null);
 
@@ -86,7 +87,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       });
 
       // Create header mapping to canonical keys
-      const headerMapping = createHeaderMapping(headers);
+      // Merge automatic mapping with manual mapping
+      const autoHeaderMapping = createHeaderMapping(headers);
+      const headerMapping = useManualMapping 
+        ? { ...autoHeaderMapping, ...manualHeaderMapping }
+        : autoHeaderMapping;
 
       // Transform rows to structured JSON using canonical keys
       const units = rows.map((row) => {
@@ -247,17 +252,66 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setParsedData(null);
     setError(null);
     setUploadStatus([]);
+    setManualHeaderMapping({});
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleHeaderMappingChange = (originalHeader, newCanonicalKey) => {
+    setManualHeaderMapping(prev => {
+      const updated = { ...prev };
+      if (newCanonicalKey) {
+        updated[originalHeader] = newCanonicalKey;
+      } else {
+        delete updated[originalHeader];
+      }
+      return updated;
+    });
+
+    // Re-parse the file with the updated mapping
+    if (selectedFile) {
+      parseExcelFile(selectedFile, true);
+    }
+  };
+
+  const getHeaderValidationStatus = (header) => {
+    const autoMapping = createHeaderMapping([header]);
+    const isAutoMapped = !!autoMapping[header];
+    const isManuallyMapped = !!manualHeaderMapping[header];
+    
+    return {
+      isValid: isAutoMapped || isManuallyMapped,
+      mappedKey: manualHeaderMapping[header] || autoMapping[header],
+      isManual: isManuallyMapped
+    };
+  };
+
+  const getUsedMappings = () => {
+    if (!parsedData) return new Set();
+    const used = new Set();
+    
+    parsedData.headers.forEach(header => {
+      const status = getHeaderValidationStatus(header);
+      if (status.mappedKey) {
+        used.add(status.mappedKey);
+      }
+    });
+    
+    return used;
   };
 
   const getMissingColumns = () => {
     if (!parsedData) return [];
     const headers = parsedData.headers || [];
 
-    // Use the utility class to get missing keys
-    return excelFieldMapper.getMissingKeys(headers, VALIDATED_KEYS);
+    // Create combined mapping (auto + manual)
+    const autoMapping = createHeaderMapping(headers);
+    const combinedMapping = { ...autoMapping, ...manualHeaderMapping };
+    const mappedKeys = new Set(Object.values(combinedMapping));
+
+    // Find missing required keys
+    return VALIDATED_KEYS.filter(key => !mappedKeys.has(key));
   };
 
   const handleSubmit = async () => {
@@ -599,6 +653,24 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </span>
                   </div>
 
+                  {/* Column Mapping Guide */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+                      <AlertCircle className="text-blue-600" size={16} />
+                      Column Mapping Guide
+                    </h4>
+                    <div className="text-sm text-gray-700 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
+                        <span><strong>Green headers:</strong> Automatically recognized and mapped</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
+                        <span><strong>Red headers:</strong> Not recognized - select the correct mapping from dropdown</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="border rounded-lg overflow-hidden" dir="ltr">
                     <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                       <table className="w-full text-sm">
@@ -607,14 +679,60 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                             <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
                               #
                             </th>
-                            {parsedData.headers.map((header, idx) => (
-                              <th
-                                key={idx}
-                                className="px-3 py-2 text-left font-semibold text-gray-700 border-b whitespace-nowrap"
-                              >
-                                {header}
-                              </th>
-                            ))}
+                            {parsedData.headers.map((header, idx) => {
+                              const validationStatus = getHeaderValidationStatus(header);
+                              const isValid = validationStatus.isValid;
+                              const mappedKey = validationStatus.mappedKey;
+                              const usedMappings = getUsedMappings();
+                              
+                              return (
+                                <th
+                                  key={idx}
+                                  className={`px-3 py-2 text-left font-semibold border-b ${
+                                    isValid 
+                                      ? "bg-green-100 text-green-800" 
+                                      : "bg-red-100 text-red-800"
+                                  }`}
+                                >
+                                  {isValid ? (
+                                    <div className="flex flex-col gap-1">
+                                      <span className="text-sm">{header}</span>
+                                      {mappedKey && mappedKey !== header && (
+                                        <span className="text-xs font-normal text-green-600">
+                                          → {mappedKey}
+                                        </span>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col gap-1 min-w-[180px]">
+                                      <span className="text-xs mb-1">
+                                        {header} (Not Mapped)
+                                      </span>
+                                      <select
+                                        value={manualHeaderMapping[header] || ""}
+                                        onChange={(e) => handleHeaderMappingChange(header, e.target.value)}
+                                        className="text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                                      >
+                                        <option value="">Select mapping...</option>
+                                        {excelTemplateColumns.map((col) => {
+                                          const isUsed = usedMappings.has(col.key) && manualHeaderMapping[header] !== col.key;
+                                          return (
+                                            <option 
+                                              key={col.key} 
+                                              value={col.key}
+                                              disabled={isUsed}
+                                              className={isUsed ? "text-gray-400" : ""}
+                                            >
+                                              {col.label} ({col.key}){isUsed ? " ✓" : ""}
+                                            </option>
+                                          );
+                                        })}
+                                      </select>
+                                    </div>
+                                  )}
+                                </th>
+                              );
+                            })}
                           </tr>
                         </thead>
                         <tbody>
