@@ -40,10 +40,13 @@ The feature displays all required template columns and automatically maps them t
 - Template columns that are successfully mapped to Excel headers
 - Display with green background (`bg-green-100`)
 - Show the template label and the Excel header it's mapped from
+- **Always include a dropdown** to allow users to change the mapping
+- Dropdown pre-selected with current Excel header
 - Example: 
   ```
-  Building Type (Green)
+  Building Type ✓ (Green)
   ← buildingType
+  [buildingType ▼]  (dropdown - can change)
   ```
 
 #### Unresolved Columns (Red Background)
@@ -58,16 +61,23 @@ The feature displays all required template columns and automatically maps them t
   ```
 
 ### 4. **Manual Mapping**
-- For unresolved columns, users select from a dropdown
+- **All columns have dropdowns** (both green and red)
+- Green columns: Dropdown pre-selected with current mapping
+- Red columns: Dropdown shows "Select mapping..." placeholder
+- Users can select or change mapping from dropdown
 - Dropdown shows all Excel headers from the first row of the sheet
 - Already-used Excel headers are disabled to prevent duplicate assignments
-- When a mapping is selected, the system automatically re-parses the Excel file
+- When a mapping is selected or changed, the system automatically re-parses the Excel file
 
 ### 5. **Smart Dropdown Features**
+- **Present on all columns** for maximum flexibility
 - Shows all Excel headers from the uploaded file
 - Disables options that are already mapped by other columns (marked with ✓)
+- Current selection is never disabled (can always change to different header)
 - Updates in real-time when selections change
 - Format: `{excelHeader}` - e.g., "named unit", "price", "floor"
+- Green columns: Show current mapping and allow changes
+- Red columns: Show placeholder "Select mapping..."
 
 ## Implementation Details
 
@@ -171,8 +181,9 @@ manualHeaderMapping = {
 ### Green (Resolved) Column Example:
 ```
 ┌──────────────────────┐
-│ Building Type        │ (Green background)
+│ Building Type ✓      │ (Green background)
 │ ← buildingType       │ (Small green text)
+│ [buildingType    ▼]  │ (Dropdown - editable)
 └──────────────────────┘
 ```
 
@@ -186,18 +197,19 @@ manualHeaderMapping = {
 
 ## Guide Section
 A helpful guide is displayed above the table:
-- 🟢 **Green columns:** Mapped to Excel sheet column (resolved)
+- 🟢 **Green columns:** Mapped to Excel sheet column (resolved) - Dropdown enabled to change mapping if needed
 - 🔴 **Red columns:** Not mapped - select Excel column from dropdown
 
 ## Technical Benefits
 
 1. **User-Centric:** Users see exactly what fields the system expects
-2. **Flexible:** Works with any Excel column names and order
+2. **Flexible:** Works with any Excel column names and order, all mappings editable
 3. **Visual:** Clear feedback on what's mapped and what needs attention
 4. **Smart:** Prevents duplicate mappings
 5. **Automatic:** Most common variations are recognized automatically
 6. **Real-time:** Changes update the preview immediately
 7. **Consistent:** Always shows data in the same structure regardless of Excel format
+8. **Editable:** All columns have dropdowns - override any auto-mapping if needed
 
 ## Files Modified
 

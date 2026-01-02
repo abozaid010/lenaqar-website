@@ -41,14 +41,18 @@ The system maps your Excel headers to the template columns automatically when po
 ### 1. Resolved Column (Green State)
 ```
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Building Type                 ┃  ← Template column name
+┃ Building Type ✓               ┃  ← Template column name
 ┃ ← buildingType                ┃  ← Excel header it's mapped from
+┃ ┌─────────────────────────┐   ┃
+┃ │ buildingType         ▼  │   ┃  ← Dropdown (editable)
+┃ └─────────────────────────┘   ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     Background: bg-green-100 (Light Green)
     Text: text-green-800 (Dark Green)
+    Border: border-green-400
 ```
 
-**Meaning:** This template column successfully found a matching Excel header (automatically or manually).
+**Meaning:** This template column successfully found a matching Excel header (automatically or manually). User can still change it via dropdown.
 
 ### 2. Unresolved Column (Red State)
 ```
@@ -60,6 +64,7 @@ The system maps your Excel headers to the template columns automatically when po
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
     Background: bg-red-100 (Light Red)
     Text: text-red-800 (Dark Red)
+    Border: border-red-400
 ```
 
 **Meaning:** This template column has no matching Excel header. User needs to select one from the dropdown.
@@ -102,7 +107,7 @@ The system maps your Excel headers to the template columns automatically when po
 ┣━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━┫
 ┃   │   ✓ (Green)     │ ✓ (Green)   │   ✗ (Red)      │   ✗ (Red)      │   ✓ (Green)    │ ✓(Grn)│   ✗ (Red)   │  ✓ (Green) ┃
 ┃   │ ← buildingType  │ ← project   │  Dropdown:     │  Dropdown:     │ ← bathroomCount│← floor│  Dropdown:  │← gardenSize┃
-┃   │                 │             │  [Select...]   │  [Select...]   │                │       │ [Select...] │            ┃
+┃   │  [buildingType▼]│  [project▼] │  [Select...]   │  [Select...]   │  [bathrooms▼]  │[floor▼]│[Select...] │[gardenSize▼]┃
 ┣━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━┫
 ┃ 1 │   apartment     │ palm hills  │       -        │       -        │       2        │   2   │      -      │     10     ┃
 ┃ 2 │     villa       │   madinty   │       -        │       -        │       3        │   3   │      -      │     50     ┃
@@ -110,8 +115,10 @@ The system maps your Excel headers to the template columns automatically when po
 ```
 
 **Key Points:**
-- Green columns are automatically mapped ✓
-- Red columns need manual mapping ✗
+- All columns have dropdowns (both green and red) ✓
+- Green columns show current mapping above dropdown
+- Green columns have dropdown pre-selected with current value
+- Red columns have dropdown with "Select mapping..." placeholder
 - Data values come from your Excel based on the mapping
 - "-" shows for unmapped columns
 
@@ -156,12 +163,22 @@ User selects "named unit" for "Unit Title"
 
 ### Step 5: Real-Time Update
 - "Unit Title" column turns green
-- Shows: "Unit Title ← named unit"
+- Shows: "Unit Title ✓ ← named unit"
+- Dropdown now shows "named unit" as selected value
 - Data appears in the preview table
 - Other dropdowns update (remove "named unit" as option)
 
+### Step 6: User Can Change Auto-Mapped Columns
+Even green columns have dropdowns! If user wants to change:
+- Click dropdown on green "Building Type" column
+- Currently shows: "buildingType" selected
+- User can select different Excel header if needed
+- System re-parses with new mapping
+
 ### Step 6: Complete Mapping or Upload
+- All columns (green and red) have editable dropdowns
 - Map remaining columns as needed
+- Change auto-mapped columns if incorrect
 - Or proceed with partial mapping (optional fields can remain empty)
 - Click Upload button
 
@@ -256,7 +273,8 @@ Action:
 ┃ ℹ️  Column Mapping Guide                                  ┃
 ┃ ─────────────────────────────────────────────────────────┃
 ┃  🟩  Green columns: Mapped to Excel sheet column         ┃
-┃                     (resolved)                            ┃
+┃                     (resolved) - Dropdown enabled to      ┃
+┃                     change mapping if needed              ┃
 ┃  🟥  Red columns: Not mapped - select Excel column       ┃
 ┃                   from dropdown                           ┃
 ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
@@ -297,12 +315,13 @@ Preview (24 units)                          Worksheet: Sheet1
 ## Benefits
 
 1. **Predictable:** Always see the same column structure
-2. **Flexible:** Works with any Excel format
+2. **Flexible:** Works with any Excel format, can override any mapping
 3. **Visual:** Clear red/green feedback
 4. **Intuitive:** Dropdown shows YOUR actual headers
 5. **Smart:** Prevents duplicate mappings
 6. **Fast:** Real-time updates
 7. **Forgiving:** Optional fields can remain unmapped
+8. **Editable:** All columns have dropdowns - change any mapping anytime
 
 ---
 

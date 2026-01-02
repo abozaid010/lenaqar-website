@@ -699,40 +699,38 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       : "bg-red-100 text-red-800"
                                   }`}
                                 >
-                                  {isResolved ? (
-                                    <div className="flex flex-col gap-1">
-                                      <span className="text-sm font-semibold">{templateCol.label}</span>
-                                      <span className="text-xs font-normal text-green-600">
+                                  <div className="flex flex-col gap-1 min-w-[180px]">
+                                    <span className="text-xs mb-1 font-semibold">
+                                      {templateCol.label} {isResolved ? "✓" : "(Not Mapped)"}
+                                    </span>
+                                    {isResolved && (
+                                      <span className="text-xs font-normal mb-1" style={{color: isResolved ? "#059669" : "#dc2626"}}>
                                         ← {excelHeader}
                                       </span>
-                                    </div>
-                                  ) : (
-                                    <div className="flex flex-col gap-1 min-w-[180px]">
-                                      <span className="text-xs mb-1 font-semibold">
-                                        {templateCol.label} (Not Mapped)
-                                      </span>
-                                      <select
-                                        value={manualHeaderMapping[templateCol.key] || ""}
-                                        onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
-                                        className="text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                                      >
-                                        <option value="">Select mapping...</option>
-                                        {excelHeaders.map((excelHeader, idx) => {
-                                          const isUsed = usedExcelHeaders.has(excelHeader) && manualHeaderMapping[templateCol.key] !== excelHeader;
-                                          return (
-                                            <option 
-                                              key={idx} 
-                                              value={excelHeader}
-                                              disabled={isUsed}
-                                              className={isUsed ? "text-gray-400" : ""}
-                                            >
-                                              {excelHeader}{isUsed ? " ✓" : ""}
-                                            </option>
-                                          );
-                                        })}
-                                      </select>
-                                    </div>
-                                  )}
+                                    )}
+                                    <select
+                                      value={excelHeader || ""}
+                                      onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
+                                      className={`text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
+                                        isResolved ? "border-green-400" : "border-red-400"
+                                      }`}
+                                    >
+                                      <option value="">Select mapping...</option>
+                                      {excelHeaders.map((header, idx) => {
+                                        const isUsed = usedExcelHeaders.has(header) && excelHeader !== header;
+                                        return (
+                                          <option 
+                                            key={idx} 
+                                            value={header}
+                                            disabled={isUsed}
+                                            className={isUsed ? "text-gray-400" : ""}
+                                          >
+                                            {header}{isUsed ? " ✓" : ""}
+                                          </option>
+                                        );
+                                      })}
+                                    </select>
+                                  </div>
                                 </th>
                               );
                             })}
