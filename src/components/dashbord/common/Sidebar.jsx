@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Users2,
   Loader2,
+  Newspaper,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -241,6 +242,23 @@ const Sidebar = () => {
             <LayoutDashboard className="h-5 w-5 mr-3" />
             <span>{t.sidebar.developers}</span>
             {isPending && pendingPath === "/developers" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
+          </Link>
+
+          <Link
+            href="/news"
+            prefetch={true}
+            onClick={(e) => handleNavigation("/news", e)}
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/news") || pendingPath === "/news"
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            } ${isPending && pendingPath === "/news" ? "opacity-70" : ""}`}
+          >
+            <Newspaper className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.news}</span>
+            {isPending && pendingPath === "/news" && (
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>

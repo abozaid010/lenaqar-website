@@ -217,6 +217,7 @@ export default {
     },
     logoutSuccess: "Logout Successful",
     developers: "Developers",
+    news: "News",
   },
   schaduall: {
     assignError: "Failed to assign salesperson",
@@ -1211,4 +1212,9 @@ export default {
       },
     },
   },
+  noNews: "No news available at the moment",
+  newsSubtitle: "Latest real estate news and updates",
+  readMore: "Read more",
+  loading: "Loading...",
+  error: "Error loading content",
 };

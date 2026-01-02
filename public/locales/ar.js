@@ -225,6 +225,7 @@ export default {
     },
     logoutSuccess: "تم تسجيل الخروج بنجاح",
     developers: "المطورين",
+    news: "الأخبار",
   },
   dashboardFilter: {
     actions: {
@@ -1266,4 +1267,9 @@ export default {
       },
     },
   },
+  noNews: "لا توجد أخبار متاحة في الوقت الحالي",
+  newsSubtitle: "أحدث أخبار وتحديثات القطاع العقاري",
+  readMore: "اقرأ المزيد",
+  loading: "جاري التحميل...",
+  error: "خطأ في تحميل المحتوى",
 };
