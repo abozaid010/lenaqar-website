@@ -442,7 +442,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl max-w-[95%] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between py-4 px-6 border-b">
           <div className="flex items-center gap-3">
