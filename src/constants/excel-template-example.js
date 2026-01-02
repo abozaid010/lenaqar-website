@@ -6,63 +6,92 @@
 
 export const excelTemplateColumns = [
   {
-    key: "area",
-    label: "Area",
-  },
-  {
-    key: "price",
-    label: "price",
-  },
-  {
-    key: "floor",
-    label: "floor",
+    key: "buildingType",
+    label: "Building Type",
   },
   {
     key: "project",
-    label: "project",
+    label: "Project",
   },
   {
-    key: "title",
-    label: "title",
+    key: "view",
+    label: "View",
   },
-
-    {
-        key: "bathroomCount",
-        label: "Bathrooms",
-    },
-    {
-        key: "roomsCount",
-        label: "Rooms",
-    },
-    {
-        key: "landArea",
-        label: "Land Area",
-    },
-    {
-        key: "gardenSize",
-        label: "Garden Size",
-    },
-    {
-        key: "finishing",
-        label: "Finishing",
-    },
-    {
-        key: "furnishing",
-        label: "Furnishing",
-    },
+  {
+    key: "unitTitle",
+    label: "Unit Title",
+  },
+  {
+    key: "bathroomCount",
+    label: "Bathroom Count",
+  },
+  {
+    key: "floor",
+    label: "Floor",
+  },
+  {
+    key: "roomsCount",
+    label: "Rooms Count",
+  },
+  {
+    key: "landArea",
+    label: "Land Area",
+  },
+  {
+    key: "gardenSize",
+    label: "Garden Area",
+  },
+  {
+    key: "finishing",
+    label: "Finishing",
+  },
+  {
+    key: "furnishing",
+    label: "Furnishing",
+  },
+  {
+    key: "garageArea",
+    label: "Garage Area",
+  },
+  {
+    key: "images",
+    label: "Images",
+  },
+  {
+    key: "model",
+    label: "Model",
+  },
+  {
+    key: "downPayment",
+    label: "Down Payment",
+  },
+  {
+    key: "totalPrice",
+    label: "Total Price",
+  },
+  {
+    key: "deliveryDate",
+    label: "Delivery Date",
+  },
 ];
 
 export const excelTemplateExampleRow = {
-  area: "100",
-  price: "100",
-  floor: "1",
+  buildingType: "apartment",
   project: "madinty",
-  title: "two bedrooms",
+  view: "garden",
+  unitTitle: "two bedrooms",
   bathroomCount: "2",
+  floor: "1",
   roomsCount: "2",
   landArea: "100",
-  gardenSize: "100",
-  finishing: "finish",
+  gardenSize: "50",
+  finishing: "finished",
   furnishing: "furnished",
+  garageArea: "20",
+  images: "https://example.com/image1.jpg",
+  model: "A1",
+  downPayment: "50000",
+  totalPrice: "1000000",
+  deliveryDate: "2025-12-31",
 };
 
