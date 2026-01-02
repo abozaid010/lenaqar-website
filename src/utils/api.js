@@ -587,3 +587,28 @@ export function getClientid() {
   }
   return clientId;
 }
+
+// News API //
+export async function fetchNews() {
+  try {
+    const response = await axiosInstance.get("/news/get");
+
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server: missing response.data.data");
+    }
+
+    // Validate that news is an array
+    if (!Array.isArray(response.data.data)) {
+      throw new Error(
+        `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+      );
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch news:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
+  }
+}
