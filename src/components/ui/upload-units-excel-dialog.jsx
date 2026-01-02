@@ -464,8 +464,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         </div>
 
         {/* Content */}
-        <div className="p-4 flex-1 overflow-y-auto">
-          <div className="space-y-3">
+        <div className="p-4 flex-1 overflow-hidden flex flex-col">
+          <div className="space-y-3 flex-1 flex flex-col overflow-hidden">
             {/* Upload Area */}
             <div className={`border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-primary transition-colors ${!selectedFile ? 'p-8' : 'p-3'}`} style={selectedFile ? { minHeight: '50px' } : {}}>
               <input
@@ -636,7 +636,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               const unresolvedCount = excelTemplateColumns.length - resolvedCount;
 
               return (
-                <div className="space-y-2">
+                <div className="space-y-2 flex flex-col flex-1 overflow-hidden">
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500 flex items-center gap-4">
                       <span className="flex items-center gap-1">
@@ -674,8 +674,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </div>
                   </div>
 
-                  <div className="border rounded-lg overflow-hidden" dir="ltr">
-                    <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                  <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
+                    <div className="overflow-x-auto overflow-y-auto flex-1">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           <tr>
@@ -779,22 +779,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       </table>
                     </div>
                   </div>
-
-                  {/* Parsed JSON Preview (Collapsible) */}
-                  <details className="border rounded-lg">
-                    <summary className="px-4 py-3 cursor-pointer hover:bg-gray-50 font-medium text-gray-700">
-                      {t.uploadExcel?.viewJson || "View Parsed JSON"} (
-                      {parsedData.units.length} {t.uploadExcel?.units || "units"})
-                    </summary>
-                    <div
-                      className="p-4 bg-gray-50 max-h-[300px] overflow-auto"
-                      dir="ltr"
-                    >
-                      <pre className="text-xs text-gray-800 whitespace-pre-wrap">
-                        {JSON.stringify(parsedData.units, null, 2)}
-                      </pre>
-                    </div>
-                  </details>
                 </div>
               );
             })()}
