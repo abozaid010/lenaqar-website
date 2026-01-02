@@ -442,7 +442,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl max-w-[85%] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg shadow-xl max-w-[95%] w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between py-4 px-6 border-b">
           <h2 className="text-xl font-semibold text-gray-800">
@@ -681,7 +681,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           <tr>
-                            <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
+                            <th className="px-2 py-2 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
                               #
                             </th>
                             {excelTemplateColumns.map((templateCol, idx) => {
@@ -693,29 +693,30 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               return (
                                 <th
                                   key={idx}
-                                  className={`px-3 py-2 text-left font-semibold border-b ${
+                                  className={`px-2 py-2 text-left font-semibold border-b ${
                                     isResolved 
                                       ? "bg-green-100 text-green-800" 
                                       : "bg-red-100 text-red-800"
                                   }`}
+                                  style={{ minWidth: "80px", maxWidth: "120px" }}
                                 >
-                                  <div className="flex flex-col gap-1 min-w-[180px]">
-                                    <span className="text-xs mb-1 font-semibold">
-                                      {templateCol.label} {isResolved ? "✓" : "(Not Mapped)"}
+                                  <div className="flex flex-col gap-1">
+                                    <span className="text-xs mb-1 font-semibold truncate" title={templateCol.label}>
+                                      {templateCol.label} {isResolved ? "✓" : ""}
                                     </span>
                                     {isResolved && (
-                                      <span className="text-xs font-normal mb-1" style={{color: isResolved ? "#059669" : "#dc2626"}}>
+                                      <span className="text-xs font-normal mb-1 truncate" style={{color: "#059669"}} title={excelHeader}>
                                         ← {excelHeader}
                                       </span>
                                     )}
                                     <select
                                       value={excelHeader || ""}
                                       onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
-                                      className={`text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
+                                      className={`text-xs px-1 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
                                         isResolved ? "border-green-400" : "border-red-400"
                                       }`}
                                     >
-                                      <option value="">Select mapping...</option>
+                                      <option value="">Select...</option>
                                       {excelHeaders.map((header, idx) => {
                                         const isUsed = usedExcelHeaders.has(header) && excelHeader !== header;
                                         return (
@@ -744,7 +745,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                 rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
                               }
                             >
-                              <td className="px-3 py-2 text-gray-600 border-b font-medium">
+                              <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
                                 {rowIndex + 1}
                               </td>
                               {excelTemplateColumns.map((templateCol, colIndex) => {
@@ -765,9 +766,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                 return (
                                   <td
                                     key={colIndex}
-                                    className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
+                                    className="px-2 py-2 text-gray-700 border-b"
+                                    style={{ minWidth: "80px", maxWidth: "120px" }}
                                   >
-                                    {cellValue}
+                                    <div className="truncate" title={cellValue}>
+                                      {cellValue}
+                                    </div>
                                   </td>
                                 );
                               })}
