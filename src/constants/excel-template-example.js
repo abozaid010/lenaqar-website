@@ -54,10 +54,6 @@ export const excelTemplateColumns = [
     label: "Garage Area",
   },
   {
-    key: "images",
-    label: "Images",
-  },
-  {
     key: "model",
     label: "Model",
   },
@@ -88,7 +84,6 @@ export const excelTemplateExampleRow = {
   finishing: "finished",
   furnishing: "furnished",
   garageArea: "20",
-  images: "https://example.com/image1.jpg",
   model: "A1",
   downPayment: "50000",
   totalPrice: "1000000",

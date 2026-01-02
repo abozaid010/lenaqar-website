@@ -44,7 +44,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [uploadStatus, setUploadStatus] = useState([]);
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
   const [missingColumns, setMissingColumns] = useState([]);
-  const [manualHeaderMapping, setManualHeaderMapping] = useState({});
+  const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
   const fileInputRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
@@ -54,7 +54,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const parseExcelFile = async (file, useManualMapping = false) => {
+  const parseExcelFile = async (file) => {
     setIsProcessing(true);
     setError(null);
 
@@ -77,7 +77,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       }
 
-      const headers = jsonData[0];
+      const excelHeaders = jsonData[0];
 
       const rows = jsonData.slice(1).filter((row) => {
         // Filter out completely empty rows
@@ -86,29 +86,36 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       });
 
-      // Create header mapping to canonical keys
-      // Merge automatic mapping with manual mapping
-      const autoHeaderMapping = createHeaderMapping(headers);
-      const headerMapping = useManualMapping 
-        ? { ...autoHeaderMapping, ...manualHeaderMapping }
-        : autoHeaderMapping;
+      // Create automatic mapping from Excel headers to template keys
+      const autoHeaderMapping = createHeaderMapping(excelHeaders);
+      
+      // Create reverse mapping: templateKey -> excelHeader (for auto-mapped columns)
+      const autoTemplateToExcel = {};
+      Object.entries(autoHeaderMapping).forEach(([excelHeader, templateKey]) => {
+        if (!autoTemplateToExcel[templateKey]) {
+          autoTemplateToExcel[templateKey] = excelHeader;
+        }
+      });
 
-      // Transform rows to structured JSON using canonical keys
+      // Merge auto mapping with manual mapping (manual takes precedence)
+      const templateToExcelMapping = { ...autoTemplateToExcel, ...manualHeaderMapping };
+
+      // Transform rows to structured JSON using template keys
       const units = rows.map((row) => {
         const unit = {};
 
-        // Map each column to the unit object using canonical keys
-        headers.forEach((header, colIndex) => {
-          const value = row[colIndex];
-
-          // Skip empty values
-          if (value === undefined || value === null || value === "") {
-            return;
+        // For each template column, get value from Excel using the mapping
+        excelTemplateColumns.forEach((templateCol) => {
+          const excelHeader = templateToExcelMapping[templateCol.key];
+          if (excelHeader) {
+            const colIndex = excelHeaders.indexOf(excelHeader);
+            if (colIndex >= 0) {
+              const value = row[colIndex];
+              if (value !== undefined && value !== null && value !== "") {
+                unit[templateCol.key] = value;
+              }
+            }
           }
-
-          // Use canonical key if mapping exists, otherwise use original header
-          const canonicalKey = headerMapping[header] || header;
-          unit[canonicalKey] = value;
         });
 
         return unit;
@@ -199,8 +206,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       });
 
       setParsedData({
-        headers,
-        headerMapping, // Store mapping for validation and preview
+        excelHeaders, // Excel sheet headers (first row)
+        templateToExcelMapping, // Maps template key -> Excel header
         rows,
         units: transformedUnits,
         summary: {
@@ -258,43 +265,56 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     }
   };
 
-  const handleHeaderMappingChange = (originalHeader, newCanonicalKey) => {
+  const handleHeaderMappingChange = (templateKey, excelHeader) => {
     setManualHeaderMapping(prev => {
       const updated = { ...prev };
-      if (newCanonicalKey) {
-        updated[originalHeader] = newCanonicalKey;
+      if (excelHeader) {
+        updated[templateKey] = excelHeader;
       } else {
-        delete updated[originalHeader];
+        delete updated[templateKey];
       }
       return updated;
     });
 
     // Re-parse the file with the updated mapping
     if (selectedFile) {
-      parseExcelFile(selectedFile, true);
+      parseExcelFile(selectedFile);
     }
   };
 
-  const getHeaderValidationStatus = (header) => {
-    const autoMapping = createHeaderMapping([header]);
-    const isAutoMapped = !!autoMapping[header];
-    const isManuallyMapped = !!manualHeaderMapping[header];
+  const getTemplateColumnStatus = (templateKey) => {
+    if (!parsedData) return { isResolved: false, excelHeader: null, isManual: false };
     
-    return {
-      isValid: isAutoMapped || isManuallyMapped,
-      mappedKey: manualHeaderMapping[header] || autoMapping[header],
-      isManual: isManuallyMapped
-    };
+    // Check if manually mapped
+    if (manualHeaderMapping[templateKey]) {
+      return {
+        isResolved: true,
+        excelHeader: manualHeaderMapping[templateKey],
+        isManual: true
+      };
+    }
+    
+    // Check if auto-mapped
+    const autoMapped = parsedData.templateToExcelMapping[templateKey];
+    if (autoMapped) {
+      return {
+        isResolved: true,
+        excelHeader: autoMapped,
+        isManual: false
+      };
+    }
+    
+    return { isResolved: false, excelHeader: null, isManual: false };
   };
 
-  const getUsedMappings = () => {
+  const getUsedExcelHeaders = () => {
     if (!parsedData) return new Set();
     const used = new Set();
     
-    parsedData.headers.forEach(header => {
-      const status = getHeaderValidationStatus(header);
-      if (status.mappedKey) {
-        used.add(status.mappedKey);
+    excelTemplateColumns.forEach(templateCol => {
+      const status = getTemplateColumnStatus(templateCol.key);
+      if (status.excelHeader) {
+        used.add(status.excelHeader);
       }
     });
     
@@ -303,15 +323,18 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const getMissingColumns = () => {
     if (!parsedData) return [];
-    const headers = parsedData.headers || [];
-
-    // Create combined mapping (auto + manual)
-    const autoMapping = createHeaderMapping(headers);
-    const combinedMapping = { ...autoMapping, ...manualHeaderMapping };
-    const mappedKeys = new Set(Object.values(combinedMapping));
+    
+    // Find all resolved template keys
+    const resolvedKeys = new Set();
+    excelTemplateColumns.forEach(templateCol => {
+      const status = getTemplateColumnStatus(templateCol.key);
+      if (status.isResolved) {
+        resolvedKeys.add(templateCol.key);
+      }
+    });
 
     // Find missing required keys
-    return VALIDATED_KEYS.filter(key => !mappedKeys.has(key));
+    return VALIDATED_KEYS.filter(key => !resolvedKeys.has(key));
   };
 
   const handleSubmit = async () => {
@@ -594,16 +617,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
             {/* Preview Table */}
             {parsedData && !isProcessing && (() => {
-              const headers = parsedData.headers || [];
-              const headerMapping = parsedData.headerMapping || {};
+              const excelHeaders = parsedData.excelHeaders || [];
+              const templateToExcelMapping = parsedData.templateToExcelMapping || {};
 
-              // Get matched canonical keys
-              const matchedKeys = new Set(Object.values(headerMapping));
-              const foundKeys = VALIDATED_KEYS.filter((key) => matchedKeys.has(key));
-              const notFoundKeys = VALIDATED_KEYS.filter((key) => !matchedKeys.has(key));
-
-              // Create reverse mapping: canonicalKey -> array of headers that matched it
-              const keyToHeaders = excelFieldMapper.createReverseMapping(headerMapping);
+              // Count resolved and unresolved template columns
+              const resolvedCount = excelTemplateColumns.filter(col => 
+                getTemplateColumnStatus(col.key).isResolved
+              ).length;
+              const unresolvedCount = excelTemplateColumns.length - resolvedCount;
 
               return (
                 <div className="space-y-4">
@@ -615,34 +636,18 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                         {t.uploadExcel?.units || "units"})
                       </h3>
                       <div className="space-y-1 mt-1">
-                        {foundKeys.length > 0 && (
-                          <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
-                            <span className="flex items-center gap-1 flex-shrink-0">
-                              <CheckCircle className="text-green-600" size={14} />
-                              <span>Found:</span>
-                            </span>
-                            <span className="flex flex-wrap gap-x-2">
-                              {foundKeys.map((key) => {
-                                const matchedHeaders = keyToHeaders[key] || [];
-                                const displayText = matchedHeaders.length > 0
-                                  ? `${key} (from: ${matchedHeaders.join(", ")})`
-                                  : key;
-                                return (
-                                  <span key={key} className="whitespace-nowrap">
-                                    {displayText}
-                                  </span>
-                                );
-                              })}
-                            </span>
-                          </div>
-                        )}
-                        {notFoundKeys.length > 0 && (
+                        <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
+                          <span className="flex items-center gap-1 flex-shrink-0">
+                            <CheckCircle className="text-green-600" size={14} />
+                            <span>Resolved: {resolvedCount} columns</span>
+                          </span>
+                        </div>
+                        {unresolvedCount > 0 && (
                           <div className="text-xs text-gray-500 flex items-start gap-1 flex-wrap">
                             <span className="flex items-center gap-1 flex-shrink-0">
                               <XCircle className="text-red-600" size={14} />
-                              <span>Not found:</span>
+                              <span>Not resolved: {unresolvedCount} columns - please select from dropdown</span>
                             </span>
-                            <span>{notFoundKeys.join(", ")}</span>
                           </div>
                         )}
                       </div>
@@ -662,11 +667,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="text-sm text-gray-700 space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-green-100 border border-green-300 rounded"></div>
-                        <span><strong>Green headers:</strong> Automatically recognized and mapped</span>
+                        <span><strong>Green columns:</strong> Mapped to Excel sheet column (resolved)</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 bg-red-100 border border-red-300 rounded"></div>
-                        <span><strong>Red headers:</strong> Not recognized - select the correct mapping from dropdown</span>
+                        <span><strong>Red columns:</strong> Not mapped - select Excel column from dropdown</span>
                       </div>
                     </div>
                   </div>
@@ -679,51 +684,49 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                             <th className="px-3 py-2 text-left font-semibold text-gray-700 border-b">
                               #
                             </th>
-                            {parsedData.headers.map((header, idx) => {
-                              const validationStatus = getHeaderValidationStatus(header);
-                              const isValid = validationStatus.isValid;
-                              const mappedKey = validationStatus.mappedKey;
-                              const usedMappings = getUsedMappings();
+                            {excelTemplateColumns.map((templateCol, idx) => {
+                              const status = getTemplateColumnStatus(templateCol.key);
+                              const isResolved = status.isResolved;
+                              const excelHeader = status.excelHeader;
+                              const usedExcelHeaders = getUsedExcelHeaders();
                               
                               return (
                                 <th
                                   key={idx}
                                   className={`px-3 py-2 text-left font-semibold border-b ${
-                                    isValid 
+                                    isResolved 
                                       ? "bg-green-100 text-green-800" 
                                       : "bg-red-100 text-red-800"
                                   }`}
                                 >
-                                  {isValid ? (
+                                  {isResolved ? (
                                     <div className="flex flex-col gap-1">
-                                      <span className="text-sm">{header}</span>
-                                      {mappedKey && mappedKey !== header && (
-                                        <span className="text-xs font-normal text-green-600">
-                                          → {mappedKey}
-                                        </span>
-                                      )}
+                                      <span className="text-sm font-semibold">{templateCol.label}</span>
+                                      <span className="text-xs font-normal text-green-600">
+                                        ← {excelHeader}
+                                      </span>
                                     </div>
                                   ) : (
                                     <div className="flex flex-col gap-1 min-w-[180px]">
-                                      <span className="text-xs mb-1">
-                                        {header} (Not Mapped)
+                                      <span className="text-xs mb-1 font-semibold">
+                                        {templateCol.label} (Not Mapped)
                                       </span>
                                       <select
-                                        value={manualHeaderMapping[header] || ""}
-                                        onChange={(e) => handleHeaderMappingChange(header, e.target.value)}
+                                        value={manualHeaderMapping[templateCol.key] || ""}
+                                        onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
                                         className="text-sm px-2 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
                                       >
                                         <option value="">Select mapping...</option>
-                                        {excelTemplateColumns.map((col) => {
-                                          const isUsed = usedMappings.has(col.key) && manualHeaderMapping[header] !== col.key;
+                                        {excelHeaders.map((excelHeader, idx) => {
+                                          const isUsed = usedExcelHeaders.has(excelHeader) && manualHeaderMapping[templateCol.key] !== excelHeader;
                                           return (
                                             <option 
-                                              key={col.key} 
-                                              value={col.key}
+                                              key={idx} 
+                                              value={excelHeader}
                                               disabled={isUsed}
                                               className={isUsed ? "text-gray-400" : ""}
                                             >
-                                              {col.label} ({col.key}){isUsed ? " ✓" : ""}
+                                              {excelHeader}{isUsed ? " ✓" : ""}
                                             </option>
                                           );
                                         })}
@@ -746,18 +749,30 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               <td className="px-3 py-2 text-gray-600 border-b font-medium">
                                 {rowIndex + 1}
                               </td>
-                              {parsedData.headers.map((_, colIndex) => (
-                                <td
-                                  key={colIndex}
-                                  className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
-                                >
-                                  {row[colIndex] !== undefined &&
-                                    row[colIndex] !== null &&
-                                    row[colIndex] !== ""
-                                    ? String(row[colIndex])
-                                    : "-"}
-                                </td>
-                              ))}
+                              {excelTemplateColumns.map((templateCol, colIndex) => {
+                                const status = getTemplateColumnStatus(templateCol.key);
+                                const excelHeader = status.excelHeader;
+                                let cellValue = "-";
+                                
+                                if (excelHeader) {
+                                  const excelColIndex = excelHeaders.indexOf(excelHeader);
+                                  if (excelColIndex >= 0) {
+                                    const value = row[excelColIndex];
+                                    if (value !== undefined && value !== null && value !== "") {
+                                      cellValue = String(value);
+                                    }
+                                  }
+                                }
+                                
+                                return (
+                                  <td
+                                    key={colIndex}
+                                    className="px-3 py-2 text-gray-700 border-b whitespace-nowrap"
+                                  >
+                                    {cellValue}
+                                  </td>
+                                );
+                              })}
                             </tr>
                           ))}
                         </tbody>
