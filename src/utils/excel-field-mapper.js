@@ -5,17 +5,13 @@
  * Maps various header name variations to canonical field keys.
  */
 
-// Validated field keys that are required for unit uploads
+// Required field keys that MUST be present for unit uploads
+// Only these fields will be validated as required during upload
 export const VALIDATED_KEYS = [
   "buildingType",
   "project",
-  "view",
-  "unitTitle",
-  "bathroomCount",
-  "floor",
   "roomsCount",
   "landArea",
-  "gardenSize",
   "finishing",
   "totalPrice",
   "deliveryDate",
@@ -82,6 +78,9 @@ export const FIELD_ALIASES = {
   ],
   floor: [
     "floor",
+    "floor number",
+    "floor-number",
+    "floornumber",
     "floors",
     "level",
     "levels",
@@ -236,6 +235,61 @@ export const FIELD_ALIASES = {
     "ready-date",
     "readydate",
     "date",
+  ],
+  phase: [
+    "phase",
+    "phase name",
+    "phase-name",
+    "phasename",
+    "project phase",
+    "project-phase",
+    "projectphase",
+  ],
+  city: [
+    "city",
+    "location",
+    "city name",
+    "city-name",
+    "cityname",
+    "district",
+    "area",
+  ],
+  unit_number: [
+    "unit number",
+    "unit-number",
+    "unitnumber",
+    "unit no",
+    "unit-no",
+    "unitno",
+    "unit no.",
+    "unit #",
+    "no",
+    "number",
+  ],
+  building_number: [
+    "building number",
+    "building-number",
+    "buildingnumber",
+    "building no",
+    "building-no",
+    "buildingno",
+    "building no.",
+    "building #",
+    "bldg no",
+    "bldg number",
+  ],
+  roof_area: [
+    "roof area",
+    "roof-area",
+    "roofarea",
+    "roof",
+    "roof size",
+    "roof-size",
+    "roofsize",
+    "terrace area",
+    "terrace-area",
+    "terracearea",
+    "terrace",
   ],
 };
 

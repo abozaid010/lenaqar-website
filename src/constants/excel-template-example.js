@@ -5,88 +5,133 @@
  */
 
 export const excelTemplateColumns = [
+  // ===== REQUIRED FIELDS (7) =====
   {
     key: "buildingType",
     label: "Building Type",
+    is_required: true,
   },
   {
     key: "project",
     label: "Project",
-  },
-  {
-    key: "view",
-    label: "View",
-  },
-  {
-    key: "unitTitle",
-    label: "Unit Title",
-  },
-  {
-    key: "bathroomCount",
-    label: "Bathroom Count",
-  },
-  {
-    key: "floor",
-    label: "Floor",
+    is_required: true,
   },
   {
     key: "roomsCount",
     label: "Rooms Count",
+    is_required: true,
   },
   {
     key: "landArea",
-    label: "Land Area",
-  },
-  {
-    key: "gardenSize",
-    label: "Garden Area",
+    label: "Total Area",
+    is_required: true,
   },
   {
     key: "finishing",
     label: "Finishing",
-  },
-  {
-    key: "furnishing",
-    label: "Furnishing",
-  },
-  {
-    key: "garageArea",
-    label: "Garage Area",
-  },
-  {
-    key: "model",
-    label: "Model",
-  },
-  {
-    key: "downPayment",
-    label: "Down Payment",
+    is_required: true,
   },
   {
     key: "totalPrice",
     label: "Total Price",
+    is_required: true,
   },
   {
     key: "deliveryDate",
     label: "Delivery Date",
+    is_required: true,
+  },
+  // ===== OPTIONAL FIELDS (9) =====
+  {
+    key: "phase",
+    label: "Phase",
+    is_required: false,
+  },
+  {
+    key: "view",
+    label: "View",
+    is_required: false,
+  },
+  {
+    key: "unitTitle",
+    label: "Unit Title",
+    is_required: false,
+  },
+  {
+    key: "floor",
+    label: "Floor",
+    is_required: false,
+  },
+  {
+    key: "bathroomCount",
+    label: "Bathroom Count",
+    is_required: false,
+  },
+  {
+    key: "gardenSize",
+    label: "Garden Area",
+    is_required: false,
+  },
+  {
+    key: "garageArea",
+    label: "Garage Area",
+    is_required: false,
+  },
+  {
+    key: "model",
+    label: "Model / (Design Type)",
+    is_required: false,
+  },
+  {
+    key: "downPayment",
+    label: "Down Payment",
+    is_required: false,
+  },
+  {
+    key: "city",
+    label: "City",
+    is_required: false,
+  },
+  {
+    key: "unit_number",
+    label: "Unit Number",
+    is_required: false,
+  },
+  {
+    key: "building_number",
+    label: "Building Number",
+    is_required: false,
+  },
+  {
+    key: "roof_area",
+    label: "Roof Area",
+    is_required: false,
   },
 ];
 
 export const excelTemplateExampleRow = {
+  // Required fields
   buildingType: "apartment",
   project: "madinty",
-  view: "garden",
-  unitTitle: "two bedrooms",
-  bathroomCount: "2",
-  floor: "1",
   roomsCount: "2",
   landArea: "100",
-  gardenSize: "50",
   finishing: "finished",
-  furnishing: "furnished",
+  totalPrice: "1000000",
+  deliveryDate: "2025-12-31",
+  // Optional fields
+  phase: "Phase 1",
+  view: "garden",
+  unitTitle: "two bedrooms",
+  floor: "1",
+  bathroomCount: "2",
+  gardenSize: "50",
   garageArea: "20",
   model: "A1",
   downPayment: "50000",
-  totalPrice: "1000000",
-  deliveryDate: "2025-12-31",
+  furnishing: "furnished",
+  city: "cairo",
+  unit_number: "101",
+  building_number: "B5",
+  roof_area: "30",
 };
 

@@ -7,7 +7,7 @@ export default {
     home: "Home",
     login: "signIn",
     logOut: "Logout",
-    clientDashboard: "Client Dashboard",
+    clientDashboard: "Login",
     jobOpportunities: "Request Demo ",
     allProperties: "All Properties",
     searchPlaceholder: "Search",

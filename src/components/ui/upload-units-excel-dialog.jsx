@@ -33,6 +33,165 @@ const downloadTemplateFile = () => {
   link.click();
 };
 
+/**
+ * Valid view enum values according to API schema
+ */
+const VALID_VIEW_VALUES = [
+  'park',
+  'street',
+  'lagoon',
+  'sea',
+  'city',
+  'river',
+  'pool',
+  'golf',
+  'garden',
+  'open area',
+  'mountain'
+];
+
+/**
+ * Converts deliveryDate to string format
+ * Handles Excel date numbers and various date formats
+ */
+const formatDeliveryDate = (value) => {
+  // Handle null, undefined, empty string
+  if (value === null || value === undefined || value === "") {
+    return "";
+  }
+  
+  // If it's already a string, return it (after trimming)
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    // If it's a date string in various formats, try to normalize it
+    if (trimmed.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      // Already in YYYY-MM-DD format
+      return trimmed;
+    }
+    // Try to parse and reformat
+    const date = new Date(trimmed);
+    if (!isNaN(date.getTime())) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+    return trimmed;
+  }
+  
+  // If it's a number (Excel date serial number or year), convert appropriately
+  if (typeof value === "number") {
+    // Very small numbers (likely day numbers or small values) - convert to string as-is
+    if (value < 100) {
+      return String(value);
+    }
+    
+    // Numbers that look like years (1900-2100 range)
+    if (value >= 1900 && value <= 2100) {
+      return String(value);
+    }
+    
+    // Try to convert Excel serial date to JavaScript date
+    // Excel dates are serial numbers where 1 = Jan 1, 1900
+    try {
+      // Excel epoch is Jan 1, 1900, but Excel incorrectly treats 1900 as leap year
+      const excelEpoch = new Date(1899, 11, 30);
+      const jsDate = new Date(excelEpoch.getTime() + value * 24 * 60 * 60 * 1000);
+      
+      // Check if the date is valid
+      if (!isNaN(jsDate.getTime())) {
+        const year = jsDate.getFullYear();
+        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
+        const day = String(jsDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      }
+    } catch (e) {
+      // If conversion fails, return as string
+    }
+    
+    // Fallback: convert to string
+    return String(value);
+  }
+  
+  // For any other type, convert to string
+  return String(value);
+};
+
+/**
+ * Validates and normalizes view value to match API enum
+ */
+const normalizeView = (value) => {
+  if (!value || typeof value !== "string") {
+    return undefined; // Omit invalid view values
+  }
+  
+  const normalized = value.trim().toLowerCase();
+  
+  // Check if it matches a valid enum value
+  if (VALID_VIEW_VALUES.includes(normalized)) {
+    return normalized;
+  }
+  
+  // Try to map common variations
+  const viewMap = {
+    'garden view': 'garden',
+    'sea view': 'sea',
+    'pool view': 'pool',
+    'street view': 'street',
+    'city view': 'city',
+    'park view': 'park',
+    'mountain view': 'mountain',
+    'river view': 'river',
+    'lagoon view': 'lagoon',
+    'golf view': 'golf',
+    'open area view': 'open area',
+  };
+  
+  if (viewMap[normalized]) {
+    return viewMap[normalized];
+  }
+  
+  // If no match, omit the field (don't send empty string)
+  return undefined;
+};
+
+/**
+ * Converts all string values in an object to lowercase
+ * Backend expects all string fields in lowercase
+ * Handles special cases for deliveryDate and view
+ */
+const convertStringsToLowercase = (obj) => {
+  const result = { ...obj };
+  
+  Object.keys(result).forEach((key) => {
+    const value = result[key];
+    
+    // Special handling for deliveryDate - must be string
+    if (key === 'deliveryDate') {
+      result[key] = formatDeliveryDate(value);
+      return;
+    }
+    
+    // Special handling for view - must be valid enum or omitted
+    if (key === 'view') {
+      const normalized = normalizeView(value);
+      if (normalized === undefined) {
+        delete result[key]; // Remove invalid view values
+      } else {
+        result[key] = normalized;
+      }
+      return;
+    }
+    
+    // Convert string values to lowercase
+    if (typeof value === "string") {
+      result[key] = value.trim().toLowerCase();
+    }
+  });
+  
+  return result;
+};
+
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
@@ -54,7 +213,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const parseExcelFile = async (file) => {
+  const parseExcelFile = async (file, manualMapping = null) => {
     setIsProcessing(true);
     setError(null);
 
@@ -97,8 +256,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         }
       });
 
+      // Use the passed mapping or fall back to state (for React state closure issue)
+      const currentManualMapping = manualMapping !== null ? manualMapping : manualHeaderMapping;
+      
       // Merge auto mapping with manual mapping (manual takes precedence)
-      const templateToExcelMapping = { ...autoTemplateToExcel, ...manualHeaderMapping };
+      const templateToExcelMapping = { ...autoTemplateToExcel, ...currentManualMapping };
 
       // Transform rows to structured JSON using template keys
       const units = rows.map((row) => {
@@ -121,51 +283,71 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         return unit;
       });
 
-      // Transform to final structure with payment plans
+      // Helper function to parse numeric values (handles formatted strings like "EGP 17,895,622")
+      const parseNumericValue = (value) => {
+// Send values as is, BE will clean it. 
+        return value;
+      };
+
+      // Transform to final structure matching API schema
       const transformedUnits = units.map((unit) => {
+        // Build object matching API schema exactly
         const transformed = {
-          // Basic details
-          clientId: clientId,
-          clientName: clientName,
-          country: "Egypt",
-          dataSource: "website",
-          purpose: "sell",
           unitId: uuidv4(),
-          // sheet data
-          buildingType: unit.buildingType || "",
           project: unit.project || "",
-          // project_ar: unit.project_ar || "",
-          view: unit.view || "",
-          // phase: unit.phase || "",
-          // city: unit.city || "",
-          // district: unit.district || "",
-          // developer: unit.developer || "",
-          unitTitle: unit.unitTitle || "",
-          // deliveryStatus: unit.deliveryStatus || "",
-          bathroomCount: unit.bathroomCount ? Number(unit.bathroomCount) : 0,
-          floor: unit.floor ? Number(unit.floor) : 0,
-          roomsCount: unit.roomsCount ? unit.roomsCount : "",
-          landArea: unit.landArea ? Number(unit.landArea) : 0,
-          gardenSize: unit.gardenSize ? Number(unit.gardenSize) : 0,
-          finishing: unit.finishing || "",
-          furnishing: unit.furnishing || "",
-          garageArea: unit.garageArea ? Number(unit.garageArea) : 0,
-          images: unit.images
-            ? unit.images.split(",").map((img) => ({
-              url: img.trim(),
-              fileId: img.split("/").pop(),
-            }))
-            : [],
-          // code: unit.code || "",
-          model: unit.model || "",
-          downPayment: unit.downPayment ? Number(unit.downPayment) : 0,
-          totalPrice: unit.totalPrice ? Number(unit.totalPrice) : 0,
+          buildingType: unit.buildingType || "",
+          roomsCount: parseNumericValue(unit.roomsCount) ,
+          landArea: parseNumericValue(unit.landArea) ,
           deliveryDate: unit.deliveryDate || "",
-          // paymentPlans: [],
-          // // Owner details (shown only for brokers)
-          // owner_name: unit.owner_name || "",
-          // owner_mobile: unit.owner_mobile || "",
+          totalPrice: parseNumericValue(unit.totalPrice) ,
+          finishing: unit.finishing || "",
+          unitTitle: unit.unitTitle || "",
         };
+        
+        // Add optional numeric fields only if they have valid values
+        if (unit.bathroomCount) {
+          transformed.bathroomCount = unit.bathroomCount;
+        }
+        
+        if (unit.floor) {
+          transformed.floor = unit.floor;
+        }
+        
+        if (unit.gardenSize) {
+          transformed.gardenSize = unit.gardenSize;
+        }
+        
+        if (unit.garageArea) {
+          transformed.garageArea = unit.garageArea;
+        }
+        
+        if (unit.roof_area || unit.roofArea) {
+          transformed.roof_area = unit.roof_area || unit.roofArea;
+        }
+        
+        // Add optional string fields only if they have values (omit empty strings)
+        if (unit.unit_number || unit.unitNumber) {
+          transformed.unit_number = unit.unit_number || unit.unitNumber;
+        }
+        
+        if (unit.building_number || unit.buildingNumber) {
+          transformed.building_number = unit.building_number || unit.buildingNumber;
+        }
+        
+        // Add view only if valid (will be validated in convertStringsToLowercase)
+        if (unit.view) {
+          transformed.view = unit.view;
+        }
+        
+        // Add phase only if it has a value
+        if (unit.phase) {
+          transformed.phase = unit.phase;
+        }
+        
+        // Add city only if it has a value
+        if (unit.city) {
+          transformed.city = unit.city;
+        }
 
         // ### Extract payment plans dynamically ### //
         // Collect all payment plan numbers that exist in the unit data
@@ -202,7 +384,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         //   }
         // });
 
-        return transformed;
+        // Convert all string fields to lowercase (backend expects lowercase)
+        return convertStringsToLowercase(transformed);
       });
 
       setParsedData({
@@ -273,13 +456,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       } else {
         delete updated[templateKey];
       }
+      
+      // Re-parse the file with the updated mapping immediately
+      // Pass the updated mapping directly to avoid React state closure issue
+      if (selectedFile) {
+        parseExcelFile(selectedFile, updated);
+      }
+      
       return updated;
     });
-
-    // Re-parse the file with the updated mapping
-    if (selectedFile) {
-      parseExcelFile(selectedFile);
-    }
   };
 
   const getTemplateColumnStatus = (templateKey) => {
@@ -333,8 +518,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }
     });
 
-    // Find missing required keys
-    return VALIDATED_KEYS.filter(key => !resolvedKeys.has(key));
+    // Find missing required keys (only check keys marked as required)
+    const requiredKeys = excelTemplateColumns
+      .filter(col => col.is_required)
+      .map(col => col.key);
+    
+    return requiredKeys.filter(key => !resolvedKeys.has(key));
   };
 
   const handleSubmit = async () => {
@@ -488,7 +677,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               key={column.key}
                               className="px-4 py-2 text-left font-semibold text-gray-700 border border-gray-300"
                             >
-                              {column.label}
+                              {column.label}{column.is_required ? " *" : ""}
                             </th>
                           ))}
                         </tr>
@@ -578,19 +767,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   </li>
                   <li>
                     {t.uploadExcel?.instruction2 ||
-                      "First row must contain column headers (buildingType, project, city, etc.)"}
+                      "First row must contain column headers (buildingType, project, phase, view, etc.)"}
                   </li>
-                  {/* <li>
-                    {t.uploadExcel?.instruction3 ||
-                      "Payment plans: Use pp1_, pp2_, pp3_ prefixes where the number represents years (e.g., pp2_ means 2-year plan)"}
-                  </li> */}
-                  {/* <li>
-                    {t.uploadExcel?.instruction4 ||
-                      "Required fields for each payment plan: price, downPayment, installment_amount_yearly"}
-                  </li> */}
                   <li>
-                    {t.uploadExcel?.instruction5 ||
-                      "Images: Provide comma-separated URLs in format: https://api.lenaai.net/images/file_id"}
+                    {t.uploadExcel?.instruction3 ||
+                      "Required fields are marked with asterisk (*) - they must be mapped to upload"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction4 ||
+                      "Optional fields can be left unmapped - data will still upload successfully"}
                   </li>
                 </ul>
               </div>
@@ -665,11 +850,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="text-xs text-gray-700 space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span><strong>Green:</strong> Mapped - Can change via dropdown</span>
+                        <span><strong>Green:</strong> Mapped column</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-                        <span><strong>Red:</strong> Not mapped - select from dropdown</span>
+                        <span><strong>Red:</strong> Required field not mapped - must select</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
+                        <span><strong>Yellow:</strong> Optional field not mapped</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">*</span>
+                        <span><strong>Asterisk (*):</strong> Required field</span>
                       </div>
                     </div>
                   </div>
@@ -694,13 +887,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                   className={`px-2 py-2 text-left font-semibold border-b ${
                                     isResolved 
                                       ? "bg-green-100 text-green-800" 
-                                      : "bg-red-100 text-red-800"
+                                      : templateCol.is_required
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-yellow-50 text-yellow-800"
                                   }`}
                                   style={{ minWidth: "80px", maxWidth: "120px" }}
                                 >
                                   <div className="flex flex-col gap-1">
                                     <span className="text-xs mb-1 font-semibold truncate" title={templateCol.label}>
-                                      {templateCol.label} {isResolved ? "✓" : ""}
+                                      {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
                                     </span>
                                     {isResolved && (
                                       <span className="text-xs font-normal mb-1 truncate" style={{color: "#059669"}} title={excelHeader}>
@@ -711,7 +906,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       value={excelHeader || ""}
                                       onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
                                       className={`text-xs px-1 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
-                                        isResolved ? "border-green-400" : "border-red-400"
+                                        isResolved 
+                                          ? "border-green-400" 
+                                          : templateCol.is_required
+                                            ? "border-red-400"
+                                            : "border-yellow-400"
                                       }`}
                                     >
                                       <option value="">Select...</option>
