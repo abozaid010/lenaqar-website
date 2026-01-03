@@ -5,6 +5,7 @@
  */
 
 export const excelTemplateColumns = [
+  // ===== REQUIRED FIELDS (7) =====
   {
     key: "buildingType",
     label: "Building Type",
@@ -15,6 +16,32 @@ export const excelTemplateColumns = [
     label: "Project",
     is_required: true,
   },
+  {
+    key: "roomsCount",
+    label: "Rooms Count",
+    is_required: true,
+  },
+  {
+    key: "landArea",
+    label: "Total Area",
+    is_required: true,
+  },
+  {
+    key: "finishing",
+    label: "Finishing",
+    is_required: true,
+  },
+  {
+    key: "totalPrice",
+    label: "Total Price",
+    is_required: true,
+  },
+  {
+    key: "deliveryDate",
+    label: "Delivery Date",
+    is_required: true,
+  },
+  // ===== OPTIONAL FIELDS (9) =====
   {
     key: "phase",
     label: "Phase",
@@ -31,34 +58,19 @@ export const excelTemplateColumns = [
     is_required: false,
   },
   {
-    key: "bathroomCount",
-    label: "Bathroom Count",
-    is_required: false,
-  },
-  {
     key: "floor",
     label: "Floor",
     is_required: false,
   },
   {
-    key: "roomsCount",
-    label: "Rooms Count",
-    is_required: true,
-  },
-  {
-    key: "landArea",
-    label: "Total Area",
-    is_required: true,
+    key: "bathroomCount",
+    label: "Bathroom Count",
+    is_required: false,
   },
   {
     key: "gardenSize",
     label: "Garden Area",
     is_required: false,
-  },
-  {
-    key: "finishing",
-    label: "Finishing",
-    is_required: true,
   },
   {
     key: "garageArea",
@@ -75,35 +87,27 @@ export const excelTemplateColumns = [
     label: "Down Payment",
     is_required: false,
   },
-  {
-    key: "totalPrice",
-    label: "Total Price",
-    is_required: true,
-  },
-  {
-    key: "deliveryDate",
-    label: "Delivery Date",
-    is_required: true,
-  },
 ];
 
 export const excelTemplateExampleRow = {
+  // Required fields
   buildingType: "apartment",
   project: "madinty",
+  roomsCount: "2",
+  landArea: "100",
+  finishing: "finished",
+  totalPrice: "1000000",
+  deliveryDate: "2025-12-31",
+  // Optional fields
   phase: "Phase 1",
   view: "garden",
   unitTitle: "two bedrooms",
-  bathroomCount: "2",
   floor: "1",
-  roomsCount: "2",
-  landArea: "100",
+  bathroomCount: "2",
   gardenSize: "50",
-  finishing: "finished",
-  furnishing: "furnished",
   garageArea: "20",
   model: "A1",
   downPayment: "50000",
-  totalPrice: "1000000",
-  deliveryDate: "2025-12-31",
+  furnishing: "furnished",
 };
 
