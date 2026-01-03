@@ -39,9 +39,9 @@ export default function Dialog({ isOpen, onClose, title, children, editMode }) {
     >
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl max-w-md overflow-hidden w-[93%] transform transition-all duration-300 ease-in-out"
+        className="rounded-lg shadow-xl overflow-hidden w-[90%] h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out"
       >
-        <div className="flex justify-between items-center p-3 bg-primary">
+        <div className="flex justify-between items-center p-3 bg-primary flex-shrink-0">
           <h3 className="text-lg font-medium text-white">{title}</h3>
           <button
             onClick={onClose}
@@ -50,7 +50,7 @@ export default function Dialog({ isOpen, onClose, title, children, editMode }) {
             <X size={22} />
           </button>
         </div>
-        <div className="p-4 overflow-y-auto bg-white max-h-[85vh]">
+        <div className="p-4 overflow-y-auto bg-white flex-1">
           {children}
         </div>
       </div>
