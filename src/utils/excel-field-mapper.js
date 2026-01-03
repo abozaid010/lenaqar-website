@@ -236,6 +236,15 @@ export const FIELD_ALIASES = {
     "readydate",
     "date",
   ],
+  phase: [
+    "phase",
+    "phase name",
+    "phase-name",
+    "phasename",
+    "project phase",
+    "project-phase",
+    "projectphase",
+  ],
 };
 
 /**

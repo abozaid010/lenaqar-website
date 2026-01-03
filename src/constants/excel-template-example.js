@@ -16,6 +16,11 @@ export const excelTemplateColumns = [
     is_required: true,
   },
   {
+    key: "phase",
+    label: "Phase",
+    is_required: false,
+  },
+  {
     key: "view",
     label: "View",
     is_required: false,
@@ -85,6 +90,7 @@ export const excelTemplateColumns = [
 export const excelTemplateExampleRow = {
   buildingType: "apartment",
   project: "madinty",
+  phase: "Phase 1",
   view: "garden",
   unitTitle: "two bedrooms",
   bathroomCount: "2",

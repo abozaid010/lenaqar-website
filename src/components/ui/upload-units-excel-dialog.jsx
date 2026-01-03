@@ -136,7 +136,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           project: unit.project || "",
           // project_ar: unit.project_ar || "",
           view: unit.view || "",
-          // phase: unit.phase || "",
+          phase: unit.phase || "",
           // city: unit.city || "",
           // district: unit.district || "",
           // developer: unit.developer || "",
@@ -150,13 +150,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           finishing: unit.finishing || "",
           furnishing: unit.furnishing || "",
           garageArea: unit.garageArea ? Number(unit.garageArea) : 0,
-          images: unit.images
-            ? unit.images.split(",").map((img) => ({
-              url: img.trim(),
-              fileId: img.split("/").pop(),
-            }))
-            : [],
-          // code: unit.code || "",
+          images: [], // Images not supported in Excel upload
           model: unit.model || "",
           downPayment: unit.downPayment ? Number(unit.downPayment) : 0,
           totalPrice: unit.totalPrice ? Number(unit.totalPrice) : 0,
@@ -582,19 +576,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   </li>
                   <li>
                     {t.uploadExcel?.instruction2 ||
-                      "First row must contain column headers (buildingType, project, city, etc.)"}
+                      "First row must contain column headers (buildingType, project, phase, view, etc.)"}
                   </li>
-                  {/* <li>
-                    {t.uploadExcel?.instruction3 ||
-                      "Payment plans: Use pp1_, pp2_, pp3_ prefixes where the number represents years (e.g., pp2_ means 2-year plan)"}
-                  </li> */}
-                  {/* <li>
-                    {t.uploadExcel?.instruction4 ||
-                      "Required fields for each payment plan: price, downPayment, installment_amount_yearly"}
-                  </li> */}
                   <li>
-                    {t.uploadExcel?.instruction5 ||
-                      "Images: Provide comma-separated URLs in format: https://api.lenaai.net/images/file_id"}
+                    {t.uploadExcel?.instruction3 ||
+                      "Required fields are marked with asterisk (*) - they must be mapped to upload"}
+                  </li>
+                  <li>
+                    {t.uploadExcel?.instruction4 ||
+                      "Optional fields can be left unmapped - data will still upload successfully"}
                   </li>
                 </ul>
               </div>
