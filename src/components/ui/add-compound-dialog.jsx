@@ -87,6 +87,7 @@ export default function AddCompoundDialog({
     images: compoundData?.images || [],
     properties_types: compoundData?.properties_types || [],
     payment_plans: compoundData?.payment_plans || [],
+    building_types_images: compoundData?.building_types_images || {},
   });
 
   useEffect(() => {
@@ -111,6 +112,7 @@ export default function AddCompoundDialog({
           images: compoundData.images || [],
           properties_types: compoundData.properties_types || [],
           payment_plans: compoundData.payment_plans || [],
+          building_types_images: compoundData?.building_types_images || {},
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -131,6 +133,7 @@ export default function AddCompoundDialog({
           images: [],
           properties_types: [],
           payment_plans: [],
+          building_types_images: {},
         });
       }
       setErrors({});
@@ -152,6 +155,7 @@ export default function AddCompoundDialog({
         master_plan: { url: null, fileId: null },
         client_id: clientId || "",
         images: [],
+        building_types_images: {},
       });
 
       setErrors({});
@@ -321,6 +325,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "ai",
         properties_types: [],
         payment_plans: [],
+        building_types_images: {},
       });
     } catch (error) {
       toast.error(
@@ -364,6 +369,21 @@ export default function AddCompoundDialog({
         payment_plans: null,
       });
     }
+  };
+
+  const handleBuildingTypeImagesChange = (propertyType, images) => {
+    setFormData((prev) => ({
+      ...prev,
+      building_types_images: {
+        ...prev.building_types_images,
+        [propertyType]: images,
+      },
+    }));
+  };
+
+  const getPropertyTypeLabel = (value) => {
+    const type = BUILDING_TYPES.find((type) => type.value === value);
+    return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
   };
 
   return (
@@ -532,6 +552,36 @@ export default function AddCompoundDialog({
               required={true}
               error={errors.properties_types}
             />
+
+            {/* Building Types Images */}
+            {formData.properties_types && formData.properties_types.length > 0 && (
+              <div className="space-y-4">
+                {formData.properties_types.map((propertyType) => (
+                  <div key={propertyType}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {getPropertyTypeLabel(propertyType)}
+                      <span className="text-xs font-normal text-gray-500 ml-2">
+                        (
+                        {(formData.building_types_images[propertyType] || [])
+                          .length}{" "}
+                        / 4)
+                      </span>
+                    </label>
+                    <ImageUploader
+                      maxImages={4}
+                      initialImages={
+                        formData.building_types_images[propertyType] || []
+                      }
+                      onImagesChange={(images) =>
+                        handleBuildingTypeImagesChange(propertyType, images)
+                      }
+                      isUploading={isUploading}
+                      setIsUploading={setIsUploading}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
 
             {/* Payment Plans */}
             <PaymentPlansList
