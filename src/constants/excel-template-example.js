@@ -8,66 +8,77 @@ export const excelTemplateColumns = [
   {
     key: "buildingType",
     label: "Building Type",
+    is_required: true,
   },
   {
     key: "project",
     label: "Project",
+    is_required: true,
   },
   {
     key: "view",
     label: "View",
+    is_required: false,
   },
   {
     key: "unitTitle",
     label: "Unit Title",
+    is_required: false,
   },
   {
     key: "bathroomCount",
     label: "Bathroom Count",
+    is_required: false,
   },
   {
     key: "floor",
     label: "Floor",
+    is_required: false,
   },
   {
     key: "roomsCount",
     label: "Rooms Count",
+    is_required: true,
   },
   {
     key: "landArea",
-    label: "Land Area",
+    label: "Total Area",
+    is_required: true,
   },
   {
     key: "gardenSize",
     label: "Garden Area",
+    is_required: false,
   },
   {
     key: "finishing",
     label: "Finishing",
-  },
-  {
-    key: "furnishing",
-    label: "Furnishing",
+    is_required: true,
   },
   {
     key: "garageArea",
     label: "Garage Area",
+    is_required: false,
   },
   {
     key: "model",
-    label: "Model",
+    label: "Model / (Design Type)",
+    is_required: false,
   },
   {
     key: "downPayment",
     label: "Down Payment",
+    is_required: false,
   },
   {
     key: "totalPrice",
     label: "Total Price",
+    is_required: true,
   },
   {
     key: "deliveryDate",
     label: "Delivery Date",
+    is_required: true,
   },
 ];
 

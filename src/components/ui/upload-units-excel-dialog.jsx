@@ -333,8 +333,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }
     });
 
-    // Find missing required keys
-    return VALIDATED_KEYS.filter(key => !resolvedKeys.has(key));
+    // Find missing required keys (only check keys marked as required)
+    const requiredKeys = excelTemplateColumns
+      .filter(col => col.is_required)
+      .map(col => col.key);
+    
+    return requiredKeys.filter(key => !resolvedKeys.has(key));
   };
 
   const handleSubmit = async () => {
@@ -488,7 +492,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               key={column.key}
                               className="px-4 py-2 text-left font-semibold text-gray-700 border border-gray-300"
                             >
-                              {column.label}
+                              {column.label}{column.is_required ? " *" : ""}
                             </th>
                           ))}
                         </tr>
@@ -665,11 +669,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="text-xs text-gray-700 space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span><strong>Green:</strong> Mapped - Can change via dropdown</span>
+                        <span><strong>Green:</strong> Mapped column</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-                        <span><strong>Red:</strong> Not mapped - select from dropdown</span>
+                        <span><strong>Red:</strong> Required field not mapped - must select</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
+                        <span><strong>Yellow:</strong> Optional field not mapped</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold">*</span>
+                        <span><strong>Asterisk (*):</strong> Required field</span>
                       </div>
                     </div>
                   </div>
@@ -694,13 +706,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                   className={`px-2 py-2 text-left font-semibold border-b ${
                                     isResolved 
                                       ? "bg-green-100 text-green-800" 
-                                      : "bg-red-100 text-red-800"
+                                      : templateCol.is_required
+                                        ? "bg-red-100 text-red-800"
+                                        : "bg-yellow-50 text-yellow-800"
                                   }`}
                                   style={{ minWidth: "80px", maxWidth: "120px" }}
                                 >
                                   <div className="flex flex-col gap-1">
                                     <span className="text-xs mb-1 font-semibold truncate" title={templateCol.label}>
-                                      {templateCol.label} {isResolved ? "✓" : ""}
+                                      {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
                                     </span>
                                     {isResolved && (
                                       <span className="text-xs font-normal mb-1 truncate" style={{color: "#059669"}} title={excelHeader}>
@@ -711,7 +725,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       value={excelHeader || ""}
                                       onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
                                       className={`text-xs px-1 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
-                                        isResolved ? "border-green-400" : "border-red-400"
+                                        isResolved 
+                                          ? "border-green-400" 
+                                          : templateCol.is_required
+                                            ? "border-red-400"
+                                            : "border-yellow-400"
                                       }`}
                                     >
                                       <option value="">Select...</option>

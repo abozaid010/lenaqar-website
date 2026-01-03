@@ -5,17 +5,13 @@
  * Maps various header name variations to canonical field keys.
  */
 
-// Validated field keys that are required for unit uploads
+// Required field keys that MUST be present for unit uploads
+// Only these fields will be validated as required during upload
 export const VALIDATED_KEYS = [
   "buildingType",
   "project",
-  "view",
-  "unitTitle",
-  "bathroomCount",
-  "floor",
   "roomsCount",
   "landArea",
-  "gardenSize",
   "finishing",
   "totalPrice",
   "deliveryDate",
@@ -82,6 +78,9 @@ export const FIELD_ALIASES = {
   ],
   floor: [
     "floor",
+    "floor number",
+    "floor-number",
+    "floornumber",
     "floors",
     "level",
     "levels",
