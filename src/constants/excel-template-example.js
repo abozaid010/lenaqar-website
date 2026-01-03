@@ -87,6 +87,26 @@ export const excelTemplateColumns = [
     label: "Down Payment",
     is_required: false,
   },
+  {
+    key: "city",
+    label: "City",
+    is_required: false,
+  },
+  {
+    key: "unit_number",
+    label: "Unit Number",
+    is_required: false,
+  },
+  {
+    key: "building_number",
+    label: "Building Number",
+    is_required: false,
+  },
+  {
+    key: "roof_area",
+    label: "Roof Area",
+    is_required: false,
+  },
 ];
 
 export const excelTemplateExampleRow = {
@@ -109,5 +129,9 @@ export const excelTemplateExampleRow = {
   model: "A1",
   downPayment: "50000",
   furnishing: "furnished",
+  city: "cairo",
+  unit_number: "101",
+  building_number: "B5",
+  roof_area: "30",
 };
 
