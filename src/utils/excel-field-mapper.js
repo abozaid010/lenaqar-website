@@ -152,6 +152,7 @@ export const FIELD_ALIASES = {
     "finishing-type",
     "finishingtype",
     "condition",
+    "Finishing Specs",
   ],
   furnishing: [
     "furnishing",
@@ -213,16 +214,13 @@ export const FIELD_ALIASES = {
     "unit price",
     "unit-price",
     "unitprice",
-    "cost",
     "total cost",
     "total-cost",
     "totalcost",
-    "amount",
     "total amount",
     "total-amount",
     "totalamount",
-    "value",
-    "Nominal Price"
+    "Nominal Price",
 
   ],
   deliveryDate: [
@@ -331,7 +329,9 @@ export class ExcelFieldMapper {
     // Then check against all aliases
     for (const canonicalKey in this.fieldAliases) {
       const aliases = this.fieldAliases[canonicalKey];
-      if (aliases.includes(normalizedHeader)) {
+      // Normalize aliases to lowercase for case-insensitive matching
+      const normalizedAliases = aliases.map(alias => String(alias).toLowerCase().trim());
+      if (normalizedAliases.includes(normalizedHeader)) {
         return canonicalKey;
       }
     }
