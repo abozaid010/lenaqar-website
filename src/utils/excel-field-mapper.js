@@ -205,6 +205,7 @@ export const FIELD_ALIASES = {
   ],
   totalPrice: [
     "price",
+    "Unit Total with Finishing Price",
     "Final Total Unit Price",
     "total price",
     "total-price",
