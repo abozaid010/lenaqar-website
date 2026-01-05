@@ -106,6 +106,7 @@ export const FIELD_ALIASES = {
     "no. of bedrooms"
   ],
   landArea: [
+    "Unit Gross Area",
     "land area",
     "land-area",
     "landarea",
@@ -204,6 +205,8 @@ export const FIELD_ALIASES = {
   ],
   totalPrice: [
     "price",
+    "Unit Total with Finishing Price",
+    "Final Total Unit Price",
     "total price",
     "total-price",
     "totalprice",
@@ -219,6 +222,8 @@ export const FIELD_ALIASES = {
     "total-amount",
     "totalamount",
     "value",
+    "Nominal Price"
+
   ],
   deliveryDate: [
     "delivery date",
