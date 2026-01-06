@@ -7,6 +7,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
