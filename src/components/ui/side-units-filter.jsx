@@ -2,9 +2,11 @@
 
 import FilterCheckboxGroup from "@/components/ui/filter-checkbox-group";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../../public/locales/en";
+import ar from "../../../public/locales/ar";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import PriceRangeSlider from "./price-range-slider";
 
 const EnumPropertyIntent = ["rent", "sell"];
@@ -18,6 +20,14 @@ export default function SideUnitFilters({
 }) {
   const { t, locale } = useI18n();
   const router = useRouter();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer || "",
     project_name: appliedFilters.project_name || "",

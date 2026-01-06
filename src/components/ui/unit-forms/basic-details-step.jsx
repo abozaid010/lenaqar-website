@@ -6,7 +6,7 @@ import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
+import { useLocaleConstants } from "@/utils/localeConstants";
 import { getprojects } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
@@ -24,6 +24,7 @@ export default function BasicDetailsStep({
   setInvalidFields = () => {},
 }) {
   const { t, locale } = useI18n();
+  const { getBuildingTypes, getViewTypes } = useLocaleConstants();
 
   // Debug logging for district selection
   console.log("🔍 DEBUG - Basic Details Step:");
@@ -176,7 +177,7 @@ export default function BasicDetailsStep({
           onChange={handleChange}
           error={invalidFields.includes("buildingType")}
         >
-          {BUILDING_TYPES.map((type) => (
+          {getBuildingTypes().map((type) => (
             <option key={type.value} value={type.value}>
               {locale === "ar" ? type.ar_label : type.en_label}
             </option>
@@ -374,19 +375,11 @@ export default function BasicDetailsStep({
           error={invalidFields.includes("view")}
         >
           <option value="">{t.basicDetails.selectView}</option>
-          {[
-            { value: "park", label: t.basicDetails.views.park },
-            { value: "street", label: t.basicDetails.views.street },
-            { value: "lagoon", label: t.basicDetails.views.lagoon },
-            { value: "sea", label: t.basicDetails.views.sea },
-            { value: "city", label: t.basicDetails.views.city },
-            { value: "river", label: t.basicDetails.views.river },
-            { value: "pool", label: t.basicDetails.views.pool },
-            { value: "golf", label: t.basicDetails.views.golf },
-            { value: "garden", label: t.basicDetails.views.garden },
-            { value: "open area", label: t.basicDetails.views.openArea },
-            { value: "mountain", label: t.basicDetails.views.mountain },
-          ]
+          {getViewTypes()
+            .map((view) => ({
+              value: view.value,
+              label: locale === "ar" ? view.ar_label : view.en_label,
+            }))
             .sort((a, b) => a.label.localeCompare(b.label))
             .map((option) => {
               return (

@@ -33,14 +33,40 @@ export async function assignSalsePerson(id, additionalProp1) {
 // #### Sales API ####
 export async function getSalesData() {
   try {
+    console.log("[getSalesData] Initiating API request to: sales-employees/list-all-employees");
     const response = await axiosInstance.get(
       "sales-employees/list-all-employees"
     );
+    
+    console.log("[getSalesData] API Response Status:", response.status);
+    console.log("[getSalesData] Response structure:", {
+      hasData: !!response.data,
+      hasDataData: !!response.data?.data,
+      hasStatus: 'status' in (response.data || {}),
+      dataType: typeof response.data,
+      dataKeys: response.data ? Object.keys(response.data) : [],
+      isDataArray: Array.isArray(response.data?.data),
+      dataLength: Array.isArray(response.data?.data) ? response.data.data.length : 'N/A',
+    });
+    console.log("[getSalesData] Full response.data:", JSON.stringify(response.data, null, 2));
+    
     return response.data;
   } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    // Return empty data structure instead of error to prevent server crashes
-    return { data: [] };
+    console.error("[getSalesData] Failed to fetch sales data:", {
+      message: error.message,
+      name: error.name,
+      response: error.response?.data,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      config: {
+        url: error.config?.url,
+        method: error.config?.method,
+        baseURL: error.config?.baseURL,
+      },
+    });
+    // Return empty data structure with status to prevent server crashes
+    // This matches the expected response structure
+    return { data: [], status: false };
   }
 }
 

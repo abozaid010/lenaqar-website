@@ -12,7 +12,9 @@ import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../../public/locales/en";
+import ar from "../../../public/locales/ar";
 import {
   useCitiesAndDistricts,
   useDevelopers,
@@ -20,7 +22,7 @@ import {
 import { addCompound, updatecompound } from "@/utils/api";
 import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
 
 export default function AddCompoundDialog({
@@ -58,6 +60,14 @@ export default function AddCompoundDialog({
   }, [delveloperLoading, disctictsLoading]);
 
   const { t, locale } = useI18n();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   const editMode = !!(compoundData && compoundData.id);
 

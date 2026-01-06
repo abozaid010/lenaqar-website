@@ -2,12 +2,14 @@
 
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../../../../public/locales/en";
+import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements } from "@/utils/api";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import ActionsModal from "./actions-modal";
 import ClientsTablePagination from "./clients-table-pagination";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
@@ -15,6 +17,14 @@ import EmptyStateVideo from "@/components/ui/empty-state-video";
 export default function ClientsTable({ users, pagination }) {
   const { t, locale } = useI18n();
   const router = useRouter();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);

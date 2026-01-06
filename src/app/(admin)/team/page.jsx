@@ -3,7 +3,11 @@ import AddNewMember from "./_components/add-new-member";
 import TeamTable from "./_components/team-table";
 import Link from "next/link";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-// ...
+import { cookies } from "next/headers";
+import { SITE_URL } from "../../metadata";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+
 export async function generateMetadata() {
   const cookieStore = await cookies();
   const clientInfoCookie = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value;
@@ -39,13 +43,45 @@ export async function generateMetadata() {
     },
   };
 }
-export default async function TeamPage() {
-  const data = await getSalesData();
 
+export default async function TeamPage() {
+  let data;
   let hasAccess = true;
-  if (!data?.status) {
+
+  try {
+    console.log("[Team Page] Starting to fetch sales data...");
+    data = await getSalesData();
+    
+    console.log("[Team Page] API Response received:", {
+      hasData: !!data,
+      hasStatus: 'status' in (data || {}),
+      hasDataProperty: !!data?.data,
+      dataType: typeof data,
+      dataKeys: data ? Object.keys(data) : [],
+      isDataArray: Array.isArray(data?.data),
+      dataLength: Array.isArray(data?.data) ? data.data.length : 'N/A',
+    });
+    
+    if (!data?.status) {
+      hasAccess = false;
+      console.log("[Team Page] Access denied - status is false or missing");
+    } else {
+      console.log("[Team Page] Access granted - status is true");
+    }
+  } catch (error) {
+    console.error("[Team Page] Error fetching sales data:", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      response: error.response?.data,
+      status: error.response?.status,
+    });
     hasAccess = false;
+    data = { data: [], status: false };
   }
+
+  // Safely extract team data with proper fallback
+  const teamData = Array.isArray(data?.data) ? data.data : [];
 
   return (
     <>
@@ -62,7 +98,7 @@ export default async function TeamPage() {
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between gap-4">
               <AddNewMember />
-              {data && data.data && data.data.length > 0 && (
+              {teamData.length > 0 && (
                 <VideoInstructionsDialog
                   variant="team"
                   iconSize="md"
@@ -72,14 +108,14 @@ export default async function TeamPage() {
             </div>
 
             <div className="flex-1 relative">
-              <TeamTable data={data.data} />
+              <TeamTable data={teamData} />
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
             <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>
             <p className="text-gray-600 mt-2">
-              You do not have permission to view this chat.
+              You do not have permission to view this page.
             </p>
             <Link
               href="/dashboard"
