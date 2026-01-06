@@ -102,8 +102,10 @@ export const FIELD_ALIASES = {
     "bed rooms",
     "bed-rooms",
     "bedrooms count",
-    "number of bedrooms",
-    "no. of bedrooms"
+    "number of bedrooms",//SODIC
+    "no. of bedrooms",
+    "number of rooms",
+    "no. of rooms"
   ],
   landArea: [
     "Unit Gross Area",
@@ -224,6 +226,7 @@ export const FIELD_ALIASES = {
 
   ],
   deliveryDate: [
+    "estimated delivery date", //SODIC
     "delivery date",
     "delivery-date",
     "deliverydate",
@@ -238,6 +241,7 @@ export const FIELD_ALIASES = {
     "ready-date",
     "readydate",
     "date",
+    "eta"
   ],
   phase: [
     "phase",
@@ -270,6 +274,7 @@ export const FIELD_ALIASES = {
     "number",
   ],
   building_number: [
+    "Building Name",//SODIC
     "building number",
     "building-number",
     "buildingnumber",
@@ -282,6 +287,7 @@ export const FIELD_ALIASES = {
     "bldg number",
   ],
   roof_area: [
+    "Open Roof Deck",//SODIC
     "roof area",
     "roof-area",
     "roofarea",
