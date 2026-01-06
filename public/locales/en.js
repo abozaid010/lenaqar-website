@@ -491,6 +491,7 @@ export default {
   buildingTypes: {
     apartment: "Apartment",
     villa: "Villa",
+    svilla: "S-Villa",
     townhouse: "Townhouse",
     duplex: "Duplex",
     penthouse: "Penthouse",
@@ -498,6 +499,15 @@ export default {
     chalet: "Chalet",
     office: "Office",
     shop: "Shop",
+    twinhouse: "Twin House",
+    house: "House",
+    clinic: "Clinic",
+    cabinet: "Cabinet",
+    commercial: "Commercial",
+    "service apartment": "Service Apartment",
+    loft: "Loft",
+    "office villa": "Office Villa",
+    condo: "Condo",
     land: "Land",
   },
 
@@ -505,6 +515,25 @@ export default {
     sell: "Sell",
     rent: "Rent",
     buy: "Buy",
+    lease: "Lease",
+  },
+  propertyStatus: {
+    "ready to move": "Ready to Move",
+    "off-plan": "Off-Plan",
+  },
+  propertyUsage: {
+    residential: "Residential",
+    commercial: "Commercial",
+    "mixed-use": "Mixed-Use",
+  },
+  propertyPurpose: {
+    housing: "Housing",
+    investment: "Investment",
+  },
+  propertyIntent: {
+    buy: "Buy",
+    rent: "Rent",
+    sell: "Sell",
     lease: "Lease",
   },
   view: {
@@ -836,12 +865,16 @@ export default {
       "fully finished": "Fully Finished",
       "semi finished": "Semi Finished",
       "core & shell": "Core & Shell",
+      flixy: "Flixy",
       unfinished: "Unfinished",
       finished: "Finished",
     },
     furnishingTypes: {
       furnished: "Furnished",
       unfurnished: "Unfurnished",
+      hotel_furnished: "Hotel Furnished",
+      "partially furnished": "Partially Furnished",
+      flixy: "Flixy",
       "semi furnished": "Semi Furnished",
     },
     amenitiesTypes: {

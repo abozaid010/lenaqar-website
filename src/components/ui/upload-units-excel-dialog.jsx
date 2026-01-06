@@ -1,5 +1,6 @@
 "use client";
 
+import { getStaticViewTypeMapping } from "@/utils/localeConstants";
 import { useI18n } from "@/context/translate-api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { v4 as uuidv4 } from "uuid";
@@ -133,19 +134,7 @@ const normalizeView = (value) => {
   }
   
   // Try to map common variations
-  const viewMap = {
-    'garden view': 'garden',
-    'sea view': 'sea',
-    'pool view': 'pool',
-    'street view': 'street',
-    'city view': 'city',
-    'park view': 'park',
-    'mountain view': 'mountain',
-    'river view': 'river',
-    'lagoon view': 'lagoon',
-    'golf view': 'golf',
-    'open area view': 'open area',
-  };
+  const viewMap = VIEW_TYPE_MAPPING;
   
   if (viewMap[normalized]) {
     return viewMap[normalized];

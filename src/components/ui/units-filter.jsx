@@ -2,14 +2,16 @@
 
 import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES, STATIC_CITIES } from "@/data/constants";
+import { getBuildingTypes, STATIC_CITIES } from "@/data/constants";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
+import en from "../../../public/locales/en";
+import ar from "../../../public/locales/ar";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import LoadingSpinner from "./loading-spinner";
 import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 const EnumPropertyIntent = ["rent", "sell"];
@@ -28,6 +30,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const { t, locale } = useI18n();
   const router = useRouter();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer_name || "",
@@ -258,10 +268,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (!filters.property_type || filters.property_type === "all") {
       return t.unitsFilter.allPropertyTypes || "All Property Types";
     }
-    const type = BUILDING_TYPES.find((t) => t.value === filters.property_type);
-    return locale === "ar"
-      ? type.ar_label
-      : type.en_label || filters.property_type;
+    const type = BUILDING_TYPES.find((bt) => bt.value === filters.property_type);
+    return type
+      ? locale === "ar"
+        ? type.ar_label
+        : type.en_label
+      : filters.property_type;
   }
 
   function getSelectedProjectName() {

@@ -1,6 +1,9 @@
 "use client";
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../../../public/locales/en";
+import ar from "../../../../public/locales/ar";
+import { useMemo } from "react";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import {
   Bath,
@@ -21,6 +24,14 @@ import UnitPricing from "./unit-pricing";
 
 export default function UnitBasicInfo({ unit }) {
   const { t, locale } = useI18n();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   // Function to copy phone number to clipboard
   const copyToClipboard = async (text) => {

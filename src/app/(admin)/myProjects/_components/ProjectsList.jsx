@@ -23,11 +23,13 @@ import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import ImportProjectsDialog from "@/components/ui/import-projects-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../../../../public/locales/en";
+import ar from "../../../../../public/locales/ar";
 import { deletePhase, deleteProject } from "@/utils/api";
 import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { filterBySearchQuery } from "@/utils/search-utils";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -37,8 +39,8 @@ import QueryErrorState from "@/components/ui/query-error-state";
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
-const getPropertyTypeLabel = (value, locale) => {
-  const type = BUILDING_TYPES.find((type) => type.value === value);
+const getPropertyTypeLabel = (value, locale, buildingTypes) => {
+  const type = buildingTypes.find((type) => type.value === value);
   return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
 };
 
@@ -52,7 +54,7 @@ const formatPaymentPlan = (plan, locale) => {
   return "";
 };
 
-const PropertyTypesBadges = ({ types, locale, maxDisplay = 3 }) => {
+const PropertyTypesBadges = ({ types, locale, maxDisplay = 3, buildingTypes }) => {
   if (!types || types.length === 0) return null;
 
   const displayTypes = types.slice(0, maxDisplay);
@@ -66,7 +68,7 @@ const PropertyTypesBadges = ({ types, locale, maxDisplay = 3 }) => {
           key={index}
           className="px-2 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full"
         >
-          {getPropertyTypeLabel(type, locale)}
+          {getPropertyTypeLabel(type, locale, buildingTypes)}
         </span>
       ))}
       {remainingCount > 0 && (
@@ -128,6 +130,14 @@ export default function ProjectsList({ clientId }) {
     isError: citiesError,
   } = useCitiesAndDistricts();
   const { t, locale } = useI18n();
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [fullScreenImages, setFullScreenImages] = useState([]);
@@ -714,6 +724,7 @@ export default function ProjectsList({ clientId }) {
                             <PropertyTypesBadges
                               types={project.properties_types}
                               locale={locale}
+                              buildingTypes={BUILDING_TYPES}
                               maxDisplay={2}
                             />
                           </div>
@@ -831,7 +842,7 @@ export default function ProjectsList({ clientId }) {
                                   className="px-3 py-2 bg-blue-50 border border-blue-200 text-blue-800 text-sm font-medium rounded-lg flex items-center gap-2"
                                 >
                                   <Tag size={14} />
-                                  {getPropertyTypeLabel(type, locale)}
+                                  {getPropertyTypeLabel(type, locale, BUILDING_TYPES)}
                                 </span>
                               )
                             )}

@@ -1,7 +1,10 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { BUILDING_TYPES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
+import en from "../../public/locales/en";
+import ar from "../../public/locales/ar";
+import { useMemo } from "react";
 import { useUsersData } from "@/hooks/use-users-data";
 import { getActionLabel } from "@/utils/actions";
 import * as XLSX from "xlsx";
@@ -10,6 +13,14 @@ import { safeJsonParse } from "@/utils/safeJsonParser";
 export function useExcelExport(searchParams) {
   const { t, locale } = useI18n();
   const { data: users, isLoading } = useUsersData(JSON.stringify(searchParams));
+
+  // Get building types with translations
+  const BUILDING_TYPES = useMemo(() => {
+    return getBuildingTypes({
+      en: { buildingTypes: en.buildingTypes || {} },
+      ar: { buildingTypes: ar.buildingTypes || {} },
+    });
+  }, []);
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
