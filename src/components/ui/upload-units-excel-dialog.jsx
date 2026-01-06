@@ -629,6 +629,73 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setIsUploading(false);
   };
 
+  const downloadFailedUnits = () => {
+    if (!parsedData || !uploadStatus.length) {
+      return;
+    }
+
+    // Get indices of failed units
+    const failedIndices = uploadStatus
+      .map((item, index) => (item.status === "failed" ? index : null))
+      .filter((index) => index !== null);
+
+    if (failedIndices.length === 0) {
+      alert(t.uploadExcel?.noFailedUnits || "No failed units to download");
+      return;
+    }
+
+    try {
+      // Get original Excel headers
+      const headers = parsedData.excelHeaders || [];
+
+      // Filter rows to only include failed units
+      const failedRows = failedIndices.map((index) => parsedData.rows[index]);
+
+      // Create workbook
+      const workbook = XLSX.utils.book_new();
+
+      // Prepare data: headers first, then failed rows
+      const excelData = [headers, ...failedRows];
+
+      // Create worksheet from array of arrays
+      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+
+      // Add worksheet to workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Failed Units");
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split("T")[0].replace(/-/g, "");
+      const filename = `failed_units_${timestamp}.xlsx`;
+
+      // Write workbook to buffer
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      // Create blob and trigger download
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting failed units:", error);
+      alert(t.uploadExcel?.exportError || "Error occurred while exporting failed units");
+    }
+  };
+
+  // Check if there are failed units
+  const hasFailedUnits = uploadStatus.some((item) => item.status === "failed");
+  const isUploadComplete = !isUploading && uploadStatus.length > 0;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
@@ -1106,21 +1173,31 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           >
             {t.uploadExcel?.cancel || "Cancel"}
           </button>
-          <button
-            onClick={handleSubmit}
-            disabled={
-              !selectedFile || !parsedData || isProcessing || isUploading
-            }
-            className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:opacity-90"
-              }`}
-          >
-            {isUploading && <Loader2 className="animate-spin" size={18} />}
-            {isUploading
-              ? t.uploadExcel?.uploading || "Uploading..."
-              : t.uploadExcel?.upload || "Upload"}
-          </button>
+          {isUploadComplete && hasFailedUnits ? (
+            <button
+              onClick={downloadFailedUnits}
+              className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
+            >
+              <Download size={18} />
+              {t.uploadExcel?.downloadFailedUnits || "Download Failed Units"}
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              disabled={
+                !selectedFile || !parsedData || isProcessing || isUploading
+              }
+              className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:opacity-90"
+                }`}
+            >
+              {isUploading && <Loader2 className="animate-spin" size={18} />}
+              {isUploading
+                ? t.uploadExcel?.uploading || "Uploading..."
+                : t.uploadExcel?.upload || "Upload"}
+            </button>
+          )}
         </div>
       </div>
 
