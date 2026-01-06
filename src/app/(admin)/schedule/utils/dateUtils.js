@@ -35,8 +35,15 @@ export const getWeekDates = () => {
   const startDate = formatDateForAPI(previousWeekStart);
   const endDate = formatDateForAPI(nextWeekEnd);
 
+  // Get base URL from environment variable
+  const getBaseUrl = () => {
+    const url = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+    return url.startsWith("http") ? url : `https://${url}`;
+  };
+  const baseUrl = getBaseUrl();
+
   return {
-    apiUrl: `https://api.lenaai.net/action/by-date?start_date=${startDate}&end_date=${endDate}`,
+    apiUrl: `${baseUrl}/action/by-date?start_date=${startDate}&end_date=${endDate}`,
     dates: {
       currentWeek: {
         start: currentWeekStart,

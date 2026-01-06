@@ -1,6 +1,13 @@
 import axios from "axios";
 
-const BASE_URL = "https://api.lenaai.net";
+const getBaseUrl = () => {
+  const url = process.env.API_BASE_URL ||
+    process.env.NEXT_PUBLIC_API_BASE_URL ||
+    "https://api.lenaai.net";
+  return url.startsWith("http") ? url : `https://${url}`;
+};
+
+const BASE_URL = getBaseUrl();
 
 export async function loginUser(credentials) {
     const params = new URLSearchParams();

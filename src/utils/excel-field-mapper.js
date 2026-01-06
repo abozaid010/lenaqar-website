@@ -102,8 +102,10 @@ export const FIELD_ALIASES = {
     "bed rooms",
     "bed-rooms",
     "bedrooms count",
-    "number of bedrooms",
-    "no. of bedrooms"
+    "number of bedrooms",//SODIC
+    "no. of bedrooms",
+    "number of rooms",
+    "no. of rooms"
   ],
   landArea: [
     "Unit Gross Area",
@@ -152,6 +154,7 @@ export const FIELD_ALIASES = {
     "finishing-type",
     "finishingtype",
     "condition",
+    "Finishing Specs",
   ],
   furnishing: [
     "furnishing",
@@ -213,19 +216,17 @@ export const FIELD_ALIASES = {
     "unit price",
     "unit-price",
     "unitprice",
-    "cost",
     "total cost",
     "total-cost",
     "totalcost",
-    "amount",
     "total amount",
     "total-amount",
     "totalamount",
-    "value",
-    "Nominal Price"
+    "Nominal Price",
 
   ],
   deliveryDate: [
+    "estimated delivery date", //SODIC
     "delivery date",
     "delivery-date",
     "deliverydate",
@@ -240,6 +241,7 @@ export const FIELD_ALIASES = {
     "ready-date",
     "readydate",
     "date",
+    "eta"
   ],
   phase: [
     "phase",
@@ -272,6 +274,7 @@ export const FIELD_ALIASES = {
     "number",
   ],
   building_number: [
+    "Building Name",//SODIC
     "building number",
     "building-number",
     "buildingnumber",
@@ -284,6 +287,7 @@ export const FIELD_ALIASES = {
     "bldg number",
   ],
   roof_area: [
+    "Open Roof Deck",//SODIC
     "roof area",
     "roof-area",
     "roofarea",
@@ -331,7 +335,9 @@ export class ExcelFieldMapper {
     // Then check against all aliases
     for (const canonicalKey in this.fieldAliases) {
       const aliases = this.fieldAliases[canonicalKey];
-      if (aliases.includes(normalizedHeader)) {
+      // Normalize aliases to lowercase for case-insensitive matching
+      const normalizedAliases = aliases.map(alias => String(alias).toLowerCase().trim());
+      if (normalizedAliases.includes(normalizedHeader)) {
         return canonicalKey;
       }
     }
