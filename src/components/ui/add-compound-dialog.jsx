@@ -80,6 +80,13 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
+  // Calculate default delivery date (3 years from today)
+  const getDefaultDeliveryDate = () => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() + 3);
+    return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+  };
+
   const [formData, setFormData] = useState({
     ar_name: compoundData?.ar_name || "",
     en_name: compoundData?.en_name || "",
@@ -89,7 +96,7 @@ export default function AddCompoundDialog({
     country: "Egypt",
     district: defaultDistrict || "",
     area: "",
-    gated: false,
+    gated: compoundData?.gated ?? true,
     video_url: compoundData?.video_url || "",
     google_map_link: compoundData?.google_map_link || "",
     master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -98,6 +105,7 @@ export default function AddCompoundDialog({
     properties_types: compoundData?.properties_types || [],
     payment_plans: compoundData?.payment_plans || [],
     building_types_images: compoundData?.building_types_images || {},
+    delivery_date: compoundData?.delivery_date || getDefaultDeliveryDate(),
   });
 
   useEffect(() => {
@@ -114,7 +122,7 @@ export default function AddCompoundDialog({
           country: compoundData.country || "Egypt",
           district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
           area: compoundData.area || "",
-          gated: compoundData.gated || false,
+          gated: compoundData.gated ?? true,
           video_url: compoundData.video_url || "",
           google_map_link: compoundData.google_map_link || "",
           master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -123,6 +131,7 @@ export default function AddCompoundDialog({
           properties_types: compoundData.properties_types || [],
           payment_plans: compoundData.payment_plans || [],
           building_types_images: compoundData?.building_types_images || {},
+          delivery_date: compoundData.delivery_date || getDefaultDeliveryDate(),
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -135,7 +144,7 @@ export default function AddCompoundDialog({
           country: "Egypt",
           district: defaultDistrict || "",
           area: "",
-          gated: false,
+          gated: true,
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
@@ -144,6 +153,7 @@ export default function AddCompoundDialog({
           properties_types: [],
           payment_plans: [],
           building_types_images: {},
+          delivery_date: getDefaultDeliveryDate(),
         });
       }
       setErrors({});
@@ -157,7 +167,7 @@ export default function AddCompoundDialog({
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
-        gated: false,
+        gated: true,
         properties_types: [],
         payment_plans: [],
         video_url: "",
@@ -166,6 +176,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "",
         images: [],
         building_types_images: {},
+        delivery_date: getDefaultDeliveryDate(),
       });
 
       setErrors({});
@@ -251,14 +262,16 @@ export default function AddCompoundDialog({
       newErrors.city = t.formValidation?.cityRequired || "City is required";
     }
 
-    if (!formData.country.trim()) {
-      newErrors.country =
-        t.formValidation?.countryRequired || "Country is required";
-    }
+    // Country is always "Egypt" (hidden field), no validation needed
 
     if (!formData.district.trim()) {
       newErrors.district =
         t.formValidation?.districtRequired || "District is required";
+    }
+
+    if (!formData.delivery_date) {
+      newErrors.delivery_date =
+        t.formValidation?.deliveryDateRequired || "Delivery date is required";
     }
 
     if (!formData.area || Number(formData.area) <= 0) {
@@ -328,7 +341,7 @@ export default function AddCompoundDialog({
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
-        gated: false,
+        gated: true,
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -336,6 +349,7 @@ export default function AddCompoundDialog({
         properties_types: [],
         payment_plans: [],
         building_types_images: {},
+        delivery_date: getDefaultDeliveryDate(),
       });
     } catch (error) {
       toast.error(
@@ -467,21 +481,23 @@ export default function AddCompoundDialog({
                 required
               />
 
-              <FormSelect
+              {/* Hidden country field - always set to Egypt */}
+              <input
+                type="hidden"
                 name="country"
-                label={t.formLabels?.country || "Country"}
-                value={formData.country}
+                value="Egypt"
+              />
+
+              {/* Delivery Date Field */}
+              <FormInput
+                type="date"
+                name="delivery_date"
+                label={t.formLabels?.deliveryDate || "Delivery Date"}
+                value={formData.delivery_date}
                 onChange={handleChange}
                 required
-                error={errors.country}
-                disabled={editMode}
-              >
-                {COUNTRIES.map((country) => (
-                  <option key={country.value} value={country.value}>
-                    {locale === "ar" ? country.ar_label : country.en_label}
-                  </option>
-                ))}
-              </FormSelect>
+                error={errors.delivery_date}
+              />
             </div>
 
             <FormSelect
