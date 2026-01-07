@@ -497,7 +497,7 @@ export default function ProjectsList({ clientId }) {
             </div>
           </div>
         )}
-        <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-white w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center gap-3 flex-wrap">
               <h2 className="text-white text-xl font-semibold">
