@@ -80,13 +80,6 @@ export default function AddCompoundDialog({
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
 
-  // Calculate default delivery date (3 years from today)
-  const getDefaultDeliveryDate = () => {
-    const date = new Date();
-    date.setFullYear(date.getFullYear() + 3);
-    return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-  };
-
   const [formData, setFormData] = useState({
     ar_name: compoundData?.ar_name || "",
     en_name: compoundData?.en_name || "",
@@ -106,7 +99,7 @@ export default function AddCompoundDialog({
     properties_types: compoundData?.properties_types || [],
     payment_plans: compoundData?.payment_plans || [],
     building_types_images: compoundData?.building_types_images || {},
-    delivery_date: compoundData?.delivery_date || getDefaultDeliveryDate(),
+    delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null ? compoundData.delivery_date : 4,
   });
 
   useEffect(() => {
@@ -133,7 +126,7 @@ export default function AddCompoundDialog({
           properties_types: compoundData.properties_types || [],
           payment_plans: compoundData.payment_plans || [],
           building_types_images: compoundData?.building_types_images || {},
-          delivery_date: compoundData.delivery_date || getDefaultDeliveryDate(),
+          delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null ? compoundData.delivery_date : 4,
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -156,7 +149,7 @@ export default function AddCompoundDialog({
           properties_types: [],
           payment_plans: [],
           building_types_images: {},
-          delivery_date: getDefaultDeliveryDate(),
+          delivery_date: 4,
         });
       }
       setErrors({});
@@ -180,7 +173,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "",
         images: [],
         building_types_images: {},
-        delivery_date: getDefaultDeliveryDate(),
+        delivery_date: 4,
       });
 
       setErrors({});
@@ -273,9 +266,15 @@ export default function AddCompoundDialog({
         t.formValidation?.districtRequired || "District is required";
     }
 
-    if (!formData.delivery_date) {
+    if (formData.delivery_date === undefined || formData.delivery_date === null || formData.delivery_date === "") {
       newErrors.delivery_date =
-        t.formValidation?.deliveryDateRequired || "Delivery date is required";
+        t.formValidation?.deliveryDateRequired || "Delivery in years is required";
+    } else {
+      const deliveryValue = parseFloat(formData.delivery_date);
+      if (isNaN(deliveryValue) || deliveryValue < 0) {
+        newErrors.delivery_date =
+          t.formValidation?.deliveryDateInvalid || "Delivery in years must be a valid number (0 or greater)";
+      }
     }
 
     if (!formData.area || Number(formData.area) <= 0) {
@@ -312,6 +311,7 @@ export default function AddCompoundDialog({
       const submissionData = {
         ...formData,
         area: Number(formData.area),
+        delivery_date: parseFloat(formData.delivery_date),
       };
 
       let res;
@@ -354,7 +354,7 @@ export default function AddCompoundDialog({
         properties_types: [],
         payment_plans: [],
         building_types_images: {},
-        delivery_date: getDefaultDeliveryDate(),
+        delivery_date: 4,
       });
     } catch (error) {
       toast.error(
@@ -537,14 +537,17 @@ export default function AddCompoundDialog({
                 value="Egypt"
               />
 
-              {/* Delivery Date Field */}
+              {/* Delivery in Years Field */}
               <FormInput
-                type="date"
+                type="number"
                 name="delivery_date"
-                label={t.formLabels?.deliveryDate || "Delivery Date"}
+                label={t.formLabels?.deliveryInYears || "Delivery in years:"}
                 value={formData.delivery_date}
                 onChange={handleChange}
                 required
+                placeholder="4"
+                min="0"
+                step="0.5"
                 error={errors.delivery_date}
               />
             </div>
