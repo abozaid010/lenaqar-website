@@ -237,7 +237,7 @@ export default function AddPaymentPlanDialog({
 
         <div>
           <label
-            className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700"}`}
+            className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
           >
             {t.formLabels?.description || "Description"}
           </label>
@@ -246,8 +246,8 @@ export default function AddPaymentPlanDialog({
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.description ? "border-red-500" : "border-gray-300"
+            className={`block w-full rounded-md border py-1 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+              errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-600"
             }`}
             placeholder={
               locale === "ar"
@@ -337,7 +337,7 @@ export default function AddPaymentPlanDialog({
           error={errors.cache_discount}
         />
 
-        <div className="pt-2 border-t border-gray-100">
+        <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -345,11 +345,11 @@ export default function AddPaymentPlanDialog({
               name="is_default"
               checked={formData.is_default}
               onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
             />
             <label
               htmlFor="is_default"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300"
             >
               {t.formLabels?.defaultPaymentPlan || "Set as Default Payment Plan"}
             </label>
@@ -360,7 +360,7 @@ export default function AddPaymentPlanDialog({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
           >
             {t.buttons?.cancel || "Cancel"}
           </button>

@@ -97,6 +97,7 @@ export default function AddCompoundDialog({
     district: defaultDistrict || "",
     area: "",
     gated: compoundData?.gated ?? true,
+    is_active: compoundData?.is_active ?? true,
     video_url: compoundData?.video_url || "",
     google_map_link: compoundData?.google_map_link || "",
     master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -123,6 +124,7 @@ export default function AddCompoundDialog({
           district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
           area: compoundData.area || "",
           gated: compoundData.gated ?? true,
+          is_active: compoundData.is_active ?? true,
           video_url: compoundData.video_url || "",
           google_map_link: compoundData.google_map_link || "",
           master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -145,6 +147,7 @@ export default function AddCompoundDialog({
           district: defaultDistrict || "",
           area: "",
           gated: true,
+          is_active: true,
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
@@ -168,6 +171,7 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
+        is_active: true,
         properties_types: [],
         payment_plans: [],
         video_url: "",
@@ -342,6 +346,7 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
+        is_active: true,
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -446,11 +451,11 @@ export default function AddCompoundDialog({
             {/* Description */}
             <div>
               <label
-                className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700"}`}
+                className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
               >
                 {t.formLabels?.description || "Description"}{" "}
                 <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2">
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
                   ({formData.description.length}/30-1200)
                 </span>
               </label>
@@ -460,8 +465,8 @@ export default function AddCompoundDialog({
                 onChange={handleChange}
                 required
                 rows={11}
-                className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
+                className={`block w-full rounded-md border py-1 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.description ? "border-red-500" : "border-gray-300 dark:border-gray-600"
                 }`}
                 placeholder={t.placeholders.projectDescription}
               />
@@ -470,6 +475,50 @@ export default function AddCompoundDialog({
                   {errors.description}
                 </p>
               )}
+            </div>
+
+            {/* Gated Community and Sold Out Checkboxes */}
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id="gated"
+                  name="gated"
+                  checked={formData.gated}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                />
+                <label
+                  htmlFor="gated"
+                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                >
+                  {t.formLabels?.gatedCommunity || "Gated Community"}
+                </label>
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  name="is_active"
+                  checked={!formData.is_active}
+                  onChange={(e) => {
+                    handleChange({
+                      target: {
+                        name: "is_active",
+                        type: "checkbox",
+                        checked: !e.target.checked, // Invert: checked means sold out (is_active = false)
+                      },
+                    });
+                  }}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
+                />
+                <label
+                  htmlFor="is_active"
+                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                >
+                  {t.formLabels?.soldOut || "Sold out"}
+                </label>
+              </div>
             </div>
 
             {/* Location */}
@@ -545,23 +594,6 @@ export default function AddCompoundDialog({
                 min="0"
                 error={errors.area}
               />
-
-              <div className="flex items-center gap-1 h-full pt-6">
-                <input
-                  type="checkbox"
-                  id="gated"
-                  name="gated"
-                  checked={formData.gated}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="gated"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  {t.formLabels?.gatedCommunity || "Gated Community"}
-                </label>
-              </div>
             </div>
 
             {/* Property Types */}
@@ -584,9 +616,9 @@ export default function AddCompoundDialog({
               <div className="space-y-4">
                 {formData.properties_types.map((propertyType) => (
                   <div key={propertyType}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                       {getPropertyTypeLabel(propertyType)}
-                      <span className="text-xs font-normal text-gray-500 ml-2">
+                      <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">
                         (
                         {(formData.building_types_images[propertyType] || [])
                           .length}{" "}
@@ -650,7 +682,7 @@ export default function AddCompoundDialog({
               <button
                 type="button"
                 onClick={() => setIsAddDeveloperDialogOpen(true)}
-                className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
+                className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 dark:text-blue-400 text-sm font-medium hover:text-blue-700 dark:hover:text-blue-300`}
               >
                 + {t.buttons?.addNew || "Add New"}
               </button>
@@ -696,9 +728,9 @@ export default function AddCompoundDialog({
 
             {/* Project Images */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 {t.formLabels?.projectImages || "Project Images"}
-                <span className="text-xs font-normal text-gray-500">
+                <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
                   ({formData.images?.length || 0} / 8)
                 </span>
               </label>
@@ -717,7 +749,7 @@ export default function AddCompoundDialog({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 {t.buttons?.cancel || "Cancel"}
               </button>

@@ -250,7 +250,7 @@ export default function ImageUploader({
                       e.stopPropagation();
                       retryFailedUpload(imageId);
                     }}
-                    className="bg-white text-red-500 text-xs font-medium py-1 px-2 rounded"
+                    className="bg-white dark:bg-gray-800 text-red-500 dark:text-red-400 text-xs font-medium py-1 px-2 rounded"
                   >
                     Retry
                   </button>
@@ -303,7 +303,7 @@ export default function ImageUploader({
           )}
         </div>
         {isSelected && (
-          <div className="mt-1 text-xs text-gray-500 truncate">
+          <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">
             {image.name}
           </div>
         )}
@@ -334,11 +334,11 @@ export default function ImageUploader({
           {totalImagesCount < maxImages && (
             <div
               onClick={openFileDialog}
-              className={`aspect-square border-2 border-dashed border-gray-300 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-colors ${dragActive ? "bg-blue-50" : ""}`}
+              className={`aspect-square border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${dragActive ? "bg-blue-50 dark:bg-blue-900/20" : ""}`}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-gray-400"
+                className="h-10 w-10 text-gray-400 dark:text-gray-500"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -350,7 +350,7 @@ export default function ImageUploader({
                   d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span className="mt-2 text-sm text-gray-500">
+              <span className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                 {t.common.addImage}
               </span>
             </div>
@@ -376,7 +376,7 @@ export default function ImageUploader({
             <span>{t.common.ProcessingImages}</span>
           </div>
         )}
-        <p className="mt-2 text-xs text-gray-500">{t.supportedFormats}</p>
+        <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{t.supportedFormats}</p>
       </div>
     </div>
   );

@@ -113,7 +113,7 @@ export default function SingleImageUploader({
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           {label}
         </label>
       )}
@@ -187,15 +187,15 @@ export default function SingleImageUploader({
                 </button>
               )}
             </div>
-            <div className="mt-2 text-xs text-gray-500 truncate w-full text-center">
+            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 truncate w-full text-center">
               {selectedImage?.name}
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 rounded-md border-2 border-dashed border-gray-300">
+          <div className="flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 dark:bg-gray-700 rounded-md border-2 border-dashed border-gray-300 dark:border-gray-600">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-12 w-12 text-gray-400 mb-4"
+              className="h-12 w-12 text-gray-400 dark:text-gray-500 mb-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -207,12 +207,12 @@ export default function SingleImageUploader({
                 d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
               />
             </svg>
-            <p className="text-base text-gray-700 mb-2">
+            <p className="text-base text-gray-700 dark:text-gray-300 mb-2">
               {placeholder ||
                 t?.formLabels?.dragDropImage ||
                 "Click or drag and drop an image here"}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {t?.formLabels?.supportedFormats ||
                 `Supported formats: JPG or PNG (Max ${getMaxSizeMB(imageType)}MB each)`}
             </p>

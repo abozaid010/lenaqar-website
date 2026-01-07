@@ -76,7 +76,7 @@ const FormMultiSelect = ({
     <div className="relative" ref={dropdownRef}>
       {label && (
         <label
-          className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700"}`}
+          className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
           htmlFor={name}
         >
           {label} {required && <span className="text-red-500">*</span>}
@@ -85,30 +85,30 @@ const FormMultiSelect = ({
       <div className="relative">
         <button
           type="button"
-          className={`block w-full rounded-md border py-1 px-2 bg-white text-gray-900 focus:outline-none focus:ring-1 appearance-none text-left ${
+          className={`block w-full rounded-md border py-1 px-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 appearance-none text-left ${
             error
               ? "border-red-500 ring-red-500 text-red-500"
-              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              : "border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
           } ${className}`}
           onClick={handleToggle}
           {...rest}
         >
           <div className="flex justify-between items-center">
-            <span className={!value.length ? "text-gray-400" : ""}>
+            <span className={!value.length ? "text-gray-400 dark:text-gray-500" : ""}>
               {getDisplayValue() || placeholder}
             </span>
-            <ChevronDown className="text-gray-400 w-5 h-5" />
+            <ChevronDown className="text-gray-400 dark:text-gray-500 w-5 h-5" />
           </div>
         </button>
 
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+          <div className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg">
             <ul className="py-1 max-h-60 overflow-auto">
               {options.map((option) => (
                 <li
                   key={option[valueKey]}
-                  className={`p-2 cursor-pointer hover:bg-gray-100 ${
-                    value.includes(option[valueKey]) ? "bg-blue-50" : ""
+                  className={`p-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                    value.includes(option[valueKey]) ? "bg-blue-50 dark:bg-blue-900/30" : ""
                   }`}
                   onClick={() => handleOptionClick(option[valueKey])}
                 >
@@ -119,7 +119,7 @@ const FormMultiSelect = ({
                       onChange={() => {}}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>
+                    <span className="text-gray-900 dark:text-gray-100">
                       {locale === "ar" ? option.ar_label : option.en_label}
                     </span>
                   </div>
