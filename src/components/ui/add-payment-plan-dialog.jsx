@@ -26,7 +26,7 @@ export default function AddPaymentPlanDialog({
     reservation_amount_percentage: "",
     installment_years: "",
     maintenance_fee: "",
-    cache_discount: "0",
+    cache_discount: "40",
     is_default: false,
   });
 
@@ -52,7 +52,7 @@ export default function AddPaymentPlanDialog({
             existingPlan.cache_discount !== undefined &&
             existingPlan.cache_discount !== null
               ? (existingPlan.cache_discount * 100).toString()
-              : "0",
+              : "40",
           is_default: existingPlan.is_default || false,
         });
       } else {
@@ -64,7 +64,7 @@ export default function AddPaymentPlanDialog({
           reservation_amount_percentage: "",
           installment_years: "",
           maintenance_fee: "",
-          cache_discount: "0",
+          cache_discount: "40",
           is_default: false,
         });
       }
@@ -78,7 +78,6 @@ export default function AddPaymentPlanDialog({
     // Check if this is a percentage field that needs range validation
     const percentageFields = [
       "downpayment_percentage",
-      "reservation_amount_percentage",
       "maintenance_fee",
       "cache_discount",
     ];
@@ -99,10 +98,26 @@ export default function AddPaymentPlanDialog({
     }
 
     // Handle regular fields (including checkbox for is_default)
-    setFormData({
+    const updatedFormData = {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
-    });
+    };
+
+    // Auto-generate plan name when downpayment or years change
+    if (name === "downpayment_percentage" || name === "installment_years") {
+      const downpayment = updatedFormData.downpayment_percentage || "";
+      const years = updatedFormData.installment_years || "";
+      
+      if (downpayment && years) {
+        updatedFormData.name = `${downpayment} downpayment, ${years} years`;
+      } else if (downpayment) {
+        updatedFormData.name = `${downpayment} downpayment`;
+      } else if (years) {
+        updatedFormData.name = `${years} years`;
+      }
+    }
+
+    setFormData(updatedFormData);
 
     // Clear error for this field when user types
     if (errors[name]) {
@@ -125,7 +140,6 @@ export default function AddPaymentPlanDialog({
     // Validate percentages are between 0 and 100
     const percentageFields = [
       "downpayment_percentage",
-      "reservation_amount_percentage",
       "maintenance_fee",
       "cache_discount",
     ];
@@ -178,17 +192,16 @@ export default function AddPaymentPlanDialog({
       // Convert string values to numbers and convert percentages from 0-100 to 0-1
       const processedData = {
         name: formData.name,
-        description: formData.description,
+        description: "", // Always send empty string
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
-        reservation_amount_percentage:
-          parseFloat(formData.reservation_amount_percentage) / 100,
+        reservation_amount_percentage: 0, // Always send 0
         installment_years: parseInt(formData.installment_years),
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
         cache_discount:
           formData.cache_discount === "" ||
           isNaN(parseFloat(formData.cache_discount))
-            ? 0
+            ? 0.4
             : parseFloat(formData.cache_discount) / 100,
         is_default: formData.is_default,
       };
@@ -221,76 +234,21 @@ export default function AddPaymentPlanDialog({
           : t.modal.addPaymentPlan || "Add Payment Plan"
       }
     >
-      <div className="space-y-3">
+      <div className="space-y-3 -mb-4">
         {/* Basic Information */}
         <FormInput
-          name="name"
-          label={t.formLabels?.planName || "Plan Name"}
-          value={formData.name}
+          type="number"
+          name="downpayment_percentage"
+          label={t.formLabels?.downpaymentPercentage || "Down Payment (%)"}
+          value={formData.downpayment_percentage}
           onChange={handleChange}
           required
-          placeholder={
-            locale === "ar" ? "خطة دفع 8 سنوات" : "8 Years Payment Plan"
-          }
-          error={errors.name}
+          placeholder="5"
+          min="0"
+          max="100"
+          step="0.1"
+          error={errors.downpayment_percentage}
         />
-
-        <div>
-          <label
-            className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700"}`}
-          >
-            {t.formLabels?.description || "Description"}
-          </label>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            rows={3}
-            className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              errors.description ? "border-red-500" : "border-gray-300"
-            }`}
-            placeholder={
-              locale === "ar"
-                ? "وصف الخطة (اختياري)"
-                : "Plan description (optional)"
-            }
-          />
-          {errors.description && (
-            <p className="text-xs text-red-500 mt-1">{errors.description}</p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-1.5">
-          <FormInput
-            type="number"
-            name="downpayment_percentage"
-            label={t.formLabels?.downpaymentPercentage || "Down Payment (%)"}
-            value={formData.downpayment_percentage}
-            onChange={handleChange}
-            required
-            placeholder="5"
-            min="0"
-            max="100"
-            step="0.1"
-            error={errors.downpayment_percentage}
-          />
-
-          <FormInput
-            type="number"
-            name="reservation_amount_percentage"
-            label={
-              t.formLabels?.reservationPercentage || "Reservation Amount (%)"
-            }
-            value={formData.reservation_amount_percentage}
-            onChange={handleChange}
-            required
-            placeholder="5"
-            min="0"
-            max="100"
-            step="0.1"
-            error={errors.reservation_amount_percentage}
-          />
-        </div>
 
         <div className="grid grid-cols-2 gap-1.5">
           <FormInput
@@ -327,14 +285,26 @@ export default function AddPaymentPlanDialog({
             t.formLabels?.cacheDiscount ||
             "Cache Discount (%)"
           }
-          value={formData.cache_discount || "0"}
+          value={formData.cache_discount || "40"}
           onChange={handleChange}
           required
-          placeholder="0"
+          placeholder="40"
           min="0"
           max="100"
           step="0.1"
           error={errors.cache_discount}
+        />
+
+        <FormInput
+          name="name"
+          label={t.formLabels?.planName || "Plan Name"}
+          value={formData.name}
+          onChange={handleChange}
+          required
+          placeholder={
+            locale === "ar" ? "خطة دفع 8 سنوات" : "8 Years Payment Plan"
+          }
+          error={errors.name}
         />
 
         <div className="pt-2 border-t border-gray-100">
@@ -356,7 +326,7 @@ export default function AddPaymentPlanDialog({
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3 pt-4">
+        <div className="flex justify-end space-x-3 pt-2">
           <button
             type="button"
             onClick={onClose}
