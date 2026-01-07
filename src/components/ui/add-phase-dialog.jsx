@@ -241,7 +241,7 @@ export default function AddPhseDilog({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {t.buttons?.cancel || "Cancel"}
             </button>

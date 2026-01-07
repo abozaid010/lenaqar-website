@@ -315,6 +315,12 @@ export const LOCALIZED_DISTRICTS = [
   },
   {
     city: "cairo",
+    value: "Sarai",
+    en_label: "Sarai City",
+    ar_label: "سراي",
+  },
+  {
+    city: "cairo",
     value: "second settlement",
     en_label: "Second Settlement",
     ar_label: "التجمع الثاني",

@@ -43,8 +43,8 @@ export default function MultiLangInput({
             type="button"
             className={`px-2 py-0.5 text-xs font-semibold ${
               activeLang === "en"
-                ? "bg-primary text-white border border-gray-300 rtl:rounded-l ltr:rounded-r"
-                : "text-gray-700"
+                ? "bg-primary text-white border border-gray-300 dark:border-gray-600 rtl:rounded-l ltr:rounded-r"
+                : "text-gray-700 dark:text-gray-300"
             }`}
             onClick={() => setActiveLang("en")}
           >

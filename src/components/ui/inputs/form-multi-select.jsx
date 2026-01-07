@@ -119,7 +119,7 @@ const FormMultiSelect = ({
                       onChange={() => {}}
                       className="mr-2 h-4 w-4"
                     />
-                    <span>
+                    <span className="text-gray-900">
                       {locale === "ar" ? option.ar_label : option.en_label}
                     </span>
                   </div>

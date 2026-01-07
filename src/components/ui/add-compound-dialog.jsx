@@ -89,7 +89,8 @@ export default function AddCompoundDialog({
     country: "Egypt",
     district: defaultDistrict || "",
     area: "",
-    gated: false,
+    gated: compoundData?.gated ?? true,
+    is_active: compoundData?.is_active ?? true,
     video_url: compoundData?.video_url || "",
     google_map_link: compoundData?.google_map_link || "",
     master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -98,6 +99,7 @@ export default function AddCompoundDialog({
     properties_types: compoundData?.properties_types || [],
     payment_plans: compoundData?.payment_plans || [],
     building_types_images: compoundData?.building_types_images || {},
+    delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null ? compoundData.delivery_date : 4,
   });
 
   useEffect(() => {
@@ -114,7 +116,8 @@ export default function AddCompoundDialog({
           country: compoundData.country || "Egypt",
           district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
           area: compoundData.area || "",
-          gated: compoundData.gated || false,
+          gated: compoundData.gated ?? true,
+          is_active: compoundData.is_active ?? true,
           video_url: compoundData.video_url || "",
           google_map_link: compoundData.google_map_link || "",
           master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -123,6 +126,7 @@ export default function AddCompoundDialog({
           properties_types: compoundData.properties_types || [],
           payment_plans: compoundData.payment_plans || [],
           building_types_images: compoundData?.building_types_images || {},
+          delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null ? compoundData.delivery_date : 4,
         });
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -135,7 +139,8 @@ export default function AddCompoundDialog({
           country: "Egypt",
           district: defaultDistrict || "",
           area: "",
-          gated: false,
+          gated: true,
+          is_active: true,
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
@@ -144,6 +149,7 @@ export default function AddCompoundDialog({
           properties_types: [],
           payment_plans: [],
           building_types_images: {},
+          delivery_date: 4,
         });
       }
       setErrors({});
@@ -157,7 +163,8 @@ export default function AddCompoundDialog({
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
-        gated: false,
+        gated: true,
+        is_active: true,
         properties_types: [],
         payment_plans: [],
         video_url: "",
@@ -166,6 +173,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "",
         images: [],
         building_types_images: {},
+        delivery_date: 4,
       });
 
       setErrors({});
@@ -251,14 +259,22 @@ export default function AddCompoundDialog({
       newErrors.city = t.formValidation?.cityRequired || "City is required";
     }
 
-    if (!formData.country.trim()) {
-      newErrors.country =
-        t.formValidation?.countryRequired || "Country is required";
-    }
+    // Country is always "Egypt" (hidden field), no validation needed
 
     if (!formData.district.trim()) {
       newErrors.district =
         t.formValidation?.districtRequired || "District is required";
+    }
+
+    if (formData.delivery_date === undefined || formData.delivery_date === null || formData.delivery_date === "") {
+      newErrors.delivery_date =
+        t.formValidation?.deliveryDateRequired || "Delivery in years is required";
+    } else {
+      const deliveryValue = parseFloat(formData.delivery_date);
+      if (isNaN(deliveryValue) || deliveryValue < 0) {
+        newErrors.delivery_date =
+          t.formValidation?.deliveryDateInvalid || "Delivery in years must be a valid number (0 or greater)";
+      }
     }
 
     if (!formData.area || Number(formData.area) <= 0) {
@@ -295,6 +311,7 @@ export default function AddCompoundDialog({
       const submissionData = {
         ...formData,
         area: Number(formData.area),
+        delivery_date: parseFloat(formData.delivery_date),
       };
 
       let res;
@@ -328,7 +345,8 @@ export default function AddCompoundDialog({
         country: "Egypt",
         district: defaultDistrict || "",
         area: "",
-        gated: false,
+        gated: true,
+        is_active: true,
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -336,6 +354,7 @@ export default function AddCompoundDialog({
         properties_types: [],
         payment_plans: [],
         building_types_images: {},
+        delivery_date: 4,
       });
     } catch (error) {
       toast.error(
@@ -458,6 +477,50 @@ export default function AddCompoundDialog({
               )}
             </div>
 
+            {/* Gated Community and Sold Out Checkboxes */}
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id="gated"
+                  name="gated"
+                  checked={formData.gated}
+                  onChange={handleChange}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="gated"
+                  className="ml-2 block text-sm text-gray-700"
+                >
+                  {t.formLabels?.gatedCommunity || "Gated Community"}
+                </label>
+              </div>
+              <div className="flex items-center gap-1">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  name="is_active"
+                  checked={!formData.is_active}
+                  onChange={(e) => {
+                    handleChange({
+                      target: {
+                        name: "is_active",
+                        type: "checkbox",
+                        checked: !e.target.checked, // Invert: checked means sold out (is_active = false)
+                      },
+                    });
+                  }}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label
+                  htmlFor="is_active"
+                  className="ml-2 block text-sm text-gray-700"
+                >
+                  {t.formLabels?.soldOut || "Sold out"}
+                </label>
+              </div>
+            </div>
+
             {/* Location */}
             <div className="grid grid-cols-2 gap-4">
               <CitySelect
@@ -467,21 +530,26 @@ export default function AddCompoundDialog({
                 required
               />
 
-              <FormSelect
+              {/* Hidden country field - always set to Egypt */}
+              <input
+                type="hidden"
                 name="country"
-                label={t.formLabels?.country || "Country"}
-                value={formData.country}
+                value="Egypt"
+              />
+
+              {/* Delivery in Years Field */}
+              <FormInput
+                type="number"
+                name="delivery_date"
+                label={t.formLabels?.deliveryInYears || "Delivery in years:"}
+                value={formData.delivery_date}
                 onChange={handleChange}
                 required
-                error={errors.country}
-                disabled={editMode}
-              >
-                {COUNTRIES.map((country) => (
-                  <option key={country.value} value={country.value}>
-                    {locale === "ar" ? country.ar_label : country.en_label}
-                  </option>
-                ))}
-              </FormSelect>
+                placeholder="4"
+                min="0"
+                step="0.5"
+                error={errors.delivery_date}
+              />
             </div>
 
             <FormSelect
@@ -529,23 +597,6 @@ export default function AddCompoundDialog({
                 min="0"
                 error={errors.area}
               />
-
-              <div className="flex items-center gap-1 h-full pt-6">
-                <input
-                  type="checkbox"
-                  id="gated"
-                  name="gated"
-                  checked={formData.gated}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="gated"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  {t.formLabels?.gatedCommunity || "Gated Community"}
-                </label>
-              </div>
             </div>
 
             {/* Property Types */}
