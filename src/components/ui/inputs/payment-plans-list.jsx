@@ -73,7 +73,7 @@ export default function PaymentPlansList({
     <div className="space-y-2">
       <div className="flex justify-between items-center mb-2">
         <label
-          className={`block text-sm font-medium ${error ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
+          className={`block text-sm font-medium ${error ? "text-red-500" : "text-gray-700"}`}
         >
           {t.formLabels?.paymentPlans || "Payment Plans"}{" "}
           {required && <span className="text-red-500">*</span>}
@@ -81,7 +81,7 @@ export default function PaymentPlansList({
         <button
           type="button"
           onClick={handleOpenAddDialog}
-          className="flex items-center text-blue-600 dark:text-blue-400 text-sm font-medium hover:text-blue-700 dark:hover:text-blue-300"
+          className="flex items-center text-blue-600 text-sm font-medium"
         >
           <Plus size={16} className="mr-1" />
           {t.buttons?.addNew || "Add Plan"}
@@ -90,21 +90,21 @@ export default function PaymentPlansList({
 
       {plans.length === 0 ? (
         <div
-          className={`border ${error ? "border-red-300 dark:border-red-700" : "border-gray-200 dark:border-gray-700"} rounded-md p-4 text-center text-gray-500 dark:text-gray-400 text-sm`}
+          className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md p-4 text-center text-gray-500 text-sm`}
         >
           {t.noPaymentPlans || "No payment plans added yet"}
         </div>
       ) : (
         <div
-          className={`border ${error ? "border-red-300 dark:border-red-700" : "border-gray-200 dark:border-gray-700"} rounded-md overflow-hidden`}
+          className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md overflow-hidden`}
         >
-          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          <ul className="divide-y divide-gray-200">
             {plans.map((plan, index) => (
-              <li key={index} className="p-3 hover:bg-gray-50 dark:hover:bg-gray-700">
+              <li key={index} className="p-3 hover:bg-gray-50">
                 <div className="flex justify-between">
                   <div>
-                    <h3 className="font-medium text-gray-900 dark:text-gray-100">{plan.name}</h3>
-                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500 dark:text-gray-400">
+                    <h3 className="font-medium text-gray-900">{plan.name}</h3>
+                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
                       <div>
                         <span className="font-medium">
                           {t.downPayment || "Down Payment"}:
@@ -123,14 +123,14 @@ export default function PaymentPlansList({
                     <button
                       type="button"
                       onClick={() => handleOpenEditDialog(plan, index)}
-                      className="p-1 text-gray-400 dark:text-gray-500 hover:text-blue-500 dark:hover:text-blue-400"
+                      className="p-1 text-gray-400 hover:text-blue-500"
                     >
                       <Edit2 size={16} />
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDeletePlan(index)}
-                      className="p-1 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400"
+                      className="p-1 text-gray-400 hover:text-red-500"
                     >
                       <Trash2 size={16} />
                     </button>

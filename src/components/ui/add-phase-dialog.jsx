@@ -168,7 +168,7 @@ export default function AddPhseDilog({
         <div className="space-y-2">
           {/* Basic Information */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.formLabels?.phaseName || "Phase Name"}{" "}
               <span className="text-red-500">*</span>
             </label>
@@ -178,14 +178,14 @@ export default function AddPhseDilog({
               value={formData.name}
               onChange={handleChange}
               disabled={editMode}
-              className={`block w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                editMode ? "bg-gray-100 dark:bg-gray-800 cursor-not-allowed" : ""
+              className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+                editMode ? "bg-gray-100 cursor-not-allowed" : ""
               }`}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               {t.formLabels?.description || "Description"}
             </label>
             <textarea
@@ -193,7 +193,7 @@ export default function AddPhseDilog({
               value={formData.description}
               onChange={handleChange}
               rows={4}
-              className="block w-full rounded-md border border-gray-300 dark:border-gray-600 py-1 px-3 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               placeholder={
                 t.formLabels?.descriptionPlaceholder ||
                 "Enter phase description..."
@@ -241,7 +241,7 @@ export default function AddPhseDilog({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {t.buttons?.cancel || "Cancel"}
             </button>

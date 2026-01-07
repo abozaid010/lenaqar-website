@@ -23,17 +23,17 @@ export default function MultiLangInput({
 
   return (
     <div>
-      <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center justify-between">
+      <div className="text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
         <label>
           {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <div className="inline-flex rounded bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 overflow-hidden">
+        <div className="inline-flex rounded bg-gray-100 border border-gray-300 overflow-hidden">
           <button
             type="button"
             className={`px-2 py-0.5 text-xs font-semibold ${
               activeLang === "ar"
-                ? "bg-primary text-white border border-gray-300 dark:border-gray-600 rtl:rounded-r ltr:rounded-l"
-                : "text-gray-700 dark:text-gray-300"
+                ? "bg-primary text-white border border-gray-300 rtl:rounded-r ltr:rounded-l"
+                : "text-gray-700"
             }`}
             onClick={() => setActiveLang("ar")}
           >

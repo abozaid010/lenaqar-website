@@ -39,18 +39,18 @@ export default function Dialog({ isOpen, onClose, title, children, editMode }) {
     >
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl overflow-hidden w-[90%] h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out bg-white dark:bg-gray-800"
+        className="rounded-lg shadow-xl overflow-hidden w-[90%] h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out"
       >
         <div className="flex justify-between items-center p-3 bg-primary flex-shrink-0">
           <h3 className="text-lg font-medium text-white">{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none"
+            className="text-gray-400 hover:text-gray-500 focus:outline-none"
           >
             <X size={22} />
           </button>
         </div>
-        <div className="p-4 overflow-y-auto bg-white dark:bg-gray-800 flex-1">
+        <div className="p-4 overflow-y-auto bg-white flex-1">
           {children}
         </div>
       </div>

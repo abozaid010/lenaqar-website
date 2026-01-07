@@ -18,7 +18,7 @@ const FormSelect = ({
     <div className="relative">
       {label && (
         <label
-          className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
+          className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700"}`}
           htmlFor={name}
         >
           {label} {required && <span className="text-red-500">*</span>}
@@ -31,16 +31,16 @@ const FormSelect = ({
           value={value}
           onChange={onChange}
           required={required}
-          className={`block w-full rounded-md border py-1 px-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-1 placeholder:text-gray-400 dark:placeholder:text-gray-500 appearance-none ${
+          className={`block w-full rounded-md border py-1 px-2 bg-white text-gray-900 focus:outline-none focus:ring-1 placeholder:text-gray-400 appearance-none ${
             error
               ? "border-red-500 ring-red-500"
-              : "border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
           } ${className}`}
           {...rest}
         >
           {children}
         </select>
-        <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
       </div>
       {error && errorMessage && (
         <div className="text-xs text-red-500 mt-1">{errorMessage}</div>
