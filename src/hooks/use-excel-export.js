@@ -1,5 +1,6 @@
 "use client";
 
+import ExcelJS from "exceljs";
 import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../public/locales/en";
@@ -7,7 +8,7 @@ import ar from "../../public/locales/ar";
 import { useMemo } from "react";
 import { useUsersData } from "@/hooks/use-users-data";
 import { getActionLabel } from "@/utils/actions";
-import * as XLSX from "xlsx";
+import { downloadExcelFile } from "@/utils/excel-utils";
 import { safeJsonParse } from "@/utils/safeJsonParser";
 
 export function useExcelExport(searchParams) {
@@ -132,7 +133,7 @@ export function useExcelExport(searchParams) {
     document.body.removeChild(a);
   }
 
-  const exportToExcel = (filename = "users_data") => {
+  const exportToExcel = async (filename = "users_data") => {
     const currentUsers = users || [];
 
     if (currentUsers.length === 0) {
@@ -142,140 +143,146 @@ export function useExcelExport(searchParams) {
 
     try {
       // Create workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
 
       // 1. Create Clients Data Sheet
       const formattedData = currentUsers.map(formatUserData);
-      const clientsWorksheet = XLSX.utils.json_to_sheet(formattedData);
-
       const columnHeaders = Object.keys(formattedData[0]);
-
-      // Set specific widths based on column content
+      
+      const clientsSheetName = locale === "ar" ? "بيانات العملاء" : "Clients Data";
+      const clientsWorksheet = workbook.addWorksheet(clientsSheetName);
+      
+      // Set columns with specific widths
       const clientsCols = columnHeaders.map((header) => {
+        let width = 20;
         if (
           header === t.clientsTable.headers.name ||
           header.includes("Name") ||
           header.includes("الاسم")
         ) {
-          return { wch: 30 };
+          width = 30;
         } else if (header === (locale === "ar" ? "النقاط" : "Score")) {
-          return { wch: 10 };
+          width = 10;
         } else if (
           header === t.clientsTable.headers.messageCount ||
           header.includes("Messages Count") ||
           header.includes("الرسائل")
         ) {
-          return { wch: 16 };
+          width = 16;
         } else if (
           header === t.clientsTable.headers.userNumber ||
           header.includes("Number") ||
           header.includes("رقم")
         ) {
-          return { wch: 18 };
+          width = 18;
         } else if (
           header === t.clientsTable.headers.requirements ||
           header.includes("Requirements") ||
           header.includes("المتطلبات")
         ) {
-          return { wch: 25 };
+          width = 25;
         } else if (
           header === t.clientsTable.headers.action ||
           header.includes("Action") ||
           header.includes("الإجراء")
         ) {
-          return { wch: 20 };
+          width = 20;
         } else if (header.includes("Update") || header.includes("تحديث")) {
-          return { wch: 15 };
-        } else {
-          return { wch: 20 };
+          width = 15;
         }
+        return { header, key: header, width };
       });
-      clientsWorksheet["!cols"] = clientsCols;
+      
+      clientsWorksheet.columns = clientsCols;
 
-      // Set text alignment for all cells in clients sheet
-      const clientsRange = XLSX.utils.decode_range(clientsWorksheet["!ref"]);
-      for (let row = clientsRange.s.r; row <= clientsRange.e.r; row++) {
-        for (let col = clientsRange.s.c; col <= clientsRange.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!clientsWorksheet[cellAddress]) continue;
+      // Add data rows
+      formattedData.forEach((row) => {
+        clientsWorksheet.addRow(row);
+      });
 
-          // Set cell format
-          clientsWorksheet[cellAddress].s = {
-            alignment: {
-              horizontal: locale === "ar" ? "right" : "left",
-              vertical: "center",
-              wrapText: false,
-            },
+      // Style header row and apply alignment to all cells
+      clientsWorksheet.eachRow((row, rowIndex) => {
+        row.eachCell((cell) => {
+          cell.alignment = {
+            horizontal: locale === "ar" ? "right" : "left",
+            vertical: "center",
+            wrapText: false,
           };
-        }
-      }
-
-      // Add clients worksheet to workbook (this will be the default sheet)
-      const clientsSheetName =
-        locale === "ar" ? "بيانات العملاء" : "Clients Data";
-      XLSX.utils.book_append_sheet(
-        workbook,
-        clientsWorksheet,
-        clientsSheetName
-      );
+          
+          // Style header row
+          if (rowIndex === 1) {
+            cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF4472C4" } };
+          }
+        });
+      });
 
       // 2. Create Filter Info Sheet
       const filterData = createFilterInfo(searchParams);
-      const filterWorksheet = XLSX.utils.json_to_sheet(filterData);
+      const filterSheetName = locale === "ar" ? "معلومات المرشح" : "Filter Info";
+      const filterWorksheet = workbook.addWorksheet(filterSheetName);
+      
+      filterWorksheet.columns = [
+        { header: locale === "ar" ? "المرشح" : "Filter", key: "filter", width: 25 },
+        { header: locale === "ar" ? "القيمة" : "Value", key: "value", width: 30 },
+      ];
 
-      // Auto-size columns for filter sheet
-      const filterCols = [{ wch: 25 }, { wch: 30 }]; // Filter column wider, Value column wider
-      filterWorksheet["!cols"] = filterCols;
+      // Add filter data
+      filterData.forEach((row) => {
+        filterWorksheet.addRow(row);
+      });
 
-      // Set text alignment for filter sheet cells
-      const filterRange = XLSX.utils.decode_range(filterWorksheet["!ref"]);
-      for (let row = filterRange.s.r; row <= filterRange.e.r; row++) {
-        for (let col = filterRange.s.c; col <= filterRange.e.c; col++) {
-          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!filterWorksheet[cellAddress]) continue;
-
-          // Set cell format
-          filterWorksheet[cellAddress].s = {
-            alignment: {
-              horizontal: locale === "ar" ? "right" : "left",
-              vertical: "center",
-              wrapText: false,
-            },
+      // Style filter sheet
+      filterWorksheet.eachRow((row, rowIndex) => {
+        row.eachCell((cell) => {
+          cell.alignment = {
+            horizontal: locale === "ar" ? "right" : "left",
+            vertical: "center",
+            wrapText: false,
           };
-        }
-      }
-
-      // Add filter worksheet to workbook
-      const filterSheetName =
-        locale === "ar" ? "معلومات المرشح" : "Filter Info";
-      XLSX.utils.book_append_sheet(workbook, filterWorksheet, filterSheetName);
+          
+          if (rowIndex === 1) {
+            cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+            cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF4472C4" } };
+          }
+        });
+      });
 
       // 3. Set the Clients Data sheet as active (default sheet to open)
-      workbook.Workbook = {
-        Views: [{ RTL: locale === "ar" ? true : false }],
+      workbook.workbookView = {
+        activeTab: 0,
+        showHorizontalScroll: true,
+        showSheetTabs: true,
+        showVerticalScroll: true,
+        windowHeight: 20000,
+        windowWidth: 32000,
+        xWindow: 0,
+        yWindow: 0,
       };
 
-      // Set the first sheet (Clients Data) as the active sheet
-      if (workbook.Workbook.Sheets) {
-        workbook.Workbook.Sheets[0] = { state: "visible" };
+      // Set RTL for Arabic
+      if (locale === "ar") {
+        clientsWorksheet.pageSetup = {
+          orientation: "portrait",
+          paperSize: ExcelJS.Workbook.WorksheetDimension.WORKSHEET_PAGE_SIZE.A4,
+          rightToLeft: true,
+        };
+        filterWorksheet.pageSetup = {
+          orientation: "portrait",
+          paperSize: ExcelJS.Workbook.WorksheetDimension.WORKSHEET_PAGE_SIZE.A4,
+          rightToLeft: true,
+        };
       }
 
       // Generate filename with current date
       const currentDate = new Date().toISOString().split("T")[0];
       const finalFilename = `${filename}_${currentDate}.xlsx`;
 
-      // Create blob and trigger native browser download
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
+      // Write workbook to buffer
+      const excelBuffer = await workbook.xlsx.writeBuffer();
 
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = URL.createObjectURL(blob);
-      triggerDownload(url, finalFilename);
+      // Trigger download using secure utility
+      downloadExcelFile(excelBuffer, finalFilename);
     } catch (error) {
       console.error("Error exporting to Excel:", error);
       alert(

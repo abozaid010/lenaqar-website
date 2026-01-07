@@ -29,13 +29,13 @@ export const FIELD_ALIASES = {
     "usage type",
     "usage-type",
     "usagetype",
-    "unit type",
+    "unit type", //Tatweer Misr
     "unittype",
     "unit-type",
-    "type",
   ],
   project: [
     "project",
+    "Project: Project Name", //Tatweer Misr
     "project name",
     "project-name",
     "projectname",
@@ -52,11 +52,10 @@ export const FIELD_ALIASES = {
     "unit title",
     "unit-title",
     "unittitle",
-    "title",
     "unit name",
     "unit-name",
     "unitname",
-    "name",
+    "Building: Building Name", //Tatweer Misr
     "description",
   ],
   bathroomCount: [
@@ -78,13 +77,12 @@ export const FIELD_ALIASES = {
   ],
   floor: [
     "floor",
-    "floor number",
+    "floor number", //Tatweer Misr
     "floor-number",
     "floornumber",
     "floors",
     "level",
     "levels",
-
   ],
   roomsCount: [
     "rooms count",
@@ -104,16 +102,17 @@ export const FIELD_ALIASES = {
     "bedrooms count",
     "number of bedrooms",//SODIC
     "no. of bedrooms",
-    "number of rooms",
+    "number of rooms", //Tatweer Misr
     "no. of rooms"
   ],
   landArea: [
+    "Gross Area",
     "Unit Gross Area",
     "land area",
     "land-area",
     "landarea",
-    "area",
     "bua",
+    "BUA (SQM)", //Tatweer Misr
     "land size",
     "land-size",
     "landsize",
@@ -123,7 +122,6 @@ export const FIELD_ALIASES = {
     "lot area",
     "lot-area",
     "lotarea",
-    "size",
   ],
   gardenSize: [
     "garden size",
@@ -219,18 +217,16 @@ export const FIELD_ALIASES = {
     "total cost",
     "total-cost",
     "totalcost",
-    "total amount",
-    "total-amount",
-    "totalamount",
+    "Unit Total with Finishing Price",
+    "Final Total Unit Price",
     "Nominal Price",
-
   ],
   deliveryDate: [
     "estimated delivery date", //SODIC
+    "Delivery Date \ Y",// Tatweer Misr
     "delivery date",
     "delivery-date",
     "deliverydate",
-    "delivery",
     "handover date",
     "handover-date",
     "handoverdate",
@@ -240,11 +236,11 @@ export const FIELD_ALIASES = {
     "ready date",
     "ready-date",
     "readydate",
-    "date",
     "eta"
   ],
   phase: [
     "phase",
+    "Phase: Phase Name", //Tatweer Misr
     "phase name",
     "phase-name",
     "phasename",
@@ -254,12 +250,10 @@ export const FIELD_ALIASES = {
   ],
   city: [
     "city",
-    "location",
     "city name",
     "city-name",
     "cityname",
     "district",
-    "area",
   ],
   unit_number: [
     "unit number",
@@ -270,8 +264,6 @@ export const FIELD_ALIASES = {
     "unitno",
     "unit no.",
     "unit #",
-    "no",
-    "number",
   ],
   building_number: [
     "Building Name",//SODIC
@@ -317,6 +309,7 @@ export class ExcelFieldMapper {
 
   /**
    * Finds the canonical key for a given header by checking exact match first, then aliases
+   * Uses a scoring system to prefer longer, more specific matches over short generic ones
    * @param {string} header - The header from Excel file
    * @returns {string|null} - The canonical key if found, null otherwise
    */
@@ -332,17 +325,34 @@ export class ExcelFieldMapper {
       }
     }
     
-    // Then check against all aliases
+    // Score all possible matches and pick the best one
+    let bestMatch = null;
+    let bestScore = 0;
+    
     for (const canonicalKey in this.fieldAliases) {
       const aliases = this.fieldAliases[canonicalKey];
-      // Normalize aliases to lowercase for case-insensitive matching
-      const normalizedAliases = aliases.map(alias => String(alias).toLowerCase().trim());
-      if (normalizedAliases.includes(normalizedHeader)) {
-        return canonicalKey;
+      
+      for (const alias of aliases) {
+        const normalizedAlias = String(alias).toLowerCase().trim();
+        
+        // Perfect match - score very high
+        if (normalizedHeader === normalizedAlias) {
+          return canonicalKey; // Return immediately on perfect match
+        }
+        
+        // Substring match - score based on alias length
+        // Longer aliases score higher (more specific)
+        if (normalizedHeader.includes(normalizedAlias) || normalizedAlias.includes(normalizedHeader)) {
+          const score = normalizedAlias.length; // Prefer longer matches
+          if (score > bestScore) {
+            bestScore = score;
+            bestMatch = canonicalKey;
+          }
+        }
       }
     }
     
-    return null;
+    return bestMatch;
   }
 
   /**
