@@ -11,7 +11,10 @@ import {
   Tag,
   Trash2,
   ChevronDown,
+  ChevronRight,
   X,
+  Image as ImageIcon,
+  ChevronsRight,
 } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
@@ -142,6 +145,11 @@ export default function ProjectsList({ clientId }) {
   const [showFullScreenSwiper, setShowFullScreenSwiper] = useState(false);
   const [fullScreenImages, setFullScreenImages] = useState([]);
   const [fullScreenMasterPlan, setFullScreenMasterPlan] = useState(null);
+  const [buildingTypeImagesModal, setBuildingTypeImagesModal] = useState({
+    open: false,
+    images: [],
+    title: "",
+  });
 
   const [projectList, setProjectList] = useState(compounds || []);
   const [projectImageLoading, setProjectImageLoading] = useState(false);
@@ -476,7 +484,19 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3">
+      <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3 relative">
+        {/* Visual Connection Indicator */}
+        {selectedProject && (
+          <div className="hidden xl:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
+            <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
+              <ChevronsRight
+                size={24}
+                className="text-primary animate-pulse"
+                strokeWidth={2.5}
+              />
+            </div>
+          </div>
+        )}
         <div className="bg-white flex-1 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center gap-3 flex-wrap">
@@ -626,13 +646,23 @@ export default function ProjectsList({ clientId }) {
                 {projectList.map((project) => (
                   <div
                     key={project.id}
-                    className={`bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                    className={`bg-gray-50 rounded-lg p-3 border-2 transition-all duration-200 cursor-pointer relative ${
                       selectedProject?.id === project.id
-                        ? "bg-primary text-white"
-                        : ""
+                        ? "bg-primary text-white border-primary shadow-lg"
+                        : "border-gray-200 hover:shadow-md hover:border-gray-300"
                     }`}
                     onClick={() => handleProjectSelection(project)}
                   >
+                    {/* Visual indicator arrow pointing to details */}
+                    {selectedProject?.id === project.id && (
+                      <div className="hidden xl:block absolute -right-6 top-1/2 -translate-y-1/2 z-10">
+                        <ChevronRight
+                          size={24}
+                          className="text-primary animate-pulse"
+                          strokeWidth={2.5}
+                        />
+                      </div>
+                    )}
                     <h3
                       className={`font-semibold text-lg ${
                         selectedProject?.id === project.id
@@ -756,7 +786,13 @@ export default function ProjectsList({ clientId }) {
 
         {/* Right Panel - Details/Map/etc */}
         {projectList.length > 0 && (
-          <div className="flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border border-gray-200">
+          <div
+            className={`flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border-2 transition-all duration-300 ${
+              selectedProject
+                ? "border-primary shadow-lg shadow-primary/10"
+                : "border-gray-200"
+            }`}
+          >
             {selectedProject && (
               <>
                 {(selectedProject.master_plan.url ||
@@ -784,6 +820,15 @@ export default function ProjectsList({ clientId }) {
                       forceLoading={projectImageLoading}
                       onLoadComplete={() => setProjectImageLoading(false)}
                     />
+                    {/* Sold Out Badge */}
+                    {selectedProject.is_active === false && (
+                      <div className="absolute top-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg font-semibold shadow-lg z-10 flex items-center gap-2">
+                        <X size={18} className="stroke-[3]" />
+                        <span>
+                          {locale === "ar" ? "نفذت الكمية" : "Sold Out"}
+                        </span>
+                      </div>
+                    )}
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
                       selectedProject.master_plan.url) && (
@@ -822,6 +867,118 @@ export default function ProjectsList({ clientId }) {
                     <p>{selectedProject.description}</p>
                   </div>
                 )}
+
+                {/* Building Types Images Section */}
+                {((selectedProject.building_types_images &&
+                  Object.keys(selectedProject.building_types_images).length >
+                    0) ||
+                  (selectedProject.types_photos &&
+                    Object.keys(selectedProject.types_photos).length > 0)) && (
+                    <div className="p-4 border-t border-gray-200">
+                      <h4 className="font-semibold text-lg text-gray-700 mb-4 flex items-center gap-2">
+                        <ImageIcon size={20} className="text-purple-600" />
+                        {locale === "ar"
+                          ? "صور أنواع المباني"
+                          : "Building Types Images"}
+                      </h4>
+                      <div className="space-y-6">
+                        {selectedProject.properties_types?.map((type) => {
+                          // Check both building_types_images and types_photos for backward compatibility
+                          let typeImages = null;
+                          
+                          // First check building_types_images (new format with objects)
+                          if (
+                            selectedProject.building_types_images?.[type] &&
+                            Array.isArray(selectedProject.building_types_images[type])
+                          ) {
+                            typeImages = selectedProject.building_types_images[type];
+                          }
+                          // Fallback to types_photos (legacy format with URL strings)
+                          else if (
+                            selectedProject.types_photos?.[type] &&
+                            Array.isArray(selectedProject.types_photos[type])
+                          ) {
+                            typeImages = selectedProject.types_photos[type].map(
+                              (url) => (typeof url === "string" ? { url } : url)
+                            );
+                          }
+
+                          if (!typeImages || typeImages.length === 0)
+                            return null;
+
+                          const typeLabel = getPropertyTypeLabel(
+                            type,
+                            locale,
+                            BUILDING_TYPES
+                          );
+
+                          return (
+                            <div
+                              key={type}
+                              className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                            >
+                              <div className="flex items-center justify-between mb-3">
+                                <h5 className="font-semibold text-base text-gray-800 flex items-center gap-2">
+                                  <Home size={16} className="text-purple-600" />
+                                  {typeLabel}
+                                </h5>
+                                <span className="text-sm text-gray-500">
+                                  {typeImages.length}{" "}
+                                  {locale === "ar" ? "صورة" : "image"}
+                                  {typeImages.length !== 1 ? "s" : ""}
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                {typeImages.slice(0, 4).map((img, idx) => (
+                                  <div
+                                    key={idx}
+                                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border border-gray-200 hover:border-primary transition-colors"
+                                    onClick={() => {
+                                      setBuildingTypeImagesModal({
+                                        open: true,
+                                        images: typeImages,
+                                        title: typeLabel,
+                                      });
+                                    }}
+                                  >
+                                    <ImageWithLoader
+                                      src={img.url || "/images/defaultImage.jpg"}
+                                      alt={`${typeLabel} - ${idx + 1}`}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                      priority={idx === 0}
+                                      loadingVariant="minimal"
+                                    />
+                                    {idx === 3 && typeImages.length > 4 && (
+                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-semibold">
+                                        +{typeImages.length - 4}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                              {typeImages.length > 4 && (
+                                <button
+                                  onClick={() => {
+                                    setBuildingTypeImagesModal({
+                                      open: true,
+                                      images: typeImages,
+                                      title: typeLabel,
+                                    });
+                                  }}
+                                  className="mt-3 text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
+                                >
+                                  {locale === "ar"
+                                    ? "عرض جميع الصور"
+                                    : "View all images"}
+                                  <ChevronRight size={16} />
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                 {/* Project Details Section */}
                 <div className="p-4 border-b border-gray-200">
@@ -1130,6 +1287,18 @@ export default function ProjectsList({ clientId }) {
           onClose={() => setShowFullScreenSwiper(false)}
           images={fullScreenImages}
           masterPlan={fullScreenMasterPlan}
+        />
+      )}
+
+      {buildingTypeImagesModal.open && (
+        <ImageSwiperModal
+          open={buildingTypeImagesModal.open}
+          onClose={() =>
+            setBuildingTypeImagesModal({ open: false, images: [], title: "" })
+          }
+          images={buildingTypeImagesModal.images}
+          masterPlan={null}
+          showMasterPlanLabel={false}
         />
       )}
 
