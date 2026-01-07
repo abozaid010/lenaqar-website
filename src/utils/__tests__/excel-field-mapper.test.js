@@ -65,6 +65,19 @@ const testCases = [
       "Land Area": "landArea",
       "Finishing Type": "finishing"
     }
+  },
+  {
+    name: "Exact match priority - similar headers (ensures exact aliases match first)",
+    headers: [
+      "Finishing Specs",  // Should match FINISHING (exact match)
+      "Total Finishing Price",  // Should match TOTAL PRICE (exact match), NOT finishing
+      "Unit Total with Finishing Price"  // Should match TOTAL PRICE (exact match)
+    ],
+    expectedMappings: {
+      "Finishing Specs": "finishing",
+      "Total Finishing Price": "totalPrice",
+      "Unit Total with Finishing Price": "totalPrice"
+    }
   }
 ];
 

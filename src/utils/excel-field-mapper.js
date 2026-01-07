@@ -103,7 +103,9 @@ export const FIELD_ALIASES = {
     "number of bedrooms",//SODIC
     "no. of bedrooms",
     "number of rooms", //Tatweer Misr
+      "Category",// Palm Hills
     "no. of rooms"
+    
   ],
   landArea: [
     "Gross Area",
@@ -112,7 +114,9 @@ export const FIELD_ALIASES = {
     "land-area",
     "landarea",
     "bua",
-    "BUA (SQM)", //Tatweer Misr
+    "Built Area (Pricing Structure)", // Palm Hills
+    // "Land Area (Pricing Structure)", // Palm Hills (with correct spacing)
+    "BUA (SQM)", // Tatweer Misr
     "land size",
     "land-size",
     "landsize",
@@ -133,7 +137,7 @@ export const FIELD_ALIASES = {
     "garden area (m²)",
     "garden-area (sq.m²)",
     "garden area (sq.m)",
-
+"Garden / Outdoor Area (Pricing Structure)",//Palm Hills
     "gardenarea",
     "yard size",
     "yard-size",
@@ -205,9 +209,9 @@ export const FIELD_ALIASES = {
     "advancepayment",
   ],
   totalPrice: [
-    "price",
     "Unit Total with Finishing Price",
     "Final Total Unit Price",
+    "Total Finishing Price",
     "total price",
     "total-price",
     "totalprice",
@@ -217,9 +221,8 @@ export const FIELD_ALIASES = {
     "total cost",
     "total-cost",
     "totalcost",
-    "Unit Total with Finishing Price",
-    "Final Total Unit Price",
     "Nominal Price",
+    "price",
   ],
   deliveryDate: [
     "estimated delivery date", //SODIC
@@ -247,6 +250,7 @@ export const FIELD_ALIASES = {
     "project phase",
     "project-phase",
     "projectphase",
+    "stage",// palm hills
   ],
   city: [
     "city",
@@ -280,6 +284,7 @@ export const FIELD_ALIASES = {
   ],
   roof_area: [
     "Open Roof Deck",//SODIC
+    " Roof Area  (Pricing Structure)", // Palm Hills
     "roof area",
     "roof-area",
     "roofarea",
@@ -316,11 +321,13 @@ export class ExcelFieldMapper {
   findCanonicalKey(header) {
     if (!header) return null;
     
-    const normalizedHeader = String(header).toLowerCase().trim();
+    // Normalize spaces for robust exact matching
+    const normalize = (str) => String(str).toLowerCase().replace(/\s+/g, ' ').trim();
+    const normalizedHeader = normalize(header);
     
     // First check for exact match (canonical key name)
     for (const canonicalKey in this.fieldAliases) {
-      if (normalizedHeader === canonicalKey.toLowerCase()) {
+      if (normalizedHeader === normalize(canonicalKey)) {
         return canonicalKey;
       }
     }
@@ -331,8 +338,7 @@ export class ExcelFieldMapper {
       const aliases = this.fieldAliases[canonicalKey];
       
       for (const alias of aliases) {
-        const normalizedAlias = String(alias).toLowerCase().trim();
-        
+        const normalizedAlias = normalize(alias);
         // Exact alias match - return immediately (highest priority)
         if (normalizedHeader === normalizedAlias) {
           return canonicalKey;
