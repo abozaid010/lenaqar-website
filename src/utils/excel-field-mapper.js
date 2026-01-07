@@ -325,7 +325,23 @@ export class ExcelFieldMapper {
       }
     }
     
-    // Score all possible matches and pick the best one
+    // FIRST PASS: Check for exact alias matches across ALL canonical keys
+    // This ensures "floor number" (exact alias) matches before "floor type" (substring match)
+    for (const canonicalKey in this.fieldAliases) {
+      const aliases = this.fieldAliases[canonicalKey];
+      
+      for (const alias of aliases) {
+        const normalizedAlias = String(alias).toLowerCase().trim();
+        
+        // Exact alias match - return immediately (highest priority)
+        if (normalizedHeader === normalizedAlias) {
+          return canonicalKey;
+        }
+      }
+    }
+    
+    // SECOND PASS: Only if no exact match found, do substring matching
+    // Score all possible substring matches and pick the best one
     let bestMatch = null;
     let bestScore = 0;
     
@@ -334,11 +350,6 @@ export class ExcelFieldMapper {
       
       for (const alias of aliases) {
         const normalizedAlias = String(alias).toLowerCase().trim();
-        
-        // Perfect match - score very high
-        if (normalizedHeader === normalizedAlias) {
-          return canonicalKey; // Return immediately on perfect match
-        }
         
         // Substring match - score based on alias length
         // Longer aliases score higher (more specific)
