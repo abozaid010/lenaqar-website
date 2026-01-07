@@ -8,6 +8,8 @@ export const BUILDING_TYPE_VALUES = [
   "svilla",
   "townhouse",
   "duplex",
+  "duplex ground",
+  "duplex roof",
   "penthouse",
   "studio",
   "chalet",

@@ -494,6 +494,8 @@ export default {
     svilla: "S-Villa",
     townhouse: "Townhouse",
     duplex: "Duplex",
+    "duplex ground": "Duplex Ground",
+    "duplex roof": "Duplex Roof",
     penthouse: "Penthouse",
     studio: "Studio",
     chalet: "Chalet",
