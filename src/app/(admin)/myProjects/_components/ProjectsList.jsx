@@ -487,7 +487,7 @@ export default function ProjectsList({ clientId }) {
       <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3 relative">
         {/* Visual Connection Indicator */}
         {selectedProject && (
-          <div className="hidden xl:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
+          <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
             <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
               <ChevronsRight
                 size={24}
