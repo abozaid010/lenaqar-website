@@ -1,5 +1,6 @@
 "use client";
 
+import ExcelJS from "exceljs";
 import { getStaticViewTypeMapping } from "@/utils/localeConstants";
 import { useI18n } from "@/context/translate-api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -14,7 +15,7 @@ import {
   Download,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import * as XLSX from "xlsx";
+import { parseExcelFile, downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import {
@@ -202,37 +203,24 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const parseExcelFile = async (file, manualMapping = null) => {
+  const parseExcelFileHandler = async (file, manualMapping = null) => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
+      const { headers: excelHeaders, rows, sheetName } = await parseExcelFile(file);
 
-      if (!sheetName) {
+      if (!excelHeaders || excelHeaders.length === 0) {
         throw new Error(
           "No worksheet found in the Excel file. Please ensure your file contains at least one worksheet."
         );
       }
 
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-      if (jsonData.length < 2) {
+      if (rows.length === 0) {
         throw new Error(
           "Excel file must contain headers and at least one data row."
         );
       }
-
-      const excelHeaders = jsonData[0];
-
-      const rows = jsonData.slice(1).filter((row) => {
-        // Filter out completely empty rows
-        return row.some(
-          (cell) => cell !== undefined && cell !== null && cell !== ""
-        );
-      });
 
       // Create automatic mapping from Excel headers to template keys
       const autoHeaderMapping = createHeaderMapping(excelHeaders);
@@ -412,7 +400,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         setParsedData(null);
         setError(null);
 
-        parseExcelFile(file);
+        parseExcelFileHandler(file);
       } else {
         alert(
           t.uploadExcel?.invalidFileType ||
@@ -449,7 +437,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       // Re-parse the file with the updated mapping immediately
       // Pass the updated mapping directly to avoid React state closure issue
       if (selectedFile) {
-        parseExcelFile(selectedFile, updated);
+        parseExcelFileHandler(selectedFile, updated);
       }
       
       return updated;
@@ -618,7 +606,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setIsUploading(false);
   };
 
-  const downloadFailedUnits = () => {
+  const downloadFailedUnits = async () => {
     if (!parsedData || !uploadStatus.length) {
       return;
     }
@@ -641,40 +629,39 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       const failedRows = failedIndices.map((index) => parsedData.rows[index]);
 
       // Create workbook
-      const workbook = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
 
-      // Prepare data: headers first, then failed rows
-      const excelData = [headers, ...failedRows];
+      // Prepare worksheet
+      const worksheet = workbook.addWorksheet("Failed Units");
 
-      // Create worksheet from array of arrays
-      const worksheet = XLSX.utils.aoa_to_sheet(excelData);
+      // Add headers
+      worksheet.columns = headers.map((header) => ({
+        header,
+        key: header.toLowerCase().replace(/\s+/g, "_"),
+        width: 20,
+      }));
 
-      // Add worksheet to workbook
-      XLSX.utils.book_append_sheet(workbook, worksheet, "Failed Units");
+      // Add data rows
+      failedRows.forEach((row) => {
+        worksheet.addRow(row);
+      });
+
+      // Style header row
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" } };
+        cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FF4472C4" } };
+        cell.alignment = { horizontal: "center", vertical: "center" };
+      });
 
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().split("T")[0].replace(/-/g, "");
       const filename = `failed_units_${timestamp}.xlsx`;
 
       // Write workbook to buffer
-      const excelBuffer = XLSX.write(workbook, {
-        bookType: "xlsx",
-        type: "array",
-      });
+      const excelBuffer = await workbook.xlsx.writeBuffer();
 
-      // Create blob and trigger download
-      const blob = new Blob([excelBuffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      });
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      // Trigger download using secure utility
+      downloadExcelFile(excelBuffer, filename);
     } catch (error) {
       console.error("Error exporting failed units:", error);
       alert(t.uploadExcel?.exportError || "Error occurred while exporting failed units");
