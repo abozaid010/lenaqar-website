@@ -330,31 +330,31 @@ export default function SearchableDropdownSelect({
             aria-expanded={isOpen}
             {...rest}
           >
-            <div className="flex items-center justify-between gap-2">
-              <span
-                className={`truncate flex-1 ${
-                  !value || value === allOptionValue
-                    ? "text-gray-400"
-                    : "text-gray-900"
+            <span
+              className={`truncate block w-full ${
+                value && value !== allOptionValue && !disabled ? "pr-10" : "pr-6"
+              } ${
+                !value || value === allOptionValue
+                  ? "text-gray-400"
+                  : "text-gray-900"
+              }`}
+            >
+              {selectedLabel}
+            </span>
+            {(!value || value === allOptionValue || disabled) && (
+              <ChevronDown
+                size={18}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${
+                  isOpen ? "rotate-180" : ""
                 }`}
-              >
-                {selectedLabel}
-              </span>
-              <div className="flex items-center gap-1 shrink-0">
-                <ChevronDown
-                  size={18}
-                  className={`text-gray-400 transition-transform ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
-            </div>
+              />
+            )}
           </button>
           {value && value !== allOptionValue && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-8 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
               aria-label={locale === "ar" ? "مسح" : "Clear"}
             >
               <X size={16} className="text-gray-400" />

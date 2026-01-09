@@ -481,33 +481,24 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3 relative">
-        {/* Visual Connection Indicator */}
-        {selectedProject && (
-          <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
-            <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
-              <ChevronsRight
-                size={24}
-                className="text-primary animate-pulse"
-                strokeWidth={2.5}
-              />
-            </div>
-          </div>
-        )}
-        <div className="bg-white w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 flex flex-col gap-4 p-3 relative">
+        {/* Header Section - Full Width */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center gap-3 flex-wrap">
-              <h2 className="text-white text-xl font-semibold">
+              <h2 className="text-white text-xl font-semibold flex-shrink-0">
                 {t.sidebar.myProjects}
               </h2>
-              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
-                <ReusableSearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder={t.projectPage?.searchPlaceholder || "Search projects..."}
-                  variant="white"
-                  className="w-full"
-                />
+              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                <div className="flex-1">
+                  <ReusableSearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder={t.projectPage?.searchPlaceholder || "Search projects..."}
+                    variant="white"
+                    className="w-full"
+                  />
+                </div>
                 {/* City Filter */}
                 {cities.length > 0 && (
                   <div className="relative" ref={cityFilterRef}>
@@ -573,7 +564,7 @@ export default function ProjectsList({ clientId }) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => setShowProjectDialog(true)}
                   className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
@@ -600,8 +591,24 @@ export default function ProjectsList({ clientId }) {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="max-h-[80vh] overflow-y-auto">
+        {/* Projects List and Details Section */}
+        <div className="flex flex-col xl:flex-row gap-4 relative">
+          {/* Visual Connection Indicator */}
+          {selectedProject && (
+            <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
+              <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
+                <ChevronsRight
+                  size={24}
+                  className="text-primary animate-pulse"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </div>
+          )}
+          <div className="bg-white w-full xl:w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="max-h-[80vh] overflow-y-auto">
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : isError ? (
@@ -778,10 +785,10 @@ export default function ProjectsList({ clientId }) {
                 ))}
               </div>
             )}
+            </div>
           </div>
-        </div>
 
-        {/* Right Panel - Details/Map/etc */}
+          {/* Right Panel - Details/Map/etc */}
         {projectList.length > 0 && (
           <div
             className={`flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border-2 transition-all duration-300 ${
@@ -792,21 +799,21 @@ export default function ProjectsList({ clientId }) {
           >
             {selectedProject && (
               <>
-                {(selectedProject.master_plan.url ||
+                {(selectedProject.master_plan?.url ||
                   selectedProject.images?.length > 0) && (
                   <div
                     className="h-80 relative cursor-pointer group"
                     onClick={() => {
                       setFullScreenImages(selectedProject.images || []);
                       setFullScreenMasterPlan(
-                        selectedProject.master_plan.url || null
+                        selectedProject.master_plan?.url || null
                       );
                       setShowFullScreenSwiper(true);
                     }}
                   >
                     <ImageWithLoader
                       src={
-                        selectedProject.master_plan.url ||
+                        selectedProject.master_plan?.url ||
                         selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
@@ -828,7 +835,7 @@ export default function ProjectsList({ clientId }) {
                     )}
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
-                      selectedProject.master_plan.url) && (
+                      selectedProject.master_plan?.url) && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg
                           className="w-10 h-10 text-white mb-2"
@@ -844,7 +851,7 @@ export default function ProjectsList({ clientId }) {
                           />
                         </svg>
                         <span className="text-white text-lg font-semibold">
-                          {(selectedProject.master_plan.url ? 1 : 0) +
+                          {(selectedProject.master_plan?.url ? 1 : 0) +
                             (selectedProject.images?.length || 0)}{" "}
                           {t?.images || "Images"}
                         </span>
@@ -1124,7 +1131,7 @@ export default function ProjectsList({ clientId }) {
                         <ImageWithLoader
                           src={
                             selectedProject.phases[selectedPhaseIdx]
-                              ?.master_plan.url ||
+                              ?.master_plan?.url ||
                             (Array.isArray(
                               selectedProject.phases[selectedPhaseIdx]?.images
                             ) &&
@@ -1149,7 +1156,7 @@ export default function ProjectsList({ clientId }) {
                         {(selectedProject.phases[selectedPhaseIdx].images
                           ?.length > 0 ||
                           selectedProject.phases[selectedPhaseIdx]?.master_plan
-                            .url) && (
+                            ?.url) && (
                           <div
                             className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                             onClick={() => {
@@ -1159,7 +1166,7 @@ export default function ProjectsList({ clientId }) {
                               );
                               setFullScreenMasterPlan(
                                 selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan.url || null
+                                  ?.master_plan?.url || null
                               );
                               setShowFullScreenSwiper(true);
                             }}
@@ -1179,7 +1186,7 @@ export default function ProjectsList({ clientId }) {
                             </svg>
                             <span className="text-white text-lg font-semibold">
                               {(selectedProject.phases[selectedPhaseIdx]
-                                ?.master_plan.url
+                                ?.master_plan?.url
                                 ? 1
                                 : 0) +
                                 (selectedProject.phases[selectedPhaseIdx].images
@@ -1250,7 +1257,7 @@ export default function ProjectsList({ clientId }) {
                           >
                             <ImageWithLoader
                               src={
-                                phase.master_plan.url ||
+                                phase.master_plan?.url ||
                                 (Array.isArray(phase?.images) &&
                                 phase?.images.length > 0
                                   ? phase.images[0].url
@@ -1287,6 +1294,7 @@ export default function ProjectsList({ clientId }) {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {showFullScreenSwiper && (
