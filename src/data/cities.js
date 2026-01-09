@@ -2,6 +2,10 @@ export const COUNTRIES = [
   { value: "Egypt", en_label: "Egypt", ar_label: "مصر" },
 ];
 
+// LOCALIZED_CITIES and LOCALIZED_DISTRICTS have been moved to cities-districts-translations.js
+// and are now managed by CitiesAndDistrictsManager
+// Keeping this comment for reference - these exports are no longer used
+/*
 export const LOCALIZED_CITIES = [
   { value: "beni suef", en_label: "Beni Suef", ar_label: "بني سويف" },
   { value: "qena", en_label: "Qena", ar_label: "قنا" },
@@ -42,6 +46,9 @@ export const LOCALIZED_CITIES = [
   { value: "new valley", en_label: "New Valley", ar_label: "الوادي الجديد" },
 ];
 
+// LOCALIZED_DISTRICTS has been moved to cities-districts-translations.js
+// and is now managed by CitiesAndDistrictsManager
+/*
 export const LOCALIZED_DISTRICTS = [
   { city: "beni suef", value: "nasser", en_label: "Nasser", ar_label: "ناصر" },
   {
@@ -956,3 +963,4 @@ export const LOCALIZED_DISTRICTS = [
     ar_label: "الفرافرة",
   },
 ];
+*/

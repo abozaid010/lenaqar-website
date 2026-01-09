@@ -90,6 +90,6 @@ export const useLocaleConstants = () => {
 };
 
 // For use outside of React components - re-export from constants
-import { getStaticViewTypeMapping, STATIC_CITIES } from '@/data/constants';
+import { getStaticViewTypeMapping } from '@/data/constants';
 
-export { getStaticViewTypeMapping, STATIC_CITIES };
+export { getStaticViewTypeMapping };

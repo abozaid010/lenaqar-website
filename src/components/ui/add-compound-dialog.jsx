@@ -15,12 +15,9 @@ import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import {
-  useCitiesAndDistricts,
-  useDevelopers,
-} from "@/hooks/use-admin-shared-data";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { addCompound, updatecompound } from "@/utils/api";
-import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -37,27 +34,15 @@ export default function AddCompoundDialog({
   const { isLoading: delveloperLoading, data: developersData } =
     useDevelopers(clientId);
 
-  const { isLoading: disctictsLoading, data: rowCitiesAndDistricts } =
-    useCitiesAndDistricts();
+  const { getDistrictsWithLabels, isLoading: districtsLoading } = useCitiesDistricts();
 
   const [developers, setDevelopers] = useState(developersData || []);
-  const [citiesAndDistricts, setCitiesAndDistrictsList] = useState(
-    rowCitiesAndDistricts
-      ? formatCitesAndDistrictData(rowCitiesAndDistricts)
-      : []
-  );
 
   useEffect(() => {
     if (developersData) {
       setDevelopers(developersData);
     }
-
-    if (rowCitiesAndDistricts) {
-      setCitiesAndDistrictsList(
-        formatCitesAndDistrictData(rowCitiesAndDistricts)
-      );
-    }
-  }, [delveloperLoading, disctictsLoading]);
+  }, [delveloperLoading]);
 
   const { t, locale } = useI18n();
 
@@ -89,8 +74,8 @@ export default function AddCompoundDialog({
     country: "Egypt",
     district: defaultDistrict || "",
     area: "",
-    gated: compoundData?.gated ?? true,
-    is_active: compoundData?.is_active ?? true,
+    gated: compoundData?.gated !== undefined && compoundData?.gated !== null ? compoundData.gated : true,
+    is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null ? compoundData.is_active : true,
     video_url: compoundData?.video_url || "",
     google_map_link: compoundData?.google_map_link || "",
     master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -116,8 +101,8 @@ export default function AddCompoundDialog({
           country: compoundData.country || "Egypt",
           district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
           area: compoundData.area || "",
-          gated: compoundData.gated ?? true,
-          is_active: compoundData.is_active ?? true,
+          gated: compoundData.gated !== undefined && compoundData.gated !== null ? compoundData.gated : true,
+          is_active: compoundData.is_active !== undefined && compoundData.is_active !== null ? compoundData.is_active : true,
           video_url: compoundData.video_url || "",
           google_map_link: compoundData.google_map_link || "",
           master_plan: compoundData?.master_plan || { url: null, fileId: null },
@@ -178,20 +163,12 @@ export default function AddCompoundDialog({
 
       setErrors({});
     }
-  }, [isOpen, editMode]);
+  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]);
 
-  function formatCitesAndDistrictData(citiesAndDistricts) {
-    const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-      .filter(([governorate]) => governorate !== "cities")
-      .map(([governorate, districts]) => ({
-        governorate,
-        districts: districts.map((district) => ({
-          district,
-        })),
-      }));
-
-    return formattedDataCitiesAndDistricts;
-  }
+  // Get districts for selected city
+  const districtsWithLabels = formData.city 
+    ? getDistrictsWithLabels(formData.city)
+    : [];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -300,8 +277,14 @@ export default function AddCompoundDialog({
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    console.log("[handleSubmit] Form submission started", {
+      editMode,
+      compoundDataId: compoundData?.id,
+    });
+
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
+      console.log("[handleSubmit] Validation errors:", formErrors);
       return;
     }
 
@@ -314,27 +297,98 @@ export default function AddCompoundDialog({
         delivery_date: parseFloat(formData.delivery_date),
       };
 
+      console.log("[handleSubmit] Submission data prepared:", {
+        editMode,
+        projectId: compoundData?.id,
+        submissionDataKeys: Object.keys(submissionData),
+        submissionDataSummary: {
+          ar_name: submissionData.ar_name,
+          en_name: submissionData.en_name,
+          city: submissionData.city,
+          district: submissionData.district,
+          area: submissionData.area,
+          delivery_date: submissionData.delivery_date,
+          gated: submissionData.gated,
+          is_active: submissionData.is_active,
+          imagesCount: submissionData.images?.length || 0,
+          paymentPlansCount: submissionData.payment_plans?.length || 0,
+          propertiesTypesCount: submissionData.properties_types?.length || 0,
+        },
+      });
+
       let res;
       if (editMode) {
+        if (!compoundData?.id) {
+          console.error("[handleSubmit] Missing project ID for update:", {
+            compoundData,
+            compoundDataId: compoundData?.id,
+          });
+          toast.error("Project ID is missing. Cannot update project.");
+          setIsSubmitting(false);
+          return;
+        }
+        console.log("[handleSubmit] Calling updatecompound with ID:", compoundData.id);
         res = await updatecompound(submissionData, compoundData.id);
       } else {
+        console.log("[handleSubmit] Calling addCompound...");
         res = await addCompound(submissionData);
       }
 
-      if (res.status) {
-        onAdd(res.data);
+      console.log("[handleSubmit] API Response received:", {
+        res,
+        resType: typeof res,
+        resKeys: res ? Object.keys(res) : [],
+        hasStatus: res?.status !== undefined,
+        status: res?.status,
+        hasData: res?.data !== undefined,
+        hasError: res?.error !== undefined,
+        error: res?.error,
+        isArray: Array.isArray(res),
+        hasId: res?.id !== undefined,
+      });
+
+      // Check for success - handle different response formats
+      // Format 1: { status: true, data: {...} }
+      // Format 2: { status: 200, data: {...} }
+      // Format 3: { id: ..., name: ..., ... } (direct data object)
+      // Format 4: { error: "..." } (error response)
+      
+      const hasError = res?.error || res?.error_message;
+      const hasSuccessStatus = res?.status === true || res?.status === 200;
+      const hasDataObject = res?.data && typeof res.data === 'object';
+      const hasDirectData = res?.id || (res && !hasError && typeof res === 'object' && !res.status);
+      
+      if (hasError) {
+        const errorMessage =
+          res?.error || 
+          res?.error_message ||
+          res?.message ||
+          "An error occurred while processing your request.";
+        console.error("[handleSubmit] Update failed with error:", {
+          errorMessage,
+          fullResponse: res,
+        });
+        toast.error(errorMessage);
+        return;
+      } else if (hasSuccessStatus || hasDataObject || hasDirectData) {
+        // Success - extract the data
+        const projectData = res?.data || res;
+        console.log("[handleSubmit] Update successful, calling onAdd with:", projectData);
+        onAdd(projectData);
         toast.success(
           editMode
             ? t.compoundUpdated || "project updated successfully!"
             : t.compoundAdded || "project added successfully!"
         );
       } else {
-        const errorMessage =
-          res.error || "An error occurred while processing your request.";
+        // Unknown response format
+        console.warn("[handleSubmit] Unknown response format:", res);
+        const errorMessage = "An error occurred while processing your request.";
         toast.error(errorMessage);
         return;
       }
 
+      console.log("[handleSubmit] Closing dialog and resetting form");
       onClose();
       setFormData({
         ar_name: "",
@@ -357,6 +411,12 @@ export default function AddCompoundDialog({
         delivery_date: 4,
       });
     } catch (error) {
+      console.error("[handleSubmit] Exception caught:", {
+        error,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        errorResponse: error.response,
+      });
       toast.error(
         editMode
           ? "Failed to update compound. Please try again."
@@ -371,6 +431,7 @@ export default function AddCompoundDialog({
       });
     } finally {
       setIsSubmitting(false);
+      console.log("[handleSubmit] Form submission completed");
     }
   };
 
@@ -570,18 +631,27 @@ export default function AddCompoundDialog({
                     ? t.formLabels?.district
                     : "Select district"}
               </option>
-              {formData?.city &&
-                citiesAndDistricts
-                  .find((gov) => gov.governorate === formData.city)
-                  ?.districts.map((dist) => (
-                    <option key={dist.district} value={dist.district}>
-                      {formatDistrictLabel(
-                        dist.district,
-                        formData.city,
-                        locale
-                      )}
-                    </option>
-                  ))}
+              {formData.city ? (
+                districtsLoading ? (
+                  <option disabled value="">
+                    {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
+                  </option>
+                ) : districtsWithLabels.length > 0 ? (
+                  districtsWithLabels
+                    .sort((a, b) => a.label.localeCompare(b.label))
+                    .map((dist) => (
+                      <option key={dist.value} value={dist.value}>
+                        {dist.label}
+                      </option>
+                    ))
+                ) : (
+                  <option disabled value="">
+                    {locale === "ar" 
+                      ? `لا توجد مناطق لـ ${formData.city}` 
+                      : `No districts found for ${formData.city}`}
+                  </option>
+                )
+              ) : null}
             </FormSelect>
 
             {/* Details */}

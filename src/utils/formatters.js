@@ -1,21 +1,15 @@
-import { LOCALIZED_CITIES, LOCALIZED_DISTRICTS } from "@/data/cities.js";
+import CitiesAndDistrictsManager from "@/services/cities-districts-manager";
 
 export function formatCityLabel(cityValue, locale = "en") {
-  const city = LOCALIZED_CITIES.find((c) => c.value === cityValue);
-  if (!city) return cityValue;
-  return locale === "ar"
-    ? city.ar_label || city.value
-    : city.en_label || city.value;
+  if (!cityValue) return "";
+  const manager = CitiesAndDistrictsManager.getInstance();
+  return manager.getCityLabel(cityValue, locale);
 }
 
 export function formatDistrictLabel(districtValue, cityValue, locale = "en") {
-  const district = LOCALIZED_DISTRICTS.find(
-    (d) => d.value === districtValue && d.city === cityValue
-  );
-  if (!district) return districtValue;
-  return locale === "ar"
-    ? district.ar_label || district.value
-    : district.en_label || district.value;
+  if (!districtValue) return "";
+  const manager = CitiesAndDistrictsManager.getInstance();
+  return manager.getDistrictLabel(districtValue, cityValue, locale);
 }
 
 export const formatPrice = (num) => {

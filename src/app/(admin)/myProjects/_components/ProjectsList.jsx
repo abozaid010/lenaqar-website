@@ -1,7 +1,8 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useCompounds, useCitiesAndDistricts } from "@/hooks/use-admin-shared-data";
+import { useCompounds } from "@/hooks/use-admin-shared-data";
+import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import {
   Clock,
   CreditCard,
@@ -127,11 +128,7 @@ export default function ProjectsList({ clientId }) {
     refetch,
     isFetching,
   } = useCompounds(clientId);
-  const {
-    data: citiesData,
-    isLoading: citiesLoading,
-    isError: citiesError,
-  } = useCitiesAndDistricts();
+  const { getCities, isLoading: citiesLoading, error: citiesError } = useCitiesDistricts();
   const { t, locale } = useI18n();
 
   // Get building types with translations
@@ -171,7 +168,7 @@ export default function ProjectsList({ clientId }) {
   const [isImportOpen, setIsImportOpen] = useState(false);
   
   // City filter state
-  const cities = citiesData?.cities || [];
+  const cities = getCities() || [];
   const [selectedCities, setSelectedCities] = useState([]);
   const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
 
@@ -1090,6 +1087,17 @@ export default function ProjectsList({ clientId }) {
                           {selectedProject.phases.length}
                         </div>
                         <div className="text-xs text-gray-500">{t.phases}</div>
+                      </div>
+                    )}
+
+                    {selectedProject.delivery_date && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.delivery_date}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {locale === "ar" ? "التسليم (سنوات)" : "Delivery (years)"}
+                        </div>
                       </div>
                     )}
                   </div>

@@ -45,28 +45,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
 
   const sharedData = useAdminSharedData();
   const rowDevelopers = sharedData.developers.data || [];
-  const rowCitiesAndDistricts = sharedData.citiesAndDistricts.data || {};
-
-  // Debug logging for troubleshooting
-  console.log("🔍 DEBUG - Add Unit Modal:");
-  console.log("📊 Shared Data:", sharedData);
-  console.log("🏙️ Raw Cities and Districts:", rowCitiesAndDistricts);
-  console.log("⏳ Cities Loading:", sharedData.citiesAndDistricts.isLoading);
-  console.log("❌ Cities Error:", sharedData.citiesAndDistricts.error);
-  console.log("🔄 Cities Fetching:", sharedData.citiesAndDistricts.isFetching);
-
-  const citiesAndDistricts = rowCitiesAndDistricts && typeof rowCitiesAndDistricts === 'object'
-    ? Object.entries(rowCitiesAndDistricts)
-      .filter(([governorate]) => governorate !== "cities")
-      .map(([governorate, districts]) => ({
-        governorate,
-        districts: Array.isArray(districts) ? districts.map((district) => ({
-          district,
-        })) : [],
-      }))
-    : [];
-
-  console.log("🏘️ Processed Cities and Districts:", citiesAndDistricts);
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -411,7 +389,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           <p className="text-gray-600 mb-4">{sharedData.sharedDataErrorMessage}</p>
           <div className="flex gap-2">
             <button
-              onClick={() => sharedData.citiesAndDistricts.refetch()}
+              onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
               Retry
@@ -473,7 +451,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
               updateFormData={updateFormData}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
-              citiesAndDistricts={citiesAndDistricts}
             />
           )}
 
