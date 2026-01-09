@@ -799,21 +799,21 @@ export default function ProjectsList({ clientId }) {
           >
             {selectedProject && (
               <>
-                {(selectedProject.master_plan.url ||
+                {(selectedProject.master_plan?.url ||
                   selectedProject.images?.length > 0) && (
                   <div
                     className="h-80 relative cursor-pointer group"
                     onClick={() => {
                       setFullScreenImages(selectedProject.images || []);
                       setFullScreenMasterPlan(
-                        selectedProject.master_plan.url || null
+                        selectedProject.master_plan?.url || null
                       );
                       setShowFullScreenSwiper(true);
                     }}
                   >
                     <ImageWithLoader
                       src={
-                        selectedProject.master_plan.url ||
+                        selectedProject.master_plan?.url ||
                         selectedProject?.images[0]?.url ||
                         "/images/defaultImage.jpg"
                       }
@@ -835,7 +835,7 @@ export default function ProjectsList({ clientId }) {
                     )}
                     {/* Overlay for indication */}
                     {(selectedProject.images?.length > 0 ||
-                      selectedProject.master_plan.url) && (
+                      selectedProject.master_plan?.url) && (
                       <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <svg
                           className="w-10 h-10 text-white mb-2"
@@ -851,7 +851,7 @@ export default function ProjectsList({ clientId }) {
                           />
                         </svg>
                         <span className="text-white text-lg font-semibold">
-                          {(selectedProject.master_plan.url ? 1 : 0) +
+                          {(selectedProject.master_plan?.url ? 1 : 0) +
                             (selectedProject.images?.length || 0)}{" "}
                           {t?.images || "Images"}
                         </span>
@@ -1131,7 +1131,7 @@ export default function ProjectsList({ clientId }) {
                         <ImageWithLoader
                           src={
                             selectedProject.phases[selectedPhaseIdx]
-                              ?.master_plan.url ||
+                              ?.master_plan?.url ||
                             (Array.isArray(
                               selectedProject.phases[selectedPhaseIdx]?.images
                             ) &&
@@ -1156,7 +1156,7 @@ export default function ProjectsList({ clientId }) {
                         {(selectedProject.phases[selectedPhaseIdx].images
                           ?.length > 0 ||
                           selectedProject.phases[selectedPhaseIdx]?.master_plan
-                            .url) && (
+                            ?.url) && (
                           <div
                             className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                             onClick={() => {
@@ -1166,7 +1166,7 @@ export default function ProjectsList({ clientId }) {
                               );
                               setFullScreenMasterPlan(
                                 selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan.url || null
+                                  ?.master_plan?.url || null
                               );
                               setShowFullScreenSwiper(true);
                             }}
@@ -1186,7 +1186,7 @@ export default function ProjectsList({ clientId }) {
                             </svg>
                             <span className="text-white text-lg font-semibold">
                               {(selectedProject.phases[selectedPhaseIdx]
-                                ?.master_plan.url
+                                ?.master_plan?.url
                                 ? 1
                                 : 0) +
                                 (selectedProject.phases[selectedPhaseIdx].images
@@ -1257,7 +1257,7 @@ export default function ProjectsList({ clientId }) {
                           >
                             <ImageWithLoader
                               src={
-                                phase.master_plan.url ||
+                                phase.master_plan?.url ||
                                 (Array.isArray(phase?.images) &&
                                 phase?.images.length > 0
                                   ? phase.images[0].url
