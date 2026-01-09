@@ -1057,6 +1057,17 @@ export default function ProjectsList({ clientId }) {
                       </div>
                     )}
 
+                    {selectedProject.units_count !== undefined && selectedProject.units_count !== null && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.units_count}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {locale === "ar" ? "عدد الوحدات" : "Units Count"}
+                        </div>
+                      </div>
+                    )}
+
                     {selectedProject.gated !== undefined && (
                       <div className="flex flex-col items-center justify-between">
                         <div className="text-xl font-bold text-primary">
@@ -1070,6 +1081,42 @@ export default function ProjectsList({ clientId }) {
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.formLabels?.gatedCommunity || "Gated Community"}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedProject.city && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div
+                          className="text-lg font-bold text-primary max-w-full truncate"
+                          title={formatCityLabel(capitalize(selectedProject.city), locale)}
+                        >
+                          {formatCityLabel(capitalize(selectedProject.city), locale)}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {t.formLabels?.city || "City"}
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedProject.district && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div
+                          className="text-lg font-bold text-primary max-w-full truncate"
+                          title={formatDistrictLabel(
+                            capitalize(selectedProject.district),
+                            capitalize(selectedProject.city),
+                            locale
+                          )}
+                        >
+                          {formatDistrictLabel(
+                            capitalize(selectedProject.district),
+                            capitalize(selectedProject.city),
+                            locale
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {t.formLabels?.district || "District"}
                         </div>
                       </div>
                     )}
@@ -1097,16 +1144,18 @@ export default function ProjectsList({ clientId }) {
                       </div>
                     )}
 
-                    {selectedProject.delivery_date && (
-                      <div className="flex flex-col items-center justify-between">
-                        <div className="text-xl font-bold text-primary">
-                          {selectedProject.delivery_date}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {locale === "ar" ? "التسليم (سنوات)" : "Delivery (years)"}
-                        </div>
+                    <div className="flex flex-col items-center justify-between">
+                      <div className="text-xl font-bold text-primary">
+                        {selectedProject.delivery_date !== undefined && 
+                         selectedProject.delivery_date !== null && 
+                         selectedProject.delivery_date !== "" 
+                          ? selectedProject.delivery_date 
+                          : locale === "ar" ? "غير محدد" : "N/A"}
                       </div>
-                    )}
+                      <div className="text-xs text-gray-500">
+                        {locale === "ar" ? "التسليم (سنوات)" : "Delivery (years)"}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
