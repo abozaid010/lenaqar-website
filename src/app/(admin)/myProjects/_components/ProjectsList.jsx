@@ -1089,6 +1089,17 @@ export default function ProjectsList({ clientId }) {
                         <div className="text-xs text-gray-500">{t.phases}</div>
                       </div>
                     )}
+
+                    {selectedProject.delivery_date && (
+                      <div className="flex flex-col items-center justify-between">
+                        <div className="text-xl font-bold text-primary">
+                          {selectedProject.delivery_date}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {locale === "ar" ? "التسليم (سنوات)" : "Delivery (years)"}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 

@@ -303,12 +303,37 @@ export async function addCompound(compoundData) {
 }
 export async function updatecompound(compoundData, projectId) {
   try {
+    console.log("[updatecompound] Starting update request:", {
+      projectId,
+      compoundData: {
+        ...compoundData,
+        images: compoundData.images?.length || 0,
+        payment_plans: compoundData.payment_plans?.length || 0,
+        properties_types: compoundData.properties_types?.length || 0,
+      },
+    });
+    
     const response = await axiosInstance.patch(
       `/projects/${projectId}/update-fields`,
       compoundData
     );
+    
+    console.log("[updatecompound] API Response:", {
+      status: response.status,
+      statusText: response.statusText,
+      data: response.data,
+      dataKeys: response.data ? Object.keys(response.data) : [],
+    });
+    
     return response.data;
   } catch (error) {
+    console.error("[updatecompound] Error occurred:", {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      fullError: error,
+    });
     return { error: error.response?.data?.error_message || error.message };
   }
 }

@@ -310,55 +310,57 @@ export default function SearchableDropdownSelect({
       )}
 
       <div className="relative">
-        <button
-          type="button"
-          id={name}
-          onClick={handleToggle}
-          onKeyDown={handleKeyDown}
-          disabled={disabled}
-          className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-left ${
-            error
-              ? "border-red-500 ring-red-500"
-              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-          } ${
-            disabled
-              ? "bg-gray-50 cursor-not-allowed opacity-60"
-              : "cursor-pointer"
-          }`}
-          aria-haspopup="listbox"
-          aria-expanded={isOpen}
-          {...rest}
-        >
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className={`truncate flex-1 ${
-                !value || value === allOptionValue
-                  ? "text-gray-400"
-                  : "text-gray-900"
-              }`}
-            >
-              {selectedLabel}
-            </span>
-            <div className="flex items-center gap-1 shrink-0">
-              {value && value !== allOptionValue && !disabled && (
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  className="p-0.5 hover:bg-gray-100 rounded transition-colors"
-                  aria-label={locale === "ar" ? "مسح" : "Clear"}
-                >
-                  <X size={16} className="text-gray-400" />
-                </button>
-              )}
-              <ChevronDown
-                size={18}
-                className={`text-gray-400 transition-transform ${
-                  isOpen ? "rotate-180" : ""
+        <div className="relative">
+          <button
+            type="button"
+            id={name}
+            onClick={handleToggle}
+            onKeyDown={handleKeyDown}
+            disabled={disabled}
+            className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-left ${
+              error
+                ? "border-red-500 ring-red-500"
+                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            } ${
+              disabled
+                ? "bg-gray-50 cursor-not-allowed opacity-60"
+                : "cursor-pointer"
+            } ${value && value !== allOptionValue && !disabled ? "pr-10" : "pr-10"}`}
+            aria-haspopup="listbox"
+            aria-expanded={isOpen}
+            {...rest}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span
+                className={`truncate flex-1 ${
+                  !value || value === allOptionValue
+                    ? "text-gray-400"
+                    : "text-gray-900"
                 }`}
-              />
+              >
+                {selectedLabel}
+              </span>
+              <div className="flex items-center gap-1 shrink-0">
+                <ChevronDown
+                  size={18}
+                  className={`text-gray-400 transition-transform ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+          {value && value !== allOptionValue && !disabled && (
+            <button
+              type="button"
+              onClick={handleClear}
+              className="absolute right-8 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
+              aria-label={locale === "ar" ? "مسح" : "Clear"}
+            >
+              <X size={16} className="text-gray-400" />
+            </button>
+          )}
+        </div>
 
         {isOpen && (
           <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
