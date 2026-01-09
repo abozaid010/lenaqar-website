@@ -7,6 +7,7 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { useLocaleConstants } from "@/utils/localeConstants";
+import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { getprojects } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
@@ -19,20 +20,18 @@ export default function BasicDetailsStep({
   clientId,
   formData,
   updateFormData,
-  citiesAndDistricts,
+  citiesAndDistricts: _citiesAndDistricts, // Keep for backward compatibility but don't use
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
   const { t, locale } = useI18n();
   const { getBuildingTypes, getViewTypes } = useLocaleConstants();
+  const { getDistrictsWithLabels, isLoading: citiesLoading } = useCitiesDistricts();
 
-  // Debug logging for district selection
-  console.log("🔍 DEBUG - Basic Details Step:");
-  console.log("🏙️ Cities and Districts:", citiesAndDistricts);
-  console.log("📍 Selected City:", formData.city);
-  console.log("🏘️ Available Districts for city:", 
-    formData.city ? citiesAndDistricts?.find((gov) => gov.governorate === formData.city)?.districts : "No city selected"
-  );
+  // Get districts for selected city
+  const districtsWithLabels = formData.city 
+    ? getDistrictsWithLabels(formData.city)
+    : [];
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -207,23 +206,26 @@ export default function BasicDetailsStep({
               ? t.formLabels.selectDistrict
               : t.formLabels.cityFirst}
           </option>
-          {formData?.city && citiesAndDistricts?.length > 0 ? (
-            citiesAndDistricts
-              ?.find((gov) => gov.governorate === formData.city)
-              ?.districts?.sort((a, b) => a.district.localeCompare(b.district))
-              .map((dist) => (
-                <option key={dist.district} value={dist.district}>
-                  {formatDistrictLabel(dist.district, formData.city, locale)}
-                </option>
-              )) || (
-                <option disabled value="">
-                  No districts found for {formData.city}
-                </option>
-              )
-          ) : formData.city ? (
-            <option disabled value="">
-              Loading districts...
-            </option>
+          {formData.city ? (
+            citiesLoading ? (
+              <option disabled value="">
+                {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
+              </option>
+            ) : districtsWithLabels.length > 0 ? (
+              districtsWithLabels
+                .sort((a, b) => a.label.localeCompare(b.label))
+                .map((dist) => (
+                  <option key={dist.value} value={dist.value}>
+                    {dist.label}
+                  </option>
+                ))
+            ) : (
+              <option disabled value="">
+                {locale === "ar" 
+                  ? `لا توجد مناطق لـ ${formData.city}` 
+                  : `No districts found for ${formData.city}`}
+              </option>
+            )
           ) : null}
         </FormSelect>
 

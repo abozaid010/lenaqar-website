@@ -15,12 +15,9 @@ import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import {
-  useCitiesAndDistricts,
-  useDevelopers,
-} from "@/hooks/use-admin-shared-data";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { addCompound, updatecompound } from "@/utils/api";
-import { formatDistrictLabel } from "@/utils/formatters";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -37,27 +34,15 @@ export default function AddCompoundDialog({
   const { isLoading: delveloperLoading, data: developersData } =
     useDevelopers(clientId);
 
-  const { isLoading: disctictsLoading, data: rowCitiesAndDistricts } =
-    useCitiesAndDistricts();
+  const { getDistrictsWithLabels, isLoading: districtsLoading } = useCitiesDistricts();
 
   const [developers, setDevelopers] = useState(developersData || []);
-  const [citiesAndDistricts, setCitiesAndDistrictsList] = useState(
-    rowCitiesAndDistricts
-      ? formatCitesAndDistrictData(rowCitiesAndDistricts)
-      : []
-  );
 
   useEffect(() => {
     if (developersData) {
       setDevelopers(developersData);
     }
-
-    if (rowCitiesAndDistricts) {
-      setCitiesAndDistrictsList(
-        formatCitesAndDistrictData(rowCitiesAndDistricts)
-      );
-    }
-  }, [delveloperLoading, disctictsLoading]);
+  }, [delveloperLoading]);
 
   const { t, locale } = useI18n();
 
@@ -180,18 +165,10 @@ export default function AddCompoundDialog({
     }
   }, [isOpen, editMode]);
 
-  function formatCitesAndDistrictData(citiesAndDistricts) {
-    const formattedDataCitiesAndDistricts = Object.entries(citiesAndDistricts)
-      .filter(([governorate]) => governorate !== "cities")
-      .map(([governorate, districts]) => ({
-        governorate,
-        districts: districts.map((district) => ({
-          district,
-        })),
-      }));
-
-    return formattedDataCitiesAndDistricts;
-  }
+  // Get districts for selected city
+  const districtsWithLabels = formData.city 
+    ? getDistrictsWithLabels(formData.city)
+    : [];
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -570,18 +547,27 @@ export default function AddCompoundDialog({
                     ? t.formLabels?.district
                     : "Select district"}
               </option>
-              {formData?.city &&
-                citiesAndDistricts
-                  .find((gov) => gov.governorate === formData.city)
-                  ?.districts.map((dist) => (
-                    <option key={dist.district} value={dist.district}>
-                      {formatDistrictLabel(
-                        dist.district,
-                        formData.city,
-                        locale
-                      )}
-                    </option>
-                  ))}
+              {formData.city ? (
+                districtsLoading ? (
+                  <option disabled value="">
+                    {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
+                  </option>
+                ) : districtsWithLabels.length > 0 ? (
+                  districtsWithLabels
+                    .sort((a, b) => a.label.localeCompare(b.label))
+                    .map((dist) => (
+                      <option key={dist.value} value={dist.value}>
+                        {dist.label}
+                      </option>
+                    ))
+                ) : (
+                  <option disabled value="">
+                    {locale === "ar" 
+                      ? `لا توجد مناطق لـ ${formData.city}` 
+                      : `No districts found for ${formData.city}`}
+                  </option>
+                )
+              ) : null}
             </FormSelect>
 
             {/* Details */}

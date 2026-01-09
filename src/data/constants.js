@@ -344,11 +344,3 @@ export const getStaticViewTypeMapping = () => ({
 });
 
 export const VIEW_TYPE_MAPPING = getStaticViewTypeMapping();
-
-export const STATIC_CITIES = [
-  "cairo",
-  "giza",
-  "north coast",
-  "new administrative capital",
-  "suez"
-];

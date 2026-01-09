@@ -2,13 +2,15 @@
 
 import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/context/translate-api";
-import { getBuildingTypes, STATIC_CITIES } from "@/data/constants";
+import { getBuildingTypes } from "@/data/constants";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
+import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useMemo } from "react";
@@ -30,6 +32,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const { t, locale } = useI18n();
   const router = useRouter();
+  const { getCityLabel } = useCitiesDistricts();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -38,6 +41,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       ar: { buildingTypes: ar.buildingTypes || {} },
     });
   }, []);
+
 
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer_name || "",
@@ -65,7 +69,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     useState(false);
   const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
   const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
-  const [isCityDropdownOpen, setIsCityDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = [];
@@ -107,7 +110,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const propertyTypeDropdownRef = useRef(null);
   const purposeDropdownRef = useRef(null);
   const projectDropdownRef = useRef(null);
-  const cityDropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
@@ -119,7 +121,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   );
   useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
   useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
-  useOnClickOutside(cityDropdownRef, () => setIsCityDropdownOpen(false));
 
   const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
@@ -301,10 +302,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }
 
   function getSelectedCity() {
-    if (!filters.city || filters.city === "all") {
+    if (!filters.city || filters.city === "all" || filters.city === "") {
       return t.unitsFilter.allCities || "All Cities";
     }
-    return formatCityLabel(filters.city, locale) || filters.city;
+    return getCityLabel(filters.city) || filters.city;
   }
 
   function getFilterDisplayText(key, value) {
@@ -330,48 +331,19 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
         {/* Cities Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={cityDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsCityDropdownOpen(!isCityDropdownOpen)}
-          >
-            <span className="truncate">{getSelectedCity()}</span>
-            <ChevronDown size={22} className="inline-block mt-1" />
-          </button>
-
-          {isCityDropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("city", "all");
-                  setIsCityDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allCities || "All Cities"}
-              </div>
-              {STATIC_CITIES.sort((a, b) =>
-                formatCityLabel(a, locale).localeCompare(
-                  formatCityLabel(b, locale)
-                )
-              ).map((city, idx) => (
-                <div
-                  key={idx}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                  onClick={() => {
-                    handleFilterChange("city", city);
-                    setIsCityDropdownOpen(false);
-                  }}
-                >
-                  {formatCityLabel(city, locale)}
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <SearchableCitySelect
+            value={filters.city === "all" ? "" : filters.city}
+            onChange={(e) => {
+              const cityValue = e.target.value || "all";
+              handleFilterChange("city", cityValue);
+            }}
+            name="city"
+            showAllOption={true}
+            allOptionLabel={t.unitsFilter.allCities || "All Cities"}
+            placeholder={t.unitsFilter.allCities || "All Cities"}
+            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+          />
         </div>
 
         {/* Developer Dropdown */}
