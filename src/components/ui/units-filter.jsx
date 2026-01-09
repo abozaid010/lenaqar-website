@@ -11,6 +11,8 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
+import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useMemo } from "react";
@@ -64,11 +66,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [developersLoading || projectsLoading]);
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
-  const [isDeveloperDropdownOpen, setIsDeveloperDropdownOpen] = useState(false);
-  const [isPropertyTypeDropdownOpen, setIsPropertyTypeDropdownOpen] =
-    useState(false);
-  const [isPurposeDropdownOpen, setIsPurposeDropdownOpen] = useState(false);
-  const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = [];
@@ -106,21 +103,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   });
 
   const priceDropdownRef = useRef(null);
-  const developerDropdownRef = useRef(null);
-  const propertyTypeDropdownRef = useRef(null);
-  const purposeDropdownRef = useRef(null);
-  const projectDropdownRef = useRef(null);
 
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
-  useOnClickOutside(developerDropdownRef, () =>
-    setIsDeveloperDropdownOpen(false)
-  );
-  useOnClickOutside(propertyTypeDropdownRef, () =>
-    setIsPropertyTypeDropdownOpen(false)
-  );
-  useOnClickOutside(purposeDropdownRef, () => setIsPurposeDropdownOpen(false));
-  useOnClickOutside(projectDropdownRef, () => setIsProjectDropdownOpen(false));
 
   const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
@@ -282,6 +267,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       return t.unitsFilter.allCompounds || "All Projects";
     }
     const c = compounds.find((c) => c.en_name === filters.project_name);
+    if (!c) return filters.project_name;
     return locale === "ar" ? c.ar_name : c.en_name || filters.project_name;
   }
 
@@ -347,202 +333,97 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
 
         {/* Developer Dropdown */}
-
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={developerDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsDeveloperDropdownOpen(!isDeveloperDropdownOpen)}
-          >
-            <span className="truncate">{getSelectedDeveloper()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
-
-          {isDeveloperDropdownOpen && (
-            <div className="absolute z-50 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("developer_name", "all");
-                  setIsDeveloperDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allDevelopers}
-              </div>
-              {developersLoading ? (
-                <LoadingSpinner
-                  size={22}
-                  containerClassName="flex items-center justify-center"
-                />
-              ) : (
-                developers
-                  .sort((a, b) => {
-                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                    return nameA.trim().localeCompare(nameB.trim(), locale, {
-                      sensitivity: "base",
-                    });
-                  })
-                  .map((d, idx) => (
-                    <div
-                      key={idx}
-                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                      onClick={() => {
-                        handleFilterChange("developer_name", d.name);
-                        setIsDeveloperDropdownOpen(false);
-                      }}
-                    >
-                      {locale === "ar" ? d.ar_name : d.en_name}
-                    </div>
-                  ))
-              )}
-            </div>
-          )}
+        <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <SearchableDropdownSelect
+            options={developers}
+            value={filters.developer_name === "all" ? "" : filters.developer_name}
+            onChange={(e) => {
+              const developerValue = e.target.value || "all";
+              handleFilterChange("developer_name", developerValue);
+            }}
+            name="developer_name"
+            getValue={(dev) => dev.name}
+            getLabel={(dev, locale) => locale === "ar" ? dev.ar_name : dev.en_name}
+            searchFields={["en_name", "ar_name", "name"]}
+            sortOptions={(options, locale) => {
+              return [...options].sort((a, b) => {
+                const nameA = locale === "ar" ? a.ar_name : a.en_name;
+                const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                return (nameA || "").trim().localeCompare((nameB || "").trim(), locale, {
+                  sensitivity: "base",
+                });
+              });
+            }}
+            showAllOption={true}
+            allOptionLabel={t.unitsFilter.allDevelopers || "All Developers"}
+            placeholder={t.unitsFilter.allDevelopers || "All Developers"}
+            isLoading={developersLoading}
+            loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
+            noResultsText={locale === "ar" ? "لا توجد نتائج" : "No developers found"}
+            searchPlaceholder={locale === "ar" ? "ابحث عن المطور..." : "Search developers..."}
+            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+          />
         </div>
 
         {/* Compounds Dropdown */}
-
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={projectDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
-          >
-            <span className="truncate">{getSelectedProjectName()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
-
-          {isProjectDropdownOpen && (
-            <div className="absolute z-49 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("project_name", "all");
-                  setIsProjectDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allCompounds}
-              </div>
-
-              {projectsLoading ? (
-                <LoadingSpinner
-                  size={22}
-                  containerClassName="flex items-center justify-center"
-                />
-              ) : (
-                compounds
-                  .sort((a, b) => {
-                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                    return nameA.trim().localeCompare(nameB.trim(), locale, {
-                      sensitivity: "base",
-                    });
-                  })
-                  .map((c, idx) => (
-                    <div
-                      key={idx}
-                      className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer truncate"
-                      onClick={() => {
-                        handleFilterChange("project_name", c.en_name);
-                        setIsProjectDropdownOpen(false);
-                      }}
-                    >
-                      {locale === "ar" ? c.ar_name : c.en_name}
-                    </div>
-                  ))
-              )}
-            </div>
-          )}
+        <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <SearchableProjectSelect
+            value={filters.project_name === "all" ? "" : filters.project_name}
+            onChange={(e) => {
+              const projectValue = e.target.value || "all";
+              handleFilterChange("project_name", projectValue);
+            }}
+            name="project_name"
+            projects={compounds}
+            isPublic={isPublic}
+            isLoading={projectsLoading}
+            showAllOption={true}
+            allOptionLabel={t.unitsFilter.allCompounds || "All Projects"}
+            placeholder={t.unitsFilter.allCompounds || "All Projects"}
+            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+          />
         </div>
 
         {/* Purpose Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={purposeDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() => setIsPurposeDropdownOpen(!isPurposeDropdownOpen)}
-          >
-            <span className="truncate">{getSelectedPurpose()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
-
-          {isPurposeDropdownOpen && (
-            <div className="absolute z-48 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-lg py-1 max-h-56 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("purpose", "all");
-                  setIsPurposeDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allPurposes}
-              </div>
-              {EnumPropertyIntent.map((purpose) => (
-                <div
-                  key={purpose}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("purpose", purpose);
-                    setIsPurposeDropdownOpen(false);
-                  }}
-                >
-                  {t.unitsFilter.purposes[purpose]}
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <SearchableDropdownSelect
+            options={EnumPropertyIntent.map((purpose) => ({
+              value: purpose,
+              label: t.unitsFilter.purposes[purpose],
+            }))}
+            value={filters.purpose === "all" ? "" : filters.purpose}
+            onChange={(e) => {
+              const purposeValue = e.target.value || "all";
+              handleFilterChange("purpose", purposeValue);
+            }}
+            name="purpose"
+            showAllOption={true}
+            allOptionLabel={t.unitsFilter.allPurposes || "All Purposes"}
+            placeholder={t.unitsFilter.allPurposes || "All Purposes"}
+            searchPlaceholder={locale === "ar" ? "ابحث عن الغرض..." : "Search purposes..."}
+            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+          />
         </div>
 
         {/* Property Type Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={propertyTypeDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
-            onClick={() =>
-              setIsPropertyTypeDropdownOpen(!isPropertyTypeDropdownOpen)
-            }
-          >
-            <span className="truncate">{getSelectedPropertyType()}</span>
-            <ChevronDown size={22} className="inline-block mt-1 shrink-0" />
-          </button>
-
-          {isPropertyTypeDropdownOpen && (
-            <div className="absolute z-47 mt-1 w-full md:min-w-[200px] bg-[#FFFFFF] rounded-[5px] shadow-2xl py-1 max-h-72 overflow-y-auto">
-              <div
-                className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                onClick={() => {
-                  handleFilterChange("property_type", "all");
-                  setIsPropertyTypeDropdownOpen(false);
-                }}
-              >
-                {t.unitsFilter.allPropertyTypes}
-              </div>
-              {BUILDING_TYPES.map((type) => (
-                <div
-                  key={type.value}
-                  className="px-4 py-3 hover:bg-gray-100 text-[#494A4B] cursor-pointer"
-                  onClick={() => {
-                    handleFilterChange("property_type", type.value);
-                    setIsPropertyTypeDropdownOpen(false);
-                  }}
-                >
-                  {locale === "ar" ? type.ar_label : type.en_label}
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="w-full md:w-auto md:flex-1 min-w-0">
+          <SearchableDropdownSelect
+            options={BUILDING_TYPES}
+            value={filters.property_type === "all" ? "" : filters.property_type}
+            onChange={(e) => {
+              const propertyTypeValue = e.target.value || "all";
+              handleFilterChange("property_type", propertyTypeValue);
+            }}
+            name="property_type"
+            getValue={(type) => type.value}
+            getLabel={(type, locale) => locale === "ar" ? type.ar_label : type.en_label}
+            searchFields={["en_label", "ar_label", "value"]}
+            showAllOption={true}
+            allOptionLabel={t.unitsFilter.allPropertyTypes || "All Property Types"}
+            placeholder={t.unitsFilter.allPropertyTypes || "All Property Types"}
+            searchPlaceholder={locale === "ar" ? "ابحث عن نوع العقار..." : "Search property types..."}
+            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+          />
         </div>
 
         {/* Price Filter Dropdown */}
