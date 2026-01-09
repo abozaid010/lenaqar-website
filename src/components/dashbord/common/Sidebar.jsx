@@ -109,8 +109,8 @@ const Sidebar = () => {
 
       {/* Sidebar content */}
       <div
-        className={`w-62 h-full bg-white text-gray-700 flex flex-col fixed lg:static z-10 transition-all duration-300 shadow-md ${
-          isOpen ? "left-0" : "-left-64 lg:left-0"
+        className={`w-[12.0rem] h-full bg-white text-gray-700 flex flex-col fixed lg:static z-10 transition-all duration-300 shadow-md ${
+          isOpen ? "left-0" : "-left-[12.0rem] lg:left-0"
         }`}
       >
         {/* Logo/Brand */}

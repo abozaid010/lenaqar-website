@@ -481,33 +481,24 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col xl:flex-row gap-4 p-3 relative">
-        {/* Visual Connection Indicator */}
-        {selectedProject && (
-          <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
-            <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
-              <ChevronsRight
-                size={24}
-                className="text-primary animate-pulse"
-                strokeWidth={2.5}
-              />
-            </div>
-          </div>
-        )}
-        <div className="bg-white w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-gray-50 flex flex-col gap-4 p-3 relative">
+        {/* Header Section - Full Width */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex flex-col gap-3">
             <div className="flex justify-between items-center gap-3 flex-wrap">
-              <h2 className="text-white text-xl font-semibold">
+              <h2 className="text-white text-xl font-semibold flex-shrink-0">
                 {t.sidebar.myProjects}
               </h2>
-              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
-                <ReusableSearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder={t.projectPage?.searchPlaceholder || "Search projects..."}
-                  variant="white"
-                  className="w-full"
-                />
+              <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+                <div className="flex-1">
+                  <ReusableSearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder={t.projectPage?.searchPlaceholder || "Search projects..."}
+                    variant="white"
+                    className="w-full"
+                  />
+                </div>
                 {/* City Filter */}
                 {cities.length > 0 && (
                   <div className="relative" ref={cityFilterRef}>
@@ -573,7 +564,7 @@ export default function ProjectsList({ clientId }) {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <button
                   onClick={() => setShowProjectDialog(true)}
                   className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
@@ -600,8 +591,24 @@ export default function ProjectsList({ clientId }) {
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="max-h-[80vh] overflow-y-auto">
+        {/* Projects List and Details Section */}
+        <div className="flex flex-col xl:flex-row gap-4 relative">
+          {/* Visual Connection Indicator */}
+          {selectedProject && (
+            <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
+              <div className="flex items-center gap-2 bg-primary/10 backdrop-blur-sm rounded-full px-3 py-2 border-2 border-primary/30 shadow-lg">
+                <ChevronsRight
+                  size={24}
+                  className="text-primary animate-pulse"
+                  strokeWidth={2.5}
+                />
+              </div>
+            </div>
+          )}
+          <div className="bg-white w-full xl:w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div className="max-h-[80vh] overflow-y-auto">
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : isError ? (
@@ -778,10 +785,10 @@ export default function ProjectsList({ clientId }) {
                 ))}
               </div>
             )}
+            </div>
           </div>
-        </div>
 
-        {/* Right Panel - Details/Map/etc */}
+          {/* Right Panel - Details/Map/etc */}
         {projectList.length > 0 && (
           <div
             className={`flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border-2 transition-all duration-300 ${
@@ -1287,6 +1294,7 @@ export default function ProjectsList({ clientId }) {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {showFullScreenSwiper && (

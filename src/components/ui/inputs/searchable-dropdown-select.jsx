@@ -330,9 +330,9 @@ export default function SearchableDropdownSelect({
             aria-expanded={isOpen}
             {...rest}
           >
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
               <span
-                className={`truncate flex-1 ${
+                className={`truncate flex-1 min-w-0 ${
                   !value || value === allOptionValue
                     ? "text-gray-400"
                     : "text-gray-900"
@@ -340,14 +340,12 @@ export default function SearchableDropdownSelect({
               >
                 {selectedLabel}
               </span>
-              <div className="flex items-center gap-1 shrink-0">
-                <ChevronDown
-                  size={18}
-                  className={`text-gray-400 transition-transform ${
-                    isOpen ? "rotate-180" : ""
-                  }`}
-                />
-              </div>
+              <ChevronDown
+                size={18}
+                className={`text-gray-400 transition-transform shrink-0 ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
             </div>
           </button>
           {value && value !== allOptionValue && !disabled && (
