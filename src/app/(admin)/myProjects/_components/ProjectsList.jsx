@@ -481,7 +481,7 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col gap-4 p-3 relative">
+      <div className="bg-gray-50 flex flex-col gap-4 p-3 relative flex-1 min-h-0 h-full">
         {/* Header Section - Full Width */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-primary p-4 flex flex-col gap-3">
@@ -594,7 +594,7 @@ export default function ProjectsList({ clientId }) {
         </div>
 
         {/* Projects List and Details Section */}
-        <div className="flex flex-col xl:flex-row gap-4 relative">
+        <div className="flex flex-col xl:flex-row gap-4 relative flex-1 min-h-0">
           {/* Visual Connection Indicator */}
           {selectedProject && (
             <div className="hidden xl:flex absolute left-[45%] top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-opacity duration-300 pointer-events-none">
@@ -607,8 +607,8 @@ export default function ProjectsList({ clientId }) {
               </div>
             </div>
           )}
-          <div className="bg-white w-full xl:w-45/100 h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="max-h-[80vh] overflow-y-auto">
+          <div className="bg-white w-full xl:w-45/100 h-full rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+            <div className="h-full overflow-y-auto">
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : isError ? (

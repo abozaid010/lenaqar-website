@@ -7,6 +7,8 @@ import { formatTimestamp } from "@/utils/formateDate";
 import SafeImage from "@/components/ui/safe-image";
 import Link from "next/link";
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function BotMessageCard({ message }) {
   const {
@@ -26,7 +28,32 @@ export default function BotMessageCard({ message }) {
   const { t } = useI18n();
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
-      {bot_response && <div className="text-sm text-primary">{bot_response}</div>}
+      {bot_response && (
+        <div className="text-sm text-primary">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              ul: ({ children }) => (
+                <ul className="list-disc pl-5 space-y-2 my-2">
+                  {children}
+                </ul>
+              ),
+              li: ({ children }) => (
+                <li className="leading-relaxed">
+                  {children}
+                </li>
+              ),
+              p: ({ children }) => (
+                <p className="mb-2 leading-relaxed">
+                  {children}
+                </p>
+              ),
+            }}
+          >
+            {bot_response}
+          </ReactMarkdown>
+        </div>
+      )}
 
       {propertiesItems?.length > 0 &&
         propertiesItems.map((itm, idx) => (
