@@ -332,7 +332,7 @@ export default function SearchableDropdownSelect({
           >
             <span
               className={`truncate block w-full ${
-                value && value !== allOptionValue && !disabled ? "pr-16" : "pr-6"
+                value && value !== allOptionValue && !disabled ? "pr-10" : "pr-6"
               } ${
                 !value || value === allOptionValue
                   ? "text-gray-400"
@@ -341,20 +341,20 @@ export default function SearchableDropdownSelect({
             >
               {selectedLabel}
             </span>
-            <ChevronDown
-              size={18}
-              className={`absolute ${
-                value && value !== allOptionValue && !disabled ? "right-8" : "right-3"
-              } top-1/2 -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${
-                isOpen ? "rotate-180" : ""
-              }`}
-            />
+            {(!value || value === allOptionValue || disabled) && (
+              <ChevronDown
+                size={18}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${
+                  isOpen ? "rotate-180" : ""
+                }`}
+              />
+            )}
           </button>
           {value && value !== allOptionValue && !disabled && (
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-8 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
               aria-label={locale === "ar" ? "مسح" : "Clear"}
             >
               <X size={16} className="text-gray-400" />
