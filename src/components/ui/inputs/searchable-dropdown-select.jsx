@@ -38,26 +38,82 @@ const defaultGetLabel = (option, locale) => {
 
 /**
  * Default search function
+ * Requires ALL words in the query to match in the same field
+ * More strict: words must be meaningful (at least 2 chars) and match as whole words when possible
  */
 const defaultSearch = (option, query, searchFields, getLabel, getValue) => {
-  const queryLower = query.toLowerCase();
-
+  const queryLower = query.toLowerCase().trim();
+  
+  if (!queryLower) return true;
+  
   // If searchFields is a function, use it directly
   if (typeof searchFields === "function") {
     return searchFields(option, queryLower);
   }
 
+  // Split query into words (handles phrases like "butter fly" or "butterfly")
+  // Filter out very short words (less than 2 chars) unless the whole query is short
+  const queryWords = queryLower
+    .split(/\s+/)
+    .filter(word => word.length > 0 && (word.length >= 2 || queryLower.length <= 3));
+
+  if (queryWords.length === 0) return true;
+
   // If searchFields is an array, search in those fields
   if (Array.isArray(searchFields)) {
+    // Check if ANY field contains ALL the words
     return searchFields.some((field) => {
       const fieldValue = getNestedValue(option, field);
-      return fieldValue?.toLowerCase().includes(queryLower);
+      if (!fieldValue) return false;
+      
+      const fieldValueLower = String(fieldValue).toLowerCase();
+      
+      // First check if the exact phrase matches (handles compound words like "butterfly")
+      // This helps match "butter fly" query with "butterfly" field value
+      if (fieldValueLower.includes(queryLower)) {
+        return true;
+      }
+      
+      // Also check if the query without spaces matches (for compound word searches)
+      // e.g., "butter fly" query should match "butterfly" field
+      const queryWithoutSpaces = queryLower.replace(/\s+/g, '');
+      if (queryWithoutSpaces.length > 3 && fieldValueLower.includes(queryWithoutSpaces)) {
+        return true;
+      }
+      
+      // Then check if ALL individual words are present in this field
+      // This requires that each word appears somewhere in the field value
+      const allWordsMatch = queryWords.every(word => {
+        if (word.length < 2) return true; // Skip very short words
+        return fieldValueLower.includes(word);
+      });
+      
+      return allWordsMatch;
     });
   }
 
-  // Default: search in label
+  // Default: search in label - require ALL words to match or exact phrase
   const label = getLabel(option);
-  return label?.toLowerCase().includes(queryLower);
+  if (!label) return false;
+  
+  const labelLower = String(label).toLowerCase();
+  
+  // Check exact phrase first (handles compound words)
+  if (labelLower.includes(queryLower)) {
+    return true;
+  }
+  
+  // Check query without spaces (for compound word matching)
+  const queryWithoutSpaces = queryLower.replace(/\s+/g, '');
+  if (queryWithoutSpaces.length > 3 && labelLower.includes(queryWithoutSpaces)) {
+    return true;
+  }
+  
+  // Then check if all words match
+  return queryWords.every(word => {
+    if (word.length < 2) return true;
+    return labelLower.includes(word);
+  });
 };
 
 /**
@@ -90,6 +146,7 @@ const defaultSort = (options, locale, getLabel) => {
  * @param {string} allOptionValue - Value for "All" option (default: "")
  * @param {Function} getValue - Function to extract value from option: (option) => string
  * @param {Function} getLabel - Function to get display label: (option, locale) => string
+ * @param {Function} getKey - Optional function to extract unique key from option: (option) => string|number (default: uses getValue)
  * @param {Array|Function} searchFields - Array of field names to search OR function: (option, query) => boolean
  * @param {Function} sortOptions - Optional custom sort function: (options, locale) => options
  * @param {boolean} isLoading - Loading state
@@ -115,6 +172,7 @@ export default function SearchableDropdownSelect({
   allOptionValue = "",
   getValue = defaultGetValue,
   getLabel = defaultGetLabel,
+  getKey,
   searchFields,
   sortOptions,
   isLoading = false,
@@ -429,11 +487,15 @@ export default function SearchableDropdownSelect({
                   {sortedOptions.map((option, index) => {
                     const optionValue = getValue(option);
                     const optionLabel = getLabel(option, locale);
+                    // Generate unique key: use getKey if provided, otherwise fallback to value, id, or index
+                    const optionKey = getKey 
+                      ? getKey(option) 
+                      : (optionValue || option?.id || `option-${index}`);
                     const isSelected = value === optionValue;
 
                     return (
                       <button
-                        key={optionValue || index}
+                        key={optionKey}
                         type="button"
                         onClick={() => handleSelect(optionValue)}
                         className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors ${

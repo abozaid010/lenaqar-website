@@ -20,9 +20,16 @@ export default function UnitsPageQueryOptimized({
     [searchParams, clientId]
   );
 
+  // Stringify searchParams for query key - this changes when filters change
+  const searchParamsKey = useMemo(
+    () => JSON.stringify(searchParamsWithClient),
+    [searchParamsWithClient]
+  );
+
   // Fetch all required data using the combined hook
+  // When searchParamsKey changes, a new query is created and fetched automatically
   const { isFetching, units, pagination, isLoading, isError, error, refetch } =
-    useUnitsPageData(JSON.stringify(searchParamsWithClient), publicUnits);
+    useUnitsPageData(searchParamsKey, publicUnits);
 
   if (isLoading | isFetching) {
     return <LoadingSpinner message="Loading units data..." />;
