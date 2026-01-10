@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useCompounds } from "@/hooks/use-admin-shared-data";
+import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import {
   Clock,
@@ -27,6 +27,7 @@ import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import ImportProjectsDialog from "@/components/ui/import-projects-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
@@ -129,6 +130,11 @@ export default function ProjectsList({ clientId }) {
     isFetching,
   } = useCompounds(clientId);
   const { getCities, isLoading: citiesLoading, error: citiesError } = useCitiesDistricts();
+  const {
+    data: developersData,
+    isLoading: developersLoading,
+    isError: developersError,
+  } = useDevelopers(null, true); // Fetch all public developers
   const { t, locale } = useI18n();
 
   // Get building types with translations
@@ -171,6 +177,10 @@ export default function ProjectsList({ clientId }) {
   const cities = getCities() || [];
   const [selectedCities, setSelectedCities] = useState([]);
   const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
+  
+  // Developer filter state
+  const developers = developersData || [];
+  const [selectedDeveloper, setSelectedDeveloper] = useState("");
 
   // Initialize selectedCities with all cities when cities data loads
   useEffect(() => {
@@ -216,10 +226,27 @@ export default function ProjectsList({ clientId }) {
         });
       }
 
+      // Filter by developer if selected
+      let developerFiltered = cityFiltered;
+      if (selectedDeveloper && selectedDeveloper !== "") {
+        const selectedDev = developers.find((dev) => dev.id === selectedDeveloper);
+        if (selectedDev) {
+          developerFiltered = cityFiltered.filter((project) => {
+            const projectDeveloperName = project.developer_name?.toLowerCase() || "";
+            const devArName = selectedDev.ar_name?.toLowerCase() || "";
+            const devEnName = selectedDev.en_name?.toLowerCase() || "";
+            return (
+              projectDeveloperName === devArName ||
+              projectDeveloperName === devEnName
+            );
+          });
+        }
+      }
+
       // Filter by search query if provided
       const filtered = searchQuery
-        ? filterBySearchQuery(cityFiltered, searchQuery, ["ar_name", "en_name"])
-        : cityFiltered;
+        ? filterBySearchQuery(developerFiltered, searchQuery, ["ar_name", "en_name"])
+        : developerFiltered;
 
       setProjectList(filtered);
       
@@ -228,7 +255,7 @@ export default function ProjectsList({ clientId }) {
         setSelectedProject(filtered[0]);
       }
     }
-  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, cities]);
+  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, cities, selectedDeveloper, developers]);
 
   // Update selected project if it's not in the filtered list
   useEffect(() => {
@@ -483,8 +510,8 @@ export default function ProjectsList({ clientId }) {
 
       <div className="bg-gray-50 flex flex-col gap-4 p-3 relative flex-1 min-h-0 h-full">
         {/* Header Section - Full Width */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-primary p-4 flex flex-col gap-3">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+          <div className="bg-primary p-4 rounded-t-lg flex flex-col gap-3">
             <div className="flex justify-between items-center gap-3 flex-wrap">
               <h2 className="text-white text-xl font-semibold flex-shrink-0">
                 {t.sidebar.myProjects}
@@ -505,14 +532,14 @@ export default function ProjectsList({ clientId }) {
                     <button
                       type="button"
                       onClick={() => setIsCityFilterOpen(!isCityFilterOpen)}
-                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[150px] justify-between"
+                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[150px] h-10 justify-between disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <span className="text-sm font-medium truncate">
                         {getCityFilterDisplayText()}
                       </span>
                       <ChevronDown
                         size={16}
-                        className={`transition-transform ${
+                        className={`text-primary transition-transform ${
                           isCityFilterOpen ? "rotate-180" : ""
                         }`}
                       />
@@ -563,6 +590,36 @@ export default function ProjectsList({ clientId }) {
                     )}
                   </div>
                 )}
+                {/* Developer Filter */}
+                <div className="min-w-[180px]">
+                  <SearchableDropdownSelect
+                    options={developers}
+                    value={selectedDeveloper}
+                    onChange={(e) => setSelectedDeveloper(e.target.value)}
+                    name="developer"
+                    placeholder={
+                      developersLoading
+                        ? (locale === "ar" ? "جاري التحميل..." : "Loading...")
+                        : locale === "ar"
+                        ? "جميع المطورين"
+                        : "All Developers"
+                    }
+                    showAllOption={true}
+                    allOptionLabel={
+                      locale === "ar" ? "جميع المطورين" : "All Developers"
+                    }
+                    allOptionValue=""
+                    getValue={(option) => option.id}
+                    getLabel={(option, locale) =>
+                      locale === "ar" ? option.ar_name || option.en_name : option.en_name || option.ar_name
+                    }
+                    searchFields={["ar_name", "en_name"]}
+                    className="w-full"
+                    buttonClassName="rounded-lg border-0 px-4 py-2 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
+                    disabled={developersLoading}
+                    isLoading={developersLoading}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button

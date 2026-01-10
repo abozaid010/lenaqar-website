@@ -29,28 +29,111 @@ export default function BotMessageCard({ message }) {
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
       {bot_response && (
-        <div className="text-sm text-primary">
+        <div className="text-sm text-primary markdown-content" style={{ whiteSpace: "normal" }}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
-              ul: ({ children }) => (
-                <ul className="list-disc pl-5 space-y-2 my-2">
+              ul: ({ children, ...props }) => (
+                <ul
+                  className="list-disc pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 my-3 sm:my-4"
+                  style={{ whiteSpace: "normal" }}
+                  {...props}
+                >
                   {children}
                 </ul>
               ),
-              li: ({ children }) => (
-                <li className="leading-relaxed">
+              ol: ({ children, ...props }) => (
+                <ol
+                  className="list-decimal pl-4 sm:pl-5 space-y-1.5 sm:space-y-2 my-3 sm:my-4"
+                  style={{ whiteSpace: "normal" }}
+                  {...props}
+                >
+                  {children}
+                </ol>
+              ),
+              li: ({ children, ...props }) => (
+                <li
+                  className="leading-relaxed mb-2 sm:mb-2.5 break-words text-sm sm:text-base"
+                  style={{ whiteSpace: "normal", display: "list-item" }}
+                  {...props}
+                >
                   {children}
                 </li>
               ),
-              p: ({ children }) => (
-                <p className="mb-2 leading-relaxed">
+              p: ({ children, ...props }) => (
+                <p
+                  className="mb-3 sm:mb-4 leading-relaxed last:mb-0 text-sm sm:text-base break-words"
+                  style={{ whiteSpace: "normal" }}
+                  {...props}
+                >
                   {children}
                 </p>
               ),
+              strong: ({ children, ...props }) => (
+                <strong
+                  className="font-semibold text-gray-900 dark:text-gray-100"
+                  {...props}
+                >
+                  {children}
+                </strong>
+              ),
+              em: ({ children, ...props }) => (
+                <em
+                  className="italic text-gray-800 dark:text-gray-200"
+                  {...props}
+                >
+                  {children}
+                </em>
+              ),
+              hr: ({ ...props }) => (
+                <hr
+                  className="my-4 sm:my-5 border-gray-300 dark:border-gray-600"
+                  {...props}
+                />
+              ),
+              code: ({ inline, children, ...props }) => {
+                if (inline) {
+                  return (
+                    <code
+                      className="px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono"
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  );
+                }
+                return (
+                  <code
+                    className="block p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs font-mono overflow-x-auto"
+                    {...props}
+                  >
+                    {children}
+                  </code>
+                );
+              },
             }}
           >
-            {bot_response}
+            {(() => {
+              const content = String(bot_response || "");
+              // Normalize line endings first
+              let processed = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+              
+              // Convert inline bullet lists to proper markdown format
+              // Pattern 1: After punctuation like colon, start new paragraph list
+              // "text: - item" -> "text:\n\n- item"
+              processed = processed.replace(/([.:،,؛;!?]\s*)\s+-\s+/g, "$1\n\n- ");
+              
+              // Pattern 2: Convert remaining inline " - " to newline list items
+              // Only if not already on a new line (avoid double conversion)
+              // "item1 - item2" -> "item1\n- item2"
+              processed = processed.replace(/([^\n])\s+-\s+([A-Z\u0600-\u06FF])/g, "$1\n- $2");
+              processed = processed.replace(/([^\n])\s+-\s+/g, "$1\n- ");
+              
+              // Clean up: ensure lists don't have excessive spacing
+              processed = processed.replace(/\n{3,}/g, "\n\n");
+              
+              return processed.trim();
+            })()}
           </ReactMarkdown>
         </div>
       )}

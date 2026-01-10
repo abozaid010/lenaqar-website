@@ -97,6 +97,7 @@ const defaultSort = (options, locale, getLabel) => {
  * @param {string} noResultsText - No results text (default: "No results found")
  * @param {string} searchPlaceholder - Search input placeholder
  * @param {string} className - Additional CSS classes
+ * @param {string} buttonClassName - Additional CSS classes for the button element
  * @param {boolean} disabled - Whether the select is disabled
  */
 export default function SearchableDropdownSelect({
@@ -121,6 +122,7 @@ export default function SearchableDropdownSelect({
   noResultsText,
   searchPlaceholder,
   className = "",
+  buttonClassName = "",
   disabled = false,
   ...rest
 }) {
@@ -131,6 +133,9 @@ export default function SearchableDropdownSelect({
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
+  
+  // Check if button should use primary color styling
+  const usePrimaryStyle = buttonClassName.includes("text-primary");
 
   // Filter options based on search query
   const filteredOptions = useMemo(() => {
@@ -325,28 +330,32 @@ export default function SearchableDropdownSelect({
               disabled
                 ? "bg-gray-50 cursor-not-allowed opacity-60"
                 : "cursor-pointer"
-            } ${value && value !== allOptionValue && !disabled ? "pr-10" : "pr-10"}`}
+            } ${value && value !== allOptionValue && !disabled ? "pr-10" : "pr-10"} ${buttonClassName}`}
             aria-haspopup="listbox"
             aria-expanded={isOpen}
             {...rest}
           >
             <span
-              className={`truncate block w-full ${
+              className={`truncate block w-full text-sm font-medium ${
                 value && value !== allOptionValue && !disabled ? "pr-10" : "pr-6"
               } ${
-                !value || value === allOptionValue
+                !value || value === allOptionValue || disabled
                   ? "text-gray-400"
-                  : "text-gray-900"
+                  : "text-primary"
               }`}
             >
               {selectedLabel}
             </span>
             {(!value || value === allOptionValue || disabled) && (
               <ChevronDown
-                size={18}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-transform pointer-events-none ${
-                  isOpen ? "rotate-180" : ""
-                }`}
+                size={16}
+                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-transform pointer-events-none ${
+                  disabled
+                    ? "text-gray-400"
+                    : usePrimaryStyle
+                    ? "text-primary"
+                    : "text-gray-400"
+                } ${isOpen ? "rotate-180" : ""}`}
               />
             )}
           </button>
@@ -354,16 +363,18 @@ export default function SearchableDropdownSelect({
             <button
               type="button"
               onClick={handleClear}
-              className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10"
+              className={`absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10 ${
+                usePrimaryStyle ? "" : ""
+              }`}
               aria-label={locale === "ar" ? "مسح" : "Clear"}
             >
-              <X size={16} className="text-gray-400" />
+              <X size={16} className={usePrimaryStyle ? "text-primary" : "text-gray-400"} />
             </button>
           )}
         </div>
 
         {isOpen && (
-          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
             {/* Search Input */}
             <div className="p-2 border-b border-gray-200">
               <div className="relative">
@@ -378,7 +389,7 @@ export default function SearchableDropdownSelect({
                   onChange={handleSearchChange}
                   onKeyDown={handleKeyDown}
                   placeholder={defaultSearchPlaceholder}
-                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm text-gray-900 placeholder:text-gray-400 bg-white"
                 />
               </div>
             </div>
