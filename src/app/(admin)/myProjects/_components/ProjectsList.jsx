@@ -1205,8 +1205,9 @@ export default function ProjectsList({ clientId }) {
                       <div className="text-xl font-bold text-primary">
                         {selectedProject.delivery_date !== undefined && 
                          selectedProject.delivery_date !== null && 
-                         selectedProject.delivery_date !== "" 
-                          ? selectedProject.delivery_date 
+                         selectedProject.delivery_date !== "" &&
+                         !isNaN(Number(selectedProject.delivery_date))
+                          ? Number(selectedProject.delivery_date)
                           : locale === "ar" ? "غير محدد" : "N/A"}
                       </div>
                       <div className="text-xs text-gray-500">
