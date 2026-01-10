@@ -82,7 +82,21 @@ export default function SearchableProjectSelect({
       allOptionLabel={allOptionLabel || t.unitsFilter?.allCompounds || "All Projects"}
       getValue={(project) => project.en_name}
       getLabel={(project, locale) => locale === "ar" ? project.ar_name : project.en_name}
-      searchFields={["ar_name", "en_name", "description", "ar_description"]}
+      getKey={(project) => {
+        // Prioritize unique ID
+        if (project.id) return `project-${project.id}`;
+        // Use combination of fields as fallback to ensure uniqueness
+        if (project.en_name && project.ar_name) {
+          return `project-${project.en_name}-${project.ar_name}`;
+        }
+        // Last resort: use en_name with client_id if available
+        if (project.en_name) {
+          return `project-${project.client_id || 'default'}-${project.en_name}`;
+        }
+        // Final fallback (should rarely happen)
+        return `project-unknown-${project.city || ''}-${project.district || ''}`;
+      }}
+      searchFields={["ar_name", "en_name"]}
       sortOptions={sortProjects}
       isLoading={isLoading}
       loadingText={locale === "ar" ? "جاري التحميل..." : "Loading projects..."}

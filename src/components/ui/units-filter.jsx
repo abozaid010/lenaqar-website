@@ -16,6 +16,8 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { unitKeys } from "@/utils/query-utils";
 import LoadingSpinner from "./loading-spinner";
 import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 const EnumPropertyIntent = ["rent", "sell"];
@@ -34,6 +36,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const { t, locale } = useI18n();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { getCityLabel } = useCitiesDistricts();
 
   // Get building types with translations
@@ -120,7 +123,23 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       newParams.delete(key);
     }
 
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    const newUrl = `${window.location.pathname}?${newParams.toString()}`;
+    
+    // Update URL - this will trigger Next.js to re-render with new searchParams
+    router.push(newUrl);
+
+    // Force refresh: If project_name changed, invalidate unit queries to force fresh API call
+    // This ensures the API is called immediately with the new project filter
+    if (key === "project_name") {
+      // Invalidate all unit list queries - this causes matching queries to refetch immediately
+      // When the component re-renders with new searchParams, the query key changes
+      // and the invalidated queries will be refetched to get fresh data
+      // Using refetchType: 'active' ensures only currently mounted queries refetch
+      queryClient.invalidateQueries({ 
+        queryKey: unitKeys.lists(),
+        refetchType: 'active' // Only refetch active queries (currently mounted components)
+      });
+    }
 
     setActiveFilters((prev) => {
       const existingFilterIndex = prev.findIndex((f) => f.key === key);
