@@ -15,6 +15,7 @@ import {
   Download,
 } from "lucide-react";
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { parseExcelFile, downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
@@ -135,7 +136,7 @@ const normalizeView = (value) => {
   }
   
   // Try to map common variations
-  const viewMap = VIEW_TYPE_MAPPING;
+  const viewMap = getStaticViewTypeMapping();
   
   if (viewMap[normalized]) {
     return viewMap[normalized];
@@ -185,6 +186,7 @@ const convertStringsToLowercase = (obj) => {
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t } = useI18n();
+  const router = useRouter();
   const [selectedFile, setSelectedFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
   const [error, setError] = useState(null);
@@ -194,6 +196,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
   const [missingColumns, setMissingColumns] = useState([]);
   const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
+  const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const fileInputRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
@@ -250,7 +253,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             const colIndex = excelHeaders.indexOf(excelHeader);
             if (colIndex >= 0) {
               const value = row[colIndex];
-              if (value !== undefined && value !== null && value !== "") {
+              // Allow all values including empty strings - they will be handled appropriately in transformation
+              if (value !== undefined && value !== null) {
                 unit[templateCol.key] = value;
               }
             }
@@ -420,9 +424,35 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setError(null);
     setUploadStatus([]);
     setManualHeaderMapping({});
+    setAllUploadsSuccessful(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const resetDialogState = () => {
+    setSelectedFile(null);
+    setParsedData(null);
+    setError(null);
+    setUploadStatus([]);
+    setManualHeaderMapping({});
+    setAllUploadsSuccessful(false);
+    setShowMissingColumnsWarning(false);
+    setMissingColumns([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClose = () => {
+    resetDialogState();
+    onClose();
+  };
+
+  const handleGoToUnits = () => {
+    router.push("/units");
+    resetDialogState();
+    onClose();
   };
 
   const handleHeaderMappingChange = (templateKey, excelHeader) => {
@@ -519,6 +549,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
     setIsUploading(true);
     setUploadStatus([]);
+    setAllUploadsSuccessful(false);
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
@@ -575,11 +606,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           })
         );
 
-        // Only auto-close if all units succeeded
+        // Mark if all uploads were successful (don't auto-close, let user dismiss)
         if (totalInserted === totalSent && failedUnits.length === 0) {
-          setTimeout(() => {
-            onClose();
-          }, 1500);
+          setAllUploadsSuccessful(true);
         }
       } else {
         // If response doesn't indicate success, mark all as failed
@@ -688,7 +717,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             )}
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
           >
             <X size={24} />
@@ -1142,7 +1171,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         {/* Footer */}
         <div className="flex items-center justify-end gap-2 px-6 py-4 border-t bg-gray-50">
           <button
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isUploading}
             className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
               }`}
@@ -1156,6 +1185,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             >
               <Download size={18} />
               {t.uploadExcel?.downloadFailedUnits || "Download Failed Units"}
+            </button>
+          ) : allUploadsSuccessful && isUploadComplete ? (
+            <button
+              onClick={handleGoToUnits}
+              className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
+            >
+              {t.uploadExcel?.goToUnitsNow || "Go to Units Now"}
             </button>
           ) : (
             <button
