@@ -135,7 +135,7 @@ const normalizeView = (value) => {
   }
   
   // Try to map common variations
-  const viewMap = VIEW_TYPE_MAPPING;
+  const viewMap = getStaticViewTypeMapping();
   
   if (viewMap[normalized]) {
     return viewMap[normalized];
@@ -250,7 +250,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             const colIndex = excelHeaders.indexOf(excelHeader);
             if (colIndex >= 0) {
               const value = row[colIndex];
-              if (value !== undefined && value !== null && value !== "") {
+              // Allow all values including empty strings - they will be handled appropriately in transformation
+              if (value !== undefined && value !== null) {
                 unit[templateCol.key] = value;
               }
             }
