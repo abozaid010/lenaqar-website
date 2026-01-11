@@ -18,8 +18,10 @@ import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { addCompound, updatecompound } from "@/utils/api";
+import { compoundKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export default function AddCompoundDialog({
@@ -31,6 +33,8 @@ export default function AddCompoundDialog({
   defaultCity,
   defaultDistrict,
 }) {
+  const queryClient = useQueryClient();
+  
   const { isLoading: delveloperLoading, data: developersData } =
     useDevelopers(clientId);
 
@@ -375,6 +379,10 @@ export default function AddCompoundDialog({
         const projectData = res?.data || res;
         console.log("[handleSubmit] Update successful, calling onAdd with:", projectData);
         onAdd(projectData);
+        
+        // Invalidate projects query cache to refetch from API
+        queryClient.invalidateQueries({ queryKey: compoundKeys.all });
+        
         toast.success(
           editMode
             ? t.compoundUpdated || "project updated successfully!"
