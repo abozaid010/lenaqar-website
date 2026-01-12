@@ -95,6 +95,19 @@ export default function ClientsTable({ users, pagination }) {
     );
   };
 
+  const handleWhatsAppClick = (e, phoneNumber) => {
+    e.stopPropagation();
+    if (phoneNumber) {
+      // Remove all non-digit characters except +
+      const cleanedNumber = phoneNumber.replace(/[^\d+]/g, "");
+      // Remove + if present and add country code if needed
+      const numberForWhatsApp = cleanedNumber.startsWith("+")
+        ? cleanedNumber.substring(1)
+        : cleanedNumber;
+      window.open(`https://wa.me/${numberForWhatsApp}`, "_blank");
+    }
+  };
+
   return (
     <>
       {localUsers?.length === 0 ? (
@@ -147,7 +160,20 @@ export default function ClientsTable({ users, pagination }) {
                     if (user.updated_at) {
                       const dateObj = new Date(user.updated_at);
                       if (!isNaN(dateObj.getTime())) {
-                        lastActivity = dateObj.toISOString().split("T")[0];
+                        const monthNames = [
+                          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                        ];
+                        const month = monthNames[dateObj.getMonth()];
+                        const day = dateObj.getDate();
+                        
+                        let hours = dateObj.getHours();
+                        const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+                        const ampm = hours >= 12 ? "PM" : "AM";
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; // the hour '0' should be '12'
+                        
+                        lastActivity = `${month} ${day}, ${hours}:${minutes} ${ampm}`;
                       }
                     }
                   } catch (error) {
@@ -182,7 +208,11 @@ export default function ClientsTable({ users, pagination }) {
                         {user.name || t.clientsTable.newLead}
                       </td>
 
-                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
+                      <td
+                        className="px-2 py-2 text-gray-600 whitespace-nowrap cursor-pointer hover:text-primary hover:underline"
+                        onClick={(e) => user.phone_number && handleWhatsAppClick(e, user.phone_number)}
+                        title={user.phone_number ? "Click to open WhatsApp" : ""}
+                      >
                         {user.phone_number || t.clientsTable.newLead}
                       </td>
 
