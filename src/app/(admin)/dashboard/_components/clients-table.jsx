@@ -7,6 +7,7 @@ import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements } from "@/utils/api";
+import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
@@ -96,69 +97,14 @@ export default function ClientsTable({ users, pagination }) {
     );
   };
 
-  // Format phone number for WhatsApp (removes country code for display but keeps it for WhatsApp URL)
-  const formatPhoneForWhatsApp = (phoneNumber) => {
-    if (!phoneNumber) return "";
-    let cleaned = String(phoneNumber).trim().replace(/[\s\-\(\)\.]/g, "");
-    if (cleaned.startsWith("00")) cleaned = cleaned.slice(2);
-    if (cleaned.startsWith("+")) cleaned = cleaned.slice(1);
-    const digitsOnly = cleaned.replace(/\D/g, "");
-    return digitsOnly ? `https://wa.me/${digitsOnly}` : "";
-  };
-
-  // Remove country code from phone number (for Egypt: +20)
-  const removeCountryCode = (phoneNumber) => {
-    if (!phoneNumber) return "";
-    let cleaned = String(phoneNumber).trim().replace(/[\s\-\(\)\.]/g, "");
-    // Remove +20 (Egypt country code)
-    if (cleaned.startsWith("+20")) {
-      return cleaned.slice(3);
-    }
-    // Remove 0020 (Egypt country code with 00 prefix)
-    if (cleaned.startsWith("0020")) {
-      return cleaned.slice(4);
-    }
-    // Remove 20 (if it starts with 20 and has more digits)
-    if (cleaned.startsWith("20") && cleaned.length > 10) {
-      return cleaned.slice(2);
-    }
-    return cleaned;
-  };
-
-  // Open WhatsApp
-  const handleOpenWhatsApp = (e, phoneNumber) => {
-    e.stopPropagation();
-    if (!phoneNumber || phoneNumber.trim() === "") return;
-    const whatsappUrl = formatPhoneForWhatsApp(phoneNumber);
-    if (whatsappUrl) {
-      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-    }
-  };
-
-  // Copy phone number to clipboard (without country code)
-  const handleCopyPhoneNumber = async (e, phoneNumber) => {
-    e.stopPropagation();
-    const phoneWithoutCountryCode = removeCountryCode(phoneNumber);
-    if (!phoneWithoutCountryCode) return;
-    
-    try {
-      await navigator.clipboard.writeText(phoneWithoutCountryCode);
-      toast.success(t.clientsTable?.phoneCopied || "Phone number copied");
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement("textarea");
-      textArea.value = phoneWithoutCountryCode;
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      try {
-        document.execCommand("copy");
-        toast.success(t.clientsTable?.phoneCopied || "Phone number copied");
-      } catch (err) {
-        toast.error(t.clientsTable?.phoneCopyFailed || "Failed to copy phone number");
-      }
-      document.body.removeChild(textArea);
-    }
+  // Wrapper for copy phone number with toast notifications
+  const handleCopyPhoneNumberWithToast = async (e, phoneNumber) => {
+    await handleCopyPhoneNumber(
+      e,
+      phoneNumber,
+      () => toast.success(t.clientsTable?.phoneCopied || "Phone number copied"),
+      () => toast.error(t.clientsTable?.phoneCopyFailed || "Failed to copy phone number")
+    );
   };
 
   return (
@@ -252,7 +198,7 @@ export default function ClientsTable({ users, pagination }) {
                         {user.phone_number ? (
                           <div className="flex items-center justify-between gap-2 min-w-[140px]">
                             <span
-                              onClick={(e) => handleCopyPhoneNumber(e, user.phone_number)}
+                              onClick={(e) => handleCopyPhoneNumberWithToast(e, user.phone_number)}
                               className="cursor-pointer hover:text-primary transition-colors flex-1 text-left"
                               title={t.clientsTable?.clickToCopy || "Click to copy phone number"}
                             >
