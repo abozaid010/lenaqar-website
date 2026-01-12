@@ -105,6 +105,7 @@ export default function ClientsTable({ users, pagination }) {
       () => toast.success(t.clientsTable?.phoneCopied || "Phone number copied"),
       () => toast.error(t.clientsTable?.phoneCopyFailed || "Failed to copy phone number")
     );
+
   };
 
   return (
@@ -159,7 +160,20 @@ export default function ClientsTable({ users, pagination }) {
                     if (user.updated_at) {
                       const dateObj = new Date(user.updated_at);
                       if (!isNaN(dateObj.getTime())) {
-                        lastActivity = dateObj.toISOString().split("T")[0];
+                        const monthNames = [
+                          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                        ];
+                        const month = monthNames[dateObj.getMonth()];
+                        const day = dateObj.getDate();
+                        
+                        let hours = dateObj.getHours();
+                        const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+                        const ampm = hours >= 12 ? "PM" : "AM";
+                        hours = hours % 12;
+                        hours = hours ? hours : 12; // the hour '0' should be '12'
+                        
+                        lastActivity = `${month} ${day}, ${hours}:${minutes} ${ampm}`;
                       }
                     }
                   } catch (error) {
@@ -222,6 +236,7 @@ export default function ClientsTable({ users, pagination }) {
                         ) : (
                           t.clientsTable.newLead
                         )}
+
                       </td>
 
                       <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
