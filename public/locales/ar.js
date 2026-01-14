@@ -226,6 +226,7 @@ export default {
     logoutSuccess: "تم تسجيل الخروج بنجاح",
     developers: "المطورين",
     news: "الأخبار",
+    map: "الخريطة",
   },
   dashboardFilter: {
     actions: {
@@ -1329,4 +1330,19 @@ export default {
   readMore: "اقرأ المزيد",
   loading: "جاري التحميل...",
   error: "خطأ في تحميل المحتوى",
+  map: {
+    loading: "جاري تحميل بيانات الخريطة...",
+    error: "خطأ في تحميل بيانات الخريطة",
+    noData: "لا توجد بيانات مشاريع متاحة",
+    subtitle: "عرض المشاريع حسب الموقع",
+    mapView: "الخريطة",
+    listView: "القائمة",
+    developer: "المطور",
+    location: "الموقع",
+    totalUnits: "إجمالي الوحدات",
+    unitTypes: "أنواع الوحدات",
+    viewOnGoogleMaps: "عرض على خرائط جوجل",
+    viewOnMap: "عرض على الخريطة",
+    projects: "مشاريع",
+  },
 };

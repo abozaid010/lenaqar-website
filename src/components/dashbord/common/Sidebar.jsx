@@ -10,6 +10,7 @@ import {
   Users2,
   Loader2,
   Newspaper,
+  MapPin,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -259,6 +260,23 @@ const Sidebar = () => {
             <Newspaper className="h-5 w-5 mr-3" />
             <span>{t.sidebar.news}</span>
             {isPending && pendingPath === "/news" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
+          </Link>
+
+          <Link
+            href="/map"
+            prefetch={true}
+            onClick={(e) => handleNavigation("/map", e)}
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/map") || pendingPath === "/map"
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            } ${isPending && pendingPath === "/map" ? "opacity-70" : ""}`}
+          >
+            <MapPin className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.map}</span>
+            {isPending && pendingPath === "/map" && (
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>

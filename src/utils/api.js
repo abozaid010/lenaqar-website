@@ -637,3 +637,96 @@ export async function fetchNews() {
     throw error;
   }
 }
+
+// Data Projection API (Map) //
+// IMPORTANT: This API is very expensive. We implement aggressive caching to ensure
+// it's only called ONCE per website session lifetime. The cache persists across:
+// - Page reloads
+// - Navigation between pages
+// - Component remounts
+// The cache is ONLY cleared on user logout/login to ensure fresh data for new sessions.
+//
+// Cache key for localStorage
+const DATA_PROJECTION_CACHE_KEY = "lenaai_data_projection_cache";
+const DATA_PROJECTION_CACHE_TIMESTAMP_KEY = "lenaai_data_projection_cache_timestamp";
+
+// Helper function to clear the cache (called on logout)
+// This ensures the expensive API is called again only after user logs out and logs back in
+export function clearDataProjectionCache() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(DATA_PROJECTION_CACHE_KEY);
+    localStorage.removeItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
+  }
+}
+
+export async function fetchDataProjection() {
+  // Check localStorage cache first (only on client side)
+  if (typeof window !== "undefined") {
+    try {
+      const cachedData = localStorage.getItem(DATA_PROJECTION_CACHE_KEY);
+      const cacheTimestamp = localStorage.getItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
+      
+      if (cachedData && cacheTimestamp) {
+        // Verify cache is valid (not expired - though we want it to persist for session)
+        const timestamp = parseInt(cacheTimestamp, 10);
+        const now = Date.now();
+        // Cache is valid for 24 hours (but should only be cleared on logout)
+        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+        
+        if (now - timestamp < CACHE_DURATION) {
+          try {
+            const parsedData = JSON.parse(cachedData);
+            console.log("Using cached data projection (avoiding expensive API call)");
+            return parsedData;
+          } catch (parseError) {
+            console.error("Failed to parse cached data, fetching fresh data:", parseError);
+            // Continue to fetch fresh data
+          }
+        } else {
+          // Cache expired, remove it
+          localStorage.removeItem(DATA_PROJECTION_CACHE_KEY);
+          localStorage.removeItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
+        }
+      }
+    } catch (cacheError) {
+      console.error("Error reading from cache, fetching fresh data:", cacheError);
+      // Continue to fetch fresh data
+    }
+  }
+
+  // If no cache or cache invalid, fetch from API
+  try {
+    console.log("Fetching data projection from API (expensive call)");
+    const response = await axiosInstance.get("/admin/data-projection");
+
+    // Validate response data structure
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server: missing response.data.data");
+    }
+
+    // Validate that data is an array
+    if (!Array.isArray(response.data.data)) {
+      throw new Error(
+        `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+      );
+    }
+
+    // Store in localStorage cache (only on client side)
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(DATA_PROJECTION_CACHE_KEY, JSON.stringify(response.data.data));
+        localStorage.setItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY, Date.now().toString());
+        console.log("Data projection cached successfully");
+      } catch (storageError) {
+        console.error("Failed to cache data projection:", storageError);
+        // Continue even if caching fails
+      }
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch data projection:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
+  }
+}

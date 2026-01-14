@@ -8,9 +8,11 @@ import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Header = ({ clientName, clientID, clientEmail }) => {
   const { t, locale } = useI18n();
+  const queryClient = useQueryClient();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
@@ -58,6 +60,15 @@ const Header = ({ clientName, clientID, clientEmail }) => {
       LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
       LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
       LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
+
+      // Clear expensive API cache (data projection) - both localStorage and TanStack Query cache
+      if (typeof window !== "undefined") {
+        const { clearDataProjectionCache } = await import("@/utils/api");
+        clearDataProjectionCache();
+        
+        // Also clear TanStack Query cache for data-projection
+        queryClient.removeQueries({ queryKey: ["data-projection"] });
+      }
 
       // Wait a brief moment to ensure cookies are cleared
       await new Promise((resolve) => setTimeout(resolve, 100));
