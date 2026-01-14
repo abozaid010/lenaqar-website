@@ -218,6 +218,7 @@ export default {
     logoutSuccess: "Logout Successful",
     developers: "Developers",
     news: "News",
+    map: "Map",
   },
   schaduall: {
     assignError: "Failed to assign salesperson",
@@ -1252,4 +1253,19 @@ export default {
   readMore: "Read more",
   loading: "Loading...",
   error: "Error loading content",
+  map: {
+    loading: "Loading map data...",
+    error: "Error loading map data",
+    noData: "No project data available",
+    subtitle: "View projects by location",
+    mapView: "Map",
+    listView: "List",
+    developer: "Developer",
+    location: "Location",
+    totalUnits: "Total Units",
+    unitTypes: "Unit Types",
+    viewOnGoogleMaps: "View on Google Maps",
+    viewOnMap: "View on Map",
+    projects: "projects",
+  },
 };
