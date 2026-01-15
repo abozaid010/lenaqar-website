@@ -1,30 +1,32 @@
 "use client";
 
 import { formatPrice } from "@/utils/formatters";
-import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle, useState } from "react";
 
 /**
- * LenaTextField - Enhanced form input component with error animations
+ * LenaTextField - Enhanced form input component with floating label and error animations
  * 
  * Features:
+ * - Floating label pattern (label moves from inside to above on focus/value)
  * - Automatic shake animation on error
- * - Smooth error state transitions
+ * - Smooth state transitions (inactive, focused, activated, hover, error, disabled)
  * - Forward ref support for scroll-to-error functionality
- * - Compatible with existing FormInput API
  * 
  * @param {Object} props
  * @param {string} props.label - Label text
  * @param {string} props.name - Input name attribute
  * @param {string|number} props.value - Input value
  * @param {Function} props.onChange - Change handler
- * @param {string} props.placeholder - Placeholder text
+ * @param {string} props.placeholder - Placeholder text (optional, uses label if not provided)
  * @param {boolean} props.required - Whether field is required
  * @param {boolean|string} props.error - Error state (boolean) or error message (string)
  * @param {string} props.errorMessage - Error message (if error is boolean)
+ * @param {string} props.helperText - Helper text to display below field
  * @param {string} props.type - Input type (text, number, email, url, etc.)
  * @param {ReactNode} props.adornment - Optional adornment element
  * @param {string} props.className - Additional CSS classes
  * @param {string} props.dir - Text direction (ltr/rtl)
+ * @param {boolean} props.disabled - Whether field is disabled
  * @param {Object} props.rest - Other input props
  */
 const LenaTextField = forwardRef(({
@@ -36,14 +38,18 @@ const LenaTextField = forwardRef(({
   required = false,
   error = false,
   errorMessage = "",
+  helperText = "",
   type = "text",
   adornment = null,
   className = "",
   dir = undefined,
+  disabled = false,
   ...rest
 }, ref) => {
   const containerRef = useRef(null);
   const inputRef = useRef(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   // Expose refs for parent components
   useImperativeHandle(ref, () => ({
@@ -75,6 +81,15 @@ const LenaTextField = forwardRef(({
   // Determine error state and message
   const hasError = !!error || !!errorMessage;
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
+  
+  // Determine if label should float (focused or has value)
+  const hasValue = value !== null && value !== undefined && value !== "";
+  const shouldFloatLabel = isFocused || hasValue;
+  
+  // Placeholder logic:
+  // - When label is floating: show custom placeholder if provided, otherwise empty
+  // - When label is NOT floating: NEVER show placeholder (label acts as placeholder)
+  const displayPlaceholder = shouldFloatLabel ? (placeholder || "") : "";
 
   // Trigger shake animation when error appears
   useEffect(() => {
@@ -93,23 +108,49 @@ const LenaTextField = forwardRef(({
     }
   }, [hasError]);
 
+  // Determine border color based on state
+  const getBorderColor = () => {
+    if (disabled) return "border-gray-300";
+    if (hasError) return "border-red-500";
+    if (isFocused) return "border-primary focus:border-primary";
+    if (isHovered) return "border-gray-400";
+    if (hasValue) return "border-gray-700";
+    return "border-gray-300";
+  };
+
+  // Determine label color
+  const getLabelColor = () => {
+    if (disabled) return "text-gray-400";
+    if (hasError) return "text-red-500";
+    if (isFocused) return "text-primary";
+    if (hasValue) return "text-gray-700";
+    return "text-gray-700";
+  };
+
   return (
     <div 
       ref={containerRef}
       className="relative transition-all duration-200"
+      onMouseEnter={() => !disabled && setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
-      {label && (
-        <label
-          className={`block text-sm font-medium mb-1 transition-colors duration-200 ${
-            hasError ? "text-red-500" : "text-gray-700"
-          }`}
-          htmlFor={name}
-        >
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
-      )}
+      {/* Input Field */}
       <div className="relative">
+        {/* Floating Label */}
+        {label && (
+          <label
+            htmlFor={name}
+            className={`absolute transition-all duration-200 pointer-events-none ${
+              dir === "rtl" ? "right-3" : "left-3"
+            } ${
+              shouldFloatLabel
+                ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5`
+                : `top-1/2 text-sm text-gray-400 transform -translate-y-1/2`
+            } ${required && shouldFloatLabel ? "after:content-['*'] after:text-red-500 after:ml-0.5" : ""}`}
+          >
+            {label}
+          </label>
+        )}
         <input
           ref={inputRef}
           id={name}
@@ -117,12 +158,25 @@ const LenaTextField = forwardRef(({
           type={inputType}
           value={inputValue || ""}
           onChange={onChange}
-          placeholder={placeholder}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={displayPlaceholder}
           required={required}
-          className={`block w-full rounded-md border py-1 px-2 focus:outline-none focus:ring-2 bg-white text-gray-900 appearance-none transition-all duration-200 ${
+          disabled={disabled}
+          className={`block w-full rounded-md border py-2.5 px-3 focus:outline-none focus:ring-2 bg-white text-gray-900 appearance-none transition-all duration-200 ${
+            shouldFloatLabel && label ? "pt-4" : ""
+          } ${
+            getBorderColor()
+          } ${
             hasError
-              ? "border-red-500 ring-2 ring-red-500 focus:ring-red-500 focus:border-red-500"
-              : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              ? "ring-2 ring-red-500 focus:ring-red-500"
+              : isFocused
+              ? "ring-2 ring-primary focus:ring-primary"
+              : "focus:ring-primary"
+          } ${
+            disabled
+              ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+              : "cursor-text"
           } ${adornment ? "ltr:pr-12 rtl:pl-12" : ""} ${className}`}
           dir={dir}
           {...rest}
@@ -133,9 +187,13 @@ const LenaTextField = forwardRef(({
           </span>
         )}
       </div>
-      {hasError && displayErrorMessage && (
-        <div className="text-xs text-red-500 mt-1 animate-fade-in">
-          {displayErrorMessage}
+
+      {/* Helper Text or Error Message */}
+      {(helperText || hasError) && (
+        <div className={`text-xs mt-1 px-1 transition-all duration-200 ${
+          hasError ? "text-red-500 animate-fade-in" : "text-gray-400"
+        }`}>
+          {hasError && displayErrorMessage ? displayErrorMessage : helperText}
         </div>
       )}
     </div>
