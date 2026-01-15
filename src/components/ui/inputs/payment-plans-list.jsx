@@ -2,8 +2,9 @@
 
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import { useI18n } from "@/context/translate-api";
-import { Edit2, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { getDefaultPaymentPlans } from "@/data/default-payment-plans";
+import { Edit2, Plus, Trash2, Check } from "lucide-react";
+import { useState, useMemo } from "react";
 
 export default function PaymentPlansList({
   plans = [],
@@ -17,6 +18,18 @@ export default function PaymentPlansList({
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
 
+  // Get default payment plans
+  const defaultPlans = useMemo(() => getDefaultPaymentPlans(), []);
+
+  // Check which default plans are already selected
+  const selectedDefaultPlanIds = useMemo(() => {
+    return new Set(
+      plans
+        .filter((plan) => plan.id && plan.id.startsWith("default_"))
+        .map((plan) => plan.id)
+    );
+  }, [plans]);
+
   const handleOpenAddDialog = () => {
     setEditingPlan(null);
     setEditingIndex(null);
@@ -24,7 +37,11 @@ export default function PaymentPlansList({
   };
 
   const handleOpenEditDialog = (plan, index) => {
-    setEditingPlan(plan);
+    // When editing a default plan, remove the default ID so it becomes a custom plan
+    const planToEdit = plan.id && plan.id.startsWith("default_")
+      ? { ...plan, id: undefined } // Remove default ID when editing
+      : plan;
+    setEditingPlan(planToEdit);
     setEditingIndex(index);
     setIsAddPlanDialogOpen(true);
   };
@@ -69,8 +86,37 @@ export default function PaymentPlansList({
     return (value * 100).toFixed(1) + "%";
   };
 
+  const handleToggleDefaultPlan = (defaultPlan) => {
+    const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
+    
+    if (isSelected) {
+      // Remove the plan if it's already selected
+      const newPlans = plans.filter((plan) => plan.id !== defaultPlan.id);
+      // If the removed plan was the default, clear default from all plans
+      const updatedPlans = newPlans.map((p) => ({ ...p, is_default: false }));
+      onChange(updatedPlans);
+    } else {
+      // Add the plan if it's not selected
+      // Create a copy to avoid mutating the default plan
+      const planToAdd = {
+        ...defaultPlan,
+        id: defaultPlan.id, // Keep the default ID to track it
+        is_default: false, // New plans are not default by default
+      };
+      const newPlans = [...plans, planToAdd];
+      
+      // If this is the first plan, make it default automatically
+      // Otherwise, if no plan is default, prompt user (handled in UI)
+      if (newPlans.length === 1) {
+        newPlans[0].is_default = true;
+      }
+      
+      onChange(newPlans);
+    }
+  };
+
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex justify-between items-center mb-2">
         <label
           className={`block text-sm font-medium ${error ? "text-red-500" : "text-gray-700"}`}
@@ -81,64 +127,168 @@ export default function PaymentPlansList({
         <button
           type="button"
           onClick={handleOpenAddDialog}
-          className="flex items-center text-blue-600 text-sm font-medium"
+          className="flex items-center text-blue-600 text-sm font-medium hover:text-blue-700"
         >
           <Plus size={16} className="mr-1" />
-          {t.buttons?.addNew || "Add Plan"}
+          {t.buttons?.addNew || "Create Custom Plan"}
         </button>
       </div>
 
-      {plans.length === 0 ? (
+      {/* Default Payment Plans Selection */}
+      <div>
+        <p className="text-xs text-gray-600 mb-2">
+          {t.formLabels?.selectDefaultPlans || "Select from common payment plans:"}
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+          {defaultPlans.map((defaultPlan) => {
+            const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
+            return (
+              <button
+                key={defaultPlan.id}
+                type="button"
+                onClick={() => handleToggleDefaultPlan(defaultPlan)}
+                className={`relative p-2 rounded-md border transition-all text-left ${
+                  isSelected
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 mb-1">
+                  <h4 className="font-medium text-gray-900 text-xs">
+                    {defaultPlan.name}
+                  </h4>
+                  {isSelected && (
+                    <Check size={12} className="text-blue-600 flex-shrink-0" />
+                  )}
+                </div>
+                <div className="text-[10px] text-gray-600">
+                  <div>
+                    <span className="font-medium">DP:</span>{" "}
+                    {formatPercentage(defaultPlan.downpayment_percentage)}
+                  </div>
+                  <div>
+                    <span className="font-medium">Yrs:</span>{" "}
+                    {defaultPlan.installment_years}
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Selected Plans List */}
+      {plans.length > 0 ? (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-200"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-2 text-gray-500">
+                {t.formLabels?.selectedPlans || "Selected Plans"} ({plans.length})
+              </span>
+            </div>
+          </div>
+
+          {/* Warning if multiple plans but no default */}
+          {plans.length > 1 && !plans.some((p) => p.is_default) && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-md p-2">
+              <p className="text-xs text-yellow-800">
+                {t.formLabels?.selectDefaultPlanWarning || "Please select a default payment plan. Click 'Set Default' on one of the plans below."}
+              </p>
+            </div>
+          )}
+
+          <div
+            className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md overflow-hidden`}
+          >
+            <ul className="divide-y divide-gray-200">
+              {plans.map((plan, index) => {
+                const isDefaultPlan = plan.id && plan.id.startsWith("default_");
+                return (
+                  <li key={plan.id || index} className="p-2 hover:bg-gray-50">
+                    <div className="flex justify-between items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h3 className="font-medium text-gray-900 text-sm truncate">
+                            {plan.name}
+                          </h3>
+                          {isDefaultPlan && (
+                            <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-medium rounded flex-shrink-0">
+                              {t.formLabels?.default || "Default"}
+                            </span>
+                          )}
+                          {plan.is_default && (
+                            <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-medium rounded flex-shrink-0">
+                              {t.formLabels?.isDefault || "Primary"}
+                            </span>
+                          )}
+                        </div>
+                        <div className="mt-0.5 flex items-center gap-3 text-[10px] text-gray-500">
+                          <div>
+                            <span className="font-medium">DP:</span>{" "}
+                            {formatPercentage(plan.downpayment_percentage)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Yrs:</span>{" "}
+                            {plan.installment_years}
+                          </div>
+                          {plan.maintenance_fee > 0 && (
+                            <div>
+                              <span className="font-medium">Maint:</span>{" "}
+                              {formatPercentage(plan.maintenance_fee)}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        {plans.length > 1 && !plan.is_default && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              // Set this plan as default
+                              const newPlans = plans.map((p, i) => ({
+                                ...p,
+                                is_default: i === index,
+                              }));
+                              onChange(newPlans);
+                            }}
+                            className="px-2 py-1 text-[10px] text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                            title={t.formLabels?.setAsDefault || "Set as default"}
+                          >
+                            {t.formLabels?.setDefault || "Set Default"}
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEditDialog(plan, index)}
+                          className="p-1 text-gray-400 hover:text-blue-500"
+                          title={t.buttons?.edit || "Edit"}
+                        >
+                          <Edit2 size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePlan(index)}
+                          className="p-1 text-gray-400 hover:text-red-500"
+                          title={t.buttons?.delete || "Delete"}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </>
+      ) : (
         <div
           className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md p-4 text-center text-gray-500 text-sm`}
         >
-          {t.noPaymentPlans || "No payment plans added yet"}
-        </div>
-      ) : (
-        <div
-          className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md overflow-hidden`}
-        >
-          <ul className="divide-y divide-gray-200">
-            {plans.map((plan, index) => (
-              <li key={index} className="p-3 hover:bg-gray-50">
-                <div className="flex justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">{plan.name}</h3>
-                    <div className="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-500">
-                      <div>
-                        <span className="font-medium">
-                          {t.downPayment || "Down Payment"}:
-                        </span>{" "}
-                        {formatPercentage(plan.downpayment_percentage)}
-                      </div>
-                      <div>
-                        <span className="font-medium">
-                          {t.installmentYears || "Years"}:
-                        </span>{" "}
-                        {plan.installment_years}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditDialog(plan, index)}
-                      className="p-1 text-gray-400 hover:text-blue-500"
-                    >
-                      <Edit2 size={16} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDeletePlan(index)}
-                      className="p-1 text-gray-400 hover:text-red-500"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {t.noPaymentPlans || "No payment plans selected. Choose from common plans above or create a custom plan."}
         </div>
       )}
 

@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { LenaCookiesManager } from "./LenaCookiesManager";
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { TokenRefreshService } from "./TokenRefreshService";
 
 const getBaseUrl = () => {
   const url = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
@@ -20,8 +20,7 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   if (!config.headers.Authorization) {
-    const token = LenaCookiesManager.getAccessToken(); // Use helper or generic get(COOKIE_KEYS.ACCESS_TOKEN)
-    // Helper is cleaner: LenaCookiesManager.getAccessToken()
+    const token = LenaCookiesManager.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -41,32 +40,25 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        console.log("Attempting to refresh token...");
+        // Use TokenRefreshService to handle token refresh and cookie sync
+        const newAccessToken = await TokenRefreshService.refreshToken();
 
-        // Call your own API route instead of external API
-        const refreshResponse = await fetch("/api/refresh-token", {
-          method: "POST",
-          credentials: "include", // Include cookies
-        });
-
-        if (!refreshResponse.ok) {
-          throw new Error("Failed to refresh token");
+        if (newAccessToken) {
+          // Update the Authorization header with the new token
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          // Retry the original request with the new token
+          return axiosInstance(originalRequest);
+        } else {
+          throw new Error("Token refresh returned no token");
         }
-
-        const data = await refreshResponse.json();
-        const newAccessToken = data.access_token;
-
-        console.log("Token refreshed successfully");
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        return axiosInstance(originalRequest);
       } catch (refreshError) {
-        console.error("Failed to refresh token:", refreshError.message);
-
-        // Redirect to login on refresh failure
-        LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
-        LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
-        window.location.href = "/login";
+        // Log error only in development
+        if (process.env.NODE_ENV === "development") {
+          console.error("[axiosInstance] Token refresh failed:", refreshError);
+        }
+        // TokenRefreshService handles cookie cleanup and redirect
+        TokenRefreshService.handleRefreshFailure();
+        return Promise.reject(refreshError);
       }
     }
 

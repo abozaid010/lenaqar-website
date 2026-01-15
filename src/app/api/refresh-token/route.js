@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getServerCookieOptions } from "@/lib/CookieConfig";
 
 const getBaseUrl = () => {
   const url = process.env.API_BASE_URL ||
@@ -23,7 +24,6 @@ export async function POST() {
     }
 
     // Make server-to-server request (no CORS issues)
-    // Make server-to-server request (no CORS issues)
     const response = await fetch(`${BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`, {
       method: "POST",
       headers: {
@@ -38,17 +38,23 @@ export async function POST() {
     const data = await response.json();
     const newAccessToken = data.access_token;
 
-    // Set the new token in cookies
+    if (!newAccessToken) {
+      throw new Error("No access token received from refresh endpoint");
+    }
+
+    // Set the new token in cookies with all required options
+    // Using centralized CookieConfig ensures consistency
+    const cookieOptions = getServerCookieOptions("ACCESS_TOKEN");
     const responseObj = NextResponse.json({ access_token: newAccessToken });
-    responseObj.cookies.set("access_token", newAccessToken, {
-      path: "/",
-      secure: true,
-      httpOnly: false,
-    });
+    responseObj.cookies.set("access_token", newAccessToken, cookieOptions);
 
     return responseObj;
   } catch (error) {
-    console.error("Token refresh failed:", error);
+    // Log error details only in development, avoid exposing sensitive info in production
+    if (process.env.NODE_ENV === "development") {
+      console.error("[refresh-token] Token refresh failed:", error);
+    }
+    // Return generic error message to avoid information leakage
     return NextResponse.json(
       { error: "Token refresh failed" },
       { status: 401 }

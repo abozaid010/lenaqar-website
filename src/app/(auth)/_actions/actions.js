@@ -3,6 +3,7 @@
 import { cookies } from "next/headers";
 import { loginUser } from "@/utils/server-api";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { getServerCookieOptions } from "@/lib/CookieConfig";
 
 export async function loginAction(prevState, formData) {
   // Input validation and sanitization
@@ -67,35 +68,23 @@ export async function loginAction(prevState, formData) {
       throw new Error("Invalid response from server");
     }
 
-    // Set secure cookie options
-    const cookieOptions = {
-      path: "/",
-      secure: true,
-      httpOnly: false,
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7 // 7 days
-    };
-
     const cookieStore = await cookies();
 
-    // Set cookies with secure options
-    cookieStore.set(COOKIE_KEYS.ACCESS_TOKEN, access_token, {
-      ...cookieOptions,
-      httpOnly: false,
-      maxAge: 60 * 60 // 1 hour for access token
-    });
+    // Set cookies using centralized CookieConfig for consistency
+    // Access token: 1 hour expiration
+    const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
+    cookieStore.set(COOKIE_KEYS.ACCESS_TOKEN, access_token, accessTokenOptions);
 
-    cookieStore.set(COOKIE_KEYS.REFRESH_TOKEN, refresh_token, {
-      ...cookieOptions,
-      httpOnly: false
-    });
+    // Refresh token: 30 days expiration (explicit, not inheriting from default)
+    const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");
+    cookieStore.set(COOKIE_KEYS.REFRESH_TOKEN, refresh_token, refreshTokenOptions);
 
-    // Set other client info
-    cookieStore.set(COOKIE_KEYS.CLIENT_ID, client_id, {
-      ...cookieOptions,
-      httpOnly: false
-    });
+    // Client ID: 30 days expiration
+    const clientIdOptions = getServerCookieOptions("CLIENT_ID");
+    cookieStore.set(COOKIE_KEYS.CLIENT_ID, client_id, clientIdOptions);
 
+    // Client info: 30 days expiration
+    const clientInfoOptions = getServerCookieOptions("CLIENT_INFO");
     cookieStore.set(
       COOKIE_KEYS.CLIENT_INFO,
       JSON.stringify({
@@ -104,10 +93,7 @@ export async function loginAction(prevState, formData) {
         phone_number,
         client_type
       }),
-      {
-        ...cookieOptions,
-        httpOnly: false // Allow client-side access
-      }
+      clientInfoOptions
     );
 
     return {
