@@ -3,9 +3,8 @@
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
 import ExistingProjectPreviewDialog from "@/components/ui/existing-project-preview-dialog";
-import FormInput from "@/components/ui/inputs/form-input";
+import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
 import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
-import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
@@ -23,7 +22,7 @@ import { addCompound, updatecompound } from "@/utils/api";
 import { parseExistingProjectData } from "@/utils/error-parser";
 import { compoundKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -73,6 +72,22 @@ export default function AddCompoundDialog({
     useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [existingProjectData, setExistingProjectData] = useState(null);
+
+  // Refs for form fields to enable scrolling to errors
+  const fieldRefs = useRef({
+    ar_name: null,
+    en_name: null,
+    description: null,
+    city: null,
+    district: null,
+    delivery_date: null,
+    area: null,
+    payment_plans: null,
+    developer_name: null,
+    google_map_link: null,
+    master_plan: null,
+    properties_types: null,
+  });
 
   const [formData, setFormData] = useState({
     ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || "",
@@ -281,6 +296,73 @@ export default function AddCompoundDialog({
     }
   };
 
+  // Function to scroll to first error field and animate it
+  const scrollToFirstError = (errors) => {
+    const errorFields = Object.keys(errors).filter((key) => errors[key]);
+    if (errorFields.length === 0) return;
+
+    // Priority order for error fields (top to bottom)
+    const fieldOrder = [
+      "ar_name",
+      "en_name",
+      "description",
+      "city",
+      "district",
+      "delivery_date",
+      "area",
+      "payment_plans",
+      "developer_name",
+      "google_map_link",
+      "master_plan",
+      "properties_types",
+    ];
+
+    // Find first error field in priority order
+    const firstErrorField = fieldOrder.find((field) => errorFields.includes(field));
+    if (!firstErrorField) return;
+
+    const fieldRef = fieldRefs.current[firstErrorField];
+    if (!fieldRef) return;
+
+    // Try to find the actual input/textarea/select element within the container
+    let targetElement = fieldRef;
+    
+    // Check if the container has a child component with ref methods (LenaTextField, LenaTextarea)
+    const inputSelectors = [
+      'input',
+      'textarea',
+      'select',
+      '[role="button"]', // For custom dropdowns
+      'button[type="button"]', // For custom selects
+    ];
+
+    for (const selector of inputSelectors) {
+      const element = fieldRef.querySelector(selector);
+      if (element) {
+        targetElement = element;
+        break;
+      }
+    }
+
+    // Scroll to the field with smooth behavior
+    targetElement.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+
+    // The LenaTextField and LenaTextarea components handle their own animations
+    // via useEffect when error prop changes, so we don't need to manually add classes
+    // But we can add a visual indicator to the container
+    fieldRef.classList.add("ring-2", "ring-red-500", "rounded-md", "p-1");
+    
+    // Remove ring after animation completes
+    setTimeout(() => {
+      if (fieldRef) {
+        fieldRef.classList.remove("ring-2", "ring-red-500", "rounded-md", "p-1");
+      }
+    }, 1000);
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -361,6 +443,12 @@ export default function AddCompoundDialog({
       }
     }
 
+    if (!formData.developer_name || !formData.developer_name.trim()) {
+      newErrors.developer_name =
+        t.formValidation?.developerRequired ||
+        "Developer is required";
+    }
+
     if (!formData.google_map_link || !formData.google_map_link.trim()) {
       newErrors.google_map_link =
         t.formValidation?.googleMapsLinkRequired ||
@@ -388,6 +476,10 @@ export default function AddCompoundDialog({
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       console.log("[handleSubmit] Validation errors:", formErrors);
+      // Scroll to first error and animate it
+      setTimeout(() => {
+        scrollToFirstError(formErrors);
+      }, 100);
       return;
     }
 
@@ -642,7 +734,10 @@ export default function AddCompoundDialog({
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
-            <div className="grid grid-cols-1 gap-2">
+            <div 
+              className="grid grid-cols-1 gap-2"
+              ref={(el) => (fieldRefs.current.ar_name = el)}
+            >
               <MultiLangInput
                 label={t.formLabels?.compoundName || "Compound Name"}
                 required
@@ -662,32 +757,25 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Description */}
-            <div>
-              <label
-                className={`block text-sm font-medium mb-1 ${errors.description ? "text-red-500" : "text-gray-700"}`}
-              >
-                {t.formLabels?.description || "Description"}{" "}
-                <span className="text-red-500">*</span>
-                <span className="text-xs text-gray-500 ml-2">
-                  ({formData.description.length}/30-1200)
-                </span>
-              </label>
-              <textarea
+            <div ref={(el) => (fieldRefs.current.description = el)}>
+              <LenaTextarea
+                label={
+                  <>
+                    {t.formLabels?.description || "Description"}{" "}
+                    <span className="text-xs text-gray-500 ml-2">
+                      ({formData.description.length}/30-1200)
+                    </span>
+                  </>
+                }
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
                 required
                 rows={5}
-                className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                  errors.description ? "border-red-500" : "border-gray-300"
-                }`}
                 placeholder={t.placeholders.projectDescription}
+                error={errors.description}
+                errorMessage={errors.description}
               />
-              {errors.description && (
-                <p className="text-xs text-red-500 mt-1">
-                  {errors.description}
-                </p>
-              )}
             </div>
 
             {/* Gated Community and Sold Out Checkboxes */}
@@ -736,45 +824,49 @@ export default function AddCompoundDialog({
 
             {/* Location - City and District on same line */}
             <div className="grid grid-cols-2 gap-4">
-              <CitySelect
-                value={formData.city}
-                onChange={handleChange}
-                error={errors.city}
-                required
-              />
+              <div ref={(el) => (fieldRefs.current.city = el)}>
+                <CitySelect
+                  value={formData.city}
+                  onChange={handleChange}
+                  error={errors.city}
+                  required
+                />
+              </div>
 
-              <SearchableDropdownSelect
-                name="district"
-                label={t.formLabels?.district || "District"}
-                value={formData.district}
-                onChange={handleChange}
-                required
-                error={!!errors.district}
-                errorMessage={errors.district}
-                disabled={!formData.city}
-                isLoading={districtsLoading}
-                options={districtsWithLabels}
-                placeholder={
-                  !formData.city
-                    ? locale === "ar"
-                      ? "الرجاء اختيار المدينة أولاً"
-                      : "Please select a city first"
-                    : locale === "ar"
-                      ? t.formLabels?.district || "اختر المنطقة"
-                      : "Select district"
-                }
-                getValue={(option) => option.value}
-                getLabel={(option) => option.label}
-                getKey={(option) => option.value}
-                searchFields={["label"]}
-                noResultsText={
-                  districtsWithLabels.length === 0 && formData.city
-                    ? locale === "ar"
-                      ? `لا توجد مناطق لـ ${formData.city}`
-                      : `No districts found for ${formData.city}`
-                    : undefined
-                }
-              />
+              <div ref={(el) => (fieldRefs.current.district = el)}>
+                <SearchableDropdownSelect
+                  name="district"
+                  label={t.formLabels?.district || "District"}
+                  value={formData.district}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.district}
+                  errorMessage={errors.district}
+                  disabled={!formData.city}
+                  isLoading={districtsLoading}
+                  options={districtsWithLabels}
+                  placeholder={
+                    !formData.city
+                      ? locale === "ar"
+                        ? "الرجاء اختيار المدينة أولاً"
+                        : "Please select a city first"
+                      : locale === "ar"
+                        ? t.formLabels?.district || "اختر المنطقة"
+                        : "Select district"
+                  }
+                  getValue={(option) => option.value}
+                  getLabel={(option) => option.label}
+                  getKey={(option) => option.value}
+                  searchFields={["label"]}
+                  noResultsText={
+                    districtsWithLabels.length === 0 && formData.city
+                      ? locale === "ar"
+                        ? `لا توجد مناطق لـ ${formData.city}`
+                        : `No districts found for ${formData.city}`
+                      : undefined
+                  }
+                />
+              </div>
             </div>
 
             {/* Hidden country field - always set to Egypt */}
@@ -786,42 +878,50 @@ export default function AddCompoundDialog({
 
             {/* Delivery and Area on same line */}
             <div className="grid grid-cols-2 gap-4">
-              <FormInput
-                type="number"
-                name="delivery_date"
-                label={t.formLabels?.deliveryInYears || "Delivery in years:"}
-                value={formData.delivery_date}
-                onChange={handleChange}
-                required
-                placeholder="4"
-                min="0"
-                step="0.5"
-                error={errors.delivery_date}
-              />
+              <div ref={(el) => (fieldRefs.current.delivery_date = el)}>
+                <LenaTextField
+                  type="number"
+                  name="delivery_date"
+                  label={t.formLabels?.deliveryInYears || "Delivery in years:"}
+                  value={formData.delivery_date}
+                  onChange={handleChange}
+                  required
+                  placeholder="4"
+                  min="0"
+                  step="0.5"
+                  error={errors.delivery_date}
+                  errorMessage={errors.delivery_date}
+                />
+              </div>
 
-              <FormInput
-                type="number"
-                name="area"
-                label={t.formLabels?.area || "Area (fdan)"}
-                value={formData.area}
-                onChange={handleChange}
-                required
-                placeholder="1000"
-                min="0"
-                error={errors.area}
-              />
+              <div ref={(el) => (fieldRefs.current.area = el)}>
+                <LenaTextField
+                  type="number"
+                  name="area"
+                  label={t.formLabels?.area || "Area (fdan)"}
+                  value={formData.area}
+                  onChange={handleChange}
+                  required
+                  placeholder="1000"
+                  min="0"
+                  error={errors.area}
+                  errorMessage={errors.area}
+                />
+              </div>
             </div>
 
             {/* Payment Plans */}
-            <PaymentPlansList
-              plans={formData.payment_plans}
-              onChange={handlePaymentPlansChange}
-              error={errors.payment_plans}
-              required={true}
-            />
+            <div ref={(el) => (fieldRefs.current.payment_plans = el)}>
+              <PaymentPlansList
+                plans={formData.payment_plans}
+                onChange={handlePaymentPlansChange}
+                error={errors.payment_plans}
+                required={true}
+              />
+            </div>
 
             {/* Developer */}
-            <div className="relative">
+            <div className="relative" ref={(el) => (fieldRefs.current.developer_name = el)}>
               <div className="flex justify-between items-center mb-1">
                 <label
                   className={`block text-sm font-medium ${
@@ -861,7 +961,7 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Links */}
-            <FormInput
+            <LenaTextField
               type="url"
               name="video_url"
               label={t.formLabels?.videoURL || "Video URL"}
@@ -869,60 +969,67 @@ export default function AddCompoundDialog({
               onChange={handleChange}
               placeholder="https://example.com/video"
             />
-            <FormInput
-              type="url"
-              name="google_map_link"
-              label={t.formLabels?.googleMapsLink || "Google Maps Link"}
-              value={formData.google_map_link}
-              onChange={handleChange}
-              placeholder="https://maps.google.com/..."
-              required
-              error={errors.google_map_link}
-            />
+            <div ref={(el) => (fieldRefs.current.google_map_link = el)}>
+              <LenaTextField
+                type="url"
+                name="google_map_link"
+                label={t.formLabels?.googleMapsLink || "Google Maps Link"}
+                value={formData.google_map_link}
+                onChange={handleChange}
+                placeholder="https://maps.google.com/..."
+                required
+                error={errors.google_map_link}
+                errorMessage={errors.google_map_link}
+              />
+            </div>
 
             {/* Master Plan Image - Now mandatory */}
-            <SingleImageUploader
-              label={t.formLabels.masterPlanImage || "Master Plan Image"}
-              value={formData.master_plan.url || null}
-              imageId={formData.master_plan.fileId || null}
-              onChange={(url, id) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  master_plan: {
-                    url,
-                    fileId: id,
-                  },
-                }));
-                // Clear error when image is uploaded
-                if (errors.master_plan) {
-                  setErrors((prev) => ({
+            <div ref={(el) => (fieldRefs.current.master_plan = el)}>
+              <SingleImageUploader
+                label={t.formLabels.masterPlanImage || "Master Plan Image"}
+                value={formData.master_plan.url || null}
+                imageId={formData.master_plan.fileId || null}
+                onChange={(url, id) => {
+                  setFormData((prev) => ({
                     ...prev,
-                    master_plan: null,
+                    master_plan: {
+                      url,
+                      fileId: id,
+                    },
                   }));
-                }
-              }}
-              disabled={isMasterPlanUploading || isSubmitting}
-              isUploading={isMasterPlanUploading}
-              setIsUploading={setIsMasterPlanUploading}
-              imageType="masterPlan"
-              required={true}
-              error={errors.master_plan}
-            />
+                  // Clear error when image is uploaded
+                  if (errors.master_plan) {
+                    setErrors((prev) => ({
+                      ...prev,
+                      master_plan: null,
+                    }));
+                  }
+                }}
+                disabled={isMasterPlanUploading || isSubmitting}
+                isUploading={isMasterPlanUploading}
+                setIsUploading={setIsMasterPlanUploading}
+                imageType="masterPlan"
+                required={true}
+                error={errors.master_plan}
+              />
+            </div>
 
             {/* Property Types */}
-            <FormMultiSelect
-              name="properties_types"
-              label={t.formLabels.propertyTypes || "Property Types"}
-              placeholder={
-                locale === "ar" ? "اختر أنواع العقارات" : "Select options"
-              }
-              value={formData.properties_types}
-              onChange={handleChange}
-              options={BUILDING_TYPES}
-              locale={locale}
-              required={true}
-              error={errors.properties_types}
-            />
+            <div ref={(el) => (fieldRefs.current.properties_types = el)}>
+              <FormMultiSelect
+                name="properties_types"
+                label={t.formLabels.propertyTypes || "Property Types"}
+                placeholder={
+                  locale === "ar" ? "اختر أنواع العقارات" : "Select options"
+                }
+                value={formData.properties_types}
+                onChange={handleChange}
+                options={BUILDING_TYPES}
+                locale={locale}
+                required={true}
+                error={errors.properties_types}
+              />
+            </div>
 
             {/* Building Types Images */}
             {formData.properties_types && formData.properties_types.length > 0 && (
