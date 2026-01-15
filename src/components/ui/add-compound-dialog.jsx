@@ -75,25 +75,37 @@ export default function AddCompoundDialog({
   const [existingProjectData, setExistingProjectData] = useState(null);
 
   const [formData, setFormData] = useState({
-    ar_name: compoundData?.ar_name || "",
-    en_name: compoundData?.en_name || "",
-    description: compoundData?.description || "",
-    developer_name: compoundData?.developer_name || "",
-    city: defaultCity || "",
-    country: "Egypt",
-    district: defaultDistrict || "",
-    area: "",
-    gated: compoundData?.gated !== undefined && compoundData?.gated !== null ? compoundData.gated : true,
-    is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null ? compoundData.is_active : true,
-    video_url: compoundData?.video_url || "",
-    google_map_link: compoundData?.google_map_link || "",
-    master_plan: compoundData?.master_plan || { url: null, fileId: null },
-    client_id: clientId || "",
-    images: compoundData?.images || [],
-    properties_types: compoundData?.properties_types || [],
-    payment_plans: compoundData?.payment_plans || [],
-    building_types_images: compoundData?.building_types_images || {},
-    delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null ? compoundData.delivery_date : 4,
+    ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || "",
+    en_name: compoundData?.en_name || compoundData?.project?.en_name || "",
+    description: compoundData?.description || compoundData?.project?.description || "",
+    developer_name: compoundData?.developer_name || compoundData?.project?.developer_name || "",
+    city: compoundData?.city || compoundData?.project?.city || defaultCity || "",
+    country: compoundData?.country || compoundData?.project?.country || "Egypt",
+    district: compoundData?.district || compoundData?.project?.district || defaultDistrict || "",
+    area: compoundData?.area || compoundData?.project?.area || "",
+    gated: compoundData?.gated !== undefined && compoundData?.gated !== null 
+      ? compoundData.gated 
+      : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
+        ? compoundData.project.gated 
+        : true),
+    is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null 
+      ? compoundData.is_active 
+      : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
+        ? compoundData.project.is_active 
+        : true),
+    video_url: compoundData?.video_url || compoundData?.project?.video_url || "",
+    google_map_link: compoundData?.google_map_link || compoundData?.project?.google_map_link || "",
+    master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || { url: null, fileId: null },
+    client_id: compoundData?.client_id || compoundData?.project?.client_id || clientId || "",
+    images: compoundData?.images || compoundData?.project?.images || [],
+    properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || [],
+    payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || [],
+    building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
+    delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
+      ? compoundData.delivery_date 
+      : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
+        ? compoundData.project.delivery_date 
+        : 4),
   });
 
   useEffect(() => {
@@ -101,27 +113,40 @@ export default function AddCompoundDialog({
       // When the dialog is opening
       if (editMode && compoundData) {
         // Load existing data for editing
-        setFormData({
-          ar_name: compoundData?.ar_name || "",
-          en_name: compoundData?.en_name || "",
-          description: compoundData.description || "",
-          developer_name: compoundData.developer_name || "",
-          city: compoundData.city || defaultCity || "", // Still use default if compound data is missing city
-          country: compoundData.country || "Egypt",
-          district: compoundData.district || defaultDistrict || "", // Still use default if compound data is missing district
-          area: compoundData.area || "",
-          gated: compoundData.gated !== undefined && compoundData.gated !== null ? compoundData.gated : true,
-          is_active: compoundData.is_active !== undefined && compoundData.is_active !== null ? compoundData.is_active : true,
-          video_url: compoundData.video_url || "",
-          google_map_link: compoundData.google_map_link || "",
-          master_plan: compoundData?.master_plan || { url: null, fileId: null },
-          client_id: compoundData.client_id || clientId || "",
-          images: compoundData.images || [],
-          properties_types: compoundData.properties_types || [],
-          payment_plans: compoundData.payment_plans || [],
-          building_types_images: compoundData?.building_types_images || {},
-          delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null ? compoundData.delivery_date : 4,
-        });
+        setFormData((prev) => ({
+          ...prev,
+          ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || "",
+          en_name: compoundData?.en_name || compoundData?.project?.en_name || "",
+          description: compoundData.description || compoundData?.project?.description || "",
+          developer_name: compoundData.developer_name || compoundData?.project?.developer_name || "",
+          city: compoundData.city || compoundData?.project?.city || defaultCity || "",
+          country: compoundData.country || compoundData?.project?.country || "Egypt",
+          district: compoundData.district || compoundData?.project?.district || defaultDistrict || "",
+          area: compoundData.area || compoundData?.project?.area || "",
+          gated: compoundData.gated !== undefined && compoundData.gated !== null 
+            ? compoundData.gated 
+            : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
+              ? compoundData.project.gated 
+              : true),
+          is_active: compoundData.is_active !== undefined && compoundData.is_active !== null 
+            ? compoundData.is_active 
+            : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
+              ? compoundData.project.is_active 
+              : true),
+          video_url: compoundData.video_url || compoundData?.project?.video_url || "",
+          google_map_link: compoundData.google_map_link || compoundData?.project?.google_map_link || "",
+          master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || { url: null, fileId: null },
+          client_id: compoundData.client_id || compoundData?.project?.client_id || clientId || "",
+          images: compoundData.images || compoundData?.project?.images || [],
+          properties_types: compoundData.properties_types || compoundData?.project?.properties_types || [],
+          payment_plans: compoundData.payment_plans || compoundData?.project?.payment_plans || [],
+          building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
+          delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null 
+            ? compoundData.delivery_date 
+            : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
+              ? compoundData.project.delivery_date 
+              : 4),
+        }));
       } else if (!editMode) {
         // Reset form with defaults for adding
         setFormData({
@@ -173,6 +198,47 @@ export default function AddCompoundDialog({
       setErrors({});
     }
   }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]);
+
+  // Additional effect to update form when compoundData changes while dialog is open
+  useEffect(() => {
+    if (isOpen && editMode && compoundData) {
+      // Update form data when compoundData changes
+      setFormData((prev) => ({
+        ...prev,
+        ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || prev.ar_name || "",
+        en_name: compoundData?.en_name || compoundData?.project?.en_name || prev.en_name || "",
+        description: compoundData?.description || compoundData?.project?.description || prev.description || "",
+        developer_name: compoundData?.developer_name || compoundData?.project?.developer_name || prev.developer_name || "",
+        city: compoundData?.city || compoundData?.project?.city || prev.city || defaultCity || "",
+        country: compoundData?.country || compoundData?.project?.country || prev.country || "Egypt",
+        district: compoundData?.district || compoundData?.project?.district || prev.district || defaultDistrict || "",
+        area: compoundData?.area || compoundData?.project?.area || prev.area || "",
+        gated: compoundData?.gated !== undefined && compoundData?.gated !== null 
+          ? compoundData.gated 
+          : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
+            ? compoundData.project.gated 
+            : prev.gated !== undefined ? prev.gated : true),
+        is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null 
+          ? compoundData.is_active 
+          : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
+            ? compoundData.project.is_active 
+            : prev.is_active !== undefined ? prev.is_active : true),
+        video_url: compoundData?.video_url || compoundData?.project?.video_url || prev.video_url || "",
+        google_map_link: compoundData?.google_map_link || compoundData?.project?.google_map_link || prev.google_map_link || "",
+        master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || prev.master_plan || { url: null, fileId: null },
+        client_id: compoundData?.client_id || compoundData?.project?.client_id || prev.client_id || clientId || "",
+        images: compoundData?.images || compoundData?.project?.images || prev.images || [],
+        properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || prev.properties_types || [],
+        payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || prev.payment_plans || [],
+        building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || prev.building_types_images || {},
+        delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
+          ? compoundData.delivery_date 
+          : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
+            ? compoundData.project.delivery_date 
+            : prev.delivery_date !== undefined ? prev.delivery_date : 4),
+      }));
+    }
+  }, [compoundData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
 
   // Get districts for selected city
   const districtsWithLabels = formData.city 
@@ -750,41 +816,42 @@ export default function AddCompoundDialog({
 
             {/* Developer */}
             <div className="relative">
-              <FormSelect
+              <div className="flex justify-between items-center mb-1">
+                <label
+                  className={`block text-sm font-medium ${
+                    errors.developer_name ? "text-red-500" : "text-gray-700"
+                  }`}
+                >
+                  {t.formLabels?.developer || "Developer"}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsAddDeveloperDialogOpen(true)}
+                  className="text-blue-600 text-sm font-medium hover:text-blue-700"
+                >
+                  + {t.buttons?.addNew || "Add New"}
+                </button>
+              </div>
+              <SearchableDropdownSelect
                 name="developer_name"
-                label={t.formLabels?.developer || "Developer"}
                 value={formData.developer_name}
                 onChange={handleChange}
                 required
-                error={errors.developer_name}
-              >
-                <option value="">
-                  {editMode
-                    ? formData.developer_name
-                    : t.formLabels?.selectDeveloper || "Select developer"}
-                </option>
-                {developers
-                  ?.slice()
-                  .sort((a, b) => {
-                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                    return nameA.trim().localeCompare(nameB.trim(), locale, {
-                      sensitivity: "base",
-                    });
-                  })
-                  .map((d, idx) => (
-                    <option key={idx} value={d.en_name}>
-                      {locale === "ar" ? d.ar_name : d.en_name}
-                    </option>
-                  ))}
-              </FormSelect>
-              <button
-                type="button"
-                onClick={() => setIsAddDeveloperDialogOpen(true)}
-                className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-0 text-blue-600 text-sm font-medium`}
-              >
-                + {t.buttons?.addNew || "Add New"}
-              </button>
+                error={!!errors.developer_name}
+                errorMessage={typeof errors.developer_name === "string" ? errors.developer_name : ""}
+                placeholder={t.formLabels?.selectDeveloper || "Select developer"}
+                options={developers || []}
+                getValue={(developer) => developer.en_name || ""}
+                getLabel={(developer, loc) => {
+                  if (loc === "ar" && developer.ar_name) {
+                    return developer.ar_name;
+                  }
+                  return developer.en_name || "";
+                }}
+                searchFields={["ar_name", "en_name"]}
+                isLoading={delveloperLoading}
+              />
             </div>
 
             {/* Links */}
