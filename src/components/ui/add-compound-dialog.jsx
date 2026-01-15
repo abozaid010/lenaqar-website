@@ -789,6 +789,35 @@ export default function AddCompoundDialog({
               placeholder="https://maps.google.com/..."
             />
 
+            {/* Master Plan Image - Now mandatory */}
+            <SingleImageUploader
+              label={t.formLabels.masterPlanImage || "Master Plan Image"}
+              value={formData.master_plan.url || null}
+              imageId={formData.master_plan.fileId || null}
+              onChange={(url, id) => {
+                setFormData((prev) => ({
+                  ...prev,
+                  master_plan: {
+                    url,
+                    fileId: id,
+                  },
+                }));
+                // Clear error when image is uploaded
+                if (errors.master_plan) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    master_plan: null,
+                  }));
+                }
+              }}
+              disabled={isMasterPlanUploading || isSubmitting}
+              isUploading={isMasterPlanUploading}
+              setIsUploading={setIsMasterPlanUploading}
+              imageType="masterPlan"
+              required={true}
+              error={errors.master_plan}
+            />
+
             {/* Property Types */}
             <FormMultiSelect
               name="properties_types"
@@ -833,35 +862,6 @@ export default function AddCompoundDialog({
                 ))}
               </div>
             )}
-
-            {/* Master Plan Image - Now mandatory */}
-            <SingleImageUploader
-              label={t.formLabels.masterPlanImage || "Master Plan Image"}
-              value={formData.master_plan.url || null}
-              imageId={formData.master_plan.fileId || null}
-              onChange={(url, id) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  master_plan: {
-                    url,
-                    fileId: id,
-                  },
-                }));
-                // Clear error when image is uploaded
-                if (errors.master_plan) {
-                  setErrors((prev) => ({
-                    ...prev,
-                    master_plan: null,
-                  }));
-                }
-              }}
-              disabled={isMasterPlanUploading || isSubmitting}
-              isUploading={isMasterPlanUploading}
-              setIsUploading={setIsMasterPlanUploading}
-              imageType="masterPlan"
-              required={true}
-              error={errors.master_plan}
-            />
 
             {/* Project Images */}
             <div>

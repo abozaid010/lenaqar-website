@@ -41,26 +41,26 @@ export default function ExistingProjectPreviewDialog({
     });
   }, []);
 
-  if (!projectData || !isOpen) return null;
-
-  // Handle Escape key
+  // Handle Escape key - MUST be called before any conditional returns
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleEscape = (e) => {
       if (e.key === "Escape") {
         onClose();
       }
     };
 
-    if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-    }
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
+
+  if (!projectData || !isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50"
