@@ -277,6 +277,22 @@ export default function AddCompoundDialog({
       newErrors.payment_plans =
         t.formValidation?.paymentPlansRequired ||
         "At least one payment plan is required";
+    } else if (formData.payment_plans.length > 1) {
+      // If multiple plans, ensure one is marked as default
+      const hasDefault = formData.payment_plans.some((plan) => plan.is_default === true);
+      if (!hasDefault) {
+        newErrors.payment_plans =
+          t.formValidation?.defaultPaymentPlanRequired ||
+          "Please select a default payment plan when multiple plans are selected";
+      }
+    } else if (formData.payment_plans.length === 1) {
+      // If only one plan, automatically set it as default (update state)
+      if (!formData.payment_plans[0].is_default) {
+        setFormData((prev) => ({
+          ...prev,
+          payment_plans: [{ ...prev.payment_plans[0], is_default: true }],
+        }));
+      }
     }
 
     if (!formData.master_plan || !formData.master_plan.url) {

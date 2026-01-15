@@ -1050,6 +1050,12 @@ export default {
     default: "Default",
     gotIt: "Got it",
     duplicateProjectMessage: "We already have this project in our system. Set project name, city correctly. You can't have two projects with same name in same city.",
+    selectDefaultPlans: "Select from common payment plans:",
+    selectedPlans: "Selected Plans",
+    isDefault: "Primary",
+    setDefault: "Set Default",
+    setAsDefault: "Set as default",
+    selectDefaultPlanWarning: "Please select a default payment plan. Click 'Set Default' on one of the plans below.",
   },
   buttons: {
     addNew: "Add New",

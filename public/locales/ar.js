@@ -1047,6 +1047,12 @@ export default {
     default: "افتراضي",
     gotIt: "حسناً",
     duplicateProjectMessage: "لدينا بالفعل هذا المشروع في نظامنا. قم بتعيين اسم المشروع والمدينة بشكل صحيح. لا يمكنك الحصول على مشروعين بنفس الاسم في نفس المدينة.",
+    selectDefaultPlans: "اختر من خطط الدفع الشائعة:",
+    selectedPlans: "الخطط المحددة",
+    isDefault: "أساسي",
+    setDefault: "تعيين كافتراضي",
+    setAsDefault: "تعيين كافتراضي",
+    selectDefaultPlanWarning: "يرجى تحديد خطة دفع افتراضية. انقر فوق 'تعيين كافتراضي' على إحدى الخطط أدناه.",
     // Payment plan dialogs and actions
     addPaymentPlan: "إضافة خطة دفع",
     editPaymentPlan: "تعديل خطة الدفع",
