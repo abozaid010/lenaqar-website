@@ -939,6 +939,8 @@ export default {
     descriptionRequired: "Description is required",
     paymentPlansRequired: "At least one payment plan is required",
     propertyTypesRequired: "At least one property type is required",
+    googleMapsLinkRequired: "Google Maps Link is required",
+    masterPlanRequired: "Master plan image is required",
   },
   toasts: {
     imageRemoved: "Image removed successfully from the server!",

@@ -361,6 +361,12 @@ export default function AddCompoundDialog({
       }
     }
 
+    if (!formData.google_map_link || !formData.google_map_link.trim()) {
+      newErrors.google_map_link =
+        t.formValidation?.googleMapsLinkRequired ||
+        "Google Maps Link is required";
+    }
+
     if (!formData.master_plan || !formData.master_plan.url) {
       newErrors.master_plan =
         t.formValidation?.masterPlanRequired ||
@@ -870,6 +876,8 @@ export default function AddCompoundDialog({
               value={formData.google_map_link}
               onChange={handleChange}
               placeholder="https://maps.google.com/..."
+              required
+              error={errors.google_map_link}
             />
 
             {/* Master Plan Image - Now mandatory */}

@@ -925,6 +925,8 @@ export default {
     percentageInvalid: "يجب أن تكون النسبة بين 0 و 1",
     positiveNumber: "يجب أن يكون الرقم موجبًا",
     positiveInteger: "يجب أن يكون الرقم عددًا صحيحًا موجبًا",
+    googleMapsLinkRequired: "رابط خرائط جوجل مطلوب",
+    masterPlanRequired: "صورة المخطط الرئيسي مطلوبة",
   },
   toasts: {
     imageRemoved: "تمت إزالة الصورة بنجاح من الخادم!",
