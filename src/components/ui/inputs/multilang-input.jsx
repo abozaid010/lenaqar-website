@@ -1,6 +1,5 @@
 import FormInput from "@/components/ui/inputs/form-input";
 import { useI18n } from "@/context/translate-api";
-import { useEffect, useState } from "react";
 
 export default function MultiLangInput({
   label,
@@ -12,63 +11,51 @@ export default function MultiLangInput({
   placeholders = {},
   missingLang,
 }) {
-  const { t, locale } = useI18n();
-  const [activeLang, setActiveLang] = useState(locale || "en");
-
-  useEffect(() => {
-    if (missingLang) {
-      setActiveLang(missingLang);
-    }
-  }, [missingLang, errors.en_name, errors.ar_name]);
+  const { t } = useI18n();
 
   return (
-    <div>
-      <div className="text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+    <div className="space-y-3">
+      <div className="text-sm font-medium text-gray-700">
         <label>
           {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <div className="inline-flex rounded bg-gray-100 border border-gray-300 overflow-hidden">
-          <button
-            type="button"
-            className={`px-2 py-0.5 text-xs font-semibold ${
-              activeLang === "ar"
-                ? "bg-primary text-white border border-gray-300 rtl:rounded-r ltr:rounded-l"
-                : "text-gray-700"
-            }`}
-            onClick={() => setActiveLang("ar")}
-          >
-            AR
-          </button>
-          <button
-            type="button"
-            className={`px-2 py-0.5 text-xs font-semibold ${
-              activeLang === "en"
-                ? "bg-primary text-white border border-gray-300 dark:border-gray-600 rtl:rounded-l ltr:rounded-r"
-                : "text-gray-700 dark:text-gray-300"
-            }`}
-            onClick={() => setActiveLang("en")}
-          >
-            EN
-          </button>
-        </div>
       </div>
-      <FormInput
-        type="text"
-        name={activeLang === "ar" ? "ar_name" : "en_name"}
-        value={activeLang === "ar" ? arValue : enValue}
-        onChange={onChange}
-        dir={activeLang === "ar" ? "rtl" : "ltr"}
-        className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-        placeholder={
-          activeLang === "ar"
-            ? placeholders.ar || (t && t.placeholders?.projectArName)
-            : placeholders.en ||
-              (t && t.placeholders?.projectEnName) ||
-              "Compound Name (English)"
-        }
-        required={required}
-        error={errors[activeLang === "ar" ? "ar_name" : "en_name"]}
-      />
+      
+      {/* Arabic Input */}
+      <div>
+        <FormInput
+          type="text"
+          name="ar_name"
+          value={arValue}
+          onChange={onChange}
+          dir="rtl"
+          className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          placeholder={
+            placeholders.ar || (t && t.placeholders?.projectArName) || "اسم المشروع (العربية)"
+          }
+          required={required}
+          error={errors.ar_name}
+        />
+      </div>
+
+      {/* English Input */}
+      <div>
+        <FormInput
+          type="text"
+          name="en_name"
+          value={enValue}
+          onChange={onChange}
+          dir="ltr"
+          className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          placeholder={
+            placeholders.en ||
+            (t && t.placeholders?.projectEnName) ||
+            "Compound Name (English)"
+          }
+          required={required}
+          error={errors.en_name}
+        />
+      </div>
     </div>
   );
 }

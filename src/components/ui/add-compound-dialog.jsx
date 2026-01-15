@@ -9,6 +9,7 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
@@ -276,6 +277,12 @@ export default function AddCompoundDialog({
       newErrors.payment_plans =
         t.formValidation?.paymentPlansRequired ||
         "At least one payment plan is required";
+    }
+
+    if (!formData.master_plan || !formData.master_plan.url) {
+      newErrors.master_plan =
+        t.formValidation?.masterPlanRequired ||
+        "Master plan image is required";
     }
 
     setErrors(newErrors);
@@ -639,7 +646,7 @@ export default function AddCompoundDialog({
               </div>
             </div>
 
-            {/* Location */}
+            {/* Location - City and District on same line */}
             <div className="grid grid-cols-2 gap-4">
               <CitySelect
                 value={formData.city}
@@ -648,14 +655,49 @@ export default function AddCompoundDialog({
                 required
               />
 
-              {/* Hidden country field - always set to Egypt */}
-              <input
-                type="hidden"
-                name="country"
-                value="Egypt"
+              <SearchableDropdownSelect
+                name="district"
+                label={t.formLabels?.district || "District"}
+                value={formData.district}
+                onChange={handleChange}
+                required
+                error={!!errors.district}
+                errorMessage={errors.district}
+                disabled={!formData.city}
+                isLoading={districtsLoading}
+                options={districtsWithLabels}
+                placeholder={
+                  !formData.city
+                    ? locale === "ar"
+                      ? "الرجاء اختيار المدينة أولاً"
+                      : "Please select a city first"
+                    : locale === "ar"
+                      ? t.formLabels?.district || "اختر المنطقة"
+                      : "Select district"
+                }
+                getValue={(option) => option.value}
+                getLabel={(option) => option.label}
+                getKey={(option) => option.value}
+                searchFields={["label"]}
+                noResultsText={
+                  districtsWithLabels.length === 0 && formData.city
+                    ? locale === "ar"
+                      ? `لا توجد مناطق لـ ${formData.city}`
+                      : `No districts found for ${formData.city}`
+                    : undefined
+                }
               />
+            </div>
 
-              {/* Delivery in Years Field */}
+            {/* Hidden country field - always set to Egypt */}
+            <input
+              type="hidden"
+              name="country"
+              value="Egypt"
+            />
+
+            {/* Delivery and Area on same line */}
+            <div className="grid grid-cols-2 gap-4">
               <FormInput
                 type="number"
                 name="delivery_date"
@@ -668,51 +710,7 @@ export default function AddCompoundDialog({
                 step="0.5"
                 error={errors.delivery_date}
               />
-            </div>
 
-            <FormSelect
-              name="district"
-              label={t.formLabels?.district || "District"}
-              value={formData.district}
-              onChange={handleChange}
-              required
-              error={errors.district}
-              disabled={!formData.city}
-            >
-              <option value="">
-                {!formData.city
-                  ? locale === "ar"
-                    ? "الرجاء اختيار المدينة أولاً"
-                    : "Please select a city first"
-                  : locale === "ar"
-                    ? t.formLabels?.district
-                    : "Select district"}
-              </option>
-              {formData.city ? (
-                districtsLoading ? (
-                  <option disabled value="">
-                    {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
-                  </option>
-                ) : districtsWithLabels.length > 0 ? (
-                  districtsWithLabels
-                    .sort((a, b) => a.label.localeCompare(b.label))
-                    .map((dist) => (
-                      <option key={dist.value} value={dist.value}>
-                        {dist.label}
-                      </option>
-                    ))
-                ) : (
-                  <option disabled value="">
-                    {locale === "ar" 
-                      ? `لا توجد مناطق لـ ${formData.city}` 
-                      : `No districts found for ${formData.city}`}
-                  </option>
-                )
-              ) : null}
-            </FormSelect>
-
-            {/* Details */}
-            <div className="grid grid-cols-2 gap-4">
               <FormInput
                 type="number"
                 name="area"
@@ -725,51 +723,6 @@ export default function AddCompoundDialog({
                 error={errors.area}
               />
             </div>
-
-            {/* Property Types */}
-            <FormMultiSelect
-              name="properties_types"
-              label={t.formLabels.propertyTypes || "Property Types"}
-              placeholder={
-                locale === "ar" ? "اختر أنواع العقارات" : "Select options"
-              }
-              value={formData.properties_types}
-              onChange={handleChange}
-              options={BUILDING_TYPES}
-              locale={locale}
-              required={true}
-              error={errors.properties_types}
-            />
-
-            {/* Building Types Images */}
-            {formData.properties_types && formData.properties_types.length > 0 && (
-              <div className="space-y-4">
-                {formData.properties_types.map((propertyType) => (
-                  <div key={propertyType}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {getPropertyTypeLabel(propertyType)}
-                      <span className="text-xs font-normal text-gray-500 ml-2">
-                        (
-                        {(formData.building_types_images[propertyType] || [])
-                          .length}{" "}
-                        / 4)
-                      </span>
-                    </label>
-                    <ImageUploader
-                      maxImages={4}
-                      initialImages={
-                        formData.building_types_images[propertyType] || []
-                      }
-                      onImagesChange={(images) =>
-                        handleBuildingTypeImagesChange(propertyType, images)
-                      }
-                      isUploading={isUploading}
-                      setIsUploading={setIsUploading}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
 
             {/* Payment Plans */}
             <PaymentPlansList
@@ -836,24 +789,78 @@ export default function AddCompoundDialog({
               placeholder="https://maps.google.com/..."
             />
 
-            {/* Master Plan Image */}
+            {/* Property Types */}
+            <FormMultiSelect
+              name="properties_types"
+              label={t.formLabels.propertyTypes || "Property Types"}
+              placeholder={
+                locale === "ar" ? "اختر أنواع العقارات" : "Select options"
+              }
+              value={formData.properties_types}
+              onChange={handleChange}
+              options={BUILDING_TYPES}
+              locale={locale}
+              required={true}
+              error={errors.properties_types}
+            />
+
+            {/* Building Types Images */}
+            {formData.properties_types && formData.properties_types.length > 0 && (
+              <div className="space-y-4">
+                {formData.properties_types.map((propertyType) => (
+                  <div key={propertyType}>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {getPropertyTypeLabel(propertyType)}
+                      <span className="text-xs font-normal text-gray-500 ml-2">
+                        (
+                        {(formData.building_types_images[propertyType] || [])
+                          .length}{" "}
+                        / 4)
+                      </span>
+                    </label>
+                    <ImageUploader
+                      maxImages={4}
+                      initialImages={
+                        formData.building_types_images[propertyType] || []
+                      }
+                      onImagesChange={(images) =>
+                        handleBuildingTypeImagesChange(propertyType, images)
+                      }
+                      isUploading={isUploading}
+                      setIsUploading={setIsUploading}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Master Plan Image - Now mandatory */}
             <SingleImageUploader
               label={t.formLabels.masterPlanImage || "Master Plan Image"}
               value={formData.master_plan.url || null}
               imageId={formData.master_plan.fileId || null}
-              onChange={(url, id) =>
+              onChange={(url, id) => {
                 setFormData((prev) => ({
                   ...prev,
                   master_plan: {
                     url,
                     fileId: id,
                   },
-                }))
-              }
+                }));
+                // Clear error when image is uploaded
+                if (errors.master_plan) {
+                  setErrors((prev) => ({
+                    ...prev,
+                    master_plan: null,
+                  }));
+                }
+              }}
               disabled={isMasterPlanUploading || isSubmitting}
               isUploading={isMasterPlanUploading}
               setIsUploading={setIsMasterPlanUploading}
               imageType="masterPlan"
+              required={true}
+              error={errors.master_plan}
             />
 
             {/* Project Images */}
