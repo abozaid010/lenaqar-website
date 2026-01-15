@@ -1042,6 +1042,8 @@ export default {
     // Existing project preview dialog
     existingProject: "المشروع الموجود",
     projectName: "اسم المشروع",
+    projectArName: "اسم المشروع (العربية)",
+    projectEnName: "اسم المشروع (الإنجليزية)",
     arabic: "العربية",
     english: "الإنجليزية",
     yes: "نعم",

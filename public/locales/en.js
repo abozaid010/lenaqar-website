@@ -1045,6 +1045,8 @@ export default {
     // Existing project preview dialog
     existingProject: "Existing Project",
     projectName: "Project Name",
+    projectArName: "Project Name (Arabic)",
+    projectEnName: "Project Name (English)",
     arabic: "Arabic",
     english: "English",
     yes: "Yes",
