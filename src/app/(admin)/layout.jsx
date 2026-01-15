@@ -2,6 +2,7 @@ import Header from "@/components/dashbord/common/Header";
 import Sidebar from "@/components/dashbord/common/Sidebar";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { I18nProvider } from "@/context/translate-api";
+import { TokenRefreshProvider } from "@/components/auth/TokenRefreshProvider";
 import { Suspense } from "react";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
@@ -28,30 +29,32 @@ const Layout = async ({ children }) => {
 
   return (
     <I18nProvider initialLocal={initialLocale}>
-      <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-        <Sidebar />
+      <TokenRefreshProvider>
+        <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
+          <Sidebar />
 
-        <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-          <Header
-            clientName={clientName}
-            clientID={clientID}
-            clientEmail={clientEmail}
-          />
+          <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
+            <Header
+              clientName={clientName}
+              clientID={clientID}
+              clientEmail={clientEmail}
+            />
 
-          <main className="overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0">
-            <Suspense
-              fallback={
-                <LoadingSpinner
-                  message="Loading..."
-                  containerClassName="flex items-center justify-center h-full"
-                />
-              }
-            >
-              {children}
-            </Suspense>
-          </main>
+            <main className="overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0">
+              <Suspense
+                fallback={
+                  <LoadingSpinner
+                    message="Loading..."
+                    containerClassName="flex items-center justify-center h-full"
+                  />
+                }
+              >
+                {children}
+              </Suspense>
+            </main>
+          </div>
         </div>
-      </div>
+      </TokenRefreshProvider>
     </I18nProvider>
   );
 };

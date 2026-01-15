@@ -4,6 +4,63 @@
  */
 
 /**
+ * Maps error messages to translation keys
+ * This allows us to use translations from locale files instead of hardcoding messages
+ */
+const ERROR_TYPE_MAPPINGS = {
+  // Arabic text validation
+  'Text must contain only Arabic letters, Arabic digits, English digits, and spaces': 'arabicTextOnly',
+  'text must contain only arabic letters, arabic digits, english digits, and spaces': 'arabicTextOnly',
+  
+  // English text validation
+  'Text must contain only English letters, digits, and spaces': 'englishTextOnly',
+  'text must contain only english letters, digits, and spaces': 'englishTextOnly',
+};
+
+/**
+ * Parses validation errors from API responses
+ * Extracts field name and maps error message to translation key
+ * @param {string} errorMessage - The error message string from API
+ * @returns {object} - Object with field names as keys and translation keys as values
+ */
+export function parseValidationErrors(errorMessage) {
+  if (!errorMessage || typeof errorMessage !== 'string') {
+    return {};
+  }
+
+  const errors = {};
+  
+  try {
+    // Pattern: "Validation error: body -> field_name (error_type): Error message"
+    const errorPattern = /Validation error:\s*body\s*->\s*(\w+)\s*\([^)]+\):\s*(.+?)(?=\n|$|Validation error:)/gi;
+    
+    let match;
+    while ((match = errorPattern.exec(errorMessage)) !== null) {
+      const fieldName = match[1];
+      let errorMsg = match[2].trim();
+      
+      // Remove "Value error, " prefix if present
+      errorMsg = errorMsg.replace(/^Value error,\s*/i, '').trim();
+      
+      // Map error message to translation key
+      const translationKey = ERROR_TYPE_MAPPINGS[errorMsg] || null;
+      
+      if (translationKey) {
+        // Return translation key - component will use it to get message from locale
+        errors[fieldName] = translationKey;
+      } else {
+        // Fallback: use the error message as-is (capitalized)
+        errors[fieldName] = errorMsg.charAt(0).toUpperCase() + errorMsg.slice(1);
+      }
+    }
+  } catch (error) {
+    console.warn('[parseValidationErrors] Failed to parse error message:', errorMessage, error);
+  }
+  
+  return errors;
+}
+
+/**
  * Extracts a balanced brace structure starting from a given position
  * @param {string} str - The string to search in
  * @param {number} startPos - Starting position (should be at opening brace)

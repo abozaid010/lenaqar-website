@@ -927,6 +927,8 @@ export default {
     positiveInteger: "يجب أن يكون الرقم عددًا صحيحًا موجبًا",
     googleMapsLinkRequired: "رابط خرائط جوجل مطلوب",
     masterPlanRequired: "صورة المخطط الرئيسي مطلوبة",
+    arabicTextOnly: "يجب أن يحتوي النص على أحرف عربية وأرقام عربية وأرقام إنجليزية ومسافات فقط",
+    englishTextOnly: "يجب أن يحتوي النص على أحرف إنجليزية وأرقام ومسافات فقط",
   },
   toasts: {
     imageRemoved: "تمت إزالة الصورة بنجاح من الخادم!",

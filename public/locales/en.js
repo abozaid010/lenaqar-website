@@ -941,6 +941,8 @@ export default {
     propertyTypesRequired: "At least one property type is required",
     googleMapsLinkRequired: "Google Maps Link is required",
     masterPlanRequired: "Master plan image is required",
+    arabicTextOnly: "Text must contain only Arabic letters, Arabic digits, English digits, and spaces",
+    englishTextOnly: "Text must contain only English letters, digits, and spaces",
   },
   toasts: {
     imageRemoved: "Image removed successfully from the server!",

@@ -2,7 +2,7 @@
 
 import { axiosInstance } from "@/lib/axiosInstance";
 import { safeMergeParams } from "./safeJsonParser";
-import { parseExistingProjectData } from "./error-parser";
+import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -322,8 +322,19 @@ export async function addCompound(compoundData) {
           statusCode: 400,
         };
       }
+      
+      // Check for validation errors
+      const validationErrors = parseValidationErrors(errorMessage);
+      if (Object.keys(validationErrors).length > 0) {
+        console.log("[addCompound] Parsed validation errors:", validationErrors);
+        return {
+          error: errorMessage,
+          validation_errors: validationErrors,
+          statusCode: 400,
+        };
+      }
     }
-    
+
     return { error: errorMessage };
   }
 }
@@ -374,8 +385,19 @@ export async function updatecompound(compoundData, projectId) {
           statusCode: 400,
         };
       }
+      
+      // Check for validation errors
+      const validationErrors = parseValidationErrors(errorMessage);
+      if (Object.keys(validationErrors).length > 0) {
+        console.log("[updatecompound] Parsed validation errors:", validationErrors);
+        return {
+          error: errorMessage,
+          validation_errors: validationErrors,
+          statusCode: 400,
+        };
+      }
     }
-    
+
     return { error: errorMessage };
   }
 }

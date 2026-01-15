@@ -19,7 +19,7 @@ import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { addCompound, updatecompound } from "@/utils/api";
-import { parseExistingProjectData } from "@/utils/error-parser";
+import { parseExistingProjectData, parseValidationErrors } from "@/utils/error-parser";
 import { compoundKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -557,6 +557,30 @@ export default function AddCompoundDialog({
         return; // Don't show toast, just show preview
       }
       
+      // Check for validation errors from API
+      if (res?.statusCode === 400 && res?.validation_errors) {
+        console.log("[handleSubmit] Found validation errors in response:", res.validation_errors);
+        // Convert translation keys to actual error messages
+        const validationErrors = {};
+        Object.keys(res.validation_errors).forEach(fieldName => {
+          const translationKey = res.validation_errors[fieldName];
+          // Check if it's a translation key (string without spaces or with camelCase)
+          if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
+            validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+          } else {
+            // It's already a message, use it as-is
+            validationErrors[fieldName] = translationKey;
+          }
+        });
+        setErrors(validationErrors);
+        setIsSubmitting(false);
+        // Scroll to first error and animate it
+        setTimeout(() => {
+          scrollToFirstError(validationErrors);
+        }, 100);
+        return; // Don't show generic toast
+      }
+      
       // Also check if res itself has existing_project_data (in case statusCode wasn't set)
       if (res?.existing_project_data && (res?.error || res?.error_message)) {
         console.log("[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:", {
@@ -585,6 +609,32 @@ export default function AddCompoundDialog({
           res?.error_message ||
           res?.message ||
           "An error occurred while processing your request.";
+        
+        // Check for validation errors in the error message
+        const validationErrorKeys = parseValidationErrors(errorMessage);
+        if (Object.keys(validationErrorKeys).length > 0) {
+          console.log("[handleSubmit] Found validation errors in response:", validationErrorKeys);
+          // Convert translation keys to actual error messages
+          const validationErrors = {};
+          Object.keys(validationErrorKeys).forEach(fieldName => {
+            const translationKey = validationErrorKeys[fieldName];
+            // Check if it's a translation key (string without spaces or with camelCase)
+            if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
+              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+            } else {
+              // It's already a message, use it as-is
+              validationErrors[fieldName] = translationKey;
+            }
+          });
+          setErrors(validationErrors);
+          setIsSubmitting(false);
+          // Scroll to first error and animate it
+          setTimeout(() => {
+            scrollToFirstError(validationErrors);
+          }, 100);
+          return; // Don't show generic toast
+        }
+        
         console.error("[handleSubmit] Update failed with error (no preview available):", {
           errorMessage,
           fullResponse: res,
@@ -649,6 +699,7 @@ export default function AddCompoundDialog({
       // Check if the error response contains existing_project_data
       const errorResponseData = error.response?.data;
       if (error.response?.status === 400 && errorResponseData?.error_message) {
+        // First check for existing project data
         const existingProjectData = parseExistingProjectData(errorResponseData.error_message);
         if (existingProjectData) {
           console.log("[handleSubmit] Found existing_project_data in exception, showing preview:", {
@@ -658,6 +709,58 @@ export default function AddCompoundDialog({
           setPreviewDialogOpen(true);
           setIsSubmitting(false);
           return; // Don't show toast
+        }
+        
+        // Check for validation errors
+        const validationErrorKeys = parseValidationErrors(errorResponseData.error_message);
+        if (Object.keys(validationErrorKeys).length > 0) {
+          console.log("[handleSubmit] Found validation errors:", validationErrorKeys);
+          // Convert translation keys to actual error messages
+          const validationErrors = {};
+          Object.keys(validationErrorKeys).forEach(fieldName => {
+            const translationKey = validationErrorKeys[fieldName];
+            // Check if it's a translation key (string without spaces or with camelCase)
+            if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
+              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+            } else {
+              // It's already a message, use it as-is
+              validationErrors[fieldName] = translationKey;
+            }
+          });
+          setErrors(validationErrors);
+          setIsSubmitting(false);
+          // Scroll to first error and animate it
+          setTimeout(() => {
+            scrollToFirstError(validationErrors);
+          }, 100);
+          return; // Don't show generic toast
+        }
+      }
+      
+      // If we have error response data with error_message, try to parse it
+      if (error.response?.data?.error_message) {
+        const validationErrorKeys = parseValidationErrors(error.response.data.error_message);
+        if (Object.keys(validationErrorKeys).length > 0) {
+          console.log("[handleSubmit] Found validation errors in error_message:", validationErrorKeys);
+          // Convert translation keys to actual error messages
+          const validationErrors = {};
+          Object.keys(validationErrorKeys).forEach(fieldName => {
+            const translationKey = validationErrorKeys[fieldName];
+            // Check if it's a translation key (string without spaces or with camelCase)
+            if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
+              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+            } else {
+              // It's already a message, use it as-is
+              validationErrors[fieldName] = translationKey;
+            }
+          });
+          setErrors(validationErrors);
+          setIsSubmitting(false);
+          // Scroll to first error and animate it
+          setTimeout(() => {
+            scrollToFirstError(validationErrors);
+          }, 100);
+          return;
         }
       }
       
