@@ -2,6 +2,7 @@
 
 import { axiosInstance } from "@/lib/axiosInstance";
 import { safeMergeParams } from "./safeJsonParser";
+import { parseExistingProjectData } from "./error-parser";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -298,7 +299,32 @@ export async function addCompound(compoundData) {
     );
     return response.data;
   } catch (error) {
-    return { error: error.response?.data?.error_message || error.message };
+    const statusCode = error.response?.status;
+    const errorMessage = error.response?.data?.error_message || error.message;
+    
+    console.log("[addCompound] Error caught:", {
+      statusCode,
+      errorMessage: errorMessage?.substring(0, 200),
+      fullErrorResponse: error.response?.data,
+    });
+    
+    // Check for 400 status code and try to extract existing_project_data
+    if (statusCode === 400 && errorMessage) {
+      const existingProjectData = parseExistingProjectData(errorMessage);
+      console.log("[addCompound] Parsed existing_project_data:", {
+        found: !!existingProjectData,
+        keys: existingProjectData ? Object.keys(existingProjectData) : null,
+      });
+      if (existingProjectData) {
+        return {
+          error: errorMessage,
+          existing_project_data: existingProjectData,
+          statusCode: 400,
+        };
+      }
+    }
+    
+    return { error: errorMessage };
   }
 }
 export async function updatecompound(compoundData, projectId) {
@@ -334,7 +360,23 @@ export async function updatecompound(compoundData, projectId) {
       statusText: error.response?.statusText,
       fullError: error,
     });
-    return { error: error.response?.data?.error_message || error.message };
+    
+    const statusCode = error.response?.status;
+    const errorMessage = error.response?.data?.error_message || error.message;
+    
+    // Check for 400 status code and try to extract existing_project_data
+    if (statusCode === 400 && errorMessage) {
+      const existingProjectData = parseExistingProjectData(errorMessage);
+      if (existingProjectData) {
+        return {
+          error: errorMessage,
+          existing_project_data: existingProjectData,
+          statusCode: 400,
+        };
+      }
+    }
+    
+    return { error: errorMessage };
   }
 }
 export async function deleteProject(project_id) {

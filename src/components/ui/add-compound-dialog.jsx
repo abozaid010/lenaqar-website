@@ -2,6 +2,7 @@
 
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import Dialog from "@/components/ui/Dialog";
+import ExistingProjectPreviewDialog from "@/components/ui/existing-project-preview-dialog";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
 import FormSelect from "@/components/ui/inputs/form-select";
@@ -18,6 +19,7 @@ import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { addCompound, updatecompound } from "@/utils/api";
+import { parseExistingProjectData } from "@/utils/error-parser";
 import { compoundKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
@@ -68,6 +70,8 @@ export default function AddCompoundDialog({
   const [missingLang, setMissingLang] = useState(null);
   const [isAddDeveloperDialogOpen, setIsAddDeveloperDialogOpen] =
     useState(false);
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [existingProjectData, setExistingProjectData] = useState(null);
 
   const [formData, setFormData] = useState({
     ar_name: compoundData?.ar_name || "",
@@ -344,13 +348,39 @@ export default function AddCompoundDialog({
         resKeys: res ? Object.keys(res) : [],
         hasStatus: res?.status !== undefined,
         status: res?.status,
+        statusCode: res?.statusCode,
         hasData: res?.data !== undefined,
         hasError: res?.error !== undefined,
         error: res?.error,
+        hasExistingProjectData: !!res?.existing_project_data,
         isArray: Array.isArray(res),
         hasId: res?.id !== undefined,
       });
 
+      // Check for 400 status code with existing_project_data FIRST (before checking other errors)
+      // This ensures we show preview dialog instead of toast
+      if (res?.statusCode === 400 && res?.existing_project_data) {
+        console.log("[handleSubmit] Project already exists, showing preview dialog:", {
+          existingProjectData: res.existing_project_data,
+          existingProjectDataKeys: res.existing_project_data ? Object.keys(res.existing_project_data) : null,
+        });
+        setExistingProjectData(res.existing_project_data);
+        setPreviewDialogOpen(true);
+        setIsSubmitting(false);
+        return; // Don't show toast, just show preview
+      }
+      
+      // Also check if res itself has existing_project_data (in case statusCode wasn't set)
+      if (res?.existing_project_data && (res?.error || res?.error_message)) {
+        console.log("[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:", {
+          existingProjectData: res.existing_project_data,
+        });
+        setExistingProjectData(res.existing_project_data);
+        setPreviewDialogOpen(true);
+        setIsSubmitting(false);
+        return; // Don't show toast, just show preview
+      }
+      
       // Check for success - handle different response formats
       // Format 1: { status: true, data: {...} }
       // Format 2: { status: 200, data: {...} }
@@ -368,11 +398,13 @@ export default function AddCompoundDialog({
           res?.error_message ||
           res?.message ||
           "An error occurred while processing your request.";
-        console.error("[handleSubmit] Update failed with error:", {
+        console.error("[handleSubmit] Update failed with error (no preview available):", {
           errorMessage,
           fullResponse: res,
+          statusCode: res?.statusCode,
         });
         toast.error(errorMessage);
+        setIsSubmitting(false);
         return;
       } else if (hasSuccessStatus || hasDataObject || hasDirectData) {
         // Success - extract the data
@@ -424,7 +456,24 @@ export default function AddCompoundDialog({
         errorMessage: error.message,
         errorStack: error.stack,
         errorResponse: error.response,
+        errorResponseData: error.response?.data,
       });
+      
+      // Check if the error response contains existing_project_data
+      const errorResponseData = error.response?.data;
+      if (error.response?.status === 400 && errorResponseData?.error_message) {
+        const existingProjectData = parseExistingProjectData(errorResponseData.error_message);
+        if (existingProjectData) {
+          console.log("[handleSubmit] Found existing_project_data in exception, showing preview:", {
+            existingProjectData,
+          });
+          setExistingProjectData(existingProjectData);
+          setPreviewDialogOpen(true);
+          setIsSubmitting(false);
+          return; // Don't show toast
+        }
+      }
+      
       toast.error(
         editMode
           ? "Failed to update compound. Please try again."
@@ -533,7 +582,7 @@ export default function AddCompoundDialog({
                 value={formData.description}
                 onChange={handleChange}
                 required
-                rows={11}
+                rows={5}
                 className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
                   errors.description ? "border-red-500" : "border-gray-300"
                 }`}
@@ -865,6 +914,15 @@ export default function AddCompoundDialog({
         isOpen={isAddDeveloperDialogOpen}
         onClose={() => setIsAddDeveloperDialogOpen(false)}
         onAdd={handleAddDeveloper}
+      />
+
+      <ExistingProjectPreviewDialog
+        isOpen={previewDialogOpen}
+        onClose={() => {
+          setPreviewDialogOpen(false);
+          setExistingProjectData(null);
+        }}
+        projectData={existingProjectData}
       />
     </>
   );

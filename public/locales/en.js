@@ -1039,6 +1039,17 @@ export default {
     extraPayments: "Extra Payments",
     deliveryFee: "Delivery Fee (%)",
     contractFee: "Contract Fee (EGP)",
+    deliveryInYears: "Delivery (years)",
+    // Existing project preview dialog
+    existingProject: "Existing Project",
+    projectName: "Project Name",
+    arabic: "Arabic",
+    english: "English",
+    yes: "Yes",
+    no: "No",
+    default: "Default",
+    gotIt: "Got it",
+    duplicateProjectMessage: "We already have this project in our system. Set project name, city correctly. You can't have two projects with same name in same city.",
   },
   buttons: {
     addNew: "Add New",

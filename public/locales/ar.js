@@ -1036,6 +1036,17 @@ export default {
     deliveryFee: "رسوم التسليم (%)",
     contractFee: "رسوم العقد (جنيه)",
     description: "الوصف",
+    deliveryInYears: "التسليم (بالسنوات)",
+    // Existing project preview dialog
+    existingProject: "المشروع الموجود",
+    projectName: "اسم المشروع",
+    arabic: "العربية",
+    english: "الإنجليزية",
+    yes: "نعم",
+    no: "لا",
+    default: "افتراضي",
+    gotIt: "حسناً",
+    duplicateProjectMessage: "لدينا بالفعل هذا المشروع في نظامنا. قم بتعيين اسم المشروع والمدينة بشكل صحيح. لا يمكنك الحصول على مشروعين بنفس الاسم في نفس المدينة.",
     // Payment plan dialogs and actions
     addPaymentPlan: "إضافة خطة دفع",
     editPaymentPlan: "تعديل خطة الدفع",

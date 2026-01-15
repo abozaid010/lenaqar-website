@@ -35,7 +35,7 @@ export default function Dialog({ isOpen, onClose, title, children, editMode }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50"
-      // onClick={handleOutsideClick}
+      onClick={handleOutsideClick}
     >
       <div
         ref={dialogRef}
