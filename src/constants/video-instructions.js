@@ -3,9 +3,9 @@ export const VIDEO_MAP = {
   team: "9Rmw2rldi1o",
   units: "eZZcqiCSXlw",
   developers: "MP6OwgY89PQ",
-  projects: "xm6tXXT9iUI",
+  projects: "EblgZCF6nU4",
   dashboard: "e5xBGWP76U8",
-  upload: "EZ223BOLeM4",
+  upload: "bbwbXmcWqTY",
 };
 
 // Default fallback messages (English)
