@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Info, X, Youtube, YoutubeIcon } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
@@ -28,6 +28,10 @@ import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
  * @param {string} iconSize - Size of the info icon: 'sm', 'md', 'lg' (default: 'md')
  * @param {string} iconClassName - Additional classes for the icon button
  * @param {string} tooltipText - Tooltip text for the icon (default: "View instructions")
+ * @param {boolean} isOpen - External control for dialog open state (optional)
+ * @param {function} onClose - Callback when dialog is closed (optional)
+ * @param {boolean} showIcon - Whether to show the icon button (default: true)
+ * @param {number} zIndex - Custom z-index for the dialog overlay (default: 50)
  */
 export default function VideoInstructionsDialog({
   variant,
@@ -46,9 +50,23 @@ export default function VideoInstructionsDialog({
   iconClassName = "",
   svgClassName = "",
   tooltipText,
+  isOpen: externalIsOpen,
+  onClose: externalOnClose,
+  showIcon = true,
+  zIndex = 50,
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
   const { t } = useI18n();
+
+  // Use external state if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  
+  // Sync external state changes to internal state
+  useEffect(() => {
+    if (externalIsOpen !== undefined) {
+      setInternalIsOpen(externalIsOpen);
+    }
+  }, [externalIsOpen]);
 
   const videoId = VIDEO_MAP[variant];
   const hasVideo = !!videoId;
@@ -119,17 +137,29 @@ export default function VideoInstructionsDialog({
   };
 
   const handleClose = () => {
-    setIsOpen(false);
+    if (externalOnClose) {
+      externalOnClose();
+    } else {
+      setInternalIsOpen(false);
+    }
+  };
+
+  const handleOpen = () => {
+    if (externalIsOpen === undefined) {
+      setInternalIsOpen(true);
+    }
+    // If external control, don't change state here
   };
 
   return (
     <>
       {/* YouTube Icon Button */}
-      <button
-        onClick={() => setIsOpen(true)}
-        className={`inline-flex items-center justify-center transition-colors group relative ${iconClassName}`}
-        aria-label={displayTooltip}
-      >
+      {showIcon && (
+        <button
+          onClick={handleOpen}
+          className={`inline-flex items-center justify-center transition-colors group relative ${iconClassName}`}
+          aria-label={displayTooltip}
+        >
         <span className={`block`} style={{ width: "2.5rem", height: "2.5rem" }}>
           <svg
             viewBox="0 0 32 32"
@@ -146,16 +176,18 @@ export default function VideoInstructionsDialog({
           </svg>
         </span>
 
-        {/* Tooltip */}
-        <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
-          {displayTooltip}
-        </span>
-      </button>
+          {/* Tooltip */}
+          <span className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 text-xs font-medium text-white bg-gray-900 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+            {displayTooltip}
+          </span>
+        </button>
+      )}
 
       {/* Dialog/Modal */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+          style={{ zIndex }}
           onClick={handleClose}
         >
           <div

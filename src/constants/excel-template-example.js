@@ -5,7 +5,7 @@
  */
 
 export const excelTemplateColumns = [
-  // ===== REQUIRED FIELDS (7) =====
+  // ===== REQUIRED FIELDS (6) =====
   {
     key: "buildingType",
     label: "Building Type",
@@ -36,12 +36,12 @@ export const excelTemplateColumns = [
     label: "Total Price",
     is_required: true,
   },
+  // ===== OPTIONAL FIELDS (10) =====
   {
     key: "deliveryDate",
     label: "Delivery Date",
-    is_required: true,
+    is_required: false,
   },
-  // ===== OPTIONAL FIELDS (9) =====
   {
     key: "phase",
     label: "Phase",
@@ -83,11 +83,6 @@ export const excelTemplateColumns = [
     is_required: false,
   },
   {
-    key: "downPayment",
-    label: "Down Payment",
-    is_required: false,
-  },
-  {
     key: "city",
     label: "City",
     is_required: false,
@@ -117,8 +112,8 @@ export const excelTemplateExampleRow = {
   landArea: "100",
   finishing: "finished",
   totalPrice: "1000000",
-  deliveryDate: "2025-12-31",
   // Optional fields
+  deliveryDate: "2025-12-31",
   phase: "Phase 1",
   view: "garden",
   unitTitle: "two bedrooms",
@@ -127,7 +122,6 @@ export const excelTemplateExampleRow = {
   gardenSize: "50",
   garageArea: "20",
   model: "A1",
-  downPayment: "50000",
   furnishing: "furnished",
   city: "cairo",
   unit_number: "101",
