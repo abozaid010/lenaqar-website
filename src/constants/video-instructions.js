@@ -5,6 +5,7 @@ export const VIDEO_MAP = {
   developers: "MP6OwgY89PQ",
   projects: "xm6tXXT9iUI",
   dashboard: "e5xBGWP76U8",
+  upload: "EZ223BOLeM4",
 };
 
 // Default fallback messages (English)
@@ -38,6 +39,11 @@ export const DEFAULT_MESSAGES = {
     title: "How to Manage Schedule",
     description:
       "Watch this video to learn how to manage your schedule effectively.",
+  },
+  upload: {
+    title: "How to Upload Units via Excel",
+    description:
+      "Watch this video to learn how to upload units using the Excel template.",
   },
   default: {
     title: "No Data Available",
@@ -75,6 +81,11 @@ export const EMPTY_STATE_MESSAGES = {
     title: "No Schedule Items",
     description:
       "Watch this video to learn how to manage your schedule effectively.",
+  },
+  upload: {
+    title: "How to Upload Units via Excel",
+    description:
+      "Watch this video to learn how to upload units using the Excel template.",
   },
   default: {
     title: "No Data Available",

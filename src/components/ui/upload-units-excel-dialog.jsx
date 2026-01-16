@@ -28,12 +28,13 @@ import {
   excelTemplateColumns,
   excelTemplateExampleRow,
 } from "@/constants/excel-template-example";
+import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
 const downloadTemplateFile = () => {
-  const link = document.createElement("a");
-  link.href = "/unit_upload_template.xlsx";
-  link.download = "unit_upload_template.xlsx";
-  link.click();
+  window.open(
+    "https://docs.google.com/spreadsheets/d/137hGxNGjDWjM-QfuDsEeozmJx4xFw9I9J7PFWqDzAXw/edit?usp=sharing",
+    "_blank"
+  );
 };
 
 /**
@@ -715,6 +716,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                 ({parsedData.summary.totalUnits} {t.uploadExcel?.units || "units"})
               </span>
             )}
+            <VideoInstructionsDialog
+              variant="upload"
+              iconSize="md"
+              tooltipText="How to upload units via Excel"
+              className="p-0"
+            />
           </div>
           <button
             onClick={handleClose}
@@ -743,11 +750,33 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm border-collapse" dir="ltr">
                       <thead>
+                        {/* Required Fields Header */}
+                        <tr>
+                          <th
+                            colSpan={excelTemplateColumns.filter((col) => col.is_required).length}
+                            className="px-4 py-2 text-center font-bold text-white bg-red-600 border border-red-700"
+                          >
+                            Required Fields
+                          </th>
+                          {excelTemplateColumns.filter((col) => !col.is_required).length > 0 && (
+                            <th
+                              colSpan={excelTemplateColumns.filter((col) => !col.is_required).length}
+                              className="px-4 py-2 text-center font-bold text-gray-700 bg-gray-200 border border-gray-300"
+                            >
+                              Nice to Have
+                            </th>
+                          )}
+                        </tr>
+                        {/* Column Headers */}
                         <tr className="bg-gray-100">
                           {excelTemplateColumns.map((column) => (
                             <th
                               key={column.key}
-                              className="px-4 py-2 text-left font-semibold text-gray-700 border border-gray-300"
+                              className={`px-4 py-2 text-left font-semibold border border-gray-300 ${
+                                column.is_required
+                                  ? "bg-red-100 text-red-800"
+                                  : "text-gray-700"
+                              }`}
                             >
                               {column.label}{column.is_required ? " *" : ""}
                             </th>
@@ -759,7 +788,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           {excelTemplateColumns.map((column) => (
                             <td
                               key={column.key}
-                              className="px-4 py-2 text-gray-700 border border-gray-300"
+                              className={`px-4 py-2 text-gray-700 border border-gray-300 ${
+                                column.is_required ? "bg-red-50" : ""
+                              }`}
                             >
                               {excelTemplateExampleRow[column.key] || "-"}
                             </td>
@@ -776,14 +807,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                         e.stopPropagation();
                         downloadTemplateFile();
                       }}
-                      className="px-6 py-2 text-primary hover:underline transition-all flex items-center gap-2"
+                      className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:underline transition-all flex items-center gap-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50"
                     >
-                      <Download size={18} />
+                      <Download size={16} />
                       {t.uploadExcel?.downloadTemplate || "Download Template"}
                     </button>
                     <button
                       onClick={handleUploadClick}
-                      className="px-12 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+                      className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
                       {t.uploadExcel?.browseFiles || "Upload"}
                     </button>
@@ -826,32 +857,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               )}
             </div>
 
-            {/* Instructions */}
-            {!parsedData && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h3 className="font-semibold text-gray-800 mb-2">
-                  {t.uploadExcel?.instructions || "Instructions:"}
-                </h3>
-                <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-                  <li>
-                    {t.uploadExcel?.instruction1 ||
-                      "Upload an Excel file with unit data in the first worksheet"}
-                  </li>
-                  <li>
-                    {t.uploadExcel?.instruction2 ||
-                      "First row must contain column headers (buildingType, project, phase, view, etc.)"}
-                  </li>
-                  <li>
-                    {t.uploadExcel?.instruction3 ||
-                      "Required fields are marked with asterisk (*) - they must be mapped to upload"}
-                  </li>
-                  <li>
-                    {t.uploadExcel?.instruction4 ||
-                      "Optional fields can be left unmapped - data will still upload successfully"}
-                  </li>
-                </ul>
-              </div>
-            )}
 
             {/* Error Message */}
             {error && (
@@ -943,10 +948,30 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="overflow-x-auto overflow-y-auto flex-1">
                       <table className="w-full text-sm">
                         <thead className="bg-gray-100 sticky top-0 z-10">
+                          {/* Required/Optional Headers */}
                           <tr>
-                            <th className="px-2 py-2 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                            <th rowSpan={2} className="px-2 py-2 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
                               #
                             </th>
+                            {excelTemplateColumns.filter((col) => col.is_required).length > 0 && (
+                              <th
+                                colSpan={excelTemplateColumns.filter((col) => col.is_required).length}
+                                className="px-2 py-2 text-center font-bold text-white bg-red-600 border-b border-red-700"
+                              >
+                                Required Fields
+                              </th>
+                            )}
+                            {excelTemplateColumns.filter((col) => !col.is_required).length > 0 && (
+                              <th
+                                colSpan={excelTemplateColumns.filter((col) => !col.is_required).length}
+                                className="px-2 py-2 text-center font-bold text-gray-700 bg-gray-200 border-b border-gray-300"
+                              >
+                                Nice to Have
+                              </th>
+                            )}
+                          </tr>
+                          {/* Column Headers */}
+                          <tr>
                             {excelTemplateColumns.map((templateCol, idx) => {
                               const status = getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
