@@ -186,7 +186,7 @@ const convertStringsToLowercase = (obj) => {
 
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState(null);
   const [parsedData, setParsedData] = useState(null);
@@ -205,6 +205,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
+
+  // Helper function to get columns in correct order (reversed for RTL)
+  const getOrderedColumns = (columns) => {
+    return locale === "ar" ? [...columns].reverse() : columns;
+  };
 
   if (!isOpen) return null;
 
@@ -837,24 +842,56 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       <thead>
                         {/* Required Fields Header */}
                         <tr>
-                          <th
-                            colSpan={excelTemplateColumns.filter((col) => col.is_required).length}
-                            className="px-4 py-2 text-center font-bold text-white bg-red-600 border border-red-700"
-                          >
-                            Required Fields
-                          </th>
-                          {excelTemplateColumns.filter((col) => !col.is_required).length > 0 && (
-                            <th
-                              colSpan={excelTemplateColumns.filter((col) => !col.is_required).length}
-                              className="px-4 py-2 text-center font-bold text-gray-700 bg-gray-200 border border-gray-300"
-                            >
-                              Nice to Have
-                            </th>
-                          )}
+                          {(() => {
+                            const orderedColumns = getOrderedColumns(excelTemplateColumns);
+                            const requiredCols = orderedColumns.filter((col) => col.is_required);
+                            const optionalCols = orderedColumns.filter((col) => !col.is_required);
+                            
+                            // For RTL, show optional first, then required
+                            return locale === "ar" ? (
+                              <>
+                                {optionalCols.length > 0 && (
+                                  <th
+                                    colSpan={optionalCols.length}
+                                    className="px-4 py-2 text-center font-bold text-gray-700 bg-gray-200 border border-gray-300"
+                                  >
+                                    Nice to Have
+                                  </th>
+                                )}
+                                {requiredCols.length > 0 && (
+                                  <th
+                                    colSpan={requiredCols.length}
+                                    className="px-4 py-2 text-center font-bold text-white bg-red-600 border border-red-700"
+                                  >
+                                    Required Fields
+                                  </th>
+                                )}
+                              </>
+                            ) : (
+                              <>
+                                {requiredCols.length > 0 && (
+                                  <th
+                                    colSpan={requiredCols.length}
+                                    className="px-4 py-2 text-center font-bold text-white bg-red-600 border border-red-700"
+                                  >
+                                    Required Fields
+                                  </th>
+                                )}
+                                {optionalCols.length > 0 && (
+                                  <th
+                                    colSpan={optionalCols.length}
+                                    className="px-4 py-2 text-center font-bold text-gray-700 bg-gray-200 border border-gray-300"
+                                  >
+                                    Nice to Have
+                                  </th>
+                                )}
+                              </>
+                            );
+                          })()}
                         </tr>
                         {/* Column Headers */}
                         <tr className="bg-gray-100">
-                          {excelTemplateColumns.map((column) => (
+                          {getOrderedColumns(excelTemplateColumns).map((column) => (
                             <th
                               key={column.key}
                               className={`px-4 py-2 text-left font-semibold border border-gray-300 ${
@@ -870,7 +907,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       </thead>
                       <tbody>
                         <tr className="bg-white">
-                          {excelTemplateColumns.map((column) => (
+                          {getOrderedColumns(excelTemplateColumns).map((column) => (
                             <td
                               key={column.key}
                               className={`px-4 py-2 text-gray-700 border border-gray-300 ${
@@ -1046,26 +1083,56 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                             <th rowSpan={2} className="px-2 py-2 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
                               #
                             </th>
-                            {excelTemplateColumns.filter((col) => col.is_required).length > 0 && (
-                              <th
-                                colSpan={excelTemplateColumns.filter((col) => col.is_required).length}
-                                className="px-2 py-2 text-center font-bold text-white bg-red-600 border-b border-red-700"
-                              >
-                                Required Fields
-                              </th>
-                            )}
-                            {excelTemplateColumns.filter((col) => !col.is_required).length > 0 && (
-                              <th
-                                colSpan={excelTemplateColumns.filter((col) => !col.is_required).length}
-                                className="px-2 py-2 text-center font-bold text-gray-700 bg-gray-200 border-b border-gray-300"
-                              >
-                                Nice to Have
-                              </th>
-                            )}
+                            {(() => {
+                              const orderedColumns = getOrderedColumns(excelTemplateColumns);
+                              const requiredCols = orderedColumns.filter((col) => col.is_required);
+                              const optionalCols = orderedColumns.filter((col) => !col.is_required);
+                              
+                              // For RTL, show optional first, then required
+                              return locale === "ar" ? (
+                                <>
+                                  {optionalCols.length > 0 && (
+                                    <th
+                                      colSpan={optionalCols.length}
+                                      className="px-2 py-2 text-center font-bold text-gray-700 bg-gray-200 border-b border-gray-300"
+                                    >
+                                      Nice to Have
+                                    </th>
+                                  )}
+                                  {requiredCols.length > 0 && (
+                                    <th
+                                      colSpan={requiredCols.length}
+                                      className="px-2 py-2 text-center font-bold text-white bg-red-600 border-b border-red-700"
+                                    >
+                                      Required Fields
+                                    </th>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {requiredCols.length > 0 && (
+                                    <th
+                                      colSpan={requiredCols.length}
+                                      className="px-2 py-2 text-center font-bold text-white bg-red-600 border-b border-red-700"
+                                    >
+                                      Required Fields
+                                    </th>
+                                  )}
+                                  {optionalCols.length > 0 && (
+                                    <th
+                                      colSpan={optionalCols.length}
+                                      className="px-2 py-2 text-center font-bold text-gray-700 bg-gray-200 border-b border-gray-300"
+                                    >
+                                      Nice to Have
+                                    </th>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </tr>
                           {/* Column Headers */}
                           <tr>
-                            {excelTemplateColumns.map((templateCol, idx) => {
+                            {getOrderedColumns(excelTemplateColumns).map((templateCol, idx) => {
                               const status = getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
                               const excelHeader = status.excelHeader;
@@ -1164,7 +1231,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
                                 {rowIndex + 1}
                               </td>
-                              {excelTemplateColumns.map((templateCol, colIndex) => {
+                              {getOrderedColumns(excelTemplateColumns).map((templateCol, colIndex) => {
                                 const status = getTemplateColumnStatus(templateCol.key);
                                 const excelHeader = status.excelHeader;
                                 let cellValue = "-";
