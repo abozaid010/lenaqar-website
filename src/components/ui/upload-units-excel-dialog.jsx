@@ -226,8 +226,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       }
 
-      // Create automatic mapping from Excel headers to template keys
-      const autoHeaderMapping = createHeaderMapping(excelHeaders);
+      // Create automatic mapping from Excel headers to template keys (now async)
+      const autoHeaderMapping = await createHeaderMapping(excelHeaders);
       
       // Create reverse mapping: templateKey -> excelHeader (for auto-mapped columns)
       const autoTemplateToExcel = {};
@@ -242,6 +242,24 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       
       // Merge auto mapping with manual mapping (manual takes precedence)
       const templateToExcelMapping = { ...autoTemplateToExcel, ...currentManualMapping };
+
+      // Validate row 2 values for matched headers
+      const valueValidationResults = {};
+      const row2 = rows.length > 0 ? rows[0] : null; // First data row (row 2 in Excel)
+      
+      if (row2) {
+        // Validate each matched header's value in row 2
+        for (const [templateKey, excelHeader] of Object.entries(templateToExcelMapping)) {
+          const colIndex = excelHeaders.indexOf(excelHeader);
+          if (colIndex >= 0) {
+            const row2Value = row2[colIndex];
+            if (row2Value !== undefined && row2Value !== null && row2Value !== "") {
+              const validation = await excelFieldMapper.validateRow2Value(templateKey, row2Value);
+              valueValidationResults[templateKey] = validation;
+            }
+          }
+        }
+      }
 
       // Transform rows to structured JSON using template keys
       const units = rows.map((row) => {
@@ -375,6 +393,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         templateToExcelMapping, // Maps template key -> Excel header
         rows,
         units: transformedUnits,
+        valueValidationResults, // Validation results for row 2 values
         summary: {
           totalUnits: transformedUnits.length,
           worksheetName: sheetName,
@@ -476,14 +495,29 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   };
 
   const getTemplateColumnStatus = (templateKey) => {
-    if (!parsedData) return { isResolved: false, excelHeader: null, isManual: false };
+    if (!parsedData) {
+      return {
+        isResolved: false,
+        excelHeader: null,
+        isManual: false,
+        valueWarning: false,
+        valueMatchStatus: null,
+      };
+    }
+    
+    const valueValidation = parsedData.valueValidationResults?.[templateKey];
+    const baseStatus = {
+      valueWarning: valueValidation?.warning || false,
+      valueMatchStatus: valueValidation || null,
+    };
     
     // Check if manually mapped
     if (manualHeaderMapping[templateKey]) {
       return {
         isResolved: true,
         excelHeader: manualHeaderMapping[templateKey],
-        isManual: true
+        isManual: true,
+        ...baseStatus,
       };
     }
     
@@ -493,11 +527,17 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       return {
         isResolved: true,
         excelHeader: autoMapped,
-        isManual: false
+        isManual: false,
+        ...baseStatus,
       };
     }
     
-    return { isResolved: false, excelHeader: null, isManual: false };
+    return {
+      isResolved: false,
+      excelHeader: null,
+      isManual: false,
+      ...baseStatus,
+    };
   };
 
   const getUsedExcelHeaders = () => {
@@ -927,15 +967,23 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     <div className="text-xs text-gray-700 space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span><strong>Green:</strong> Mapped column</span>
+                        <span><strong>Green:</strong> Mapped column with valid value</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded"></div>
-                        <span><strong>Red:</strong> Required field not mapped - must select</span>
+                        <div className="w-3 h-3 bg-yellow-100 border border-yellow-400 rounded flex items-center justify-center">
+                          <AlertCircle className="text-yellow-600" size={8} />
+                        </div>
+                        <span><strong>Yellow with ⚠️:</strong> Optional field mapped but value needs confirmation</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex items-center justify-center">
+                          <AlertCircle className="text-red-600" size={8} />
+                        </div>
+                        <span><strong>Red with ⚠️:</strong> Required field not mapped OR invalid value - must fix</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
-                        <span><strong>Yellow:</strong> Optional field not mapped</span>
+                        <span><strong>Light Yellow:</strong> Optional field not mapped</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold">*</span>
@@ -976,40 +1024,65 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               const status = getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
                               const excelHeader = status.excelHeader;
+                              const valueWarning = status.valueWarning;
                               const usedExcelHeaders = getUsedExcelHeaders();
+                              
+                              // Determine background color based on status
+                              let bgColorClass = "";
+                              if (!isResolved) {
+                                // Not resolved
+                                bgColorClass = templateCol.is_required
+                                  ? "bg-red-100 text-red-800"
+                                  : "bg-yellow-50 text-yellow-800";
+                              } else if (valueWarning && templateCol.is_required) {
+                                // Required field resolved but value invalid - show red
+                                bgColorClass = "bg-red-100 text-red-800";
+                              } else if (valueWarning) {
+                                // Optional field resolved but value warning - show yellow
+                                bgColorClass = "bg-yellow-100 text-yellow-900";
+                              } else {
+                                // Resolved and valid
+                                bgColorClass = "bg-green-100 text-green-800";
+                              }
                               
                               return (
                                 <th
                                   key={idx}
-                                  className={`px-2 py-2 text-left font-semibold border-b ${
-                                    isResolved 
-                                      ? "bg-green-100 text-green-800" 
-                                      : templateCol.is_required
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-yellow-50 text-yellow-800"
-                                  }`}
+                                  className={`px-2 py-2 text-left font-semibold border-b ${bgColorClass}`}
                                   style={{ minWidth: "80px", maxWidth: "120px" }}
                                 >
                                   <div className="flex flex-col gap-1">
-                                    <span className="text-xs mb-1 font-semibold truncate" title={templateCol.label}>
-                                      {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
-                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-xs mb-1 font-semibold truncate" title={templateCol.label}>
+                                        {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
+                                      </span>
+                                      {valueWarning && (
+                                        <AlertCircle
+                                          className="text-yellow-600 flex-shrink-0"
+                                          size={14}
+                                          title="Value in row 2 doesn't match expected values. Please confirm."
+                                        />
+                                      )}
+                                    </div>
                                     {isResolved && (
                                       <span className="text-xs font-normal mb-1 truncate" style={{color: "#059669"}} title={excelHeader}>
                                         ← {excelHeader}
                                       </span>
                                     )}
-                                    <select
-                                      value={excelHeader || ""}
-                                      onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
-                                      className={`text-xs px-1 py-1 border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer ${
-                                        isResolved 
-                                          ? "border-green-400" 
-                                          : templateCol.is_required
-                                            ? "border-red-400"
-                                            : "border-yellow-400"
-                                      }`}
-                                    >
+                                    <div className="relative">
+                                      <select
+                                        value={excelHeader || ""}
+                                        onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
+                                        className={`text-xs px-1 py-1 border rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full ${
+                                          valueWarning
+                                            ? "border-yellow-400 bg-yellow-50"
+                                            : isResolved 
+                                              ? "border-green-400" 
+                                              : templateCol.is_required
+                                                ? "border-red-400"
+                                                : "border-yellow-400"
+                                        }`}
+                                      >
                                       <option value="">Select...</option>
                                       {excelHeaders.map((header, idx) => {
                                         const isUsed = usedExcelHeaders.has(header) && excelHeader !== header;
@@ -1025,6 +1098,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         );
                                       })}
                                     </select>
+                                  </div>
                                   </div>
                                 </th>
                               );
