@@ -14,7 +14,7 @@ import {
   Loader2,
   Download,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { parseExcelFile, downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
@@ -199,6 +199,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [validationErrors, setValidationErrors] = useState([]);
   const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
+  const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const fileInputRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
@@ -210,6 +211,27 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const getOrderedColumns = (columns) => {
     return locale === "ar" ? [...columns].reverse() : columns;
   };
+
+  // Track dialog opens and auto-show video for first 2 times
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const STORAGE_KEY = "uploadUnitsExcelDialog_openCount";
+    
+    try {
+      // Get current count from localStorage
+      const currentCount = parseInt(localStorage.getItem(STORAGE_KEY) || "0", 10);
+      
+      // If less than 2, show video and increment count
+      if (currentCount < 2) {
+        setIsVideoDialogOpen(true);
+        localStorage.setItem(STORAGE_KEY, String(currentCount + 1));
+      }
+    } catch (error) {
+      // If localStorage is not available, just continue without tracking
+      console.warn("localStorage not available for tracking dialog opens:", error);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -811,6 +833,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               iconSize="md"
               tooltipText="How to upload units via Excel"
               className="p-0"
+              isOpen={isVideoDialogOpen}
+              onClose={() => setIsVideoDialogOpen(false)}
+              zIndex={101}
             />
           </div>
           <button
