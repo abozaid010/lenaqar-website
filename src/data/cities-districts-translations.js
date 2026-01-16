@@ -7,6 +7,8 @@
 export const CITIES_DISTRICTS_TRANSLATIONS = {
   cities: {
     "cairo": { en_label: "Cairo", ar_label: "القاهرة" },
+    "6 october": { en_label: "6 October", ar_label: "السادس من أكتوبر" },
+    "sheikh zayed": { en_label: "Sheikh Zayed", ar_label: "الشيخ زايد" },
     "giza": { en_label: "Giza", ar_label: "الجيزة" },
     "north coast": { en_label: "North Coast", ar_label: "الساحل الشمالي" },
     "new administrative capital": { en_label: "New Administrative Capital", ar_label: "العاصمة الإدارية الجديدة" },
@@ -35,11 +37,14 @@ export const CITIES_DISTRICTS_TRANSLATIONS = {
     "new valley": { en_label: "New Valley", ar_label: "الوادي الجديد" },
     "matrouh": { en_label: "Matrouh", ar_label: "مطروح" },
     "red sea": { en_label: "Red Sea", ar_label: "البحر الأحمر" },
+    "asyut": { en_label: "Asyut", ar_label: "أسيوط" },
   },
   districts: {
     "cairo": {
       "al shorouk": { en_label: "Al Shorouk", ar_label: "الشروق" },
+      "nour": { en_label: "Nour", ar_label: "النور" },
       "sarai": { en_label: "Sarai", ar_label: "سراي" },
+      "madinet nasr": { en_label: "Madinet Nasr", ar_label: "مدينة نصر" },
       "fifth settlement": { en_label: "Fifth Settlement", ar_label: "التجمع الخامس" },
       "new heliopolis": { en_label: "New Heliopolis", ar_label: "هليوبوليس الجديدة" },
       "downtown cairo": { en_label: "Downtown Cairo", ar_label: "وسط البلد" },
@@ -53,16 +58,35 @@ export const CITIES_DISTRICTS_TRANSLATIONS = {
       "el katameya": { en_label: "El Katameya", ar_label: "القطامية" },
       "badr": { en_label: "Badr", ar_label: "بدر" },
     },
+    "6 october": {
+      "the first district": { en_label: "The First District", ar_label: "الحي الأول" },
+      "the second district": { en_label: "The Second District", ar_label: "الحي الثاني" },
+      "the third district": { en_label: "The Third District", ar_label: "الحي الثالث" },
+      "the fourth district": { en_label: "The Fourth District", ar_label: "الحي الرابع" },
+      "the fifth district": { en_label: "The Fifth District", ar_label: "الحي الخامس" },
+      "the sixth district": { en_label: "The Sixth District", ar_label: "الحي السادس" },
+      "the seventh district": { en_label: "The Seventh District", ar_label: "الحي السابع" },
+      "the eighth district": { en_label: "The Eighth District", ar_label: "الحي الثامن" },
+      "west somid": { en_label: "West Somid", ar_label: "غرب سُميد" },
+      "new giza": { en_label: "New Giza", ar_label: "نيو جيزة" },
+      "al bashayer district": { en_label: "Al Bashayer District", ar_label: "حي البشاير" },
+    },
+    "sheikh zayed": {
+      "first district": { en_label: "First District", ar_label: "الحي الأول" },
+      "fourth district": { en_label: "Fourth District", ar_label: "الحي الرابع" },
+      "eighth district": { en_label: "Eighth District", ar_label: "الحي الثامن" },
+      "fourteenth district": { en_label: "Fourteenth District", ar_label: "الحي الرابع عشر" },
+      "beverly hills": { en_label: "Beverly Hills", ar_label: "بيفرلي هيلز" },
+      "green revolution": { en_label: "Green Revolution", ar_label: "الثورة الخضراء" },
+      "sheikh zayed axis": { en_label: "Sheikh Zayed Axis", ar_label: "محور الشيخ زايد" },
+    },
     "giza": {
       "mohandessin": { en_label: "Mohandessin", ar_label: "المهندسين" },
-      "new giza": { en_label: "New Giza", ar_label: "نيو جيزة" },
-      "6th of october city": { en_label: "6th of October City", ar_label: "مدينة 6 أكتوبر" },
       "hadayek october": { en_label: "Hadayek October", ar_label: "حدائق أكتوبر" },
       "agouza": { en_label: "Agouza", ar_label: "العجوزة" },
       "haram": { en_label: "Haram", ar_label: "الهرم" },
       "imbaba": { en_label: "Imbaba", ar_label: "إمبابة" },
       "giza district": { en_label: "Giza District", ar_label: "حي الجيزة" },
-      "sheikh zayed": { en_label: "Sheikh Zayed", ar_label: "الشيخ زايد" },
       "dokki": { en_label: "Dokki", ar_label: "الدقي" },
     },
     "north coast": {
@@ -383,6 +407,9 @@ export const CITIES_DISTRICTS_TRANSLATIONS = {
       "ras ghareb": { en_label: "Ras Ghareb", ar_label: "رأس غارب" },
       "makadi bay": { en_label: "Makadi Bay", ar_label: "مكادي باي" },
       "sahl hasheesh": { en_label: "Sahl Hasheesh", ar_label: "سهل حشيش" },
+    },
+    "asyut": {
+      "asyut": { en_label: "Asyut", ar_label: "أسيوط" },
     },
   },
 };

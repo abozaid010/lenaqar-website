@@ -145,7 +145,14 @@ class CitiesAndDistrictsManager {
       return locale === "ar" ? translation.ar_label : translation.en_label;
     }
 
-    // Fallback: capitalize first letter
+    // Log error for missing translation
+    console.error(
+      `[CitiesAndDistrictsManager] Missing translation for city: "${cityKey}" (locale: ${locale}). ` +
+      `Please add translation to cities-districts-translations.js. ` +
+      `Showing key as fallback: "${city}"`
+    );
+
+    // Fallback: return capitalized key
     return capitalizeWords(city);
   }
 
@@ -164,7 +171,14 @@ class CitiesAndDistrictsManager {
       return locale === "ar" ? translation.ar_label : translation.en_label;
     }
 
-    // Fallback: capitalize first letter
+    // Log error for missing translation
+    console.error(
+      `[CitiesAndDistrictsManager] Missing translation for district: "${districtKey}" in city: "${cityKey}" (locale: ${locale}). ` +
+      `Please add translation to cities-districts-translations.js. ` +
+      `Showing key as fallback: "${district}"`
+    );
+
+    // Fallback: return capitalized key
     return capitalizeWords(district);
   }
 
