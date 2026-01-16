@@ -201,16 +201,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const fileInputRef = useRef(null);
+  const tableScrollRef = useRef(null);
+  const exampleTableScrollRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
   const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
-  // Helper function to get columns in correct order (reversed for RTL)
-  const getOrderedColumns = (columns) => {
-    return locale === "ar" ? [...columns].reverse() : columns;
-  };
 
   // Track dialog opens and auto-show video for first 2 times
   useEffect(() => {
@@ -232,6 +230,24 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       console.warn("localStorage not available for tracking dialog opens:", error);
     }
   }, [isOpen]);
+
+  // Scroll to show required fields (always at start since columns are not reversed)
+  useEffect(() => {
+    // Scroll preview table to start to show required fields
+    if (parsedData && tableScrollRef.current) {
+      const scrollContainer = tableScrollRef.current;
+      setTimeout(() => {
+        scrollContainer.scrollLeft = 0;
+      }, 100);
+    }
+    // Scroll example table to start to show required fields
+    if (exampleTableScrollRef.current) {
+      const scrollContainer = exampleTableScrollRef.current;
+      setTimeout(() => {
+        scrollContainer.scrollLeft = 0;
+      }, 100);
+    }
+  }, [parsedData, isOpen]);
 
   if (!isOpen) return null;
 
@@ -862,37 +878,16 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               {!selectedFile ? (
                 <div className="space-y-6">
                   {/* Example Table */}
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm border-collapse" dir="ltr">
+                  <div ref={exampleTableScrollRef} className="overflow-x-auto" dir="ltr">
+                    <table className="w-full text-sm border-collapse">
                       <thead>
                         {/* Required Fields Header */}
                         <tr>
                           {(() => {
-                            const orderedColumns = getOrderedColumns(excelTemplateColumns);
-                            const requiredCols = orderedColumns.filter((col) => col.is_required);
-                            const optionalCols = orderedColumns.filter((col) => !col.is_required);
+                            const requiredCols = excelTemplateColumns.filter((col) => col.is_required);
+                            const optionalCols = excelTemplateColumns.filter((col) => !col.is_required);
                             
-                            // For RTL, show optional first, then required
-                            return locale === "ar" ? (
-                              <>
-                                {optionalCols.length > 0 && (
-                                  <th
-                                    colSpan={optionalCols.length}
-                                    className="px-4 py-2 text-center font-bold text-gray-700 bg-gray-200 border border-gray-300"
-                                  >
-                                    Nice to Have
-                                  </th>
-                                )}
-                                {requiredCols.length > 0 && (
-                                  <th
-                                    colSpan={requiredCols.length}
-                                    className="px-4 py-2 text-center font-bold text-white bg-red-600 border border-red-700"
-                                  >
-                                    Required Fields
-                                  </th>
-                                )}
-                              </>
-                            ) : (
+                            return (
                               <>
                                 {requiredCols.length > 0 && (
                                   <th
@@ -916,7 +911,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                         </tr>
                         {/* Column Headers */}
                         <tr className="bg-gray-100">
-                          {getOrderedColumns(excelTemplateColumns).map((column) => (
+                          {excelTemplateColumns.map((column) => (
                             <th
                               key={column.key}
                               className={`px-4 py-2 text-left font-semibold border border-gray-300 ${
@@ -932,7 +927,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       </thead>
                       <tbody>
                         <tr className="bg-white">
-                          {getOrderedColumns(excelTemplateColumns).map((column) => (
+                          {excelTemplateColumns.map((column) => (
                             <td
                               key={column.key}
                               className={`px-4 py-2 text-gray-700 border border-gray-300 ${
@@ -1100,7 +1095,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   </div>
 
                   <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
-                    <div className="overflow-x-auto overflow-y-auto flex-1">
+                    <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr">
                       <table className="w-full text-sm" style={{ tableLayout: "auto" }}>
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           {/* Required/Optional Headers */}
@@ -1109,31 +1104,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               #
                             </th>
                             {(() => {
-                              const orderedColumns = getOrderedColumns(excelTemplateColumns);
-                              const requiredCols = orderedColumns.filter((col) => col.is_required);
-                              const optionalCols = orderedColumns.filter((col) => !col.is_required);
+                              const requiredCols = excelTemplateColumns.filter((col) => col.is_required);
+                              const optionalCols = excelTemplateColumns.filter((col) => !col.is_required);
                               
-                              // For RTL, show optional first, then required
-                              return locale === "ar" ? (
-                                <>
-                                  {optionalCols.length > 0 && (
-                                    <th
-                                      colSpan={optionalCols.length}
-                                      className="px-2 py-2 text-center font-bold text-gray-700 bg-gray-200 border-b border-gray-300"
-                                    >
-                                      Nice to Have
-                                    </th>
-                                  )}
-                                  {requiredCols.length > 0 && (
-                                    <th
-                                      colSpan={requiredCols.length}
-                                      className="px-2 py-2 text-center font-bold text-white bg-red-600 border-b border-red-700"
-                                    >
-                                      Required Fields
-                                    </th>
-                                  )}
-                                </>
-                              ) : (
+                              return (
                                 <>
                                   {requiredCols.length > 0 && (
                                     <th
@@ -1157,7 +1131,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           </tr>
                           {/* Column Headers */}
                           <tr>
-                            {getOrderedColumns(excelTemplateColumns).map((templateCol, idx) => {
+                            {excelTemplateColumns.map((templateCol, idx) => {
                               const status = getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
                               const excelHeader = status.excelHeader;
@@ -1256,7 +1230,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
                                 {rowIndex + 1}
                               </td>
-                              {getOrderedColumns(excelTemplateColumns).map((templateCol, colIndex) => {
+                              {excelTemplateColumns.map((templateCol, colIndex) => {
                                 const status = getTemplateColumnStatus(templateCol.key);
                                 const excelHeader = status.excelHeader;
                                 let cellValue = "-";
