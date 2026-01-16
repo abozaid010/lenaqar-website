@@ -453,6 +453,8 @@ export default {
     successful: "ناجح",
     missingColumnsWarning: "تأكد من أن الورقة تحتوي على هذه القيم المفقودة قبل الرفع:",
     gotIt: "حسناً",
+    validationErrorTitle: "أخطاء التحقق",
+    validationErrorMessage: "يرجى إصلاح المشاكل التالية قبل الرفع:",
     columnMappingGuide: "دليل ربط الأعمدة",
     greenMapped: "أخضر: عمود مربوط بقيمة صحيحة",
     yellowWarning: "أصفر مع ⚠️: حقل اختياري مربوط لكن القيمة تحتاج تأكيد",

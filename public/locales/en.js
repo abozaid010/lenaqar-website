@@ -436,6 +436,8 @@ export default {
     successful: "Successful",
     missingColumnsWarning: "Make sure sheet contains these missing values before you upload:",
     gotIt: "Got it",
+    validationErrorTitle: "Validation Errors",
+    validationErrorMessage: "Please fix the following issues before uploading:",
     columnMappingGuide: "Column Mapping Guide",
     greenMapped: "Green: Mapped column with valid value",
     yellowWarning: "Yellow with ⚠️: Optional field mapped but value needs confirmation",

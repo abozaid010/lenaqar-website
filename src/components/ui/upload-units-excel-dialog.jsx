@@ -196,6 +196,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [uploadStatus, setUploadStatus] = useState([]);
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
   const [missingColumns, setMissingColumns] = useState([]);
+  const [validationErrors, setValidationErrors] = useState([]);
   const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const fileInputRef = useRef(null);
@@ -445,6 +446,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setUploadStatus([]);
     setManualHeaderMapping({});
     setAllUploadsSuccessful(false);
+    setShowMissingColumnsWarning(false);
+    setValidationErrors([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -459,6 +462,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
     setMissingColumns([]);
+    setValidationErrors([]);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -574,16 +578,57 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     return requiredKeys.filter(key => !resolvedKeys.has(key));
   };
 
+  /**
+   * Validates all required fields before upload
+   * Returns array of validation errors
+   */
+  const validateRequiredFields = () => {
+    if (!parsedData) return [];
+    
+    const errors = [];
+    
+    // Get all required columns
+    const requiredColumns = excelTemplateColumns.filter(col => col.is_required);
+    
+    requiredColumns.forEach(templateCol => {
+      const status = getTemplateColumnStatus(templateCol.key);
+      const columnLabel = templateCol.label;
+      
+      // Check if field is not mapped
+      if (!status.isResolved) {
+        errors.push({
+          field: templateCol.key,
+          label: columnLabel,
+          type: 'not_mapped',
+          message: `${columnLabel} is not mapped to any Excel column`,
+        });
+        return;
+      }
+      
+      // Check if field has value warning (invalid value)
+      if (status.valueWarning) {
+        errors.push({
+          field: templateCol.key,
+          label: columnLabel,
+          type: 'invalid_value',
+          message: `${columnLabel} has an invalid value in row 2. Please check and confirm the value is correct.`,
+        });
+      }
+    });
+    
+    return errors;
+  };
+
   const handleSubmit = async () => {
     if (!selectedFile || !parsedData) {
       alert(t.uploadExcel?.noFileSelected || "Please select a file first");
       return;
     }
 
-    // Check for missing columns
-    const missing = getMissingColumns();
-    if (missing.length > 0) {
-      setMissingColumns(missing);
+    // Validate all required fields
+    const validationErrors = validateRequiredFields();
+    if (validationErrors.length > 0) {
+      setValidationErrors(validationErrors);
       setShowMissingColumnsWarning(true);
       return;
     }
@@ -1317,36 +1362,51 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       {/* Missing Columns Warning Dialog */}
       {showMissingColumnsWarning && (
         <div className="fixed inset-0 z-[101] flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
             <div className="flex items-center justify-between py-4 px-6 border-b">
-              <h3 className="text-lg font-semibold text-gray-800">
-                {t.uploadExcel?.title || "Upload Units Excel Sheet"}
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <AlertCircle className="text-red-600" size={20} />
+                {t.uploadExcel?.validationErrorTitle || "Validation Errors"}
               </h3>
               <button
-                onClick={() => setShowMissingColumnsWarning(false)}
+                onClick={() => {
+                  setShowMissingColumnsWarning(false);
+                  setValidationErrors([]);
+                }}
                 className="text-gray-500 hover:text-gray-700 transition-colors"
               >
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6">
+            <div className="p-6 overflow-y-auto flex-1">
               <p className="text-sm text-gray-700 mb-4">
-                {t.uploadExcel?.missingColumnsWarning || "Make sure sheet contains these missing values before you upload:"}
+                {t.uploadExcel?.validationErrorMessage || "Please fix the following issues before uploading:"}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {missingColumns.map((key) => (
-                  <span
-                    key={key}
-                    className="px-3 py-1 bg-red-50 text-red-700 rounded-md text-sm font-medium"
+              <div className="space-y-3">
+                {validationErrors.map((error, index) => (
+                  <div
+                    key={index}
+                    className="flex items-start gap-3 p-3 bg-red-50 border border-red-200 rounded-lg"
                   >
-                    {key}
-                  </span>
+                    <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={18} />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-red-800 mb-1">
+                        {error.label}
+                      </p>
+                      <p className="text-xs text-red-700">
+                        {error.message}
+                      </p>
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
             <div className="flex items-center justify-end px-6 py-4 border-t bg-gray-50">
               <button
-                onClick={() => setShowMissingColumnsWarning(false)}
+                onClick={() => {
+                  setShowMissingColumnsWarning(false);
+                  setValidationErrors([]);
+                }}
                 className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
               >
                 {t.uploadExcel?.gotIt || "Got it"}
