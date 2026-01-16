@@ -962,32 +962,32 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
                     <h4 className="font-semibold text-gray-800 text-xs mb-1 flex items-center gap-2">
                       <AlertCircle className="text-blue-600" size={14} />
-                      Column Mapping Guide
+                      {t.uploadExcel?.columnMappingGuide || "Column Mapping Guide"}
                     </h4>
                     <div className="text-xs text-gray-700 space-y-1">
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span><strong>Green:</strong> Mapped column with valid value</span>
+                        <span>{t.uploadExcel?.greenMapped || "Green: Mapped column with valid value"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-yellow-100 border border-yellow-400 rounded flex items-center justify-center">
                           <AlertCircle className="text-yellow-600" size={8} />
                         </div>
-                        <span><strong>Yellow with ⚠️:</strong> Optional field mapped but value needs confirmation</span>
+                        <span>{t.uploadExcel?.yellowWarning || "Yellow with ⚠️: Optional field mapped but value needs confirmation"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex items-center justify-center">
                           <AlertCircle className="text-red-600" size={8} />
                         </div>
-                        <span><strong>Red with ⚠️:</strong> Required field not mapped OR invalid value - must fix</span>
+                        <span>{t.uploadExcel?.redWarning || "Red with ⚠️: Required field not mapped OR invalid value - must fix"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
-                        <span><strong>Light Yellow:</strong> Optional field not mapped</span>
+                        <span>{t.uploadExcel?.lightYellow || "Light Yellow: Optional field not mapped"}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-semibold">*</span>
-                        <span><strong>Asterisk (*):</strong> Required field</span>
+                        <span>{t.uploadExcel?.asterisk || "Asterisk (*): Required field"}</span>
                       </div>
                     </div>
                   </div>

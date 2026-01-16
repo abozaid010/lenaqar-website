@@ -436,6 +436,12 @@ export default {
     successful: "Successful",
     missingColumnsWarning: "Make sure sheet contains these missing values before you upload:",
     gotIt: "Got it",
+    columnMappingGuide: "Column Mapping Guide",
+    greenMapped: "Green: Mapped column with valid value",
+    yellowWarning: "Yellow with ⚠️: Optional field mapped but value needs confirmation",
+    redWarning: "Red with ⚠️: Required field not mapped OR invalid value - must fix",
+    lightYellow: "Light Yellow: Optional field not mapped",
+    asterisk: "Asterisk (*): Required field",
   },
   steps: {
     basicDetails: "Basic Details",
