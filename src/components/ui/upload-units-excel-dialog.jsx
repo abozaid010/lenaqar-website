@@ -200,6 +200,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
+  const [isInfoBoxCollapsed, setIsInfoBoxCollapsed] = useState(false);
   const fileInputRef = useRef(null);
   const tableScrollRef = useRef(null);
   const exampleTableScrollRef = useRef(null);
@@ -248,6 +249,16 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }, 100);
     }
   }, [parsedData, isOpen]);
+
+  // Auto-collapse info box after 3 seconds when parsedData is set
+  useEffect(() => {
+    if (parsedData && !isProcessing) {
+      const timer = setTimeout(() => {
+        setIsInfoBoxCollapsed(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [parsedData, isProcessing]);
 
   if (!isOpen) return null;
 
@@ -467,6 +478,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         setSelectedFile(file);
         setParsedData(null);
         setError(null);
+        setIsInfoBoxCollapsed(false);
 
         parseExcelFileHandler(file);
       } else {
@@ -491,6 +503,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
+    setIsInfoBoxCollapsed(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -854,12 +867,48 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               zIndex={101}
             />
           </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            <X size={24} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleClose}
+              disabled={isUploading}
+              className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+            >
+              {t.uploadExcel?.cancel || "Cancel"}
+            </button>
+            {isUploadComplete && hasFailedUnits ? (
+              <button
+                onClick={downloadFailedUnits}
+                className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
+              >
+                <Download size={18} />
+                {t.uploadExcel?.downloadFailedUnits || "Download Failed Units"}
+              </button>
+            ) : allUploadsSuccessful && isUploadComplete ? (
+              <button
+                onClick={handleGoToUnits}
+                className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
+              >
+                {t.uploadExcel?.goToUnitsNow || "Go to Units Now"}
+              </button>
+            ) : (
+              <button
+                onClick={handleSubmit}
+                disabled={
+                  !selectedFile || !parsedData || isProcessing || isUploading
+                }
+                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:opacity-90"
+                  }`}
+              >
+                {isUploading && <Loader2 className="animate-spin" size={18} />}
+                {isUploading
+                  ? t.uploadExcel?.uploading || "Uploading..."
+                  : t.uploadExcel?.upload || "Upload"}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Content */}
@@ -958,7 +1007,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       onClick={handleUploadClick}
                       className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
-                      {t.uploadExcel?.browseFiles || "Upload"}
+                      {t.uploadExcel?.browseFiles || "Submit"}
                     </button>
                   </div>
 
@@ -1061,37 +1110,47 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   </div>
 
                   {/* Column Mapping Guide */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
-                    <h4 className="font-semibold text-gray-800 text-xs mb-1 flex items-center gap-2">
-                      <AlertCircle className="text-blue-600" size={14} />
-                      {t.uploadExcel?.columnMappingGuide || "Column Mapping Guide"}
-                    </h4>
-                    <div className="text-xs text-gray-700 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
-                        <span>{t.uploadExcel?.greenMapped || "Green: Mapped column with valid value"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-yellow-100 border border-yellow-400 rounded flex items-center justify-center">
-                          <AlertCircle className="text-yellow-600" size={8} />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg overflow-hidden">
+                    <button
+                      onClick={() => setIsInfoBoxCollapsed(!isInfoBoxCollapsed)}
+                      className="w-full p-2 flex items-center justify-between hover:bg-blue-100 transition-colors"
+                    >
+                      <h4 className="font-semibold text-gray-800 text-xs flex items-center gap-2">
+                        <AlertCircle className="text-blue-600" size={14} />
+                        {t.uploadExcel?.columnMappingGuide || "Column Mapping Guide"}
+                      </h4>
+                      <span className="text-xs text-gray-600">
+                        {isInfoBoxCollapsed ? "▼" : "▲"}
+                      </span>
+                    </button>
+                    {!isInfoBoxCollapsed && (
+                      <div className="px-2 pb-2 text-xs text-gray-700 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-green-100 border border-green-300 rounded"></div>
+                          <span>{t.uploadExcel?.greenMapped || "Green: Mapped column with valid value"}</span>
                         </div>
-                        <span>{t.uploadExcel?.yellowWarning || "Yellow with ⚠️: Optional field mapped but value needs confirmation"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex items-center justify-center">
-                          <AlertCircle className="text-red-600" size={8} />
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-yellow-100 border border-yellow-400 rounded flex items-center justify-center">
+                            <AlertCircle className="text-yellow-600" size={8} />
+                          </div>
+                          <span>{t.uploadExcel?.yellowWarning || "Yellow with ⚠️: Optional field mapped but value needs confirmation"}</span>
                         </div>
-                        <span>{t.uploadExcel?.redWarning || "Red with ⚠️: Required field not mapped OR invalid value - must fix"}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-red-100 border border-red-300 rounded flex items-center justify-center">
+                            <AlertCircle className="text-red-600" size={8} />
+                          </div>
+                          <span>{t.uploadExcel?.redWarning || "Red with ⚠️: Required field not mapped OR invalid value - must fix"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
+                          <span>{t.uploadExcel?.lightYellow || "Light Yellow: Optional field not mapped"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">*</span>
+                          <span>{t.uploadExcel?.asterisk || "Asterisk (*): Required field"}</span>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-yellow-50 border border-yellow-300 rounded"></div>
-                        <span>{t.uploadExcel?.lightYellow || "Light Yellow: Optional field not mapped"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold">*</span>
-                        <span>{t.uploadExcel?.asterisk || "Asterisk (*): Required field"}</span>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
@@ -1100,9 +1159,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           {/* Required/Optional Headers */}
                           <tr>
-                            <th rowSpan={2} className="px-2 py-2 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
-                              #
-                            </th>
                             {(() => {
                               const requiredCols = excelTemplateColumns.filter((col) => col.is_required);
                               const optionalCols = excelTemplateColumns.filter((col) => !col.is_required);
@@ -1131,6 +1187,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           </tr>
                           {/* Column Headers */}
                           <tr>
+                            <th className="px-2 py-1 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                              #
+                            </th>
                             {excelTemplateColumns.map((templateCol, idx) => {
                               const status = getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
@@ -1176,11 +1235,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                           />
                                         )}
                                       </div>
-                                      {isResolved && (
-                                        <span className="text-xs font-normal break-words" style={{color: "#059669"}} title={excelHeader}>
-                                          ← {excelHeader}
-                                        </span>
-                                      )}
                                     </div>
                                     <div className="relative mt-auto">
                                       <select
@@ -1381,49 +1435,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-2 px-6 py-4 border-t bg-gray-50">
-          <button
-            onClick={handleClose}
-            disabled={isUploading}
-            className={`px-6 py-1 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors ${isUploading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-          >
-            {t.uploadExcel?.cancel || "Cancel"}
-          </button>
-          {isUploadComplete && hasFailedUnits ? (
-            <button
-              onClick={downloadFailedUnits}
-              className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
-            >
-              <Download size={18} />
-              {t.uploadExcel?.downloadFailedUnits || "Download Failed Units"}
-            </button>
-          ) : allUploadsSuccessful && isUploadComplete ? (
-            <button
-              onClick={handleGoToUnits}
-              className="px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
-            >
-              {t.uploadExcel?.goToUnitsNow || "Go to Units Now"}
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={
-                !selectedFile || !parsedData || isProcessing || isUploading
-              }
-              className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:opacity-90"
-                }`}
-            >
-              {isUploading && <Loader2 className="animate-spin" size={18} />}
-              {isUploading
-                ? t.uploadExcel?.uploading || "Uploading..."
-                : t.uploadExcel?.upload || "Upload"}
-            </button>
-          )}
-        </div>
       </div>
 
       {/* Missing Columns Warning Dialog */}
