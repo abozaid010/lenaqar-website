@@ -22,7 +22,6 @@ export const VALIDATED_KEYS = [
   "landArea",
   "finishing",
   "totalPrice",
-  "deliveryDate",
 ];
 
 // Field aliases mapping - maps canonical keys to possible header variations
