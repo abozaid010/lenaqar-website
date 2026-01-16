@@ -1039,7 +1039,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
                   <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
                     <div className="overflow-x-auto overflow-y-auto flex-1">
-                      <table className="w-full text-sm">
+                      <table className="w-full text-sm" style={{ tableLayout: "auto" }}>
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           {/* Required/Optional Headers */}
                           <tr>
@@ -1094,12 +1094,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                 <th
                                   key={idx}
                                   className={`px-2 py-2 text-left font-semibold border-b ${bgColorClass}`}
-                                  style={{ minWidth: "80px", maxWidth: "120px", height: "92px" }}
+                                  style={{ minWidth: "110px", width: "auto", height: "100px" }}
                                 >
                                   <div className="flex flex-col h-full justify-between gap-1">
                                     <div className="flex flex-col gap-1">
-                                      <div className="flex items-center gap-1">
-                                        <span className="text-xs font-semibold truncate" title={templateCol.label}>
+                                      <div className="flex items-center gap-1 flex-wrap">
+                                        <span className="text-xs font-semibold break-words" title={templateCol.label}>
                                           {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
                                         </span>
                                         {valueWarning && (
@@ -1111,7 +1111,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         )}
                                       </div>
                                       {isResolved && (
-                                        <span className="text-xs font-normal truncate" style={{color: "#059669"}} title={excelHeader}>
+                                        <span className="text-xs font-normal break-words" style={{color: "#059669"}} title={excelHeader}>
                                           ← {excelHeader}
                                         </span>
                                       )}
@@ -1120,7 +1120,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       <select
                                         value={excelHeader || ""}
                                         onChange={(e) => handleHeaderMappingChange(templateCol.key, e.target.value)}
-                                        className={`text-xs px-1 py-1.5 border rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full h-[27px] ${
+                                        className={`text-xs px-1 py-0.5 border rounded bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer w-full h-[27px] leading-tight ${
                                           valueWarning
                                             ? "border-yellow-400 bg-yellow-50"
                                             : isResolved 
@@ -1129,6 +1129,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                                 ? "border-red-400"
                                                 : "border-yellow-400"
                                         }`}
+                                        style={{ paddingTop: "2px", paddingBottom: "2px" }}
                                       >
                                       <option value="">Select...</option>
                                       {excelHeaders.map((header, idx) => {
@@ -1182,9 +1183,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                   <td
                                     key={colIndex}
                                     className="px-2 py-2 text-gray-700 border-b"
-                                    style={{ minWidth: "80px", maxWidth: "120px" }}
+                                    style={{ minWidth: "100px", width: "auto" }}
                                   >
-                                    <div className="truncate" title={cellValue}>
+                                    <div className="break-words" title={cellValue}>
                                       {cellValue}
                                     </div>
                                   </td>

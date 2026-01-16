@@ -110,9 +110,7 @@ export const FIELD_ALIASES = {
     "number of bedrooms",//SODIC
     "no. of bedrooms",
     "number of rooms", //Tatweer Misr
-      "Category",// Palm Hills
     "no. of rooms"
-    
   ],
   landArea: [
     "Gross Area",
