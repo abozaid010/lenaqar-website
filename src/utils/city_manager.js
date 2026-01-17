@@ -115,6 +115,24 @@ class CityManager {
   }
 
   /**
+   * Get city by value (lowercase) or ID (async - ensures data is loaded)
+   */
+  async getCityByValue(cityValue) {
+    await this.initializeData();
+    if (!cityValue) return null;
+    
+    const normalizedValue = String(cityValue).toLowerCase().trim();
+    return this.cities.find(city => 
+      city.value === normalizedValue || 
+      city.value === cityValue ||
+      city.id === cityValue || 
+      city.id.toLowerCase() === normalizedValue ||
+      city.en_name.toLowerCase() === normalizedValue ||
+      city.ar_name === cityValue
+    );
+  }
+
+  /**
    * Get district by name and city (async - ensures data is loaded)
    */
   async getDistrictByName(districtName, cityId) {

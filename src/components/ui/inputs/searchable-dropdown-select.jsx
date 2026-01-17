@@ -120,6 +120,11 @@ const defaultSearch = (option, query, searchFields, getLabel, getValue) => {
  * Default sort function
  */
 const defaultSort = (options, locale, getLabel) => {
+  // Ensure options is an array
+  if (!options || !Array.isArray(options)) {
+    return [];
+  }
+  
   return [...options].sort((a, b) => {
     const labelA = getLabel(a, locale) || "";
     const labelB = getLabel(b, locale) || "";
@@ -197,6 +202,11 @@ export default function SearchableDropdownSelect({
 
   // Filter options based on search query
   const filteredOptions = useMemo(() => {
+    // Ensure options is an array
+    if (!options || !Array.isArray(options)) {
+      return [];
+    }
+    
     if (!searchQuery.trim()) {
       return options;
     }
@@ -222,6 +232,10 @@ export default function SearchableDropdownSelect({
         return allOptionLabel;
       }
       return placeholder || "Select...";
+    }
+    // Ensure options is an array before using find
+    if (!options || !Array.isArray(options)) {
+      return value;
     }
     const option = options.find((opt) => getValue(opt) === value);
     if (!option) return value;

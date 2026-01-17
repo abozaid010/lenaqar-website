@@ -19,7 +19,8 @@ export function useCitiesDistricts() {
 
   const getDistricts = useCallback(
     async (city) => {
-      const cityObj = await manager.getCityById(city);
+      // city is the lowercase value (e.g., "cairo", "mostaqbal city")
+      const cityObj = await manager.getCityByValue(city);
       if (!cityObj) return [];
       const districts = await manager.getDistrictsForCity(cityObj.id);
       return districts.map(district => district.value);
@@ -29,14 +30,23 @@ export function useCitiesDistricts() {
 
   const getCityLabel = useCallback(
     async (city) => {
-      return await manager.getCityLabel(city, locale);
+      // city might be lowercase value or city ID
+      const cityObj = await manager.getCityByValue(city);
+      if (!cityObj) {
+        // If not found, try using it as city ID directly
+        return await manager.getCityLabel(city, locale);
+      }
+      return await manager.getCityLabel(cityObj.id, locale);
     },
     [locale]
   );
 
   const getDistrictLabel = useCallback(
     async (district, city) => {
-      return await manager.getDistrictLabel(district, city, locale);
+      // city might be lowercase value or city ID
+      const cityObj = await manager.getCityByValue(city);
+      const cityId = cityObj ? cityObj.id : city;
+      return await manager.getDistrictLabel(district, cityId, locale);
     },
     [locale]
   );
@@ -47,8 +57,17 @@ export function useCitiesDistricts() {
 
   const getDistrictsWithLabels = useCallback(
     async (city) => {
-      const cityObj = await manager.getCityById(city);
-      if (!cityObj) return [];
+      // city is the lowercase value (e.g., "cairo", "mostaqbal city")
+      if (!city) {
+        return [];
+      }
+      
+      const cityObj = await manager.getCityByValue(city);
+      if (!cityObj) {
+        console.warn(`City not found for districts: "${city}"`);
+        return [];
+      }
+      
       return await manager.getDistrictsWithLabels(cityObj.id, locale);
     },
     [locale]
