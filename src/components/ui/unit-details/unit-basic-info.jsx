@@ -4,7 +4,6 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../public/locales/en";
 import ar from "../../../../public/locales/ar";
 import { useMemo } from "react";
-import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import {
   Bath,
   BedDouble,
@@ -79,8 +78,8 @@ export default function UnitBasicInfo({ unit }) {
       <div className="flex flex-wrap gap-2 mt-2">
         <span className="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {[
-            formatCityLabel(unit.city, locale),
-            formatDistrictLabel(unit.district, unit.city, locale),
+            unit.city,
+            unit.district,
             locale === "ar" ? unit.project_ar : unit.project,
             unit.phase,
           ]

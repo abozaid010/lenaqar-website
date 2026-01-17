@@ -3,6 +3,7 @@
 import { useI18n } from "@/context/translate-api";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
+import CityManager from "@/utils/city_manager";
 import {
   Clock,
   CreditCard,
@@ -32,7 +33,6 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deletePhase, deleteProject } from "@/utils/api";
-import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -129,7 +129,7 @@ export default function ProjectsList({ clientId }) {
     refetch,
     isFetching,
   } = useCompounds(clientId);
-  const { getCities, isLoading: citiesLoading, error: citiesError } = useCitiesDistricts();
+  const { getCities } = useCitiesDistricts();
   const {
     data: developersData,
     isLoading: developersLoading,
@@ -174,13 +174,43 @@ export default function ProjectsList({ clientId }) {
   const [isImportOpen, setIsImportOpen] = useState(false);
   
   // City filter state
-  const cities = getCities() || [];
+  const [cities, setCities] = useState([]);
+  const [cityLabels, setCityLabels] = useState({});
   const [selectedCities, setSelectedCities] = useState([]);
   const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
   
   // Developer filter state
   const developers = developersData || [];
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
+
+  // Load cities asynchronously
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        const citiesData = await getCities();
+        setCities(citiesData || []);
+
+        // Load city labels - map lowercase values to proper city IDs
+        const labels = {};
+        const manager = CityManager.getInstance();
+        const allCities = await manager.getCities();
+
+        // Create mapping from lowercase value to proper city ID
+        for (const cityObj of allCities) {
+          const lowercaseValue = cityObj.value; // e.g., "cairo"
+          const cityId = cityObj.id; // e.g., "Cairo"
+          labels[lowercaseValue] = await manager.getCityLabel(cityId, locale);
+        }
+        setCityLabels(labels);
+      } catch (error) {
+        console.error("Failed to load cities:", error);
+        setCities([]);
+        setCityLabels({});
+      }
+    };
+
+    loadCities();
+  }, [getCities, locale]);
 
   // Initialize selectedCities with all cities when cities data loads
   useEffect(() => {
@@ -457,7 +487,7 @@ export default function ProjectsList({ clientId }) {
       return locale === "ar" ? "جميع المدن" : "All Cities";
     }
     if (selectedCities.length === 1) {
-      return formatCityLabel(capitalize(selectedCities[0]), locale);
+      return cityLabels[selectedCities[0]] || capitalize(selectedCities[0]);
     }
     return locale === "ar"
       ? `${selectedCities.length} مدن`
@@ -580,7 +610,7 @@ export default function ProjectsList({ clientId }) {
                                   className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                                 />
                                 <span className="text-sm text-gray-700 flex-1">
-                                  {formatCityLabel(capitalize(city), locale)}
+                                  {cityLabels[city] || capitalize(city)}
                                 </span>
                               </label>
                             );
@@ -762,7 +792,7 @@ export default function ProjectsList({ clientId }) {
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        {formatCityLabel(capitalize(project.city), locale)}
+                        {cityLabels[project.city] || capitalize(project.city)}
                       </div>
                       <div className="flex items-center">
                         <svg
@@ -778,11 +808,7 @@ export default function ProjectsList({ clientId }) {
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                           />
                         </svg>
-                        {formatDistrictLabel(
-                          capitalize(project.district),
-                          capitalize(project.city),
-                          locale
-                        )}
+                        {capitalize(project.district)}
                       </div>
                       <div className="flex-1"></div>
                       <button
@@ -1146,9 +1172,9 @@ export default function ProjectsList({ clientId }) {
                       <div className="flex flex-col items-center justify-between">
                         <div
                           className="text-lg font-bold text-primary max-w-full truncate"
-                          title={formatCityLabel(capitalize(selectedProject.city), locale)}
+                          title={cityLabels[selectedProject.city] || capitalize(selectedProject.city)}
                         >
-                          {formatCityLabel(capitalize(selectedProject.city), locale)}
+                          {cityLabels[selectedProject.city] || capitalize(selectedProject.city)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.formLabels?.city || "City"}
@@ -1160,17 +1186,9 @@ export default function ProjectsList({ clientId }) {
                       <div className="flex flex-col items-center justify-between">
                         <div
                           className="text-lg font-bold text-primary max-w-full truncate"
-                          title={formatDistrictLabel(
-                            capitalize(selectedProject.district),
-                            capitalize(selectedProject.city),
-                            locale
-                          )}
+                          title={capitalize(selectedProject.district)}
                         >
-                          {formatDistrictLabel(
-                            capitalize(selectedProject.district),
-                            capitalize(selectedProject.city),
-                            locale
-                          )}
+                          {capitalize(selectedProject.district)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.formLabels?.district || "District"}

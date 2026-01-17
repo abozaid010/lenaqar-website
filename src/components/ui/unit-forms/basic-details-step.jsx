@@ -11,7 +11,6 @@ import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { getprojects } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
-  formatDistrictLabel,
 } from "@/utils/formatters";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";

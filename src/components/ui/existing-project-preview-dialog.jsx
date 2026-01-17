@@ -3,7 +3,6 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
-import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { CreditCard, Home, Tag } from "lucide-react";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
@@ -142,7 +141,7 @@ export default function ExistingProjectPreviewDialog({
                     {t.formLabels?.city || "City"}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
-                    {formatCityLabel(capitalize(projectData.city), locale)}
+                    {capitalize(projectData.city)}
                   </p>
                 </div>
               )}
@@ -152,11 +151,7 @@ export default function ExistingProjectPreviewDialog({
                     {t.formLabels?.district || "District"}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
-                    {formatDistrictLabel(
-                      capitalize(projectData.district),
-                      capitalize(projectData.city),
-                      locale
-                    )}
+                    {capitalize(projectData.district)}
                   </p>
                 </div>
               )}

@@ -3,6 +3,7 @@
 import { useI18n } from "@/context/translate-api";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
+import { useEffect, useState } from "react";
 
 /**
  * SearchableCitySelect - A reusable city selection component with search functionality
@@ -37,8 +38,26 @@ export default function SearchableCitySelect({
   ...rest
 }) {
   const { t, locale } = useI18n();
-  const { getAllCitiesWithLabels, isLoading: citiesLoading } = useCitiesDistricts();
-  const citiesWithLabels = getAllCitiesWithLabels();
+  const { getAllCitiesWithLabels } = useCitiesDistricts();
+  const [citiesWithLabels, setCitiesWithLabels] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCities = async () => {
+      try {
+        setCitiesLoading(true);
+        const cities = await getAllCitiesWithLabels();
+        setCitiesWithLabels(cities || []);
+      } catch (error) {
+        console.error("Failed to load cities:", error);
+        setCitiesWithLabels([]);
+      } finally {
+        setCitiesLoading(false);
+      }
+    };
+
+    loadCities();
+  }, [getAllCitiesWithLabels]);
 
   return (
     <SearchableDropdownSelect

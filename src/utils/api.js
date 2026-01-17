@@ -3,6 +3,7 @@
 import { axiosInstance } from "@/lib/axiosInstance";
 import { safeMergeParams } from "./safeJsonParser";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
+import CityManager from "./city_manager";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -167,14 +168,10 @@ export async function fetchProjects(isPublic = false) {
 
 export async function fetchCitisAndProjects() {
   try {
-    const response = await axiosInstance.get("/projects/cities-and-districts");
-
-    // Validate response structure
-    if (!response.data || !response.data.data) {
-      throw new Error("Invalid response format from server: missing response.data.data");
-    }
-
-    return response.data.data;
+    // Get singleton instance and return cities and districts data
+    // Data is loaded once at website lifetime and cached in memory
+    const cityManager = CityManager.getInstance();
+    return cityManager.getCitiesAndDistrictsData();
   } catch (error) {
     console.error("Failed to fetch cities and districts:", error.message);
     // Re-throw the error so TanStack Query can handle it properly
