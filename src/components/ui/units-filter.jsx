@@ -8,7 +8,6 @@ import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
-import { formatCityLabel } from "@/utils/formatters";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
@@ -37,7 +36,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { getCityLabel } = useCitiesDistricts();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -68,8 +66,30 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
   }, [developersLoading || projectsLoading]);
 
+  // Load city labels asynchronously
+  useEffect(() => {
+    const loadCityLabels = async () => {
+      try {
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const cities = await manager.getCities();
+        const labels = {};
+
+        for (const city of cities) {
+          labels[city.value] = await manager.getCityLabel(city.id, locale);
+        }
+
+        setCityLabels(labels);
+      } catch (error) {
+        console.error("Failed to load city labels:", error);
+      }
+    };
+
+    loadCityLabels();
+  }, [locale]);
+
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
+  const [cityLabels, setCityLabels] = useState({});
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = [];
     if (filters.developer_name) {
@@ -310,7 +330,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (!filters.city || filters.city === "all" || filters.city === "") {
       return t.unitsFilter.allCities || "All Cities";
     }
-    return getCityLabel(filters.city) || filters.city;
+    return cityLabels[filters.city] || filters.city;
   }
 
   function getFilterDisplayText(key, value) {

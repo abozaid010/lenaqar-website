@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/context/translate-api";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
-import { useCitiesDistricts } from "@/hooks/use-cities-districts";
+import CityManager from "@/utils/city_manager";
 import {
   Clock,
   CreditCard,
@@ -32,7 +32,6 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deletePhase, deleteProject } from "@/utils/api";
-import { formatCityLabel, formatDistrictLabel } from "@/utils/formatters";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -129,7 +128,6 @@ export default function ProjectsList({ clientId }) {
     refetch,
     isFetching,
   } = useCompounds(clientId);
-  const { getCities, isLoading: citiesLoading, error: citiesError } = useCitiesDistricts();
   const {
     data: developersData,
     isLoading: developersLoading,
@@ -174,7 +172,6 @@ export default function ProjectsList({ clientId }) {
   const [isImportOpen, setIsImportOpen] = useState(false);
   
   // City filter state
-  const cities = getCities() || [];
   const [selectedCities, setSelectedCities] = useState([]);
   const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
   
@@ -182,12 +179,118 @@ export default function ProjectsList({ clientId }) {
   const developers = developersData || [];
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
 
-  // Initialize selectedCities with all cities when cities data loads
+  // Single translations object that holds everything
+  const [translations, setTranslations] = useState({
+    cities: [],           // Array of city values (lowercase)
+    cityLabels: {},      // Map: cityValue -> translated label
+    districtLabels: {}, // Map: "cityValue|districtValue" -> translated label
+    isLoading: true
+  });
+
+  // Load all translations in one go
   useEffect(() => {
-    if (cities.length > 0 && selectedCities.length === 0) {
-      setSelectedCities([...cities]);
+    const loadAllTranslations = async () => {
+      try {
+        const manager = CityManager.getInstance();
+        await manager.initializeData();
+
+        // Get all cities from manager
+        const allCities = await manager.getCities();
+        const citiesData = allCities.map(city => city.value);
+        
+        // Load city labels
+        const cityLabels = {};
+        for (const cityObj of allCities) {
+          cityLabels[cityObj.value] = await manager.getCityLabel(cityObj.id, locale);
+        }
+
+        // Load district labels for all projects
+        const districtLabels = {};
+        if (compounds && Array.isArray(compounds) && compounds.length > 0) {
+          // Get all unique city-district combinations from projects
+          const cityDistrictPairs = new Set();
+          compounds.forEach(project => {
+            if (project.city && project.district) {
+              const cityKey = String(project.city).toLowerCase().trim();
+              const districtKey = String(project.district).toLowerCase().trim();
+              cityDistrictPairs.add(`${cityKey}|${districtKey}`);
+            }
+          });
+
+          // Load labels for each city-district pair
+          for (const pair of cityDistrictPairs) {
+            const [cityValue, districtValue] = pair.split('|');
+            const cityObj = await manager.getCityByValue(cityValue);
+            if (cityObj) {
+              // Try multiple ways to find the district
+              let label = await manager.getDistrictLabel(districtValue, cityObj.id, locale);
+              
+              // If not found, try finding by en_name or ar_name
+              if (!label) {
+                const districts = await manager.getDistrictsForCity(cityObj.id);
+                const districtObj = districts.find(d => 
+                  d.value === districtValue ||
+                  d.en_name.toLowerCase() === districtValue ||
+                  d.ar_name === districtValue
+                );
+                if (districtObj) {
+                  label = locale === "ar" ? districtObj.label_ar : districtObj.label_en;
+                }
+              }
+              
+              if (label) {
+                districtLabels[pair] = label;
+              }
+            }
+          }
+        }
+
+        setTranslations({
+          cities: citiesData,
+          cityLabels,
+          districtLabels,
+          isLoading: false
+        });
+      } catch (error) {
+        console.error("Failed to load translations:", error);
+        setTranslations({
+          cities: [],
+          cityLabels: {},
+          districtLabels: {},
+          isLoading: false
+        });
+      }
+    };
+
+    loadAllTranslations();
+  }, [locale, compounds]);
+
+  // Initialize selectedCities with all cities when translations load
+  useEffect(() => {
+    if (translations.cities.length > 0 && selectedCities.length === 0) {
+      setSelectedCities([...translations.cities]);
     }
-  }, [cities, selectedCities.length]);
+  }, [translations.cities, selectedCities.length]);
+
+  // Helper function to get city label with fallback
+  const getCityDisplayName = useMemo(() => {
+    return (city) => {
+      // First try cityLabels (pre-loaded translations)
+      if (translations.cityLabels[city]) {
+        return translations.cityLabels[city];
+      }
+      // Fallback: if CityManager is initialized, try to get label directly
+      const manager = CityManager.getInstance();
+      if (manager.isInitialized && manager.cities.length > 0) {
+        const cityObj = manager.cities.find(c => c.value === city);
+        if (cityObj) {
+          return locale === "ar" ? cityObj.label_ar : cityObj.label_en;
+        }
+      }
+      // Final fallback
+      return capitalize(city);
+    };
+  }, [translations.cityLabels, locale]);
 
   useEffect(() => {
     if (!isLoading && !isError && compounds) {
@@ -217,7 +320,7 @@ export default function ProjectsList({ clientId }) {
 
       // Filter by city if cities are selected
       let cityFiltered = sorted;
-      if (selectedCities.length > 0 && selectedCities.length < cities.length) {
+      if (selectedCities.length > 0 && selectedCities.length < translations.cities.length) {
         cityFiltered = sorted.filter((project) => {
           const projectCity = project.city?.toLowerCase() || "";
           return selectedCities.some(
@@ -255,7 +358,7 @@ export default function ProjectsList({ clientId }) {
         setSelectedProject(filtered[0]);
       }
     }
-  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, cities, selectedDeveloper, developers]);
+  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, translations.cities, selectedDeveloper, developers]);
 
   // Update selected project if it's not in the filtered list
   useEffect(() => {
@@ -442,10 +545,10 @@ export default function ProjectsList({ clientId }) {
   };
 
   const handleSelectAllCities = () => {
-    if (selectedCities.length === cities.length) {
+    if (selectedCities.length === translations.cities.length) {
       setSelectedCities([]);
     } else {
-      setSelectedCities([...cities]);
+      setSelectedCities([...translations.cities]);
     }
   };
 
@@ -453,15 +556,53 @@ export default function ProjectsList({ clientId }) {
     if (selectedCities.length === 0) {
       return locale === "ar" ? "جميع المدن" : "All Cities";
     }
-    if (selectedCities.length === cities.length) {
+    if (selectedCities.length === translations.cities.length) {
       return locale === "ar" ? "جميع المدن" : "All Cities";
     }
     if (selectedCities.length === 1) {
-      return formatCityLabel(capitalize(selectedCities[0]), locale);
+      return getCityDisplayName(selectedCities[0]);
     }
     return locale === "ar"
       ? `${selectedCities.length} مدن`
       : `${selectedCities.length} Cities`;
+  };
+
+  // Helper function to get district label with fallback
+  const getDistrictDisplayName = (district, city) => {
+    if (!district) return "";
+    if (!city) return capitalize(district);
+    
+    const cityKey = String(city).toLowerCase().trim();
+    const districtKey = String(district).toLowerCase().trim();
+    const key = `${cityKey}|${districtKey}`;
+    
+    // First try pre-loaded labels
+    if (translations.districtLabels[key]) {
+      return translations.districtLabels[key];
+    }
+    
+    // Fallback: try to get from CityManager if available
+    const manager = CityManager.getInstance();
+    if (manager.isInitialized && manager.cities.length > 0 && manager.districts.length > 0) {
+      const cityObj = manager.cities.find(c => 
+        c.value === cityKey || 
+        c.id.toLowerCase() === cityKey
+      );
+      if (cityObj) {
+        const districtObj = manager.districts.find(
+          d => d.city_id === cityObj.id && 
+          (d.value === districtKey || 
+           d.en_name.toLowerCase() === districtKey ||
+           d.ar_name === district)
+        );
+        if (districtObj) {
+          return locale === "ar" ? districtObj.label_ar : districtObj.label_en;
+        }
+      }
+    }
+    
+    // Final fallback
+    return capitalize(district);
   };
 
   return (
@@ -527,7 +668,7 @@ export default function ProjectsList({ clientId }) {
                   />
                 </div>
                 {/* City Filter */}
-                {cities.length > 0 && (
+                {translations.cities.length > 0 && (
                   <div className="relative" ref={cityFilterRef}>
                     <button
                       type="button"
@@ -555,7 +696,7 @@ export default function ProjectsList({ clientId }) {
                               onClick={handleSelectAllCities}
                               className="text-xs text-primary hover:underline"
                             >
-                              {selectedCities.length === cities.length
+                              {selectedCities.length === translations.cities.length
                                 ? locale === "ar"
                                   ? "إلغاء الكل"
                                   : "Clear All"
@@ -566,7 +707,7 @@ export default function ProjectsList({ clientId }) {
                           </div>
                         </div>
                         <div className="p-2">
-                          {cities.map((city) => {
+                          {translations.cities.map((city) => {
                             const isSelected = selectedCities.includes(city);
                             return (
                               <label
@@ -580,7 +721,7 @@ export default function ProjectsList({ clientId }) {
                                   className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                                 />
                                 <span className="text-sm text-gray-700 flex-1">
-                                  {formatCityLabel(capitalize(city), locale)}
+                                  {getCityDisplayName(city)}
                                 </span>
                               </label>
                             );
@@ -762,7 +903,7 @@ export default function ProjectsList({ clientId }) {
                             d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                           />
                         </svg>
-                        {formatCityLabel(capitalize(project.city), locale)}
+                        {getCityDisplayName(project.city)}
                       </div>
                       <div className="flex items-center">
                         <svg
@@ -778,11 +919,7 @@ export default function ProjectsList({ clientId }) {
                             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                           />
                         </svg>
-                        {formatDistrictLabel(
-                          capitalize(project.district),
-                          capitalize(project.city),
-                          locale
-                        )}
+                        {getDistrictDisplayName(project.district, project.city)}
                       </div>
                       <div className="flex-1"></div>
                       <button
@@ -1146,9 +1283,9 @@ export default function ProjectsList({ clientId }) {
                       <div className="flex flex-col items-center justify-between">
                         <div
                           className="text-lg font-bold text-primary max-w-full truncate"
-                          title={formatCityLabel(capitalize(selectedProject.city), locale)}
+                          title={getCityDisplayName(selectedProject.city)}
                         >
-                          {formatCityLabel(capitalize(selectedProject.city), locale)}
+                          {getCityDisplayName(selectedProject.city)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.formLabels?.city || "City"}
@@ -1160,17 +1297,9 @@ export default function ProjectsList({ clientId }) {
                       <div className="flex flex-col items-center justify-between">
                         <div
                           className="text-lg font-bold text-primary max-w-full truncate"
-                          title={formatDistrictLabel(
-                            capitalize(selectedProject.district),
-                            capitalize(selectedProject.city),
-                            locale
-                          )}
+                          title={getDistrictDisplayName(selectedProject.district, selectedProject.city)}
                         >
-                          {formatDistrictLabel(
-                            capitalize(selectedProject.district),
-                            capitalize(selectedProject.city),
-                            locale
-                          )}
+                          {getDistrictDisplayName(selectedProject.district, selectedProject.city)}
                         </div>
                         <div className="text-xs text-gray-500">
                           {t.formLabels?.district || "District"}

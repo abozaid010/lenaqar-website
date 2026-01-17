@@ -40,9 +40,11 @@ export default function AddCompoundDialog({
   const { isLoading: delveloperLoading, data: developersData } =
     useDevelopers(clientId);
 
-  const { getDistrictsWithLabels, isLoading: districtsLoading } = useCitiesDistricts();
+  const { getDistrictsWithLabels } = useCitiesDistricts();
 
   const [developers, setDevelopers] = useState(developersData || []);
+  const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
 
   useEffect(() => {
     if (developersData) {
@@ -255,10 +257,28 @@ export default function AddCompoundDialog({
     }
   }, [compoundData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
 
-  // Get districts for selected city
-  const districtsWithLabels = formData.city 
-    ? getDistrictsWithLabels(formData.city)
-    : [];
+  // Load districts when city changes
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (!formData.city) {
+        setDistrictsWithLabels([]);
+        return;
+      }
+
+      try {
+        setIsLoadingDistricts(true);
+        const districts = await getDistrictsWithLabels(formData.city);
+        setDistrictsWithLabels(districts || []);
+      } catch (error) {
+        console.error("Failed to load districts:", error);
+        setDistrictsWithLabels([]);
+      } finally {
+        setIsLoadingDistricts(false);
+      }
+    };
+
+    loadDistricts();
+  }, [formData.city, getDistrictsWithLabels]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -946,7 +966,7 @@ export default function AddCompoundDialog({
                   error={!!errors.district}
                   errorMessage={errors.district}
                   disabled={!formData.city}
-                  isLoading={districtsLoading}
+                  isLoading={isLoadingDistricts}
                   options={districtsWithLabels}
                   placeholder={
                     !formData.city

@@ -1,14 +1,14 @@
-import CitiesAndDistrictsManager from "@/services/cities-districts-manager";
+import CityManager from "./city_manager";
 
-export function formatCityLabel(cityValue, locale = "en") {
+export async function formatCityLabel(cityValue, locale = "en") {
   if (!cityValue) return "";
-  const manager = CitiesAndDistrictsManager.getInstance();
+  const manager = CityManager.getInstance();
   return manager.getCityLabel(cityValue, locale);
 }
 
-export function formatDistrictLabel(districtValue, cityValue, locale = "en") {
+export async function formatDistrictLabel(districtValue, cityValue, locale = "en") {
   if (!districtValue) return "";
-  const manager = CitiesAndDistrictsManager.getInstance();
+  const manager = CityManager.getInstance();
   return manager.getDistrictLabel(districtValue, cityValue, locale);
 }
 

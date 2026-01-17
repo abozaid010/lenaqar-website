@@ -7,7 +7,6 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/utils/api";
-import { formatCityLabel } from "@/utils/formatters";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
 import {
@@ -140,8 +139,7 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     {t.city}{" "}
                   </p>
                   <span className="line-clamp-1 text-[14px] font-bold">
-                    {formatCityLabel(u.city, locale) ||
-                      "Location not specified"}
+                    {u.city || "Location not specified"}
                   </span>
                 </div>
 

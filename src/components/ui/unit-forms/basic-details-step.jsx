@@ -11,7 +11,6 @@ import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { getprojects } from "@/utils/api";
 import {
   convertArabicToEnglishNumbers,
-  formatDistrictLabel,
 } from "@/utils/formatters";
 import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -28,10 +27,33 @@ export default function BasicDetailsStep({
   const { getBuildingTypes, getViewTypes } = useLocaleConstants();
   const { getDistrictsWithLabels, isLoading: citiesLoading } = useCitiesDistricts();
 
-  // Get districts for selected city
-  const districtsWithLabels = formData.city 
-    ? getDistrictsWithLabels(formData.city)
-    : [];
+  // State for districts
+  const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
+  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
+
+  // Load districts when city changes
+  useEffect(() => {
+    const loadDistricts = async () => {
+      if (!formData.city) {
+        setDistrictsWithLabels([]);
+        return;
+      }
+
+      try {
+        setIsLoadingDistricts(true);
+        const districts = await getDistrictsWithLabels(formData.city);
+        setDistrictsWithLabels(districts || []);
+      } catch (error) {
+        console.error("Failed to load districts:", error);
+        setDistrictsWithLabels([]);
+      } finally {
+        setIsLoadingDistricts(false);
+      }
+    };
+
+    loadDistricts();
+  }, [formData.city, getDistrictsWithLabels]);
+
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -207,7 +229,7 @@ export default function BasicDetailsStep({
               : t.formLabels.cityFirst}
           </option>
           {formData.city ? (
-            citiesLoading ? (
+            isLoadingDistricts ? (
               <option disabled value="">
                 {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
               </option>
