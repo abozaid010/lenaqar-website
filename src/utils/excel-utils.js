@@ -31,6 +31,37 @@ export async function parseExcelFile(file) {
       );
     }
 
+    /**
+     * ExcelJS returns formula cells as an object like:
+     * { formula: 'SUM(A1,C1)', result: 123 }
+     *
+     * We prefer the computed value (`result`) over the formula text.
+     * Note: ExcelJS does NOT calculate formulas; it only exposes the cached result
+     * stored by Excel/Sheets when the file was last saved.
+     */
+    const getCellComputedValue = (cell) => {
+      const v = cell?.value;
+
+      // Dates are objects too, so handle them early.
+      if (v instanceof Date) return v;
+
+      // Formula / sharedFormula cells
+      if (v && typeof v === "object" && (v.formula || v.sharedFormula)) {
+        if (v.result !== undefined && v.result !== null) return v.result;
+
+        // Fallback: keep the formula so data isn't silently lost
+        const f = v.formula || v.sharedFormula;
+        return f ? `=${f}` : null;
+      }
+
+      // Other complex cell types (richText, hyperlink, etc.) -> use rendered text
+      if (v && typeof v === "object") {
+        return cell?.text ?? null;
+      }
+
+      return v;
+    };
+
     // Extract headers from first row
     // First, find the maximum column number by checking the header row and all data rows
     const headerRow = worksheet.getRow(1);
@@ -63,7 +94,8 @@ export async function parseExcelFile(file) {
     const headers = [];
     for (let col = 1; col <= maxColumn; col++) {
       const cell = headerRow.getCell(col);
-      headers.push(cell.value?.toString() || "");
+      const headerValue = getCellComputedValue(cell);
+      headers.push(headerValue === null || headerValue === undefined ? "" : String(headerValue));
     }
 
     // Extract data rows - iterate through all columns to maintain index alignment
@@ -75,7 +107,7 @@ export async function parseExcelFile(file) {
       // Iterate through all columns to ensure consistent array length
       for (let col = 1; col <= maxColumn; col++) {
         const cell = row.getCell(col);
-        rowData.push(cell.value);
+        rowData.push(getCellComputedValue(cell));
       }
 
       // Filter out completely empty rows

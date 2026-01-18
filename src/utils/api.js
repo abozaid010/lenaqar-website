@@ -298,13 +298,13 @@ export async function addCompound(compoundData) {
   } catch (error) {
     const statusCode = error.response?.status;
     const errorMessage = error.response?.data?.error_message || error.message;
-    
+
     console.log("[addCompound] Error caught:", {
       statusCode,
       errorMessage: errorMessage?.substring(0, 200),
       fullErrorResponse: error.response?.data,
     });
-    
+
     // Check for 400 status code and try to extract existing_project_data
     if (statusCode === 400 && errorMessage) {
       const existingProjectData = parseExistingProjectData(errorMessage);
@@ -319,7 +319,7 @@ export async function addCompound(compoundData) {
           statusCode: 400,
         };
       }
-      
+
       // Check for validation errors
       const validationErrors = parseValidationErrors(errorMessage);
       if (Object.keys(validationErrors).length > 0) {
@@ -346,19 +346,19 @@ export async function updatecompound(compoundData, projectId) {
         properties_types: compoundData.properties_types?.length || 0,
       },
     });
-    
+
     const response = await axiosInstance.patch(
       `/projects/${projectId}/update-fields`,
       compoundData
     );
-    
+
     console.log("[updatecompound] API Response:", {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
       dataKeys: response.data ? Object.keys(response.data) : [],
     });
-    
+
     return response.data;
   } catch (error) {
     console.error("[updatecompound] Error occurred:", {
@@ -368,10 +368,10 @@ export async function updatecompound(compoundData, projectId) {
       statusText: error.response?.statusText,
       fullError: error,
     });
-    
+
     const statusCode = error.response?.status;
     const errorMessage = error.response?.data?.error_message || error.message;
-    
+
     // Check for 400 status code and try to extract existing_project_data
     if (statusCode === 400 && errorMessage) {
       const existingProjectData = parseExistingProjectData(errorMessage);
@@ -382,7 +382,7 @@ export async function updatecompound(compoundData, projectId) {
           statusCode: 400,
         };
       }
-      
+
       // Check for validation errors
       const validationErrors = parseValidationErrors(errorMessage);
       if (Object.keys(validationErrors).length > 0) {
@@ -700,64 +700,10 @@ export async function fetchNews() {
 }
 
 // Data Projection API (Map) //
-// IMPORTANT: This API is very expensive. We implement aggressive caching to ensure
-// it's only called ONCE per website session lifetime. The cache persists across:
-// - Page reloads
-// - Navigation between pages
-// - Component remounts
-// The cache is ONLY cleared on user logout/login to ensure fresh data for new sessions.
-//
-// Cache key for localStorage
-const DATA_PROJECTION_CACHE_KEY = "lenaai_data_projection_cache";
-const DATA_PROJECTION_CACHE_TIMESTAMP_KEY = "lenaai_data_projection_cache_timestamp";
 
-// Helper function to clear the cache (called on logout)
-// This ensures the expensive API is called again only after user logs out and logs back in
-export function clearDataProjectionCache() {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(DATA_PROJECTION_CACHE_KEY);
-    localStorage.removeItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
-  }
-}
 
 export async function fetchDataProjection() {
-  // Check localStorage cache first (only on client side)
-  if (typeof window !== "undefined") {
-    try {
-      const cachedData = localStorage.getItem(DATA_PROJECTION_CACHE_KEY);
-      const cacheTimestamp = localStorage.getItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
-      
-      if (cachedData && cacheTimestamp) {
-        // Verify cache is valid (not expired - though we want it to persist for session)
-        const timestamp = parseInt(cacheTimestamp, 10);
-        const now = Date.now();
-        // Cache is valid for 24 hours (but should only be cleared on logout)
-        const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-        
-        if (now - timestamp < CACHE_DURATION) {
-          try {
-            const parsedData = JSON.parse(cachedData);
-            console.log("Using cached data projection (avoiding expensive API call)");
-            return parsedData;
-          } catch (parseError) {
-            console.error("Failed to parse cached data, fetching fresh data:", parseError);
-            // Continue to fetch fresh data
-          }
-        } else {
-          // Cache expired, remove it
-          localStorage.removeItem(DATA_PROJECTION_CACHE_KEY);
-          localStorage.removeItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY);
-        }
-      }
-    } catch (cacheError) {
-      console.error("Error reading from cache, fetching fresh data:", cacheError);
-      // Continue to fetch fresh data
-    }
-  }
-
-  // If no cache or cache invalid, fetch from API
   try {
-    console.log("Fetching data projection from API (expensive call)");
     const response = await axiosInstance.get("/admin/data-projection");
 
     // Validate response data structure
@@ -770,18 +716,6 @@ export async function fetchDataProjection() {
       throw new Error(
         `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
       );
-    }
-
-    // Store in localStorage cache (only on client side)
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(DATA_PROJECTION_CACHE_KEY, JSON.stringify(response.data.data));
-        localStorage.setItem(DATA_PROJECTION_CACHE_TIMESTAMP_KEY, Date.now().toString());
-        console.log("Data projection cached successfully");
-      } catch (storageError) {
-        console.error("Failed to cache data projection:", storageError);
-        // Continue even if caching fails
-      }
     }
 
     return response.data.data;
