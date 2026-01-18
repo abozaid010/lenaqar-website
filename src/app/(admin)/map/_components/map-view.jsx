@@ -3,8 +3,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchDataProjection } from "@/utils/api";
 import { useI18n } from "@/context/translate-api";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { Loader2, Map, List, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 
 // Dynamically import MapContainer to avoid SSR issues with Leaflet
@@ -116,10 +117,11 @@ const getProjectCoordinates = async (project) => {
 };
 
 const MapView = () => {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [viewMode, setViewMode] = useState("list"); // "map" or "list" - default to list for faster initial load
   const [projectCoordinates, setProjectCoordinates] = useState({});
   const [isLoadingCoords, setIsLoadingCoords] = useState(false);
+  const [selectedDeveloperId, setSelectedDeveloperId] = useState("");
 
   const getProjectKey = (developer, project, projectIndex) => {
     const developerId = developer?.developer_id;
@@ -150,16 +152,24 @@ const MapView = () => {
     retry: false, // Don't retry on failure (expensive API, user should logout/login to retry)
   });
 
+  const displayedProjectionData = useMemo(() => {
+    if (!projectionData || !Array.isArray(projectionData)) return [];
+    if (!selectedDeveloperId) return projectionData;
+    return projectionData.filter(
+      (developer) => String(developer?.developer_id) === selectedDeveloperId
+    );
+  }, [projectionData, selectedDeveloperId]);
+
   const isBusy = isLoading || (viewMode === "map" && isLoadingCoords);
 
   // Process coordinates only when map view is active
   useEffect(() => {
-    if (!projectionData || viewMode !== "map") return;
+    if (!displayedProjectionData || viewMode !== "map") return;
 
     const loadCoordinates = async () => {
       // Only fetch missing coordinates (avoid re-calling external APIs on toggles)
       const missing = [];
-      for (const developer of projectionData) {
+      for (const developer of displayedProjectionData) {
         for (const [projectIndex, project] of (developer.projects || []).entries()) {
           const key = getProjectKey(developer, project, projectIndex);
           if (!projectCoordinates[key]) {
@@ -188,16 +198,34 @@ const MapView = () => {
     };
 
     loadCoordinates();
-  }, [projectionData, viewMode, projectCoordinates]);
+  }, [displayedProjectionData, viewMode, projectCoordinates]);
 
   // Calculate center of map (average of all coordinates)
   const getMapCenter = () => {
-    const coords = Object.values(projectCoordinates);
+    const visibleCoords = [];
+
+    for (const developer of displayedProjectionData) {
+      for (const [projectIndex, project] of (developer.projects || []).entries()) {
+        const key = getProjectKey(developer, project, projectIndex);
+        const coords = projectCoordinates[key];
+        if (coords) visibleCoords.push(coords);
+      }
+    }
+
+    const coords = visibleCoords;
     if (coords.length === 0) return [30.0444, 31.2357]; // Default to Cairo
 
     const avgLat = coords.reduce((sum, [lat]) => sum + lat, 0) / coords.length;
     const avgLng = coords.reduce((sum, [, lng]) => sum + lng, 0) / coords.length;
     return [avgLat, avgLng];
+  };
+
+  const getDeveloperDisplayName = (developer) => {
+    if (!developer) return "";
+    if (locale === "ar") {
+      return developer.ar_name || developer.developer_name || developer.en_name || "";
+    }
+    return developer.en_name || developer.developer_name || developer.ar_name || "";
   };
 
   // Count total projects per developer
@@ -223,27 +251,62 @@ const MapView = () => {
               {t.map?.subtitle || "View projects by location"}
             </p>
           </div>
-          <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
-            <button
-              onClick={() => setViewMode("map")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "map"
-                ? "bg-primary text-white"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <Map className="h-4 w-4" />
-              <span>{t.map?.mapView || "Map"}</span>
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "list"
-                ? "bg-primary text-white"
-                : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              <List className="h-4 w-4" />
-              <span>{t.map?.listView || "List"}</span>
-            </button>
+          <div className="flex items-center gap-3">
+            <div className="w-[260px]">
+              <SearchableDropdownSelect
+                options={projectionData || []}
+                value={selectedDeveloperId}
+                onChange={(e) => setSelectedDeveloperId(e.target.value)}
+                name="developerFilter"
+                showAllOption
+                allOptionLabel={locale === "ar" ? "كل المطورين" : "All developers"}
+                allOptionValue=""
+                placeholder={locale === "ar" ? "اختر مطور" : "Select developer"}
+                searchPlaceholder={locale === "ar" ? "ابحث بالاسم..." : "Search by name..."}
+                searchFields={["ar_name", "en_name", "developer_name"]}
+                getValue={(developer) => String(developer?.developer_id ?? "")}
+                getLabel={(developer, currentLocale) => {
+                  if (currentLocale === "ar") {
+                    return (
+                      developer?.ar_name ||
+                      developer?.developer_name ||
+                      developer?.en_name ||
+                      ""
+                    );
+                  }
+                  return (
+                    developer?.en_name ||
+                    developer?.developer_name ||
+                    developer?.ar_name ||
+                    ""
+                  );
+                }}
+                buttonClassName="h-[40px] text-primary"
+                disabled={isLoading || isError}
+              />
+            </div>
+            <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+              <button
+                onClick={() => setViewMode("map")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "map"
+                  ? "bg-primary text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
+              >
+                <Map className="h-4 w-4" />
+                <span>{t.map?.mapView || "Map"}</span>
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "list"
+                  ? "bg-primary text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+                  }`}
+              >
+                <List className="h-4 w-4" />
+                <span>{t.map?.listView || "List"}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -279,7 +342,7 @@ const MapView = () => {
         </div>
       )}
 
-      {!isBusy && !isError && projectionData && projectionData.length > 0 && (
+      {!isBusy && !isError && displayedProjectionData && displayedProjectionData.length > 0 && (
         viewMode === "map" ? (
           <div className="flex-1 rounded-lg overflow-hidden border border-gray-200 shadow-sm bg-white">
             {typeof window !== "undefined" && (
@@ -292,7 +355,7 @@ const MapView = () => {
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
-                {projectionData.map((developer) =>
+                {displayedProjectionData.map((developer) =>
                   developer.projects?.map((project, projectIndex) => {
                     const key = getProjectKey(developer, project, projectIndex);
                     const coords = projectCoordinates[key];
@@ -304,7 +367,7 @@ const MapView = () => {
                           <div className="p-2 min-w-[200px]">
                             <h3 className="font-bold text-lg mb-2">{project.project_name}</h3>
                             <p className="text-sm text-gray-600 mb-1">
-                              <strong>{t.map?.developer || "Developer"}:</strong> {developer.developer_name}
+                              <strong>{t.map?.developer || "Developer"}:</strong> {getDeveloperDisplayName(developer)}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
                               <strong>{t.map?.location || "Location"}:</strong> {project.city}, {project.district}
@@ -352,7 +415,7 @@ const MapView = () => {
         ) : (
           <div className="flex-1 overflow-y-auto">
             <div className="space-y-4">
-              {projectionData.map((developer) => (
+              {displayedProjectionData.map((developer) => (
                 <div
                   key={developer.developer_id}
                   className="bg-white rounded-lg shadow-md border border-gray-200 p-6"
@@ -360,7 +423,7 @@ const MapView = () => {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h2 className="text-2xl font-bold text-gray-900 mb-1">
-                        {developer.developer_name}
+                        {getDeveloperDisplayName(developer)}
                       </h2>
                       <p className="text-gray-600">
                         {getDeveloperProjectCount(developer)} {t.map?.projects || "projects"} • {getDeveloperTotalUnits(developer)} {t.map?.totalUnits || "total units"}
