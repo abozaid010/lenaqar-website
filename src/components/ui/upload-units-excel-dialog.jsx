@@ -1018,30 +1018,34 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </table>
                   </div>
 
-                  {/* Buttons */}
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        downloadTemplateFile();
-                      }}
-                      className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:underline transition-all flex items-center gap-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50"
-                    >
-                      <Download size={16} />
-                      {t.uploadExcel?.downloadTemplate || "Download Template"}
-                    </button>
+                  {/* Actions */}
+                  <div className="flex flex-col items-center justify-center gap-3">
                     <button
                       onClick={handleUploadClick}
                       className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
                       {t.uploadExcel?.browseFiles || "Submit"}
                     </button>
-                  </div>
 
-                  <p className="text-sm text-gray-500">
-                    {t.uploadExcel?.supportedFormats ||
-                      "Supported formats: .xlsx, .xls"}
-                  </p>
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <p className="text-sm text-gray-500">
+                        {t.uploadExcel?.supportedFormats ||
+                          "Supported formats: .xlsx, .xls"}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadTemplateFile();
+                        }}
+                        className="text-sm text-gray-600 underline underline-offset-2 hover:text-gray-800 transition-colors flex items-center gap-2 bg-transparent border-0 p-0"
+                      >
+                        <Download size={16} />
+                        {t.uploadExcel?.downloadTemplate || "Download Template"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
