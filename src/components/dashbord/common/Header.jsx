@@ -63,9 +63,8 @@ const Header = ({ clientName, clientID, clientEmail }) => {
 
       // Clear expensive API cache (data projection) - both localStorage and TanStack Query cache
       if (typeof window !== "undefined") {
-        const { clearDataProjectionCache } = await import("@/utils/api");
-        clearDataProjectionCache();
-        
+
+
         // Also clear TanStack Query cache for data-projection
         queryClient.removeQueries({ queryKey: ["data-projection"] });
       }
