@@ -402,7 +402,7 @@ export default {
     button: "Upload Excel",
     title: "Upload Units Excel Sheet",
     dragDrop: "Drag and drop your Excel file here, or",
-    browseFiles: "Submit",
+    browseFiles: "Choose file",
     downloadTemplate: "Download Template",
     supportedFormats: "Supported formats: .xlsx, .xls",
     fileSize: "File size",

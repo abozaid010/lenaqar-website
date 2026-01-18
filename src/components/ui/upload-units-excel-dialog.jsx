@@ -63,6 +63,15 @@ const formatDeliveryDate = (value) => {
   if (value === null || value === undefined || value === "") {
     return "";
   }
+
+  // If it's a Date object (ExcelJS often returns Date objects), format as YYYY-MM-DD
+  if (value instanceof Date) {
+    if (isNaN(value.getTime())) return "";
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
   
   // If it's already a string, return it (after trimming)
   if (typeof value === "string") {
@@ -843,6 +852,24 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const hasFailedUnits = uploadStatus.some((item) => item.status === "failed");
   const isUploadComplete = !isUploading && uploadStatus.length > 0;
 
+  const formatPreviewCellValue = (templateKey, rawValue) => {
+    if (rawValue === undefined || rawValue === null || rawValue === "") return "-";
+
+    // Dates: always show date-only text (avoid long timezone strings)
+    if (rawValue instanceof Date) {
+      const formatted = formatDeliveryDate(rawValue);
+      return formatted || "-";
+    }
+
+    // Delivery date column: normalize common Excel date representations
+    if (templateKey === "deliveryDate") {
+      const formatted = formatDeliveryDate(rawValue);
+      return formatted || "-";
+    }
+
+    return String(rawValue);
+  };
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
@@ -1293,9 +1320,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                   const excelColIndex = excelHeaders.indexOf(excelHeader);
                                   if (excelColIndex >= 0) {
                                     const value = row[excelColIndex];
-                                    if (value !== undefined && value !== null && value !== "") {
-                                      cellValue = String(value);
-                                    }
+                                    cellValue = formatPreviewCellValue(templateCol.key, value);
                                   }
                                 }
                                 
