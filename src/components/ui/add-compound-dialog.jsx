@@ -89,6 +89,7 @@ export default function AddCompoundDialog({
     google_map_link: null,
     master_plan: null,
     properties_types: null,
+    building_types_images: null,
   });
 
   const [formData, setFormData] = useState({
@@ -335,6 +336,7 @@ export default function AddCompoundDialog({
       "google_map_link",
       "master_plan",
       "properties_types",
+      "building_types_images",
     ];
 
     // Find first error field in priority order
@@ -439,6 +441,24 @@ export default function AddCompoundDialog({
       newErrors.properties_types =
         t.formValidation?.propertyTypesRequired ||
         "At least one property type is required";
+    }
+
+    // Require at least one image for EACH selected building type
+    if (formData.properties_types && formData.properties_types.length > 0) {
+      const buildingTypeImagesErrors = {};
+      for (const propertyType of formData.properties_types) {
+        const imgs = formData.building_types_images?.[propertyType] || [];
+        if (!Array.isArray(imgs) || imgs.length === 0) {
+          buildingTypeImagesErrors[propertyType] =
+            locale === "ar"
+              ? "الرجاء رفع صورة واحدة على الأقل لهذا النوع"
+              : "Please upload at least one image for this building type";
+        }
+      }
+
+      if (Object.keys(buildingTypeImagesErrors).length > 0) {
+        newErrors.building_types_images = buildingTypeImagesErrors;
+      }
     }
 
     if (!formData.payment_plans || formData.payment_plans.length === 0) {
@@ -836,6 +856,21 @@ export default function AddCompoundDialog({
         [propertyType]: images,
       },
     }));
+
+    // Clear error for this building type when user uploads images
+    setErrors((prev) => {
+      if (!prev?.building_types_images || !prev.building_types_images[propertyType]) {
+        return prev;
+      }
+
+      const nextTypeErrors = { ...prev.building_types_images };
+      delete nextTypeErrors[propertyType];
+
+      return {
+        ...prev,
+        building_types_images: Object.keys(nextTypeErrors).length > 0 ? nextTypeErrors : null,
+      };
+    });
   };
 
   const getPropertyTypeLabel = (value) => {
@@ -1156,10 +1191,19 @@ export default function AddCompoundDialog({
 
             {/* Building Types Images */}
             {formData.properties_types && formData.properties_types.length > 0 && (
-              <div className="space-y-4">
+              <div
+                className="space-y-4"
+                ref={(el) => (fieldRefs.current.building_types_images = el)}
+              >
                 {formData.properties_types.map((propertyType) => (
                   <div key={propertyType}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      className={`block text-sm font-medium mb-1 ${
+                        errors.building_types_images?.[propertyType]
+                          ? "text-red-600"
+                          : "text-gray-700"
+                      }`}
+                    >
                       {getPropertyTypeLabel(propertyType)}
                       <span className="text-xs font-normal text-gray-500 ml-2">
                         (
@@ -1168,6 +1212,11 @@ export default function AddCompoundDialog({
                         / 4)
                       </span>
                     </label>
+                    {errors.building_types_images?.[propertyType] && (
+                      <p className="text-xs text-red-600 mb-2">
+                        {errors.building_types_images[propertyType]}
+                      </p>
+                    )}
                     <ImageUploader
                       maxImages={4}
                       initialImages={
