@@ -919,6 +919,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               tooltipText="How to upload units via Excel"
               className="p-0"
               isOpen={isVideoDialogOpen}
+              onOpen={() => setIsVideoDialogOpen(true)}
               onClose={() => setIsVideoDialogOpen(false)}
               zIndex={101}
             />

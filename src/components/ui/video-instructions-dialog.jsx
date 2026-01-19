@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info, X, Youtube, YoutubeIcon } from "lucide-react";
+import { X } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
 
@@ -27,8 +27,10 @@ import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
  * @param {string} quality - Preferred video quality: 'default', 'hd720', 'hd1080' (default: 'default')
  * @param {string} iconSize - Size of the info icon: 'sm', 'md', 'lg' (default: 'md')
  * @param {string} iconClassName - Additional classes for the icon button
+ * @param {string} className - Alias for iconClassName (backwards compatibility)
  * @param {string} tooltipText - Tooltip text for the icon (default: "View instructions")
  * @param {boolean} isOpen - External control for dialog open state (optional)
+ * @param {function} onOpen - Callback when dialog is opened (optional)
  * @param {function} onClose - Callback when dialog is closed (optional)
  * @param {boolean} showIcon - Whether to show the icon button (default: true)
  * @param {number} zIndex - Custom z-index for the dialog overlay (default: 50)
@@ -48,9 +50,11 @@ export default function VideoInstructionsDialog({
   quality = "default",
   iconSize = "md",
   iconClassName = "",
+  className = "",
   svgClassName = "",
   tooltipText,
   isOpen: externalIsOpen,
+  onOpen: externalOnOpen,
   onClose: externalOnClose,
   showIcon = true,
   zIndex = 50,
@@ -60,6 +64,7 @@ export default function VideoInstructionsDialog({
 
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const mergedIconClassName = [iconClassName, className].filter(Boolean).join(" ");
   
   // Sync external state changes to internal state
   useEffect(() => {
@@ -145,10 +150,14 @@ export default function VideoInstructionsDialog({
   };
 
   const handleOpen = () => {
-    if (externalIsOpen === undefined) {
-      setInternalIsOpen(true);
+    // If parent controls open state, notify it
+    if (externalOnOpen) {
+      externalOnOpen();
+      return;
     }
-    // If external control, don't change state here
+
+    // Otherwise use internal state
+    if (externalIsOpen === undefined) setInternalIsOpen(true);
   };
 
   return (
@@ -156,8 +165,9 @@ export default function VideoInstructionsDialog({
       {/* YouTube Icon Button */}
       {showIcon && (
         <button
+          type="button"
           onClick={handleOpen}
-          className={`inline-flex items-center justify-center transition-colors group relative ${iconClassName}`}
+          className={`inline-flex items-center justify-center transition-colors group relative ${mergedIconClassName}`}
           aria-label={displayTooltip}
         >
         <span className={`block`} style={{ width: "2.5rem", height: "2.5rem" }}>
@@ -165,7 +175,7 @@ export default function VideoInstructionsDialog({
             viewBox="0 0 32 32"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            className="w-full h-full"
+            className={`w-full h-full ${svgClassName}`}
           >
             <rect width="32" height="32" rx="8" fill="#fff" />
             <path
