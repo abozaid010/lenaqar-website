@@ -179,6 +179,49 @@ export async function fetchCitisAndProjects() {
   }
 }
 
+// Campaigns API //
+export async function fetchCampaigns({ limit = 50, offset = 0 } = {}) {
+  try {
+    const response = await axiosInstance.get("/campaign/list", {
+      params: { limit, offset },
+    });
+
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    const campaigns = response.data.data.campaigns;
+    if (!Array.isArray(campaigns)) {
+      throw new Error("Expected campaigns array but received invalid data format");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch campaigns:", error.message);
+    throw error;
+  }
+}
+
+export async function createCampaign(payload) {
+  try {
+    const response = await axiosInstance.post("/campaign/create", payload);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create campaign:", error.message);
+    return { error: error.response?.data?.error_message || error.message };
+  }
+}
+
+export async function updateCampaign(id, payload) {
+  try {
+    const response = await axiosInstance.patch(`/campaign/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update campaign:", error.message);
+    return { error: error.response?.data?.error_message || error.message };
+  }
+}
+
 export async function getClientActions(phoneNumber) {
   try {
     const response = await axiosInstance.get(`action/${phoneNumber}`);
