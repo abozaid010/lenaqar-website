@@ -434,6 +434,10 @@ export default {
     success: "Success",
     failed: "Failed",
     successful: "Successful",
+    missingProjects: "Missing Projects",
+    missingProjectsTitle: "Missing projects",
+    missingProjectsMessage:
+      "The following projects were not found, so units referencing them were rejected. Please create these projects (or fix their names in the Excel sheet) and re-upload the failed units.",
     missingColumnsWarning: "Make sure sheet contains these missing values before you upload:",
     gotIt: "Got it",
     validationErrorTitle: "Validation Errors",

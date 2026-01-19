@@ -203,6 +203,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState([]);
+  const [missingProjects, setMissingProjects] = useState([]);
+  const [isMissingProjectsDialogOpen, setIsMissingProjectsDialogOpen] =
+    useState(false);
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
   const [missingColumns, setMissingColumns] = useState([]);
   const [validationErrors, setValidationErrors] = useState([]);
@@ -508,6 +511,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setParsedData(null);
     setError(null);
     setUploadStatus([]);
+    setMissingProjects([]);
+    setIsMissingProjectsDialogOpen(false);
     setManualHeaderMapping({});
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
@@ -523,6 +528,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setParsedData(null);
     setError(null);
     setUploadStatus([]);
+    setMissingProjects([]);
+    setIsMissingProjectsDialogOpen(false);
     setManualHeaderMapping({});
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
@@ -701,6 +708,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setIsUploading(true);
     setUploadStatus([]);
     setAllUploadsSuccessful(false);
+    setMissingProjects([]);
+    setIsMissingProjectsDialogOpen(false);
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
@@ -719,8 +728,28 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
       // Check if the upload was successful
       if (response?.status && response?.data) {
-        const insertedIds = response.data.inserted_ids || [];
-        const failedUnits = response.data.failed_units || [];
+        const insertedIds =
+          response.data.inserted_ids || response.data?.summary?.inserted_ids || [];
+        const failedUnits =
+          response.data.failed_units || response.data?.summary?.failed_units || [];
+        const missingProjectsFromApi =
+          response.data.missing_projects ||
+          response.data?.summary?.missing_projects ||
+          [];
+
+        const normalizedMissingProjects = Array.from(
+          new Set(
+            (Array.isArray(missingProjectsFromApi) ? missingProjectsFromApi : [])
+              .filter(Boolean)
+              .map((p) => String(p).trim())
+              .filter(Boolean)
+          )
+        );
+
+        if (normalizedMissingProjects.length > 0) {
+          setMissingProjects(normalizedMissingProjects);
+          setIsMissingProjectsDialogOpen(true);
+        }
         const totalSent = parsedData.units.length;
         const totalInserted = insertedIds.length;
 
@@ -890,6 +919,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               tooltipText="How to upload units via Excel"
               className="p-0"
               isOpen={isVideoDialogOpen}
+              onOpen={() => setIsVideoDialogOpen(true)}
               onClose={() => setIsVideoDialogOpen(false)}
               zIndex={101}
             />
@@ -903,6 +933,18 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             >
               {t.uploadExcel?.cancel || "Cancel"}
             </button>
+            {isUploadComplete && missingProjects.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsMissingProjectsDialogOpen(true)}
+                className="px-4 py-1 bg-red-600 text-white rounded-md transition-opacity flex items-center gap-2 hover:opacity-90"
+                title="Some projects were missing during import"
+              >
+                <AlertCircle size={18} />
+                {t.uploadExcel?.missingProjects || "Missing Projects"} (
+                {missingProjects.length})
+              </button>
+            )}
             {isUploadComplete && hasFailedUnits ? (
               <button
                 onClick={downloadFailedUnits}
@@ -1018,30 +1060,34 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     </table>
                   </div>
 
-                  {/* Buttons */}
-                  <div className="flex items-center justify-center gap-3">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        downloadTemplateFile();
-                      }}
-                      className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800 hover:underline transition-all flex items-center gap-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50"
-                    >
-                      <Download size={16} />
-                      {t.uploadExcel?.downloadTemplate || "Download Template"}
-                    </button>
+                  {/* Actions */}
+                  <div className="flex flex-col items-center justify-center gap-3">
                     <button
                       onClick={handleUploadClick}
                       className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
                       {t.uploadExcel?.browseFiles || "Submit"}
                     </button>
-                  </div>
 
-                  <p className="text-sm text-gray-500">
-                    {t.uploadExcel?.supportedFormats ||
-                      "Supported formats: .xlsx, .xls"}
-                  </p>
+                    <div className="flex items-center justify-center gap-3 flex-wrap">
+                      <p className="text-sm text-gray-500">
+                        {t.uploadExcel?.supportedFormats ||
+                          "Supported formats: .xlsx, .xls"}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          downloadTemplateFile();
+                        }}
+                        className="text-sm text-gray-600 underline underline-offset-2 hover:text-gray-800 transition-colors flex items-center gap-2 bg-transparent border-0 p-0"
+                      >
+                        <Download size={16} />
+                        {t.uploadExcel?.downloadTemplate || "Download Template"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">
@@ -1510,6 +1556,56 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   setShowMissingColumnsWarning(false);
                   setValidationErrors([]);
                 }}
+                className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+              >
+                {t.uploadExcel?.gotIt || "Got it"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Missing Projects Dialog */}
+      {isMissingProjectsDialogOpen && missingProjects.length > 0 && (
+        <div className="fixed inset-0 z-[102] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between py-4 px-6 border-b">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <AlertCircle className="text-red-600" size={20} />
+                {t.uploadExcel?.missingProjectsTitle || "Missing projects"}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsMissingProjectsDialogOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto flex-1">
+              <p className="text-sm text-gray-700 mb-4">
+                {t.uploadExcel?.missingProjectsMessage ||
+                  "The following projects were not found, so units referencing them were rejected. Please create these projects (or fix their names in the Excel sheet) and re-upload the failed units."}
+              </p>
+
+              <div className="border rounded-lg overflow-hidden">
+                <div className="max-h-[40vh] overflow-y-auto divide-y">
+                  {missingProjects.map((project) => (
+                    <div key={project} className="px-4 py-3 bg-red-50">
+                      <span className="text-sm font-medium text-red-800">
+                        {project}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end px-6 py-4 border-t bg-gray-50">
+              <button
+                type="button"
+                onClick={() => setIsMissingProjectsDialogOpen(false)}
                 className="px-6 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
               >
                 {t.uploadExcel?.gotIt || "Got it"}
