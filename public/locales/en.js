@@ -204,6 +204,7 @@ export default {
     schedule: "Calendar",
     myProjects: "My Projects",
     dashboard: "Conversations",
+    campaigns: "Campaigns",
     analytics: "Analytics",
     units: "Units",
     team: "Team",

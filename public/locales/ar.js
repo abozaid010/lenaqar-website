@@ -212,6 +212,7 @@ export default {
     schedule: "مهام الاسبوع",
     myProjects: "مشاريعي",
     dashboard: " المحادثات",
+    campaigns: "الحملات",
     analytics: "التحليلات",
     units: "الوحدات",
     team: "الفريق",

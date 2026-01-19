@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   BarChart2,
   Calendar,
+  Megaphone,
   FolderKanban,
   Home,
   LayoutDashboard,
@@ -141,6 +142,23 @@ const Sidebar = () => {
             <LayoutDashboard className="h-5 w-5 mr-3" />
             <span>{t.sidebar.dashboard}</span>
             {isPending && pendingPath === "/dashboard" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
+          </Link>
+
+          <Link
+            href="/campaigns"
+            prefetch={true}
+            onClick={(e) => handleNavigation("/campaigns", e)}
+            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/campaigns") || pendingPath === "/campaigns"
+                ? "bg-primary text-white"
+                : "text-gray-700 hover:bg-gray-100"
+            } ${isPending && pendingPath === "/campaigns" ? "opacity-70" : ""}`}
+          >
+            <Megaphone className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.campaigns || "Campaigns"}</span>
+            {isPending && pendingPath === "/campaigns" && (
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>

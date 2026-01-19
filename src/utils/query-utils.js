@@ -20,6 +20,15 @@ export const unitKeys = {
   detail: (id) => [...unitKeys.details(), id],
 };
 
+// Query key factory for campaigns
+export const campaignKeys = {
+  all: ["campaigns"],
+  lists: () => [...campaignKeys.all, "list"],
+  list: (params) => [...campaignKeys.lists(), params],
+  details: () => [...campaignKeys.all, "detail"],
+  detail: (id) => [...campaignKeys.details(), id],
+};
+
 // Query key factory for developers
 export const developerKeys = {
   all: ["developers"],

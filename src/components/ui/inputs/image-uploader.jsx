@@ -4,7 +4,12 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
-import { getMaxSizeBytes, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
+import {
+  getMaxSizeBytes,
+  getMaxSizeMB,
+  isSupportedImageFile,
+  SUPPORTED_IMAGE_ACCEPT,
+} from "@/config/imageUpload";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -12,6 +17,7 @@ import toast from "react-hot-toast";
 export default function ImageUploader({
   maxImages = 8,
   initialImages = [],
+  imageType = "normal", // 'normal' | 'masterPlan' (campaigns use 10MB via masterPlan)
   onImagesChange = () => { },
   isUploading,
   setIsUploading,
@@ -62,13 +68,17 @@ export default function ImageUploader({
     }
     const newSelectedImages = [];
     const newUploadStatus = { ...uploadStatus };
+    const maxSizeBytes = getMaxSizeBytes(imageType);
+    const maxSizeMB = getMaxSizeMB(imageType);
     for (const file of Array.from(files)) {
       if (!isSupportedImageFile(file)) {
         toast.error(t.invalidFileType);
         continue;
       }
-      if (file.size > getMaxSizeBytes('normal')) {
-        toast.error(`${file.name}_${t.fileSizeExceeds}`);
+      if (file.size > maxSizeBytes) {
+        toast.error(
+          `${file.name} exceeds ${maxSizeMB}MB. Please upload a smaller image.`
+        );
         continue;
       }
       const imageId = `image_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
