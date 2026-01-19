@@ -421,6 +421,10 @@ export default {
     success: "نجح",
     failed: "فشل",
     successful: "ناجح",
+    missingProjects: "مشاريع مفقودة",
+    missingProjectsTitle: "مشاريع مفقودة",
+    missingProjectsMessage:
+      "المشاريع التالية غير موجودة، لذلك تم رفض الوحدات المرتبطة بها. يرجى إنشاء هذه المشاريع (أو تصحيح أسمائها في ملف الإكسل) ثم إعادة رفع الوحدات الفاشلة.",
     missingColumnsWarning: "تأكد من أن الورقة تحتوي على هذه القيم المفقودة قبل الرفع:",
     gotIt: "حسناً",
     validationErrorTitle: "أخطاء التحقق",
