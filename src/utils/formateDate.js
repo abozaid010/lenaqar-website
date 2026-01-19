@@ -33,3 +33,47 @@ export function formatTimestamp(ts) {
   });
   return `${datePart} - ${timePart}`;
 }
+
+/**
+ * Matches the Conversations (dashboard) timestamp format:
+ * e.g. "Jan 19, 1:35 PM"
+ *
+ * Returns "" if the value is missing/invalid.
+ */
+export function formatDateTimeAmPmShort(value) {
+  if (!value) return "";
+
+  let dateObj;
+  try {
+    dateObj = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateObj.getTime())) return "";
+  } catch {
+    return "";
+  }
+
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
+
+  const month = monthNames[dateObj.getMonth()];
+  const day = dateObj.getDate();
+
+  let hours = dateObj.getHours();
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+
+  return `${month} ${day}, ${hours}:${minutes} ${ampm}`;
+}

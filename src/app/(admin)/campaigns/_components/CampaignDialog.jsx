@@ -27,6 +27,7 @@ export default function CampaignDialog({
 }) {
   const { t, locale } = useI18n();
   const queryClient = useQueryClient();
+  const c = t?.campaigns || {};
 
   const editMode = !!campaign?.id;
   const didInitRef = useRef(false);
@@ -45,7 +46,9 @@ export default function CampaignDialog({
   const [isUnitSelectorOpen, setIsUnitSelectorOpen] = useState(false);
 
   const title = useMemo(() => {
-    return editMode ? "Update Campaign" : "New Campaign";
+    return editMode
+      ? c.updateTitle || "Update Campaign"
+      : c.createTitle || "New Campaign";
   }, [editMode]);
 
   // Initialize only once per open, so toggling preserves edits
@@ -105,20 +108,20 @@ export default function CampaignDialog({
 
   const validate = () => {
     if (!payload.client_phone_number) {
-      toast.error("Client phone number is required.");
+      toast.error(c.errors?.clientPhoneRequired || "Client phone number is required.");
       return false;
     }
 
     if (mode === "unit") {
       if (!selectedUnit) {
-        toast.error("Please select a unit.");
+        toast.error(c.errors?.unitRequired || "Please select a unit.");
         return false;
       }
       return true;
     }
 
     if (!payload.text) {
-      toast.error("Text is required.");
+      toast.error(c.errors?.textRequired || "Text is required.");
       return false;
     }
 
@@ -127,6 +130,10 @@ export default function CampaignDialog({
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
+    if (isUploadingImages) {
+      toast.error(c.errors?.waitForImages || "Please wait for images to finish uploading.");
+      return;
+    }
     if (!validate()) return;
 
     setIsSubmitting(true);
@@ -143,31 +150,67 @@ export default function CampaignDialog({
 
       const isOk = res?.status === true || res?.code === 200;
       if (!isOk) {
-        toast.error(res?.message || "Request failed. Please try again.");
+        toast.error(res?.message || c.errors?.requestFailed || "Request failed. Please try again.");
         setIsSubmitting(false);
         return;
       }
 
       toast.success(
-        editMode ? "Campaign updated successfully" : "Campaign created successfully"
+        editMode
+          ? c.toasts?.updated || "Campaign updated successfully"
+          : c.toasts?.created || "Campaign created successfully"
       );
 
       queryClient.invalidateQueries({ queryKey: campaignKeys.all });
       onSuccess?.(res?.data || null);
       onClose?.();
     } catch (e) {
-      toast.error(e?.message || "Something went wrong.");
+      toast.error(e?.message || c.errors?.somethingWentWrong || "Something went wrong.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title={title}>
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      showCloseButton={false}
+      headerActions={
+        <>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
+            disabled={isSubmitting}
+          >
+            {t?.buttons?.cancel || "Cancel"}
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            disabled={isSubmitting || isUploadingImages}
+          >
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                {editMode ? c.updating || "Updating..." : c.creating || "Creating..."}
+              </span>
+            ) : editMode ? (
+              c.updateButton || "Update"
+            ) : (
+              c.createButton || "Create"
+            )}
+          </button>
+        </>
+      }
+    >
       <div className="max-w-3xl mx-auto">
         <div className="space-y-4">
           <LenaTextField
-            label="Client phone number"
+            label={c.clientPhoneNumber || "Client phone number"}
             name="client_phone_number"
             value={clientPhoneNumber}
             onChange={(e) => setClientPhoneNumber(e.target.value)}
@@ -178,7 +221,7 @@ export default function CampaignDialog({
           {/* Mode selector */}
           <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
             <div className="text-sm font-medium text-gray-800 mb-2">
-              Campaign type
+              {c.campaignType || "Campaign type"}
             </div>
             <div className="flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -188,7 +231,7 @@ export default function CampaignDialog({
                   checked={mode === "text"}
                   onChange={() => setMode("text")}
                 />
-                <span className="text-sm text-gray-800">Text</span>
+                <span className="text-sm text-gray-800">{c.typeText || "Text"}</span>
               </label>
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
@@ -197,7 +240,7 @@ export default function CampaignDialog({
                   checked={mode === "unit"}
                   onChange={() => setMode("unit")}
                 />
-                <span className="text-sm text-gray-800">Unit</span>
+                <span className="text-sm text-gray-800">{c.typeUnit || "Unit"}</span>
               </label>
             </div>
           </div>
@@ -206,7 +249,7 @@ export default function CampaignDialog({
           {mode === "text" && (
             <div className="space-y-4">
               <LenaTextarea
-                label="Text"
+                label={c.text || "Text"}
                 name="text"
                 value={textValue}
                 onChange={(e) => setTextValue(e.target.value)}
@@ -217,7 +260,7 @@ export default function CampaignDialog({
 
               <div>
                 <div className="text-sm font-medium text-gray-800 mb-2">
-                  Images (max 4, up to 10MB each)
+                  {c.imagesLabel || "Images (max 4, up to 10MB each)"}
                 </div>
                 <ImageUploader
                   maxImages={4}
@@ -236,7 +279,7 @@ export default function CampaignDialog({
             <div className="space-y-3">
               <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
                 <div className="text-sm font-medium text-gray-800 mb-1">
-                  Selected unit
+                  {c.selectedUnit || "Selected unit"}
                 </div>
                 {selectedUnit ? (
                   <div className="text-sm text-gray-700">
@@ -248,12 +291,18 @@ export default function CampaignDialog({
                         "Unit"}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {selectedUnit?.project ? `Project: ${selectedUnit.project}` : null}
-                      {selectedUnit?.city ? ` • City: ${selectedUnit.city}` : null}
+                      {selectedUnit?.project
+                        ? `${c.project || "Project"}: ${selectedUnit.project}`
+                        : null}
+                      {selectedUnit?.city
+                        ? ` • ${c.city || "City"}: ${selectedUnit.city}`
+                        : null}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-sm text-gray-500">No unit selected.</div>
+                  <div className="text-sm text-gray-500">
+                    {c.noUnitSelected || "No unit selected."}
+                  </div>
                 )}
               </div>
 
@@ -262,11 +311,11 @@ export default function CampaignDialog({
                 onClick={() => setIsUnitSelectorOpen(true)}
                 className="px-4 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
               >
-                Choose unit
+                {c.chooseUnit || "Choose unit"}
               </button>
 
               <div className="text-xs text-gray-500">
-                Note: images are hidden when unit is selected.
+                {c.unitModeNote || "Note: images are hidden when unit is selected."}
               </div>
             </div>
           )}
@@ -274,13 +323,13 @@ export default function CampaignDialog({
           {/* Suggested answers */}
           <div className="space-y-3">
             <div className="text-sm font-medium text-gray-800">
-              Suggested answers (up to 3)
+              {c.suggestedAnswersLabel || "Suggested answers (up to 3)"}
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {[0, 1, 2].map((i) => (
                 <LenaTextField
                   key={i}
-                  label={`Suggested ${i + 1}`}
+                  label={`${c.suggested || "Suggested"} ${i + 1}`}
                   name={`suggested_${i}`}
                   value={suggestedAns[i] || ""}
                   onChange={(e) =>
@@ -304,35 +353,6 @@ export default function CampaignDialog({
               setIsUnitSelectorOpen(false);
             }}
           />
-
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm"
-              disabled={isSubmitting}
-            >
-              {t?.buttons?.cancel || "Cancel"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              className="px-4 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm disabled:opacity-70 disabled:pointer-events-none"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin" />
-                  {editMode ? "Updating..." : "Creating..."}
-                </span>
-              ) : editMode ? (
-                "Update"
-              ) : (
-                "Create"
-              )}
-            </button>
-          </div>
         </div>
       </div>
     </Dialog>

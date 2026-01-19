@@ -76,8 +76,11 @@ export default function ImageUploader({
         continue;
       }
       if (file.size > maxSizeBytes) {
+        const tpl =
+          t?.common?.fileSizeExceedsMb ||
+          "File size exceeds {mb}MB. Please upload a smaller image.";
         toast.error(
-          `${file.name} exceeds ${maxSizeMB}MB. Please upload a smaller image.`
+          `${file.name} - ${String(tpl).replace("{mb}", String(maxSizeMB))}`
         );
         continue;
       }

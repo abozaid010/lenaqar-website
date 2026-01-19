@@ -8,6 +8,7 @@ import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
+import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { BellDot, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
@@ -157,25 +158,8 @@ export default function ClientsTable({ users, pagination }) {
                 {localUsers?.map((user) => {
                   let lastActivity = t.clientsTable.lastActivity.na;
                   try {
-                    if (user.updated_at) {
-                      const dateObj = new Date(user.updated_at);
-                      if (!isNaN(dateObj.getTime())) {
-                        const monthNames = [
-                          "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                        ];
-                        const month = monthNames[dateObj.getMonth()];
-                        const day = dateObj.getDate();
-                        
-                        let hours = dateObj.getHours();
-                        const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-                        const ampm = hours >= 12 ? "PM" : "AM";
-                        hours = hours % 12;
-                        hours = hours ? hours : 12; // the hour '0' should be '12'
-                        
-                        lastActivity = `${month} ${day}, ${hours}:${minutes} ${ampm}`;
-                      }
-                    }
+                    const formatted = formatDateTimeAmPmShort(user.updated_at);
+                    if (formatted) lastActivity = formatted;
                   } catch (error) {
                     console.error("Invalid date format:", user.updated_at);
                   }

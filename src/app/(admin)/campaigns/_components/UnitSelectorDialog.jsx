@@ -28,6 +28,7 @@ function getFirstUnitImage(unit) {
 
 export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
   const { t, locale } = useI18n();
+  const c = t?.campaigns || {};
   const clientId = LenaCookiesManager.getClientId() || "";
 
   const { data: projectsData, isLoading: projectsLoading } = useCompounds(
@@ -107,7 +108,11 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
   const pagination = data?.data?.pagination || null;
 
   return (
-    <Dialog isOpen={isOpen} onClose={onClose} title="Select a unit">
+    <Dialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={c.unitSelectorTitle || "Select a unit"}
+    >
       <div className="space-y-4">
         {/* Filters */}
         <div className="p-4 bg-white rounded-lg shadow-sm border border-gray-200">
@@ -242,7 +247,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               }}
               className="px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm"
             >
-              Clear
+              {c.clear || "Clear"}
             </button>
             <button
               type="button"
@@ -252,10 +257,10 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               {isFetching ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin" />
-                  Loading...
+                  {c.loading || "Loading..."}
                 </span>
               ) : (
-                "Refresh"
+                c.refresh || "Refresh"
               )}
             </button>
           </div>
@@ -264,13 +269,15 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
         {/* Results */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           {isLoading ? (
-            <LoadingSpinner message="Loading units..." />
+            <LoadingSpinner message={c.loadingUnits || "Loading units..."} />
           ) : isError ? (
             <div className="text-red-600 text-sm">
-              {error?.message || "Failed to load units"}
+              {error?.message || c.failedToLoadUnits || "Failed to load units"}
             </div>
           ) : units.length === 0 ? (
-            <div className="text-gray-600 text-sm">No units found.</div>
+            <div className="text-gray-600 text-sm">
+              {c.noUnitsFound || "No units found."}
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {units.map((u) => (
@@ -290,11 +297,11 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                   </div>
                   <div className="p-3">
                     <div className="font-semibold text-gray-900 line-clamp-1">
-                      {u?.unitTitle || "Unnamed Unit"}
+                      {u?.unitTitle || c.unnamedUnit || "Unnamed Unit"}
                     </div>
                     <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                      {u?.project ? `Project: ${u.project}` : null}
-                      {u?.city ? ` • City: ${u.city}` : null}
+                      {u?.project ? `${c.project || "Project"}: ${u.project}` : null}
+                      {u?.city ? ` • ${c.city || "City"}: ${u.city}` : null}
                     </div>
 
                     <div className="mt-2 text-xs text-gray-700 flex flex-wrap gap-2">
@@ -319,7 +326,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                         }}
                         className="px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
                       >
-                        Select
+                        {c.select || "Select"}
                       </button>
                     </div>
                   </div>

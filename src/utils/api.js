@@ -204,7 +204,7 @@ export async function fetchCampaigns({ limit = 50, offset = 0 } = {}) {
 
 export async function createCampaign(payload) {
   try {
-    const response = await axiosInstance.post("/campaign", payload);
+    const response = await axiosInstance.post("/campaign/create", payload);
     return response.data;
   } catch (error) {
     console.error("Failed to create campaign:", error.message);

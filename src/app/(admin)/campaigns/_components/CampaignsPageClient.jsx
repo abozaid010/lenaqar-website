@@ -5,24 +5,15 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useI18n } from "@/context/translate-api";
 import { fetchCampaigns } from "@/utils/api";
+import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus, RefreshCw } from "lucide-react";
 import { useMemo, useState } from "react";
 import CampaignDialog from "./CampaignDialog";
 
-function formatDateTime(value) {
-  if (!value) return "—";
-  try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString();
-  } catch {
-    return String(value);
-  }
-}
-
 function CampaignCard({ campaign, onEdit }) {
+  const { t } = useI18n();
   const isUnitMode = !!campaign?.unit;
   const images = Array.isArray(campaign?.images) ? campaign.images : [];
   const suggestedAns = Array.isArray(campaign?.suggested_ans)
@@ -33,31 +24,44 @@ function CampaignCard({ campaign, onEdit }) {
     : [];
   const lastClick = linkClicked.length ? linkClicked[linkClicked.length - 1] : null;
 
+  const campaignId = campaign?.id || "";
+  const campaignUrlText = campaignId
+    ? `https://chat.lenaai.net/?campaign=${campaignId}`
+    : "—";
+  const campaignHref = campaignId
+    ? `https://chat.lenaai.net/?campaign=${campaignId}`
+    : undefined;
+
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-semibold px-2 py-1 rounded bg-gray-100 text-gray-700">
-              {isUnitMode ? "Unit" : "Text"}
+              {isUnitMode ? t?.campaigns?.typeUnit || "Unit" : t?.campaigns?.typeText || "Text"}
             </span>
-            <span className="text-xs font-mono text-gray-500">
-              ID: {campaign?.id || "—"}
+            <span className="text-xs font-mono text-gray-500 truncate">
+              {campaignHref ? (
+                <a
+                  href={campaignHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  {campaignUrlText}
+                </a>
+              ) : (
+                campaignUrlText
+              )}
             </span>
           </div>
 
           <div className="mt-2 space-y-1 text-sm text-gray-800">
             <div className="flex flex-wrap gap-x-4 gap-y-1">
               <span>
-                <span className="text-gray-500">Client:</span>{" "}
-                <span className="font-medium">{campaign?.client_name || "—"}</span>
-              </span>
-              <span>
-                <span className="text-gray-500">Client ID:</span>{" "}
-                <span className="font-mono">{campaign?.client_id || "—"}</span>
-              </span>
-              <span>
-                <span className="text-gray-500">Phone:</span>{" "}
+                <span className="text-gray-500">
+                  {t?.campaigns?.campaignManager || "Campaign manager"}:
+                </span>{" "}
                 <span className="font-mono">
                   {campaign?.client_phone_number || "—"}
                 </span>
@@ -66,14 +70,14 @@ function CampaignCard({ campaign, onEdit }) {
 
             {!isUnitMode ? (
               <div className="text-gray-800">
-                <span className="text-gray-500">Text:</span>{" "}
+                <span className="text-gray-500">{t?.campaigns?.text || "Text"}:</span>{" "}
                 <span className="font-medium">
                   {campaign?.text ? String(campaign.text) : "—"}
                 </span>
               </div>
             ) : (
               <div className="text-gray-800">
-                <span className="text-gray-500">Unit:</span>{" "}
+                <span className="text-gray-500">{t?.campaigns?.unit || "Unit"}:</span>{" "}
                 <span className="font-medium">
                   {campaign?.unit?.unitTitle ||
                     campaign?.unit?.title ||
@@ -83,17 +87,6 @@ function CampaignCard({ campaign, onEdit }) {
                 </span>
               </div>
             )}
-
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              <span>
-                <span className="text-gray-500">Created:</span>{" "}
-                {formatDateTime(campaign?.created_at)}
-              </span>
-              <span>
-                <span className="text-gray-500">Updated:</span>{" "}
-                {formatDateTime(campaign?.updated_at)}
-              </span>
-            </div>
           </div>
         </div>
 
@@ -103,7 +96,7 @@ function CampaignCard({ campaign, onEdit }) {
           className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
         >
           <Pencil size={16} />
-          Edit
+          {t?.campaigns?.edit || "Edit"}
         </button>
       </div>
 
@@ -111,7 +104,7 @@ function CampaignCard({ campaign, onEdit }) {
       {!isUnitMode && (
         <div className="mt-3">
           <div className="text-xs font-medium text-gray-600 mb-2">
-            Images ({images.length})
+            {t?.campaigns?.images || "Images"} ({images.length})
           </div>
           {images.length ? (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -133,7 +126,9 @@ function CampaignCard({ campaign, onEdit }) {
               ))}
             </div>
           ) : (
-            <div className="text-sm text-gray-500">No images</div>
+            <div className="text-sm text-gray-500">
+              {t?.campaigns?.noImages || "No images"}
+            </div>
           )}
         </div>
       )}
@@ -141,7 +136,7 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Suggested answers */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          Suggested answers ({suggestedAns.length})
+          {t?.campaigns?.suggestedAnswers || "Suggested answers"} ({suggestedAns.length})
         </div>
         {suggestedAns.length ? (
           <div className="flex flex-wrap gap-2">
@@ -155,36 +150,45 @@ function CampaignCard({ campaign, onEdit }) {
             ))}
           </div>
         ) : (
-          <div className="text-sm text-gray-500">No suggested answers</div>
+          <div className="text-sm text-gray-500">
+            {t?.campaigns?.noSuggestedAnswers || "No suggested answers"}
+          </div>
         )}
+      </div>
+
+      {/* Created/Updated */}
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-800">
+        <span>
+          <span className="text-gray-500">{t?.campaigns?.createdAt || "Created"}:</span>{" "}
+          {formatDateTimeAmPmShort(campaign?.created_at) || "—"}
+        </span>
+        <span>
+          <span className="text-gray-500">{t?.campaigns?.updatedAt || "Updated"}:</span>{" "}
+          {formatDateTimeAmPmShort(campaign?.updated_at) || "—"}
+        </span>
       </div>
 
       {/* Link clicked */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          Link clicks: {linkClicked.length}
+          {t?.campaigns?.linkClicks || "Link clicks"}: {linkClicked.length}
         </div>
         {lastClick ? (
           <div className="text-sm text-gray-700">
-            Last: <span className="font-mono">{formatDateTime(lastClick?.date)}</span>{" "}
+            {t?.campaigns?.lastClick || "Last"}:{" "}
+            <span className="font-mono">
+              {formatDateTimeAmPmShort(lastClick?.date) || "—"}
+            </span>{" "}
             {lastClick?.device ? (
               <span className="text-gray-500">({String(lastClick.device)})</span>
             ) : null}
           </div>
         ) : (
-          <div className="text-sm text-gray-500">No clicks</div>
+          <div className="text-sm text-gray-500">
+            {t?.campaigns?.noClicks || "No clicks"}
+          </div>
         )}
       </div>
-
-      {/* Full details */}
-      <details className="mt-3">
-        <summary className="cursor-pointer text-sm text-gray-700 font-medium">
-          Details (raw)
-        </summary>
-        <pre className="mt-2 text-xs bg-gray-50 border border-gray-200 rounded-md p-3 overflow-auto max-h-[320px]">
-          {JSON.stringify(campaign, null, 2)}
-        </pre>
-      </details>
     </div>
   );
 }
