@@ -10,18 +10,22 @@ export default function Dialog({
   children,
   headerActions = null,
   showCloseButton = true,
+  closeOnOutsideClick = true,
+  closeOnEscape = true,
 }) {
   const dialogRef = useRef(null);
 
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
-        onClose();
+        if (closeOnEscape) onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
+      if (closeOnEscape) {
+        document.addEventListener("keydown", handleEscape);
+      }
       document.body.style.overflow = "hidden";
     }
 
@@ -29,9 +33,10 @@ export default function Dialog({
       document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, closeOnEscape]);
 
   const handleOutsideClick = (e) => {
+    if (!closeOnOutsideClick) return;
     if (dialogRef.current && !dialogRef.current.contains(e.target)) {
       onClose();
     }

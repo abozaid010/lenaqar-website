@@ -3,7 +3,7 @@
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import { useI18n } from "@/context/translate-api";
 import { getDefaultPaymentPlans } from "@/data/default-payment-plans";
-import { Edit2, Plus, Trash2, Check } from "lucide-react";
+import { Edit2, Plus, Trash2, Check, ChevronDown } from "lucide-react";
 import { useState, useMemo } from "react";
 
 export default function PaymentPlansList({
@@ -17,6 +17,7 @@ export default function PaymentPlansList({
   const [isAddPlanDialogOpen, setIsAddPlanDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
+  const [isDefaultPlansOpen, setIsDefaultPlansOpen] = useState(false); // collapsed by default
 
   // Get default payment plans
   const defaultPlans = useMemo(() => getDefaultPaymentPlans(), []);
@@ -115,6 +116,9 @@ export default function PaymentPlansList({
     }
   };
 
+  const hasPlans = Array.isArray(plans) && plans.length > 0;
+  const showDefaultPlansSection = !hasPlans; // show only when empty payment plans
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-2">
@@ -135,47 +139,65 @@ export default function PaymentPlansList({
       </div>
 
       {/* Default Payment Plans Selection */}
-      <div>
-        <p className="text-xs text-gray-600 mb-2">
-          {t.formLabels?.selectDefaultPlans || "Select from common payment plans:"}
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          {defaultPlans.map((defaultPlan) => {
-            const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
-            return (
-              <button
-                key={defaultPlan.id}
-                type="button"
-                onClick={() => handleToggleDefaultPlan(defaultPlan)}
-                className={`relative p-2 rounded-md border transition-all text-left ${
-                  isSelected
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                }`}
-              >
-                <div className="flex items-center gap-1.5 mb-1">
-                  <h4 className="font-medium text-gray-900 text-xs">
-                    {defaultPlan.name}
-                  </h4>
-                  {isSelected && (
-                    <Check size={12} className="text-blue-600 flex-shrink-0" />
-                  )}
-                </div>
-                <div className="text-[10px] text-gray-600">
-                  <div>
-                    <span className="font-medium">DP:</span>{" "}
-                    {formatPercentage(defaultPlan.downpayment_percentage)}
-                  </div>
-                  <div>
-                    <span className="font-medium">Yrs:</span>{" "}
-                    {defaultPlan.installment_years}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+      {showDefaultPlansSection ? (
+        <div className="border border-gray-200 rounded-md bg-gray-50">
+          <button
+            type="button"
+            onClick={() => setIsDefaultPlansOpen((v) => !v)}
+            className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left"
+            aria-expanded={isDefaultPlansOpen}
+          >
+            <span className="text-xs text-gray-700">
+              {t.formLabels?.selectDefaultPlans || "Select from common payment plans:"}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`text-gray-500 transition-transform ${isDefaultPlansOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {isDefaultPlansOpen ? (
+            <div className="px-3 pb-3">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {defaultPlans.map((defaultPlan) => {
+                  const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
+                  return (
+                    <button
+                      key={defaultPlan.id}
+                      type="button"
+                      onClick={() => handleToggleDefaultPlan(defaultPlan)}
+                      className={`relative p-2 rounded-md border transition-all text-left ${
+                        isSelected
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <h4 className="font-medium text-gray-900 text-xs">
+                          {defaultPlan.name}
+                        </h4>
+                        {isSelected && (
+                          <Check size={12} className="text-blue-600 flex-shrink-0" />
+                        )}
+                      </div>
+                      <div className="text-[10px] text-gray-600">
+                        <div>
+                          <span className="font-medium">DP:</span>{" "}
+                          {formatPercentage(defaultPlan.downpayment_percentage)}
+                        </div>
+                        <div>
+                          <span className="font-medium">Yrs:</span>{" "}
+                          {defaultPlan.installment_years}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
         </div>
-      </div>
+      ) : null}
 
       {/* Selected Plans List */}
       {plans.length > 0 ? (
@@ -288,7 +310,9 @@ export default function PaymentPlansList({
         <div
           className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md p-4 text-center text-gray-500 text-sm`}
         >
-          {t.noPaymentPlans || "No payment plans selected. Choose from common plans above or create a custom plan."}
+          {t.formLabels?.noPaymentPlansHint ||
+            t.noPaymentPlans ||
+            "No payment plans selected. Choose from common plans above or create a custom plan."}
         </div>
       )}
 

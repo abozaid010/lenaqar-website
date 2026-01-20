@@ -13,7 +13,7 @@ import { useMemo, useState } from "react";
 import CampaignDialog from "./CampaignDialog";
 
 function CampaignCard({ campaign, onEdit }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isUnitMode = !!campaign?.unit;
   const images = Array.isArray(campaign?.images) ? campaign.images : [];
   const suggestedAns = Array.isArray(campaign?.suggested_ans)
@@ -32,73 +32,121 @@ function CampaignCard({ campaign, onEdit }) {
     ? `https://chat.lenaai.net/?campaign=${campaignId}`
     : undefined;
 
+  const previewLabel = t?.uploadExcel?.preview || (locale === "ar" ? "معاينة" : "Preview");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    if (!campaignId) return;
+    const text = `https://chat.lenaai.net/?campaign=${campaignId}`;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const el = document.createElement("textarea");
+        el.value = text;
+        el.setAttribute("readonly", "");
+        el.style.position = "absolute";
+        el.style.left = "-9999px";
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        document.body.removeChild(el);
+      }
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1200);
+    } catch {
+      // If copy fails, do nothing (avoid breaking the UI)
+    }
+  };
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-      <div className="flex items-start justify-between gap-3">
+    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {/* Header (type + link + actions) */}
+      <div className="flex items-center justify-between gap-3 bg-[#F6F7FB] border-b border-[#E6E6E6] px-4 py-3">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-semibold px-2 py-1 rounded bg-gray-100 text-gray-700">
-              {isUnitMode ? t?.campaigns?.typeUnit || "Unit" : t?.campaigns?.typeText || "Text"}
-            </span>
-            <span className="text-xs font-mono text-gray-500 truncate">
-              {campaignHref ? (
-                <a
-                  href={campaignHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline"
-                >
-                  {campaignUrlText}
-                </a>
-              ) : (
-                campaignUrlText
-              )}
-            </span>
-          </div>
-
-          <div className="mt-2 space-y-1 text-sm text-gray-800">
-            <div className="flex flex-wrap gap-x-4 gap-y-1">
-              <span>
-                <span className="text-gray-500">
-                  {t?.campaigns?.campaignManager || "Campaign manager"}:
-                </span>{" "}
-                <span className="font-mono">
-                  {campaign?.client_phone_number || "—"}
-                </span>
-              </span>
-            </div>
-
-            {!isUnitMode ? (
-              <div className="text-gray-800">
-                <span className="text-gray-500">{t?.campaigns?.text || "Text"}:</span>{" "}
-                <span className="font-medium">
-                  {campaign?.text ? String(campaign.text) : "—"}
-                </span>
-              </div>
+          <div className="text-xs font-mono text-gray-600 break-all">
+            {campaignHref ? (
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="hover:underline text-left"
+                title={copied ? (locale === "ar" ? "تم النسخ" : "Copied") : (locale === "ar" ? "اضغط لنسخ الرابط" : "Click to copy link")}
+              >
+                {campaignUrlText}
+                {copied ? (
+                  <span className="ms-2 inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
+                    {locale === "ar" ? "تم النسخ" : "Copied"}
+                  </span>
+                ) : null}
+              </button>
             ) : (
-              <div className="text-gray-800">
-                <span className="text-gray-500">{t?.campaigns?.unit || "Unit"}:</span>{" "}
-                <span className="font-medium">
-                  {campaign?.unit?.unitTitle ||
-                    campaign?.unit?.title ||
-                    campaign?.unit?.unitId ||
-                    campaign?.unit?.id ||
-                    "Selected unit"}
-                </span>
-              </div>
+              campaignUrlText
             )}
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => onEdit?.(campaign)}
-          className="shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
-        >
-          <Pencil size={16} />
-          {t?.campaigns?.edit || "Edit"}
-        </button>
+        <div className="shrink-0 flex items-center gap-2">
+          {campaignHref ? (
+            <a
+              href={campaignHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-white text-[#494A4B] hover:bg-gray-50 transition-colors text-sm"
+            >
+              {previewLabel}
+            </a>
+          ) : (
+            <button
+              type="button"
+              disabled
+              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
+            >
+              {previewLabel}
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => onEdit?.(campaign)}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
+          >
+            <Pencil size={16} />
+            {t?.campaigns?.edit || "Edit"}
+          </button>
+        </div>
       </div>
+
+      {/* Body */}
+      <div className="p-4">
+        <div className="space-y-1 text-sm text-gray-800">
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            <span>
+              <span className="text-gray-500">
+                {t?.campaigns?.campaignManager || "Campaign manager"}:
+              </span>{" "}
+              <span className="font-mono">{campaign?.client_phone_number || "—"}</span>
+            </span>
+          </div>
+
+          {!isUnitMode ? (
+            <div className="text-gray-800">
+              <span className="text-gray-500">{t?.campaigns?.text || "Text"}:</span>{" "}
+              <span className="font-medium">{campaign?.text ? String(campaign.text) : "—"}</span>
+            </div>
+          ) : (
+            <div className="text-gray-800">
+              <span className="text-gray-500">{t?.campaigns?.unit || "Unit"}:</span>{" "}
+              <span className="font-medium">
+                {campaign?.unit?.unitTitle ||
+                  campaign?.unit?.title ||
+                  campaign?.unit?.unitId ||
+                  campaign?.unit?.id ||
+                  "Selected unit"}
+              </span>
+            </div>
+          )}
+        </div>
 
       {/* Images */}
       {!isUnitMode && (
@@ -175,7 +223,7 @@ function CampaignCard({ campaign, onEdit }) {
         </div>
         {lastClick ? (
           <div className="text-sm text-gray-700">
-            {t?.campaigns?.lastClick || "Last"}:{" "}
+            {t?.campaigns?.lastClick || "Latest interaction"}:{" "}
             <span className="font-mono">
               {formatDateTimeAmPmShort(lastClick?.date) || "—"}
             </span>{" "}
@@ -188,6 +236,7 @@ function CampaignCard({ campaign, onEdit }) {
             {t?.campaigns?.noClicks || "No clicks"}
           </div>
         )}
+      </div>
       </div>
     </div>
   );
