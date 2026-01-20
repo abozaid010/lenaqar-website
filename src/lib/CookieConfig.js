@@ -9,7 +9,7 @@ export const COOKIE_CONFIG = {
    * Expires after 1 hour
    */
   ACCESS_TOKEN: {
-    maxAge: 60 * 60, // 1 hour in seconds
+    maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
@@ -21,7 +21,7 @@ export const COOKIE_CONFIG = {
    * Expires after 30 days
    */
   REFRESH_TOKEN: {
-    maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
+    maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
@@ -33,7 +33,7 @@ export const COOKIE_CONFIG = {
    * Expires after 30 days (same as refresh token)
    */
   CLIENT_ID: {
-    maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
+    maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
@@ -45,7 +45,7 @@ export const COOKIE_CONFIG = {
    * Expires after 30 days
    */
   CLIENT_INFO: {
-    maxAge: 60 * 60 * 24 * 30, // 30 days in seconds
+    maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
