@@ -544,8 +544,8 @@ export async function importDevelopers(developers) {
 export async function importProjects(projects) {
   try {
     const response = await axiosInstance.post(
-      `/projects/import_projects`,
-      projects
+      `/projects/reference_projects`,
+      projects.map((p) => p.id)
     );
     return response.data;
   } catch (error) {
