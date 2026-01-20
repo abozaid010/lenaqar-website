@@ -243,7 +243,7 @@ export default {
     suggestedAnswersLabel: "Suggested answers (up to 3)",
     noSuggestedAnswers: "No suggested answers",
     linkClicks: "Link clicks",
-    lastClick: "Last",
+    lastClick: "Latest interaction",
     noClicks: "No clicks",
     noImages: "No images",
     createdAt: "Created",
@@ -1108,6 +1108,8 @@ export default {
     reservationPercentage: "Reservation Amount (%)",
     installmentYears: "Installment Years",
     maintenanceFee: "Maintenance Fee (%)",
+    cacheDiscount: "Cash Discount (%)",
+    defaultPaymentPlan: "Set as Default Payment Plan",
     installmentIncreaseRate: "Annual Installment Increase Rate (%)",
     extraPayments: "Extra Payments",
     deliveryFee: "Delivery Fee (%)",
@@ -1168,6 +1170,8 @@ export default {
     loading: "saving...",
   },
   noPaymentPlans: "No payment plans added yet",
+  noPaymentPlansHint:
+    "No payment plans selected. Choose from common plans above or create a custom plan.",
   phasee: {
     updatePhasesuccess: "   phase updated successfuly",
     updatePhaseFaile: " Failed to update phase  ",

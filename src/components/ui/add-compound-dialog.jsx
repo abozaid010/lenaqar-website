@@ -883,6 +883,38 @@ export default function AddCompoundDialog({
       <Dialog
         isOpen={isOpen}
         onClose={onClose}
+        closeOnOutsideClick={false}
+        closeOnEscape={false}
+        showCloseButton={false}
+        headerActions={
+          <>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
+              disabled={isSubmitting}
+            >
+              {t.buttons?.cancel || "Cancel"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={isSubmitting || isUploading || isMasterPlanUploading}
+              className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            >
+              {isSubmitting ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+                </span>
+              ) : editMode ? (
+                t.updateProject
+              ) : (
+                t.buttons?.saveProject || "Save Project"
+              )}
+            </button>
+          </>
+        }
         title={
           editMode
             ? t.updateProject
@@ -1252,36 +1284,6 @@ export default function AddCompoundDialog({
               />
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                {t.buttons?.cancel || "Cancel"}
-              </button>
-              <button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                  isSubmitting || isUploading || isMasterPlanUploading
-                    ? "pointer-events-none opacity-80"
-                    : "hover:bg-primary/90"
-                }`}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 size={20} className="animate-spin mr-2" />
-                    {editMode ? t.updating : t.buttons?.saving || "Saving..."}
-                  </div>
-                ) : editMode ? (
-                  t.updateProject
-                ) : (
-                  t.buttons?.saveProject || "Save Project"
-                )}
-              </button>
-            </div>
           </div>
         </div>
       </Dialog>

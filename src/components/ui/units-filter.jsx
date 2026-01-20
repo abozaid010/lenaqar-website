@@ -317,13 +317,33 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return t.unitsFilter.purposes[filters.purpose] || filters.purpose;
   }
 
+  const getDeveloperValue = (dev) => {
+    if (!dev) return "";
+    const v =
+      dev.developer_name ??
+      dev.en_name ??
+      dev.ar_name ??
+      dev.name ??
+      dev.id ??
+      "";
+    return String(v);
+  };
+
+  const getDeveloperLabel = (dev, locale) => {
+    if (!dev) return "";
+    if (locale === "ar") {
+      return dev.ar_name || dev.developer_name || dev.en_name || dev.name || "";
+    }
+    return dev.en_name || dev.developer_name || dev.ar_name || dev.name || "";
+  };
+
   function getSelectedDeveloper() {
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
-    const d = developers.find((d) => d.name === filters.developer_name);
-
-    return locale === "ar" ? d.ar_name : d.en_name || filters.developer_name;
+    const d = developers.find((d) => getDeveloperValue(d) === filters.developer_name);
+    if (!d) return filters.developer_name;
+    return getDeveloperLabel(d, locale) || filters.developer_name;
   }
 
   function getSelectedCity() {
@@ -381,13 +401,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               handleFilterChange("developer_name", developerValue);
             }}
             name="developer_name"
-            getValue={(dev) => dev.name}
-            getLabel={(dev, locale) => locale === "ar" ? dev.ar_name : dev.en_name}
-            searchFields={["en_name", "ar_name", "name"]}
+            getValue={getDeveloperValue}
+            getLabel={getDeveloperLabel}
+            searchFields={["ar_name", "en_name", "developer_name", "name"]}
             sortOptions={(options, locale) => {
               return [...options].sort((a, b) => {
-                const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                const nameB = locale === "ar" ? b.ar_name : b.en_name;
+                const nameA = getDeveloperLabel(a, locale);
+                const nameB = getDeveloperLabel(b, locale);
                 return (nameA || "").trim().localeCompare((nameB || "").trim(), locale, {
                   sensitivity: "base",
                 });
