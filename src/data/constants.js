@@ -23,7 +23,9 @@ export const BUILDING_TYPE_VALUES = [
   "service apartment",
   "loft",
   "office villa",
-  "condo"
+  "condo",
+  "land",
+ "food and beverage"
 ];
 
 export const VIEW_TYPE_VALUES = [
@@ -44,7 +46,8 @@ export const FINISHING_TYPE_VALUES = [
   "fully finished",
   "semi finished",
   "core & shell",
-  "flixy"
+  "flixy",
+  "white box"
 ];
 
 export const FURNISHING_TYPE_VALUES = [
