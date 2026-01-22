@@ -13,7 +13,7 @@ import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
-import { getBuildingTypes } from "@/data/constants";
+import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
@@ -62,7 +62,22 @@ export default function AddCompoundDialog({
     });
   }, []);
 
+  // Get finishing types with translations
+  const FINISHING_TYPES = useMemo(() => {
+    return getFinishingTypes({
+      en: { finishingTypes: en.unitDetails?.finishingTypes || {} },
+      ar: { finishingTypes: ar.unitDetails?.finishingTypes || {} },
+    });
+  }, []);
+
   const editMode = !!(compoundData && compoundData.id);
+
+  // Helper function to normalize finishing_type to always be an array
+  const normalizeFinishingType = (value) => {
+    if (!value) return [];
+    if (Array.isArray(value)) return value;
+    return [value];
+  };
 
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -90,6 +105,7 @@ export default function AddCompoundDialog({
     master_plan: null,
     properties_types: null,
     building_types_images: null,
+    finishing_type: null,
   });
 
   const [formData, setFormData] = useState({
@@ -119,6 +135,7 @@ export default function AddCompoundDialog({
     properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || [],
     payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || [],
     building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
+    finishing_type: normalizeFinishingType(compoundData?.finishing_type || compoundData?.project?.finishing_type),
     delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
       ? compoundData.delivery_date 
       : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
@@ -155,15 +172,16 @@ export default function AddCompoundDialog({
           google_map_link: compoundData.google_map_link || compoundData?.project?.google_map_link || "",
           master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || { url: null, fileId: null },
           client_id: compoundData.client_id || compoundData?.project?.client_id || clientId || "",
-          images: compoundData.images || compoundData?.project?.images || [],
-          properties_types: compoundData.properties_types || compoundData?.project?.properties_types || [],
-          payment_plans: compoundData.payment_plans || compoundData?.project?.payment_plans || [],
-          building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
-          delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null 
-            ? compoundData.delivery_date 
-            : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
-              ? compoundData.project.delivery_date 
-              : 4),
+        images: compoundData.images || compoundData?.project?.images || [],
+        properties_types: compoundData.properties_types || compoundData?.project?.properties_types || [],
+        payment_plans: compoundData.payment_plans || compoundData?.project?.payment_plans || [],
+        building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
+        finishing_type: compoundData.finishing_type || compoundData?.project?.finishing_type || [],
+        delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null 
+          ? compoundData.delivery_date 
+          : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
+            ? compoundData.project.delivery_date 
+            : 4),
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -186,6 +204,7 @@ export default function AddCompoundDialog({
           properties_types: [],
           payment_plans: [],
           building_types_images: {},
+          finishing_type: [],
           delivery_date: 4,
         });
       }
@@ -210,6 +229,7 @@ export default function AddCompoundDialog({
         client_id: clientId || "",
         images: [],
         building_types_images: {},
+        finishing_type: [],
         delivery_date: 4,
       });
 
@@ -249,6 +269,7 @@ export default function AddCompoundDialog({
         properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || prev.properties_types || [],
         payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || prev.payment_plans || [],
         building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || prev.building_types_images || {},
+        finishing_type: compoundData?.finishing_type || compoundData?.project?.finishing_type || prev.finishing_type || [],
         delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
           ? compoundData.delivery_date 
           : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
@@ -337,6 +358,7 @@ export default function AddCompoundDialog({
       "master_plan",
       "properties_types",
       "building_types_images",
+      "finishing_type",
     ];
 
     // Find first error field in priority order
@@ -441,6 +463,12 @@ export default function AddCompoundDialog({
       newErrors.properties_types =
         t.formValidation?.propertyTypesRequired ||
         "At least one property type is required";
+    }
+
+    if (!formData.finishing_type || formData.finishing_type.length === 0) {
+      newErrors.finishing_type =
+        t.formValidation?.finishingTypeRequired ||
+        "At least one finishing type is required";
     }
 
     // Require at least one image for EACH selected building type
@@ -725,6 +753,7 @@ export default function AddCompoundDialog({
         properties_types: [],
         payment_plans: [],
         building_types_images: {},
+        finishing_type: [],
         delivery_date: 4,
       });
     } catch (error) {
@@ -968,8 +997,8 @@ export default function AddCompoundDialog({
               />
             </div>
 
-            {/* Gated Community and Sold Out Checkboxes */}
-            <div className="flex items-center gap-6">
+            {/* Gated Community, Sold Out Checkboxes, and Finishing Type */}
+            <div className="flex items-center gap-6 flex-wrap">
               <div className="flex items-center gap-1">
                 <input
                   type="checkbox"
@@ -1009,6 +1038,32 @@ export default function AddCompoundDialog({
                 >
                   {t.formLabels?.soldOut || "Sold out"}
                 </label>
+              </div>
+              <div ref={(el) => (fieldRefs.current.finishing_type = el)} className="flex items-center gap-2 flex-1 min-w-[200px]">
+                <label
+                  htmlFor="finishing_type"
+                  className={`text-sm font-medium whitespace-nowrap ${
+                    errors.finishing_type ? "text-red-500" : "text-gray-700"
+                  }`}
+                >
+                  {t.formLabels?.finishingType || t.finishingType || "Finishing Type"}
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="flex-1">
+                  <FormMultiSelect
+                    name="finishing_type"
+                    placeholder={
+                      locale === "ar" ? "اختر نوع التشطيب" : "Select finishing type"
+                    }
+                    value={formData.finishing_type}
+                    onChange={handleChange}
+                    options={FINISHING_TYPES}
+                    locale={locale}
+                    required={true}
+                    error={errors.finishing_type}
+                    errorMessage={errors.finishing_type}
+                  />
+                </div>
               </div>
             </div>
 
