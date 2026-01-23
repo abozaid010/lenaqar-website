@@ -316,18 +316,28 @@ export function createResponsiveSrcSet(baseUrl, widths = [640, 750, 828, 1080, 1
  * @returns {string} - Fallback image source or retry the same image
  */
 export function handleImageError(error, originalSrc, context = 'default') {
+  // Ensure we have a valid source URL
+  if (!originalSrc || typeof originalSrc !== 'string') {
+    console.warn('Invalid or missing image source provided to handleImageError');
+    return getFallbackImage(context);
+  }
+  
   const retryCount = incrementRetryAttempts(originalSrc);
   
-  console.warn(`Image loading failed for ${originalSrc} (attempt ${retryCount}):`, error?.message || 'Unknown error');
+  // Safely extract error message
+  const errorMessage = error?.message || error?.toString() || 'Unknown error';
+  
+  console.warn(`Image loading failed for ${originalSrc} (attempt ${retryCount}):`, errorMessage);
   
   // Log the error for debugging
   if (process.env.NODE_ENV === 'development') {
     console.error('Image error details:', {
       src: originalSrc,
-      error: error?.message || 'Unknown error',
+      error: errorMessage,
       context,
       retryAttempt: retryCount,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      errorObject: error || {} // Include full error object for debugging
     });
   }
   

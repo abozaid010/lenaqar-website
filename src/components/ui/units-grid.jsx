@@ -13,6 +13,7 @@ import {
   createSafeImageSource,
   handleImageError,
   getFirstValidImage,
+  getFallbackImage,
 } from "@/utils/imageUtils";
 import EmptyStateVideo from "./empty-state-video";
 
@@ -69,12 +70,23 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const originalSrc = u.images[0]?.url;
+                      
+                      // Ensure we have a valid source before handling error
+                      if (!originalSrc) {
+                        console.warn('No valid image source found for unit:', u.id || 'unknown');
+                        if (e.currentTarget) {
+                          e.currentTarget.src = getFallbackImage("property");
+                          e.currentTarget.onerror = null;
+                        }
+                        return;
+                      }
+                      
                       const fallbackSrc = handleImageError(
                         e,
                         originalSrc,
                         "property"
                       );
-                      if (fallbackSrc !== originalSrc) {
+                      if (fallbackSrc !== originalSrc && e.currentTarget) {
                         e.currentTarget.src = fallbackSrc;
                         e.currentTarget.onerror = null;
                       }
