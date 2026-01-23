@@ -61,16 +61,31 @@ export default function ImageWithLoader({
   };
 
   const handleError = (e) => {
+    // Ensure we have a valid event object
+    if (!e || !e.currentTarget) {
+      console.warn('Invalid error event received in ImageWithLoader');
+      setIsLoading(false);
+      setHasError(true);
+      return;
+    }
+    
     const retryCount = incrementRetryAttempts(src);
     
     if (shouldRetryImage(src)) {
       // Retry the image after a short delay
       console.log(`Retrying image ${src} (attempt ${retryCount + 1})`);
       setTimeout(() => {
-        setIsLoading(true);
-        setHasError(false);
-        // Force re-render by updating the src
-        e.currentTarget.src = src + '?retry=' + retryCount;
+        // Check if the element still exists before trying to modify it
+        if (e.currentTarget && e.currentTarget.src) {
+          setIsLoading(true);
+          setHasError(false);
+          // Force re-render by updating the src
+          e.currentTarget.src = src + '?retry=' + retryCount;
+        } else {
+          console.warn('Image element no longer available for retry');
+          setIsLoading(false);
+          setHasError(true);
+        }
       }, 1000);
     } else {
       // After max retries, mark as broken and show error

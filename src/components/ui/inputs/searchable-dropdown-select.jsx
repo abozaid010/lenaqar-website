@@ -501,10 +501,10 @@ export default function SearchableDropdownSelect({
                   {sortedOptions.map((option, index) => {
                     const optionValue = getValue(option);
                     const optionLabel = getLabel(option, locale);
-                    // Generate unique key: use getKey if provided, otherwise fallback to value, id, or index
+                    // Generate unique key: use getKey if provided, otherwise fallback to value+index, id, or index
                     const optionKey = getKey 
                       ? getKey(option) 
-                      : (optionValue || option?.id || `option-${index}`);
+                      : (optionValue && optionValue !== '' ? `${optionValue}-${index}` : (option?.id || `option-${index}`));
                     const isSelected = value === optionValue;
 
                     return (
