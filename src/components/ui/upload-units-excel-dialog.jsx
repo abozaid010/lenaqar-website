@@ -1,10 +1,8 @@
 "use client";
 
 import ExcelJS from "exceljs";
-import { getStaticViewTypeMapping } from "@/utils/localeConstants";
 import { useI18n } from "@/context/translate-api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { v4 as uuidv4 } from "uuid";
 import {
   Upload,
   X,
@@ -14,21 +12,28 @@ import {
   Loader2,
   Download,
 } from "lucide-react";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRouter } from "next/navigation";
-import { parseExcelFile, downloadExcelFile } from "@/utils/excel-utils";
+import { downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import {
   VALIDATED_KEYS,
   excelFieldMapper,
-  createHeaderMapping,
 } from "@/utils/excel-field-mapper";
+import {
+  parseExcelFileOnly,
+  applyMappingToData as applyMappingToDataProcessor,
+  processExcelFile,
+  formatDeliveryDate,
+} from "@/utils/excel_file_processor";
 import {
   excelTemplateColumns,
   excelTemplateExampleRow,
 } from "@/constants/excel-template-example";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import { debounce } from "@/utils/debounce";
 
 const downloadTemplateFile = () => {
   window.open(
@@ -37,167 +42,13 @@ const downloadTemplateFile = () => {
   );
 };
 
-/**
- * Valid view enum values according to API schema
- */
-const VALID_VIEW_VALUES = [
-  'park',
-  'street',
-  'lagoon',
-  'sea',
-  'city',
-  'river',
-  'pool',
-  'golf',
-  'garden',
-  'open area',
-  'mountain'
-];
-
-/**
- * Converts deliveryDate to string format
- * Handles Excel date numbers and various date formats
- */
-const formatDeliveryDate = (value) => {
-  // Handle null, undefined, empty string
-  if (value === null || value === undefined || value === "") {
-    return "";
-  }
-
-  // If it's a Date object (ExcelJS often returns Date objects), format as YYYY-MM-DD
-  if (value instanceof Date) {
-    if (isNaN(value.getTime())) return "";
-    const year = value.getFullYear();
-    const month = String(value.getMonth() + 1).padStart(2, "0");
-    const day = String(value.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
-  
-  // If it's already a string, return it (after trimming)
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    // If it's a date string in various formats, try to normalize it
-    if (trimmed.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      // Already in YYYY-MM-DD format
-      return trimmed;
-    }
-    // Try to parse and reformat
-    const date = new Date(trimmed);
-    if (!isNaN(date.getTime())) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-    return trimmed;
-  }
-  
-  // If it's a number (Excel date serial number or year), convert appropriately
-  if (typeof value === "number") {
-    // Very small numbers (likely day numbers or small values) - convert to string as-is
-    if (value < 100) {
-      return String(value);
-    }
-    
-    // Numbers that look like years (1900-2100 range)
-    if (value >= 1900 && value <= 2100) {
-      return String(value);
-    }
-    
-    // Try to convert Excel serial date to JavaScript date
-    // Excel dates are serial numbers where 1 = Jan 1, 1900
-    try {
-      // Excel epoch is Jan 1, 1900, but Excel incorrectly treats 1900 as leap year
-      const excelEpoch = new Date(1899, 11, 30);
-      const jsDate = new Date(excelEpoch.getTime() + value * 24 * 60 * 60 * 1000);
-      
-      // Check if the date is valid
-      if (!isNaN(jsDate.getTime())) {
-        const year = jsDate.getFullYear();
-        const month = String(jsDate.getMonth() + 1).padStart(2, '0');
-        const day = String(jsDate.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-      }
-    } catch (e) {
-      // If conversion fails, return as string
-    }
-    
-    // Fallback: convert to string
-    return String(value);
-  }
-  
-  // For any other type, convert to string
-  return String(value);
-};
-
-/**
- * Validates and normalizes view value to match API enum
- */
-const normalizeView = (value) => {
-  if (!value || typeof value !== "string") {
-    return undefined; // Omit invalid view values
-  }
-  
-  const normalized = value.trim().toLowerCase();
-  
-  // Check if it matches a valid enum value
-  if (VALID_VIEW_VALUES.includes(normalized)) {
-    return normalized;
-  }
-  
-  // Try to map common variations
-  const viewMap = getStaticViewTypeMapping();
-  
-  if (viewMap[normalized]) {
-    return viewMap[normalized];
-  }
-  
-  // If no match, omit the field (don't send empty string)
-  return undefined;
-};
-
-/**
- * Converts all string values in an object to lowercase
- * Backend expects all string fields in lowercase
- * Handles special cases for deliveryDate and view
- */
-const convertStringsToLowercase = (obj) => {
-  const result = { ...obj };
-  
-  Object.keys(result).forEach((key) => {
-    const value = result[key];
-    
-    // Special handling for deliveryDate - must be string
-    if (key === 'deliveryDate') {
-      result[key] = formatDeliveryDate(value);
-      return;
-    }
-    
-    // Special handling for view - must be valid enum or omitted
-    if (key === 'view') {
-      const normalized = normalizeView(value);
-      if (normalized === undefined) {
-        delete result[key]; // Remove invalid view values
-      } else {
-        result[key] = normalized;
-      }
-      return;
-    }
-    
-    // Convert string values to lowercase
-    if (typeof value === "string") {
-      result[key] = value.trim().toLowerCase();
-    }
-  });
-  
-  return result;
-};
 
 
 export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const { t, locale } = useI18n();
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState(null);
+  const [rawExcelData, setRawExcelData] = useState(null); // Raw parsed Excel data (headers, rows, sheetName)
   const [parsedData, setParsedData] = useState(null);
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -207,7 +58,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isMissingProjectsDialogOpen, setIsMissingProjectsDialogOpen] =
     useState(false);
   const [showMissingColumnsWarning, setShowMissingColumnsWarning] = useState(false);
-  const [missingColumns, setMissingColumns] = useState([]);
   const [validationErrors, setValidationErrors] = useState([]);
   const [manualHeaderMapping, setManualHeaderMapping] = useState({}); // Maps templateKey -> excelHeader
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
@@ -222,6 +72,145 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
+  // Memoized expensive computations
+  const getTemplateColumnStatus = useCallback((templateKey) => {
+    if (!parsedData) {
+      return {
+        isResolved: false,
+        excelHeader: null,
+        isManual: false,
+        valueWarning: false,
+        valueMatchStatus: null,
+      };
+    }
+    
+    const valueValidation = parsedData.valueValidationResults?.[templateKey];
+    const baseStatus = {
+      valueWarning: valueValidation?.warning || false,
+      valueMatchStatus: valueValidation || null,
+    };
+    
+    // Check if manually mapped
+    if (manualHeaderMapping[templateKey]) {
+      return {
+        isResolved: true,
+        excelHeader: manualHeaderMapping[templateKey],
+        isManual: true,
+        ...baseStatus,
+      };
+    }
+    
+    // Check if auto-mapped
+    const autoMapped = parsedData.templateToExcelMapping[templateKey];
+    if (autoMapped) {
+      return {
+        isResolved: true,
+        excelHeader: autoMapped,
+        isManual: false,
+        ...baseStatus,
+      };
+    }
+    
+    return {
+      isResolved: false,
+      excelHeader: null,
+      isManual: false,
+      ...baseStatus,
+    };
+  }, [parsedData, manualHeaderMapping]);
+
+  // Memoize template column statuses for all columns
+  const templateColumnStatuses = useMemo(() => {
+    if (!parsedData) return {};
+    return Object.fromEntries(
+      excelTemplateColumns.map(col => [col.key, getTemplateColumnStatus(col.key)])
+    );
+  }, [parsedData, manualHeaderMapping, getTemplateColumnStatus]);
+
+  // Memoize used Excel headers
+  const usedExcelHeaders = useMemo(() => {
+    if (!parsedData) return new Set();
+    const used = new Set();
+    
+    excelTemplateColumns.forEach(templateCol => {
+      const status = getTemplateColumnStatus(templateCol.key);
+      if (status.excelHeader) {
+        used.add(status.excelHeader);
+      }
+    });
+    
+    return used;
+  }, [parsedData, manualHeaderMapping, getTemplateColumnStatus]);
+
+  // Memoize missing columns
+  const missingColumns = useMemo(() => {
+    if (!parsedData) return [];
+    
+    // Find all resolved template keys
+    const resolvedKeys = new Set();
+    excelTemplateColumns.forEach(templateCol => {
+      const status = getTemplateColumnStatus(templateCol.key);
+      if (status.isResolved) {
+        resolvedKeys.add(templateCol.key);
+      }
+    });
+
+    // Find missing required keys (only check keys marked as required)
+    const requiredKeys = excelTemplateColumns
+      .filter(col => col.is_required)
+      .map(col => col.key);
+    
+    return requiredKeys.filter(key => !resolvedKeys.has(key));
+  }, [parsedData, manualHeaderMapping, getTemplateColumnStatus]);
+
+  // Apply mapping and transform data (uses already-parsed rawExcelData)
+  // Wrapper around the processor function to handle state updates
+  // FIX: Accept rawDataParam to avoid React state closure issue
+  const applyMappingToData = useCallback(async (rawDataParam = null, manualMapping = null) => {
+    // Use parameter if provided, otherwise fall back to state
+    const dataToProcess = rawDataParam || rawExcelData;
+    if (!dataToProcess) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Use the passed mapping or fall back to state (for React state closure issue)
+      const currentManualMapping = manualMapping !== null ? manualMapping : manualHeaderMapping;
+      
+      // Call the processor function
+      const processedData = await applyMappingToDataProcessor(dataToProcess, currentManualMapping);
+
+      // Update state with processed data
+      setParsedData(processedData);
+
+      setIsProcessing(false);
+    } catch (err) {
+      console.error("Error applying mapping:", err);
+      setError(err.message || "Failed to apply mapping");
+      setIsProcessing(false);
+    }
+  }, [rawExcelData, manualHeaderMapping]);
+
+  // Create debounced re-apply mapping function (doesn't re-parse file)
+  const debouncedReapplyMapping = useMemo(
+    () => debounce((mapping) => {
+      if (rawExcelData) {
+        // Pass null for rawDataParam to use state (rawExcelData is already set at this point)
+        applyMappingToData(null, mapping);
+      }
+    }, 300),
+    [rawExcelData, applyMappingToData]
+  );
+
+  // Virtualizer for table rows (only when parsedData exists)
+  const rowVirtualizer = useVirtualizer({
+    count: parsedData?.rows?.length || 0,
+    getScrollElement: () => tableScrollRef.current,
+    estimateSize: () => 40, // Estimated row height
+    overscan: 5, // Render 5 extra rows outside viewport
+    enabled: !!parsedData && !isProcessing,
+  });
 
   // Track dialog opens and auto-show video for first 2 times
   useEffect(() => {
@@ -272,286 +261,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     }
   }, [parsedData, isProcessing]);
 
-  if (!isOpen) return null;
-
-  const parseExcelFileHandler = async (file, manualMapping = null) => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const { headers: excelHeaders, rows, sheetName } = await parseExcelFile(file);
-
-      if (!excelHeaders || excelHeaders.length === 0) {
-        throw new Error(
-          "No worksheet found in the Excel file. Please ensure your file contains at least one worksheet."
-        );
-      }
-
-      if (rows.length === 0) {
-        throw new Error(
-          "Excel file must contain headers and at least one data row."
-        );
-      }
-
-      // Create automatic mapping from Excel headers to template keys (now async)
-      const autoHeaderMapping = await createHeaderMapping(excelHeaders);
-      
-      // Create reverse mapping: templateKey -> excelHeader (for auto-mapped columns)
-      const autoTemplateToExcel = {};
-      Object.entries(autoHeaderMapping).forEach(([excelHeader, templateKey]) => {
-        if (!autoTemplateToExcel[templateKey]) {
-          autoTemplateToExcel[templateKey] = excelHeader;
-        }
-      });
-
-      // Use the passed mapping or fall back to state (for React state closure issue)
-      const currentManualMapping = manualMapping !== null ? manualMapping : manualHeaderMapping;
-      
-      // Merge auto mapping with manual mapping (manual takes precedence)
-      const templateToExcelMapping = { ...autoTemplateToExcel, ...currentManualMapping };
-
-      // Validate row 2 values for matched headers
-      const valueValidationResults = {};
-      const row2 = rows.length > 0 ? rows[0] : null; // First data row (row 2 in Excel)
-      
-      if (row2) {
-        // Validate each matched header's value in row 2
-        for (const [templateKey, excelHeader] of Object.entries(templateToExcelMapping)) {
-          const colIndex = excelHeaders.indexOf(excelHeader);
-          if (colIndex >= 0) {
-            const row2Value = row2[colIndex];
-            if (row2Value !== undefined && row2Value !== null && row2Value !== "") {
-              const validation = await excelFieldMapper.validateRow2Value(templateKey, row2Value);
-              valueValidationResults[templateKey] = validation;
-            }
-          }
-        }
-      }
-
-      // Transform rows to structured JSON using template keys
-      const units = rows.map((row) => {
-        const unit = {};
-
-        // For each template column, get value from Excel using the mapping
-        excelTemplateColumns.forEach((templateCol) => {
-          const excelHeader = templateToExcelMapping[templateCol.key];
-          if (excelHeader) {
-            const colIndex = excelHeaders.indexOf(excelHeader);
-            if (colIndex >= 0) {
-              const value = row[colIndex];
-              // Allow all values including empty strings - they will be handled appropriately in transformation
-              if (value !== undefined && value !== null) {
-                unit[templateCol.key] = value;
-              }
-            }
-          }
-        });
-
-        return unit;
-      });
-
-      // Helper function to parse numeric values (handles formatted strings like "EGP 17,895,622")
-      const parseNumericValue = (value) => {
-// Send values as is, BE will clean it. 
-        return value;
-      };
-
-      // Transform to final structure matching API schema
-      const transformedUnits = units.map((unit) => {
-        // Build object matching API schema exactly
-        const transformed = {
-          unitId: uuidv4(),
-          project: unit.project || "",
-          buildingType: unit.buildingType || "",
-          roomsCount: parseNumericValue(unit.roomsCount) ,
-          landArea: parseNumericValue(unit.landArea) ,
-          deliveryDate: unit.deliveryDate || "",
-          totalPrice: parseNumericValue(unit.totalPrice) ,
-          finishing: unit.finishing || "",
-          unitTitle: unit.unitTitle || "",
-        };
-        
-        // Add optional numeric fields only if they have valid values
-        if (unit.bathroomCount) {
-          transformed.bathroomCount = unit.bathroomCount;
-        }
-        
-        if (unit.floor) {
-          transformed.floor = unit.floor;
-        }
-        
-        if (unit.gardenSize) {
-          transformed.gardenSize = unit.gardenSize;
-        }
-        
-        if (unit.garageArea) {
-          transformed.garageArea = unit.garageArea;
-        }
-        
-        if (unit.roof_area || unit.roofArea) {
-          transformed.roof_area = unit.roof_area || unit.roofArea;
-        }
-        
-        // Add optional string fields only if they have values (omit empty strings)
-        if (unit.unit_number || unit.unitNumber) {
-          transformed.unit_number = unit.unit_number || unit.unitNumber;
-        }
-        
-        if (unit.building_number || unit.buildingNumber) {
-          transformed.building_number = unit.building_number || unit.buildingNumber;
-        }
-        
-        // Add view only if valid (will be validated in convertStringsToLowercase)
-        if (unit.view) {
-          transformed.view = unit.view;
-        }
-        
-        // Add phase only if it has a value
-        if (unit.phase) {
-          transformed.phase = unit.phase;
-        }
-        
-        // Add city only if it has a value
-        if (unit.city) {
-          transformed.city = unit.city;
-        }
-
-        // ### Extract payment plans dynamically ### //
-        // Collect all payment plan numbers that exist in the unit data
-        // const paymentPlanNumbers = new Set();
-        // Object.keys(unit).forEach((key) => {
-        //   const match = key.match(/^pp(\d+)_/);
-        //   if (match) {
-        //     paymentPlanNumbers.add(parseInt(match[1]));
-        //   }
-        // });
-
-        // Process each payment plan number found
-        // paymentPlanNumbers.forEach((planNumber) => {
-        //   const prefix = `pp${planNumber}_`;
-        //   const years = planNumber; // Determine years from plan number (pp1 = 1 year, pp2 = 2 years, etc.)
-        //   const price = unit[`${prefix}price`];
-        //   const maintenance = unit[`${prefix}maintenance`];
-        //   const downPayment = unit[`${prefix}downPayment`];
-        //   const installmentAmount = unit[`${prefix}installment_amount_yearly`];
-
-        //   // Check if all required fields exist for this payment plan
-        //   // Required: price, downPayment, installment_amount_yearly
-        //   // Optional: maintenance
-        //   const hasRequiredFields = price && downPayment && installmentAmount;
-
-        //   if (hasRequiredFields) {
-        //     transformed.paymentPlans.push({
-        //       years: years,
-        //       price: Number(price),
-        //       maintenance: maintenance ? Number(maintenance) : 0,
-        //       downPayment: Number(downPayment),
-        //       installment_amount_yearly: Number(installmentAmount),
-        //     });
-        //   }
-        // });
-
-        // Convert all string fields to lowercase (backend expects lowercase)
-        return convertStringsToLowercase(transformed);
-      });
-
-      setParsedData({
-        excelHeaders, // Excel sheet headers (first row)
-        templateToExcelMapping, // Maps template key -> Excel header
-        rows,
-        units: transformedUnits,
-        valueValidationResults, // Validation results for row 2 values
-        summary: {
-          totalUnits: transformedUnits.length,
-          worksheetName: sheetName,
-        },
-      });
-
-      setIsProcessing(false);
-    } catch (err) {
-      console.error("Error parsing Excel file:", err);
-      setError(err.message || "Failed to parse Excel file");
-      setIsProcessing(false);
-    }
-  };
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const validTypes = [
-        "application/vnd.ms-excel",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (
-        validTypes.includes(file.type) ||
-        file.name.endsWith(".xlsx") ||
-        file.name.endsWith(".xls")
-      ) {
-        setSelectedFile(file);
-        setParsedData(null);
-        setError(null);
-        setIsInfoBoxCollapsed(false);
-
-        parseExcelFileHandler(file);
-      } else {
-        alert(
-          t.uploadExcel?.invalidFileType ||
-          "Please select a valid Excel file (.xlsx or .xls)"
-        );
-      }
-    }
-  };
-
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleRemoveFile = () => {
-    setSelectedFile(null);
-    setParsedData(null);
-    setError(null);
-    setUploadStatus([]);
-    setMissingProjects([]);
-    setIsMissingProjectsDialogOpen(false);
-    setManualHeaderMapping({});
-    setAllUploadsSuccessful(false);
-    setShowMissingColumnsWarning(false);
-    setValidationErrors([]);
-    setIsInfoBoxCollapsed(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const resetDialogState = () => {
-    setSelectedFile(null);
-    setParsedData(null);
-    setError(null);
-    setUploadStatus([]);
-    setMissingProjects([]);
-    setIsMissingProjectsDialogOpen(false);
-    setManualHeaderMapping({});
-    setAllUploadsSuccessful(false);
-    setShowMissingColumnsWarning(false);
-    setMissingColumns([]);
-    setValidationErrors([]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleClose = () => {
-    resetDialogState();
-    onClose();
-  };
-
-  const handleGoToUnits = () => {
-    router.push("/units");
-    resetDialogState();
-    onClose();
-  };
-
-  const handleHeaderMappingChange = (templateKey, excelHeader) => {
+  // Handle header mapping change (must be before early return)
+  const handleHeaderMappingChange = useCallback((templateKey, excelHeader) => {
     setManualHeaderMapping(prev => {
       const updated = { ...prev };
       if (excelHeader) {
@@ -560,101 +271,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         delete updated[templateKey];
       }
       
-      // Re-parse the file with the updated mapping immediately
+      // Debounce the re-apply mapping (doesn't re-parse file, just re-applies mapping)
       // Pass the updated mapping directly to avoid React state closure issue
-      if (selectedFile) {
-        parseExcelFileHandler(selectedFile, updated);
-      }
+      debouncedReapplyMapping(updated);
       
       return updated;
     });
-  };
-
-  const getTemplateColumnStatus = (templateKey) => {
-    if (!parsedData) {
-      return {
-        isResolved: false,
-        excelHeader: null,
-        isManual: false,
-        valueWarning: false,
-        valueMatchStatus: null,
-      };
-    }
-    
-    const valueValidation = parsedData.valueValidationResults?.[templateKey];
-    const baseStatus = {
-      valueWarning: valueValidation?.warning || false,
-      valueMatchStatus: valueValidation || null,
-    };
-    
-    // Check if manually mapped
-    if (manualHeaderMapping[templateKey]) {
-      return {
-        isResolved: true,
-        excelHeader: manualHeaderMapping[templateKey],
-        isManual: true,
-        ...baseStatus,
-      };
-    }
-    
-    // Check if auto-mapped
-    const autoMapped = parsedData.templateToExcelMapping[templateKey];
-    if (autoMapped) {
-      return {
-        isResolved: true,
-        excelHeader: autoMapped,
-        isManual: false,
-        ...baseStatus,
-      };
-    }
-    
-    return {
-      isResolved: false,
-      excelHeader: null,
-      isManual: false,
-      ...baseStatus,
-    };
-  };
-
-  const getUsedExcelHeaders = () => {
-    if (!parsedData) return new Set();
-    const used = new Set();
-    
-    excelTemplateColumns.forEach(templateCol => {
-      const status = getTemplateColumnStatus(templateCol.key);
-      if (status.excelHeader) {
-        used.add(status.excelHeader);
-      }
-    });
-    
-    return used;
-  };
-
-  const getMissingColumns = () => {
-    if (!parsedData) return [];
-    
-    // Find all resolved template keys
-    const resolvedKeys = new Set();
-    excelTemplateColumns.forEach(templateCol => {
-      const status = getTemplateColumnStatus(templateCol.key);
-      if (status.isResolved) {
-        resolvedKeys.add(templateCol.key);
-      }
-    });
-
-    // Find missing required keys (only check keys marked as required)
-    const requiredKeys = excelTemplateColumns
-      .filter(col => col.is_required)
-      .map(col => col.key);
-    
-    return requiredKeys.filter(key => !resolvedKeys.has(key));
-  };
+  }, [debouncedReapplyMapping]);
 
   /**
    * Validates all required fields before upload
    * Returns array of validation errors
    */
-  const validateRequiredFields = () => {
+  const validateRequiredFields = useCallback(() => {
     if (!parsedData) return [];
     
     const errors = [];
@@ -663,7 +292,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     const requiredColumns = excelTemplateColumns.filter(col => col.is_required);
     
     requiredColumns.forEach(templateCol => {
-      const status = getTemplateColumnStatus(templateCol.key);
+      const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
       const columnLabel = templateCol.label;
       
       // Check if field is not mapped
@@ -689,6 +318,124 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     });
     
     return errors;
+  }, [parsedData, templateColumnStatuses, getTemplateColumnStatus]);
+
+  if (!isOpen) return null;
+
+  // Parse Excel file only (doesn't do mapping/transformation)
+  // Wrapper around the processor function to handle state updates
+  const parseExcelFileOnlyLocal = async (file) => {
+    setError(null);
+
+    try {
+      // Use the processor function
+      const rawData = await parseExcelFileOnly(file);
+      
+      // Store raw Excel data (for other uses like debounced re-apply)
+      setRawExcelData(rawData);
+      
+      // FIX: Return rawData so it can be passed directly to avoid closure issue
+      return rawData;
+    } catch (err) {
+      console.error("Error parsing Excel file:", err);
+      setError(err.message || "Failed to parse Excel file");
+      throw err;
+    }
+  };
+
+
+  // Combined handler for initial file parse (parses file then applies mapping)
+  const parseExcelFileHandler = async (file, manualMapping = null) => {
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // FIX: Get rawData directly and pass it to avoid React state closure issue
+      const rawData = await parseExcelFileOnlyLocal(file);
+      // Pass rawData directly to avoid closure issue (rawExcelData state may not be updated yet)
+      await applyMappingToData(rawData, manualMapping);
+    } catch (err) {
+      // Error already set by parseExcelFileOnlyLocal or applyMappingToData
+      setIsProcessing(false);
+    }
+  };
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = [
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ];
+      if (
+        validTypes.includes(file.type) ||
+        file.name.endsWith(".xlsx") ||
+        file.name.endsWith(".xls")
+      ) {
+        setSelectedFile(file);
+        setRawExcelData(null);
+        setParsedData(null);
+        setError(null);
+        setIsInfoBoxCollapsed(false);
+
+        parseExcelFileHandler(file);
+      } else {
+        alert(
+          t.uploadExcel?.invalidFileType ||
+          "Please select a valid Excel file (.xlsx or .xls)"
+        );
+      }
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    setRawExcelData(null);
+    setParsedData(null);
+    setError(null);
+    setUploadStatus([]);
+    setMissingProjects([]);
+    setIsMissingProjectsDialogOpen(false);
+    setManualHeaderMapping({});
+    setAllUploadsSuccessful(false);
+    setShowMissingColumnsWarning(false);
+    setValidationErrors([]);
+    setIsInfoBoxCollapsed(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const resetDialogState = () => {
+    setSelectedFile(null);
+    setRawExcelData(null);
+    setParsedData(null);
+    setError(null);
+    setUploadStatus([]);
+    setMissingProjects([]);
+    setIsMissingProjectsDialogOpen(false);
+    setManualHeaderMapping({});
+    setAllUploadsSuccessful(false);
+    setShowMissingColumnsWarning(false);
+    setValidationErrors([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleClose = () => {
+    resetDialogState();
+    onClose();
+  };
+
+  const handleGoToUnits = () => {
+    router.push("/units");
+    resetDialogState();
+    onClose();
   };
 
   const handleSubmit = async () => {
@@ -1157,7 +904,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
               // Count resolved and unresolved template columns
               const resolvedCount = excelTemplateColumns.filter(col => 
-                getTemplateColumnStatus(col.key).isResolved
+                templateColumnStatuses[col.key]?.isResolved
               ).length;
               const unresolvedCount = excelTemplateColumns.length - resolvedCount;
 
@@ -1227,7 +974,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                   </div>
 
                   <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
-                    <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr">
+                    <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr" style={{ position: 'relative' }}>
                       <table className="w-full text-sm" style={{ tableLayout: "auto" }}>
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           {/* Required/Optional Headers */}
@@ -1264,11 +1011,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                               #
                             </th>
                             {excelTemplateColumns.map((templateCol, idx) => {
-                              const status = getTemplateColumnStatus(templateCol.key);
+                              const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
                               const excelHeader = status.excelHeader;
                               const valueWarning = status.valueWarning;
-                              const usedExcelHeaders = getUsedExcelHeaders();
                               
                               // Determine background color based on status
                               let bgColorClass = "";
@@ -1346,44 +1092,110 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                             })}
                           </tr>
                         </thead>
-                        <tbody>
-                          {parsedData.rows.map((row, rowIndex) => (
-                            <tr
-                              key={rowIndex}
-                              className={
-                                rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
-                              }
-                            >
-                              <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
-                                {rowIndex + 1}
-                              </td>
-                              {excelTemplateColumns.map((templateCol, colIndex) => {
-                                const status = getTemplateColumnStatus(templateCol.key);
-                                const excelHeader = status.excelHeader;
-                                let cellValue = "-";
-                                
-                                if (excelHeader) {
-                                  const excelColIndex = excelHeaders.indexOf(excelHeader);
-                                  if (excelColIndex >= 0) {
-                                    const value = row[excelColIndex];
-                                    cellValue = formatPreviewCellValue(templateCol.key, value);
-                                  }
-                                }
-                                
+                        <tbody
+                          style={{
+                            height: parsedData.rows.length > 0 && rowVirtualizer.getVirtualItems().length > 0 ? `${rowVirtualizer.getTotalSize()}px` : 'auto',
+                            width: '100%',
+                            position: 'relative',
+                          }}
+                        >
+                          {(() => {
+                            const virtualItems = rowVirtualizer.getVirtualItems();
+                            // Use virtualization if we have items, otherwise fallback to rendering all rows
+                            if (virtualItems.length > 0) {
+                              return virtualItems.map((virtualRow) => {
+                                const rowIndex = virtualRow.index;
+                                const row = parsedData.rows[rowIndex];
+                                if (!row) return null;
                                 return (
-                                  <td
-                                    key={colIndex}
-                                    className="px-2 py-2 text-gray-700 border-b"
-                                    style={{ minWidth: "100px", width: "auto" }}
+                                  <tr
+                                    key={virtualRow.key}
+                                    data-index={rowIndex}
+                                    ref={rowVirtualizer.measureElement}
+                                    className={
+                                      rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                    }
+                                    style={{
+                                      position: 'absolute',
+                                      top: 0,
+                                      left: 0,
+                                      width: '100%',
+                                      height: `${virtualRow.size}px`,
+                                      transform: `translateY(${virtualRow.start}px)`,
+                                    }}
                                   >
-                                    <div className="break-words" title={cellValue}>
-                                      {cellValue}
-                                    </div>
-                                  </td>
+                                    <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                                      {rowIndex + 1}
+                                    </td>
+                                    {excelTemplateColumns.map((templateCol, colIndex) => {
+                                      const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
+                                      const excelHeader = status.excelHeader;
+                                      let cellValue = "-";
+                                      
+                                      if (excelHeader) {
+                                        const excelColIndex = excelHeaders.indexOf(excelHeader);
+                                        if (excelColIndex >= 0) {
+                                          const value = row[excelColIndex];
+                                          cellValue = formatPreviewCellValue(templateCol.key, value);
+                                        }
+                                      }
+                                      
+                                      return (
+                                        <td
+                                          key={colIndex}
+                                          className="px-2 py-2 text-gray-700 border-b"
+                                          style={{ minWidth: "100px", width: "auto" }}
+                                        >
+                                          <div className="break-words" title={cellValue}>
+                                            {cellValue}
+                                          </div>
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
                                 );
-                              })}
-                            </tr>
-                          ))}
+                              });
+                            } else {
+                              // Fallback: render all rows normally if virtualization isn't working
+                              return parsedData.rows.map((row, rowIndex) => (
+                                <tr
+                                  key={rowIndex}
+                                  className={
+                                    rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
+                                  }
+                                >
+                                  <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                                    {rowIndex + 1}
+                                  </td>
+                                  {excelTemplateColumns.map((templateCol, colIndex) => {
+                                    const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
+                                    const excelHeader = status.excelHeader;
+                                    let cellValue = "-";
+                                    
+                                    if (excelHeader) {
+                                      const excelColIndex = excelHeaders.indexOf(excelHeader);
+                                      if (excelColIndex >= 0) {
+                                        const value = row[excelColIndex];
+                                        cellValue = formatPreviewCellValue(templateCol.key, value);
+                                      }
+                                    }
+                                    
+                                    return (
+                                      <td
+                                        key={colIndex}
+                                        className="px-2 py-2 text-gray-700 border-b"
+                                        style={{ minWidth: "100px", width: "auto" }}
+                                      >
+                                        <div className="break-words" title={cellValue}>
+                                          {cellValue}
+                                        </div>
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              ));
+                            }
+                          })()}
                         </tbody>
                       </table>
                     </div>

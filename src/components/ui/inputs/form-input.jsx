@@ -25,7 +25,6 @@ const FormInput = ({
     inputValue = formatPrice(value);
   }
 
-  if (type === "number") inputType = "text";
   if (type === "money") inputType = "text";
   return (
     <div className="relative">
@@ -42,7 +41,7 @@ const FormInput = ({
         id={name}
         name={name}
         type={inputType}
-        value={inputValue || ""}
+        value={type === "number" ? (inputValue !== undefined && inputValue !== null ? inputValue : "") : (inputValue || "")}
         onChange={onChange}
         placeholder={placeholder}
         required={required}
