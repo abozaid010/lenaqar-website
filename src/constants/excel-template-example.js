@@ -27,16 +27,16 @@ export const excelTemplateColumns = [
     is_required: true,
   },
   {
-    key: "finishing",
-    label: "Finishing",
-    is_required: true,
-  },
-  {
     key: "totalPrice",
     label: "Total Price",
     is_required: true,
   },
-  // ===== OPTIONAL FIELDS (10) =====
+  // ===== OPTIONAL FIELDS (11) =====
+  {
+    key: "finishing",
+    label: "Finishing",
+    is_required: false,
+  },
   {
     key: "deliveryDate",
     label: "Delivery Date",
@@ -110,9 +110,9 @@ export const excelTemplateExampleRow = {
   project: "madinty",
   roomsCount: "2",
   landArea: "100",
-  finishing: "finished",
   totalPrice: "1000000",
   // Optional fields
+  finishing: "finished",
   deliveryDate: "2025-12-31",
   phase: "Phase 1",
   view: "garden",

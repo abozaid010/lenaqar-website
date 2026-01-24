@@ -20,7 +20,6 @@ export const VALIDATED_KEYS = [
   "project",
   "roomsCount",
   "landArea",
-  "finishing",
   "totalPrice",
 ];
 
@@ -46,6 +45,7 @@ export const FIELD_ALIASES = {
     "project name",
     "project-name",
     "projectname",
+    "Project ID"
   ],
   view: [
     "view",
@@ -113,6 +113,7 @@ export const FIELD_ALIASES = {
     "no. of rooms"
   ],
   landArea: [
+    "Built up Area (BUA)",
     "Gross Area",
     "Unit Gross Area",
     "land area",
@@ -379,11 +380,11 @@ const EXPECTED_VALUES_MAP = {
   project: isValidString, // Function - any valid string
   roomsCount: isValidRoomsCount, // Function - integer or word number
   landArea: isValidNumber, // Function - any valid number
-  finishing: EXTENDED_FINISHING_VALUES, // Array - uses matches_values with extended values
   totalPrice: isValidNumber, // Function - any valid number
   deliveryDate: isValidDate, // Function - any valid date
   
   // Optional fields with validation
+  finishing: EXTENDED_FINISHING_VALUES, // Array - uses matches_values with extended values
   view: VIEW_TYPE_VALUES, // Array - uses matches_values
   furnishing: FURNISHING_TYPE_VALUES, // Array - uses matches_values
   bathroomCount: isValidRoomsCount, // Function - integer or word number (similar to roomsCount)
