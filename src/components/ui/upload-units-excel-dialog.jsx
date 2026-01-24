@@ -317,6 +317,31 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }
     });
     
+    // Validate landArea > 0 and totalPrice > 10000 for all units
+    parsedData.units.forEach((unit, index) => {
+      const unitNumber = index + 1;
+      
+      // Check landArea > 0
+      if (unit.landArea !== undefined && unit.landArea !== null && unit.landArea <= 0) {
+        errors.push({
+          field: 'landArea',
+          label: 'Land Area',
+          type: 'invalid_value',
+          message: `Unit ${unitNumber}: Land Area must be greater than 0 (current value: ${unit.landArea})`,
+        });
+      }
+      
+      // Check totalPrice > 10000
+      if (unit.totalPrice !== undefined && unit.totalPrice !== null && unit.totalPrice <= 10000) {
+        errors.push({
+          field: 'totalPrice',
+          label: 'Total Price',
+          type: 'invalid_value',
+          message: `Unit ${unitNumber}: Total Price must be greater than 10,000 (current value: ${unit.totalPrice})`,
+        });
+      }
+    });
+    
     return errors;
   }, [parsedData, templateColumnStatuses, getTemplateColumnStatus]);
 
