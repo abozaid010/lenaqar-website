@@ -17,6 +17,7 @@ export const BUILDING_TYPE_VALUES = [
   "shop",
   "twinhouse",
   "house",
+  "pharmacy",
   "clinic",
   "cabinet",
   "commercial",
@@ -25,7 +26,9 @@ export const BUILDING_TYPE_VALUES = [
   "office villa",
   "condo",
   "land",
- "food and beverage"
+ "food and beverage",
+ "retail",
+ "standalone"
 ];
 
 export const VIEW_TYPE_VALUES = [
