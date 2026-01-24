@@ -321,18 +321,18 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     parsedData.units.forEach((unit, index) => {
       const unitNumber = index + 1;
       
-      // Check landArea > 0
-      if (unit.landArea !== undefined && unit.landArea !== null && unit.landArea <= 0) {
+      // Check landArea >= 1
+      if (unit.landArea === undefined || unit.landArea === null || unit.landArea < 1) {
         errors.push({
           field: 'landArea',
           label: 'Land Area',
           type: 'invalid_value',
-          message: `Unit ${unitNumber}: Land Area must be greater than 0 (current value: ${unit.landArea})`,
+          message: `Unit ${unitNumber}: Land Area must be at least 1 (current value: ${unit.landArea})`,
         });
       }
       
       // Check totalPrice > 10000
-      if (unit.totalPrice !== undefined && unit.totalPrice !== null && unit.totalPrice <= 10000) {
+      if (unit.totalPrice === undefined || unit.totalPrice === null || unit.totalPrice <= 10000) {
         errors.push({
           field: 'totalPrice',
           label: 'Total Price',
