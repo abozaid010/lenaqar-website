@@ -403,131 +403,13 @@ const EXPECTED_VALUES_MAP = {
   building_number: isValidString, // Function - any valid string (can be alphanumeric)
 };
 
-// Cache for Transformers.js model to avoid reloading
-let semanticModel = null;
-let semanticModelPromise = null;
-
-/**
- * Loads the semantic similarity model (lazy loading with dynamic import)
- * @returns {Promise} Promise that resolves to the model
- */
-async function loadSemanticModel() {
-  if (semanticModel) {
-    return semanticModel;
-  }
-  
-  if (semanticModelPromise) {
-    return semanticModelPromise;
-  }
-  
-  // Use dynamic import to avoid issues with Next.js/Turbopack
-  semanticModelPromise = (async () => {
-    try {
-      const { pipeline } = await import('@xenova/transformers');
-      const model = await pipeline(
-        'feature-extraction',
-        'Xenova/all-MiniLM-L6-v2'
-      );
-      semanticModel = model;
-      return model;
-    } catch (error) {
-      console.warn('Failed to load semantic model:', error);
-      // Return null to indicate model is not available
-      semanticModelPromise = null;
-      return null;
-    }
-  })();
-  
-  return semanticModelPromise;
-}
-
-/**
- * Calculates cosine similarity between two vectors
- * @param {Array<number>} a - First vector
- * @param {Array<number>} b - Second vector
- * @returns {number} Cosine similarity score (0-1)
- */
-function cosineSimilarity(a, b) {
-  if (a.length !== b.length) return 0;
-  
-  let dotProduct = 0;
-  let normA = 0;
-  let normB = 0;
-  
-  for (let i = 0; i < a.length; i++) {
-    dotProduct += a[i] * b[i];
-    normA += a[i] * a[i];
-    normB += b[i] * b[i];
-  }
-  
-  const denominator = Math.sqrt(normA) * Math.sqrt(normB);
-  return denominator === 0 ? 0 : dotProduct / denominator;
-}
-
-/**
- * Semantic matching using Transformers.js embeddings
- * @param {string} value - Value to match
- * @param {Array<string>} candidates - Array of candidate values
- * @param {number} threshold - Similarity threshold (default: 0.7)
- * @returns {Promise<{matched: boolean, confidence: number, matchedValue: string | null}>}
- */
-async function semanticMatch(value, candidates, threshold = 0.7) {
-  try {
-    const model = await loadSemanticModel();
-    
-    // If model failed to load, skip semantic matching
-    if (!model) {
-      return {
-        matched: false,
-        confidence: 0,
-        matchedValue: null,
-      };
-    }
-    
-    // Generate embeddings for value and all candidates
-    const valueEmbedding = await model(value, { pooling: 'mean', normalize: true });
-    const candidateEmbeddings = await Promise.all(
-      candidates.map(candidate => model(candidate, { pooling: 'mean', normalize: true }))
-    );
-    
-    // Find best match by cosine similarity
-    let bestMatch = null;
-    let bestScore = 0;
-    
-    for (let i = 0; i < candidates.length; i++) {
-      const similarity = cosineSimilarity(valueEmbedding.data, candidateEmbeddings[i].data);
-      if (similarity > bestScore) {
-        bestScore = similarity;
-        bestMatch = candidates[i];
-      }
-    }
-    
-    if (bestScore >= threshold && bestMatch) {
-      return {
-        matched: true,
-        confidence: bestScore,
-        matchedValue: bestMatch,
-      };
-    }
-    
-    return {
-      matched: false,
-      confidence: bestScore,
-      matchedValue: null,
-    };
-  } catch (error) {
-    console.warn('Semantic matching failed:', error);
-    return {
-      matched: false,
-      confidence: 0,
-      matchedValue: null,
-    };
-  }
-}
+// Semantic matching removed for performance optimization
+// The ML model (@xenova/transformers) was blocking the main thread
+// We now rely on exact matching + fuzzy matching (Fuse.js) only
 
 /**
  * Modular matching method for values
- * Strategy: Exact match → Semantic match → Fuzzy match
+ * Strategy: Exact match → Fuzzy match (semantic matching removed for performance)
  * @param {string} key - Canonical field key (e.g., "buildingType")
  * @param {string} value - Value to match (e.g., "apartment")
  * @param {Array<string>} input - Array of expected values (e.g., BUILDING_TYPE_VALUES)
@@ -556,13 +438,7 @@ export async function matches_values(key, value, input) {
     }
   }
   
-  // Step 2: Semantic match using Transformers.js
-  const semanticResult = await semanticMatch(normalizedValue, input, 0.7);
-  if (semanticResult.matched) {
-    return semanticResult;
-  }
-  
-  // Step 3: Fuzzy match using Fuse.js
+  // Step 2: Fuzzy match using Fuse.js (semantic matching removed for performance)
   const fuse = new Fuse(input, {
     threshold: 0.6, // 0.0 = perfect match, 1.0 = match anything
     includeScore: true,
@@ -638,7 +514,7 @@ export class ExcelFieldMapper {
 
   /**
    * Finds the canonical key for a given header
-   * Strategy: Exact match (in order) → Fuzzy match → Semantic match
+   * Strategy: Exact match (in order) → Fuzzy match (semantic matching removed for performance)
    * @param {string} header - The header from Excel file
    * @param {boolean} exactOnly - If true, only do exact matching
    * @returns {Promise<string|null>} - The canonical key if found, null otherwise
@@ -657,7 +533,7 @@ export class ExcelFieldMapper {
       return null;
     }
     
-    // Normalize spaces for fuzzy/semantic matching
+    // Normalize spaces for fuzzy matching
     const normalize = (str) => String(str).toLowerCase().replace(/\s+/g, ' ').trim();
     const normalizedHeader = normalize(header);
     
@@ -686,22 +562,13 @@ export class ExcelFieldMapper {
       return aliasToKeyMap.get(matchedAlias) || null;
     }
     
-    // Phase 3: Semantic matching using Transformers.js (if no fuzzy match)
-    try {
-      const semanticResult = await semanticMatch(normalizedHeader, allAliases, 0.7);
-      if (semanticResult.matched && semanticResult.matchedValue) {
-        return aliasToKeyMap.get(semanticResult.matchedValue) || null;
-      }
-    } catch (error) {
-      console.warn('Semantic matching failed in findCanonicalKey:', error);
-    }
-    
+    // Semantic matching removed for performance - relying on exact + fuzzy matching only
     return null;
   }
 
   /**
    * Creates a mapping from Excel headers to canonical keys
-   * Prioritizes exact matches over fuzzy/semantic matches
+   * Prioritizes exact matches over fuzzy matches (semantic matching removed for performance)
    * @param {Array} headers - Array of header strings from Excel
    * @returns {Promise<Object>} - Mapping object: { [header]: canonicalKey }
    */
