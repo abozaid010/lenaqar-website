@@ -416,7 +416,7 @@ const EXPECTED_VALUES_MAP = {
  * @param {number} fuzzyThreshold - Optional fuzzy match threshold (0.0 = perfect match, 1.0 = match anything). Default: 0.4
  * @returns {Promise<{matched: boolean, confidence: number, matchedValue: string | null}>}
  */
-export async function matches_values(key, value, input, fuzzyThreshold = 0.4) {
+export async function matches_values(key, value, input, fuzzyThreshold = 0.6) {
   if (!value || !input || input.length === 0) {
     return {
       matched: false,
@@ -640,7 +640,7 @@ export class ExcelFieldMapper {
     // If validator is an array, use matches_values
     if (Array.isArray(validator)) {
       // Use 0.6 fuzzy threshold for buildingType (property type) for more lenient matching
-      const fuzzyThreshold = canonicalKey === 'buildingType' ? 0.6 : 0.4;
+      const fuzzyThreshold = 0.6;
       const result = await matches_values(canonicalKey, row2Value, validator, fuzzyThreshold);
       
       if (result.matched) {
