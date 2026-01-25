@@ -28,7 +28,10 @@ export const BUILDING_TYPE_VALUES = [
   "land",
  "food and beverage",
  "retail",
- "standalone"
+ "standalone",
+ "admin", 
+ "bank",
+ "medical"
 ];
 
 export const VIEW_TYPE_VALUES = [
@@ -50,7 +53,8 @@ export const FINISHING_TYPE_VALUES = [
   "semi finished",
   "core & shell",
   "flixy",
-  "white box"
+  "white box", 
+  "turnkey"
 ];
 
 export const FURNISHING_TYPE_VALUES = [
@@ -58,7 +62,8 @@ export const FURNISHING_TYPE_VALUES = [
   "unfurnished",
   "hotel_furnished",
   "partially furnished",
-  "flixy"
+  "flixy", 
+  "turnkey"
 ];
 
 export const PROPERTY_STATUS_VALUES = [
