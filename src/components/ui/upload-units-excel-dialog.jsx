@@ -1034,7 +1034,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
                   <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
                     <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr" style={{ position: 'relative' }}>
-                      <table className="w-full text-sm" style={{ tableLayout: "auto" }}>
+                      <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+                        <colgroup>
+                          <col style={{ width: "50px" }} />
+                          {excelTemplateColumns.map((_, idx) => (
+                            <col key={idx} style={{ width: "110px" }} />
+                          ))}
+                        </colgroup>
                         <thead className="bg-gray-100 sticky top-0 z-10">
                           {/* Required/Optional Headers */}
                           <tr>
@@ -1066,7 +1072,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           </tr>
                           {/* Column Headers */}
                           <tr>
-                            <th className="px-2 py-1 text-left font-semibold text-gray-700 border-b" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                            <th className="px-2 py-1 text-left font-semibold text-gray-700 border-b" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                               #
                             </th>
                             {excelTemplateColumns.map((templateCol, idx) => {
@@ -1097,7 +1103,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                 <th
                                   key={idx}
                                   className={`px-2 py-2 text-left font-semibold border-b ${bgColorClass}`}
-                                  style={{ minWidth: "110px", width: "auto", height: "100px" }}
+                                  style={{ width: "110px", minWidth: "110px", maxWidth: "110px", height: "100px" }}
                                 >
                                   <div className="flex flex-col h-full justify-between gap-1">
                                     <div className="flex flex-col gap-1">
@@ -1183,7 +1189,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                   >
-                                    <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                                    <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                                       {rowIndex + 1}
                                     </td>
                                     {excelTemplateColumns.map((templateCol, colIndex) => {
@@ -1202,10 +1208,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       return (
                                         <td
                                           key={colIndex}
-                                          className="px-2 py-2 text-gray-700 border-b"
-                                          style={{ minWidth: "100px", width: "auto" }}
+                                          className="px-2 py-2 text-gray-700 border-b overflow-hidden"
+                                          style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                         >
-                                          <div className="break-words" title={cellValue}>
+                                          <div className="truncate" title={cellValue}>
                                             {cellValue}
                                           </div>
                                         </td>
@@ -1223,7 +1229,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
                                   }
                                 >
-                                  <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ minWidth: "40px", maxWidth: "50px" }}>
+                                  <td className="px-2 py-2 text-gray-600 border-b font-medium" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                                     {rowIndex + 1}
                                   </td>
                                   {excelTemplateColumns.map((templateCol, colIndex) => {
@@ -1242,10 +1248,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     return (
                                       <td
                                         key={colIndex}
-                                        className="px-2 py-2 text-gray-700 border-b"
-                                        style={{ minWidth: "100px", width: "auto" }}
+                                        className="px-2 py-2 text-gray-700 border-b overflow-hidden"
+                                        style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                       >
-                                        <div className="break-words" title={cellValue}>
+                                        <div className="truncate" title={cellValue}>
                                           {cellValue}
                                         </div>
                                       </td>
