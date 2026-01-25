@@ -1,2202 +1,2216 @@
 [
-    {
-      "alias": [
-        "القاهرة",
-        "قاهرة",
-        "القاهرة الجديدة",
-        "قاهره",
-        "مصر",
-        "كايرو",
-        "New Cairo",
-        "new-cairo",
-        "Al qahira",
-        "Alqahira"
-      ],
-      "districts": [
-        {
-          "en_name": "Al Shorouk",
-          "ar_name": "الشروق",
-          "aliases": []
-        },
-        {
-          "en_name": "Nour",
-          "ar_name": "نور",
-          "aliases": [
-            "nour tmg",
-            "noor city",
-            "مدينة نور"
-          ]
-        },
-        {
-          "en_name": "Sarai",
-          "ar_name": "سراي",
-          "aliases": []
-        },
-        {
-          "en_name": "Madinet Nasr",
-          "ar_name": "مدينة نصر",
-          "aliases": [
-            "مكرم عبيد"
-          ]
-        },
-        {
-          "en_name": "Fifth Settlement",
-          "ar_name": "التجمع الخامس",
-          "aliases": [
-            "التجمع الخامس",
-            "الحي الخامس",
-            "التجمع 5",
-            "التجمع ٥",
-            "الحي 5",
-            "الحي الخامس",
-            "التجمع",
-            "التعسين الشمالى",
-            "التعسين الجنوبى",
-            "بيت الوطن"
-          ]
-        },
-        {
-          "en_name": "New Heliopolis",
-          "ar_name": "هيليوبوليس الجديدة",
-          "aliases": [
-            "مصر الجديده",
-            "هليوبوليس",
-            "هليوبولس الجديده"
-          ]
-        },
-        {
-          "en_name": "Downtown Cairo",
-          "ar_name": "الداون تاون",
-          "aliases": []
-        },
-        {
-          "en_name": "First Settlement",
-          "ar_name": "التجمع الأول",
-          "aliases": [
-            "التجمع الأول",
-            "الحي الأول",
-            "التجمع 1",
-            "الحي 1"
-          ]
-        },
-        {
-          "en_name": "Second Settlement",
-          "ar_name": "التجمع الثاني",
-          "aliases": []
-        },
-        {
-          "en_name": "Third Settlement",
-          "ar_name": "التجمع الثالث",
-          "aliases": [
-            "التجمع الثالث",
-            "الحي الثالث",
-            "التجمع 3",
-            "الحي 3"
-          ]
-        },
-        {
-          "en_name": "Fourth Settlement",
-          "ar_name": "التجمع الرابع",
-          "aliases": [
-            "التجمع الرابع",
-            "التجمع 4",
-            "الحي 4"
-          ]
-        },
-        {
-          "en_name": "Sixth Settlement",
-          "ar_name": "التجمع السادس",
-          "aliases": [
-            "التجمع 6",
-            "الحي 6"
-          ]
-        },
-        {
-          "en_name": "Mostaqbal City",
-          "ar_name": "مدينة المستقبل",
-          "aliases": [
-            " المستقبل سيتى"
-          ]
-        },
-        {
-          "en_name": "El Mokattam",
-          "ar_name": "المقطم",
-          "aliases": []
-        },
-        {
-          "en_name": "El Katameya",
-          "ar_name": "القطامية",
-          "aliases": []
-        },
-        {
-          "en_name": "Badr",
-          "ar_name": "بدر",
-          "aliases": []
-        }
-      ],
-      "ar_name": "القاهرة",
-      "id": "Cairo",
-      "en_name": "Cairo"
-    },
-    {
-      "alias": [
-        "مدينة 6 أكتوبر",
-        "6 October",
-        "6th of October",
-        "٦ اكتوبر"
-      ],
-      "districts": [
-        {
-          "en_name": "The First District",
-          "ar_name": "الحى الاول",
-          "aliases": []
-        },
-        {
-          "en_name": "The Second District",
-          "ar_name": "الحى الثاني",
-          "aliases": []
-        },
-        {
-          "en_name": "The Third District",
-          "ar_name": "الحى الثالث",
-          "aliases": []
-        },
-        {
-          "en_name": "The Fourth District",
-          "ar_name": "الحى الرابع",
-          "aliases": []
-        },
-        {
-          "en_name": "The Fifth District",
-          "ar_name": "الحى الخامس",
-          "aliases": []
-        },
-        {
-          "en_name": "The Sixth District",
-          "ar_name": "الحى السادس",
-          "aliases": []
-        },
-        {
-          "en_name": "The Seventh District",
-          "ar_name": "الحى السابع",
-          "aliases": []
-        },
-        {
-          "en_name": "The Eighth District",
-          "ar_name": "الحى الثامن",
-          "aliases": []
-        },
-        {
-          "en_name": "West Somid",
-          "ar_name": "غرب سوميد",
-          "aliases": []
-        },
-        {
-          "en_name": "New Giza",
-          "ar_name": "نيو جيزة",
-          "aliases": [
-            "نيو جيزا"
-          ]
-        },
-        {
-          "en_name": "Al Bashayer District",
-          "ar_name": "حي البشاير",
-          "aliases": []
-        }
-      ],
-      "ar_name": "6 أكتوبر",
-      "id": "6 October",
-      "en_name": "6 October"
-    },
-    {
-      "alias": [
-        "الشيخ زايد",
-        "مدينة الشيخ زايد",
-        "Sheikh Zayed City"
-      ],
-      "districts": [
-        {
-          "en_name": "First District",
-          "ar_name": "الحي الأول",
-          "aliases": [
-            "District 1"
-          ]
-        },
-        {
-          "en_name": "Fourth District",
-          "ar_name": "الحي الرابع",
-          "aliases": [
-            "District 4"
-          ]
-        },
-        {
-          "en_name": "Eighth District",
-          "ar_name": "الحي الثامن",
-          "aliases": [
-            "District 8",
-            "حي الفيلات"
-          ]
-        },
-        {
-          "en_name": "Fourteenth District",
-          "ar_name": "الحي الرابع عشر",
-          "aliases": [
-            "District 14",
-            "Al Rabwa area"
-          ]
-        },
-        {
-          "en_name": "Beverly Hills",
-          "ar_name": "بيفرلي هيلز",
-          "aliases": [
-            "Sodic West",
-            "سوديك ويست"
-          ]
-        },
-        {
-          "en_name": "Green Revolution",
-          "ar_name": "الثورة الخضراء",
-          "aliases": [
-            "El Thawra El Khadra"
-          ]
-        },
-        {
-          "en_name": "Sheikh Zayed Axis",
-          "ar_name": "محور الشيخ زايد",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الشيخ زايد",
-      "id": "Sheikh Zayed",
-      "en_name": "Sheikh Zayed"
-    },
-    {
-      "alias": [
-        "الجيزة",
-        "جيزة"
-      ],
-      "districts": [
-        {
-          "en_name": "Mohandessin",
-          "ar_name": "المهندسين",
-          "aliases": []
-        },
-        {
-          "en_name": "Hadayek October",
-          "ar_name": "حدائق أكتوبر",
-          "aliases": []
-        },
-        {
-          "en_name": "Agouza",
-          "ar_name": "العجوزة",
-          "aliases": []
-        },
-        {
-          "en_name": "Haram",
-          "ar_name": "الهرم",
-          "aliases": []
-        },
-        {
-          "en_name": "Imbaba",
-          "ar_name": "إمبابة",
-          "aliases": []
-        },
-        {
-          "en_name": "Giza District",
-          "ar_name": "حي الجيزة",
-          "aliases": []
-        },
-        {
-          "en_name": "Dokki",
-          "ar_name": "الدقي",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الجيزة",
-      "id": "Giza",
-      "en_name": "Giza"
-    },
-    {
-      "alias": [
-        "الساحل",
-        "الساحل الطيب",
-        "الساحل الشرير",
-        "شمالي الساحل"
-      ],
-      "districts": [
-        {
-          "en_name": "Sidi Abdel Rahman",
-          "ar_name": "سيدي عبد الرحمن",
-          "aliases": []
-        },
-        {
-          "en_name": "Ras El Hekma",
-          "ar_name": "رأس الحكمة",
-          "aliases": []
-        },
-        {
-          "en_name": "Siwa",
-          "ar_name": "سيوة",
-          "aliases": []
-        },
-        {
-          "en_name": "El Alamein",
-          "ar_name": "العلمين",
-          "aliases": [
-            "العالمين",
-            "العلمين الجديده",
-            "العالمين الجديده"
-          ]
-        },
-        {
-          "en_name": "Marina",
-          "ar_name": "مارينا",
-          "aliases": [
-            "مارينه"
-          ]
-        },
-        {
-          "en_name": "Ghazala Bay",
-          "ar_name": "خليج غزالة",
-          "aliases": [
-            "غزالة"
-          ]
-        },
-        {
-          "en_name": "El Dabaa",
-          "ar_name": "الضبعة",
-          "aliases": [
-            "ضبعة"
-          ]
-        },
-        {
-          "en_name": "Sidi Heneish",
-          "ar_name": "سيدي هنيس",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الساحل",
-      "id": "North Coast",
-      "en_name": "North Coast"
-    },
-    {
-      "alias": [
-        "العاصمة الإدارية الجديدة",
-        "العاصمة الإدارية",
-        "العاصمة الجديدة",
-        "الادارية الجديدة",
-        "العاصمة",
-        "العاصمه",
-        "new capital",
-        "new administrative capital"
-      ],
-      "districts": [
-        {
-          "en_name": "R2 District",
-          "ar_name": "حي R2",
-          "aliases": []
-        },
-        {
-          "en_name": "R7",
-          "ar_name": "حي R7",
-          "aliases": []
-        },
-        {
-          "en_name": "R7 District",
-          "ar_name": "حي R7",
-          "aliases": []
-        },
-        {
-          "en_name": "Diplomatic District",
-          "ar_name": "الحي الدبلوماسي",
-          "aliases": []
-        },
-        {
-          "en_name": "Government District",
-          "ar_name": "الحي الحكومي",
-          "aliases": []
-        },
-        {
-          "en_name": "Knowledge City",
-          "ar_name": "مدينة المعرفة",
-          "aliases": []
-        },
-        {
-          "en_name": "Residential Districts",
-          "ar_name": "الأحياء السكنية",
-          "aliases": []
-        },
-        {
-          "en_name": "Downtown",
-          "ar_name": "وسط المدينة",
-          "aliases": []
-        },
-        {
-          "en_name": "Green River",
-          "ar_name": "النهر الأخضر",
-          "aliases": []
-        },
-        {
-          "en_name": "R3",
-          "ar_name": "R3 حي",
-          "aliases": []
-        },
-        {
-          "en_name": "R8",
-          "ar_name": "R8 حي",
-          "aliases": []
-        },
-        {
-          "en_name": "R3 District",
-          "ar_name": "حي R3",
-          "aliases": []
-        },
-        {
-          "en_name": "Cultural District",
-          "ar_name": "الحي الثقافي",
-          "aliases": []
-        },
-        {
-          "en_name": "Financial District",
-          "ar_name": "الحي المالي",
-          "aliases": []
-        },
-        {
-          "en_name": "Sports City",
-          "ar_name": "مدينة الرياضة",
-          "aliases": []
-        },
-        {
-          "en_name": "Medical City",
-          "ar_name": "المدينة الطبية",
-          "aliases": []
-        },
-        {
-          "en_name": "R1 District",
-          "ar_name": "حي R1",
-          "aliases": []
-        }
-      ],
-      "ar_name": "العاصمة الإدارية الجديدة",
-      "id": "New Administrative Capital",
-      "en_name": "New Administrative Capital"
-    },
-    {
-      "alias": [
-        "القليوبية",
-        "Qaliubia",
-        "Qalubiya",
-        "Qalyubeya"
-      ],
-      "districts": [
-        {
-          "en_name": "Shubra El Kheima",
-          "ar_name": "شبرا الخيمة",
-          "aliases": [
-            "Shobra El Kheima",
-            "Shubra"
-          ]
-        },
-        {
-          "en_name": "El Obour City",
-          "ar_name": "العبور",
-          "aliases": [
-            "مدينة العبور",
-            "Obour"
-          ]
-        },
-        {
-          "en_name": "Banha",
-          "ar_name": "بنها",
-          "aliases": [
-            "Benha"
-          ]
-        },
-        {
-          "en_name": "Qalyub",
-          "ar_name": "قليوب",
-          "aliases": [
-            "Qaliub",
-            "Qalyoub"
-          ]
-        },
-        {
-          "en_name": "El Qanater El Khayriya",
-          "ar_name": "القناطر الخيرية",
-          "aliases": [
-            "القناطر",
-            "Qanater",
-            "Al Qanater"
-          ]
-        },
-        {
-          "en_name": "Khanka",
-          "ar_name": "الخانكة",
-          "aliases": [
-            "El Khanka",
-            "Al Khanka"
-          ]
-        },
-        {
-          "en_name": "Khosous",
-          "ar_name": "الخصوص",
-          "aliases": [
-            "El Khosous",
-            "Al Khosous"
-          ]
-        },
-        {
-          "en_name": "Shibin El Qanater",
-          "ar_name": "شبين القناطر",
-          "aliases": [
-            "Shibin Al Qanater"
-          ]
-        }
-      ],
-      "ar_name": "القليوبية",
-      "id": "Qalyubia",
-      "en_name": "Qalyubia"
-    },
-    {
-      "alias": [
-        "الإسكندرية",
-        "اسكندرية",
-        "Alex"
-      ],
-      "districts": [
-        {
-          "en_name": "Smouha",
-          "ar_name": "سموحة",
-          "aliases": []
-        },
-        {
-          "en_name": "Stanley",
-          "ar_name": "ستانلي",
-          "aliases": []
-        },
-        {
-          "en_name": "Gleem",
-          "ar_name": "جليم",
-          "aliases": []
-        },
-        {
-          "en_name": "Sporting",
-          "ar_name": "سبورتنج",
-          "aliases": []
-        },
-        {
-          "en_name": "Sidi Gaber",
-          "ar_name": "سيدي جابر",
-          "aliases": []
-        },
-        {
-          "en_name": "Miami",
-          "ar_name": "ميامي",
-          "aliases": []
-        },
-        {
-          "en_name": "Montaza",
-          "ar_name": "المنتزه",
-          "aliases": []
-        },
-        {
-          "en_name": "Agami",
-          "ar_name": "العجمي",
-          "aliases": []
-        },
-        {
-          "en_name": "Borg El Arab",
-          "ar_name": "برج العرب",
-          "aliases": [
-            "مدينة برج العرب"
-          ]
-        }
-      ],
-      "ar_name": "الإسكندرية",
-      "id": "Alexandria",
-      "en_name": "Alexandria"
-    },
-    {
-      "alias": [
-        "الشرقية",
-        "Sharqeya"
-      ],
-      "districts": [
-        {
-          "en_name": "Zagazig",
-          "ar_name": "الزقازيق",
-          "aliases": []
-        },
-        {
-          "en_name": "Belbeis",
-          "ar_name": "بلبيس",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Hammad",
-          "ar_name": "أبو حماد",
-          "aliases": []
-        },
-        {
-          "en_name": "Minya El Qamh",
-          "ar_name": "منيا القمح",
-          "aliases": []
-        },
-        {
-          "en_name": "10th of Ramadan",
-          "ar_name": "العاشر من رمضان",
-          "aliases": [
-            "العاشر"
-          ]
-        },
-        {
-          "en_name": "Abu Kebir",
-          "ar_name": "أبو كبير",
-          "aliases": []
-        },
-        {
-          "en_name": "Fakous",
-          "ar_name": "فاقوس",
-          "aliases": []
-        },
-        {
-          "en_name": "Husseiniya",
-          "ar_name": "الحسينية",
-          "aliases": []
-        },
-        {
-          "en_name": "Diyarb Negm",
-          "ar_name": "ديرب نجم",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الشرقية",
-      "id": "Sharqia",
-      "en_name": "Sharqia"
-    },
-    {
-      "alias": [
-        "الدقهلية",
-        "Dakahlia"
-      ],
-      "districts": [
-        {
-          "en_name": "Mansoura",
-          "ar_name": "المنصورة",
-          "aliases": []
-        },
-        {
-          "en_name": "Talkha",
-          "ar_name": "طلخا",
-          "aliases": []
-        },
-        {
-          "en_name": "Meet Ghamr",
-          "ar_name": "ميت غمر",
-          "aliases": []
-        },
-        {
-          "en_name": "Sherbin",
-          "ar_name": "شربين",
-          "aliases": []
-        },
-        {
-          "en_name": "Belqas",
-          "ar_name": "بلقاس",
-          "aliases": []
-        },
-        {
-          "en_name": "Sinbillawin",
-          "ar_name": "السنبلاوين",
-          "aliases": []
-        },
-        {
-          "en_name": "Dekernes",
-          "ar_name": "دكرنس",
-          "aliases": []
-        },
-        {
-          "en_name": "Meniet El Nasr",
-          "ar_name": "منية النصر",
-          "aliases": []
-        },
-        {
-          "en_name": "Gamasa",
-          "ar_name": "جمصة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الدقهلية",
-      "id": "Dakahlia",
-      "en_name": "Dakahlia"
-    },
-    {
-      "alias": [
-        "البحيرة",
-        "El Beheira",
-        "Al Beheira"
-      ],
-      "districts": [
-        {
-          "en_name": "Damanhour",
-          "ar_name": "دمنهور",
-          "aliases": []
-        },
-        {
-          "en_name": "Kafr El Dawwar",
-          "ar_name": "كفر الدوار",
-          "aliases": []
-        },
-        {
-          "en_name": "Rashid (Rosetta)",
-          "ar_name": "رشيد",
-          "aliases": [
-            "Rosetta"
-          ]
-        },
-        {
-          "en_name": "Abu Hummus",
-          "ar_name": "أبو حمص",
-          "aliases": [
-            "Abu Hummus"
-          ]
-        },
-        {
-          "en_name": "Housh Eissa",
-          "ar_name": "حوش عيسى",
-          "aliases": [
-            "Hosh Eissa"
-          ]
-        },
-        {
-          "en_name": "Itay El Barud",
-          "ar_name": "إيتاي البارود",
-          "aliases": [
-            "Itai El Baroud"
-          ]
-        },
-        {
-          "en_name": "Kom Hamada",
-          "ar_name": "كوم حمادة",
-          "aliases": []
-        },
-        {
-          "en_name": "Mahmoudiyah",
-          "ar_name": "المحمودية",
-          "aliases": [
-            "El Mahmoudia"
-          ]
-        },
-        {
-          "en_name": "Wadi El Natrun",
-          "ar_name": "وادي النطرون",
-          "aliases": [
-            "Wady El Natrun"
-          ]
-        }
-      ],
-      "ar_name": "البحيرة",
-      "id": "Beheira",
-      "en_name": "Beheira"
-    },
-    {
-      "alias": [
-        "الغربية",
-        "El Gharbia"
-      ],
-      "districts": [
-        {
-          "en_name": "Tanta",
-          "ar_name": "طنطا",
-          "aliases": []
-        },
-        {
-          "en_name": "El Mahalla El Kubra",
-          "ar_name": "المحلة الكبرى",
-          "aliases": [
-            "El Mahalla",
-            "Mahalla"
-          ]
-        },
-        {
-          "en_name": "Kafr El Zayat",
-          "ar_name": "كفر الزيات",
-          "aliases": []
-        },
-        {
-          "en_name": "Zefta",
-          "ar_name": "زفتى",
-          "aliases": []
-        },
-        {
-          "en_name": "Basyoun",
-          "ar_name": "بسيون",
-          "aliases": []
-        },
-        {
-          "en_name": "Qutour",
-          "ar_name": "قطور",
-          "aliases": [
-            "Kotour"
-          ]
-        },
-        {
-          "en_name": "Santa",
-          "ar_name": "السنطة",
-          "aliases": [
-            "El Santa"
-          ]
-        },
-        {
-          "en_name": "Samanoud",
-          "ar_name": "سمنود",
-          "aliases": [
-            "Samannoud"
-          ]
-        },
-        {
-          "en_name": "Tanta First District",
-          "ar_name": "حي أول طنطا",
-          "aliases": []
-        },
-        {
-          "en_name": "Tanta Second District",
-          "ar_name": "حي ثاني طنطا",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الغربية",
-      "id": "Gharbia",
-      "en_name": "Gharbia"
-    },
-    {
-      "alias": [
-        "المنوفية",
-        "Menoufia",
-        "Al Minufiyah"
-      ],
-      "districts": [
-        {
-          "en_name": "Shibin El Kom",
-          "ar_name": "شبين الكوم",
-          "aliases": [
-            "Shebin El Kom"
-          ]
-        },
-        {
-          "en_name": "Sadat City",
-          "ar_name": "مدينة السادات",
-          "aliases": [
-            "El Sadat City"
-          ]
-        },
-        {
-          "en_name": "Ashmoun",
-          "ar_name": "أشمون",
-          "aliases": [
-            "Ashmoon"
-          ]
-        },
-        {
-          "en_name": "Menouf",
-          "ar_name": "منوف",
-          "aliases": [
-            "Minuf"
-          ]
-        },
-        {
-          "en_name": "Quesna",
-          "ar_name": "قويسنا",
-          "aliases": [
-            "Qwisna",
-            "Qwaysna"
-          ]
-        },
-        {
-          "en_name": "Al Bagor",
-          "ar_name": "الباجور",
-          "aliases": [
-            "El Bagour"
-          ]
-        },
-        {
-          "en_name": "Berket El Sabea",
-          "ar_name": "بركة السبع",
-          "aliases": [
-            "Birka El Saba"
-          ]
-        },
-        {
-          "en_name": "Sers El Layan",
-          "ar_name": "سرس الليان",
-          "aliases": [
-            "Sars El Layan"
-          ]
-        },
-        {
-          "en_name": "Shanawan (Village Cluster)",
-          "ar_name": "شنوان",
-          "aliases": []
-        }
-      ],
-      "ar_name": "المنوفية",
-      "id": "Monufia",
-      "en_name": "Monufia"
-    },
-    {
-      "alias": [
-        "كفر الشيخ",
-        "Kafr ElSheikh"
-      ],
-      "districts": [
-        {
-          "en_name": "Kafr El Sheikh City",
-          "ar_name": "مدينة كفر الشيخ",
-          "aliases": [
-            "Kafr El-Sheikh"
-          ]
-        },
-        {
-          "en_name": "Desouk",
-          "ar_name": "دسوق",
-          "aliases": []
-        },
-        {
-          "en_name": "Fouh",
-          "ar_name": "فوه",
-          "aliases": [
-            "Fuwa"
-          ]
-        },
-        {
-          "en_name": "Baltim",
-          "ar_name": "بلطيم",
-          "aliases": [
-            "Bella/Baltim"
-          ]
-        },
-        {
-          "en_name": "Sidi Salem",
-          "ar_name": "سيدي سالم",
-          "aliases": []
-        },
-        {
-          "en_name": "Mutobas",
-          "ar_name": "مطوبس",
-          "aliases": [
-            "Motobas"
-          ]
-        },
-        {
-          "en_name": "Qellin",
-          "ar_name": "قلين",
-          "aliases": [
-            "Qaleen"
-          ]
-        },
-        {
-          "en_name": "El Hamoul",
-          "ar_name": "الحامول",
-          "aliases": [
-            "Hamoul"
-          ]
-        },
-        {
-          "en_name": "Biyala",
-          "ar_name": "بيلا",
-          "aliases": [
-            "Beyala"
-          ]
-        },
-        {
-          "en_name": "Burullus",
-          "ar_name": "البرلس",
-          "aliases": [
-            "El Brolos",
-            "Brolos"
-          ]
-        }
-      ],
-      "ar_name": "كفر الشيخ",
-      "id": "Kafr El Sheikh",
-      "en_name": "Kafr El Sheikh"
-    },
-    {
-      "alias": [
-        "دمياط",
-        "Dumyat"
-      ],
-      "districts": [
-        {
-          "en_name": "Damietta City",
-          "ar_name": "دمياط",
-          "aliases": []
-        },
-        {
-          "en_name": "New Damietta",
-          "ar_name": "دمياط الجديدة",
-          "aliases": [
-            "Damietta El Gedida"
-          ]
-        },
-        {
-          "en_name": "Faraskur",
-          "ar_name": "فارسكور",
-          "aliases": []
-        },
-        {
-          "en_name": "Kafr Saad",
-          "ar_name": "كفر سعد",
-          "aliases": []
-        },
-        {
-          "en_name": "Kafr El Battikh",
-          "ar_name": "كفر البطيخ",
-          "aliases": []
-        },
-        {
-          "en_name": "Ras El Bar",
-          "ar_name": "رأس البر",
-          "aliases": [
-            "Ras El-Barr"
-          ]
-        },
-        {
-          "en_name": "Ezbet El Borg",
-          "ar_name": "عزبة البرج",
-          "aliases": [
-            "Izbat Al Burg"
-          ]
-        },
-        {
-          "en_name": "El Zarqa",
-          "ar_name": "الزرقا",
-          "aliases": [
-            "Al Zarqa"
-          ]
-        },
-        {
-          "en_name": "El Sinaniya",
-          "ar_name": "السنانية",
-          "aliases": []
-        },
-        {
-          "en_name": "Mit Abu Ghaleb / Villages",
-          "ar_name": "قرى",
-          "aliases": []
-        }
-      ],
-      "ar_name": "دمياط",
-      "id": "Damietta",
-      "en_name": "Damietta"
-    },
-    {
-      "alias": [
-        "بورسعيد",
-        "Port Saeed"
-      ],
-      "districts": [
-        {
-          "en_name": "El Manakh",
-          "ar_name": "المناخ",
-          "aliases": []
-        },
-        {
-          "en_name": "El Arab",
-          "ar_name": "العرب",
-          "aliases": []
-        },
-        {
-          "en_name": "Port Fouad",
-          "ar_name": "بورفؤاد",
-          "aliases": [
-            "Port Fuad"
-          ]
-        },
-        {
-          "en_name": "El Sharq",
-          "ar_name": "الشرق",
-          "aliases": []
-        },
-        {
-          "en_name": "El Zohour",
-          "ar_name": "الزهور",
-          "aliases": []
-        },
-        {
-          "en_name": "El Dawahy",
-          "ar_name": "الضواحي",
-          "aliases": []
-        },
-        {
-          "en_name": "Mubarak West",
-          "ar_name": "غرب",
-          "aliases": [
-            "Gharb"
-          ]
-        },
-        {
-          "en_name": "South District (Port)",
-          "ar_name": "جنوب",
-          "aliases": [
-            "South Port"
-          ]
-        },
-        {
-          "en_name": "Industrial Area",
-          "ar_name": "المنطقة الصناعية",
-          "aliases": []
-        },
-        {
-          "en_name": "Investment Zone",
-          "ar_name": "منطقة الاستثمار",
-          "aliases": []
-        }
-      ],
-      "ar_name": "بورسعيد",
-      "id": "Port Said",
-      "en_name": "Port Said"
-    },
-    {
-      "alias": [
-        "الإسماعيلية",
-        "Ismaïlia"
-      ],
-      "districts": [
-        {
-          "en_name": "Ismailia City",
-          "ar_name": "الإسماعيلية",
-          "aliases": []
-        },
-        {
-          "en_name": "Fayed",
-          "ar_name": "فايد",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Suwir",
-          "ar_name": "أبو صوير",
-          "aliases": [
-            "Abu Sawir"
-          ]
-        },
-        {
-          "en_name": "El Qantara Gharb",
-          "ar_name": "القنطرة غرب",
-          "aliases": [
-            "Qantara Gharb"
-          ]
-        },
-        {
-          "en_name": "El Qantara Sharq",
-          "ar_name": "القنطرة شرق",
-          "aliases": [
-            "Qantara Sharq"
-          ]
-        },
-        {
-          "en_name": "Tell El Kebir",
-          "ar_name": "التل الكبير",
-          "aliases": []
-        },
-        {
-          "en_name": "Kasasien",
-          "ar_name": "القصاصين",
-          "aliases": [
-            "El Kasasin"
-          ]
-        },
-        {
-          "en_name": "Nefesha",
-          "ar_name": "نفيشة",
-          "aliases": []
-        },
-        {
-          "en_name": "Sarabeum",
-          "ar_name": "سرابيوم",
-          "aliases": []
-        },
-        {
-          "en_name": "New Ismailia",
-          "ar_name": "الإسماعيلية الجديدة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الإسماعيلية",
-      "id": "Ismailia",
-      "en_name": "Ismailia"
-    },
-    {
-      "alias": [
-        "السويس"
-      ],
-      "districts": [
-        {
-          "en_name": "Arbaeen",
-          "ar_name": "الأربعين",
-          "aliases": [
-            "El Arbaeen"
-          ]
-        },
-        {
-          "en_name": "Suez City (El Ganayen)",
-          "ar_name": "الجنائن",
-          "aliases": [
-            "El Ganayen"
-          ]
-        },
-        {
-          "en_name": "Ain Sokhna",
-          "ar_name": "العين السخنة",
-          "aliases": [
-            "Ain El Sokhna"
-          ]
-        },
-        {
-          "en_name": "Faisal District",
-          "ar_name": "حي فيصل",
-          "aliases": [
-            "Feisal"
-          ]
-        },
-        {
-          "en_name": "Attaka",
-          "ar_name": "عتاقة",
-          "aliases": [
-            "Ataqa"
-          ]
-        },
-        {
-          "en_name": "Suez Port Area",
-          "ar_name": "الميناء",
-          "aliases": [
-            "Port"
-          ]
-        },
-        {
-          "en_name": "PetroSuez Area",
-          "ar_name": "منطقة البترول",
-          "aliases": [
-            "Petroleum Zone"
-          ]
-        },
-        {
-          "en_name": "Adabiya",
-          "ar_name": "الأدبية",
-          "aliases": []
-        },
-        {
-          "en_name": "New Suez",
-          "ar_name": "السويس الجديدة",
-          "aliases": []
-        },
-        {
-          "en_name": "Northwest Gulf of Suez",
-          "ar_name": "شمال غرب خليج السويس",
-          "aliases": []
-        }
-      ],
-      "ar_name": "السويس",
-      "id": "Suez",
-      "en_name": "Suez"
-    },
-    {
-      "alias": [
-        "شمال سيناء"
-      ],
-      "districts": [
-        {
-          "en_name": "Arish",
-          "ar_name": "العريش",
-          "aliases": [
-            "El Arish"
-          ]
-        },
-        {
-          "en_name": "Sheikh Zuweid",
-          "ar_name": "الشيخ زويد",
-          "aliases": []
-        },
-        {
-          "en_name": "Rafah",
-          "ar_name": "رفح",
-          "aliases": []
-        },
-        {
-          "en_name": "Bir El Abd",
-          "ar_name": "بئر العبد",
-          "aliases": []
-        },
-        {
-          "en_name": "Nakhl",
-          "ar_name": "نخل",
-          "aliases": []
-        },
-        {
-          "en_name": "Hasna",
-          "ar_name": "الحسنة",
-          "aliases": [
-            "Al Hassana"
-          ]
-        },
-        {
-          "en_name": "Qatia",
-          "ar_name": "قاطية",
-          "aliases": []
-        },
-        {
-          "en_name": "Mahdiya",
-          "ar_name": "المهدية",
-          "aliases": []
-        },
-        {
-          "en_name": "Rumana",
-          "ar_name": "رمانة",
-          "aliases": []
-        },
-        {
-          "en_name": "Joura",
-          "ar_name": "الجورة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "شمال سيناء",
-      "id": "North Sinai",
-      "en_name": "North Sinai"
-    },
-    {
-      "alias": [
-        "جنوب سيناء"
-      ],
-      "districts": [
-        {
-          "en_name": "Sharm El Sheikh",
-          "ar_name": "شرم الشيخ",
-          "aliases": []
-        },
-        {
-          "en_name": "Dahab",
-          "ar_name": "دهب",
-          "aliases": []
-        },
-        {
-          "en_name": "Nuweiba",
-          "ar_name": "نويبع",
-          "aliases": [
-            "Neuweiba"
-          ]
-        },
-        {
-          "en_name": "Taba",
-          "ar_name": "طابا",
-          "aliases": []
-        },
-        {
-          "en_name": "St. Catherine",
-          "ar_name": "سانت كاترين",
-          "aliases": [
-            "Saint Catherine"
-          ]
-        },
-        {
-          "en_name": "El Tor",
-          "ar_name": "الطور",
-          "aliases": [
-            "Al Tur"
-          ]
-        },
-        {
-          "en_name": "Ras Sudr",
-          "ar_name": "رأس سدر",
-          "aliases": [
-            "Ras Sedr"
-          ]
-        },
-        {
-          "en_name": "Abu Rudeis",
-          "ar_name": "أبو رديس",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Zenima",
-          "ar_name": "أبو زنيمة",
-          "aliases": []
-        },
-        {
-          "en_name": "Nabq Bay",
-          "ar_name": "نبق",
-          "aliases": [
-            "Nabq"
-          ]
-        }
-      ],
-      "ar_name": "جنوب سيناء",
-      "id": "South Sinai",
-      "en_name": "South Sinai"
-    },
-    {
-      "alias": [
-        "الفيوم",
-        "Faiyum"
-      ],
-      "districts": [
-        {
-          "en_name": "Fayoum City",
-          "ar_name": "الفيوم",
-          "aliases": []
-        },
-        {
-          "en_name": "Ibshway",
-          "ar_name": "إبشواي",
-          "aliases": [
-            "Ibsheway"
-          ]
-        },
-        {
-          "en_name": "Tamiya",
-          "ar_name": "طامية",
-          "aliases": [
-            "Tamiya"
-          ]
-        },
-        {
-          "en_name": "Sinnuris",
-          "ar_name": "سنورس",
-          "aliases": [
-            "Senoris"
-          ]
-        },
-        {
-          "en_name": "Etsa",
-          "ar_name": "إطسا",
-          "aliases": [
-            "Itsa"
-          ]
-        },
-        {
-          "en_name": "Youssef El Seddik",
-          "ar_name": "يوسف الصديق",
-          "aliases": []
-        },
-        {
-          "en_name": "Kom Oshim",
-          "ar_name": "كوم أوشيم",
-          "aliases": []
-        },
-        {
-          "en_name": "Qasr El Sagha",
-          "ar_name": "قصر الصاغة",
-          "aliases": []
-        },
-        {
-          "en_name": "Lake Qarun (Area)",
-          "ar_name": "بحيرة قارون",
-          "aliases": [
-            "Qaroun"
-          ]
-        },
-        {
-          "en_name": "New Fayoum",
-          "ar_name": "الفيوم الجديدة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الفيوم",
-      "id": "Fayoum",
-      "en_name": "Fayoum"
-    },
-    {
-      "alias": [
-        "بني سويف",
-        "Beni Sweif"
-      ],
-      "districts": [
-        {
-          "en_name": "Beni Suef City",
-          "ar_name": "بني سويف",
-          "aliases": []
-        },
-        {
-          "en_name": "El Wasta",
-          "ar_name": "الواسطى",
-          "aliases": [
-            "Al Wasta"
-          ]
-        },
-        {
-          "en_name": "Nasser",
-          "ar_name": "ناصر",
-          "aliases": []
-        },
-        {
-          "en_name": "Ihnasiya",
-          "ar_name": "اهناسيا",
-          "aliases": [
-            "Ihnasia"
-          ]
-        },
-        {
-          "en_name": "Beba",
-          "ar_name": "ببا",
-          "aliases": []
-        },
-        {
-          "en_name": "Fashn",
-          "ar_name": "الفشن",
-          "aliases": [
-            "El Fashn"
-          ]
-        },
-        {
-          "en_name": "Sumusta El Waqf",
-          "ar_name": "سمسطا",
-          "aliases": [
-            "Samasta"
-          ]
-        },
-        {
-          "en_name": "New Beni Suef",
-          "ar_name": "بني سويف الجديدة",
-          "aliases": []
-        },
-        {
-          "en_name": "Industrial Zone",
-          "ar_name": "المنطقة الصناعية",
-          "aliases": []
-        },
-        {
-          "en_name": "Beni Suef University Area",
-          "ar_name": "جامعة بني سويف",
-          "aliases": []
-        }
-      ],
-      "ar_name": "بني سويف",
-      "id": "Beni Suef",
-      "en_name": "Beni Suef"
-    },
-    {
-      "alias": [
-        "المنيا",
-        "Al Minya"
-      ],
-      "districts": [
-        {
-          "en_name": "Minya City",
-          "ar_name": "المنيا",
-          "aliases": []
-        },
-        {
-          "en_name": "Samalut",
-          "ar_name": "سمالوط",
-          "aliases": [
-            "Samalut/Samalout"
-          ]
-        },
-        {
-          "en_name": "Mallawi",
-          "ar_name": "ملوي",
-          "aliases": [
-            "Mallawi"
-          ]
-        },
-        {
-          "en_name": "Abu Qurqas",
-          "ar_name": "أبو قرقاص",
-          "aliases": []
-        },
-        {
-          "en_name": "Matay",
-          "ar_name": "مطاي",
-          "aliases": []
-        },
-        {
-          "en_name": "Maghagha",
-          "ar_name": "مغاغة",
-          "aliases": []
-        },
-        {
-          "en_name": "Beni Mazar",
-          "ar_name": "بني مزار",
-          "aliases": []
-        },
-        {
-          "en_name": "Deir Mawas",
-          "ar_name": "دير مواس",
-          "aliases": []
-        },
-        {
-          "en_name": "New Minya",
-          "ar_name": "المنيا الجديدة",
-          "aliases": []
-        },
-        {
-          "en_name": "Ashmunein (Area)",
-          "ar_name": "الأشمونين",
-          "aliases": [
-            "Al Ashmunein"
-          ]
-        }
-      ],
-      "ar_name": "المنيا",
-      "id": "Minya",
-      "en_name": "Minya"
-    },
-    {
-      "alias": [
-        "أسيوط",
-        "Asyut"
-      ],
-      "districts": [
-        {
-          "en_name": "Assiut City",
-          "ar_name": "أسيوط",
-          "aliases": []
-        },
-        {
-          "en_name": "Abnoub",
-          "ar_name": "أبنوب",
-          "aliases": []
-        },
-        {
-          "en_name": "Manfalut",
-          "ar_name": "منفلوط",
-          "aliases": []
-        },
-        {
-          "en_name": "Qusiya",
-          "ar_name": "القوصية",
-          "aliases": [
-            "El Quseyya"
-          ]
-        },
-        {
-          "en_name": "Dairut",
-          "ar_name": "ديروط",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Tij",
-          "ar_name": "أبو تيج",
-          "aliases": [
-            "Abutig"
-          ]
-        },
-        {
-          "en_name": "Badari",
-          "ar_name": "البداري",
-          "aliases": [
-            "El Badari"
-          ]
-        },
-        {
-          "en_name": "Sahel Selim",
-          "ar_name": "ساحل سليم",
-          "aliases": []
-        },
-        {
-          "en_name": "Sedfa",
-          "ar_name": "صدفا",
-          "aliases": [
-            "Sodfa"
-          ]
-        },
-        {
-          "en_name": "New Assiut",
-          "ar_name": "أسيوط الجديدة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "أسيوط",
-      "id": "Assiut",
-      "en_name": "Assiut"
-    },
-    {
-      "alias": [
-        "سوهاج"
-      ],
-      "districts": [
-        {
-          "en_name": "Sohag City",
-          "ar_name": "سوهاج",
-          "aliases": []
-        },
-        {
-          "en_name": "Akhmim",
-          "ar_name": "أخميم",
-          "aliases": []
-        },
-        {
-          "en_name": "Tahta",
-          "ar_name": "طهطا",
-          "aliases": []
-        },
-        {
-          "en_name": "Tema",
-          "ar_name": "طهطا/طما",
-          "aliases": [
-            "Tema/Temma",
-            "Tima"
-          ]
-        },
-        {
-          "en_name": "Girga",
-          "ar_name": "جرجا",
-          "aliases": []
-        },
-        {
-          "en_name": "Saqilatuh",
-          "ar_name": "ساقلتة",
-          "aliases": [
-            "Saqilatuh/Saqilatlah",
-            "Saqilta"
-          ]
-        },
-        {
-          "en_name": "El Maragha",
-          "ar_name": "المراغة",
-          "aliases": [
-            "Al Maraghah"
-          ]
-        },
-        {
-          "en_name": "Juhayna",
-          "ar_name": "جهينة",
-          "aliases": [
-            "Juhaina"
-          ]
-        },
-        {
-          "en_name": "Baliana",
-          "ar_name": "البلينا",
-          "aliases": [
-            "El Balyana"
-          ]
-        },
-        {
-          "en_name": "Dar El Salam",
-          "ar_name": "دار السلام",
-          "aliases": [
-            "Dar Al Salam"
-          ]
-        }
-      ],
-      "ar_name": "سوهاج",
-      "id": "Sohag",
-      "en_name": "Sohag"
-    },
-    {
-      "alias": [
-        "قنا"
-      ],
-      "districts": [
-        {
-          "en_name": "Qena City",
-          "ar_name": "قنا",
-          "aliases": []
-        },
-        {
-          "en_name": "Qus",
-          "ar_name": "قوص",
-          "aliases": []
-        },
-        {
-          "en_name": "Nag Hammadi",
-          "ar_name": "نجع حمادي",
-          "aliases": []
-        },
-        {
-          "en_name": "Deshna",
-          "ar_name": "دشنا",
-          "aliases": []
-        },
-        {
-          "en_name": "Farshut",
-          "ar_name": "فرشوط",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Tesht",
-          "ar_name": "أبوتشت",
-          "aliases": [
-            "Abu Tesht/Abu Tisht"
-          ]
-        },
-        {
-          "en_name": "Naqada",
-          "ar_name": "نقادة",
-          "aliases": []
-        },
-        {
-          "en_name": "Waqf",
-          "ar_name": "الوقف",
-          "aliases": []
-        },
-        {
-          "en_name": "New Qena",
-          "ar_name": "قنا الجديدة",
-          "aliases": []
-        },
-        {
-          "en_name": "Quft",
-          "ar_name": "قفط",
-          "aliases": [
-            "Koft"
-          ]
-        }
-      ],
-      "ar_name": "قنا",
-      "id": "Qena",
-      "en_name": "Qena"
-    },
-    {
-      "alias": [
-        "الأقصر",
-        "Luxor Governorate"
-      ],
-      "districts": [
-        {
-          "en_name": "Luxor City (East Bank)",
-          "ar_name": "الأقصر",
-          "aliases": [
-            "East Bank"
-          ]
-        },
-        {
-          "en_name": "Karnak",
-          "ar_name": "الكرنك",
-          "aliases": []
-        },
-        {
-          "en_name": "West Bank (Thebes)",
-          "ar_name": "البر الغربي",
-          "aliases": [
-            "Gurna/El Qurna"
-          ]
-        },
-        {
-          "en_name": "Armant",
-          "ar_name": "إسنا/أرمنت",
-          "aliases": [
-            "Armant/Erment"
-          ]
-        },
-        {
-          "en_name": "Esna",
-          "ar_name": "إسنا",
-          "aliases": []
-        },
-        {
-          "en_name": "Al Toud",
-          "ar_name": "الطود",
-          "aliases": [
-            "El Tod"
-          ]
-        },
-        {
-          "en_name": "New Tiba",
-          "ar_name": "طيبة الجديدة",
-          "aliases": [
-            "New Tiba City"
-          ]
-        },
-        {
-          "en_name": "El Bayadiya",
-          "ar_name": "البياضية",
-          "aliases": [
-            "Al Bayadeya"
-          ]
-        },
-        {
-          "en_name": "Zeniya",
-          "ar_name": "الزينية",
-          "aliases": [
-            "El Zinia"
-          ]
-        },
-        {
-          "en_name": "El Qusair Road Area",
-          "ar_name": "طريق القصير",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الأقصر",
-      "id": "Luxor",
-      "en_name": "Luxor"
-    },
-    {
-      "alias": [
-        "أسوان"
-      ],
-      "districts": [
-        {
-          "en_name": "Aswan City",
-          "ar_name": "أسوان",
-          "aliases": []
-        },
-        {
-          "en_name": "Edfu",
-          "ar_name": "إدفو",
-          "aliases": []
-        },
-        {
-          "en_name": "Kom Ombo",
-          "ar_name": "كوم أمبو",
-          "aliases": []
-        },
-        {
-          "en_name": "Daraw",
-          "ar_name": "دراو",
-          "aliases": []
-        },
-        {
-          "en_name": "Nasr El Nuba",
-          "ar_name": "نصر النوبة",
-          "aliases": [
-            "Nasr Al Nuba"
-          ]
-        },
-        {
-          "en_name": "Kalabsha (Area)",
-          "ar_name": "كلابشة",
-          "aliases": []
-        },
-        {
-          "en_name": "Abu Simbel",
-          "ar_name": "أبو سمبل",
-          "aliases": []
-        },
-        {
-          "en_name": "New Aswan",
-          "ar_name": "أسوان الجديدة",
-          "aliases": []
-        },
-        {
-          "en_name": "Sehail Island (Area)",
-          "ar_name": "جزيرة سهيل",
-          "aliases": [
-            "Sehel"
-          ]
-        },
-        {
-          "en_name": "El Sabayia / Wadi Karkar",
-          "ar_name": "وادي كركر",
-          "aliases": []
-        }
-      ],
-      "ar_name": "أسوان",
-      "id": "Aswan",
-      "en_name": "Aswan"
-    },
-    {
-      "alias": [
-        "الوادي الجديد",
-        "Al Wadi Al Gedid"
-      ],
-      "districts": [
-        {
-          "en_name": "Kharga",
-          "ar_name": "الخارجة",
-          "aliases": [
-            "El Kharga"
-          ]
-        },
-        {
-          "en_name": "Dakhla",
-          "ar_name": "الداخلة",
-          "aliases": [
-            "El Dakhla"
-          ]
-        },
-        {
-          "en_name": "Farafra",
-          "ar_name": "الفرافرة",
-          "aliases": [
-            "El Farafra"
-          ]
-        },
-        {
-          "en_name": "Baris",
-          "ar_name": "باريس",
-          "aliases": [
-            "Paris"
-          ]
-        },
-        {
-          "en_name": "Balat",
-          "ar_name": "بلاط",
-          "aliases": []
-        },
-        {
-          "en_name": "Mut (Dakhla)",
-          "ar_name": "موط",
-          "aliases": [
-            "Mut City"
-          ]
-        },
-        {
-          "en_name": "Bulaq (Oasis)",
-          "ar_name": "بولاك/واحة",
-          "aliases": [
-            "Oasis area"
-          ]
-        },
-        {
-          "en_name": "Ain Dalla",
-          "ar_name": "عين دلة",
-          "aliases": []
-        },
-        {
-          "en_name": "El Qasr (Dakhla)",
-          "ar_name": "القصر",
-          "aliases": [
-            "Al Qasr"
-          ]
-        },
-        {
-          "en_name": "New Kharga",
-          "ar_name": "الخارجة الجديدة",
-          "aliases": []
-        }
-      ],
-      "ar_name": "الوادي الجديد",
-      "id": "New Valley",
-      "en_name": "New Valley"
-    },
-    {
-      "alias": [
-        "مطروح",
-        "Marsa Matrouh Governorate"
-      ],
-      "districts": [
-        {
-          "en_name": "Marsa Matrouh",
-          "ar_name": "مرسى مطروح",
-          "aliases": [
-            "Matruh"
-          ]
-        },
-        {
-          "en_name": "Sidi Barrani",
-          "ar_name": "سيدي براني",
-          "aliases": []
-        },
-        {
-          "en_name": "Nagila",
-          "ar_name": "النجيلة",
-          "aliases": [
-            "An Najila"
-          ]
-        },
-        {
-          "en_name": "Hammam",
-          "ar_name": "الحمام",
-          "aliases": [
-            "El Hammam"
-          ]
-        },
-        {
-          "en_name": "Sallum",
-          "ar_name": "السلوم",
-          "aliases": []
-        },
-        {
-          "en_name": "Barani (Area)",
-          "ar_name": "براني",
-          "aliases": []
-        },
-        {
-          "en_name": "El Negaila",
-          "ar_name": "النجيلة البحرية",
-          "aliases": [
-            "Negaila Bahari"
-          ]
-        }
-      ],
-      "ar_name": "مطروح",
-      "id": "Matrouh",
-      "en_name": "Matrouh"
-    },
-    {
-      "alias": [
-        "البحر الأحمر"
-      ],
-      "districts": [
-        {
-          "en_name": "Hurghada",
-          "ar_name": "الغردقة",
-          "aliases": []
-        },
-        {
-          "en_name": "El Gouna",
-          "ar_name": "الجونة",
-          "aliases": []
-        },
-        {
-          "en_name": "Safaga",
-          "ar_name": "سفاجا",
-          "aliases": []
-        },
-        {
-          "en_name": "Quseir",
-          "ar_name": "القصير",
-          "aliases": [
-            "El Quseir"
-          ]
-        },
-        {
-          "en_name": "Marsa Alam",
-          "ar_name": "مرسى علم",
-          "aliases": []
-        },
-        {
-          "en_name": "Shalateen",
-          "ar_name": "شلاتين",
-          "aliases": []
-        },
-        {
-          "en_name": "Halayeb",
-          "ar_name": "حلايب",
-          "aliases": []
-        },
-        {
-          "en_name": "Ras Ghareb",
-          "ar_name": "رأس غارب",
-          "aliases": []
-        },
-        {
-          "en_name": "Makadi Bay",
-          "ar_name": "مكادي باي",
-          "aliases": [
-            "Makadi"
-          ]
-        },
-        {
-          "en_name": "Sahl Hasheesh",
-          "ar_name": "سهل حشيش",
-          "aliases": []
-        }
-      ],
-      "ar_name": "البحر الأحمر",
-      "id": "Red Sea",
-      "en_name": "Red Sea"
-    },
-    {
-      "alias": [
-        "الصعيد",
-        "اسيوط",
-        "Asyut"
-      ],
-      "districts": [
-        {
-          "en_name": "Asyut",
-          "ar_name": "اسيوط",
-          "aliases": [
-            "assuit city"
-          ]
-        }
-      ],
-      "ar_name": "اسيوط",
-      "id": "Asyut",
-      "en_name": "Asyut"
-    }
-  ]
+  {
+    "alias": [
+      "القاهرة",
+      "قاهرة",
+      "القاهرة الجديدة",
+      "قاهره",
+      "مصر",
+      "كايرو",
+      "New Cairo",
+      "new-cairo",
+      "Al qahira",
+      "Alqahira"
+    ],
+    "districts": [
+      {
+        "en_name": "Al Shorouk",
+        "ar_name": "الشروق",
+        "aliases": []
+      },
+      {
+        "en_name": "Nour",
+        "ar_name": "نور",
+        "aliases": [
+          "nour tmg",
+          "noor city",
+          "مدينة نور"
+        ]
+      },
+      {
+        "en_name": "Sarai",
+        "ar_name": "سراي",
+        "aliases": []
+      },
+      {
+        "en_name": "Madinet Nasr",
+        "ar_name": "مدينة نصر",
+        "aliases": [
+          "مكرم عبيد"
+        ]
+      },
+      {
+        "en_name": "Fifth Settlement",
+        "ar_name": "التجمع الخامس",
+        "aliases": [
+          "التجمع الخامس",
+          "الحي الخامس",
+          "التجمع 5",
+          "التجمع ٥",
+          "الحي 5",
+          "الحي الخامس",
+          "التجمع",
+          "التعسين الشمالى",
+          "التعسين الجنوبى",
+          "بيت الوطن"
+        ]
+      },
+      {
+        "en_name": "New Heliopolis",
+        "ar_name": "هيليوبوليس الجديدة",
+        "aliases": [
+          "مصر الجديده",
+          "هليوبوليس",
+          "هليوبولس الجديده"
+        ]
+      },
+      {
+        "en_name": "Downtown Cairo",
+        "ar_name": "الداون تاون",
+        "aliases": []
+      },
+      {
+        "en_name": "First Settlement",
+        "ar_name": "التجمع الأول",
+        "aliases": [
+          "التجمع الأول",
+          "الحي الأول",
+          "التجمع 1",
+          "الحي 1"
+        ]
+      },
+      {
+        "en_name": "Second Settlement",
+        "ar_name": "التجمع الثاني",
+        "aliases": []
+      },
+      {
+        "en_name": "Third Settlement",
+        "ar_name": "التجمع الثالث",
+        "aliases": [
+          "التجمع الثالث",
+          "الحي الثالث",
+          "التجمع 3",
+          "الحي 3"
+        ]
+      },
+      {
+        "en_name": "Fourth Settlement",
+        "ar_name": "التجمع الرابع",
+        "aliases": [
+          "التجمع الرابع",
+          "التجمع 4",
+          "الحي 4"
+        ]
+      },
+      {
+        "en_name": "Sixth Settlement",
+        "ar_name": "التجمع السادس",
+        "aliases": [
+          "التجمع 6",
+          "الحي 6"
+        ]
+      },
+      {
+        "en_name": "Mostaqbal City",
+        "ar_name": "مدينة المستقبل",
+        "aliases": [
+          " المستقبل سيتى"
+        ]
+      },
+      {
+        "en_name": "El Mokattam",
+        "ar_name": "المقطم",
+        "aliases": []
+      },
+      {
+        "en_name": "El Katameya",
+        "ar_name": "القطامية",
+        "aliases": []
+      },
+      {
+        "en_name": "Badr",
+        "ar_name": "بدر",
+        "aliases": []
+      }
+    ],
+    "ar_name": "القاهرة",
+    "id": "Cairo",
+    "en_name": "Cairo"
+  },
+  {
+    "alias": [
+      "مدينة 6 أكتوبر",
+      "6 October",
+      "6th of October",
+      "٦ اكتوبر"
+    ],
+    "districts": [
+      {
+        "en_name": "The First District",
+        "ar_name": "الحى الاول",
+        "aliases": []
+      },
+      {
+        "en_name": "The Second District",
+        "ar_name": "الحى الثاني",
+        "aliases": []
+      },
+      {
+        "en_name": "The Third District",
+        "ar_name": "الحى الثالث",
+        "aliases": []
+      },
+      {
+        "en_name": "The Fourth District",
+        "ar_name": "الحى الرابع",
+        "aliases": []
+      },
+      {
+        "en_name": "The Fifth District",
+        "ar_name": "الحى الخامس",
+        "aliases": []
+      },
+      {
+        "en_name": "The Sixth District",
+        "ar_name": "الحى السادس",
+        "aliases": []
+      },
+      {
+        "en_name": "The Seventh District",
+        "ar_name": "الحى السابع",
+        "aliases": []
+      },
+      {
+        "en_name": "The Eighth District",
+        "ar_name": "الحى الثامن",
+        "aliases": []
+      },
+      {
+        "en_name": "West Somid",
+        "ar_name": "غرب سوميد",
+        "aliases": []
+      },
+      {
+        "en_name": "New Giza",
+        "ar_name": "نيو جيزة",
+        "aliases": [
+          "نيو جيزا"
+        ]
+      },
+      {
+        "en_name": "Al Bashayer District",
+        "ar_name": "حي البشاير",
+        "aliases": []
+      },
+      {
+        "en_name": "Northern Expansions ",
+        "ar_name": "التوسعات الشمالية",
+        "aliases": [
+          "Al-Tosaat Al-Shamalyia"
+        ]
+      }
+    ],
+    "ar_name": "6 أكتوبر",
+    "id": "6 October",
+    "en_name": "6 October"
+  },
+  {
+    "alias": [
+      "الشيخ زايد",
+      "مدينة الشيخ زايد",
+      "Sheikh Zayed City"
+    ],
+    "districts": [
+      {
+        "en_name": "First District",
+        "ar_name": "الحي الأول",
+        "aliases": [
+          "District 1"
+        ]
+      },
+      {
+        "en_name": "Fourth District",
+        "ar_name": "الحي الرابع",
+        "aliases": [
+          "District 4"
+        ]
+      },
+      {
+        "en_name": "Eighth District",
+        "ar_name": "الحي الثامن",
+        "aliases": [
+          "District 8",
+          "حي الفيلات"
+        ]
+      },
+      {
+        "en_name": "Fourteenth District",
+        "ar_name": "الحي الرابع عشر",
+        "aliases": [
+          "District 14",
+          "Al Rabwa area"
+        ]
+      },
+      {
+        "en_name": "Beverly Hills",
+        "ar_name": "بيفرلي هيلز",
+        "aliases": [
+          "Sodic West",
+          "سوديك ويست"
+        ]
+      },
+      {
+        "en_name": "Green Revolution",
+        "ar_name": "الثورة الخضراء",
+        "aliases": [
+          "El Thawra El Khadra"
+        ]
+      },
+      {
+        "en_name": "Sheikh Zayed Axis",
+        "ar_name": "محور الشيخ زايد",
+        "aliases": []
+      },
+      {
+        "en_name": "New Zayed",
+        "ar_name": "الشيخ زايد الجديدة",
+        "aliases": [
+          "نيو زايد"
+        ]
+      }
+    ],
+    "ar_name": "الشيخ زايد",
+    "id": "Sheikh Zayed",
+    "en_name": "Sheikh Zayed"
+  },
+  {
+    "alias": [
+      "الجيزة",
+      "جيزة"
+    ],
+    "districts": [
+      {
+        "en_name": "Mohandessin",
+        "ar_name": "المهندسين",
+        "aliases": []
+      },
+      {
+        "en_name": "Hadayek October",
+        "ar_name": "حدائق أكتوبر",
+        "aliases": []
+      },
+      {
+        "en_name": "Agouza",
+        "ar_name": "العجوزة",
+        "aliases": []
+      },
+      {
+        "en_name": "Haram",
+        "ar_name": "الهرم",
+        "aliases": []
+      },
+      {
+        "en_name": "Imbaba",
+        "ar_name": "إمبابة",
+        "aliases": []
+      },
+      {
+        "en_name": "Giza District",
+        "ar_name": "حي الجيزة",
+        "aliases": []
+      },
+      {
+        "en_name": "Dokki",
+        "ar_name": "الدقي",
+        "aliases": []
+      }
+    ],
+    "ar_name": "",
+    "id": "Giza",
+    "en_name": "Giza"
+  },
+  {
+    "alias": [
+      "الساحل",
+      "الساحل الطيب",
+      "الساحل الشرير",
+      "شمالي الساحل"
+    ],
+    "districts": [
+      {
+        "en_name": "Sidi Abdel Rahman",
+        "ar_name": "سيدي عبد الرحمن",
+        "aliases": []
+      },
+      {
+        "en_name": "Ras El Hekma",
+        "ar_name": "رأس الحكمة",
+        "aliases": []
+      },
+      {
+        "en_name": "Siwa",
+        "ar_name": "سيوة",
+        "aliases": []
+      },
+      {
+        "en_name": "El Alamein",
+        "ar_name": "العلمين",
+        "aliases": [
+          "العالمين",
+          "العلمين الجديده",
+          "العالمين الجديده"
+        ]
+      },
+      {
+        "en_name": "Marina",
+        "ar_name": "مارينا",
+        "aliases": [
+          "مارينه"
+        ]
+      },
+      {
+        "en_name": "Ghazala Bay",
+        "ar_name": "خليج غزالة",
+        "aliases": [
+          "غزالة"
+        ]
+      },
+      {
+        "en_name": "El Dabaa",
+        "ar_name": "الضبعة",
+        "aliases": [
+          "ضبعة"
+        ]
+      },
+      {
+        "en_name": "Sidi Heneish",
+        "ar_name": "سيدي هنيس",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الساحل",
+    "id": "North Coast",
+    "en_name": "North Coast"
+  },
+  {
+    "alias": [
+      "العاصمة الإدارية الجديدة",
+      "العاصمة الإدارية",
+      "العاصمة الجديدة",
+      "الادارية الجديدة",
+      "العاصمة",
+      "العاصمه",
+      "new capital",
+      "new administrative capital"
+    ],
+    "districts": [
+      {
+        "en_name": "R2 District",
+        "ar_name": "حي R2",
+        "aliases": []
+      },
+      {
+        "en_name": "R7",
+        "ar_name": "حي R7",
+        "aliases": []
+      },
+      {
+        "en_name": "R7 District",
+        "ar_name": "حي R7",
+        "aliases": []
+      },
+      {
+        "en_name": "Diplomatic District",
+        "ar_name": "الحي الدبلوماسي",
+        "aliases": []
+      },
+      {
+        "en_name": "Government District",
+        "ar_name": "الحي الحكومي",
+        "aliases": []
+      },
+      {
+        "en_name": "Knowledge City",
+        "ar_name": "مدينة المعرفة",
+        "aliases": []
+      },
+      {
+        "en_name": "Residential Districts",
+        "ar_name": "الأحياء السكنية",
+        "aliases": []
+      },
+      {
+        "en_name": "Downtown",
+        "ar_name": "وسط المدينة",
+        "aliases": []
+      },
+      {
+        "en_name": "Green River",
+        "ar_name": "النهر الأخضر",
+        "aliases": []
+      },
+      {
+        "en_name": "R3",
+        "ar_name": "R3 حي",
+        "aliases": []
+      },
+      {
+        "en_name": "R8",
+        "ar_name": "R8 حي",
+        "aliases": []
+      },
+      {
+        "en_name": "R3 District",
+        "ar_name": "حي R3",
+        "aliases": []
+      },
+      {
+        "en_name": "Cultural District",
+        "ar_name": "الحي الثقافي",
+        "aliases": []
+      },
+      {
+        "en_name": "Financial District",
+        "ar_name": "الحي المالي",
+        "aliases": []
+      },
+      {
+        "en_name": "Sports City",
+        "ar_name": "مدينة الرياضة",
+        "aliases": []
+      },
+      {
+        "en_name": "Medical City",
+        "ar_name": "المدينة الطبية",
+        "aliases": []
+      },
+      {
+        "en_name": "R1 District",
+        "ar_name": "حي R1",
+        "aliases": []
+      }
+    ],
+    "ar_name": "العاصمة الإدارية الجديدة",
+    "id": "New Administrative Capital",
+    "en_name": "New Administrative Capital"
+  },
+  {
+    "alias": [
+      "القليوبية",
+      "Qaliubia",
+      "Qalubiya",
+      "Qalyubeya"
+    ],
+    "districts": [
+      {
+        "en_name": "Shubra El Kheima",
+        "ar_name": "شبرا الخيمة",
+        "aliases": [
+          "Shobra El Kheima",
+          "Shubra"
+        ]
+      },
+      {
+        "en_name": "El Obour City",
+        "ar_name": "العبور",
+        "aliases": [
+          "مدينة العبور",
+          "Obour"
+        ]
+      },
+      {
+        "en_name": "Banha",
+        "ar_name": "بنها",
+        "aliases": [
+          "Benha"
+        ]
+      },
+      {
+        "en_name": "Qalyub",
+        "ar_name": "قليوب",
+        "aliases": [
+          "Qaliub",
+          "Qalyoub"
+        ]
+      },
+      {
+        "en_name": "El Qanater El Khayriya",
+        "ar_name": "القناطر الخيرية",
+        "aliases": [
+          "القناطر",
+          "Qanater",
+          "Al Qanater"
+        ]
+      },
+      {
+        "en_name": "Khanka",
+        "ar_name": "الخانكة",
+        "aliases": [
+          "El Khanka",
+          "Al Khanka"
+        ]
+      },
+      {
+        "en_name": "Khosous",
+        "ar_name": "الخصوص",
+        "aliases": [
+          "El Khosous",
+          "Al Khosous"
+        ]
+      },
+      {
+        "en_name": "Shibin El Qanater",
+        "ar_name": "شبين القناطر",
+        "aliases": [
+          "Shibin Al Qanater"
+        ]
+      }
+    ],
+    "ar_name": "القليوبية",
+    "id": "Qalyubia",
+    "en_name": "Qalyubia"
+  },
+  {
+    "alias": [
+      "الإسكندرية",
+      "اسكندرية",
+      "Alex"
+    ],
+    "districts": [
+      {
+        "en_name": "Smouha",
+        "ar_name": "سموحة",
+        "aliases": []
+      },
+      {
+        "en_name": "Stanley",
+        "ar_name": "ستانلي",
+        "aliases": []
+      },
+      {
+        "en_name": "Gleem",
+        "ar_name": "جليم",
+        "aliases": []
+      },
+      {
+        "en_name": "Sporting",
+        "ar_name": "سبورتنج",
+        "aliases": []
+      },
+      {
+        "en_name": "Sidi Gaber",
+        "ar_name": "سيدي جابر",
+        "aliases": []
+      },
+      {
+        "en_name": "Miami",
+        "ar_name": "ميامي",
+        "aliases": []
+      },
+      {
+        "en_name": "Montaza",
+        "ar_name": "المنتزه",
+        "aliases": []
+      },
+      {
+        "en_name": "Agami",
+        "ar_name": "العجمي",
+        "aliases": []
+      },
+      {
+        "en_name": "Borg El Arab",
+        "ar_name": "برج العرب",
+        "aliases": [
+          "مدينة برج العرب"
+        ]
+      }
+    ],
+    "ar_name": "الإسكندرية",
+    "id": "Alexandria",
+    "en_name": "Alexandria"
+  },
+  {
+    "alias": [
+      "الشرقية",
+      "Sharqeya"
+    ],
+    "districts": [
+      {
+        "en_name": "Zagazig",
+        "ar_name": "الزقازيق",
+        "aliases": []
+      },
+      {
+        "en_name": "Belbeis",
+        "ar_name": "بلبيس",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Hammad",
+        "ar_name": "أبو حماد",
+        "aliases": []
+      },
+      {
+        "en_name": "Minya El Qamh",
+        "ar_name": "منيا القمح",
+        "aliases": []
+      },
+      {
+        "en_name": "10th of Ramadan",
+        "ar_name": "العاشر من رمضان",
+        "aliases": [
+          "العاشر"
+        ]
+      },
+      {
+        "en_name": "Abu Kebir",
+        "ar_name": "أبو كبير",
+        "aliases": []
+      },
+      {
+        "en_name": "Fakous",
+        "ar_name": "فاقوس",
+        "aliases": []
+      },
+      {
+        "en_name": "Husseiniya",
+        "ar_name": "الحسينية",
+        "aliases": []
+      },
+      {
+        "en_name": "Diyarb Negm",
+        "ar_name": "ديرب نجم",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الشرقية",
+    "id": "Sharqia",
+    "en_name": "Sharqia"
+  },
+  {
+    "alias": [
+      "الدقهلية",
+      "Dakahlia"
+    ],
+    "districts": [
+      {
+        "en_name": "Mansoura",
+        "ar_name": "المنصورة",
+        "aliases": []
+      },
+      {
+        "en_name": "Talkha",
+        "ar_name": "طلخا",
+        "aliases": []
+      },
+      {
+        "en_name": "Meet Ghamr",
+        "ar_name": "ميت غمر",
+        "aliases": []
+      },
+      {
+        "en_name": "Sherbin",
+        "ar_name": "شربين",
+        "aliases": []
+      },
+      {
+        "en_name": "Belqas",
+        "ar_name": "بلقاس",
+        "aliases": []
+      },
+      {
+        "en_name": "Sinbillawin",
+        "ar_name": "السنبلاوين",
+        "aliases": []
+      },
+      {
+        "en_name": "Dekernes",
+        "ar_name": "دكرنس",
+        "aliases": []
+      },
+      {
+        "en_name": "Meniet El Nasr",
+        "ar_name": "منية النصر",
+        "aliases": []
+      },
+      {
+        "en_name": "Gamasa",
+        "ar_name": "جمصة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الدقهلية",
+    "id": "Dakahlia",
+    "en_name": "Dakahlia"
+  },
+  {
+    "alias": [
+      "البحيرة",
+      "El Beheira",
+      "Al Beheira"
+    ],
+    "districts": [
+      {
+        "en_name": "Damanhour",
+        "ar_name": "دمنهور",
+        "aliases": []
+      },
+      {
+        "en_name": "Kafr El Dawwar",
+        "ar_name": "كفر الدوار",
+        "aliases": []
+      },
+      {
+        "en_name": "Rashid (Rosetta)",
+        "ar_name": "رشيد",
+        "aliases": [
+          "Rosetta"
+        ]
+      },
+      {
+        "en_name": "Abu Hummus",
+        "ar_name": "أبو حمص",
+        "aliases": [
+          "Abu Hummus"
+        ]
+      },
+      {
+        "en_name": "Housh Eissa",
+        "ar_name": "حوش عيسى",
+        "aliases": [
+          "Hosh Eissa"
+        ]
+      },
+      {
+        "en_name": "Itay El Barud",
+        "ar_name": "إيتاي البارود",
+        "aliases": [
+          "Itai El Baroud"
+        ]
+      },
+      {
+        "en_name": "Kom Hamada",
+        "ar_name": "كوم حمادة",
+        "aliases": []
+      },
+      {
+        "en_name": "Mahmoudiyah",
+        "ar_name": "المحمودية",
+        "aliases": [
+          "El Mahmoudia"
+        ]
+      },
+      {
+        "en_name": "Wadi El Natrun",
+        "ar_name": "وادي النطرون",
+        "aliases": [
+          "Wady El Natrun"
+        ]
+      }
+    ],
+    "ar_name": "البحيرة",
+    "id": "Beheira",
+    "en_name": "Beheira"
+  },
+  {
+    "alias": [
+      "الغربية",
+      "El Gharbia"
+    ],
+    "districts": [
+      {
+        "en_name": "Tanta",
+        "ar_name": "طنطا",
+        "aliases": []
+      },
+      {
+        "en_name": "El Mahalla El Kubra",
+        "ar_name": "المحلة الكبرى",
+        "aliases": [
+          "El Mahalla",
+          "Mahalla"
+        ]
+      },
+      {
+        "en_name": "Kafr El Zayat",
+        "ar_name": "كفر الزيات",
+        "aliases": []
+      },
+      {
+        "en_name": "Zefta",
+        "ar_name": "زفتى",
+        "aliases": []
+      },
+      {
+        "en_name": "Basyoun",
+        "ar_name": "بسيون",
+        "aliases": []
+      },
+      {
+        "en_name": "Qutour",
+        "ar_name": "قطور",
+        "aliases": [
+          "Kotour"
+        ]
+      },
+      {
+        "en_name": "Santa",
+        "ar_name": "السنطة",
+        "aliases": [
+          "El Santa"
+        ]
+      },
+      {
+        "en_name": "Samanoud",
+        "ar_name": "سمنود",
+        "aliases": [
+          "Samannoud"
+        ]
+      },
+      {
+        "en_name": "Tanta First District",
+        "ar_name": "حي أول طنطا",
+        "aliases": []
+      },
+      {
+        "en_name": "Tanta Second District",
+        "ar_name": "حي ثاني طنطا",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الغربية",
+    "id": "Gharbia",
+    "en_name": "Gharbia"
+  },
+  {
+    "alias": [
+      "المنوفية",
+      "Menoufia",
+      "Al Minufiyah"
+    ],
+    "districts": [
+      {
+        "en_name": "Shibin El Kom",
+        "ar_name": "شبين الكوم",
+        "aliases": [
+          "Shebin El Kom"
+        ]
+      },
+      {
+        "en_name": "Sadat City",
+        "ar_name": "مدينة السادات",
+        "aliases": [
+          "El Sadat City"
+        ]
+      },
+      {
+        "en_name": "Ashmoun",
+        "ar_name": "أشمون",
+        "aliases": [
+          "Ashmoon"
+        ]
+      },
+      {
+        "en_name": "Menouf",
+        "ar_name": "منوف",
+        "aliases": [
+          "Minuf"
+        ]
+      },
+      {
+        "en_name": "Quesna",
+        "ar_name": "قويسنا",
+        "aliases": [
+          "Qwisna",
+          "Qwaysna"
+        ]
+      },
+      {
+        "en_name": "Al Bagor",
+        "ar_name": "الباجور",
+        "aliases": [
+          "El Bagour"
+        ]
+      },
+      {
+        "en_name": "Berket El Sabea",
+        "ar_name": "بركة السبع",
+        "aliases": [
+          "Birka El Saba"
+        ]
+      },
+      {
+        "en_name": "Sers El Layan",
+        "ar_name": "سرس الليان",
+        "aliases": [
+          "Sars El Layan"
+        ]
+      },
+      {
+        "en_name": "Shanawan (Village Cluster)",
+        "ar_name": "شنوان",
+        "aliases": []
+      }
+    ],
+    "ar_name": "المنوفية",
+    "id": "Monufia",
+    "en_name": "Monufia"
+  },
+  {
+    "alias": [
+      "كفر الشيخ",
+      "Kafr ElSheikh"
+    ],
+    "districts": [
+      {
+        "en_name": "Kafr El Sheikh City",
+        "ar_name": "مدينة كفر الشيخ",
+        "aliases": [
+          "Kafr El-Sheikh"
+        ]
+      },
+      {
+        "en_name": "Desouk",
+        "ar_name": "دسوق",
+        "aliases": []
+      },
+      {
+        "en_name": "Fouh",
+        "ar_name": "فوه",
+        "aliases": [
+          "Fuwa"
+        ]
+      },
+      {
+        "en_name": "Baltim",
+        "ar_name": "بلطيم",
+        "aliases": [
+          "Bella/Baltim"
+        ]
+      },
+      {
+        "en_name": "Sidi Salem",
+        "ar_name": "سيدي سالم",
+        "aliases": []
+      },
+      {
+        "en_name": "Mutobas",
+        "ar_name": "مطوبس",
+        "aliases": [
+          "Motobas"
+        ]
+      },
+      {
+        "en_name": "Qellin",
+        "ar_name": "قلين",
+        "aliases": [
+          "Qaleen"
+        ]
+      },
+      {
+        "en_name": "El Hamoul",
+        "ar_name": "الحامول",
+        "aliases": [
+          "Hamoul"
+        ]
+      },
+      {
+        "en_name": "Biyala",
+        "ar_name": "بيلا",
+        "aliases": [
+          "Beyala"
+        ]
+      },
+      {
+        "en_name": "Burullus",
+        "ar_name": "البرلس",
+        "aliases": [
+          "El Brolos",
+          "Brolos"
+        ]
+      }
+    ],
+    "ar_name": "كفر الشيخ",
+    "id": "Kafr El Sheikh",
+    "en_name": "Kafr El Sheikh"
+  },
+  {
+    "alias": [
+      "دمياط",
+      "Dumyat"
+    ],
+    "districts": [
+      {
+        "en_name": "Damietta City",
+        "ar_name": "دمياط",
+        "aliases": []
+      },
+      {
+        "en_name": "New Damietta",
+        "ar_name": "دمياط الجديدة",
+        "aliases": [
+          "Damietta El Gedida"
+        ]
+      },
+      {
+        "en_name": "Faraskur",
+        "ar_name": "فارسكور",
+        "aliases": []
+      },
+      {
+        "en_name": "Kafr Saad",
+        "ar_name": "كفر سعد",
+        "aliases": []
+      },
+      {
+        "en_name": "Kafr El Battikh",
+        "ar_name": "كفر البطيخ",
+        "aliases": []
+      },
+      {
+        "en_name": "Ras El Bar",
+        "ar_name": "رأس البر",
+        "aliases": [
+          "Ras El-Barr"
+        ]
+      },
+      {
+        "en_name": "Ezbet El Borg",
+        "ar_name": "عزبة البرج",
+        "aliases": [
+          "Izbat Al Burg"
+        ]
+      },
+      {
+        "en_name": "El Zarqa",
+        "ar_name": "الزرقا",
+        "aliases": [
+          "Al Zarqa"
+        ]
+      },
+      {
+        "en_name": "El Sinaniya",
+        "ar_name": "السنانية",
+        "aliases": []
+      },
+      {
+        "en_name": "Mit Abu Ghaleb / Villages",
+        "ar_name": "قرى",
+        "aliases": []
+      }
+    ],
+    "ar_name": "دمياط",
+    "id": "Damietta",
+    "en_name": "Damietta"
+  },
+  {
+    "alias": [
+      "بورسعيد",
+      "Port Saeed"
+    ],
+    "districts": [
+      {
+        "en_name": "El Manakh",
+        "ar_name": "المناخ",
+        "aliases": []
+      },
+      {
+        "en_name": "El Arab",
+        "ar_name": "العرب",
+        "aliases": []
+      },
+      {
+        "en_name": "Port Fouad",
+        "ar_name": "بورفؤاد",
+        "aliases": [
+          "Port Fuad"
+        ]
+      },
+      {
+        "en_name": "El Sharq",
+        "ar_name": "الشرق",
+        "aliases": []
+      },
+      {
+        "en_name": "El Zohour",
+        "ar_name": "الزهور",
+        "aliases": []
+      },
+      {
+        "en_name": "El Dawahy",
+        "ar_name": "الضواحي",
+        "aliases": []
+      },
+      {
+        "en_name": "Mubarak West",
+        "ar_name": "غرب",
+        "aliases": [
+          "Gharb"
+        ]
+      },
+      {
+        "en_name": "South District (Port)",
+        "ar_name": "جنوب",
+        "aliases": [
+          "South Port"
+        ]
+      },
+      {
+        "en_name": "Industrial Area",
+        "ar_name": "المنطقة الصناعية",
+        "aliases": []
+      },
+      {
+        "en_name": "Investment Zone",
+        "ar_name": "منطقة الاستثمار",
+        "aliases": []
+      }
+    ],
+    "ar_name": "بورسعيد",
+    "id": "Port Said",
+    "en_name": "Port Said"
+  },
+  {
+    "alias": [
+      "الإسماعيلية",
+      "Ismaïlia"
+    ],
+    "districts": [
+      {
+        "en_name": "Ismailia City",
+        "ar_name": "الإسماعيلية",
+        "aliases": []
+      },
+      {
+        "en_name": "Fayed",
+        "ar_name": "فايد",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Suwir",
+        "ar_name": "أبو صوير",
+        "aliases": [
+          "Abu Sawir"
+        ]
+      },
+      {
+        "en_name": "El Qantara Gharb",
+        "ar_name": "القنطرة غرب",
+        "aliases": [
+          "Qantara Gharb"
+        ]
+      },
+      {
+        "en_name": "El Qantara Sharq",
+        "ar_name": "القنطرة شرق",
+        "aliases": [
+          "Qantara Sharq"
+        ]
+      },
+      {
+        "en_name": "Tell El Kebir",
+        "ar_name": "التل الكبير",
+        "aliases": []
+      },
+      {
+        "en_name": "Kasasien",
+        "ar_name": "القصاصين",
+        "aliases": [
+          "El Kasasin"
+        ]
+      },
+      {
+        "en_name": "Nefesha",
+        "ar_name": "نفيشة",
+        "aliases": []
+      },
+      {
+        "en_name": "Sarabeum",
+        "ar_name": "سرابيوم",
+        "aliases": []
+      },
+      {
+        "en_name": "New Ismailia",
+        "ar_name": "الإسماعيلية الجديدة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الإسماعيلية",
+    "id": "Ismailia",
+    "en_name": "Ismailia"
+  },
+  {
+    "alias": [
+      "السويس"
+    ],
+    "districts": [
+      {
+        "en_name": "Arbaeen",
+        "ar_name": "الأربعين",
+        "aliases": [
+          "El Arbaeen"
+        ]
+      },
+      {
+        "en_name": "Suez City (El Ganayen)",
+        "ar_name": "الجنائن",
+        "aliases": [
+          "El Ganayen"
+        ]
+      },
+      {
+        "en_name": "Ain Sokhna",
+        "ar_name": "العين السخنة",
+        "aliases": [
+          "Ain El Sokhna"
+        ]
+      },
+      {
+        "en_name": "Faisal District",
+        "ar_name": "حي فيصل",
+        "aliases": [
+          "Feisal"
+        ]
+      },
+      {
+        "en_name": "Attaka",
+        "ar_name": "عتاقة",
+        "aliases": [
+          "Ataqa"
+        ]
+      },
+      {
+        "en_name": "Suez Port Area",
+        "ar_name": "الميناء",
+        "aliases": [
+          "Port"
+        ]
+      },
+      {
+        "en_name": "PetroSuez Area",
+        "ar_name": "منطقة البترول",
+        "aliases": [
+          "Petroleum Zone"
+        ]
+      },
+      {
+        "en_name": "Adabiya",
+        "ar_name": "الأدبية",
+        "aliases": []
+      },
+      {
+        "en_name": "New Suez",
+        "ar_name": "السويس الجديدة",
+        "aliases": []
+      },
+      {
+        "en_name": "Northwest Gulf of Suez",
+        "ar_name": "شمال غرب خليج السويس",
+        "aliases": []
+      }
+    ],
+    "ar_name": "السويس",
+    "id": "Suez",
+    "en_name": "Suez"
+  },
+  {
+    "alias": [
+      "شمال سيناء"
+    ],
+    "districts": [
+      {
+        "en_name": "Arish",
+        "ar_name": "العريش",
+        "aliases": [
+          "El Arish"
+        ]
+      },
+      {
+        "en_name": "Sheikh Zuweid",
+        "ar_name": "الشيخ زويد",
+        "aliases": []
+      },
+      {
+        "en_name": "Rafah",
+        "ar_name": "رفح",
+        "aliases": []
+      },
+      {
+        "en_name": "Bir El Abd",
+        "ar_name": "بئر العبد",
+        "aliases": []
+      },
+      {
+        "en_name": "Nakhl",
+        "ar_name": "نخل",
+        "aliases": []
+      },
+      {
+        "en_name": "Hasna",
+        "ar_name": "الحسنة",
+        "aliases": [
+          "Al Hassana"
+        ]
+      },
+      {
+        "en_name": "Qatia",
+        "ar_name": "قاطية",
+        "aliases": []
+      },
+      {
+        "en_name": "Mahdiya",
+        "ar_name": "المهدية",
+        "aliases": []
+      },
+      {
+        "en_name": "Rumana",
+        "ar_name": "رمانة",
+        "aliases": []
+      },
+      {
+        "en_name": "Joura",
+        "ar_name": "الجورة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "شمال سيناء",
+    "id": "North Sinai",
+    "en_name": "North Sinai"
+  },
+  {
+    "alias": [
+      "جنوب سيناء"
+    ],
+    "districts": [
+      {
+        "en_name": "Sharm El Sheikh",
+        "ar_name": "شرم الشيخ",
+        "aliases": []
+      },
+      {
+        "en_name": "Dahab",
+        "ar_name": "دهب",
+        "aliases": []
+      },
+      {
+        "en_name": "Nuweiba",
+        "ar_name": "نويبع",
+        "aliases": [
+          "Neuweiba"
+        ]
+      },
+      {
+        "en_name": "Taba",
+        "ar_name": "طابا",
+        "aliases": []
+      },
+      {
+        "en_name": "St. Catherine",
+        "ar_name": "سانت كاترين",
+        "aliases": [
+          "Saint Catherine"
+        ]
+      },
+      {
+        "en_name": "El Tor",
+        "ar_name": "الطور",
+        "aliases": [
+          "Al Tur"
+        ]
+      },
+      {
+        "en_name": "Ras Sudr",
+        "ar_name": "رأس سدر",
+        "aliases": [
+          "Ras Sedr"
+        ]
+      },
+      {
+        "en_name": "Abu Rudeis",
+        "ar_name": "أبو رديس",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Zenima",
+        "ar_name": "أبو زنيمة",
+        "aliases": []
+      },
+      {
+        "en_name": "Nabq Bay",
+        "ar_name": "نبق",
+        "aliases": [
+          "Nabq"
+        ]
+      }
+    ],
+    "ar_name": "جنوب سيناء",
+    "id": "South Sinai",
+    "en_name": "South Sinai"
+  },
+  {
+    "alias": [
+      "الفيوم",
+      "Faiyum"
+    ],
+    "districts": [
+      {
+        "en_name": "Fayoum City",
+        "ar_name": "الفيوم",
+        "aliases": []
+      },
+      {
+        "en_name": "Ibshway",
+        "ar_name": "إبشواي",
+        "aliases": [
+          "Ibsheway"
+        ]
+      },
+      {
+        "en_name": "Tamiya",
+        "ar_name": "طامية",
+        "aliases": [
+          "Tamiya"
+        ]
+      },
+      {
+        "en_name": "Sinnuris",
+        "ar_name": "سنورس",
+        "aliases": [
+          "Senoris"
+        ]
+      },
+      {
+        "en_name": "Etsa",
+        "ar_name": "إطسا",
+        "aliases": [
+          "Itsa"
+        ]
+      },
+      {
+        "en_name": "Youssef El Seddik",
+        "ar_name": "يوسف الصديق",
+        "aliases": []
+      },
+      {
+        "en_name": "Kom Oshim",
+        "ar_name": "كوم أوشيم",
+        "aliases": []
+      },
+      {
+        "en_name": "Qasr El Sagha",
+        "ar_name": "قصر الصاغة",
+        "aliases": []
+      },
+      {
+        "en_name": "Lake Qarun (Area)",
+        "ar_name": "بحيرة قارون",
+        "aliases": [
+          "Qaroun"
+        ]
+      },
+      {
+        "en_name": "New Fayoum",
+        "ar_name": "الفيوم الجديدة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الفيوم",
+    "id": "Fayoum",
+    "en_name": "Fayoum"
+  },
+  {
+    "alias": [
+      "بني سويف",
+      "Beni Sweif"
+    ],
+    "districts": [
+      {
+        "en_name": "Beni Suef City",
+        "ar_name": "بني سويف",
+        "aliases": []
+      },
+      {
+        "en_name": "El Wasta",
+        "ar_name": "الواسطى",
+        "aliases": [
+          "Al Wasta"
+        ]
+      },
+      {
+        "en_name": "Nasser",
+        "ar_name": "ناصر",
+        "aliases": []
+      },
+      {
+        "en_name": "Ihnasiya",
+        "ar_name": "اهناسيا",
+        "aliases": [
+          "Ihnasia"
+        ]
+      },
+      {
+        "en_name": "Beba",
+        "ar_name": "ببا",
+        "aliases": []
+      },
+      {
+        "en_name": "Fashn",
+        "ar_name": "الفشن",
+        "aliases": [
+          "El Fashn"
+        ]
+      },
+      {
+        "en_name": "Sumusta El Waqf",
+        "ar_name": "سمسطا",
+        "aliases": [
+          "Samasta"
+        ]
+      },
+      {
+        "en_name": "New Beni Suef",
+        "ar_name": "بني سويف الجديدة",
+        "aliases": []
+      },
+      {
+        "en_name": "Industrial Zone",
+        "ar_name": "المنطقة الصناعية",
+        "aliases": []
+      },
+      {
+        "en_name": "Beni Suef University Area",
+        "ar_name": "جامعة بني سويف",
+        "aliases": []
+      }
+    ],
+    "ar_name": "بني سويف",
+    "id": "Beni Suef",
+    "en_name": "Beni Suef"
+  },
+  {
+    "alias": [
+      "المنيا",
+      "Al Minya"
+    ],
+    "districts": [
+      {
+        "en_name": "Minya City",
+        "ar_name": "المنيا",
+        "aliases": []
+      },
+      {
+        "en_name": "Samalut",
+        "ar_name": "سمالوط",
+        "aliases": [
+          "Samalut/Samalout"
+        ]
+      },
+      {
+        "en_name": "Mallawi",
+        "ar_name": "ملوي",
+        "aliases": [
+          "Mallawi"
+        ]
+      },
+      {
+        "en_name": "Abu Qurqas",
+        "ar_name": "أبو قرقاص",
+        "aliases": []
+      },
+      {
+        "en_name": "Matay",
+        "ar_name": "مطاي",
+        "aliases": []
+      },
+      {
+        "en_name": "Maghagha",
+        "ar_name": "مغاغة",
+        "aliases": []
+      },
+      {
+        "en_name": "Beni Mazar",
+        "ar_name": "بني مزار",
+        "aliases": []
+      },
+      {
+        "en_name": "Deir Mawas",
+        "ar_name": "دير مواس",
+        "aliases": []
+      },
+      {
+        "en_name": "New Minya",
+        "ar_name": "المنيا الجديدة",
+        "aliases": []
+      },
+      {
+        "en_name": "Ashmunein (Area)",
+        "ar_name": "الأشمونين",
+        "aliases": [
+          "Al Ashmunein"
+        ]
+      }
+    ],
+    "ar_name": "المنيا",
+    "id": "Minya",
+    "en_name": "Minya"
+  },
+  {
+    "alias": [
+      "أسيوط",
+      "Asyut"
+    ],
+    "districts": [
+      {
+        "en_name": "Assiut City",
+        "ar_name": "أسيوط",
+        "aliases": []
+      },
+      {
+        "en_name": "Abnoub",
+        "ar_name": "أبنوب",
+        "aliases": []
+      },
+      {
+        "en_name": "Manfalut",
+        "ar_name": "منفلوط",
+        "aliases": []
+      },
+      {
+        "en_name": "Qusiya",
+        "ar_name": "القوصية",
+        "aliases": [
+          "El Quseyya"
+        ]
+      },
+      {
+        "en_name": "Dairut",
+        "ar_name": "ديروط",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Tij",
+        "ar_name": "أبو تيج",
+        "aliases": [
+          "Abutig"
+        ]
+      },
+      {
+        "en_name": "Badari",
+        "ar_name": "البداري",
+        "aliases": [
+          "El Badari"
+        ]
+      },
+      {
+        "en_name": "Sahel Selim",
+        "ar_name": "ساحل سليم",
+        "aliases": []
+      },
+      {
+        "en_name": "Sedfa",
+        "ar_name": "صدفا",
+        "aliases": [
+          "Sodfa"
+        ]
+      },
+      {
+        "en_name": "New Assiut",
+        "ar_name": "أسيوط الجديدة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "أسيوط",
+    "id": "Assiut",
+    "en_name": "Assiut"
+  },
+  {
+    "alias": [
+      "سوهاج"
+    ],
+    "districts": [
+      {
+        "en_name": "Sohag City",
+        "ar_name": "سوهاج",
+        "aliases": []
+      },
+      {
+        "en_name": "Akhmim",
+        "ar_name": "أخميم",
+        "aliases": []
+      },
+      {
+        "en_name": "Tahta",
+        "ar_name": "طهطا",
+        "aliases": []
+      },
+      {
+        "en_name": "Tema",
+        "ar_name": "طهطا/طما",
+        "aliases": [
+          "Tema/Temma",
+          "Tima"
+        ]
+      },
+      {
+        "en_name": "Girga",
+        "ar_name": "جرجا",
+        "aliases": []
+      },
+      {
+        "en_name": "Saqilatuh",
+        "ar_name": "ساقلتة",
+        "aliases": [
+          "Saqilatuh/Saqilatlah",
+          "Saqilta"
+        ]
+      },
+      {
+        "en_name": "El Maragha",
+        "ar_name": "المراغة",
+        "aliases": [
+          "Al Maraghah"
+        ]
+      },
+      {
+        "en_name": "Juhayna",
+        "ar_name": "جهينة",
+        "aliases": [
+          "Juhaina"
+        ]
+      },
+      {
+        "en_name": "Baliana",
+        "ar_name": "البلينا",
+        "aliases": [
+          "El Balyana"
+        ]
+      },
+      {
+        "en_name": "Dar El Salam",
+        "ar_name": "دار السلام",
+        "aliases": [
+          "Dar Al Salam"
+        ]
+      }
+    ],
+    "ar_name": "سوهاج",
+    "id": "Sohag",
+    "en_name": "Sohag"
+  },
+  {
+    "alias": [
+      "قنا"
+    ],
+    "districts": [
+      {
+        "en_name": "Qena City",
+        "ar_name": "قنا",
+        "aliases": []
+      },
+      {
+        "en_name": "Qus",
+        "ar_name": "قوص",
+        "aliases": []
+      },
+      {
+        "en_name": "Nag Hammadi",
+        "ar_name": "نجع حمادي",
+        "aliases": []
+      },
+      {
+        "en_name": "Deshna",
+        "ar_name": "دشنا",
+        "aliases": []
+      },
+      {
+        "en_name": "Farshut",
+        "ar_name": "فرشوط",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Tesht",
+        "ar_name": "أبوتشت",
+        "aliases": [
+          "Abu Tesht/Abu Tisht"
+        ]
+      },
+      {
+        "en_name": "Naqada",
+        "ar_name": "نقادة",
+        "aliases": []
+      },
+      {
+        "en_name": "Waqf",
+        "ar_name": "الوقف",
+        "aliases": []
+      },
+      {
+        "en_name": "New Qena",
+        "ar_name": "قنا الجديدة",
+        "aliases": []
+      },
+      {
+        "en_name": "Quft",
+        "ar_name": "قفط",
+        "aliases": [
+          "Koft"
+        ]
+      }
+    ],
+    "ar_name": "قنا",
+    "id": "Qena",
+    "en_name": "Qena"
+  },
+  {
+    "alias": [
+      "الأقصر",
+      "Luxor Governorate"
+    ],
+    "districts": [
+      {
+        "en_name": "Luxor City (East Bank)",
+        "ar_name": "الأقصر",
+        "aliases": [
+          "East Bank"
+        ]
+      },
+      {
+        "en_name": "Karnak",
+        "ar_name": "الكرنك",
+        "aliases": []
+      },
+      {
+        "en_name": "West Bank (Thebes)",
+        "ar_name": "البر الغربي",
+        "aliases": [
+          "Gurna/El Qurna"
+        ]
+      },
+      {
+        "en_name": "Armant",
+        "ar_name": "إسنا/أرمنت",
+        "aliases": [
+          "Armant/Erment"
+        ]
+      },
+      {
+        "en_name": "Esna",
+        "ar_name": "إسنا",
+        "aliases": []
+      },
+      {
+        "en_name": "Al Toud",
+        "ar_name": "الطود",
+        "aliases": [
+          "El Tod"
+        ]
+      },
+      {
+        "en_name": "New Tiba",
+        "ar_name": "طيبة الجديدة",
+        "aliases": [
+          "New Tiba City"
+        ]
+      },
+      {
+        "en_name": "El Bayadiya",
+        "ar_name": "البياضية",
+        "aliases": [
+          "Al Bayadeya"
+        ]
+      },
+      {
+        "en_name": "Zeniya",
+        "ar_name": "الزينية",
+        "aliases": [
+          "El Zinia"
+        ]
+      },
+      {
+        "en_name": "El Qusair Road Area",
+        "ar_name": "طريق القصير",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الأقصر",
+    "id": "Luxor",
+    "en_name": "Luxor"
+  },
+  {
+    "alias": [
+      "أسوان"
+    ],
+    "districts": [
+      {
+        "en_name": "Aswan City",
+        "ar_name": "أسوان",
+        "aliases": []
+      },
+      {
+        "en_name": "Edfu",
+        "ar_name": "إدفو",
+        "aliases": []
+      },
+      {
+        "en_name": "Kom Ombo",
+        "ar_name": "كوم أمبو",
+        "aliases": []
+      },
+      {
+        "en_name": "Daraw",
+        "ar_name": "دراو",
+        "aliases": []
+      },
+      {
+        "en_name": "Nasr El Nuba",
+        "ar_name": "نصر النوبة",
+        "aliases": [
+          "Nasr Al Nuba"
+        ]
+      },
+      {
+        "en_name": "Kalabsha (Area)",
+        "ar_name": "كلابشة",
+        "aliases": []
+      },
+      {
+        "en_name": "Abu Simbel",
+        "ar_name": "أبو سمبل",
+        "aliases": []
+      },
+      {
+        "en_name": "New Aswan",
+        "ar_name": "أسوان الجديدة",
+        "aliases": []
+      },
+      {
+        "en_name": "Sehail Island (Area)",
+        "ar_name": "جزيرة سهيل",
+        "aliases": [
+          "Sehel"
+        ]
+      },
+      {
+        "en_name": "El Sabayia / Wadi Karkar",
+        "ar_name": "وادي كركر",
+        "aliases": []
+      }
+    ],
+    "ar_name": "أسوان",
+    "id": "Aswan",
+    "en_name": "Aswan"
+  },
+  {
+    "alias": [
+      "الوادي الجديد",
+      "Al Wadi Al Gedid"
+    ],
+    "districts": [
+      {
+        "en_name": "Kharga",
+        "ar_name": "الخارجة",
+        "aliases": [
+          "El Kharga"
+        ]
+      },
+      {
+        "en_name": "Dakhla",
+        "ar_name": "الداخلة",
+        "aliases": [
+          "El Dakhla"
+        ]
+      },
+      {
+        "en_name": "Farafra",
+        "ar_name": "الفرافرة",
+        "aliases": [
+          "El Farafra"
+        ]
+      },
+      {
+        "en_name": "Baris",
+        "ar_name": "باريس",
+        "aliases": [
+          "Paris"
+        ]
+      },
+      {
+        "en_name": "Balat",
+        "ar_name": "بلاط",
+        "aliases": []
+      },
+      {
+        "en_name": "Mut (Dakhla)",
+        "ar_name": "موط",
+        "aliases": [
+          "Mut City"
+        ]
+      },
+      {
+        "en_name": "Bulaq (Oasis)",
+        "ar_name": "بولاك/واحة",
+        "aliases": [
+          "Oasis area"
+        ]
+      },
+      {
+        "en_name": "Ain Dalla",
+        "ar_name": "عين دلة",
+        "aliases": []
+      },
+      {
+        "en_name": "El Qasr (Dakhla)",
+        "ar_name": "القصر",
+        "aliases": [
+          "Al Qasr"
+        ]
+      },
+      {
+        "en_name": "New Kharga",
+        "ar_name": "الخارجة الجديدة",
+        "aliases": []
+      }
+    ],
+    "ar_name": "الوادي الجديد",
+    "id": "New Valley",
+    "en_name": "New Valley"
+  },
+  {
+    "alias": [
+      "مطروح",
+      "Marsa Matrouh Governorate"
+    ],
+    "districts": [
+      {
+        "en_name": "Marsa Matrouh",
+        "ar_name": "مرسى مطروح",
+        "aliases": [
+          "Matruh"
+        ]
+      },
+      {
+        "en_name": "Sidi Barrani",
+        "ar_name": "سيدي براني",
+        "aliases": []
+      },
+      {
+        "en_name": "Nagila",
+        "ar_name": "النجيلة",
+        "aliases": [
+          "An Najila"
+        ]
+      },
+      {
+        "en_name": "Hammam",
+        "ar_name": "الحمام",
+        "aliases": [
+          "El Hammam"
+        ]
+      },
+      {
+        "en_name": "Sallum",
+        "ar_name": "السلوم",
+        "aliases": []
+      },
+      {
+        "en_name": "Barani (Area)",
+        "ar_name": "براني",
+        "aliases": []
+      },
+      {
+        "en_name": "El Negaila",
+        "ar_name": "النجيلة البحرية",
+        "aliases": [
+          "Negaila Bahari"
+        ]
+      }
+    ],
+    "ar_name": "مطروح",
+    "id": "Matrouh",
+    "en_name": "Matrouh"
+  },
+  {
+    "alias": [
+      "البحر الأحمر"
+    ],
+    "districts": [
+      {
+        "en_name": "Hurghada",
+        "ar_name": "الغردقة",
+        "aliases": []
+      },
+      {
+        "en_name": "El Gouna",
+        "ar_name": "الجونة",
+        "aliases": []
+      },
+      {
+        "en_name": "Safaga",
+        "ar_name": "سفاجا",
+        "aliases": []
+      },
+      {
+        "en_name": "Quseir",
+        "ar_name": "القصير",
+        "aliases": [
+          "El Quseir"
+        ]
+      },
+      {
+        "en_name": "Marsa Alam",
+        "ar_name": "مرسى علم",
+        "aliases": []
+      },
+      {
+        "en_name": "Shalateen",
+        "ar_name": "شلاتين",
+        "aliases": []
+      },
+      {
+        "en_name": "Halayeb",
+        "ar_name": "حلايب",
+        "aliases": []
+      },
+      {
+        "en_name": "Ras Ghareb",
+        "ar_name": "رأس غارب",
+        "aliases": []
+      },
+      {
+        "en_name": "Makadi Bay",
+        "ar_name": "مكادي باي",
+        "aliases": [
+          "Makadi"
+        ]
+      },
+      {
+        "en_name": "Sahl Hasheesh",
+        "ar_name": "سهل حشيش",
+        "aliases": []
+      }
+    ],
+    "ar_name": "البحر الأحمر",
+    "id": "Red Sea",
+    "en_name": "Red Sea"
+  },
+  {
+    "alias": [
+      "الصعيد",
+      "اسيوط",
+      "Asyut"
+    ],
+    "districts": [
+      {
+        "en_name": "Asyut",
+        "ar_name": "اسيوط",
+        "aliases": [
+          "assuit city"
+        ]
+      }
+    ],
+    "ar_name": "اسيوط",
+    "id": "Asyut",
+    "en_name": "Asyut"
+  }
+]
