@@ -52,6 +52,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [parsedData, setParsedData] = useState(null);
   const [error, setError] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isReapplyingMapping, setIsReapplyingMapping] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState([]);
   const [missingProjects, setMissingProjects] = useState([]);
@@ -166,12 +167,16 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   // Apply mapping and transform data (uses already-parsed rawExcelData)
   // Wrapper around the processor function to handle state updates
   // FIX: Accept rawDataParam to avoid React state closure issue
-  const applyMappingToData = useCallback(async (rawDataParam = null, manualMapping = null) => {
+  const applyMappingToData = useCallback(async (rawDataParam = null, manualMapping = null, isReapply = false) => {
     // Use parameter if provided, otherwise fall back to state
     const dataToProcess = rawDataParam || rawExcelData;
     if (!dataToProcess) return;
 
-    setIsProcessing(true);
+    if (isReapply) {
+      setIsReapplyingMapping(true);
+    } else {
+      setIsProcessing(true);
+    }
     setError(null);
 
     try {
@@ -184,11 +189,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       // Update state with processed data
       setParsedData(processedData);
 
-      setIsProcessing(false);
+      if (isReapply) {
+        setIsReapplyingMapping(false);
+      } else {
+        setIsProcessing(false);
+      }
     } catch (err) {
       console.error("Error applying mapping:", err);
       setError(err.message || "Failed to apply mapping");
-      setIsProcessing(false);
+      if (isReapply) {
+        setIsReapplyingMapping(false);
+      } else {
+        setIsProcessing(false);
+      }
     }
   }, [rawExcelData, manualHeaderMapping]);
 
@@ -197,7 +210,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     () => debounce((mapping) => {
       if (rawExcelData) {
         // Pass null for rawDataParam to use state (rawExcelData is already set at this point)
-        applyMappingToData(null, mapping);
+        // Set isReapply=true to use isReapplyingMapping flag instead of isProcessing
+        applyMappingToData(null, mapping, true);
       }
     }, 300),
     [rawExcelData, applyMappingToData]
@@ -469,7 +483,25 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       return;
     }
 
-    // Validate all required fields
+    // CRITICAL FIX: Re-apply mapping with current manualHeaderMapping before validation/upload
+    // This ensures we always use the latest mapping, even if debounce hasn't completed
+    if (rawExcelData) {
+      setIsReapplyingMapping(true);
+      try {
+        const processedData = await applyMappingToDataProcessor(rawExcelData, manualHeaderMapping);
+        setParsedData(processedData);
+        // Wait a tick to ensure state is updated
+        await new Promise(resolve => setTimeout(resolve, 0));
+      } catch (err) {
+        console.error("Error re-applying mapping before submit:", err);
+        setError(err.message || "Failed to apply mapping");
+        setIsReapplyingMapping(false);
+        return;
+      }
+      setIsReapplyingMapping(false);
+    }
+
+    // Validate all required fields (now using updated parsedData)
     const validationErrors = validateRequiredFields();
     if (validationErrors.length > 0) {
       setValidationErrors(validationErrors);
@@ -736,17 +768,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               <button
                 onClick={handleSubmit}
                 disabled={
-                  !selectedFile || !parsedData || isProcessing || isUploading
+                  !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                 }
-                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isUploading
+                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:opacity-90"
                   }`}
               >
-                {isUploading && <Loader2 className="animate-spin" size={18} />}
+                {(isUploading || isReapplyingMapping) && <Loader2 className="animate-spin" size={18} />}
                 {isUploading
                   ? t.uploadExcel?.uploading || "Uploading..."
-                  : t.uploadExcel?.upload || "Upload"}
+                  : isReapplyingMapping
+                    ? t.uploadExcel?.processing || "Processing..."
+                    : t.uploadExcel?.upload || "Upload"}
               </button>
             )}
           </div>

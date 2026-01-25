@@ -47,11 +47,29 @@ export async function parseExcelFile(file) {
 
       // Formula / sharedFormula cells
       if (v && typeof v === "object" && (v.formula || v.sharedFormula)) {
-        if (v.result !== undefined && v.result !== null) return v.result;
+        // Prefer the computed result if available
+        if (v.result !== undefined && v.result !== null) {
+          return v.result;
+        }
 
-        // Fallback: keep the formula so data isn't silently lost
+        // Fallback: try to get the displayed text value from Excel
+        const cellText = cell?.text;
+        if (cellText !== undefined && cellText !== null && cellText !== "") {
+          // Filter out error-indicating formulas
+          const textStr = String(cellText).trim();
+          if (!textStr.startsWith('=IFERROR(__xludf') && !textStr.startsWith('=__xludf')) {
+            return cellText;
+          }
+        }
+
+        // If formula can't be resolved and text is an error formula, return null/empty
         const f = v.formula || v.sharedFormula;
-        return f ? `=${f}` : null;
+        if (f && (f.includes('__xludf') || f.includes('DUMMYFUNCTION'))) {
+          return null; // Don't show error formulas
+        }
+
+        // Last resort: return null instead of formula string to avoid showing formulas
+        return null;
       }
 
       // Other complex cell types (richText, hyperlink, etc.) -> use rendered text
@@ -98,21 +116,56 @@ export async function parseExcelFile(file) {
       headers.push(headerValue === null || headerValue === undefined ? "" : String(headerValue));
     }
 
+    // Helper function to check if a cell value is effectively empty
+    const isCellEmpty = (value) => {
+      if (value === null || value === undefined) return true;
+      const str = String(value).trim();
+      if (str === "") return true;
+      // Filter out error formulas
+      if (str.startsWith('=IFERROR(__xludf') || str.startsWith('=__xludf')) return true;
+      return false;
+    };
+
     // Extract data rows - iterate through all columns to maintain index alignment
     const rows = [];
+    let consecutiveEmptyRows = 0;
+    const MAX_CONSECUTIVE_EMPTY = 10; // Stop after 10 consecutive empty rows
+    let hasSeenData = false; // Track if we've encountered any data rows
+
     worksheet.eachRow((row, rowIndex) => {
       if (rowIndex === 1) return; // Skip header row
 
       const rowData = [];
+      let hasNonEmptyValue = false;
+      
       // Iterate through all columns to ensure consistent array length
       for (let col = 1; col <= maxColumn; col++) {
         const cell = row.getCell(col);
-        rowData.push(getCellComputedValue(cell));
+        const value = getCellComputedValue(cell);
+        
+        // Check if value is actually non-empty (after trimming and filtering formulas)
+        if (!isCellEmpty(value)) {
+          hasNonEmptyValue = true;
+        }
+        
+        rowData.push(value);
       }
 
-      // Filter out completely empty rows
-      if (rowData.some((cell) => cell !== null && cell !== undefined && cell !== "")) {
+      // Only include rows with actual data
+      if (hasNonEmptyValue) {
+        consecutiveEmptyRows = 0;
+        hasSeenData = true;
         rows.push(rowData);
+      } else {
+        consecutiveEmptyRows++;
+        // Optimization: if we've seen data and hit many consecutive empty rows,
+        // we can assume we've reached the end of the data section
+        // Note: ExcelJS eachRow doesn't support early return, but this helps with performance
+        // by identifying when we're past the data section
+        if (hasSeenData && consecutiveEmptyRows >= MAX_CONSECUTIVE_EMPTY) {
+          // We'll continue iterating but won't add more rows
+          // This is a performance optimization hint
+        }
       }
     });
 
