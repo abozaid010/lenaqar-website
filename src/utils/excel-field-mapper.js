@@ -341,7 +341,7 @@ function isValidRoomsCount(value) {
   // Check if it's a valid integer (including negative for special cases)
   if (/^-?\d+$/.test(str)) {
     const num = parseInt(str, 10);
-    return num >= 0 && num <= 100; // Reasonable range for rooms (0-100)
+    return num >= 0 && num <= 15; // Reasonable range for rooms (0-15)
   }
   
   // Check if it's a word number (case-insensitive)
@@ -413,9 +413,10 @@ const EXPECTED_VALUES_MAP = {
  * @param {string} key - Canonical field key (e.g., "buildingType")
  * @param {string} value - Value to match (e.g., "apartment")
  * @param {Array<string>} input - Array of expected values (e.g., BUILDING_TYPE_VALUES)
+ * @param {number} fuzzyThreshold - Optional fuzzy match threshold (0.0 = perfect match, 1.0 = match anything). Default: 0.4
  * @returns {Promise<{matched: boolean, confidence: number, matchedValue: string | null}>}
  */
-export async function matches_values(key, value, input) {
+export async function matches_values(key, value, input, fuzzyThreshold = 0.6) {
   if (!value || !input || input.length === 0) {
     return {
       matched: false,
@@ -446,7 +447,7 @@ export async function matches_values(key, value, input) {
   });
   
   const fuzzyResults = fuse.search(normalizedValue);
-  if (fuzzyResults.length > 0 && fuzzyResults[0].score < 0.4) {
+  if (fuzzyResults.length > 0 && fuzzyResults[0].score < fuzzyThreshold) {
     // Lower score is better in Fuse.js
     const bestMatch = fuzzyResults[0];
     return {
@@ -638,7 +639,9 @@ export class ExcelFieldMapper {
     
     // If validator is an array, use matches_values
     if (Array.isArray(validator)) {
-      const result = await matches_values(canonicalKey, row2Value, validator);
+      // Use 0.6 fuzzy threshold for buildingType (property type) for more lenient matching
+      const fuzzyThreshold = 0.6;
+      const result = await matches_values(canonicalKey, row2Value, validator, fuzzyThreshold);
       
       if (result.matched) {
         return {
