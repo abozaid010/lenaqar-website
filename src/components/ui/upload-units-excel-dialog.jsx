@@ -345,13 +345,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         });
       }
       
-      // Check totalPrice > 10000
-      if (unit.totalPrice === undefined || unit.totalPrice === null || unit.totalPrice <= 10000) {
+      // Check totalPrice > 200000
+      if (unit.totalPrice === undefined || unit.totalPrice === null || unit.totalPrice <= 200000) {
         errors.push({
           field: 'totalPrice',
           label: 'Total Price',
           type: 'invalid_value',
-          message: `Unit ${unitNumber}: Total Price must be greater than 10,000 (current value: ${unit.totalPrice})`,
+          message: `Unit ${unitNumber}: Total Price must be greater than 200,000 (current value: ${unit.totalPrice})`,
         });
       }
     });
