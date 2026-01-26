@@ -9,6 +9,7 @@ import { COOKIE_CONFIG } from "./CookieConfig";
  */
 export class TokenExpirationManager {
   // Default threshold: refresh 5 minutes before expiration
+  // With 1-hour access tokens, this means refresh at 55 minutes
   static DEFAULT_REFRESH_THRESHOLD = 5 * 60 * 1000; // 5 minutes in milliseconds
 
   /**

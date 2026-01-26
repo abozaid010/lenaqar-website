@@ -39,6 +39,7 @@ export class TokenRefreshService {
 
       const data = await refreshResponse.json();
       const newAccessToken = data.access_token;
+      const newRefreshToken = data.refresh_token;
 
       if (!newAccessToken) {
         throw new Error("No access token received from refresh endpoint");
@@ -47,6 +48,9 @@ export class TokenRefreshService {
       // CRITICAL FIX: Update client-side cookie immediately after server refresh
       // This ensures client-side cookie is in sync with server-side cookie
       this.updateClientCookie(newAccessToken);
+
+      // Note: Refresh token is HttpOnly, so we can't update it client-side
+      // The server handles refresh token rotation automatically
 
       if (process.env.NODE_ENV === "development") {
         console.log("[TokenRefreshService] Token refreshed successfully");
@@ -95,7 +99,8 @@ export class TokenRefreshService {
       console.log("[TokenRefreshService] Handling refresh failure - clearing cookies");
     }
     LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
-    LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
+    // Note: REFRESH_TOKEN is HttpOnly, can't be removed client-side
+    // Server-side middleware or API route should handle refresh token cleanup
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 

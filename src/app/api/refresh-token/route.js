@@ -37,16 +37,27 @@ export async function POST() {
 
     const data = await response.json();
     const newAccessToken = data.access_token;
+    const newRefreshToken = data.refresh_token;
 
     if (!newAccessToken) {
       throw new Error("No access token received from refresh endpoint");
     }
 
-    // Set the new token in cookies with all required options
+    // Set the new tokens in cookies with all required options
     // Using centralized CookieConfig ensures consistency
-    const cookieOptions = getServerCookieOptions("ACCESS_TOKEN");
-    const responseObj = NextResponse.json({ access_token: newAccessToken });
-    responseObj.cookies.set("access_token", newAccessToken, cookieOptions);
+    const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
+    const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");
+    const responseObj = NextResponse.json({ 
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken 
+    });
+    
+    responseObj.cookies.set("access_token", newAccessToken, accessTokenOptions);
+    
+    // Only set new refresh token if provided by backend (token rotation)
+    if (newRefreshToken) {
+      responseObj.cookies.set("refresh_token", newRefreshToken, refreshTokenOptions);
+    }
 
     return responseObj;
   } catch (error) {
