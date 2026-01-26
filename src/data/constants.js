@@ -31,7 +31,11 @@ export const BUILDING_TYPE_VALUES = [
  "standalone",
  "admin", 
  "bank",
- "medical"
+ "medical",
+ "palace",
+ "sky loft",
+ "maisonette",
+ "warehouse"
 ];
 
 export const VIEW_TYPE_VALUES = [
