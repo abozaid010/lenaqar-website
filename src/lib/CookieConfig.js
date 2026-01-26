@@ -6,10 +6,10 @@
 export const COOKIE_CONFIG = {
   /**
    * Access token configuration
-   * Expires after 1 hour
+   * Expires after 1 hour for better security
    */
   ACCESS_TOKEN: {
-    maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
+    maxAge: 60 * 60, // 1 hour in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
@@ -18,14 +18,15 @@ export const COOKIE_CONFIG = {
 
   /**
    * Refresh token configuration
-   * Expires after 30 days
+   * Expires after 10 days
+   * HttpOnly for better security
    */
   REFRESH_TOKEN: {
     maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
     secure: true,
     sameSite: "lax",
-    httpOnly: false,
+    httpOnly: true,
   },
 
   /**
