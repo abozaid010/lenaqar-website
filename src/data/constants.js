@@ -35,7 +35,8 @@ export const BUILDING_TYPE_VALUES = [
  "palace",
  "sky loft",
  "maisonette",
- "warehouse"
+ "warehouse",
+ "suite",
 ];
 
 export const VIEW_TYPE_VALUES = [
