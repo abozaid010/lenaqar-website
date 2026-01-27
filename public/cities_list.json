@@ -209,6 +209,13 @@
         "aliases": [
           "Al-Tosaat Al-Shamalyia"
         ]
+      },
+      {
+        "en_name": "Eastern Expansions ",
+        "ar_name": "التوسعات الشرقية",
+        "aliases": [
+          "Al-Tosaat Al-Sharqia"
+        ]
       }
     ],
     "ar_name": "6 أكتوبر",
@@ -326,7 +333,7 @@
         "aliases": []
       }
     ],
-    "ar_name": "",
+    "ar_name": "الجيزة",
     "id": "Giza",
     "en_name": "Giza"
   },
@@ -582,6 +589,11 @@
         "en_name": "Smouha",
         "ar_name": "سموحة",
         "aliases": []
+      },
+      {
+        "en_name": "Mahram Bek",
+        "ar_name": "محرم بيك",
+        "aliases": ["محرم بك"]
       },
       {
         "en_name": "Stanley",
