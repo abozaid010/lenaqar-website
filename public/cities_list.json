@@ -19,6 +19,11 @@
         "aliases": []
       },
       {
+        "en_name": "Maadi",
+        "ar_name": "المعادي",
+        "aliases": []
+      },
+      {
         "en_name": "Nour",
         "ar_name": "نور",
         "aliases": [
@@ -65,7 +70,16 @@
         ]
       },
       {
-        "en_name": "Downtown Cairo",
+        "en_name": "Fustat",
+        "ar_name": "الفسطاط",
+        "aliases": [
+          "فسطاط",
+          "الفسطاط الجديده",
+          "مصر القديمة"
+        ]
+      },
+      {
+        "en_name": "Downtown",
         "ar_name": "الداون تاون",
         "aliases": []
       },
@@ -149,6 +163,11 @@
       {
         "en_name": "The First District",
         "ar_name": "الحى الاول",
+        "aliases": []
+      },
+      {
+        "en_name": "New October",
+        "ar_name": "6 أكتوبر الجديدة",
         "aliases": []
       },
       {
@@ -418,15 +437,16 @@
         "aliases": []
       },
       {
+        "en_name": "Investor Area",
+        "ar_name": "منطقة المستثمرين",
+        "aliases": []
+      },
+      {
         "en_name": "R7",
         "ar_name": "حي R7",
         "aliases": []
       },
-      {
-        "en_name": "R7 District",
-        "ar_name": "حي R7",
-        "aliases": []
-      },
+     
       {
         "en_name": "Diplomatic District",
         "ar_name": "الحي الدبلوماسي",
@@ -467,11 +487,7 @@
         "ar_name": "R8 حي",
         "aliases": []
       },
-      {
-        "en_name": "R3 District",
-        "ar_name": "حي R3",
-        "aliases": []
-      },
+      
       {
         "en_name": "Cultural District",
         "ar_name": "الحي الثقافي",
@@ -493,7 +509,7 @@
         "aliases": []
       },
       {
-        "en_name": "R1 District",
+        "en_name": "R1",
         "ar_name": "حي R1",
         "aliases": []
       }
@@ -750,7 +766,12 @@
         "en_name": "Gamasa",
         "ar_name": "جمصة",
         "aliases": []
+      },
+      {"en_name": "New Mansoura",
+        "ar_name": "المنصورة الجديدة",
+        "aliases": []
       }
+
     ],
     "ar_name": "الدقهلية",
     "id": "Dakahlia",

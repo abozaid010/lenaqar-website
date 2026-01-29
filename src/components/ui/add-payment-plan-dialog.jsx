@@ -285,7 +285,7 @@ export default function AddPaymentPlanDialog({
             t.formLabels?.cacheDiscount ||
             "Cache Discount (%)"
           }
-          value={formData.cache_discount || "40"}
+          value={formData.cache_discount ?? ""}
           onChange={handleChange}
           required
           placeholder="40"
