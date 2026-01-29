@@ -156,7 +156,7 @@ const LenaTextField = forwardRef(({
           id={name}
           name={name}
           type={inputType}
-          value={inputValue || ""}
+          value={inputValue ?? ""}
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
