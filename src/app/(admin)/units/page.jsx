@@ -21,18 +21,18 @@ export async function generateMetadata() {
       ? `Units - ${clientName} | LENAAI AI Sales Agent`
       : "Units - LENAAI AI Sales Agent",
     description:
-      "Manage and view all property units. Filter, search, and organize your real estate inventory with LENAAI's AI-powered CRM platform.",
+      "Manage and view all property units. Filter, search, and organize your inventory with LENAAI's Real Estate AI Sales Agent dashboard.",
     keywords: [
       "property units",
       "real estate inventory",
       "unit management",
-      "AI CRM",
+      "AI Sales Agent dashboard",
       "property listings",
     ],
     openGraph: {
       title: "Units - LENAAI AI Sales Agent",
       description:
-        "Manage and view all property units with LENAAI's AI-powered CRM.",
+        "Manage and view all property units with LENAAI's Real Estate AI Sales Agent dashboard.",
       url: `${SITE_URL}/units`,
       type: "website",
     },

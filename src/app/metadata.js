@@ -7,14 +7,27 @@ export const defaultMetadata = {
     template: "%s | LENAAI",
   },
   description:
-    "LENAAI - ChatGPT for real estate, Realestate GPT. Best tool to sell real estate by AI agent. Real estate chatbot, lead generation, marketing automation, and AI-powered CRM. Free listings.",
+    "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
   keywords: [
+    // Brand / Name Variations
+    "LENAAI",
+    "LenaAI",
+    "Lena AI",
+    "lenaai",
+    "lena",
+    "Lina AI",
+    "lina ai",
+    // Common misspellings (for search coverage)
+    "Realstate AI Sales agent",
     // Primary Value: Real Estate Chatbot (Sell by AI)
     "sell real estate by AI",
     "best tool to sell real estate by AI agent",
     "real estate chatbot",
     "AI agent real estate",
     "ChatGPT for real estate",
+    "ChatGPT for real estate Egypt",
+    "chat gpt for real estate in egypt",
+    "chat gpt for realestate in egypt",
     "like ChatGPT",
     "AI Sales Agent",
     "AI Agent",
@@ -50,12 +63,13 @@ export const defaultMetadata = {
     "conversion rate to sales",
     "marketing campaign performance",
     "real estate marketing automation",
-    // Tertiary Value: CRM with AI
-    "AI-powered CRM",
-    "CRM for properties",
-    "real estate CRM",
-    "CRM automation",
-    "lead management CRM",
+    // Tertiary Value: Sales Agent Workspace (Dashboard)
+    "AI Sales Agent dashboard",
+    "real estate sales agent dashboard",
+    "lead management dashboard",
+    "sales pipeline dashboard",
+    "client management dashboard",
+    "team management dashboard",
     "client scoring AI",
     "real estate AI assistant",
     "AI property agent",
@@ -121,7 +135,7 @@ export const defaultMetadata = {
     url: SITE_URL,
     title: "LENAAI | Sell Real Estate by AI - Best AI Agent Tool",
     description:
-      "ChatGPT for real estate, Realestate GPT. Best tool to sell real estate by AI agent. Real estate chatbot, lead generation, marketing automation, and AI-powered CRM. Free listings.",
+      "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
     siteName: "LENAAI",
     locale: "en_US",
     alternateLocale: ["ar_SA", "ar_AE", "ar_EG", "ar_KW", "ar_QA"],
@@ -130,7 +144,7 @@ export const defaultMetadata = {
         url: `${SITE_URL}/images/logo.png`,
         width: 1200,
         height: 630,
-        alt: "LENAAI AI Agent - Best AI Tool for Real Estate",
+        alt: "LENAAI Real Estate AI Sales Agent",
       },
     ],
   },
@@ -138,7 +152,7 @@ export const defaultMetadata = {
     card: "summary_large_image",
     title: "LENAAI | ChatGPT for Real Estate - AI Sales Agent That Talks & Sells",
     description:
-      "ChatGPT for real estate, Realestate GPT. Best tool to sell real estate by AI agent. Real estate chatbot, lead generation, marketing automation, and AI-powered CRM.",
+      "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
     images: [`${SITE_URL}/images/logo.png`],
   },
   robots: {

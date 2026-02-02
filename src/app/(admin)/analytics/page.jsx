@@ -26,7 +26,7 @@ export async function generateMetadata() {
       "real estate analytics",
       "sales analytics",
       "marketing analytics",
-      "CRM analytics",
+      "sales pipeline analytics",
       "AI analytics",
       "business insights",
     ],

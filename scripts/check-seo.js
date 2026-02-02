@@ -16,6 +16,8 @@ const AI_KEYWORDS = [
   'ChatGPT',
   'AI Agent',
   'AI Sales Agent',
+  'Real Estate AI Sales Agent',
+  'Realstate AI Sales agent',
   'AI Salesman',
   'Chatbot',
   'conversational AI',
@@ -192,7 +194,7 @@ function checkFile(filePath) {
       });
       if (!hasAIKeyword && !filePath.includes('layout.')) {
         warnings.push(
-          `⚠️  ${relativePath}: Title should mention AI/ChatGPT value proposition (real estate chatbot, AI agent, lead generation, or CRM)`
+          `⚠️  ${relativePath}: Title should mention AI/ChatGPT value proposition (real estate chatbot, AI agent, lead generation, or AI Sales Agent dashboard)`
         );
       }
     }

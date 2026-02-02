@@ -20,17 +20,17 @@ export async function generateMetadata() {
       ? `Team Management - ${clientName} | LENAAI AI Sales Agent`
       : "Team Management - LENAAI AI Sales Agent",
     description:
-      "Manage your real estate sales team, assign team members, and track performance with LENAAI's AI-powered CRM platform.",
+      "Manage your real estate sales team, assign team members, and track performance with LENAAI's Real Estate AI Sales Agent platform.",
     keywords: [
       "team management",
       "sales team",
       "real estate team",
-      "AI CRM team",
+      "AI Sales Agent team",
     ],
     openGraph: {
       title: "Team Management - LENAAI AI Sales Agent",
       description:
-        "Manage your real estate sales team with LENAAI's AI-powered CRM.",
+        "Manage your real estate sales team with LENAAI's Real Estate AI Sales Agent platform.",
       url: `${SITE_URL}/team`,
       type: "website",
     },

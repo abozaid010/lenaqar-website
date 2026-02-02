@@ -8,11 +8,11 @@ export async function generateMetadata({ params }) {
   return {
     title: "Client Chat - LENAAI AI Sales Agent",
     description:
-      "Chat with client and manage communications through LENAAI's AI-powered CRM. Use our AI Sales Agent to engage with clients and close deals.",
+      "Chat with clients and manage conversations in LENAAI's AI Sales Agent dashboard. Engage leads, qualify buyers, and close deals faster.",
     openGraph: {
       title: "Client Chat - LENAAI AI Sales Agent",
       description:
-        "Chat with clients using LENAAI's AI-powered CRM platform.",
+        "Chat with clients using LENAAI's Real Estate AI Sales Agent platform.",
       url: `${SITE_URL}/dashboard/${userId}`,
       type: "website",
     },

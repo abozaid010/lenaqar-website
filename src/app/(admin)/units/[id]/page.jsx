@@ -35,10 +35,10 @@ export async function generateMetadata({ params }) {
     ? `${unit.unitTitle} - Admin Unit Details | LENAAI AI Sales Agent`
     : clientName
       ? `Admin Unit Details - ${clientName} | LENAAI AI Sales Agent`
-      : "Admin Unit Details - AI CRM | LENAAI";
+      : "Admin Unit Details - AI Sales Agent | LENAAI";
   const description = unit
-    ? `${unit.unitTitle || "Property"} - ${unit.area || ""} sqm, ${unit.rooms || ""} rooms. Manage and view unit details in LENAAI's AI-powered CRM platform. Track how the AI Sales Agent presents this property to clients.`
-    : "View and manage unit details in LENAAI's AI-powered CRM platform. Track property information and how the AI Sales Agent engages with clients about this unit.";
+    ? `${unit.unitTitle || "Property"} - ${unit.area || ""} sqm, ${unit.rooms || ""} rooms. Manage unit details in LENAAI's AI Sales Agent dashboard and track how the AI presents this property to clients.`
+    : "View and manage unit details in LENAAI's AI Sales Agent dashboard. Track property information and how the AI engages with clients about this unit.";
 
   return {
     title,

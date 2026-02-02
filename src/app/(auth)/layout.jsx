@@ -3,7 +3,7 @@ import { SITE_URL } from "../metadata";
 export const metadata = {
   title: "Login",
   description:
-    "Login to LENAAI - AI-powered real estate CRM platform. Access your dashboard, manage properties, and automate your sales process.",
+    "Login to LENAAI - Real Estate AI Sales Agent platform. Access your dashboard, manage leads and properties, and automate your sales process.",
   robots: {
     index: false,
     follow: false,
