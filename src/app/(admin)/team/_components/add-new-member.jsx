@@ -239,7 +239,8 @@ export default function AddNewMember({ isEdit = false, data }) {
               value={formData.phone}
               onChange={handleChange}
               dir="ltr"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-start focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              style={{ textAlign: "start" }}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
