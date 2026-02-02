@@ -2,7 +2,7 @@ import { SITE_URL } from "../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "Privacy Policy - LENAAI AI CRM",
+  title: "Privacy Policy - LENAAI AI Sales Agent",
   description:
     "LENAAI Privacy Policy - Learn how we collect, use, and protect your information when using our AI-powered real estate CRM platform and AI Sales Agent.",
   keywords: ["privacy policy", "data protection", "LENAAI privacy", "real estate CRM privacy"],

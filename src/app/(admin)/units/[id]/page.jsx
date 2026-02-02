@@ -32,9 +32,9 @@ export async function generateMetadata({ params }) {
     : null;
 
   const title = unit?.unitTitle
-    ? `${unit.unitTitle} - Admin Unit Details | LENAAI AI CRM`
+    ? `${unit.unitTitle} - Admin Unit Details | LENAAI AI Sales Agent`
     : clientName
-      ? `Admin Unit Details - ${clientName} | LENAAI AI CRM`
+      ? `Admin Unit Details - ${clientName} | LENAAI AI Sales Agent`
       : "Admin Unit Details - AI CRM | LENAAI";
   const description = unit
     ? `${unit.unitTitle || "Property"} - ${unit.area || ""} sqm, ${unit.rooms || ""} rooms. Manage and view unit details in LENAAI's AI-powered CRM platform. Track how the AI Sales Agent presents this property to clients.`

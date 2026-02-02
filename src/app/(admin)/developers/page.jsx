@@ -4,7 +4,7 @@ import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "Developers - Real Estate Developers Directory | LENAAI AI CRM",
+  title: "Developers - Real Estate Developers Directory | LENAAI AI Sales Agent",
   description:
     "Browse our directory of real estate developers in Egypt. Discover trusted developers, their projects, and property portfolios. Powered by LENAAI AI.",
   keywords: [

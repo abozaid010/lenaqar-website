@@ -3,7 +3,7 @@ import { SITE_URL } from "../../metadata";
 import CampaignsPageClient from "./_components/CampaignsPageClient";
 
 export const metadata = {
-  title: "Campaigns | LENAAI AI CRM",
+  title: "Campaigns | LENAAI AI Sales Agent",
   description:
     "Create and manage marketing campaigns. View campaign performance and update campaign content.",
   robots: {

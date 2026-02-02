@@ -4,7 +4,7 @@ import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "My Projects - Manage Real Estate Projects | LENAAI AI CRM",
+  title: "My Projects - Manage Real Estate Projects | LENAAI AI Sales Agent",
   description:
     "Manage your real estate projects, view project details, units, payment plans, and track project performance on LENAAI's AI-powered CRM platform.",
   keywords: [
@@ -15,7 +15,7 @@ export const metadata = {
     "developers projects",
   ],
   openGraph: {
-    title: "My Projects - LENAAI AI CRM",
+    title: "My Projects - LENAAI AI Sales Agent",
     description:
       "Manage your real estate projects with LENAAI's AI-powered CRM platform.",
     url: `${SITE_URL}/myProjects`,
