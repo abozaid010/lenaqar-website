@@ -6,6 +6,11 @@ export const defaultMetadata = {
     default: "LENAAI | Sell Real Estate by AI - Best AI Agent Tool for Real Estate Chatbot",
     template: "%s | LENAAI",
   },
+  icons: {
+    icon: "/images/logo-5.png",
+    shortcut: "/images/logo-5.png",
+    apple: "/images/logo-5.png",
+  },
   description:
     "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
   keywords: [
