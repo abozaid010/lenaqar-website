@@ -5,7 +5,7 @@ export default {
     home: "الرئيسية",
     login: "تسجيل الدخول",
     logOut: "تسجيل الخروج",
-    clientDashboard: "تسجيل الدخول",
+    clientDashboard: "لوحة التحكم",
     jobOpportunities: " طلب تجربة",
     allProperties: "جميع العقارات",
     searchPlaceholder: "بحث",
