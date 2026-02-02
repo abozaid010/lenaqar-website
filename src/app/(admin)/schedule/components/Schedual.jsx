@@ -143,7 +143,7 @@ const Schedule = ({ data, dataSales }) => {
 
   return (
     <div className="border border-red-50">
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 ">
+      <div className="min-h-screen bg-[#E2DBFF]/10 p-6 ">
         <div className="max-w-7xl mx-auto ">
           <div className="mb-8">
             {/* Week Navigation */}

@@ -5,7 +5,6 @@ import DashbordFilter from "./_components/dashbord-filter";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { AverageScoreProvider } from "@/context/average-score";
 import { cookies } from "next/headers";
-import PremiumFeatures from "./_components/premuim-features";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
@@ -61,11 +60,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className="bg-gray-50 min-h-screen ">
-        <div className="container my-3 no-print !px-0">
-          <PremiumFeatures />
-        </div>
-
+      <div className="min-h-screen bg-[#E2DBFF]/10">
         <div className="container bg-white rounded-md shadow-sm py-4 md:py-6">
           <AverageScoreProvider>
             <div className="flex items-center justify-between mb-4">

@@ -40,7 +40,7 @@ const Layout = async ({ children }) => {
               clientEmail={clientEmail}
             />
 
-            <main className="overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0">
+            <main className="overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0 bg-[#E2DBFF1a]">
               <Suspense
                 fallback={
                   <LoadingSpinner

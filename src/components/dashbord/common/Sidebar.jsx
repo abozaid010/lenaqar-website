@@ -128,7 +128,7 @@ const Sidebar = () => {
         </div>
 
         {/* Navigation Menu */}
-        <div className="flex-1 ">
+        <div className="flex-1 bg-[#E2DBFF]/10">
           <Link
             href="/dashboard"
             prefetch={true}
