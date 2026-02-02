@@ -44,7 +44,11 @@ export default function AddPaymentPlanDialog({
             existingPlan.reservation_amount_percentage
               ? (existingPlan.reservation_amount_percentage * 100).toString()
               : "",
-          installment_years: existingPlan.installment_years || "",
+          installment_years:
+            existingPlan.installment_years !== undefined &&
+            existingPlan.installment_years !== null
+              ? String(existingPlan.installment_years)
+              : "",
           maintenance_fee: existingPlan.maintenance_fee
             ? (existingPlan.maintenance_fee * 100).toString()
             : "",
@@ -157,15 +161,11 @@ export default function AddPaymentPlanDialog({
       }
     });
 
-    // Validate installment years is a positive integer
-    const installmentYears = parseInt(formData.installment_years);
-    if (
-      isNaN(installmentYears) ||
-      installmentYears <= 0 ||
-      !Number.isInteger(parseFloat(formData.installment_years))
-    ) {
+    // Validate installment years is a positive number (float allowed)
+    const installmentYears = parseFloat(formData.installment_years);
+    if (!Number.isFinite(installmentYears) || installmentYears <= 0) {
       newErrors.installment_years =
-        "Installment years must be a positive integer";
+        "Installment years must be a positive number";
     }
 
     setErrors(newErrors);
@@ -196,7 +196,7 @@ export default function AddPaymentPlanDialog({
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
         reservation_amount_percentage: 0, // Always send 0
-        installment_years: parseInt(formData.installment_years),
+        installment_years: parseFloat(formData.installment_years),
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
         cache_discount:
           formData.cache_discount === "" ||
@@ -260,6 +260,7 @@ export default function AddPaymentPlanDialog({
             required
             placeholder="8"
             min="1"
+            step="0.1"
             error={errors.installment_years}
           />
 
