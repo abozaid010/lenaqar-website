@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import AddNewMember from "./add-new-member";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 
-export default function TeamTable({ data }) {
+export default function TeamTable({ data, canManageTeam = true }) {
   const router = useRouter();
   const { t } = useI18n();
   const [currentId, setCurrentId] = useState(null);
@@ -74,9 +74,12 @@ export default function TeamTable({ data }) {
                   {t.team.role || "Position"}
                 </th>
 
-                <th className="px-2 py-2 text-center whitespace-nowrap"></th>
-
-                <th className="px-2 py-2 text-center whitespace-nowrap"></th>
+                {canManageTeam && (
+                  <>
+                    <th className="px-2 py-2 text-center whitespace-nowrap" />
+                    <th className="px-2 py-2 text-center whitespace-nowrap" />
+                  </>
+                )}
               </tr>
             </thead>
 
@@ -93,21 +96,24 @@ export default function TeamTable({ data }) {
                     {item.phone}
                   </td>
                   <td className="px-2 py-2 text-gray-600 whitespace-nowrap text-center">
-                    {item.position}
+                    {item.job_title ?? item.position}
                   </td>
-                  <td className="px-2 py-2 text-center">
-                    <AddNewMember isEdit={true} data={item} />
-                  </td>
-
-                  <td className="px-2 py-2 text-center">
-                    <button onClick={() => handleDelete(item.id)}>
-                      {loadingDelete && currentId === item.id ? (
-                        <div className="animate-spin w-4 h-4 border-2 border-gray-400 rounded-full border-t-transparent"></div>
-                      ) : (
-                        <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
-                      )}
-                    </button>
-                  </td>
+                  {canManageTeam && (
+                    <>
+                      <td className="px-2 py-2 text-center">
+                        <AddNewMember isEdit={true} data={item} canManageTeam={canManageTeam} />
+                      </td>
+                      <td className="px-2 py-2 text-center">
+                        <button onClick={() => handleDelete(item.id)}>
+                          {loadingDelete && currentId === item.id ? (
+                            <div className="animate-spin w-4 h-4 border-2 border-gray-400 rounded-full border-t-transparent"></div>
+                          ) : (
+                            <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
+                          )}
+                        </button>
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
             </tbody>

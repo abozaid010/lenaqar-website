@@ -924,14 +924,16 @@ export default function ProjectsList({ clientId }) {
                       <div className="flex-1"></div>
                       <button
                         onClick={() => handleEditClick(project)}
-                        className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200"
+                        className="ml-2 h-8 w-8 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
+                        style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                         title="Edit Project"
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         onClick={(e) => handleDeleteClick(project, e)}
-                        className="ml-1 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200"
+                        className="ml-1 h-8 w-8 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
+                        style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                         title="Delete Project"
                       >
                         <Trash2 size={16} />

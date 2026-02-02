@@ -3,12 +3,13 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
+import UnifiedHeader from "@/components/ui/UnifiedHeader";
 import { useI18n } from "@/context/translate-api";
 import { fetchCampaigns } from "@/utils/api";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Plus, RefreshCw } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import CampaignDialog from "./CampaignDialog";
 
@@ -92,7 +93,7 @@ function CampaignCard({ campaign, onEdit }) {
               href={campaignHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-white text-[#494A4B] hover:bg-gray-50 transition-colors text-sm"
+              className="inline-flex items-center h-10 px-3 py-2 rounded-md border border-[#E6E6E6] bg-white text-[#494A4B] hover:bg-gray-50 transition-colors text-sm"
             >
               {previewLabel}
             </a>
@@ -100,7 +101,7 @@ function CampaignCard({ campaign, onEdit }) {
             <button
               type="button"
               disabled
-              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
+              className="inline-flex items-center h-10 px-3 py-2 rounded-md border border-[#E6E6E6] bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
             >
               {previewLabel}
             </button>
@@ -109,7 +110,7 @@ function CampaignCard({ campaign, onEdit }) {
           <button
             type="button"
             onClick={() => onEdit?.(campaign)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
+            className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
           >
             <Pencil size={16} />
             {t?.campaigns?.edit || "Edit"}
@@ -291,41 +292,34 @@ export default function CampaignsPageClient() {
     );
   }
 
+  const campaignsTitle = t?.sidebar?.campaigns ?? "Campaigns";
+  const newCampaignLabel = t?.campaigns?.newCampaign ?? "New Campaign";
+  const showingLabel = t?.campaigns?.showing ?? "Showing";
+  const ofLabel = t?.campaigns?.of ?? "of";
+
   return (
     <div className="container">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t?.sidebar?.campaigns || "Campaigns"}
-          </h1>
-          <p className="text-sm text-gray-600">
-            Total: <span className="font-medium">{totalCount}</span>
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm"
-          >
-            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </button>
-
+      <UnifiedHeader
+        title={campaignsTitle}
+        leadingSlot={
+          <span className="text-sm text-primary">
+            {t?.campaigns?.total ?? "Total"}: <span className="font-medium">{totalCount}</span>
+          </span>
+        }
+        trailingSlot={
           <button
             type="button"
             onClick={() => {
               setEditingCampaign(null);
               setIsCampaignDialogOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
+            className="inline-flex items-center gap-2 h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
           >
             <Plus size={16} />
-            New Campaign
+            {newCampaignLabel}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">
@@ -333,23 +327,23 @@ export default function CampaignsPageClient() {
           type="button"
           disabled={!canPrev}
           onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
-          className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           {t?.previous || "Previous"}
         </button>
         <div className="text-sm text-gray-600">
-          Showing{" "}
+          {showingLabel}{" "}
           <span className="font-medium">{Math.min(offset + 1, totalCount)}</span>-
           <span className="font-medium">
             {Math.min(offset + limit, totalCount)}
           </span>{" "}
-          of <span className="font-medium">{totalCount}</span>
+          {ofLabel} <span className="font-medium">{totalCount}</span>
         </div>
         <button
           type="button"
           disabled={!canNext}
           onClick={() => setOffset((prev) => prev + limit)}
-          className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           {t?.next || "Next"}
         </button>

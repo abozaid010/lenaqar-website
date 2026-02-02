@@ -200,7 +200,7 @@ export default function DashbordFilter({ appliedFilters }) {
           >
             <div
               onClick={() => setIsCampaignDropdownOpen(!isCampaignDropdownOpen)}
-              className="w-full flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
+              className="w-full h-10 flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
             >
               <span className="truncate">
                 {filters.campaign_ids.length === 0
@@ -252,13 +252,13 @@ export default function DashbordFilter({ appliedFilters }) {
           <div className="relative inline-block flex-1 w-62">
             <div
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className="w-full items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
+              className="relative w-full h-10 flex items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
             >
-              <button dir="ltr" className="whitespace-nowrap ">
+              <span dir="ltr" className="whitespace-nowrap truncate min-w-0 flex-1">
                 {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
                   filters.end_date
                 )}`}
-              </button>
+              </span>
 
               <ChevronDown className="absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
             </div>
@@ -320,7 +320,7 @@ export default function DashbordFilter({ appliedFilters }) {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handlePrint}
-            className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium min-w-[44px] sm:min-w-fit whitespace-nowrap"
+            className="flex items-center justify-center gap-1.5 h-10 px-3 py-2 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium min-w-[44px] sm:min-w-fit whitespace-nowrap"
             title={t.dashboardFilter.actions.print}
           >
             <Printer size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />

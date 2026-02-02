@@ -97,7 +97,7 @@ const Header = ({ clientName, clientID, clientEmail }) => {
       <div className="flex items-center space-x-2 sm:space-x-4 ">
         <button
           onClick={sendMessageWhatsApp}
-          className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-[16px] py-[10px] h-[40px] sm:px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
+          className="flex items-center gap-2 h-10 bg-[#25D366] hover:bg-[#20BA5A] text-white font-medium px-4 sm:px-6 rounded-md shadow-md transition-all duration-300 transform hover:scale-105 focus:outline-none"
         >
           <svg
             width="20"

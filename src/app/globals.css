@@ -53,6 +53,11 @@ div {
 
 button {
   cursor: pointer;
+  min-height: 2.5rem; /* 40px - fixed height for all buttons */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 .timeline {
