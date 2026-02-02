@@ -35,6 +35,7 @@ export default function AddCompoundDialog({
   defaultCity,
   defaultDistrict,
 }) {
+  const GOOGLE_MAPS_REQUIRED_PREFIX = "https://maps.app.goo.gl";
   const queryClient = useQueryClient();
   
   const { isLoading: delveloperLoading, data: developersData } =
@@ -315,6 +316,24 @@ export default function AddCompoundDialog({
       return;
     }
 
+    // Validate Google Maps link prefix while typing
+    if (name === "google_map_link") {
+      const trimmed = (value || "").trim();
+      const isValid =
+        trimmed.length === 0 || trimmed.startsWith(GOOGLE_MAPS_REQUIRED_PREFIX);
+
+      if (!isValid) {
+        setErrors((prev) => ({
+          ...prev,
+          google_map_link:
+            t.formValidation?.googleMapsLinkMustStartWith ||
+            `Google Maps link must start with ${GOOGLE_MAPS_REQUIRED_PREFIX}`,
+        }));
+      } else if (errors.google_map_link) {
+        setErrors((prev) => ({ ...prev, google_map_link: null }));
+      }
+    }
+
     if (name === "city") {
       // Reset district when city changes
       setFormData({
@@ -521,6 +540,12 @@ export default function AddCompoundDialog({
       newErrors.google_map_link =
         t.formValidation?.googleMapsLinkRequired ||
         "Google Maps Link is required";
+    } else if (
+      !formData.google_map_link.trim().startsWith(GOOGLE_MAPS_REQUIRED_PREFIX)
+    ) {
+      newErrors.google_map_link =
+        t.formValidation?.googleMapsLinkMustStartWith ||
+        `Google Maps link must start with ${GOOGLE_MAPS_REQUIRED_PREFIX}`;
     }
 
     if (!formData.master_plan || !formData.master_plan.url) {
@@ -1221,7 +1246,7 @@ export default function AddCompoundDialog({
                 label={t.formLabels?.googleMapsLink || "Google Maps Link"}
                 value={formData.google_map_link}
                 onChange={handleChange}
-                placeholder="https://maps.google.com/..."
+                placeholder="https://maps.app.goo.gl/..."
                 required
                 error={errors.google_map_link}
                 errorMessage={errors.google_map_link}

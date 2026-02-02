@@ -1010,6 +1010,8 @@ export default {
     paymentPlansRequired: "At least one payment plan is required",
     propertyTypesRequired: "At least one property type is required",
     googleMapsLinkRequired: "Google Maps Link is required",
+    googleMapsLinkMustStartWith:
+      "Google Maps link must start with https://maps.app.goo.gl",
     masterPlanRequired: "Master plan image is required",
     arabicTextOnly: "Text must contain only Arabic letters, Arabic digits, English digits, and spaces",
     englishTextOnly: "Text must contain only English letters, digits, and spaces",
@@ -1322,6 +1324,12 @@ export default {
     welcomeMessagePlaceholder: "Enter welcome message (max 50 words)",
     initialSuggestions: "Initial Suggested Questions",
     suggestionPlaceholder: "Suggested question (max 20 words)",
+    addSuggestion: "+ Add question",
+    removeSuggestion: "Remove question",
+    remove: "Remove",
+    maxSuggestions: "You can add up to 5 questions",
+    fillAllSuggestions:
+      "Please fill all suggested questions (or remove empty ones) before saving.",
     words: "words",
     welcomeMessageWordLimit: "Welcome message cannot exceed 50 words",
     suggestionWordLimit: "Each suggested question cannot exceed 20 words",
