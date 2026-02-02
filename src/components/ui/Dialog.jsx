@@ -8,6 +8,7 @@ export default function Dialog({
   onClose,
   title,
   children,
+  headerLeading = null,
   headerActions = null,
   showCloseButton = true,
   closeOnOutsideClick = true,
@@ -53,9 +54,14 @@ export default function Dialog({
         ref={dialogRef}
         className="rounded-lg shadow-xl overflow-hidden w-[90%] h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out"
       >
-        <div className="flex justify-between items-center gap-3 p-3 bg-primary flex-shrink-0">
-          <h3 className="text-lg font-medium text-white">{title}</h3>
-          <div className="flex items-center gap-2">
+        <div className="flex justify-between items-center gap-3 p-3 bg-primary flex-shrink-0 relative">
+          <div className="flex justify-start items-center shrink-0 order-first">
+            {headerLeading}
+          </div>
+          <h3 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-medium text-white px-2 pointer-events-none">
+            {title}
+          </h3>
+          <div className="flex justify-end items-center gap-2 shrink-0 order-last">
             {headerActions}
             {showCloseButton ? (
               <button
