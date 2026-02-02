@@ -145,13 +145,7 @@ const Schedule = ({ data, dataSales }) => {
     <div className="border border-red-50">
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6 ">
         <div className="max-w-7xl mx-auto ">
-          {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Calendar className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold text-primary">{t.Schedule}</h1>
-            </div>
-
             {/* Week Navigation */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
               <div className="flex items-center justify-between">

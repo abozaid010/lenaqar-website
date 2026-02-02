@@ -3,6 +3,7 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
+import UnifiedHeader from "@/components/ui/UnifiedHeader";
 import { useI18n } from "@/context/translate-api";
 import { fetchCampaigns } from "@/utils/api";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
@@ -291,41 +292,43 @@ export default function CampaignsPageClient() {
     );
   }
 
+  const campaignsTitle = t?.sidebar?.campaigns || "Campaigns";
+  const refreshLabel = t?.campaigns?.refresh || "Refresh";
+  const newCampaignLabel = t?.campaigns?.newCampaign || "New Campaign";
+
   return (
     <div className="container">
-      <div className="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {t?.sidebar?.campaigns || "Campaigns"}
-          </h1>
-          <p className="text-sm text-gray-600">
-            Total: <span className="font-medium">{totalCount}</span>
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm"
-          >
-            <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-            Refresh
-          </button>
-
+      <UnifiedHeader
+        title={campaignsTitle}
+        leadingSlot={
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-primary">
+              Total: <span className="font-medium">{totalCount}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="inline-flex items-center gap-2 rounded-lg border-2 border-primary bg-transparent px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
+            >
+              <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
+              {refreshLabel}
+            </button>
+          </div>
+        }
+        trailingSlot={
           <button
             type="button"
             onClick={() => {
               setEditingCampaign(null);
               setIsCampaignDialogOpen(true);
             }}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
           >
             <Plus size={16} />
-            New Campaign
+            {newCampaignLabel}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">
