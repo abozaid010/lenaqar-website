@@ -232,13 +232,14 @@ export default function AddNewMember({ isEdit = false, data }) {
               {t.team.phone} <span className="text-red-500">*</span>
             </label>
             <input
-              type="text"
+              type="tel"
               name="phone"
               required
               placeholder="+20 123 456 7890"
               value={formData.phone}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              dir="ltr"
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-start focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
