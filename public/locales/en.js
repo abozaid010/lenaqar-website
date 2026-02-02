@@ -7,7 +7,7 @@ export default {
     home: "Home",
     login: "signIn",
     logOut: "Logout",
-    clientDashboard: "Login",
+    clientDashboard: "Dashboard",
     jobOpportunities: "Request Demo ",
     allProperties: "All Properties",
     searchPlaceholder: "Search",
@@ -32,7 +32,7 @@ export default {
   hero: {
     title1: "MAKE IT AI",
     subtitle1: "EFFICIENT & COST-EFFECTIVE",
-    title2: "SMART REAL ESTATE CRM",
+    title2: "REAL ESTATE AI SALES AGENT",
     subtitle2: "AUTOMATE & SCALE EFFORTLESSLY",
   },
   buttons: {
@@ -52,7 +52,7 @@ export default {
     backgroundAlt: "Background",
     aiImageAlt: "AI Assistant",
     message1: "⁠Filter Leads",
-    message2: "Smart CRM for Units, Leads & Sales Teams",
+    message2: "AI Sales Agent Dashboard for Units, Leads & Teams",
     message3: "24/7 AI Sales Team – Never Miss a Lead",
     message4: "AI Chatbot on Your Website",
     message5: "Live Client Handling & Market Insights",
@@ -78,14 +78,14 @@ export default {
       feature4:
         "Website Chatbot – Handles inquiries from your website visitors 24/7, especially those coming from Google.",
       feature5:
-        "Smart CRM – Manage sales, units, and client data in one place with a seamless interface.",
+        "AI Sales Agent Dashboard – Manage sales, units, and client data in one place with a seamless interface.",
       feature6:
         "Client Insights – Get AI-powered analytics about each client's needs, behaviors, and communication history to close deals faster.",
     },
     ctaButton: "Get Started",
     images: {
-      desktopAlt: "Lena CRM Dashboard Desktop View",
-      mobileAlt: "Lena CRM Mobile View",
+      desktopAlt: "Lena AI Sales Agent Dashboard Desktop View",
+      mobileAlt: "Lena AI Sales Agent Dashboard Mobile View",
     },
   },
   salesManager: {
@@ -99,7 +99,7 @@ export default {
       challenge2:
         "I need a faster way to follow up—before my leads buy somewhere else.",
       challenge3:
-        "Our CRM is full of junk leads, making it hard to track real opportunities.",
+        "Our lead list is full of junk leads, making it hard to track real opportunities.",
     },
     imageAlt: "Hani - The Overwhelmed Sales Manager",
   },
@@ -518,7 +518,7 @@ export default {
     saveUnit: "Save Unit",
   },
   updatePhase: "updatePhase",
-  viewInCRM: "View in CRM",
+  viewInCRM: "View in Dashboard",
   phases: "Phases",
   description: "Description",
   addNewProject: "Add New Project",
@@ -1010,6 +1010,8 @@ export default {
     paymentPlansRequired: "At least one payment plan is required",
     propertyTypesRequired: "At least one property type is required",
     googleMapsLinkRequired: "Google Maps Link is required",
+    googleMapsLinkMustStartWith:
+      "Google Maps link must start with https://maps.app.goo.gl",
     masterPlanRequired: "Master plan image is required",
     arabicTextOnly: "Text must contain only Arabic letters, Arabic digits, English digits, and spaces",
     englishTextOnly: "Text must contain only English letters, digits, and spaces",
@@ -1322,6 +1324,12 @@ export default {
     welcomeMessagePlaceholder: "Enter welcome message (max 50 words)",
     initialSuggestions: "Initial Suggested Questions",
     suggestionPlaceholder: "Suggested question (max 20 words)",
+    addSuggestion: "+ Add question",
+    removeSuggestion: "Remove question",
+    remove: "Remove",
+    maxSuggestions: "You can add up to 5 questions",
+    fillAllSuggestions:
+      "Please fill all suggested questions (or remove empty ones) before saving.",
     words: "words",
     welcomeMessageWordLimit: "Welcome message cannot exceed 50 words",
     suggestionWordLimit: "Each suggested question cannot exceed 20 words",

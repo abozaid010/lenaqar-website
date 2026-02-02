@@ -24,14 +24,15 @@
 - Lead filtration and qualification
 - Marketing analytics and insights
 
-### Tertiary Value (Priority 3): CRM for Properties
-**CRM for properties with AI features, automation, and lead management**
-- AI-powered CRM for real estate
+### Tertiary Value (Priority 3): Sales Agent Workspace (Dashboard)
+**Real Estate AI Sales Agent workspace with automation and lead management**
+- AI Sales Agent dashboard for real estate
+- Lead management and qualification
 - Automation features
 - Lead filtration
 - Lead generation
 - Client scoring and qualification
-- Sales pipeline management
+- Sales pipeline visibility
 - Team management
 
 ### Fourth Value (Priority 4): Free Listings
@@ -181,10 +182,10 @@ When writing metadata, emphasize in this order:
    - "Increase conversion rate to sales"
    - "Lead filtration and qualification"
 
-3. **CRM with AI Features (Tertiary)**:
-   - "AI-powered CRM for real estate"
-   - "CRM with automation and lead management"
-   - "Lead generation and filtration CRM"
+3. **Sales Agent Workspace (Tertiary)**:
+   - "Real Estate AI Sales Agent dashboard"
+   - "Sales agent workspace with automation and lead management"
+   - "Lead generation and filtration dashboard"
 
 4. **Free Listings (Fourth)**:
    - "Free real estate listings"
@@ -201,14 +202,14 @@ When writing metadata, emphasize in this order:
 - "Generate qualified leads for real estate with AI. Improve marketing campaigns, automate lead filtration, and increase conversion rate to sales."
 - "AI-powered lead generation for real estate. Marketing automation that filters non-qualified leads and improves campaign performance."
 
-**Good Examples (Tertiary Value - CRM):**
-- "AI-powered CRM for real estate with automation, lead filtration, and lead generation. Manage properties, clients, and sales pipeline."
-- "Real estate CRM with AI features - automation, lead management, and client scoring."
+**Good Examples (Tertiary Value - Sales Agent Workspace):**
+- "Real Estate AI Sales Agent dashboard with automation, lead filtration, and lead generation. Manage properties, clients, and sales pipeline."
+- "AI Sales Agent workspace for real estate - automation, lead management, and client scoring."
 
 **Bad Examples:**
 - "Real estate platform" (too generic, no AI mention)
 - "Property listings" (doesn't explain AI value, listings are 4th priority)
-- "CRM system" (doesn't emphasize AI agent capabilities or lead generation)
+- "Sales dashboard system" (doesn't emphasize AI agent capabilities or lead generation)
 
 ## Robots Meta Tags
 

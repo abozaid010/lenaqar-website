@@ -18,20 +18,20 @@ export async function generateMetadata() {
 
   return {
     title: clientName
-      ? `Analytics - ${clientName} | LENAAI AI CRM`
-      : "Analytics - LENAAI AI CRM",
+      ? `Analytics - ${clientName} | LENAAI AI Sales Agent`
+      : "Analytics - LENAAI AI Sales Agent",
     description:
       "View comprehensive analytics and insights for your real estate business. Track sales performance, marketing campaigns, and client engagement metrics.",
     keywords: [
       "real estate analytics",
       "sales analytics",
       "marketing analytics",
-      "CRM analytics",
+      "sales pipeline analytics",
       "AI analytics",
       "business insights",
     ],
     openGraph: {
-      title: "Analytics - LENAAI AI CRM",
+      title: "Analytics - LENAAI AI Sales Agent",
       description:
         "View comprehensive analytics and insights for your real estate business powered by AI.",
       url: `${SITE_URL}/analytics`,

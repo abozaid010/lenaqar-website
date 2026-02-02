@@ -6,13 +6,13 @@ export async function generateMetadata({ params }) {
   const { email } = await params;
 
   return {
-    title: "Client Information - LENAAI AI CRM",
+    title: "Client Information - LENAAI AI Sales Agent",
     description:
-      "View and manage client information in LENAAI's AI-powered CRM. Track client interactions, scores, and engagement with our AI Sales Agent platform.",
+      "View and manage client information in LENAAI's AI Sales Agent dashboard. Track interactions, scores, and engagement to close deals faster.",
     openGraph: {
-      title: "Client Information - LENAAI AI CRM",
+      title: "Client Information - LENAAI AI Sales Agent",
       description:
-        "View and manage client information in LENAAI's AI-powered CRM. Track client interactions, scores, and engagement with our AI Sales Agent platform.",
+        "View and manage client information in LENAAI's AI Sales Agent dashboard. Track interactions, scores, and engagement to close deals faster.",
       url: `${SITE_URL}/${email}`,
       type: "website",
     },

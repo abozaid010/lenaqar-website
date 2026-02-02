@@ -3,20 +3,20 @@ import { Bot, X } from "lucide-react";
 import { useState } from "react";
 
 const ChatBot = () => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  // Keep chat visible by default; user can close it.
+  const [isChatOpen, setIsChatOpen] = useState(true);
 
   // LenaAI Chat URL
-  const chatUrl = "https://chat.lenaai.net/demo";
+  const chatUrl = "https://chat.lenaai.net/?client=public";
 
-  const toggleChat = () => {
-    setIsChatOpen(!isChatOpen);
-  };
+  const openChat = () => setIsChatOpen(true);
+  const closeChat = () => setIsChatOpen(false);
 
   return (
     <>
       {/* Floating Chatbot Button */}
       <button
-        onClick={toggleChat}
+        onClick={openChat}
         className="fixed bottom-6 right-6 bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white p-4 rounded-full shadow-lg transition-all duration-300 hover:scale-110 flex items-center justify-center z-40"
         aria-label="Toggle Chat"
       >
@@ -33,7 +33,7 @@ const ChatBot = () => {
             <h3 className="text-lg font-medium text-white">LenaAI Assistant</h3>
           </div>
           <button
-            onClick={toggleChat}
+            onClick={closeChat}
             className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
           >
             <X size={20} />

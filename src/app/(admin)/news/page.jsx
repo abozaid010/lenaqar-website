@@ -3,7 +3,7 @@ import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import NewsFeed from "./_components/news-feed";
 
 export const metadata = {
-  title: "News - Real Estate News & Updates | LENAAI AI CRM",
+  title: "News - Real Estate News & Updates | LENAAI AI Sales Agent",
   description:
     "Stay updated with the latest real estate news, market trends, and industry insights. Powered by LENAAI AI.",
   keywords: [

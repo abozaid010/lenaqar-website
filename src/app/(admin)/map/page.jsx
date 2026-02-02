@@ -3,7 +3,7 @@ import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import MapView from "./_components/map-view";
 
 export const metadata = {
-  title: "Projects Map - Real Estate Projects by Location | LENAAI AI CRM",
+  title: "Projects Map - Real Estate Projects by Location | LENAAI AI Sales Agent",
   description:
     "View all real estate projects on an interactive map. See project locations, unit summaries, and developer information.",
   keywords: [

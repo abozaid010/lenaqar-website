@@ -2,14 +2,19 @@ import { SITE_URL } from "../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export const metadata = {
-  title: "Privacy Policy - LENAAI AI CRM",
+  title: "Privacy Policy - LENAAI AI Sales Agent",
   description:
-    "LENAAI Privacy Policy - Learn how we collect, use, and protect your information when using our AI-powered real estate CRM platform and AI Sales Agent.",
-  keywords: ["privacy policy", "data protection", "LENAAI privacy", "real estate CRM privacy"],
+    "LENAAI Privacy Policy - Learn how we collect, use, and protect your information when using our Real Estate AI Sales Agent platform.",
+  keywords: [
+    "privacy policy",
+    "data protection",
+    "LENAAI privacy",
+    "real estate AI sales agent privacy",
+  ],
   openGraph: {
     title: "Privacy Policy | LENAAI",
     description:
-      "Learn how LENAAI collects, uses, and protects your information when using our AI-powered real estate CRM platform.",
+      "Learn how LENAAI collects, uses, and protects your information when using our Real Estate AI Sales Agent platform.",
     url: `${SITE_URL}/privacy`,
     type: "website",
   },

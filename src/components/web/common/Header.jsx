@@ -41,15 +41,6 @@ const Header = ({ ci }) => {
 
             {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-x-4">
-              {ci && (
-                <Link
-                  href="/dashboard"
-                  className="hover:text-blue-200 transition-colors"
-                >
-                  {t.header.clientDashboard}
-                </Link>
-              )}
-
               <CalendarModal buttonText={t.header.jobOpportunities} />
 
               <Link
@@ -80,14 +71,12 @@ const Header = ({ ci }) => {
                 <span className="whitespace-nowrap">{t.header.sendMessage}</span>
               </button>
               <LanguageSwitcher />
-              {!ci && (
-                <Link
-                  href="/login"
-                  className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
-                >
-                  {t.header.login}
-                </Link>
-              )}
+              <Link
+                href={ci ? "/dashboard" : "/login"}
+                className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
+              >
+                {ci ? t.header.clientDashboard : t.header.login}
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -102,15 +91,6 @@ const Header = ({ ci }) => {
           <div className="lg:hidden bg-[#030250]/95 backdrop-blur-md border-t border-blue-700/30">
             <div className="container mx-auto px-4 py-3">
               <nav className="flex flex-col space-y-3">
-                {ci && (
-                  <Link
-                    href="/dashboard"
-                    className="hover:text-blue-200 transition-colors py-2"
-                  >
-                    {t.header.clientDashboard}
-                  </Link>
-                )}
-
                 <div>
                   <CalendarModal buttonText={t.header.jobOpportunities} />
                 </div>
@@ -139,14 +119,12 @@ const Header = ({ ci }) => {
                     </svg>
                     <span className="whitespace-nowrap">{t.header.sendMessage}</span>
                   </button>
-                  {!ci && (
-                    <Link
-                      href="/login"
-                      className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
-                    >
-                      {t.header.login}
-                    </Link>
-                  )}
+                  <Link
+                    href={ci ? "/dashboard" : "/login"}
+                    className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
+                  >
+                    {ci ? t.header.clientDashboard : t.header.login}
+                  </Link>
                 </div>
               </nav>
             </div>
