@@ -97,14 +97,16 @@ export default async function TeamPage() {
         {hasAccess ? (
           <div className="flex flex-col h-full">
             <div className="flex items-center justify-between gap-4">
-              <AddNewMember />
-              {teamData.length > 0 && (
+              {teamData.length > 0 ? (
                 <VideoInstructionsDialog
                   variant="team"
                   iconSize="md"
                   tooltipText="How to manage team members"
                 />
+              ) : (
+                <div aria-hidden="true" />
               )}
+              <AddNewMember />
             </div>
 
             <div className="flex-1 relative">

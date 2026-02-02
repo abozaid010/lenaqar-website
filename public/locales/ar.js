@@ -1159,11 +1159,21 @@ export default {
   },
   team: {
     addNew: "إضافة جديد",
+    addNewSales: "إضافة مندوب مبيعات",
     noMembers: "لم يتم إضافة موظفين.",
     name: "الاسم",
     email: "البريد الإلكتروني",
+    password: "كلمة المرور",
+    passwordInvalid:
+      "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل وحروف ورموز.",
+    passwordHint: "8 أحرف على الأقل، مع حروف ورموز",
     phone: "الهاتف",
     role: "الدور",
+    roles: {
+      admin: "مدير",
+      editor: "محرر",
+      viewer: "مشاهد",
+    },
     save: "حفظ",
     loading: "جاري الحفظ...",
   },

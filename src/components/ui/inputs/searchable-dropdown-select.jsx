@@ -377,7 +377,7 @@ export default function SearchableDropdownSelect({
     <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
         <label
-          className={`block text-sm font-medium mb-1 ${
+          className={`block text-sm font-medium mb-1 text-start ${
             error ? "text-red-500" : "text-gray-700"
           }`}
           htmlFor={name}
@@ -394,7 +394,7 @@ export default function SearchableDropdownSelect({
             onClick={handleToggle}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-left ${
+            className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start ${
               error
                 ? "border-red-500 ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
@@ -408,7 +408,7 @@ export default function SearchableDropdownSelect({
             {...rest}
           >
             <span
-              className={`truncate block w-full text-sm font-medium ${
+              className={`truncate block w-full text-sm font-medium text-start ${
                 value && value !== allOptionValue && !disabled ? "pr-10" : "pr-6"
               } ${
                 !value || value === allOptionValue || disabled

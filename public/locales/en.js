@@ -1169,11 +1169,21 @@ export default {
   },
   team: {
     addNew: "Add New",
+    addNewSales: "Add New Sales",
     noMembers: "There are no team members yet",
     name: "Name",
     email: "Email",
+    password: "Password",
+    passwordInvalid:
+      "Password must be at least 8 characters and contain both letters and a symbol.",
+    passwordHint: "At least 8 characters, with letters and a symbol",
     phone: "Phone",
     role: "Position",
+    roles: {
+      admin: "Admin",
+      editor: "Editor",
+      viewer: "Viewer",
+    },
     save: "Save",
     loading: "saving...",
   },

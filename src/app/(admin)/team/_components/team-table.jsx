@@ -93,7 +93,7 @@ export default function TeamTable({ data }) {
                     {item.phone}
                   </td>
                   <td className="px-2 py-2 text-gray-600 whitespace-nowrap text-center">
-                    {item.position}
+                    {item.job_title ?? item.position}
                   </td>
                   <td className="px-2 py-2 text-center">
                     <AddNewMember isEdit={true} data={item} />

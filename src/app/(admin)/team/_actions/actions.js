@@ -12,10 +12,12 @@ export async function addNewSales(prevState, formData) {
     const clientId = await getClientid();
 
     const payload = Object.fromEntries(formData.entries());
+    const role = payload.role || "viewer";
 
     const newSales = {
       ...payload,
-      position: "sales",
+      role,
+      job_title: role,
       client_id: clientId,
     };
 
@@ -40,9 +42,12 @@ export async function editEmployee(prevState, formData) {
     const clientId = await getClientid();
 
     const payload = Object.fromEntries(formData.entries());
+    const role = payload.role || "viewer";
+
     const newSales = {
       ...payload,
-      position: "sales",
+      role,
+      job_title: role,
       client_id: clientId,
     };
 
