@@ -6,9 +6,14 @@ import {
   editExistingEmployee,
 } from "@/components/services/serviceFetching";
 import { revalidatePath } from "next/cache";
+import { assertCanManageTeam } from "@/lib/getRoleFromToken";
 
 export async function addNewSales(prevState, formData) {
   try {
+    const { allowed } = await assertCanManageTeam();
+    if (!allowed) {
+      return { success: false, error: "You do not have permission to add team members." };
+    }
     const clientId = await getClientid();
 
     const payload = Object.fromEntries(formData.entries());
@@ -39,6 +44,10 @@ export async function addNewSales(prevState, formData) {
 
 export async function editEmployee(prevState, formData) {
   try {
+    const { allowed } = await assertCanManageTeam();
+    if (!allowed) {
+      return { success: false, error: "You do not have permission to edit team members." };
+    }
     const clientId = await getClientid();
 
     const payload = Object.fromEntries(formData.entries());

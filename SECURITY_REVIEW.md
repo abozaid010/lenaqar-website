@@ -64,6 +64,22 @@ This document reviews the security implications of the authentication fix implem
 
 4. **Error Handling**: Improved error handling that doesn't expose sensitive information in production.
 
+### ✅ Authorization: Use JWT for Role, Not Cookie
+**Issue**: Using the `CLIENT_INFO` cookie (e.g. `client_type`) for authorization is unsafe because cookies can be tampered with by the client.
+
+**Best practice**:
+- **Never trust the client** for authorization. Do not use cookie-stored role for access decisions.
+- **Use the JWT** for role when possible: the backend should include `client_type` or `role` in the signed JWT payload. The frontend/server can then read role from the token (server-side decode only; signature is verified when the API is called).
+- **Backend must enforce**: Every privileged API (e.g. create/update/delete team members) must validate the Bearer token and check the user’s role (from token or DB) and return 403 for non-admin/owner. UI hiding is for UX only, not security.
+
+**Implementation**:
+- `src/lib/getRoleFromToken.js`: Server-only helper that reads the access token from cookies and decodes the JWT payload to get `client_type` or `role`. Used for both UI (who can see add/edit/delete) and server-action checks.
+- Team page: `canManageTeamFromToken()` drives visibility of add/edit/delete (from JWT, not cookie).
+- Team server actions (`addNewSales`, `editEmployee`): `assertCanManageTeam()` rejects when the JWT contains a role that is not admin/owner. If the JWT has no role claim, the request is allowed through and the backend must enforce.
+- Delete employee is called from the client; the backend must return 403 for non-admin/owner.
+
+**Backend requirement**: Include `client_type` (or `role`) in the JWT at login so the app can enforce role server-side and in UI without trusting the cookie.
+
 ## Recommendations for Future Improvements
 
 1. **Rate Limiting**: Implement rate limiting on the refresh token endpoint

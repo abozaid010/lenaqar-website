@@ -1,0 +1,76 @@
+/**
+ * Server-only: get current user role from the JWT access token (cookie).
+ * Use this for authorization checks in server actions – do not trust the
+ * CLIENT_INFO cookie for authorization (it can be tampered with).
+ *
+ * The backend should put role/client_type in the JWT payload when issuing
+ * the token. If not present, this returns null and the backend must enforce
+ * authorization on every privileged API.
+ */
+
+import { cookies } from "next/headers";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+
+const ALLOWED_MANAGE_ROLES = ["admin", "owner"];
+
+/**
+ * Decode JWT payload without verification (signature is verified by the API when the token is sent).
+ * Use only server-side. Returns payload object or null.
+ */
+function decodeJwtPayload(token) {
+  if (!token || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(
+      base64.length + ((4 - (base64.length % 4)) % 4),
+      "="
+    );
+    const payload = JSON.parse(atob(padded));
+    return typeof payload === "object" && payload !== null ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Get the current user's role from the access token cookie.
+ * Prefer JWT claims (client_type or role) over any client-stored data.
+ *
+ * @returns {Promise<string|null>} Role/client_type from JWT, or null if not in token or not logged in
+ */
+export async function getRoleFromToken() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+  const payload = decodeJwtPayload(token);
+  if (!payload) return null;
+  // Backend may use client_type (from login) or role in JWT
+  const role = payload.client_type ?? payload.role ?? null;
+  return role != null && typeof role === "string" ? role : null;
+}
+
+/**
+ * Check if the current user is allowed to manage team (admin/owner).
+ * Uses JWT only; does not trust CLIENT_INFO cookie.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function canManageTeamFromToken() {
+  const role = await getRoleFromToken();
+  if (role == null) return false;
+  return ALLOWED_MANAGE_ROLES.includes(role.toLowerCase());
+}
+
+/**
+ * Reject if JWT contains a role that is not admin/owner.
+ * If role is not in JWT (null), does not reject – backend must enforce.
+ *
+ * @returns {Promise<{ allowed: boolean }>}
+ */
+export async function assertCanManageTeam() {
+  const role = await getRoleFromToken();
+  if (role == null) return { allowed: true }; // unknown: let backend decide
+  const allowed = ALLOWED_MANAGE_ROLES.includes(role.toLowerCase());
+  return { allowed };
+}

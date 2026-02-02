@@ -331,7 +331,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                 e.stopPropagation();
                                 handleWhatsApp(d.whatsapp);
                               }}
-                              className="p-2 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                              className="h-8 w-8 p-2 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                               title="Open WhatsApp"
                             >
                               <svg
@@ -352,7 +353,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                 e.stopPropagation();
                                 handleCall(d.sales_phone);
                               }}
-                              className="p-2 bg-blue-500 hover:bg-blue-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                              className="h-8 w-8 p-2 bg-blue-500 hover:bg-blue-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                               title="Call Developer"
                             >
                               <Phone size={16} className="text-white" />
@@ -366,7 +368,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                 e.stopPropagation();
                                 handleEmail(d.sales_email);
                               }}
-                              className="p-2 bg-gray-500 hover:bg-gray-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                              className="h-8 w-8 p-2 bg-gray-500 hover:bg-gray-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                               title="Email Developer"
                             >
                               <Mail size={16} className="text-white" />
@@ -385,7 +388,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                               onClick={() =>
                                 setOpenMenuId(openMenuId === d.id ? null : d.id)
                               }
-                              className="ml-2 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 hover:bg-primary hover:text-white"
+                              className="ml-2 h-8 w-8 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 hover:bg-primary hover:text-white aspect-square flex-shrink-0 flex items-center justify-center"
+                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                               title="More options"
                             >
                               <MoreVertical size={16} />
@@ -426,7 +430,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                               e.stopPropagation();
                               toggleExpand(d.id);
                             }}
-                            className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                            className="h-8 w-8 p-2 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center aspect-square flex-shrink-0"
+                            style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                             title={isExpanded ? "Collapse" : "Expand"}
                           >
                             {isExpanded ? (
@@ -497,7 +502,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                   e.stopPropagation();
                                   handleWebsite(d.website);
                                 }}
-                                className="p-2 bg-gray-600 hover:bg-gray-700 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                                className="h-8 w-8 p-2 bg-gray-600 hover:bg-gray-700 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                                 title="Visit Website"
                               >
                                 <Globe size={16} className="text-white" />
@@ -511,7 +517,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                   e.stopPropagation();
                                   handleInstagram(d.instagram);
                                 }}
-                                className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                                className="h-8 w-8 p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                                 title="Visit Instagram"
                               >
                                 <Instagram size={16} className="text-white" />
@@ -525,7 +532,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                   e.stopPropagation();
                                   handleLinkedIn(d.linkedin);
                                 }}
-                                className="p-2 bg-[#0077b5] hover:bg-[#006399] rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                                className="h-8 w-8 p-2 bg-[#0077b5] hover:bg-[#006399] rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                                 title="Visit LinkedIn"
                               >
                                 <Linkedin size={16} className="text-white" />
@@ -539,7 +547,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                                   e.stopPropagation();
                                   handleFacebook(d.facebook);
                                 }}
-                                className="p-2 bg-[#1877f2] hover:bg-[#166fe5] rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                                className="h-8 w-8 p-2 bg-[#1877f2] hover:bg-[#166fe5] rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
                                 title="Visit Facebook"
                               >
                                 <Facebook size={16} className="text-white" />

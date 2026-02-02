@@ -7,6 +7,8 @@ import { cookies } from "next/headers";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import { canManageTeamFromToken } from "@/lib/getRoleFromToken";
+import { safeCookieParse } from "@/utils/safeJsonParser";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -83,6 +85,15 @@ export default async function TeamPage() {
   // Safely extract team data with proper fallback
   const teamData = Array.isArray(data?.data) ? data.data : [];
 
+  // Prefer JWT for role (tamper-proof). Fallback to cookie for UI only when JWT has no role (backend must enforce).
+  let canManageTeam = await canManageTeamFromToken();
+  if (!canManageTeam) {
+    const cookieStore = await cookies();
+    const clientInfo = safeCookieParse(cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value, {});
+    const clientType = (clientInfo?.client_type ?? "").toLowerCase();
+    canManageTeam = clientType === "admin" || clientType === "owner";
+  }
+
   return (
     <>
       <BreadcrumbSchema
@@ -106,11 +117,11 @@ export default async function TeamPage() {
               ) : (
                 <div aria-hidden="true" />
               )}
-              <AddNewMember />
+              <AddNewMember canManageTeam={canManageTeam} />
             </div>
 
             <div className="flex-1 relative">
-              <TeamTable data={teamData} />
+              <TeamTable data={teamData} canManageTeam={canManageTeam} />
             </div>
           </div>
         ) : (

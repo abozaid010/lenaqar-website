@@ -347,7 +347,7 @@ const Schedule = ({ data, dataSales }) => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-primary" />
-                  {t.AllSales}
+                  {t.sidebar?.team ?? "Team"}
                 </h3>
                 {dataSales?.length > 0 ? (
                   <div className="space-y-3">

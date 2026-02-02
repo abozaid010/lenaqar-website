@@ -34,7 +34,7 @@ const initialState = {
   error: null,
 };
 
-export default function AddNewMember({ isEdit = false, data }) {
+export default function AddNewMember({ isEdit = false, data, canManageTeam = true }) {
   const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(() => {
@@ -106,19 +106,20 @@ export default function AddNewMember({ isEdit = false, data }) {
 
   return (
     <>
-      {isEdit === true ? (
-        <button onClick={() => setIsOpen(true)}>
-          <Edit2 className="w-4 h-4 text-blue-500 hover:text-blue-700" />
-        </button>
-      ) : (
-        <button
-          className="mt-4 w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
-          onClick={() => setIsOpen(true)}
-        >
-          <PlusIcon size={20} />
-          <span className="text-base">{t.team.addNew}</span>
-        </button>
-      )}
+      {canManageTeam &&
+        (isEdit === true ? (
+          <button onClick={() => setIsOpen(true)}>
+            <Edit2 className="w-4 h-4 text-blue-500 hover:text-blue-700" />
+          </button>
+        ) : (
+          <button
+            className="mt-4 w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
+            onClick={() => setIsOpen(true)}
+          >
+            <PlusIcon size={20} />
+            <span className="text-base">{t.team.addNew}</span>
+          </button>
+        ))}
 
       <Dialog
         isOpen={isOpen}
