@@ -36,7 +36,7 @@ export default function UnifiedHeader({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border-2 border-primary bg-transparent px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
+            className="h-10 rounded-lg border-2 border-primary bg-transparent px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
             aria-label={cancelLabel}
           >
             {cancelLabel}
@@ -60,7 +60,7 @@ export default function UnifiedHeader({
             type="button"
             onClick={onSubmit}
             disabled={submitDisabled || submitLoading}
-            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff] disabled:opacity-60 disabled:cursor-not-allowed"
+            className="h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff] disabled:opacity-60 disabled:cursor-not-allowed"
             aria-label={submitLabel}
           >
             {submitLoading ? (

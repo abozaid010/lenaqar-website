@@ -9,7 +9,7 @@ import { fetchCampaigns } from "@/utils/api";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
-import { Pencil, Plus, RefreshCw } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import CampaignDialog from "./CampaignDialog";
 
@@ -93,7 +93,7 @@ function CampaignCard({ campaign, onEdit }) {
               href={campaignHref}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-white text-[#494A4B] hover:bg-gray-50 transition-colors text-sm"
+              className="inline-flex items-center h-10 px-3 py-2 rounded-md border border-[#E6E6E6] bg-white text-[#494A4B] hover:bg-gray-50 transition-colors text-sm"
             >
               {previewLabel}
             </a>
@@ -101,7 +101,7 @@ function CampaignCard({ campaign, onEdit }) {
             <button
               type="button"
               disabled
-              className="inline-flex items-center px-3 py-2 rounded-md border border-[#E6E6E6] bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
+              className="inline-flex items-center h-10 px-3 py-2 rounded-md border border-[#E6E6E6] bg-gray-50 text-gray-400 cursor-not-allowed text-sm"
             >
               {previewLabel}
             </button>
@@ -110,7 +110,7 @@ function CampaignCard({ campaign, onEdit }) {
           <button
             type="button"
             onClick={() => onEdit?.(campaign)}
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
+            className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
           >
             <Pencil size={16} />
             {t?.campaigns?.edit || "Edit"}
@@ -292,28 +292,19 @@ export default function CampaignsPageClient() {
     );
   }
 
-  const campaignsTitle = t?.sidebar?.campaigns || "Campaigns";
-  const refreshLabel = t?.campaigns?.refresh || "Refresh";
-  const newCampaignLabel = t?.campaigns?.newCampaign || "New Campaign";
+  const campaignsTitle = t?.sidebar?.campaigns ?? "Campaigns";
+  const newCampaignLabel = t?.campaigns?.newCampaign ?? "New Campaign";
+  const showingLabel = t?.campaigns?.showing ?? "Showing";
+  const ofLabel = t?.campaigns?.of ?? "of";
 
   return (
     <div className="container">
       <UnifiedHeader
         title={campaignsTitle}
         leadingSlot={
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-primary">
-              Total: <span className="font-medium">{totalCount}</span>
-            </span>
-            <button
-              type="button"
-              onClick={() => refetch()}
-              className="inline-flex items-center gap-2 rounded-lg border-2 border-primary bg-transparent px-3 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
-            >
-              <RefreshCw size={16} className={isFetching ? "animate-spin" : ""} />
-              {refreshLabel}
-            </button>
-          </div>
+          <span className="text-sm text-primary">
+            {t?.campaigns?.total ?? "Total"}: <span className="font-medium">{totalCount}</span>
+          </span>
         }
         trailingSlot={
           <button
@@ -322,7 +313,7 @@ export default function CampaignsPageClient() {
               setEditingCampaign(null);
               setIsCampaignDialogOpen(true);
             }}
-            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
+            className="inline-flex items-center gap-2 h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
           >
             <Plus size={16} />
             {newCampaignLabel}
@@ -336,23 +327,23 @@ export default function CampaignsPageClient() {
           type="button"
           disabled={!canPrev}
           onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
-          className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           {t?.previous || "Previous"}
         </button>
         <div className="text-sm text-gray-600">
-          Showing{" "}
+          {showingLabel}{" "}
           <span className="font-medium">{Math.min(offset + 1, totalCount)}</span>-
           <span className="font-medium">
             {Math.min(offset + limit, totalCount)}
           </span>{" "}
-          of <span className="font-medium">{totalCount}</span>
+          {ofLabel} <span className="font-medium">{totalCount}</span>
         </div>
         <button
           type="button"
           disabled={!canNext}
           onClick={() => setOffset((prev) => prev + limit)}
-          className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
+          className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
           {t?.next || "Next"}
         </button>

@@ -230,6 +230,10 @@ export default {
     map: "الخريطة",
   },
   campaigns: {
+    total: "الإجمالي",
+    newCampaign: "حملة جديدة",
+    showing: "عرض",
+    of: "من",
     createTitle: "حملة جديدة",
     updateTitle: "تعديل الحملة",
     createButton: "إنشاء",

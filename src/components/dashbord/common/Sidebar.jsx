@@ -135,7 +135,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/dashboard", e)}
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
               isLinkActive("/dashboard") || pendingPath === "/dashboard"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/dashboard" ? "opacity-70" : ""}`}
           >
@@ -152,7 +152,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/campaigns", e)}
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
               isLinkActive("/campaigns") || pendingPath === "/campaigns"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/campaigns" ? "opacity-70" : ""}`}
           >
@@ -169,7 +169,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/schedule", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
               isLinkActive("/schedule") || pendingPath === "/schedule"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/schedule" ? "opacity-70" : ""}`}
           >
@@ -186,7 +186,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/analytics", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
               isLinkActive("/analytics") || pendingPath === "/analytics"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/analytics" ? "opacity-70" : ""}`}
           >
@@ -203,7 +203,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/units", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
               isLinkActive("/units") || pendingPath === "/units"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/units" ? "opacity-70" : ""}`}
           >
@@ -220,7 +220,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/team", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
               isLinkActive("/team") || pendingPath === "/team"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/team" ? "opacity-70" : ""}`}
           >
@@ -237,7 +237,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/myProjects", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
               isLinkActive("/myProjects") || pendingPath === "/myProjects"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/myProjects" ? "opacity-70" : ""}`}
           >
@@ -254,7 +254,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/developers", e)}
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
               isLinkActive("/developers") || pendingPath === "/developers"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/developers" ? "opacity-70" : ""}`}
           >
@@ -271,7 +271,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/news", e)}
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
               isLinkActive("/news") || pendingPath === "/news"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/news" ? "opacity-70" : ""}`}
           >
@@ -288,7 +288,7 @@ const Sidebar = () => {
             onClick={(e) => handleNavigation("/map", e)}
             className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
               isLinkActive("/map") || pendingPath === "/map"
-                ? "bg-primary text-white"
+                ? "bg-[#E2DBFF] text-primary"
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/map" ? "opacity-70" : ""}`}
           >

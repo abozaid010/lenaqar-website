@@ -222,6 +222,10 @@ export default {
     map: "Map",
   },
   campaigns: {
+    total: "Total",
+    newCampaign: "New Campaign",
+    showing: "Showing",
+    of: "of",
     createTitle: "New Campaign",
     updateTitle: "Update Campaign",
     createButton: "Create",
