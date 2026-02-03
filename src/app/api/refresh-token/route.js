@@ -3,64 +3,105 @@ import { NextResponse } from "next/server";
 import { getServerCookieOptions } from "@/lib/CookieConfig";
 import { API_BASE_URL } from "@/lib/apiConfig";
 
-export async function POST() {
-  try {
-    const cookieStore = await cookies();
-    const refreshToken = cookieStore.get("refresh_token")?.value;
+/**
+ * Shared refresh logic: read refresh_token from cookies, call backend, return new tokens.
+ * @returns {{ newAccessToken: string, newRefreshToken?: string }}
+ * @throws {Error} When refresh fails
+ */
+async function performRefresh() {
+  const cookieStore = await cookies();
+  const refreshToken = cookieStore.get("refresh_token")?.value;
 
-    if (!refreshToken) {
-      return NextResponse.json(
-        { error: "No refresh token found" },
-        { status: 401 }
-      );
-    }
+  if (!refreshToken) {
+    throw new Error("No refresh token found");
+  }
 
-    // Make server-to-server request (no CORS issues)
-    const response = await fetch(`${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`, {
+  const response = await fetch(
+    `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
+    {
       method: "POST",
       headers: {
-        "Accept": "application/json",
+        Accept: "application/json",
       },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to refresh token");
     }
+  );
 
-    const data = await response.json();
-    const newAccessToken = data.access_token;
-    const newRefreshToken = data.refresh_token;
+  if (!response.ok) {
+    throw new Error("Failed to refresh token");
+  }
 
-    if (!newAccessToken) {
-      throw new Error("No access token received from refresh endpoint");
-    }
+  const data = await response.json();
+  const newAccessToken = data.access_token;
+  const newRefreshToken = data.refresh_token;
 
-    // Set the new tokens in cookies with all required options
-    // Using centralized CookieConfig ensures consistency
-    const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
-    const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");
-    const responseObj = NextResponse.json({ 
+  if (!newAccessToken) {
+    throw new Error("No access token received from refresh endpoint");
+  }
+
+  return { newAccessToken, newRefreshToken };
+}
+
+/**
+ * Apply token cookies to a NextResponse (shared by POST and GET handlers).
+ */
+function setTokenCookies(responseObj, newAccessToken, newRefreshToken) {
+  const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
+  const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");
+
+  responseObj.cookies.set("access_token", newAccessToken, accessTokenOptions);
+  if (newRefreshToken) {
+    responseObj.cookies.set("refresh_token", newRefreshToken, refreshTokenOptions);
+  }
+}
+
+export async function POST() {
+  try {
+    const { newAccessToken, newRefreshToken } = await performRefresh();
+
+    const responseObj = NextResponse.json({
       access_token: newAccessToken,
-      refresh_token: newRefreshToken 
+      refresh_token: newRefreshToken,
     });
-    
-    responseObj.cookies.set("access_token", newAccessToken, accessTokenOptions);
-    
-    // Only set new refresh token if provided by backend (token rotation)
-    if (newRefreshToken) {
-      responseObj.cookies.set("refresh_token", newRefreshToken, refreshTokenOptions);
-    }
+    setTokenCookies(responseObj, newAccessToken, newRefreshToken);
 
     return responseObj;
   } catch (error) {
-    // Log error details only in development, avoid exposing sensitive info in production
     if (process.env.NODE_ENV === "development") {
       console.error("[refresh-token] Token refresh failed:", error);
     }
-    // Return generic error message to avoid information leakage
     return NextResponse.json(
       { error: "Token refresh failed" },
       { status: 401 }
     );
+  }
+}
+
+/**
+ * GET handler for middleware redirect flow: refresh token, set cookies, redirect back.
+ * Query param: redirect = URL path (e.g. /dashboard) to send user to after refresh.
+ * If no redirect param, redirect to /dashboard by default.
+ */
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const redirectPath = searchParams.get("redirect") || "/dashboard";
+
+    // Ensure redirect is same-origin path (no open redirect)
+    const safeRedirect = redirectPath.startsWith("/") && !redirectPath.startsWith("//")
+      ? redirectPath
+      : "/dashboard";
+
+    const { newAccessToken, newRefreshToken } = await performRefresh();
+
+    const redirectUrl = new URL(safeRedirect, request.url);
+    const responseObj = NextResponse.redirect(redirectUrl);
+    setTokenCookies(responseObj, newAccessToken, newRefreshToken);
+
+    return responseObj;
+  } catch (error) {
+    if (process.env.NODE_ENV === "development") {
+      console.error("[refresh-token] GET token refresh failed:", error);
+    }
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 }

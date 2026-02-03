@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { TokenRefreshService } from "@/lib/TokenRefreshService";
-import { TokenExpirationManager } from "@/lib/TokenExpirationManager";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 /**
  * Custom hook for token refresh operations
@@ -19,9 +19,9 @@ export function useTokenRefresh() {
    * @returns {Promise<string|null>} New access token or null if refresh failed
    */
   const refreshToken = useCallback(async () => {
-    // Check if user is authenticated
-    if (!TokenExpirationManager.isAuthenticated()) {
-      setError(new Error("No refresh token available"));
+    // Allow refresh when we have an access token (refresh token is httpOnly, sent by browser to /api/refresh-token)
+    if (!LenaCookiesManager.getAccessToken()) {
+      setError(new Error("No access token available"));
       return null;
     }
 

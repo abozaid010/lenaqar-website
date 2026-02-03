@@ -137,6 +137,16 @@ export class TokenExpirationManager {
   }
 
   /**
+   * Whether to run proactive refresh (e.g. in TokenRefreshProvider).
+   * Uses only access token presence because refresh token is httpOnly and not
+   * readable on the client; the browser still sends it to /api/refresh-token.
+   * @returns {boolean} True if we have an access token and should consider proactive refresh
+   */
+  static shouldRunProactiveRefresh() {
+    return !!LenaCookiesManager.getAccessToken();
+  }
+
+  /**
    * Checks if user has a valid refresh token
    * @returns {boolean} True if refresh token exists
    */
