@@ -34,8 +34,8 @@ export function TokenRefreshProvider({
       return;
     }
 
-    // Check if user is authenticated
-    if (!TokenExpirationManager.isAuthenticated()) {
+    // Check if we should run proactive refresh (have access token; refresh token is httpOnly and sent by browser)
+    if (!TokenExpirationManager.shouldRunProactiveRefresh()) {
       return;
     }
 

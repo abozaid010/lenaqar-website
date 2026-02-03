@@ -61,12 +61,22 @@ export function middleware(request) {
   );
 
   if (isProtectedRoute) {
-    if (!accessToken || !refreshToken) {
+    // No refresh token: must log in again
+    if (!refreshToken) {
       const response = NextResponse.redirect(new URL("/login", request.url));
       response.cookies.delete(COOKIE_KEYS.ACCESS_TOKEN);
       response.cookies.delete(COOKIE_KEYS.REFRESH_TOKEN);
       response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
       return response;
+    }
+    // Access token missing but refresh token present: refresh then continue (keep user logged in up to 10 days)
+    if (!accessToken) {
+      const redirectParam = encodeURIComponent(
+        request.nextUrl.pathname + request.nextUrl.search
+      );
+      return NextResponse.redirect(
+        new URL(`/api/refresh-token?redirect=${redirectParam}`, request.url)
+      );
     }
   }
 

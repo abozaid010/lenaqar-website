@@ -1,3 +1,13 @@
+// Single source for API image hostname from NEXT_PUBLIC_API_BASE_URL (next.config has no @/ alias)
+const apiBaseUrlRaw = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+const apiBaseUrl = apiBaseUrlRaw.startsWith("http") ? apiBaseUrlRaw : `https://${apiBaseUrlRaw}`;
+const apiHostname = (() => {
+  try {
+    return new URL(apiBaseUrl).hostname;
+  } catch {
+    return "api.lenaai.net";
+  }
+})();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -26,19 +36,10 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "api.lenaai.net",
+        hostname: apiHostname,
         pathname: "/**",
       },
-      ...(process.env.NEXT_PUBLIC_API_DOMAIN
-        ? [{
-            protocol: "https",
-            hostname: process.env.NEXT_PUBLIC_API_DOMAIN,
-            pathname: "/**",
-          }]
-        : []),
     ],
-    // Note: 'domains' is deprecated in Next.js 13+, using remotePatterns instead
-    // domains: [process.env.NEXT_PUBLIC_API_DOMAIN, 'api.lenaai.net'],
     // Add better error handling for images
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

@@ -8,6 +8,7 @@ import { cookies } from "next/headers";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { SELECTION_COLORS } from "@/constants/colors";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -60,7 +61,7 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className="min-h-screen bg-[#E2DBFF]/10">
+      <div className={`min-h-screen ${SELECTION_COLORS.BG}`}>
         <div className="container bg-white rounded-md shadow-sm py-4 md:py-6">
           <AverageScoreProvider>
             <div className="flex items-center justify-between mb-4">

@@ -4,12 +4,20 @@ module.exports = {
       "./app/**/*.{js,ts,jsx,tsx}",
       "./components/**/*.{js,ts,jsx,tsx}",
     ],
-    theme: {
-      extend: {
-        fontFamily: {
-          montserrat: ['var(--font-montserrat)'],
+  theme: {
+    extend: {
+      colors: {
+        // Selection colors - centralized from src/constants/colors.js
+        selection: {
+          light: '#E2DBFF1a', // bg-[#E2DBFF]/10 equivalent
+          DEFAULT: '#E2DBFF',
+          dark: '#d0c0f0',
         },
-        keyframes: {
+      },
+      fontFamily: {
+        montserrat: ['var(--font-montserrat)'],
+      },
+      keyframes: {
           shake: {
             '0%, 100%': { transform: 'translateX(0)' },
             '10%, 30%, 50%, 70%, 90%': { transform: 'translateX(-4px)' },

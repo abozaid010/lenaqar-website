@@ -1,6 +1,7 @@
 "use client";
 import { assignSalsePerson } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
+import { SELECTION_COLORS } from "@/constants/colors";
 import {
   Calendar,
   ChevronDown,
@@ -143,7 +144,7 @@ const Schedule = ({ data, dataSales }) => {
 
   return (
     <div className="border border-red-50">
-      <div className="min-h-screen bg-[#E2DBFF]/10 p-6 ">
+      <div className={`min-h-screen ${SELECTION_COLORS.BG} p-6`}>
         <div className="max-w-7xl mx-auto ">
           <div className="mb-8">
             {/* Week Navigation */}

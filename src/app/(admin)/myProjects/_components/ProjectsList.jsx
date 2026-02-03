@@ -3,6 +3,7 @@
 import { useI18n } from "@/context/translate-api";
 import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
+import { SELECTION_COLORS } from "@/constants/colors";
 import {
   Clock,
   CreditCard,
@@ -848,10 +849,10 @@ export default function ProjectsList({ clientId }) {
                 {projectList.map((project) => (
                   <div
                     key={project.id}
-                    className={`bg-gray-50 rounded-lg p-3 border-2 transition-all duration-200 cursor-pointer relative ${
+                    className={`rounded-lg p-3 border-2 transition-all duration-200 cursor-pointer relative ${
                       selectedProject?.id === project.id
-                        ? "bg-primary text-white border-primary shadow-lg"
-                        : "border-gray-200 hover:shadow-md hover:border-gray-300"
+                        ? "border-primary shadow-lg bg-[#E2DBFF33]"
+                        : "bg-gray-50 border-gray-200 hover:shadow-md hover:border-gray-300"
                     }`}
                     onClick={() => handleProjectSelection(project)}
                   >
@@ -868,7 +869,7 @@ export default function ProjectsList({ clientId }) {
                     <h3
                       className={`font-semibold text-lg ${
                         selectedProject?.id === project.id
-                          ? "text-white"
+                          ? "text-primary"
                           : "text-gray-800"
                       }`}
                     >
@@ -879,7 +880,7 @@ export default function ProjectsList({ clientId }) {
                     <div
                       className={`flex items-center space-x-4 text-sm mb-2 ${
                         selectedProject?.id === project.id
-                          ? "text-white"
+                          ? "text-primary"
                           : "text-gray-600"
                       }`}
                     >

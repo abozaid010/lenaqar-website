@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from './metadata';
+import { API_BASE_URL } from '@/lib/apiConfig';
 
 const CHAT_URL = 'https://chat.lenaai.net';
 const MAIN_SITE_URL = SITE_URL;
@@ -8,11 +9,8 @@ const MAIN_SITE_URL = SITE_URL;
 // These are the properties that the AI agent talks about, recommends, shows master plans and payment plans for
 async function getPublicUnits() {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.lenaai.net';
-    const apiUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`;
-
     const response = await fetch(
-      `${apiUrl}/public/units?limit=1000`,
+      `${API_BASE_URL}/public/units?limit=1000`,
       {
         next: { revalidate: 3600 }, // Revalidate every hour
       }

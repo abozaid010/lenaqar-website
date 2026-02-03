@@ -8,6 +8,7 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
+import { SELECTION_COLORS } from "@/constants/colors";
 
 const Layout = async ({ children }) => {
   // Get the clientID from the cookie on the server then pass it as a prop to the Header component => To avoid hydration issues
@@ -40,7 +41,7 @@ const Layout = async ({ children }) => {
               clientEmail={clientEmail}
             />
 
-            <main className="overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0 bg-[#E2DBFF1a]">
+            <main className={`overflow-y-auto p-3 relative flex-1 flex flex-col min-h-0 ${SELECTION_COLORS.BG}`}>
               <Suspense
                 fallback={
                   <LoadingSpinner

@@ -2,6 +2,8 @@
  * Image utility functions for handling various image loading scenarios
  */
 
+import { API_HOSTNAME } from "@/lib/apiConfig";
+
 // Cache for known broken images to avoid repeated failed requests
 const brokenImageCache = new Set();
 
@@ -44,11 +46,7 @@ export function isConfiguredHostname(url) {
   
   try {
     const { hostname } = new URL(url);
-    const allowed = [
-      'ik.imagekit.io',
-      'api.lenaai.net',
-      process.env.NEXT_PUBLIC_API_DOMAIN,
-    ].filter(Boolean);
+    const allowed = ['ik.imagekit.io', API_HOSTNAME].filter(Boolean);
     
     return allowed.some(allowedHost => {
       // Exact match or subdomain match

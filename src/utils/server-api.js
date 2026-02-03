@@ -1,13 +1,5 @@
 import axios from "axios";
-
-const getBaseUrl = () => {
-  const url = process.env.API_BASE_URL ||
-    process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://api.lenaai.net";
-  return url.startsWith("http") ? url : `https://${url}`;
-};
-
-const BASE_URL = getBaseUrl();
+import { API_BASE_URL } from "@/lib/apiConfig";
 
 export async function loginUser(credentials) {
     const params = new URLSearchParams();
@@ -15,7 +7,7 @@ export async function loginUser(credentials) {
     params.append('username', credentials.email);
     params.append('password', credentials.password);
 
-    const response = await axios.post(`${BASE_URL}/client/login`, params, {
+    const response = await axios.post(`${API_BASE_URL}/client/login`, params, {
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/x-www-form-urlencoded'
