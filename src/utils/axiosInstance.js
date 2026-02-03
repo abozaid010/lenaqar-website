@@ -1,14 +1,10 @@
 "use server";
 import axios from "axios";
 import { cookies } from "next/headers";
-
-const BASE_URL =
-  process.env.API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://api.lenaai.net";
+import { API_BASE_URL } from "@/lib/apiConfig";
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   timeout: 30000, // 30 seconds timeout
   headers: {
     "Content-Type": "application/json",
@@ -67,7 +63,7 @@ axiosInstance.interceptors.response.use(
 
         // Call external API directly to refresh the token
         const refreshResponse = await axios.post(
-          `${BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
+          `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
           {},
           {
             headers: {

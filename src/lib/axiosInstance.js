@@ -3,16 +3,10 @@
 import axios from "axios";
 import { LenaCookiesManager } from "./LenaCookiesManager";
 import { TokenRefreshService } from "./TokenRefreshService";
-
-const getBaseUrl = () => {
-  const url = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
-  return url.startsWith("http") ? url : `https://${url}`;
-};
-
-const BASE_URL = getBaseUrl();
+import { API_BASE_URL } from "./apiConfig";
 
 export const axiosInstance = axios.create({
-  baseURL: BASE_URL,
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
