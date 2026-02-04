@@ -177,17 +177,18 @@ export default function CampaignDialog({
       onClose={onClose}
       title={title}
       showCloseButton={false}
+      headerLeading={
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
+          disabled={isSubmitting}
+        >
+          {t?.buttons?.cancel || "Cancel"}
+        </button>
+      }
       headerActions={
-        <>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
-            disabled={isSubmitting}
-          >
-            {t?.buttons?.cancel || "Cancel"}
-          </button>
-          <button
+        <button
             type="button"
             onClick={handleSubmit}
             className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
@@ -203,8 +204,7 @@ export default function CampaignDialog({
             ) : (
               c.createButton || "Create"
             )}
-          </button>
-        </>
+        </button>
       }
     >
       <div className="max-w-3xl mx-auto">

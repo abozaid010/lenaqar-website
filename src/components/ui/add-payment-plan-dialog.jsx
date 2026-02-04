@@ -2,6 +2,7 @@
 
 import Dialog from "@/components/ui/Dialog";
 import FormInput from "@/components/ui/inputs/form-input";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useI18n } from "@/context/translate-api";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ export default function AddPaymentPlanDialog({
     downpayment_percentage: "",
     reservation_amount_percentage: "",
     installment_years: "",
+    delivery_in_years: "",
     maintenance_fee: "",
     cache_discount: "40",
     is_default: false,
@@ -49,6 +51,11 @@ export default function AddPaymentPlanDialog({
             existingPlan.installment_years !== null
               ? String(existingPlan.installment_years)
               : "",
+          delivery_in_years:
+            existingPlan.delivery_in_years !== undefined &&
+            existingPlan.delivery_in_years !== null
+              ? String(existingPlan.delivery_in_years)
+              : "",
           maintenance_fee: existingPlan.maintenance_fee
             ? (existingPlan.maintenance_fee * 100).toString()
             : "",
@@ -67,6 +74,7 @@ export default function AddPaymentPlanDialog({
           downpayment_percentage: "",
           reservation_amount_percentage: "",
           installment_years: "",
+          delivery_in_years: "",
           maintenance_fee: "",
           cache_discount: "40",
           is_default: false,
@@ -97,6 +105,16 @@ export default function AddPaymentPlanDialog({
         } else {
           // Otherwise restrict to valid range
           return; // Exit without updating state
+        }
+      }
+    }
+
+    // Validate delivery_in_years: positive float >= 0 and <= 10
+    if (name === "delivery_in_years" && value !== "") {
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue < 0 || numValue > 10) {
+        if (value !== "" && value !== "." && value !== "0.") {
+          return;
         }
       }
     }
@@ -168,6 +186,19 @@ export default function AddPaymentPlanDialog({
         "Installment years must be a positive number";
     }
 
+    // Validate delivery_in_years: positive float >= 0 and <= 10
+    const deliveryInYears = parseFloat(formData.delivery_in_years);
+    if (
+      formData.delivery_in_years !== "" &&
+      (!Number.isFinite(deliveryInYears) ||
+        deliveryInYears < 0 ||
+        deliveryInYears > 10)
+    ) {
+      newErrors.delivery_in_years =
+        t.formValidation?.deliveryInYearsInvalid ||
+        "Delivery (years) must be between 0 and 10";
+    }
+
     setErrors(newErrors);
 
     // Show a single toast error if there are any validation errors
@@ -197,6 +228,11 @@ export default function AddPaymentPlanDialog({
           parseFloat(formData.downpayment_percentage) / 100,
         reservation_amount_percentage: 0, // Always send 0
         installment_years: parseFloat(formData.installment_years),
+        delivery_in_years:
+          formData.delivery_in_years === "" ||
+          isNaN(parseFloat(formData.delivery_in_years))
+            ? 0
+            : parseFloat(formData.delivery_in_years),
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
         cache_discount:
           formData.cache_discount === "" ||
@@ -233,8 +269,48 @@ export default function AddPaymentPlanDialog({
           ? t.modal.updatePaymentPlan || "Edit Payment Plan"
           : t.modal.addPaymentPlan || "Add Payment Plan"
       }
+      showCloseButton={false}
+      headerLeading={
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-1.5 rounded-md text-sm font-medium text-white/90 hover:text-white border border-white/50 hover:border-white focus:outline-none focus:ring-1 focus:ring-white/50"
+        >
+          {t.buttons?.cancel || "Cancel"}
+        </button>
+      }
+      headerActions={
+        <button
+          type="submit"
+          form="add-payment-plan-form"
+          disabled={isSubmitting}
+          className={`px-4 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-1 focus:ring-white/50 ${
+            isSubmitting
+              ? "pointer-events-none opacity-80 bg-white/80 text-primary"
+              : "bg-white text-primary hover:bg-white/90"
+          }`}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center justify-center gap-2">
+              <Loader2 size={18} className="animate-spin" />
+              {t.buttons?.saving || "Saving..."}
+            </div>
+          ) : editMode ? (
+            t.buttons?.update || "Update"
+          ) : (
+            t.buttons?.save || "Save"
+          )}
+        </button>
+      }
     >
-      <div className="space-y-3 -mb-4">
+      <form
+        id="add-payment-plan-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          handleSubmit(e);
+        }}
+        className="space-y-3 -mb-4"
+      >
         {/* Basic Information */}
         <FormInput
           type="number"
@@ -278,6 +354,23 @@ export default function AddPaymentPlanDialog({
             error={errors.maintenance_fee}
           />
         </div>
+
+        <LenaTextField
+          type="number"
+          name="delivery_in_years"
+          label={t.formLabels?.deliveryInYears || "Delivery (years)"}
+          value={formData.delivery_in_years}
+          onChange={handleChange}
+          placeholder="0"
+          min={0}
+          max={10}
+          step="0.1"
+          error={errors.delivery_in_years}
+          helperText={
+            t.formValidation?.deliveryInYearsHelper ||
+            "Value between 0 and 10 (e.g. 2.5)"
+          }
+        />
 
         <FormInput
           type="number"
@@ -326,38 +419,7 @@ export default function AddPaymentPlanDialog({
             </label>
           </div>
         </div>
-
-        <div className="flex justify-end space-x-3 pt-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            {t.buttons?.cancel || "Cancel"}
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`px-4 py-1.5 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-              isSubmitting
-                ? "pointer-events-none opacity-80"
-                : "hover:bg-primary/90"
-            }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center">
-                <Loader2 size={20} className="animate-spin mr-2" />
-                {t.buttons?.saving || "Saving..."}
-              </div>
-            ) : editMode ? (
-              t.buttons?.update || "Update"
-            ) : (
-              t.buttons?.save || "Save"
-            )}
-          </button>
-        </div>
-      </div>
+      </form>
     </Dialog>
   );
 }
