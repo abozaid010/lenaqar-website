@@ -76,6 +76,10 @@ export async function POST() {
   }
 }
 
+// Use public site URL for redirects so production behind a proxy doesn't redirect to localhost
+const SITE_ORIGIN =
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+
 /**
  * GET handler for middleware redirect flow: refresh token, set cookies, redirect back.
  * Query param: redirect = URL path (e.g. /dashboard) to send user to after refresh.
@@ -93,7 +97,7 @@ export async function GET(request) {
 
     const { newAccessToken, newRefreshToken } = await performRefresh();
 
-    const redirectUrl = new URL(safeRedirect, request.url);
+    const redirectUrl = new URL(safeRedirect, SITE_ORIGIN);
     const responseObj = NextResponse.redirect(redirectUrl);
     setTokenCookies(responseObj, newAccessToken, newRefreshToken);
 
@@ -102,6 +106,6 @@ export async function GET(request) {
     if (process.env.NODE_ENV === "development") {
       console.error("[refresh-token] GET token refresh failed:", error);
     }
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/login", SITE_ORIGIN));
   }
 }
