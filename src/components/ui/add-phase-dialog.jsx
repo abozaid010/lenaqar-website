@@ -87,13 +87,18 @@ export default function AddPhseDilog({
     setIsSubmitting(true);
 
     try {
+      const imagesForApi = (formData.images || []).map(({ url, fileId }) => ({
+        url,
+        fileId,
+      }));
+
       if (editMode) {
         const formDataToUpdate = {
           name: formData.name,
           master_plan: formData.master_plan,
           description: formData.description,
           updated_at: new Date().toISOString(),
-          images: formData.images,
+          images: imagesForApi,
         };
 
         const res = await updatePhase(
@@ -118,7 +123,10 @@ export default function AddPhseDilog({
           toast.error(t.phasee.updatePhaseFaile || "Failed to update phase");
         }
       } else {
-        const res = await addNewPhase(formData, projectId);
+        const res = await addNewPhase(
+          { ...formData, images: imagesForApi },
+          projectId
+        );
         if (res.code === 200) {
           toast.success(t.addPhaseSuccess);
           onAdd({
@@ -163,8 +171,46 @@ export default function AddPhseDilog({
       isOpen={isOpen}
       onClose={onClose}
       title={t.phasee?.addnew || "Add New Project"}
+      showCloseButton={false}
+      headerLeading={
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
+          disabled={isSubmitting || isUploading || isMasterPlanUploading}
+        >
+          {t.buttons?.cancel || "Cancel"}
+        </button>
+      }
+      headerActions={
+        <button
+          type="submit"
+          form="add-phase-form"
+          disabled={isSubmitting || isUploading || isMasterPlanUploading}
+          className={`px-3 py-1.5 rounded-md text-sm font-medium focus:outline-none focus:ring-1 focus:ring-white/50 ${
+            isSubmitting || isUploading || isMasterPlanUploading
+              ? "pointer-events-none opacity-80 bg-white/80 text-primary"
+              : "bg-white text-primary hover:bg-white/90"
+          }`}
+        >
+          {isSubmitting || isUploading || isMasterPlanUploading ? (
+            <span className="inline-flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin" />
+              {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+            </span>
+          ) : editMode ? (
+            t.updatePhase
+          ) : (
+            t.addPhase
+          )}
+        </button>
+      }
     >
-      <div>
+      <form
+        id="add-phase-form"
+        onSubmit={handleSubmit}
+        className="space-y-2"
+      >
         <div className="space-y-2">
           {/* Basic Information */}
           <div>
@@ -236,39 +282,8 @@ export default function AddPhseDilog({
               setIsUploading={setIsUploading}
             />
           </div>
-
-          <div className="flex justify-end space-x-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-                className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              {t.buttons?.cancel || "Cancel"}
-            </button>
-            <button
-              type="submit"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${
-                isSubmitting || isUploading || isMasterPlanUploading
-                  ? "pointer-events-none opacity-80"
-                  : "hover:bg-primary/90"
-              }`}
-            >
-              {isSubmitting ? (
-                <div className="flex items-center justify-center">
-                  <Loader2 size={20} className="animate-spin mr-2" />
-                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
-                </div>
-              ) : editMode ? (
-                t.updatePhase
-              ) : (
-                t.addPhase
-              )}
-            </button>
-          </div>
         </div>
-      </div>
+      </form>
     </Dialog>
   );
 }

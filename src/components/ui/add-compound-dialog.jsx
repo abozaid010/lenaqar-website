@@ -579,8 +579,25 @@ export default function AddCompoundDialog({
     setIsSubmitting(true);
 
     try {
+      const imagesForApi = (formData.images || []).map(({ url, fileId }) => ({
+        url,
+        fileId,
+      }));
+      const buildingTypesImagesForApi = formData.building_types_images
+        ? Object.fromEntries(
+            Object.entries(formData.building_types_images).map(
+              ([key, arr]) => [
+                key,
+                (arr || []).map(({ url, fileId }) => ({ url, fileId })),
+              ]
+            )
+          )
+        : {};
+
       const submissionData = {
         ...formData,
+        images: imagesForApi,
+        building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
       };
@@ -940,22 +957,23 @@ export default function AddCompoundDialog({
         closeOnOutsideClick={false}
         closeOnEscape={false}
         showCloseButton={false}
+        headerLeading={
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            disabled={isSubmitting}
+          >
+            {t.buttons?.cancel || "Cancel"}
+          </button>
+        }
         headerActions={
-          <>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
-              disabled={isSubmitting}
-            >
-              {t.buttons?.cancel || "Cancel"}
-            </button>
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting || isUploading || isMasterPlanUploading}
-              className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
-            >
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={isSubmitting || isUploading || isMasterPlanUploading}
+            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+          >
               {isSubmitting ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin" />
@@ -966,8 +984,7 @@ export default function AddCompoundDialog({
               ) : (
                 t.buttons?.saveProject || "Save Project"
               )}
-            </button>
-          </>
+          </button>
         }
         title={
           editMode

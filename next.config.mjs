@@ -1,13 +1,19 @@
-// Single source for API image hostname from NEXT_PUBLIC_API_BASE_URL (next.config has no @/ alias)
-const apiBaseUrlRaw = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
-const apiBaseUrl = apiBaseUrlRaw.startsWith("http") ? apiBaseUrlRaw : `https://${apiBaseUrlRaw}`;
-const apiHostname = (() => {
+// Image hostname from NEXT_PUBLIC_IMAGE_BASE_URL (fallback API) for next/image remotePatterns
+const imageBaseUrlRaw =
+  process.env.NEXT_PUBLIC_IMAGE_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://api.lenaai.net";
+const imageBaseUrl = imageBaseUrlRaw.startsWith("http")
+  ? imageBaseUrlRaw
+  : `https://${imageBaseUrlRaw}`;
+const imageHostname = (() => {
   try {
-    return new URL(apiBaseUrl).hostname;
+    return new URL(imageBaseUrl).hostname;
   } catch {
     return "api.lenaai.net";
   }
 })();
+
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -36,7 +42,12 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: apiHostname,
+        hostname: imageHostname,
+        pathname: "/**",
+      },
+      {
+        protocol: "http",
+        hostname: imageHostname,
         pathname: "/**",
       },
     ],
@@ -45,7 +56,7 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
     // Improve image loading performance
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 60*60*8, // 8 hours
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],

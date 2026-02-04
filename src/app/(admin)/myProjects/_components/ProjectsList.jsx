@@ -25,6 +25,7 @@ import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
+import LazyVisible from "@/components/ui/lazy-visible";
 import ImportProjectsDialog from "@/components/ui/import-projects-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
@@ -1069,71 +1070,111 @@ export default function ProjectsList({ clientId }) {
                   </div>
                 )}
 
-                {/* Building Types Images Section */}
+                {/* Building Types Images Section - lazy: images load only when section is visible */}
                 {((selectedProject.building_types_images &&
                   Object.keys(selectedProject.building_types_images).length >
                     0) ||
                   (selectedProject.types_photos &&
                     Object.keys(selectedProject.types_photos).length > 0)) && (
-                    <div className="p-4 border-t border-gray-200">
-                      <h4 className="font-semibold text-lg text-gray-700 mb-4 flex items-center gap-2">
-                        <ImageIcon size={20} className="text-purple-600" />
-                        {locale === "ar"
-                          ? "صور أنواع المباني"
-                          : "Building Types Images"}
-                      </h4>
-                      <div className="space-y-6">
-                        {selectedProject.properties_types?.map((type) => {
-                          // Check both building_types_images and types_photos for backward compatibility
-                          let typeImages = null;
-                          
-                          // First check building_types_images (new format with objects)
-                          if (
-                            selectedProject.building_types_images?.[type] &&
-                            Array.isArray(selectedProject.building_types_images[type])
-                          ) {
-                            typeImages = selectedProject.building_types_images[type];
-                          }
-                          // Fallback to types_photos (legacy format with URL strings)
-                          else if (
-                            selectedProject.types_photos?.[type] &&
-                            Array.isArray(selectedProject.types_photos[type])
-                          ) {
-                            typeImages = selectedProject.types_photos[type].map(
-                              (url) => (typeof url === "string" ? { url } : url)
+                    <LazyVisible
+                      placeholder={
+                        <div className="p-4 border-t border-gray-200">
+                          <div className="h-6 w-48 bg-gray-200 rounded animate-pulse mb-4" />
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[1, 2, 3, 4].map((i) => (
+                              <div
+                                key={i}
+                                className="aspect-square rounded-lg bg-gray-100 animate-pulse"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      }
+                    >
+                      <div className="p-4 border-t border-gray-200">
+                        <h4 className="font-semibold text-lg text-gray-700 mb-4 flex items-center gap-2">
+                          <ImageIcon size={20} className="text-purple-600" />
+                          {locale === "ar"
+                            ? "صور أنواع المباني"
+                            : "Building Types Images"}
+                        </h4>
+                        <div className="space-y-6">
+                          {selectedProject.properties_types?.map((type) => {
+                            // Check both building_types_images and types_photos for backward compatibility
+                            let typeImages = null;
+
+                            // First check building_types_images (new format with objects)
+                            if (
+                              selectedProject.building_types_images?.[type] &&
+                              Array.isArray(selectedProject.building_types_images[type])
+                            ) {
+                              typeImages = selectedProject.building_types_images[type];
+                            }
+                            // Fallback to types_photos (legacy format with URL strings)
+                            else if (
+                              selectedProject.types_photos?.[type] &&
+                              Array.isArray(selectedProject.types_photos[type])
+                            ) {
+                              typeImages = selectedProject.types_photos[type].map(
+                                (url) => (typeof url === "string" ? { url } : url)
+                              );
+                            }
+
+                            if (!typeImages || typeImages.length === 0)
+                              return null;
+
+                            const typeLabel = getPropertyTypeLabel(
+                              type,
+                              locale,
+                              BUILDING_TYPES
                             );
-                          }
 
-                          if (!typeImages || typeImages.length === 0)
-                            return null;
-
-                          const typeLabel = getPropertyTypeLabel(
-                            type,
-                            locale,
-                            BUILDING_TYPES
-                          );
-
-                          return (
-                            <div
-                              key={type}
-                              className="bg-gray-50 rounded-lg p-4 border border-gray-200"
-                            >
-                              <div className="flex items-center justify-between mb-3">
-                                <h5 className="font-semibold text-base text-gray-800 flex items-center gap-2">
-                                  <Home size={16} className="text-purple-600" />
-                                  {typeLabel}
-                                </h5>
-                                <span className="text-sm text-gray-500">
-                                  {typeImages.length}{" "}
-                                  {locale === "ar" ? "صورة" : "image"}
-                                  {typeImages.length !== 1 ? "s" : ""}
-                                </span>
-                              </div>
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                {typeImages.slice(0, 4).map((img, idx) => (
-                                  <div
-                                    key={idx}
-                                    className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border border-gray-200 hover:border-primary transition-colors"
+                            return (
+                              <div
+                                key={type}
+                                className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                              >
+                                <div className="flex items-center justify-between mb-3">
+                                  <h5 className="font-semibold text-base text-gray-800 flex items-center gap-2">
+                                    <Home size={16} className="text-purple-600" />
+                                    {typeLabel}
+                                  </h5>
+                                  <span className="text-sm text-gray-500">
+                                    {typeImages.length}{" "}
+                                    {locale === "ar" ? "صورة" : "image"}
+                                    {typeImages.length !== 1 ? "s" : ""}
+                                  </span>
+                                </div>
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                  {typeImages.slice(0, 4).map((img, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="relative aspect-square rounded-lg overflow-hidden cursor-pointer group border border-gray-200 hover:border-primary transition-colors"
+                                      onClick={() => {
+                                        setBuildingTypeImagesModal({
+                                          open: true,
+                                          images: typeImages,
+                                          title: typeLabel,
+                                        });
+                                      }}
+                                    >
+                                      <ImageWithLoader
+                                        src={img.url || "/images/defaultImage.jpg"}
+                                        alt={`${typeLabel} - ${idx + 1}`}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                        priority={false}
+                                        loadingVariant="minimal"
+                                      />
+                                      {idx === 3 && typeImages.length > 4 && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-semibold">
+                                          +{typeImages.length - 4}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                                {typeImages.length > 4 && (
+                                  <button
                                     onClick={() => {
                                       setBuildingTypeImagesModal({
                                         open: true,
@@ -1141,44 +1182,20 @@ export default function ProjectsList({ clientId }) {
                                         title: typeLabel,
                                       });
                                     }}
+                                    className="mt-3 text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
                                   >
-                                    <ImageWithLoader
-                                      src={img.url || "/images/defaultImage.jpg"}
-                                      alt={`${typeLabel} - ${idx + 1}`}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                      priority={idx === 0}
-                                      loadingVariant="minimal"
-                                    />
-                                    {idx === 3 && typeImages.length > 4 && (
-                                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center text-white font-semibold">
-                                        +{typeImages.length - 4}
-                                      </div>
-                                    )}
-                                  </div>
-                                ))}
+                                    {locale === "ar"
+                                      ? "عرض جميع الصور"
+                                      : "View all images"}
+                                    <ChevronRight size={16} />
+                                  </button>
+                                )}
                               </div>
-                              {typeImages.length > 4 && (
-                                <button
-                                  onClick={() => {
-                                    setBuildingTypeImagesModal({
-                                      open: true,
-                                      images: typeImages,
-                                      title: typeLabel,
-                                    });
-                                  }}
-                                  className="mt-3 text-sm text-primary hover:text-primary/80 font-medium flex items-center gap-1"
-                                >
-                                  {locale === "ar"
-                                    ? "عرض جميع الصور"
-                                    : "View all images"}
-                                  <ChevronRight size={16} />
-                                </button>
-                              )}
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
+                    </LazyVisible>
                   )}
 
                 {/* Project Details Section */}
@@ -1365,6 +1382,21 @@ export default function ProjectsList({ clientId }) {
                   {(selectedProject.phases ||
                     selectedProject.phases.images?.length > 0) &&
                   selectedProject.phases.length > 0 ? (
+                    <LazyVisible
+                      placeholder={
+                        <div>
+                          <div className="h-96 bg-gray-100 animate-pulse" />
+                          <div className="flex gap-4 px-4 pb-2 mt-4">
+                            {[1, 2, 3].map((i) => (
+                              <div
+                                key={i}
+                                className="min-w-[120px] h-20 rounded-lg bg-gray-200 animate-pulse flex-shrink-0"
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      }
+                    >
                     <>
                       <div className="h-96 relative overflow-hidden bg-gray-50 group">
                         <ImageWithLoader
@@ -1385,7 +1417,7 @@ export default function ProjectsList({ clientId }) {
                             "Phase Image"
                           }
                           className="w-full h-full object-cover"
-                          priority={true}
+                          priority={false}
                           loadingVariant="default"
                           forceLoading={phaseImageLoading}
                           onLoadComplete={() => setPhaseImageLoading(false)}
@@ -1517,6 +1549,7 @@ export default function ProjectsList({ clientId }) {
                         ))}
                       </div>
                     </>
+                    </LazyVisible>
                   ) : (
                     <div className="flex flex-col items-center justify-center py-6">
                       <Clock

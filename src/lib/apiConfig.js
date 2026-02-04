@@ -14,3 +14,19 @@ try {
   // fallback if malformed env
 }
 export const API_HOSTNAME = apiHostname;
+
+// Image base URL: optional; defaults to API so images work when API is same origin.
+// In dev, set NEXT_PUBLIC_IMAGE_BASE_URL=https://api.lenaai.net so images load from prod while API is localhost.
+const imageBaseRaw = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || raw;
+export const IMAGE_BASE_URL =
+  imageBaseRaw.startsWith("http://") || imageBaseRaw.startsWith("https://")
+    ? imageBaseRaw
+    : `https://${imageBaseRaw}`;
+
+let imageHostname = apiHostname;
+try {
+  imageHostname = new URL(IMAGE_BASE_URL).hostname;
+} catch {
+  // keep apiHostname
+}
+export const IMAGE_HOSTNAME = imageHostname;
