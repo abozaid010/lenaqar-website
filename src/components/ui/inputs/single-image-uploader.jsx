@@ -143,7 +143,7 @@ export default function SingleImageUploader({
           <div className="relative group w-full flex flex-col gap-1 items-center justify-center">
             <div className="relative w-full h-[240px]">
               <ImageWithLoader
-                src={selectedImage?.preview || value}
+                src={value || "/images/property_placeholder.jpg"}
                 alt={`Image ${selectedImage?.name || "uploaded"}`}
                 className="w-full h-full object-cover rounded-md"
                 priority={true}

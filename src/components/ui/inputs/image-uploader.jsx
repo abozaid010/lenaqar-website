@@ -186,7 +186,7 @@ export default function ImageUploader({
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
           <ImageWithLoader
-            src={image.preview || image.url || "/placeholder.svg"}
+            src={image.url || "/placeholder.svg"}
             alt={`Image ${image.name}`}
             className="w-full h-full object-cover rounded-md"
             priority={false}
