@@ -313,8 +313,8 @@ const WORD_TO_NUMBER = {
 };
 
 /**
- * Validates if a value is a valid number (integer or float)
- * Accepts positive numbers, decimals, and can handle formatted numbers (e.g., "1,000.50")
+ * Validates if a value is a valid number (integer or float), including zero.
+ * Accepts zero, positive numbers, decimals, and can handle formatted numbers (e.g., "1,000.50")
  */
 function isValidNumber(value) {
   if (value === null || value === undefined || value === '') return false;
@@ -327,19 +327,22 @@ function isValidNumber(value) {
   
   // Check if it's a valid number (including decimals, negative, scientific notation)
   const parsed = parseFloat(numStr);
-  return !isNaN(numStr) && !isNaN(parsed) && isFinite(parsed);
+  if (!isNaN(numStr) && !isNaN(parsed) && isFinite(parsed)) {
+    return true; // Explicitly accept zero and all valid numbers
+  }
+  return false;
 }
 
 /**
- * Validates if a value is a valid integer or word number
+ * Validates if a value is a valid integer >= 0 or word number (bedrooms/rooms count)
  */
 function isValidRoomsCount(value) {
   if (value === null || value === undefined || value === '') return false;
   
   const str = String(value).toLowerCase().trim();
   
-  // Check if it's a valid integer (including negative for special cases)
-  if (/^-?\d+$/.test(str)) {
+  // Check if it's a valid non-negative integer
+  if (/^\d+$/.test(str)) {
     const num = parseInt(str, 10);
     return num >= 0 && num <= 15; // Reasonable range for rooms (0-15)
   }
@@ -364,6 +367,36 @@ function isValidString(value) {
   return value !== null && value !== undefined && String(value).trim().length > 0;
 }
 
+/**
+ * Validates project field: non-empty string with length > 2 characters
+ */
+function isValidProjectString(value) {
+  if (value === null || value === undefined) return false;
+  const trimmed = String(value).trim();
+  return trimmed.length > 2;
+}
+
+/**
+ * Validates floor: zero (0), or "V" / "G" / "Ground" (case-insensitive), or any valid number
+ */
+function isValidFloor(value) {
+  if (value === null || value === undefined || value === '') return false;
+  const str = String(value).trim().toLowerCase();
+  if (str === '0') return true;
+  if (['v', 'g', 'ground'].includes(str)) return true;
+  return isValidNumber(value);
+}
+
+/**
+ * Validates land area: valid number strictly greater than 15
+ */
+function isValidLandArea(value) {
+  if (value === null || value === undefined || value === '') return false;
+  let numStr = String(value).trim().replace(/[, ]/g, '');
+  const parsed = parseFloat(numStr);
+  return !isNaN(numStr) && !isNaN(parsed) && isFinite(parsed) && parsed > 15;
+}
+
 // Extended finishing values (including "finished" and "not finished")
 const EXTENDED_FINISHING_VALUES = [
   ...FINISHING_TYPE_VALUES,
@@ -376,10 +409,10 @@ const EXTENDED_FINISHING_VALUES = [
 // Can be an array of expected values OR a validator function
 const EXPECTED_VALUES_MAP = {
   // Required fields
-  buildingType: BUILDING_TYPE_VALUES, // Array - uses matches_values
-  project: isValidString, // Function - any valid string
-  roomsCount: isValidRoomsCount, // Function - integer or word number
-  landArea: isValidNumber, // Function - any valid number
+  buildingType: BUILDING_TYPE_VALUES, // Unit type: must match at least 0.6 with one of BUILDING_TYPE_VALUES
+  project: isValidProjectString, // Function - string length > 2
+  roomsCount: isValidRoomsCount, // Function - integer >= 0 or word number
+  landArea: isValidLandArea, // Function - valid number > 15
   totalPrice: isValidNumber, // Function - any valid number
   deliveryDate: isValidDate, // Function - any valid date
   
@@ -388,7 +421,7 @@ const EXPECTED_VALUES_MAP = {
   view: VIEW_TYPE_VALUES, // Array - uses matches_values
   furnishing: FURNISHING_TYPE_VALUES, // Array - uses matches_values
   bathroomCount: isValidRoomsCount, // Function - integer or word number (similar to roomsCount)
-  floor: isValidNumber, // Function - any valid number (can be negative for basement)
+  floor: isValidFloor, // Function - 0, "V", "G", "Ground", or any valid number
   gardenSize: isValidNumber, // Function - any valid number
   garageArea: isValidNumber, // Function - any valid number
   roof_area: isValidNumber, // Function - any valid number
