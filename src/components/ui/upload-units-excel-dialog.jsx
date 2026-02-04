@@ -331,17 +331,17 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }
     });
     
-    // Validate landArea > 0 and totalPrice > 10000 for all units
+    // Validate landArea > 15 and totalPrice for all units
     parsedData.units.forEach((unit, index) => {
       const unitNumber = index + 1;
       
-      // Check landArea >= 1
-      if (unit.landArea === undefined || unit.landArea === null || unit.landArea < 1) {
+      // Check landArea > 15
+      if (unit.landArea === undefined || unit.landArea === null || unit.landArea <= 15) {
         errors.push({
           field: 'landArea',
           label: 'Land Area',
           type: 'invalid_value',
-          message: `Unit ${unitNumber}: Land Area must be at least 1 (current value: ${unit.landArea})`,
+          message: `Unit ${unitNumber}: Land Area must be greater than 15 (current value: ${unit.landArea})`,
         });
       }
       

@@ -19,8 +19,13 @@
         "aliases": []
       },
       {
+        "en_name": "Sheraton",
+        "ar_name": "الشيراتون",
+        "aliases": []
+      },
+      {
         "en_name": "Madinaty",
-        "ar_name": "مدينتى",
+        "ar_name": "مدينتي",
         "aliases": []
       },
       {
@@ -439,6 +444,11 @@
       {
         "en_name": "R2 District",
         "ar_name": "حي R2",
+        "aliases": []
+      },
+      {
+        "en_name": "Central Business District",
+        "ar_name": "حي الأعمال المركزي",
         "aliases": []
       },
       {
