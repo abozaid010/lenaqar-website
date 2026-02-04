@@ -87,13 +87,18 @@ export default function AddPhseDilog({
     setIsSubmitting(true);
 
     try {
+      const imagesForApi = (formData.images || []).map(({ url, fileId }) => ({
+        url,
+        fileId,
+      }));
+
       if (editMode) {
         const formDataToUpdate = {
           name: formData.name,
           master_plan: formData.master_plan,
           description: formData.description,
           updated_at: new Date().toISOString(),
-          images: formData.images,
+          images: imagesForApi,
         };
 
         const res = await updatePhase(
@@ -118,7 +123,10 @@ export default function AddPhseDilog({
           toast.error(t.phasee.updatePhaseFaile || "Failed to update phase");
         }
       } else {
-        const res = await addNewPhase(formData, projectId);
+        const res = await addNewPhase(
+          { ...formData, images: imagesForApi },
+          projectId
+        );
         if (res.code === 200) {
           toast.success(t.addPhaseSuccess);
           onAdd({

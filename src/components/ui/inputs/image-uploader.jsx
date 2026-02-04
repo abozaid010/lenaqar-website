@@ -85,21 +85,11 @@ export default function ImageUploader({
         continue;
       }
       const imageId = `image_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      const readFilePromise = new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const imageData = {
-            id: imageId,
-            file,
-            preview: e.target.result,
-            name: file.name,
-          };
-          newSelectedImages.push(imageData);
-          resolve(imageData);
-        };
-        reader.readAsDataURL(file);
+      newSelectedImages.push({
+        id: imageId,
+        file,
+        name: file.name,
       });
-      await readFilePromise;
       newUploadStatus[imageId] = "uploading";
     }
     setSelectedImages((prev) => [...prev, ...newSelectedImages]);
@@ -118,8 +108,7 @@ export default function ImageUploader({
         successfulUploads.push({
           url: res.url,
           fileId: res.fileId,
-          preview: image.preview,
-          name: image.name,
+          id: image.id,
         });
       } catch (error) {
         setUploadStatus((prev) => ({ ...prev, [image.id]: "error" }));
@@ -127,8 +116,9 @@ export default function ImageUploader({
         console.error(`Failed to upload image ${image.name}:`, error);
       }
     }
+    // Only pass url/fileId to parent and API; never pass preview or internal id
     const sanitizedUploads = [...uploadedImages, ...successfulUploads].map(
-      ({ preview, name, ...rest }) => rest
+      ({ preview, name, id, ...rest }) => rest
     );
     setUploadedImages([...uploadedImages, ...successfulUploads]);
     onImagesChange(sanitizedUploads);

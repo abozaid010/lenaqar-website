@@ -579,8 +579,25 @@ export default function AddCompoundDialog({
     setIsSubmitting(true);
 
     try {
+      const imagesForApi = (formData.images || []).map(({ url, fileId }) => ({
+        url,
+        fileId,
+      }));
+      const buildingTypesImagesForApi = formData.building_types_images
+        ? Object.fromEntries(
+            Object.entries(formData.building_types_images).map(
+              ([key, arr]) => [
+                key,
+                (arr || []).map(({ url, fileId }) => ({ url, fileId })),
+              ]
+            )
+          )
+        : {};
+
       const submissionData = {
         ...formData,
+        images: imagesForApi,
+        building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
       };

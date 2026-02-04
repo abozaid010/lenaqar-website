@@ -26,7 +26,7 @@ export default function SingleImageUploader({
   const { t } = useI18n();
   const fileInputRef = useRef(null);
   const [selectedImage, setSelectedImage] = useState(
-    value ? { name: null, preview: value, imageId: imageId } : null
+    value ? { name: null, imageId: imageId } : null
   );
   const [isUploading, setIsUploadingLocal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -35,9 +35,9 @@ export default function SingleImageUploader({
     if (!value) {
       setSelectedImage(null);
     } else {
-      setSelectedImage({ name: null, preview: value, imageId: imageId });
+      setSelectedImage({ name: null, imageId: imageId });
     }
-  }, [value]);
+  }, [value, imageId]);
 
   const handleFileSelect = async (e) => {
     const file = e.target.files[0];
@@ -54,14 +54,7 @@ export default function SingleImageUploader({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSelectedImage({
-        name: file.name,
-        preview: reader.result,
-      });
-    };
-    reader.readAsDataURL(file);
+    setSelectedImage({ name: file.name });
 
     try {
       setIsUploadingLocal(true);
