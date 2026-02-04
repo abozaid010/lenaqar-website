@@ -16,7 +16,7 @@ const protectedRoutes = [
   "/developers",
 ];
 
-export function middleware(request) {
+export function proxy(request) {
   const { pathname } = request.nextUrl;
 
   // Handle image requests with proper MIME types
