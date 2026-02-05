@@ -3,7 +3,7 @@
 import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
-import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
@@ -22,8 +22,7 @@ import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 const EnumPropertyIntent = ["rent", "sell"];
 
 export default function UnitsFilter({ appliedFilters, isPublic }) {
-  const { data: projectsData, isLoading: projectsLoading } = useCompounds(
-    null,
+  const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
     isPublic
   );
   const { data: developersData, isLoading: developersLoading } = useDevelopers(

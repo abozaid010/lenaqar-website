@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useI18n } from "@/context/translate-api";
-import { useCompounds } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
 
 /**
@@ -45,9 +45,8 @@ export default function SearchableProjectSelect({
 }) {
   const { t, locale } = useI18n();
   
-  // Fetch projects if not provided as prop
-  const { data: fetchedProjects, isLoading: fetchedLoading } = useCompounds(
-    null,
+  // Fetch lightweight projects if not provided as prop
+  const { data: fetchedProjects, isLoading: fetchedLoading } = useProjectsNames(
     isPublic
   );
   

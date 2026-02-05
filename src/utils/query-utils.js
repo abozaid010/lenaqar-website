@@ -49,6 +49,12 @@ export const compoundKeys = {
   ],
 };
 
+// Query key factory for project names (lightweight)
+export const projectNamesKeys = {
+  all: ["projectNames"],
+  lists: (isPublic) => [...projectNamesKeys.all, "list", { isPublic }],
+};
+
 // Query key factory for cities and projects
 export const cityKeys = {
   all: ["cities"],

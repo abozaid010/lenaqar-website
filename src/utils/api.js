@@ -166,6 +166,43 @@ export async function fetchProjects(isPublic = false) {
   }
 }
 
+export async function fetchProjectsNames(isPublic = false) {
+  const url = isPublic ? "/projectsv2/all_projects_names?public=true" : "/projectsv2/all_projects_names";
+
+  try {
+    const response = await axiosInstance.get(url);
+
+    // Validate response data structure
+    if (!response.data) {
+      throw new Error("Invalid response format from server: missing response.data");
+    }
+
+    // Handle new API response structure: {status, code, message, data, error_message}
+    if (response.data.data) {
+      if (!Array.isArray(response.data.data)) {
+        throw new Error(
+          `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+        );
+      }
+      return response.data.data;
+    }
+
+    // Fallback: check if data is directly an array (for backward compatibility)
+    if (Array.isArray(response.data)) {
+      return response.data;
+    }
+
+    // If neither structure matches, throw error
+    throw new Error(
+      `Unexpected response structure. Expected {data: array} or array, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
+  } catch (error) {
+    console.error("Failed to fetch project names:", error.message);
+    // Re-throw the error so TanStack Query can handle it properly
+    throw error;
+  }
+}
+
 export async function fetchCitisAndProjects() {
   try {
     // Get singleton instance and return cities and districts data

@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
@@ -129,7 +129,7 @@ export default function ProjectsList({ clientId }) {
     error,
     refetch,
     isFetching,
-  } = useCompounds(clientId);
+  } = useProjectsNames(false);
   const {
     data: developersData,
     isLoading: developersLoading,
