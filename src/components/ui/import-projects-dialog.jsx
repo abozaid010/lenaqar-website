@@ -2,7 +2,7 @@
 
 import ImportDialog from "@/components/ui/import-dialog";
 import { useI18n } from "@/context/translate-api";
-import { useCompounds } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { importProjects } from "@/utils/api";
 
 export default function ImportProjectsDialog({
@@ -21,7 +21,7 @@ export default function ImportProjectsDialog({
     error,
     refetch,
     isFetching,
-  } = useCompounds(null, true);
+  } = useProjectsNames(true);
 
   const handleImport = async (selectedIds) => {
     // Map selected IDs to full project objects matching API format

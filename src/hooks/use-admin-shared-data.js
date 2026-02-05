@@ -4,9 +4,11 @@ import {
   fetchCitisAndProjects,
   fetchDevelopers,
   fetchProjects,
+  fetchProjectsNames,
+  fetchProjectsPaginated,
 } from "@/utils/api";
-import { cityKeys, compoundKeys, developerKeys } from "@/utils/query-utils";
-import { useQuery } from "@tanstack/react-query";
+import { cityKeys, compoundKeys, developerKeys, paginatedProjectKeys, projectNamesKeys } from "@/utils/query-utils";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 
 // Hook for fetching developers
 export function useDevelopers(client_id, isPublic = false) {
@@ -24,6 +26,30 @@ export function useCompounds(client_id, isPublic = false) {
     queryKey: compoundKeys.lists(client_id, isPublic),
     queryFn: () => fetchProjects(isPublic),
     staleTime: 1000 * 60 * 10, // 10 minutes
+    refetchOnWindowFocus: false,
+  });
+}
+
+// Hook for fetching lightweight project names (optimized)
+export function useProjectsNames(isPublic = false) {
+  return useQuery({
+    queryKey: projectNamesKeys.lists(isPublic),
+    queryFn: () => fetchProjectsNames(isPublic),
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    refetchOnWindowFocus: false,
+  });
+}
+
+// Hook for fetching paginated projects (full project data, cursor-based)
+export function useProjectsPaginated({ cityEnName, developerId } = {}) {
+  return useInfiniteQuery({
+    queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
+    queryFn: ({ pageParam }) =>
+      fetchProjectsPaginated({ limit: 10, lastDocId: pageParam, cityEnName, developerId }),
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) =>
+      lastPage.has_more ? lastPage.last_doc_id : undefined,
+    staleTime: 1000 * 60 * 30, // 30 minutes - cached for the session
     refetchOnWindowFocus: false,
   });
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useCompounds, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsPaginated, useDevelopers } from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
@@ -34,6 +34,8 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deletePhase, deleteProject } from "@/utils/api";
+import { paginatedProjectKeys } from "@/utils/query-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -122,20 +124,59 @@ const PaymentPlansBadges = ({ plans, locale, maxDisplay = 2 }) => {
 };
 
 export default function ProjectsList({ clientId }) {
-  const {
-    data: compounds,
-    isLoading,
-    isError,
-    error,
-    refetch,
-    isFetching,
-  } = useCompounds(clientId);
+  const queryClient = useQueryClient();
+  const { t, locale } = useI18n();
+
+  // City filter state (declared early so cityEnName can be derived for the hook)
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
+
+  // Single translations object that holds city/district labels
+  const [translations, setTranslations] = useState({
+    cities: [],           // Array of city values (lowercase)
+    cityLabels: {},      // Map: cityValue -> translated label
+    districtLabels: {}, // Map: "cityValue|districtValue" -> translated label
+    isLoading: true
+  });
+
+  // Derive cityEnName for the API:
+  // - If exactly one city selected, pass it as server-side filter
+  // - Otherwise fetch all and filter client-side (for 0, all, or multiple cities)
+  const cityEnName = useMemo(() => {
+    if (selectedCities.length === 1 && selectedCities.length < translations.cities.length) {
+      return selectedCities[0];
+    }
+    return undefined;
+  }, [selectedCities, translations.cities.length]);
+
   const {
     data: developersData,
     isLoading: developersLoading,
     isError: developersError,
   } = useDevelopers(null, true); // Fetch all public developers
-  const { t, locale } = useI18n();
+
+  // Developer filter state
+  const developers = developersData || []
+  const [selectedDeveloper, setSelectedDeveloper] = useState("");
+
+  // Paginated projects query
+  const {
+    data: paginatedData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProjectsPaginated({ cityEnName, developerId: selectedDeveloper || undefined });
+
+  // Flatten all loaded pages into a single array
+  const projectsList = useMemo(() => {
+    if (!paginatedData?.pages) return [];
+    return paginatedData.pages.flatMap((page) => page.projects || []);
+  }, [paginatedData]);
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -154,16 +195,14 @@ export default function ProjectsList({ clientId }) {
     title: "",
   });
 
-  const [projectList, setProjectList] = useState(compounds || []);
+  const [projectList, setProjectList] = useState([]);
   const [projectImageLoading, setProjectImageLoading] = useState(false);
 
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(
-    compounds?.[0] || null
-  );
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const [showPhaseDialog, setShowPhaseDialog] = useState(false);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
@@ -172,22 +211,6 @@ export default function ProjectsList({ clientId }) {
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
-  
-  // City filter state
-  const [selectedCities, setSelectedCities] = useState([]);
-  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
-  
-  // Developer filter state
-  const developers = developersData || [];
-  const [selectedDeveloper, setSelectedDeveloper] = useState("");
-
-  // Single translations object that holds everything
-  const [translations, setTranslations] = useState({
-    cities: [],           // Array of city values (lowercase)
-    cityLabels: {},      // Map: cityValue -> translated label
-    districtLabels: {}, // Map: "cityValue|districtValue" -> translated label
-    isLoading: true
-  });
 
   // Load all translations in one go
   useEffect(() => {
@@ -208,10 +231,10 @@ export default function ProjectsList({ clientId }) {
 
         // Load district labels for all projects
         const districtLabels = {};
-        if (compounds && Array.isArray(compounds) && compounds.length > 0) {
+        if (projectsList && Array.isArray(projectsList) && projectsList.length > 0) {
           // Get all unique city-district combinations from projects
           const cityDistrictPairs = new Set();
-          compounds.forEach(project => {
+          projectsList.forEach(project => {
             if (project.city && project.district) {
               const cityKey = String(project.city).toLowerCase().trim();
               const districtKey = String(project.district).toLowerCase().trim();
@@ -265,7 +288,7 @@ export default function ProjectsList({ clientId }) {
     };
 
     loadAllTranslations();
-  }, [locale, compounds]);
+  }, [locale, projectsList]);
 
   // Initialize selectedCities with all cities when translations load
   useEffect(() => {
@@ -295,15 +318,15 @@ export default function ProjectsList({ clientId }) {
   }, [translations.cityLabels, locale]);
 
   useEffect(() => {
-    if (!isLoading && !isError && compounds) {
-      // Validate that compounds is an array
-      if (!Array.isArray(compounds)) {
-        console.error("Compounds data is not an array:", compounds);
+    if (!isLoading && !isError && projectsList) {
+      // Validate that projects List is an array
+      if (!Array.isArray(projectsList)) {
+        console.error("Projects data is not an array:", projectsList);
         return;
       }
 
-      // Sort compounds
-      const sorted = [...compounds].sort((a, b) => {
+      // Sort projects
+      const sorted = [...projectsList].sort((a, b) => {
         const rawA =
           (locale === "ar" ? a?.ar_name : a?.en_name) ??
           (locale === "ar" ? a?.en_name : a?.ar_name) ??
@@ -320,9 +343,13 @@ export default function ProjectsList({ clientId }) {
         });
       });
 
-      // Filter by city if cities are selected
+      // Client-side city filter only when multiple (but not all) cities are selected
+      // Single city is handled server-side via city_en_name param
       let cityFiltered = sorted;
-      if (selectedCities.length > 0 && selectedCities.length < translations.cities.length) {
+      if (
+        selectedCities.length > 1 &&
+        selectedCities.length < translations.cities.length
+      ) {
         cityFiltered = sorted.filter((project) => {
           const projectCity = project.city?.toLowerCase() || "";
           return selectedCities.some(
@@ -331,27 +358,10 @@ export default function ProjectsList({ clientId }) {
         });
       }
 
-      // Filter by developer if selected
-      let developerFiltered = cityFiltered;
-      if (selectedDeveloper && selectedDeveloper !== "") {
-        const selectedDev = developers.find((dev) => dev.id === selectedDeveloper);
-        if (selectedDev) {
-          developerFiltered = cityFiltered.filter((project) => {
-            const projectDeveloperName = project.developer_name?.toLowerCase() || "";
-            const devArName = selectedDev.ar_name?.toLowerCase() || "";
-            const devEnName = selectedDev.en_name?.toLowerCase() || "";
-            return (
-              projectDeveloperName === devArName ||
-              projectDeveloperName === devEnName
-            );
-          });
-        }
-      }
-
       // Filter by search query if provided
       const filtered = searchQuery
-        ? filterBySearchQuery(developerFiltered, searchQuery, ["ar_name", "en_name"])
-        : developerFiltered;
+        ? filterBySearchQuery(cityFiltered, searchQuery, ["ar_name", "en_name"])
+        : cityFiltered;
 
       setProjectList(filtered);
       
@@ -360,7 +370,7 @@ export default function ProjectsList({ clientId }) {
         setSelectedProject(filtered[0]);
       }
     }
-  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, translations.cities, selectedDeveloper, developers]);
+  }, [isLoading, isError, projectsList, locale, searchQuery, selectedCities, translations.cities]);
 
   // Update selected project if it's not in the filtered list
   useEffect(() => {
@@ -409,6 +419,8 @@ export default function ProjectsList({ clientId }) {
       return updatedList;
     });
     setSelectedProject(data);
+    // Invalidate paginated cache so fresh data loads on next fetch
+    queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
   };
 
   const handlePhase = (data) => {
@@ -447,6 +459,8 @@ export default function ProjectsList({ clientId }) {
           }
           return updatedList;
         });
+        // Invalidate paginated cache so fresh data loads on next fetch
+        queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
       }
     } catch (error) {
       toast.error(t.failedProject);
@@ -506,7 +520,8 @@ export default function ProjectsList({ clientId }) {
 
   const handleImported = async () => {
     try {
-      await refetch();
+      // Invalidate and refetch paginated projects
+      await queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
       toast.success(
         t.projectPage?.importSuccess ||
           "Projects imported successfully."
@@ -981,6 +996,24 @@ export default function ProjectsList({ clientId }) {
                     </div>
                   </div>
                 ))}
+
+                {/* Load More Button */}
+                {hasNextPage && (
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="w-full py-3 mt-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-600 font-medium transition-all duration-200 hover:border-primary hover:text-primary hover:bg-primary/5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <LoadingSpinner containerClassName="inline-flex" size={20} />
+                        <span>{locale === "ar" ? "جاري التحميل..." : "Loading..."}</span>
+                      </>
+                    ) : (
+                      <span>{locale === "ar" ? "تحميل المزيد" : "Load More"}</span>
+                    )}
+                  </button>
+                )}
               </div>
             )}
             </div>
