@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsPaginated, useDevelopers } from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
@@ -34,6 +34,8 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deletePhase, deleteProject } from "@/utils/api";
+import { paginatedProjectKeys } from "@/utils/query-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -122,20 +124,55 @@ const PaymentPlansBadges = ({ plans, locale, maxDisplay = 2 }) => {
 };
 
 export default function ProjectsList({ clientId }) {
+  const queryClient = useQueryClient();
+  const { t, locale } = useI18n();
+
+  // City filter state (declared early so cityEnName can be derived for the hook)
+  const [selectedCities, setSelectedCities] = useState([]);
+  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
+
+  // Single translations object that holds city/district labels
+  const [translations, setTranslations] = useState({
+    cities: [],           // Array of city values (lowercase)
+    cityLabels: {},      // Map: cityValue -> translated label
+    districtLabels: {}, // Map: "cityValue|districtValue" -> translated label
+    isLoading: true
+  });
+
+  // Derive cityEnName for the API:
+  // - If exactly one city selected, pass it as server-side filter
+  // - Otherwise fetch all and filter client-side (for 0, all, or multiple cities)
+  const cityEnName = useMemo(() => {
+    if (selectedCities.length === 1 && selectedCities.length < translations.cities.length) {
+      return selectedCities[0];
+    }
+    return undefined;
+  }, [selectedCities, translations.cities.length]);
+
+  // Paginated projects query
   const {
-    data: compounds,
+    data: paginatedData,
     isLoading,
     isError,
     error,
     refetch,
     isFetching,
-  } = useProjectsNames(false);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useProjectsPaginated({ cityEnName });
+
+  // Flatten all loaded pages into a single array
+  const compounds = useMemo(() => {
+    if (!paginatedData?.pages) return [];
+    return paginatedData.pages.flatMap((page) => page.projects || []);
+  }, [paginatedData]);
+
   const {
     data: developersData,
     isLoading: developersLoading,
     isError: developersError,
   } = useDevelopers(null, true); // Fetch all public developers
-  const { t, locale } = useI18n();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -154,16 +191,14 @@ export default function ProjectsList({ clientId }) {
     title: "",
   });
 
-  const [projectList, setProjectList] = useState(compounds || []);
+  const [projectList, setProjectList] = useState([]);
   const [projectImageLoading, setProjectImageLoading] = useState(false);
 
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectToEdit, setProjectToEdit] = useState(null);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
-  const [selectedProject, setSelectedProject] = useState(
-    compounds?.[0] || null
-  );
+  const [selectedProject, setSelectedProject] = useState(null);
 
   const [showPhaseDialog, setShowPhaseDialog] = useState(false);
   const [selectedPhaseIdx, setSelectedPhaseIdx] = useState(0);
@@ -173,21 +208,9 @@ export default function ProjectsList({ clientId }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
   
-  // City filter state
-  const [selectedCities, setSelectedCities] = useState([]);
-  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
-  
   // Developer filter state
-  const developers = developersData || [];
+  const developers = developersData || []
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
-
-  // Single translations object that holds everything
-  const [translations, setTranslations] = useState({
-    cities: [],           // Array of city values (lowercase)
-    cityLabels: {},      // Map: cityValue -> translated label
-    districtLabels: {}, // Map: "cityValue|districtValue" -> translated label
-    isLoading: true
-  });
 
   // Load all translations in one go
   useEffect(() => {
@@ -320,9 +343,13 @@ export default function ProjectsList({ clientId }) {
         });
       });
 
-      // Filter by city if cities are selected
+      // Client-side city filter only when multiple (but not all) cities are selected
+      // Single city is handled server-side via city_en_name param
       let cityFiltered = sorted;
-      if (selectedCities.length > 0 && selectedCities.length < translations.cities.length) {
+      if (
+        selectedCities.length > 1 &&
+        selectedCities.length < translations.cities.length
+      ) {
         cityFiltered = sorted.filter((project) => {
           const projectCity = project.city?.toLowerCase() || "";
           return selectedCities.some(
@@ -409,6 +436,8 @@ export default function ProjectsList({ clientId }) {
       return updatedList;
     });
     setSelectedProject(data);
+    // Invalidate paginated cache so fresh data loads on next fetch
+    queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
   };
 
   const handlePhase = (data) => {
@@ -447,6 +476,8 @@ export default function ProjectsList({ clientId }) {
           }
           return updatedList;
         });
+        // Invalidate paginated cache so fresh data loads on next fetch
+        queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
       }
     } catch (error) {
       toast.error(t.failedProject);
@@ -506,7 +537,8 @@ export default function ProjectsList({ clientId }) {
 
   const handleImported = async () => {
     try {
-      await refetch();
+      // Invalidate and refetch paginated projects
+      await queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
       toast.success(
         t.projectPage?.importSuccess ||
           "Projects imported successfully."
@@ -981,6 +1013,24 @@ export default function ProjectsList({ clientId }) {
                     </div>
                   </div>
                 ))}
+
+                {/* Load More Button */}
+                {hasNextPage && (
+                  <button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    className="w-full py-3 mt-2 rounded-lg border-2 border-dashed border-gray-300 text-gray-600 font-medium transition-all duration-200 hover:border-primary hover:text-primary hover:bg-primary/5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  >
+                    {isFetchingNextPage ? (
+                      <>
+                        <LoadingSpinner containerClassName="inline-flex" size={20} />
+                        <span>{locale === "ar" ? "جاري التحميل..." : "Loading..."}</span>
+                      </>
+                    ) : (
+                      <span>{locale === "ar" ? "تحميل المزيد" : "Load More"}</span>
+                    )}
+                  </button>
+                )}
               </div>
             )}
             </div>

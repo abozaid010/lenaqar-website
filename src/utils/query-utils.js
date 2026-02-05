@@ -55,6 +55,12 @@ export const projectNamesKeys = {
   lists: (isPublic) => [...projectNamesKeys.all, "list", { isPublic }],
 };
 
+// Query key factory for paginated projects (full data, cursor-based)
+export const paginatedProjectKeys = {
+  all: ["paginatedProjects"],
+  list: (filters) => [...paginatedProjectKeys.all, "list", filters],
+};
+
 // Query key factory for cities and projects
 export const cityKeys = {
   all: ["cities"],

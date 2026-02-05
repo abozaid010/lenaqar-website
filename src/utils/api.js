@@ -203,6 +203,33 @@ export async function fetchProjectsNames(isPublic = false) {
   }
 }
 
+export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName } = {}) {
+  try {
+    const params = new URLSearchParams();
+    params.append("limit", String(limit));
+    if (lastDocId) params.append("last_doc_id", lastDocId);
+    if (cityEnName) params.append("city_en_name", cityEnName);
+
+    const response = await axiosInstance.get(`/projectsv2/all?${params.toString()}`);
+
+    if (!response.data) {
+      throw new Error("Invalid response format from server: missing response.data");
+    }
+
+    const data = response.data.data;
+    if (!data || !Array.isArray(data.projects)) {
+      throw new Error(
+        `Unexpected response structure. Expected { projects: array, last_doc_id, has_more }, but got: ${JSON.stringify(Object.keys(data || {}))}`
+      );
+    }
+
+    return data; // { projects, last_doc_id, has_more }
+  } catch (error) {
+    console.error("Failed to fetch paginated projects:", error.message);
+    throw error;
+  }
+}
+
 export async function fetchCitisAndProjects() {
   try {
     // Get singleton instance and return cities and districts data
