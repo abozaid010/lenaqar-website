@@ -203,12 +203,13 @@ export async function fetchProjectsNames(isPublic = false) {
   }
 }
 
-export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName } = {}) {
+export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName, developerId } = {}) {
   try {
     const params = new URLSearchParams();
     params.append("limit", String(limit));
     if (lastDocId) params.append("last_doc_id", lastDocId);
     if (cityEnName) params.append("city_en_name", cityEnName);
+    if (developerId) params.append("developer_id", developerId);
 
     const response = await axiosInstance.get(`/projectsv2/all?${params.toString()}`);
 

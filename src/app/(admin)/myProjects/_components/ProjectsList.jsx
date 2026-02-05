@@ -149,6 +149,16 @@ export default function ProjectsList({ clientId }) {
     return undefined;
   }, [selectedCities, translations.cities.length]);
 
+  const {
+    data: developersData,
+    isLoading: developersLoading,
+    isError: developersError,
+  } = useDevelopers(null, true); // Fetch all public developers
+
+  // Developer filter state
+  const developers = developersData || []
+  const [selectedDeveloper, setSelectedDeveloper] = useState("");
+
   // Paginated projects query
   const {
     data: paginatedData,
@@ -160,19 +170,13 @@ export default function ProjectsList({ clientId }) {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useProjectsPaginated({ cityEnName });
+  } = useProjectsPaginated({ cityEnName, developerId: selectedDeveloper || undefined });
 
   // Flatten all loaded pages into a single array
-  const compounds = useMemo(() => {
+  const projectsList = useMemo(() => {
     if (!paginatedData?.pages) return [];
     return paginatedData.pages.flatMap((page) => page.projects || []);
   }, [paginatedData]);
-
-  const {
-    data: developersData,
-    isLoading: developersLoading,
-    isError: developersError,
-  } = useDevelopers(null, true); // Fetch all public developers
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -207,10 +211,6 @@ export default function ProjectsList({ clientId }) {
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
-  
-  // Developer filter state
-  const developers = developersData || []
-  const [selectedDeveloper, setSelectedDeveloper] = useState("");
 
   // Load all translations in one go
   useEffect(() => {
@@ -231,10 +231,10 @@ export default function ProjectsList({ clientId }) {
 
         // Load district labels for all projects
         const districtLabels = {};
-        if (compounds && Array.isArray(compounds) && compounds.length > 0) {
+        if (projectsList && Array.isArray(projectsList) && projectsList.length > 0) {
           // Get all unique city-district combinations from projects
           const cityDistrictPairs = new Set();
-          compounds.forEach(project => {
+          projectsList.forEach(project => {
             if (project.city && project.district) {
               const cityKey = String(project.city).toLowerCase().trim();
               const districtKey = String(project.district).toLowerCase().trim();
@@ -288,7 +288,7 @@ export default function ProjectsList({ clientId }) {
     };
 
     loadAllTranslations();
-  }, [locale, compounds]);
+  }, [locale, projectsList]);
 
   // Initialize selectedCities with all cities when translations load
   useEffect(() => {
@@ -318,15 +318,15 @@ export default function ProjectsList({ clientId }) {
   }, [translations.cityLabels, locale]);
 
   useEffect(() => {
-    if (!isLoading && !isError && compounds) {
-      // Validate that compounds is an array
-      if (!Array.isArray(compounds)) {
-        console.error("Compounds data is not an array:", compounds);
+    if (!isLoading && !isError && projectsList) {
+      // Validate that projects List is an array
+      if (!Array.isArray(projectsList)) {
+        console.error("Projects data is not an array:", projectsList);
         return;
       }
 
-      // Sort compounds
-      const sorted = [...compounds].sort((a, b) => {
+      // Sort projects
+      const sorted = [...projectsList].sort((a, b) => {
         const rawA =
           (locale === "ar" ? a?.ar_name : a?.en_name) ??
           (locale === "ar" ? a?.en_name : a?.ar_name) ??
@@ -358,27 +358,10 @@ export default function ProjectsList({ clientId }) {
         });
       }
 
-      // Filter by developer if selected
-      let developerFiltered = cityFiltered;
-      if (selectedDeveloper && selectedDeveloper !== "") {
-        const selectedDev = developers.find((dev) => dev.id === selectedDeveloper);
-        if (selectedDev) {
-          developerFiltered = cityFiltered.filter((project) => {
-            const projectDeveloperName = project.developer_name?.toLowerCase() || "";
-            const devArName = selectedDev.ar_name?.toLowerCase() || "";
-            const devEnName = selectedDev.en_name?.toLowerCase() || "";
-            return (
-              projectDeveloperName === devArName ||
-              projectDeveloperName === devEnName
-            );
-          });
-        }
-      }
-
       // Filter by search query if provided
       const filtered = searchQuery
-        ? filterBySearchQuery(developerFiltered, searchQuery, ["ar_name", "en_name"])
-        : developerFiltered;
+        ? filterBySearchQuery(cityFiltered, searchQuery, ["ar_name", "en_name"])
+        : cityFiltered;
 
       setProjectList(filtered);
       
@@ -387,7 +370,7 @@ export default function ProjectsList({ clientId }) {
         setSelectedProject(filtered[0]);
       }
     }
-  }, [isLoading, isError, compounds, locale, searchQuery, selectedCities, translations.cities, selectedDeveloper, developers]);
+  }, [isLoading, isError, projectsList, locale, searchQuery, selectedCities, translations.cities]);
 
   // Update selected project if it's not in the filtered list
   useEffect(() => {

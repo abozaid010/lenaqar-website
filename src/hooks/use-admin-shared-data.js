@@ -41,11 +41,11 @@ export function useProjectsNames(isPublic = false) {
 }
 
 // Hook for fetching paginated projects (full project data, cursor-based)
-export function useProjectsPaginated({ cityEnName } = {}) {
+export function useProjectsPaginated({ cityEnName, developerId } = {}) {
   return useInfiniteQuery({
-    queryKey: paginatedProjectKeys.list({ cityEnName }),
+    queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
     queryFn: ({ pageParam }) =>
-      fetchProjectsPaginated({ limit: 10, lastDocId: pageParam, cityEnName }),
+      fetchProjectsPaginated({ limit: 10, lastDocId: pageParam, cityEnName, developerId }),
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,
