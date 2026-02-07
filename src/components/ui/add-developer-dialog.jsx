@@ -108,26 +108,49 @@ export default function AddDeveloperDialog({
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Validation
+  const validateForm = () => {
     const newErrors = {};
+    let hasMissingLang = false;
+
+    // Mandatory fields validation
     if (!formData.ar_name?.trim()) {
       newErrors.ar_name = t.errors?.required || "Required";
       setMissingLang("ar");
-      setErrors(newErrors);
-      return;
+      hasMissingLang = true;
     }
 
     if (!formData.en_name?.trim()) {
       newErrors.en_name = t.errors?.required || "Required";
-      setMissingLang("en");
-      setErrors(newErrors);
-      return;
+      if (!hasMissingLang) {
+        setMissingLang("en");
+      }
     }
 
-    // Optional field validations
-    // Email validation
+    if (!formData.description?.trim()) {
+      newErrors.description = t.errors?.required || "Required";
+    }
+
+    if (!formData.ar_description?.trim()) {
+      newErrors.ar_description = t.errors?.required || "Required";
+    }
+
+    if (!formData.sales_email?.trim()) {
+      newErrors.sales_email = t.errors?.required || "Required";
+    }
+
+    if (!formData.sales_phone?.trim()) {
+      newErrors.sales_phone = t.errors?.required || "Required";
+    }
+
+    if (!formData.whatsapp?.trim()) {
+      newErrors.whatsapp = t.errors?.required || "Required";
+    }
+
+    if (!formData.founded_year?.trim()) {
+      newErrors.founded_year = t.errors?.required || "Required";
+    }
+
+    // Email validation (mandatory field)
     if (formData.sales_email && formData.sales_email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.sales_email)) {
@@ -135,7 +158,23 @@ export default function AddDeveloperDialog({
       }
     }
 
-    // URL validation
+    // Phone validation (mandatory field)
+    if (formData.sales_phone && formData.sales_phone.trim() !== "") {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(formData.sales_phone) || formData.sales_phone.trim().length < 10) {
+        newErrors.sales_phone = t.errors?.invalidPhone || "Invalid phone number";
+      }
+    }
+
+    // WhatsApp validation (mandatory field)
+    if (formData.whatsapp && formData.whatsapp.trim() !== "") {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(formData.whatsapp) || formData.whatsapp.trim().length < 10) {
+        newErrors.whatsapp = t.errors?.invalidPhone || "Invalid WhatsApp number";
+      }
+    }
+
+    // Optional social media URL validations
     const urlFields = ["website", "instagram", "linkedin", "facebook"];
     urlFields.forEach((field) => {
       if (formData[field] && formData[field].trim() !== "") {
@@ -147,7 +186,7 @@ export default function AddDeveloperDialog({
       }
     });
 
-    // Year validation
+    // Year validation (mandatory field)
     if (formData.founded_year && formData.founded_year !== "") {
       const year = parseInt(formData.founded_year);
       if (isNaN(year) || year < 1800 || year > 2100) {
@@ -155,8 +194,16 @@ export default function AddDeveloperDialog({
       }
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate all fields before submission
+    const isValid = validateForm();
+    if (!isValid) {
       return;
     }
 
