@@ -130,7 +130,7 @@ export default function ClientsTable({ users, pagination }) {
                       className="cursor-pointer no-print"
                     />
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[100px]">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[80px]">
                     {t.clientsTable.headers.name}
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
