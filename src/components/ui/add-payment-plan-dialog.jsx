@@ -264,6 +264,7 @@ export default function AddPaymentPlanDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      closeOnOutsideClick={false}
       title={
         editMode
           ? t.modal.updatePaymentPlan || "Edit Payment Plan"
