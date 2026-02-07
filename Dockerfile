@@ -4,9 +4,9 @@ FROM node:20-bookworm-slim
 # Create app directory
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies with native modules support
 COPY package.json package-lock.json ./
-RUN npm ci --ignore-scripts=false --omit=optional
+RUN npm ci --ignore-scripts=false --include=optional
 
 # Copy project files
 COPY . .
