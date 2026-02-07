@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json ./
-RUN SHARP_SKIP_GLOBAL_LIBVIPS=true npm ci --ignore-scripts=false --omit=optional
+RUN SHARP_SKIP_GLOBAL_LIBVIPS=true LIGHTNINGCSS_SKIP_INSTALL=true npm ci --ignore-scripts=false --omit=optional
 
 # Copy project files
 COPY . .
