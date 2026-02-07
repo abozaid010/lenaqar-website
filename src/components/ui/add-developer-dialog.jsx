@@ -108,26 +108,49 @@ export default function AddDeveloperDialog({
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Validation
+  const validateForm = () => {
     const newErrors = {};
+    let hasMissingLang = false;
+
+    // Mandatory fields validation
     if (!formData.ar_name?.trim()) {
       newErrors.ar_name = t.errors?.required || "Required";
       setMissingLang("ar");
-      setErrors(newErrors);
-      return;
+      hasMissingLang = true;
     }
 
     if (!formData.en_name?.trim()) {
       newErrors.en_name = t.errors?.required || "Required";
-      setMissingLang("en");
-      setErrors(newErrors);
-      return;
+      if (!hasMissingLang) {
+        setMissingLang("en");
+      }
     }
 
-    // Optional field validations
-    // Email validation
+    if (!formData.description?.trim()) {
+      newErrors.description = t.errors?.required || "Required";
+    }
+
+    if (!formData.ar_description?.trim()) {
+      newErrors.ar_description = t.errors?.required || "Required";
+    }
+
+    if (!formData.sales_email?.trim()) {
+      newErrors.sales_email = t.errors?.required || "Required";
+    }
+
+    if (!formData.sales_phone?.trim()) {
+      newErrors.sales_phone = t.errors?.required || "Required";
+    }
+
+    if (!formData.whatsapp?.trim()) {
+      newErrors.whatsapp = t.errors?.required || "Required";
+    }
+
+    if (!formData.founded_year?.trim()) {
+      newErrors.founded_year = t.errors?.required || "Required";
+    }
+
+    // Email validation (mandatory field)
     if (formData.sales_email && formData.sales_email.trim() !== "") {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(formData.sales_email)) {
@@ -135,7 +158,23 @@ export default function AddDeveloperDialog({
       }
     }
 
-    // URL validation
+    // Phone validation (mandatory field)
+    if (formData.sales_phone && formData.sales_phone.trim() !== "") {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(formData.sales_phone) || formData.sales_phone.trim().length < 10) {
+        newErrors.sales_phone = t.errors?.invalidPhone || "Invalid phone number";
+      }
+    }
+
+    // WhatsApp validation (mandatory field)
+    if (formData.whatsapp && formData.whatsapp.trim() !== "") {
+      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+      if (!phoneRegex.test(formData.whatsapp) || formData.whatsapp.trim().length < 10) {
+        newErrors.whatsapp = t.errors?.invalidPhone || "Invalid WhatsApp number";
+      }
+    }
+
+    // Optional social media URL validations
     const urlFields = ["website", "instagram", "linkedin", "facebook"];
     urlFields.forEach((field) => {
       if (formData[field] && formData[field].trim() !== "") {
@@ -147,7 +186,7 @@ export default function AddDeveloperDialog({
       }
     });
 
-    // Year validation
+    // Year validation (mandatory field)
     if (formData.founded_year && formData.founded_year !== "") {
       const year = parseInt(formData.founded_year);
       if (isNaN(year) || year < 1800 || year > 2100) {
@@ -155,8 +194,16 @@ export default function AddDeveloperDialog({
       }
     }
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate all fields before submission
+    const isValid = validateForm();
+    if (!isValid) {
       return;
     }
 
@@ -198,6 +245,38 @@ export default function AddDeveloperDialog({
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
+      closeOnOutsideClick={false}
+      closeOnEscape={false}
+      showCloseButton={false}
+      headerLeading={
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
+          disabled={isSubmitting}
+        >
+          {t.cancel}
+        </button>
+      }
+      headerActions={
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+        >
+          {isSubmitting ? (
+            <span className="inline-flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin" />
+              {t.saving}
+            </span>
+          ) : isEdit ? (
+            t.saveChangesButton
+          ) : (
+            t.saveDeveloper
+          )}
+        </button>
+      }
       title={
         isEdit ? t.developerPage.editDeveloper : t.developerPage.addDeveloper
       }
@@ -227,21 +306,26 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.description || "Description"} ({t.common?.english || "English"})
+              {t.formLabels?.description || "Description"} ({t.common?.english || "English"}) *
             </label>
             <textarea
               name="description"
               value={formData.description || ""}
               onChange={handleChange}
               rows={4}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.description ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.description || "Enter description in English"}
             />
+            {errors.description && (
+              <p className="text-xs text-red-500 mt-1">{errors.description}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"})
+              {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"}) *
             </label>
             <textarea
               name="ar_description"
@@ -249,9 +333,14 @@ export default function AddDeveloperDialog({
               onChange={handleChange}
               rows={4}
               dir="rtl"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.ar_description ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.arDescription || "أدخل الوصف بالعربية"}
             />
+            {errors.ar_description && (
+              <p className="text-xs text-red-500 mt-1">{errors.ar_description}</p>
+            )}
           </div>
         </div>
 
@@ -259,14 +348,16 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesEmail || "Sales Email"}
+              {t.formLabels?.salesEmail || "Sales Email"} *
             </label>
             <input
               type="email"
               name="sales_email"
               value={formData.sales_email || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.sales_email ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.email || "example@email.com"}
             />
             {errors.sales_email && (
@@ -276,30 +367,40 @@ export default function AddDeveloperDialog({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesPhone || "Sales Phone"}
+              {t.formLabels?.salesPhone || "Sales Phone"} *
             </label>
             <input
               type="tel"
               name="sales_phone"
               value={formData.sales_phone || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.sales_phone ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.phone || "Phone number"}
             />
+            {errors.sales_phone && (
+              <p className="text-xs text-red-500 mt-1">{errors.sales_phone}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              WhatsApp
+              WhatsApp *
             </label>
             <input
               type="text"
               name="whatsapp"
               value={formData.whatsapp || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.whatsapp ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.whatsapp || "WhatsApp number"}
             />
+            {errors.whatsapp && (
+              <p className="text-xs text-red-500 mt-1">{errors.whatsapp}</p>
+            )}
           </div>
         </div>
 
@@ -378,7 +479,7 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.foundedYear || "Founded Year"}
+              {t.formLabels?.foundedYear || "Founded Year"} *
             </label>
             <input
               type="number"
@@ -387,43 +488,15 @@ export default function AddDeveloperDialog({
               onChange={handleChange}
               min="1800"
               max="2100"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.founded_year ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder="e.g., 2015"
             />
             {errors.founded_year && (
               <p className="text-xs text-red-500 mt-1">{errors.founded_year}</p>
             )}
           </div>
-        </div>
-
-        <div className="flex justify-end space-x-2 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            {t.cancel}
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className={`px-4 py-1.5 w-42 bg-primary rounded-md text-sm font-medium text-white focus:outline-none focus:ring-1 focus:ring-blue-500 ${isSubmitting
-                ? "pointer-events-none opacity-80"
-                : "hover:bg-primary/90"
-              }`}
-          >
-            {isSubmitting ? (
-              <div className="flex items-center justify-center gap-2">
-                <Loader2 size={20} className="animate-spin" />
-                {t.saving}
-              </div>
-            ) : isEdit ? (
-              t.saveChangesButton
-            ) : (
-              t.saveDeveloper
-            )}
-          </button>
         </div>
       </div>
     </Dialog>
