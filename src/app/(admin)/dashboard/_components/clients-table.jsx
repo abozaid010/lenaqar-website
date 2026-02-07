@@ -130,25 +130,25 @@ export default function ClientsTable({ users, pagination }) {
                       className="cursor-pointer no-print"
                     />
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[100px]">
                     {t.clientsTable.headers.name}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.userNumber}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.date}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.requirements}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap hidden md:table-cell">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap hidden md:table-cell max-w-[100px]">
                     {t.clientsTable.headers.messageCount}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.campaign}
                   </th>
-                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap">
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.action}
                   </th>
                 </tr>
@@ -188,16 +188,16 @@ export default function ClientsTable({ users, pagination }) {
                         />
                       </td>
 
-                      <td className="px-2 py-2 font-medium text-gray-900 whitespace-nowrap">
+                      <td className="px-2 py-2 font-medium text-gray-900 whitespace-nowrap max-w-[150px] truncate">
                         {user.name || t.clientsTable.newLead}
                       </td>
 
-                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
+                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap max-w-[120px]">
                         {user.phone_number ? (
                           <div className="flex items-center justify-between gap-2 min-w-[140px]">
                             <span
                               onClick={(e) => handleCopyPhoneNumberWithToast(e, user.phone_number)}
-                              className="cursor-pointer hover:text-primary transition-colors flex-1 text-left"
+                              className="cursor-pointer hover:text-primary transition-colors flex-1 text-left truncate"
                               title={t.clientsTable?.clickToCopy || "Click to copy phone number"}
                             >
                               {user.phone_number}
@@ -224,12 +224,12 @@ export default function ClientsTable({ users, pagination }) {
 
                       </td>
 
-                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap">
+                      <td className="px-2 py-2 text-gray-600 whitespace-nowrap max-w-[120px] truncate">
                         {lastActivity}
                       </td>
 
                       <td
-                        className={`px-2 py-2 whitespace-nowrap ${
+                        className={`px-2 py-2 whitespace-nowrap max-w-[120px] truncate ${
                           user.requirement_name &&
                           user.requirement_name !== "Not defined"
                             ? "text-primary/90 cursor-pointer hover:underline font-semibold"
@@ -267,7 +267,7 @@ export default function ClientsTable({ users, pagination }) {
                         )}
                       </td>
 
-                      <td className="px-2 py-2 text-center font-medium whitespace-nowrap hidden md:table-cell">
+                      <td className="px-2 py-2 text-center font-medium whitespace-nowrap hidden md:table-cell max-w-[100px] truncate">
                         <span className="inline-flex items-center gap-1">
                           <span className="inline-flex items-center min-w-[24px] px-2 py-0.5 rounded bg-gray-200 text-gray-700 text-xs font-semibold">
                             {user.messages_count || 0}
@@ -287,7 +287,7 @@ export default function ClientsTable({ users, pagination }) {
                         </span>
                       </td>
 
-                      <td className="px-2 py-2 text-center whitespace-nowrap">
+                      <td className="px-2 py-2 text-center whitespace-nowrap max-w-[120px] truncate">
                         {user?.campaign_ids && user.campaign_ids.length > 0 ? (
                           <div className="inline-flex flex-col items-center gap-1 justify-center">
                             <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-100 text-blue-700 text-xs font-medium">
@@ -326,7 +326,7 @@ export default function ClientsTable({ users, pagination }) {
                       </td>
 
                       <td
-                        className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap ${
+                        className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap max-w-[120px] truncate ${
                           ACTIONS_COLORS[user.last_action] || "text-gray-400"
                         }`}
                         onClick={(e) => handleclientAction(e, user.user_id)}
