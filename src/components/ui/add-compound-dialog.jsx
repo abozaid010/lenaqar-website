@@ -1190,7 +1190,8 @@ export default function AddCompoundDialog({
                   onChange={handleChange}
                   required
                   placeholder="1000"
-                  min="0"
+                  min="0.0"
+                  step="0.01"
                   error={errors.area}
                   errorMessage={errors.area}
                 />

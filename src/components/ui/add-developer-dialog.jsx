@@ -306,21 +306,26 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.description || "Description"} ({t.common?.english || "English"})
+              {t.formLabels?.description || "Description"} ({t.common?.english || "English"}) *
             </label>
             <textarea
               name="description"
               value={formData.description || ""}
               onChange={handleChange}
               rows={4}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.description ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.description || "Enter description in English"}
             />
+            {errors.description && (
+              <p className="text-xs text-red-500 mt-1">{errors.description}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"})
+              {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"}) *
             </label>
             <textarea
               name="ar_description"
@@ -328,9 +333,14 @@ export default function AddDeveloperDialog({
               onChange={handleChange}
               rows={4}
               dir="rtl"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.ar_description ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.arDescription || "أدخل الوصف بالعربية"}
             />
+            {errors.ar_description && (
+              <p className="text-xs text-red-500 mt-1">{errors.ar_description}</p>
+            )}
           </div>
         </div>
 
@@ -338,14 +348,16 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesEmail || "Sales Email"}
+              {t.formLabels?.salesEmail || "Sales Email"} *
             </label>
             <input
               type="email"
               name="sales_email"
               value={formData.sales_email || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.sales_email ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.email || "example@email.com"}
             />
             {errors.sales_email && (
@@ -355,30 +367,40 @@ export default function AddDeveloperDialog({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesPhone || "Sales Phone"}
+              {t.formLabels?.salesPhone || "Sales Phone"} *
             </label>
             <input
               type="tel"
               name="sales_phone"
               value={formData.sales_phone || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.sales_phone ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.phone || "Phone number"}
             />
+            {errors.sales_phone && (
+              <p className="text-xs text-red-500 mt-1">{errors.sales_phone}</p>
+            )}
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              WhatsApp
+              WhatsApp *
             </label>
             <input
               type="text"
               name="whatsapp"
               value={formData.whatsapp || ""}
               onChange={handleChange}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.whatsapp ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder={t.placeholders?.whatsapp || "WhatsApp number"}
             />
+            {errors.whatsapp && (
+              <p className="text-xs text-red-500 mt-1">{errors.whatsapp}</p>
+            )}
           </div>
         </div>
 
@@ -457,7 +479,7 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.foundedYear || "Founded Year"}
+              {t.formLabels?.foundedYear || "Founded Year"} *
             </label>
             <input
               type="number"
@@ -466,7 +488,9 @@ export default function AddDeveloperDialog({
               onChange={handleChange}
               min="1800"
               max="2100"
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                errors.founded_year ? "border-red-500" : "border-gray-300"
+              }`}
               placeholder="e.g., 2015"
             />
             {errors.founded_year && (
