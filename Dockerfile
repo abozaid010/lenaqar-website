@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm config set sharp_libvips_binary_host https://npmmirror.com/mirrors/sharp-libvips && \
+    npm ci --ignore-scripts=false --omit=optional
 
 # Copy project files
 COPY . .
