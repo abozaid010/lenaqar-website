@@ -2,7 +2,7 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { NextResponse } from "next/server";
 
 // Use public site URL for redirects so production behind a proxy doesn't redirect to localhost
-const SITE_ORIGIN =
+const SITE_HOME_PAGE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
 
 const protectedRoutes = [
@@ -67,7 +67,7 @@ export function proxy(request) {
   if (isProtectedRoute) {
     // No refresh token: must log in again
     if (!refreshToken) {
-      const response = NextResponse.redirect(new URL("/login", SITE_ORIGIN));
+      const response = NextResponse.redirect(new URL("/login", SITE_HOME_PAGE));
       response.cookies.delete(COOKIE_KEYS.ACCESS_TOKEN);
       response.cookies.delete(COOKIE_KEYS.REFRESH_TOKEN);
       response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
@@ -79,14 +79,14 @@ export function proxy(request) {
         request.nextUrl.pathname + request.nextUrl.search
       );
       return NextResponse.redirect(
-        new URL(`/api/refresh-token?redirect=${redirectParam}`, SITE_ORIGIN)
+        new URL(`/api/refresh-token?redirect=${redirectParam}`, SITE_HOME_PAGE)
       );
     }
   }
 
   if (pathname === "/" && accessToken) {
     console.log("Redirecting to dashboard");
-    return NextResponse.redirect(new URL("/dashboard", SITE_ORIGIN));
+    return NextResponse.redirect(new URL("/dashboard", SITE_HOME_PAGE));
   }
 
   return NextResponse.next();
