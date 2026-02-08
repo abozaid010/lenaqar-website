@@ -1,6 +1,6 @@
 "use client";
 
-import FormInput from "@/components/ui/inputs/form-input";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useI18n } from "@/context/translate-api";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import { useState } from "react";
@@ -184,7 +184,7 @@ export default function RentalDetailsStep({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
         {/* Price */}
-        <FormInput
+        <LenaTextField
           label={t.rentalDetails.price}
           required
           value={formData.rentDurationType[activeDuration].price}
@@ -197,7 +197,7 @@ export default function RentalDetailsStep({
         />
 
         {/* Security Deposit */}
-        <FormInput
+        <LenaTextField
           label={t.rentalDetails.securityDeposit}
           value={formData.rentDurationType[activeDuration].securityDeposit}
           onChange={(e) =>
@@ -209,7 +209,7 @@ export default function RentalDetailsStep({
         />
 
         {/* Cleaning Fee */}
-        <FormInput
+        <LenaTextField
           label={t.rentalDetails.cleaningFee}
           value={formData.rentDurationType[activeDuration].cleaningFee}
           onChange={(e) =>
@@ -221,7 +221,7 @@ export default function RentalDetailsStep({
         />
 
         {/* Service Fee */}
-        <FormInput
+        <LenaTextField
           label={t.rentalDetails.serviceFee}
           value={formData.rentDurationType[activeDuration].serviceFee}
           onChange={(e) =>
@@ -271,7 +271,7 @@ export default function RentalDetailsStep({
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
             {/* Owner Name */}
-            <FormInput
+            <LenaTextField
               label={t.formLabels.ownerName || "Owner Name"}
               name="owner_name"
               value={commonFormData.owner_name}
@@ -280,7 +280,7 @@ export default function RentalDetailsStep({
             />
 
             {/* Owner Mobile */}
-            <FormInput
+            <LenaTextField
               label={t.formLabels.ownerMobile || "Owner Mobile"}
               name="owner_mobile"
               value={commonFormData.owner_mobile}

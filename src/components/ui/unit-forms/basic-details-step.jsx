@@ -2,17 +2,18 @@
 
 import AddCompoundDialog from "@/components/ui/add-compound-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
-import FormInput from "@/components/ui/inputs/form-input";
-import FormSelect from "@/components/ui/inputs/form-select";
-import CitySelect from "@/components/ui/inputs/sorted-city-select";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import { useI18n } from "@/context/translate-api";
 import { useLocaleConstants } from "@/utils/localeConstants";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
-import { getprojects } from "@/utils/api";
+import { useProjectsNames } from "@/hooks/use-admin-shared-data";
+import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-hot-toast";
 
 export default function BasicDetailsStep({
@@ -57,39 +58,37 @@ export default function BasicDetailsStep({
   const [projectId, setProjectId] = useState(null);
   const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
-  const [dataProject, setDataProject] = useState(() => {
-    if (formData.project) {
-      return [
-        {
-          en_name: formData.project,
-          ar_name: formData.project_ar || "",
-        },
-      ];
-    }
-    return [];
-  });
+  const [addedCompounds, setAddedCompounds] = useState([]);
+  const [projectPhasesMap, setProjectPhasesMap] = useState({});
 
-  const [isLoadingProjects, setIsLoadingProjects] = useState(false);
-
-  const printLocationDetails = async (city, district) => {
-    if (city && district) {
-      try {
-        setIsLoadingProjects(true);
-        const data = await getprojects(city, district);
-        setDataProject(data);
-      } catch (error) {
-        setDataProject([]);
-      } finally {
-        setIsLoadingProjects(false);
-      }
-    }
-  };
+  const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
 
   useEffect(() => {
-    if (formData.city && formData.district) {
-      printLocationDetails(formData.city, formData.district);
+    if (Array.isArray(projectsData) && projectsData.length > 0) {
+      ProjectsNamesManager.getInstance().setProjects(projectsData);
     }
-  }, [formData.city, formData.district]);
+  }, [projectsData]);
+
+  const filteredFromApi = useMemo(() => {
+    if (!formData.city || !formData.district || !Array.isArray(projectsData)) return [];
+    const normalizedCity = String(formData.city).toLowerCase().trim();
+    const normalizedDistrict = String(formData.district).toLowerCase().trim();
+    return projectsData.filter(
+      (p) =>
+        p.city?.toLowerCase() === normalizedCity &&
+        p.district?.toLowerCase() === normalizedDistrict
+    );
+  }, [formData.city, formData.district, projectsData]);
+
+  const dataProject = useMemo(
+    () => [...filteredFromApi, ...addedCompounds],
+    [filteredFromApi, addedCompounds]
+  );
+
+  useEffect(() => {
+    const selected = dataProject.find((p) => p.en_name === formData.project);
+    if (selected?.id) setProjectId(selected.id);
+  }, [formData.project, dataProject]);
 
   const handleChange = (e, dataInput = "") => {
     const { name, value, type, checked } = e.target;
@@ -108,20 +107,13 @@ export default function BasicDetailsStep({
     // If city or district changed, only clear project if the new value is different
     if (name === "city" || name === "district") {
       if (formData[name] !== updatedValue) {
+        setAddedCompounds([]);
         if (name === "city") {
-          // If city changed, clear district and project
-          updateFormData({ [name]: updatedValue, district: "", project: "" });
+          updateFormData({ [name]: updatedValue, district: "", project: "", project_ar: "" });
         } else {
-          // If district changed, only clear project
-          updateFormData({ [name]: updatedValue, project: "" });
-        }
-
-        // If district changed, call the function to print location details
-        if (name === "district" && formData.city && updatedValue) {
-          printLocationDetails(formData.city, updatedValue);
+          updateFormData({ [name]: updatedValue, project: "", project_ar: "" });
         }
       } else {
-        // If value didn't change, keep current values
         updateFormData({ [name]: updatedValue });
       }
     } else {
@@ -142,44 +134,37 @@ export default function BasicDetailsStep({
   };
 
   const handleAddCompound = (newCompound) => {
-    setDataProject([...dataProject, newCompound]);
-
-    updateFormData({ project: newCompound.en_name });
+    setAddedCompounds((prev) => [...prev, newCompound]);
+    updateFormData({ project: newCompound.en_name, project_ar: newCompound.ar_name || "" });
   };
+
+  const selectedProjectFromList = useMemo(
+    () => dataProject.find((p) => p.en_name === formData.project || p.name === formData.project),
+    [dataProject, formData.project]
+  );
+
+  const phases = useMemo(() => {
+    if (!selectedProjectFromList) return [];
+    const existingPhases = selectedProjectFromList.phases ?? projectPhasesMap[selectedProjectFromList.id] ?? [];
+    return [{ ...selectedProjectFromList, phases: existingPhases }];
+  }, [selectedProjectFromList, projectPhasesMap]);
 
   const handleAddPhase = (newPhase) => {
-    if (phases[0]) {
-      const updatedPhases = [...phases[0].phases, newPhase];
-      const updatedProject = { ...phases[0], phases: updatedPhases };
-      const updatedDataProject = dataProject.map((p) =>
-        p.name === formData.project ? updatedProject : p
-      );
-      setDataProject(updatedDataProject);
-      // Update form with the newly added phase
-      updateFormData({ phase: newPhase.name });
-    } else if (projectId) {
-      // If we have a projectId but no phases yet, create new project data
-      const newProjectData = {
-        id: projectId,
-        name: formData.project,
-        phases: [newPhase],
-      };
-      setDataProject([...dataProject, newProjectData]);
-      // Update form with the newly added phase
-      updateFormData({ phase: newPhase.name });
-    }
+    if (!projectId) return;
+    const currentPhases = phases[0]?.phases ?? [];
+    setProjectPhasesMap((prev) => ({
+      ...prev,
+      [projectId]: [...currentPhases, newPhase],
+    }));
+    updateFormData({ phase: newPhase.name });
   };
-
-  const phases = dataProject.filter(
-    (project) => project.en_name === formData.project
-  );
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
         {/* Unit Title */}
         <div className="col-span-1 md:col-span-2">
-          <FormInput
+          <LenaTextField
             label={t.basicDetails.unitTitle}
             name="unitTitle"
             required
@@ -191,114 +176,79 @@ export default function BasicDetailsStep({
         </div>
 
         {/* Building Type */}
-        <FormSelect
-          label={t.basicDetails.buildingType}
+        <SearchableDropdownSelect
           name="buildingType"
           value={formData.buildingType || ""}
           onChange={handleChange}
           error={invalidFields.includes("buildingType")}
-        >
-          {getBuildingTypes().map((type) => (
-            <option key={type.value} value={type.value}>
-              {locale === "ar" ? type.ar_label : type.en_label}
-            </option>
-          ))}
-        </FormSelect>
+          options={getBuildingTypes()}
+          getValue={(opt) => opt.value}
+          getLabel={(opt) => (locale === "ar" ? opt.ar_label : opt.en_label)}
+          placeholder={t.basicDetails.buildingType}
+        />
 
         {/* City */}
-        <CitySelect
-          value={formData.city}
+        <SearchableCitySelect
+          name="city"
+          value={formData.city || ""}
           onChange={handleChange}
           required
           error={invalidFields.includes("city")}
+          placeholder={t.basicDetails.selectCity}
         />
 
         {/* District */}
-        <FormSelect
-          label={t.basicDetails.district}
+        <SearchableDropdownSelect
           name="district"
           value={formData.district || ""}
           onChange={handleChange}
           disabled={!formData.city}
           required
           error={invalidFields.includes("district")}
-        >
-          <option value="">
-            {formData.city
+          options={districtsWithLabels}
+          getValue={(opt) => opt.value}
+          getLabel={(opt) => opt.label}
+          placeholder={
+            formData.city
               ? t.formLabels.selectDistrict
-              : t.formLabels.cityFirst}
-          </option>
-          {formData.city ? (
-            isLoadingDistricts ? (
-              <option disabled value="">
-                {locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
-              </option>
-            ) : districtsWithLabels.length > 0 ? (
-              districtsWithLabels
-                .sort((a, b) => a.label.localeCompare(b.label))
-                .map((dist) => (
-                  <option key={dist.value} value={dist.value}>
-                    {dist.label}
-                  </option>
-                ))
-            ) : (
-              <option disabled value="">
-                {locale === "ar" 
-                  ? `لا توجد مناطق لـ ${formData.city}` 
-                  : `No districts found for ${formData.city}`}
-              </option>
-            )
-          ) : null}
-        </FormSelect>
+              : t.formLabels.cityFirst
+          }
+          isLoading={formData.city && isLoadingDistricts}
+          loadingText={locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
+          noResultsText={
+            formData.city && districtsWithLabels.length === 0 && !isLoadingDistricts
+              ? (locale === "ar"
+                ? `لا توجد مناطق لـ ${formData.city}`
+                : `No districts found for ${formData.city}`)
+              : undefined
+          }
+        />
 
         {/* Project */}
         <div className="relative">
-          <FormSelect
-            label={t.basicDetails.compound}
+          <SearchableDropdownSelect
             name="project"
             value={formData.project || ""}
             onChange={handleChange}
             disabled={!formData.district}
             required
             error={invalidFields.includes("project")}
-          >
-            {formData.project && isLoadingProjects && (
-              <option key={formData.project} value={formData.project}>
-                {locale === "ar" ? formData.project_ar : formData.project}
-              </option>
-            )}
-
-            {!isLoadingProjects && dataProject.length > 0 && (
-              <>
-                <option value="">{t.basicDetails.selectCompound}</option>
-                {dataProject
-                  .sort((a, b) => {
-                    const nameA = locale === "ar" ? a.ar_name : a.en_name;
-                    const nameB = locale === "ar" ? b.ar_name : b.en_name;
-                    return nameA.trim().localeCompare(nameB.trim(), locale, {
-                      sensitivity: "base",
-                    });
-                  })
-                  .map((project) => (
-                    <option key={project.en_name} value={project.en_name}>
-                      {locale === "ar" ? project.ar_name : project.en_name}
-                    </option>
-                  ))}
-              </>
-            )}
-
-            {!isLoadingProjects && dataProject.length === 0 && (
-              <option disabled value="">
-                {t.basicDetails.placeholders.noProjects}
-              </option>
-            )}
-
-            {formData.city && formData.district && isLoadingProjects && (
-              <option value="">
-                {t.basicDetails.placeholders.loadingProjects}
-              </option>
-            )}
-          </FormSelect>
+            options={dataProject}
+            getValue={(opt) => opt.en_name}
+            getLabel={(opt) => (locale === "ar" ? opt.ar_name : opt.en_name)}
+            placeholder={
+              formData.city && formData.district && isLoadingProjectsFromApi
+                ? t.basicDetails.placeholders.loadingProjects
+                : t.basicDetails.selectCompound
+            }
+            isLoading={!!(formData.city && formData.district && isLoadingProjectsFromApi)}
+            loadingText={locale === "ar" ? "جاري التحميل..." : "Loading..."}
+            noResultsText={
+              !isLoadingProjectsFromApi && dataProject.length === 0 && formData.district
+                ? t.basicDetails.placeholders.noProjects
+                : undefined
+            }
+          />
 
           <button
             type="button"
@@ -320,53 +270,27 @@ export default function BasicDetailsStep({
         </div>
 
         {/* Phase */}
-        <FormSelect
-          label={t.basicDetails.selectPhase || "Select Phase"}
+        <SearchableDropdownSelect
           name="phase"
-          value={formData.phase}
+          value={formData.phase || ""}
           onChange={handleChange}
           disabled={!formData.project}
-        >
-          {!formData.project ? (
-            <option value="">
-              {t?.projectFirst || "Select project first"}
-            </option>
-          ) : (
-            <>
-              {formData.phase ? (
-                <>
-                  <option value="">{t.basicDetails.selectPhase}</option>
-                  <option value={formData.phase}>
-                    {formData.phase ? formData.phase : ""}
-                  </option>
-                </>
-              ) : null}
-              {phases[0]?.phases && phases[0].phases.length === 0 ? (
-                <option value="" disabled>
-                  {t.basicDetails.noPhases}
-                </option>
-              ) : null}
-              {formData.project &&
-                !isLoadingProjects &&
-                phases[0]?.phases?.length > 0 && (
-                  <>
-                    {!formData.phase && (
-                      <option value="">{t.basicDetails.selectPhase}</option>
-                    )}
-                    {phases[0].phases
-                      .sort((a, b) => a.name.localeCompare(b.name))
-                      .map((phase, idx) =>
-                        formData.phase === phase.name ? null : (
-                          <option key={phase.name + idx} value={phase.name}>
-                            {phase.name}
-                          </option>
-                        )
-                      )}
-                  </>
-                )}
-            </>
-          )}
-        </FormSelect>
+          options={
+            formData.project && phases[0]?.phases?.length
+              ? phases[0].phases
+              : []
+          }
+          getValue={(opt) => opt.name}
+          getLabel={(opt) => opt.name}
+          placeholder={
+            !formData.project
+              ? t?.projectFirst || "Select project first"
+              : phases[0]?.phases?.length === 0
+                ? t.basicDetails.noPhases
+                : t.basicDetails.selectPhase
+          }
+          noResultsText={t.basicDetails.noPhases}
+        />
 
         <AddPhaseDialog
           isOpen={isAddPhaseDialogOpen}
@@ -376,46 +300,36 @@ export default function BasicDetailsStep({
         />
 
         {/* Purpose */}
-        <FormSelect
-          label={t.basicDetails.purpose}
+        <SearchableDropdownSelect
           name="purpose"
-          required
           value={formData.purpose || ""}
           onChange={handleChange}
+          required
           error={invalidFields.includes("purpose")}
-        >
-          <option value="">{t.basicDetails.selectPurpose}</option>
-          <option value="sell">{t.basicDetails.purposes.sell}</option>
-          <option value="rent">{t.basicDetails.purposes.rent}</option>
-        </FormSelect>
+          options={[
+            { value: "sell", label: t.basicDetails.purposes.sell },
+            { value: "rent", label: t.basicDetails.purposes.rent },
+          ]}
+          getValue={(opt) => opt.value}
+          getLabel={(opt) => opt.label}
+          placeholder={t.basicDetails.selectPurpose}
+        />
 
         {/* View */}
-        <FormSelect
-          label={t.basicDetails.view}
+        <SearchableDropdownSelect
           name="view"
-          required
           value={formData.view || ""}
           onChange={handleChange}
+          required
           error={invalidFields.includes("view")}
-        >
-          <option value="">{t.basicDetails.selectView}</option>
-          {getViewTypes()
-            .map((view) => ({
-              value: view.value,
-              label: locale === "ar" ? view.ar_label : view.en_label,
-            }))
-            .sort((a, b) => a.label.localeCompare(b.label))
-            .map((option) => {
-              return (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              );
-            })}
-        </FormSelect>
+          options={getViewTypes()}
+          getValue={(opt) => opt.value}
+          getLabel={(opt) => (locale === "ar" ? opt.ar_label : opt.en_label)}
+          placeholder={t.basicDetails.selectView}
+        />
 
         {/* code */}
-        <FormInput
+        <LenaTextField
           label={t.basicDetails.code}
           name="code"
           value={formData.code}
@@ -424,7 +338,7 @@ export default function BasicDetailsStep({
         />
 
         {/* model */}
-        <FormInput
+        <LenaTextField
           label={t.basicDetails.model}
           name="model"
           value={formData.model}
@@ -441,7 +355,7 @@ export default function BasicDetailsStep({
           <>
             {/* Rooms */}
             <div>
-              <FormInput
+              <LenaTextField
                 label={t.basicDetails.rooms}
                 name="roomsCount"
                 required
@@ -453,7 +367,7 @@ export default function BasicDetailsStep({
               />
             </div>
             {/* Bathrooms */}
-            <FormInput
+            <LenaTextField
               label={t.basicDetails.bathrooms}
               name="bathroomCount"
               required
@@ -467,7 +381,7 @@ export default function BasicDetailsStep({
         )}
 
         {/* Floor */}
-        <FormInput
+        <LenaTextField
           label={t.basicDetails.floor}
           name="floor"
           value={formData.floor || ""}
@@ -477,7 +391,7 @@ export default function BasicDetailsStep({
         />
 
         {/* Land Area */}
-        <FormInput
+        <LenaTextField
           label={`${t.basicDetails.landArea} (m²)`}
           name="landArea"
           value={formData.landArea || ""}
@@ -488,7 +402,7 @@ export default function BasicDetailsStep({
 
         {/* Garden Size */}
         {formData.buildingType !== "office" && (
-          <FormInput
+          <LenaTextField
             label={`${t.basicDetails.gardenSize} (m²)`}
             name="gardenSize"
             value={formData.gardenSize || ""}
@@ -499,7 +413,7 @@ export default function BasicDetailsStep({
         )}
 
         {/* Garage Area */}
-        <FormInput
+        <LenaTextField
           label={`${t.basicDetails.garageArea} (m²)`}
           name="garageArea"
           value={formData.garageArea || ""}

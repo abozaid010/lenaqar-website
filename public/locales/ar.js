@@ -1156,6 +1156,15 @@ export default {
     editUnit: "تعديل الوحدة",
     addPaymentPlan: "إضافة خطة دفع",
     updatePaymentPlan: "تحديث خطة الدفع",
+    fillFromText: {
+      buttonLabel: "تعبئة من نص",
+      placeholder: "الصق النص هنا من واتساب أو فيسبوك لملء هذه الحقول تلقائياً",
+      extractButton: "استخراج",
+      extracting: "جاري الاستخراج...",
+      failedExtract: "فشل الاستخراج",
+      noUnitsFound: "لم يتم العثور على وحدات",
+      back: "رجوع",
+    },
   },
   team: {
     addNew: "إضافة جديد",

@@ -3,7 +3,7 @@
  * - Fetches data from /projectsv2/all_projects_names endpoint
  * - Provides formatted projects lists for dropdowns
  * - Uses ar_name and en_name for translations
- * - Stores only essential fields: id, en_name, ar_name, city
+ * - Stores only essential fields: id, en_name, ar_name, city, district
  */
 class ProjectsNamesManager {
   constructor() {
@@ -115,10 +115,27 @@ class ProjectsNamesManager {
    */
   getProjectsByCity(cityName) {
     if (!cityName) return this.projects;
-    
+
     const normalizedCity = String(cityName).toLowerCase().trim();
-    return this.projects.filter(project => 
+    return this.projects.filter(project =>
       project.city && project.city.toLowerCase() === normalizedCity
+    );
+  }
+
+  /**
+   * Get projects by city and district (for dropdown filtering)
+   */
+  getProjectsByCityAndDistrict(cityName, districtName) {
+    if (!cityName || !districtName) return [];
+
+    const normalizedCity = String(cityName).toLowerCase().trim();
+    const normalizedDistrict = String(districtName).toLowerCase().trim();
+    return this.projects.filter(
+      (project) =>
+        project.city &&
+        project.city.toLowerCase() === normalizedCity &&
+        project.district &&
+        project.district.toLowerCase() === normalizedDistrict
     );
   }
 
@@ -132,6 +149,7 @@ class ProjectsNamesManager {
       en_name: project.en_name,
       ar_name: project.ar_name,
       city: project.city,
+      district: project.district,
       label: locale === "ar" ? project.ar_name : project.en_name,
     }));
   }
@@ -154,6 +172,7 @@ class ProjectsNamesManager {
         en_name: project.en_name,
         ar_name: project.ar_name,
         city: project.city,
+        district: project.district,
         label: locale === "ar" ? project.ar_name : project.en_name,
       }));
   }

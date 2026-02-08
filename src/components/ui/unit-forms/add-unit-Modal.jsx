@@ -19,8 +19,10 @@ import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
+import { extractUnitsFromText } from "@/utils/api";
+import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 
-export default function AddUnitModal({ isEdit, unitData, onClose }) {
+export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
   const clientId = LenaCookiesManager.getClientId() || null;
 
   if (!clientId) {
@@ -54,6 +56,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
+  const [showFillFromTextPanel, setShowFillFromTextPanel] = useState(false);
+  const [fillFromTextValue, setFillFromTextValue] = useState("");
+  const [extractingFromText, setExtractingFromText] = useState(false);
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
@@ -132,6 +137,75 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
+  };
+
+  /** Map API extracted unit to formData + SellFormData/rentFormData */
+  const mapApiUnitToForm = (apiUnit) => {
+    const formDataPartial = {
+      ...(apiUnit.project != null && { project: String(apiUnit.project) }),
+      ...(apiUnit.developer != null && { developer: String(apiUnit.developer) }),
+      ...(apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
+      ...(apiUnit.bathroomCount != null && { bathroomCount: apiUnit.bathroomCount }),
+      ...(apiUnit.roomsCount != null && { roomsCount: apiUnit.roomsCount }),
+      ...(apiUnit.buildingType != null && { buildingType: String(apiUnit.buildingType) }),
+      ...(apiUnit.landArea != null && { landArea: apiUnit.landArea }),
+      ...(apiUnit.gardenSize != null && { gardenSize: apiUnit.gardenSize }),
+      ...(apiUnit.garageArea != null && { garageArea: apiUnit.garageArea }),
+      ...(apiUnit.furnishing != null && { furnishing: String(apiUnit.furnishing) }),
+      ...(apiUnit.view != null && { view: String(apiUnit.view) }),
+      ...(apiUnit.purpose != null && { purpose: String(apiUnit.purpose) }),
+      ...(apiUnit.code != null && { code: String(apiUnit.code) }),
+      ...(apiUnit.unitId != null && { unitId: apiUnit.unitId }),
+      ...(apiUnit.clientId != null && { clientId: apiUnit.clientId }),
+      ...(apiUnit.clientName != null && { clientName: apiUnit.clientName }),
+      ...(apiUnit.dataSource != null && { dataSource: apiUnit.dataSource }),
+      ...(apiUnit.images != null && Array.isArray(apiUnit.images) && { images: apiUnit.images }),
+    };
+    const sellPartial =
+      apiUnit.purpose === "sell" && apiUnit.totalPrice != null
+        ? { totalPrice: apiUnit.totalPrice }
+        : {};
+    return { formDataPartial, sellPartial };
+  };
+
+  const handleExtractFromText = async (e) => {
+    e?.preventDefault?.();
+    const text = (fillFromTextValue || "").trim();
+    if (!text) {
+      toast.error(t.modal?.fillFromText?.noUnitsFound || "Please paste some text.");
+      return;
+    }
+    setExtractingFromText(true);
+    try {
+      const res = await extractUnitsFromText(text);
+      if (!res?.status || !res?.data?.extracted_units?.length) {
+        toast.error(
+          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+        );
+        return;
+      }
+      const units = res.data.extracted_units;
+      if (units.length === 1) {
+        const { formDataPartial, sellPartial } = mapApiUnitToForm(units[0]);
+        setFormData((prev) => ({ ...prev, ...formDataPartial }));
+        if (Object.keys(sellPartial).length) {
+          setSellFormData((prev) => ({ ...prev, ...sellPartial }));
+        }
+        setShowFillFromTextPanel(false);
+        setFillFromTextValue("");
+        setCurrentStep(1);
+        toast.success(t.modal?.fillFromText?.extractButton || "Fields filled.");
+      } else {
+        onClose();
+        if (typeof onUnitsExtracted === "function") {
+          onUnitsExtracted(units);
+        }
+      }
+    } catch (err) {
+      toast.error(t.modal?.fillFromText?.failedExtract || "Failed to extract");
+    } finally {
+      setExtractingFromText(false);
+    }
   };
 
   const validateDeliveryDate = (dateString) => {
@@ -408,12 +482,21 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
     );
   }
 
-  const headerLeading =
-    currentStep > 1 ? (
+  // Same header style as add-developer-dialog: primary bg, white text, cancel (leading) | title (center) | Fill from text + Next/Save (trailing)
+  const headerLeading = showFillFromTextPanel ? (
+    <button
+      type="button"
+      onClick={() => setShowFillFromTextPanel(false)}
+      className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium inline-flex items-center gap-2"
+    >
+      {locale === "ar" ? <ArrowRight size={17} /> : <ArrowLeft size={17} />}
+      {t.modal?.fillFromText?.back || "Back"}
+    </button>
+  ) : currentStep > 1 ? (
       <button
         type="button"
         onClick={handleBack}
-        className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium inline-flex items-center gap-2"
+        className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium inline-flex items-center gap-2 disabled:opacity-70 disabled:pointer-events-none"
       >
         {locale === "ar" ? (
           <ArrowRight size={17} />
@@ -424,6 +507,35 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
       </button>
     ) : undefined;
 
+  const headerTrailing = (
+    <div className="flex items-center gap-2">
+      <button
+        type="button"
+        onClick={() => setShowFillFromTextPanel(true)}
+        className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
+      >
+        {t.modal?.fillFromText?.buttonLabel || "Fill from text"}
+      </button>
+      <button
+        type="button"
+        onClick={currentStep < 3 ? handleNext : handleSubmit}
+        disabled={currentStep === 3 && (loading || isUploading)}
+        className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none inline-flex items-center justify-center gap-2"
+      >
+        {currentStep === 3 && (loading || isUploading) ? (
+          <>
+            <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            {currentStep < 3 ? t.buttons.next : t.buttons.saveUnit}
+          </>
+        ) : currentStep < 3 ? (
+          t.buttons.next
+        ) : (
+          t.buttons.saveUnit
+        )}
+      </button>
+    </div>
+  );
+
   return createPortal(
     <UnifiedDialog
       isOpen={true}
@@ -432,36 +544,70 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
       cancelLabel={t.cancel}
       onCancel={onClose}
       headerLeading={headerLeading}
-      submitLabel={
-        currentStep < 3 ? t.buttons.next : t.buttons.saveUnit
-      }
-      onSubmit={currentStep < 3 ? handleNext : handleSubmit}
-      submitDisabled={currentStep === 3 && (loading || isUploading)}
-      submitLoading={currentStep === 3 && (loading || isUploading)}
+      headerTrailing={headerTrailing}
       closeOnOutsideClick={false}
       closeOnEscape={false}
       bodyClassName="p-0"
     >
-      {/* Step Indicator */}
-      <div className="p-3 md:p-5">
-        <StepIndicator
-          currentStep={currentStep}
-          steps={[
-            { number: 1, label: t.steps.basicDetails },
-            {
-              number: 2,
-              label:
-                formData.purpose === "sell"
-                  ? t.steps.financialDetails
-                  : t.steps.rentalDetails,
-            },
-            { number: 3, label: t.steps.imagesInfo },
-          ]}
-        />
-      </div>
+      {showFillFromTextPanel ? (
+        /* Paste panel: LenaTextarea + Extract + Back */
+        <div className="p-4 md:p-6 space-y-4">
+          <button
+            type="button"
+            onClick={() => setShowFillFromTextPanel(false)}
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            {t.modal?.fillFromText?.back || "Back"}
+          </button>
+          <LenaTextarea
+            name="fillFromText"
+            value={fillFromTextValue}
+            onChange={(e) => setFillFromTextValue(e.target.value)}
+            placeholder={t.modal?.fillFromText?.placeholder || "Paste text here from WhatsApp/Facebook to auto-fill these fields"}
+            helperText={t.modal?.fillFromText?.placeholder}
+            rows={8}
+            className="w-full"
+          />
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={handleExtractFromText}
+              disabled={extractingFromText || !fillFromTextValue?.trim()}
+              className="px-4 py-2 rounded-md bg-primary text-white font-medium disabled:opacity-70 disabled:pointer-events-none inline-flex items-center gap-2"
+            >
+              {extractingFromText ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  {t.modal?.fillFromText?.extracting || "Extracting..."}
+                </>
+              ) : (
+                t.modal?.fillFromText?.extractButton || "Extract"
+              )}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Step Indicator */}
+          <div className="p-3 md:p-5">
+            <StepIndicator
+              currentStep={currentStep}
+              steps={[
+                { number: 1, label: t.steps.basicDetails },
+                {
+                  number: 2,
+                  label:
+                    formData.purpose === "sell"
+                      ? t.steps.financialDetails
+                      : t.steps.rentalDetails,
+                },
+                { number: 3, label: t.steps.imagesInfo },
+              ]}
+            />
+          </div>
 
-      {/* Step Content */}
-      <form
+          {/* Step Content – Back / Next / Save Unit are in the dialog header only (no footer nav) */}
+          <form
         onSubmit={handleSubmit}
         ref={modalRef}
         className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
@@ -515,6 +661,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
           )}
 
         </form>
+        </>
+      )}
     </UnifiedDialog>,
     document.body
   );
