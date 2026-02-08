@@ -1,6 +1,6 @@
 "use client";
 
-import FormInput from "@/components/ui/inputs/form-input";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useI18n } from "@/context/translate-api";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import { Plus, Trash2Icon } from "lucide-react";
@@ -106,7 +106,7 @@ export default function SaleDetailsStep({
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
         {/* Total Price */}
-        <FormInput
+        <LenaTextField
           label={t.saleDetails.totalPrice}
           name="totalPrice"
           required
@@ -119,7 +119,7 @@ export default function SaleDetailsStep({
         />
 
         {/* Delivery Date */}
-        <FormInput
+        <LenaTextField
           label={t.saleDetails.deliveryDate}
           name="deliveryDate"
           required
@@ -138,7 +138,7 @@ export default function SaleDetailsStep({
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
             {/* Owner Name */}
-            <FormInput
+            <LenaTextField
               label={t.formLabels.ownerName || "Owner Name"}
               name="owner_name"
               value={commonFormData.owner_name}
@@ -148,7 +148,7 @@ export default function SaleDetailsStep({
             />
 
             {/* Owner Mobile */}
-            <FormInput
+            <LenaTextField
               label={t.formLabels.ownerPhone}
               name="owner_mobile"
               value={commonFormData.owner_mobile}
@@ -187,7 +187,7 @@ export default function SaleDetailsStep({
                 className="flex items-center py-1 border-b border-gray-300 pb-4"
               >
                 <div className="flex-grow grid grid-cols-1 md:grid-cols-9 gap-1.5">
-                  <FormInput
+                  <LenaTextField
                     label={t.saleDetails.years}
                     placeholder={"1"}
                     name={`years-${index}`}
@@ -201,7 +201,7 @@ export default function SaleDetailsStep({
                   />
 
                   <div className="col-span-2">
-                    <FormInput
+                    <LenaTextField
                       label={t.saleDetails.price}
                       name={`price-${index}`}
                       required
@@ -217,7 +217,7 @@ export default function SaleDetailsStep({
                   </div>
 
                   <div className="col-span-2">
-                    <FormInput
+                    <LenaTextField
                       label={t.saleDetails.downPayment}
                       name={`downPayment-${index}`}
                       required
@@ -233,7 +233,7 @@ export default function SaleDetailsStep({
                   </div>
 
                   <div className="col-span-2">
-                    <FormInput
+                    <LenaTextField
                       label={t.saleDetails.installment}
                       name={`installment_amount_yearly-${index}`}
                       required
@@ -255,7 +255,7 @@ export default function SaleDetailsStep({
                   </div>
 
                   <div className="col-span-2">
-                    <FormInput
+                    <LenaTextField
                       label={t.saleDetails.maintenance}
                       name={`maintenance-${index}`}
                       value={plan.maintenance}

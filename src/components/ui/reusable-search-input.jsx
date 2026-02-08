@@ -10,6 +10,9 @@ export default function ReusableSearchInput({
   className = "",
   onClear,
   variant = "default", // "default" or "white"
+  inputRef,
+  onBlur,
+  onFocus,
 }) {
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
@@ -33,9 +36,12 @@ export default function ReusableSearchInput({
         }`}
       />
       <input
+        ref={inputRef}
         type="text"
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        onFocus={onFocus}
         placeholder={placeholder || t.searchPlaceholder || "Search..."}
         className={`border rounded-md p-2 w-full ${
           isRTL ? "pr-10" : "pl-10"

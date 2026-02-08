@@ -166,6 +166,10 @@ export async function fetchProjects(isPublic = false) {
   }
 }
 
+/**
+ * Fetches lightweight project names for dropdowns/filters.
+ * Response items: { id, en_name, ar_name, city, district } (district required for city+district filtering).
+ */
 export async function fetchProjectsNames(isPublic = false) {
   const url = isPublic ? "/projectsv2/all_projects_names?public=true" : "/projectsv2/all_projects_names";
 
@@ -339,6 +343,22 @@ export async function addUnitSaleViaExcel(formData) {
   } catch (error) {
     console.error("Failed to add units via excel:", error.message);
     return { error: error.response?.data?.message || error.message };
+  }
+}
+
+export async function extractUnitsFromText(text) {
+  try {
+    const response = await axiosInstance.post(`/units/extract-from-text`, {
+      text: text || "",
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to extract units from text:", error.message);
+    return {
+      status: false,
+      data: null,
+      error_message: error.response?.data?.error_message || error.message,
+    };
   }
 }
 

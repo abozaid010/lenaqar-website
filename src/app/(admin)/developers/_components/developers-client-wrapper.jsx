@@ -9,7 +9,7 @@ import { useI18n } from "@/context/translate-api";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
-import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, ChevronDown, ChevronUp, Globe, Instagram, Linkedin, Facebook, Calendar } from "lucide-react";
+import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, ChevronDown, ChevronUp, Globe, Instagram, Linkedin, Facebook, Calendar, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -34,7 +34,10 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [expandedDeveloperId, setExpandedDeveloperId] = useState(null);
+  const [searchExpanded, setSearchExpanded] = useState(false);
   const menuRefs = useRef({});
+  const searchInputRef = useRef(null);
+  const searchBlurTimeoutRef = useRef(null);
 
   useEffect(() => {
     if (!isLoading && !isError && data) {
@@ -68,6 +71,30 @@ export default function DevelopersClientWrapper({ clientId }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [openMenuId]);
+
+  const handleSearchExpand = () => {
+    setSearchExpanded(true);
+    setTimeout(() => searchInputRef.current?.focus(), 0);
+  };
+
+  const handleSearchBlur = () => {
+    searchBlurTimeoutRef.current = setTimeout(() => {
+      setSearchExpanded(false);
+    }, 150);
+  };
+
+  const handleSearchFocus = () => {
+    if (searchBlurTimeoutRef.current) {
+      clearTimeout(searchBlurTimeoutRef.current);
+      searchBlurTimeoutRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (searchBlurTimeoutRef.current) clearTimeout(searchBlurTimeoutRef.current);
+    };
+  }, []);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -219,14 +246,30 @@ export default function DevelopersClientWrapper({ clientId }) {
               <h2 className="text-white text-xl font-semibold">
                 {t.sidebar.developers}
               </h2>
-              <div className="flex items-center gap-2 flex-1 min-w-[200px] max-w-md">
-                <ReusableSearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
-                  variant="white"
-                  className="w-full"
-                />
+              <div className="flex items-center gap-2 flex-1 min-w-0 transition-all duration-200">
+                {searchExpanded ? (
+                  <div className="flex-1 min-w-0">
+                    <ReusableSearchInput
+                      value={searchQuery}
+                      onChange={setSearchQuery}
+                      placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
+                      variant="white"
+                      className="w-full"
+                      inputRef={searchInputRef}
+                      onBlur={handleSearchBlur}
+                      onFocus={handleSearchFocus}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleSearchExpand}
+                    className="flex items-center justify-center p-2 rounded-md border border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                    aria-label={t.developerPage?.searchPlaceholder || "Search developers"}
+                  >
+                    <Search size={20} />
+                  </button>
+                )}
               </div>
               <div className="flex items-center gap-2">
                 <button
