@@ -141,7 +141,16 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   /** Map API extracted unit to formData + SellFormData/rentFormData */
   const mapApiUnitToForm = (apiUnit) => {
+    const purpose =
+      apiUnit.purpose != null
+        ? String(apiUnit.purpose)
+        : apiUnit.totalPrice != null
+          ? "sell"
+          : undefined;
     const formDataPartial = {
+      ...(apiUnit.country != null && { country: String(apiUnit.country) }),
+      ...(apiUnit.city != null && { city: String(apiUnit.city) }),
+      ...(apiUnit.district != null && { district: String(apiUnit.district) }),
       ...(apiUnit.project != null && { project: String(apiUnit.project) }),
       ...(apiUnit.developer != null && { developer: String(apiUnit.developer) }),
       ...(apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
@@ -153,7 +162,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.garageArea != null && { garageArea: apiUnit.garageArea }),
       ...(apiUnit.furnishing != null && { furnishing: String(apiUnit.furnishing) }),
       ...(apiUnit.view != null && { view: String(apiUnit.view) }),
-      ...(apiUnit.purpose != null && { purpose: String(apiUnit.purpose) }),
+      ...(purpose != null && { purpose }),
       ...(apiUnit.code != null && { code: String(apiUnit.code) }),
       ...(apiUnit.unitId != null && { unitId: apiUnit.unitId }),
       ...(apiUnit.clientId != null && { clientId: apiUnit.clientId }),
@@ -162,10 +171,22 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.images != null && Array.isArray(apiUnit.images) && { images: apiUnit.images }),
     };
     const sellPartial =
-      apiUnit.purpose === "sell" && apiUnit.totalPrice != null
+      (purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null
         ? { totalPrice: apiUnit.totalPrice }
         : {};
     return { formDataPartial, sellPartial };
+  };
+
+  const applyExtractedUnit = (unit) => {
+    const { formDataPartial, sellPartial } = mapApiUnitToForm(unit);
+    setFormData((prev) => ({ ...prev, ...formDataPartial }));
+    if (Object.keys(sellPartial).length) {
+      setSellFormData((prev) => ({ ...prev, ...sellPartial }));
+    }
+    setShowFillFromTextPanel(false);
+    setFillFromTextValue("");
+    setCurrentStep(1);
+    toast.success(t.modal?.fillFromText?.extractButton || "Fields filled.");
   };
 
   const handleExtractFromText = async (e) => {
@@ -178,23 +199,29 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     setExtractingFromText(true);
     try {
       const res = await extractUnitsFromText(text);
-      if (!res?.status || !res?.data?.extracted_units?.length) {
+      if (!res?.status) {
         toast.error(
           res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
         );
         return;
       }
-      const units = res.data.extracted_units;
+      const data = res?.data ?? {};
+      // New API: single object in data.extracted_data
+      const singleExtracted = data.extracted_data;
+      if (singleExtracted != null && typeof singleExtracted === "object") {
+        applyExtractedUnit(singleExtracted);
+        return;
+      }
+      // Legacy API: array in data.extracted_units
+      const units = data.extracted_units;
+      if (!Array.isArray(units) || units.length === 0) {
+        toast.error(
+          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+        );
+        return;
+      }
       if (units.length === 1) {
-        const { formDataPartial, sellPartial } = mapApiUnitToForm(units[0]);
-        setFormData((prev) => ({ ...prev, ...formDataPartial }));
-        if (Object.keys(sellPartial).length) {
-          setSellFormData((prev) => ({ ...prev, ...sellPartial }));
-        }
-        setShowFillFromTextPanel(false);
-        setFillFromTextValue("");
-        setCurrentStep(1);
-        toast.success(t.modal?.fillFromText?.extractButton || "Fields filled.");
+        applyExtractedUnit(units[0]);
       } else {
         onClose();
         if (typeof onUnitsExtracted === "function") {
@@ -567,6 +594,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             helperText={t.modal?.fillFromText?.placeholder}
             rows={8}
             className="w-full"
+            disabled={extractingFromText}
           />
           <div className="flex justify-end">
             <button
