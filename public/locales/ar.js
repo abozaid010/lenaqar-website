@@ -791,7 +791,7 @@ export default {
   send: "إرسال",
   Ai: "الرد الألي",
   manual: "رد مناسب",
-  saveDeveloper: "حفظ المطور",
+  saveDeveloper: "حفظ",
   saving: "جاري الحفظ...",
   cancel: "إلغاء",
   DeveloperName: "اسم المطور",

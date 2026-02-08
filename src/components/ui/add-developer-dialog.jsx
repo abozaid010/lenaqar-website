@@ -1,11 +1,10 @@
 "use client";
 
-import Dialog from "@/components/ui/Dialog";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { useI18n } from "@/context/translate-api";
 import { addDeveloper, updateDeveloper } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -242,41 +241,17 @@ export default function AddDeveloperDialog({
   };
 
   return (
-    <Dialog
+    <UnifiedDialog
       isOpen={isOpen}
       onClose={onClose}
       closeOnOutsideClick={false}
       closeOnEscape={false}
-      showCloseButton={false}
-      headerLeading={
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
-          disabled={isSubmitting}
-        >
-          {t.cancel}
-        </button>
-      }
-      headerActions={
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
-        >
-          {isSubmitting ? (
-            <span className="inline-flex items-center gap-2">
-              <Loader2 size={16} className="animate-spin" />
-              {t.saving}
-            </span>
-          ) : isEdit ? (
-            t.saveChangesButton
-          ) : (
-            t.saveDeveloper
-          )}
-        </button>
-      }
+      cancelLabel={t.cancel}
+      onCancel={onClose}
+      submitLabel={isEdit ? t.saveChangesButton : t.saveDeveloper}
+      onSubmit={handleSubmit}
+      submitDisabled={isSubmitting}
+      submitLoading={isSubmitting}
       title={
         isEdit ? t.developerPage.editDeveloper : t.developerPage.addDeveloper
       }
@@ -499,6 +474,6 @@ export default function AddDeveloperDialog({
           </div>
         </div>
       </div>
-    </Dialog>
+    </UnifiedDialog>
   );
 }

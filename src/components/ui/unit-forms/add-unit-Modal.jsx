@@ -13,7 +13,8 @@ import { useI18n } from "@/context/translate-api";
 import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
@@ -407,43 +408,64 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
     );
   }
 
-  return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-      <div
-        ref={modalRef}
-        className="rounded-md bg-white shadow-xl w-full max-w-4xl"
+  const headerLeading =
+    currentStep > 1 ? (
+      <button
+        type="button"
+        onClick={handleBack}
+        className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium inline-flex items-center gap-2"
       >
-        {/* Header */}
-        <div className="bg-primary rounded-t-md text-white py-4 px-6 flex justify-between items-center">
-          <h2 className="text-xl font-semibold">{modalTitle}</h2>
-          <button onClick={onClose} className="text-white hover:text-gray-200">
-            <X size={21} />
-          </button>
-        </div>
+        {locale === "ar" ? (
+          <ArrowRight size={17} />
+        ) : (
+          <ArrowLeft size={17} />
+        )}
+        {t.buttons.back}
+      </button>
+    ) : undefined;
 
-        {/* Step Indicator */}
-        <div className="p-3 md:p-5">
-          <StepIndicator
-            currentStep={currentStep}
-            steps={[
-              { number: 1, label: t.steps.basicDetails },
-              {
-                number: 2,
-                label:
-                  formData.purpose === "sell"
-                    ? t.steps.financialDetails
-                    : t.steps.rentalDetails,
-              },
-              { number: 3, label: t.steps.imagesInfo },
-            ]}
-          />
-        </div>
+  return createPortal(
+    <UnifiedDialog
+      isOpen={true}
+      onClose={onClose}
+      title={modalTitle}
+      cancelLabel={t.cancel}
+      onCancel={onClose}
+      headerLeading={headerLeading}
+      submitLabel={
+        currentStep < 3 ? t.buttons.next : t.buttons.saveUnit
+      }
+      onSubmit={currentStep < 3 ? handleNext : handleSubmit}
+      submitDisabled={currentStep === 3 && (loading || isUploading)}
+      submitLoading={currentStep === 3 && (loading || isUploading)}
+      closeOnOutsideClick={false}
+      closeOnEscape={false}
+      bodyClassName="p-0"
+    >
+      {/* Step Indicator */}
+      <div className="p-3 md:p-5">
+        <StepIndicator
+          currentStep={currentStep}
+          steps={[
+            { number: 1, label: t.steps.basicDetails },
+            {
+              number: 2,
+              label:
+                formData.purpose === "sell"
+                  ? t.steps.financialDetails
+                  : t.steps.rentalDetails,
+            },
+            { number: 3, label: t.steps.imagesInfo },
+          ]}
+        />
+      </div>
 
-        {/* Step Content */}
-        <form
-          onSubmit={handleSubmit}
-          className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[85vh]"
-        >
+      {/* Step Content */}
+      <form
+        onSubmit={handleSubmit}
+        ref={modalRef}
+        className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
+      >
           {currentStep === 1 && (
             <BasicDetailsStep
               clientId={clientId}
@@ -492,63 +514,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose }) {
             />
           )}
 
-          {/* Navigation Buttons */}
-          <div className="mt-5 flex justify-between">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1.5 px-6 rounded-md transition-colors"
-              >
-                {locale === "ar" ? (
-                  <ArrowRight size={17} />
-                ) : (
-                  <ArrowLeft size={17} />
-                )}
-
-                <span className="block mb-1">{t.buttons.back}</span>
-              </button>
-            ) : (
-              <div></div>
-            )}
-
-            {currentStep < 3 ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                className="flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-1.5 px-6 rounded-md transition-colors"
-              >
-                {locale === "ar" ? (
-                  <ArrowLeft size={17} />
-                ) : (
-                  <ArrowRight size={17} />
-                )}
-                <span className="block mb-1">{t.buttons.next}</span>
-              </button>
-            ) : (
-              <button
-                disabled={loading && isUploading}
-                className={`flex items-center gap-2 bg-primary hover:opacity-95 text-white font-medium py-2 px-6 rounded-md transition-colors ${loading || isUploading ? "opacity-50 pointer-events-none" : ""}`}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                {t.buttons.saveUnit}
-              </button>
-            )}
-          </div>
         </form>
-      </div>
-    </div>,
+    </UnifiedDialog>,
     document.body
   );
 }
