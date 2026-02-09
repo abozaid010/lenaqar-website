@@ -1247,7 +1247,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         transform: `translateY(${virtualRow.start}px)`,
                                       }}
                                     >
-                                    <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccess ? "border-r border-emerald-200" : ""}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px", height: `${virtualRow.size}px` }}>
+                                    <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px", height: `${virtualRow.size}px` }}>
                                       <div className={`flex flex-col h-full ${isFailed ? "justify-between" : "justify-center items-center gap-1"}`}>
                                         <div className="flex flex-col items-center gap-1">
                                           {isSuccess ? (
@@ -1278,7 +1278,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       return (
                                         <td
                                           key={colIndex}
-                                          className={`px-2 py-3 text-gray-700 border-b overflow-hidden text-center ${isSuccess ? "border-r border-emerald-200" : ""} ${colIndex === excelTemplateColumns.length - 1 && isSuccess ? "border-r-0" : ""}`}
+                                          className={`px-2 py-3 text-gray-700 border-b overflow-hidden text-center ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"} ${colIndex === excelTemplateColumns.length - 1 && (isSuccess || isFailed) ? "border-r-0" : ""}`}
                                           style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                         >
                                           <div className="truncate text-center" title={cellValue}>
@@ -1309,7 +1309,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     key={rowIndex}
                                     className={rowBgF}
                                   >
-                                  <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccessF ? "border-r border-emerald-200" : ""}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
+                                  <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccessF ? "border-r border-b border-emerald-200" : isFailedF ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                                     <div className={`flex flex-col min-h-[52px] ${isFailedF ? "justify-between" : "justify-center items-center gap-1"}`}>
                                       <div className="flex flex-col items-center gap-1">
                                         {isSuccessF ? (
@@ -1340,7 +1340,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     return (
                                       <td
                                         key={colIndex}
-                                        className={`px-2 py-3 text-gray-700 border-b overflow-hidden text-center ${isSuccessF ? "border-r border-emerald-200" : ""} ${colIndex === excelTemplateColumns.length - 1 && isSuccessF ? "border-r-0" : ""}`}
+                                        className={`px-2 py-3 text-gray-700 border-b overflow-hidden text-center ${isSuccessF ? "border-r border-b border-emerald-200" : isFailedF ? "border-b border-r border-red-200" : "border-b border-gray-200"} ${colIndex === excelTemplateColumns.length - 1 && (isSuccessF || isFailedF) ? "border-r-0" : ""}`}
                                         style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                       >
                                         <div className="truncate text-center" title={cellValue}>
