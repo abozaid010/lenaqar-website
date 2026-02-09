@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText } from "@/utils/api";
-import LenaTextarea from "@/components/ui/inputs/lena-textarea";
+import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
   const clientId = LenaCookiesManager.getClientId() || null;
@@ -56,8 +56,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   // Track over all upload statecl
   const [isUploading, setIsUploading] = useState(false);
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
-  const [showFillFromTextPanel, setShowFillFromTextPanel] = useState(false);
-  const [fillFromTextValue, setFillFromTextValue] = useState("");
+  const [showFillFromTextDialog, setShowFillFromTextDialog] = useState(false);
   const [extractingFromText, setExtractingFromText] = useState(false);
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
@@ -183,18 +182,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     if (Object.keys(sellPartial).length) {
       setSellFormData((prev) => ({ ...prev, ...sellPartial }));
     }
-    setShowFillFromTextPanel(false);
-    setFillFromTextValue("");
     setCurrentStep(1);
     toast.success(t.modal?.fillFromText?.extractButton || "Fields filled.");
   };
 
-  const handleExtractFromText = async (e) => {
+  /** @param {React.BaseSyntheticEvent} [e] @param {string} [textOverride] @returns {Promise<boolean>} success */
+  const handleExtractFromText = async (e, textOverride) => {
     e?.preventDefault?.();
-    const text = (fillFromTextValue || "").trim();
+    const text = (textOverride ?? "").trim();
     if (!text) {
       toast.error(t.modal?.fillFromText?.noUnitsFound || "Please paste some text.");
-      return;
+      return false;
     }
     setExtractingFromText(true);
     try {
@@ -203,33 +201,33 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         toast.error(
           res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
         );
-        return;
+        return false;
       }
       const data = res?.data ?? {};
-      // New API: single object in data.extracted_data
       const singleExtracted = data.extracted_data;
       if (singleExtracted != null && typeof singleExtracted === "object") {
         applyExtractedUnit(singleExtracted);
-        return;
+        return true;
       }
-      // Legacy API: array in data.extracted_units
       const units = data.extracted_units;
       if (!Array.isArray(units) || units.length === 0) {
         toast.error(
           res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
         );
-        return;
+        return false;
       }
       if (units.length === 1) {
         applyExtractedUnit(units[0]);
-      } else {
-        onClose();
-        if (typeof onUnitsExtracted === "function") {
-          onUnitsExtracted(units);
-        }
+        return true;
       }
+      onClose();
+      if (typeof onUnitsExtracted === "function") {
+        onUnitsExtracted(units);
+      }
+      return true;
     } catch (err) {
       toast.error(t.modal?.fillFromText?.failedExtract || "Failed to extract");
+      return false;
     } finally {
       setExtractingFromText(false);
     }
@@ -509,17 +507,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     );
   }
 
-  // Same header style as add-developer-dialog: primary bg, white text, cancel (leading) | title (center) | Fill from text + Next/Save (trailing)
-  const headerLeading = showFillFromTextPanel ? (
-    <button
-      type="button"
-      onClick={() => setShowFillFromTextPanel(false)}
-      className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium inline-flex items-center gap-2"
-    >
-      {locale === "ar" ? <ArrowRight size={17} /> : <ArrowLeft size={17} />}
-      {t.modal?.fillFromText?.back || "Back"}
-    </button>
-  ) : currentStep > 1 ? (
+  const headerLeading =
+    currentStep > 1 ? (
       <button
         type="button"
         onClick={handleBack}
@@ -538,7 +527,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     <div className="flex items-center gap-2">
       <button
         type="button"
-        onClick={() => setShowFillFromTextPanel(true)}
+        onClick={() => setShowFillFromTextDialog(true)}
         className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
       >
         {t.modal?.fillFromText?.buttonLabel || "Fill from text"}
@@ -564,82 +553,42 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   );
 
   return createPortal(
-    <UnifiedDialog
-      isOpen={true}
-      onClose={onClose}
-      title={modalTitle}
-      cancelLabel={t.cancel}
-      onCancel={onClose}
-      headerLeading={headerLeading}
-      headerTrailing={headerTrailing}
-      closeOnOutsideClick={false}
-      closeOnEscape={false}
-      bodyClassName="p-0"
-    >
-      {showFillFromTextPanel ? (
-        /* Paste panel: LenaTextarea + Extract + Back */
-        <div className="p-4 md:p-6 space-y-4">
-          <button
-            type="button"
-            onClick={() => setShowFillFromTextPanel(false)}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            {t.modal?.fillFromText?.back || "Back"}
-          </button>
-          <LenaTextarea
-            name="fillFromText"
-            value={fillFromTextValue}
-            onChange={(e) => setFillFromTextValue(e.target.value)}
-            placeholder={t.modal?.fillFromText?.placeholder || "Paste text here from WhatsApp/Facebook to auto-fill these fields"}
-            helperText={t.modal?.fillFromText?.placeholder}
-            rows={8}
-            className="w-full"
-            disabled={extractingFromText}
-          />
-          <div className="flex justify-end">
-            <button
-              type="button"
-              onClick={handleExtractFromText}
-              disabled={extractingFromText || !fillFromTextValue?.trim()}
-              className="px-4 py-2 rounded-md bg-primary text-white font-medium disabled:opacity-70 disabled:pointer-events-none inline-flex items-center gap-2"
-            >
-              {extractingFromText ? (
-                <>
-                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t.modal?.fillFromText?.extracting || "Extracting..."}
-                </>
-              ) : (
-                t.modal?.fillFromText?.extractButton || "Extract"
-              )}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {/* Step Indicator */}
-          <div className="p-3 md:p-5">
-            <StepIndicator
-              currentStep={currentStep}
-              steps={[
-                { number: 1, label: t.steps.basicDetails },
-                {
-                  number: 2,
-                  label:
-                    formData.purpose === "sell"
-                      ? t.steps.financialDetails
-                      : t.steps.rentalDetails,
-                },
-                { number: 3, label: t.steps.imagesInfo },
-              ]}
-            />
-          </div>
-
-          {/* Step Content – Back / Next / Save Unit are in the dialog header only (no footer nav) */}
-          <form
-        onSubmit={handleSubmit}
-        ref={modalRef}
-        className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
+    <>
+      <UnifiedDialog
+        isOpen={true}
+        onClose={onClose}
+        title={modalTitle}
+        cancelLabel={t.cancel}
+        onCancel={onClose}
+        headerLeading={headerLeading}
+        headerTrailing={headerTrailing}
+        closeOnOutsideClick={false}
+        closeOnEscape={false}
+        bodyClassName="p-0"
       >
+        {/* Step Indicator */}
+        <div className="p-3 md:p-5">
+          <StepIndicator
+            currentStep={currentStep}
+            steps={[
+              { number: 1, label: t.steps.basicDetails },
+              {
+                number: 2,
+                label:
+                  formData.purpose === "sell"
+                    ? t.steps.financialDetails
+                    : t.steps.rentalDetails,
+              },
+              { number: 3, label: t.steps.imagesInfo },
+            ]}
+          />
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          ref={modalRef}
+          className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
+        >
           {currentStep === 1 && (
             <BasicDetailsStep
               clientId={clientId}
@@ -687,11 +636,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
               setIsUploading={setIsUploading}
             />
           )}
-
         </form>
-        </>
-      )}
-    </UnifiedDialog>,
+      </UnifiedDialog>
+
+      <FillFromTextDialog
+        isOpen={showFillFromTextDialog}
+        onClose={() => setShowFillFromTextDialog(false)}
+        onExtract={(text) => handleExtractFromText(null, text)}
+        extracting={extractingFromText}
+        t={t}
+      />
+    </>,
     document.body
   );
 }

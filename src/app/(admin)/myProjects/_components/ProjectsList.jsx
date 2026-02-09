@@ -675,7 +675,7 @@ export default function ProjectsList({ clientId }) {
                 {t.sidebar.myProjects}
               </h2>
               <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-                <div className="flex-1">
+                <div className="flex-1 hidden">
                   <ReusableSearchInput
                     value={searchQuery}
                     onChange={setSearchQuery}
