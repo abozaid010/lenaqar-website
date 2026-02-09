@@ -129,6 +129,7 @@ export async function fetchDevelopers(isPublic = false) {
   }
 }
 
+/** Fetches all projects in one request (no pagination). For paginated list use fetchProjectsPaginated. */
 export async function fetchProjects(isPublic = false) {
   const url = isPublic ? "/public/projects" : "/projects/all";
 
@@ -221,10 +222,11 @@ export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName
       throw new Error("Invalid response format from server: missing response.data");
     }
 
-    const data = response.data.data;
+    // Support both response.data.data and response.data (payload at top level)
+    const data = response.data.data ?? response.data;
     if (!data || !Array.isArray(data.projects)) {
       throw new Error(
-        `Unexpected response structure. Expected { projects: array, last_doc_id, has_more }, but got: ${JSON.stringify(Object.keys(data || {}))}`
+        `Unexpected response structure. Expected { projects: array, last_doc_id?, has_more? }, but got: ${JSON.stringify(Object.keys(data || {}))}`
       );
     }
 

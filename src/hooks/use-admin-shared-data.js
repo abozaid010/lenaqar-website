@@ -45,11 +45,11 @@ export function useProjectsPaginated({ cityEnName, developerId } = {}) {
   return useInfiniteQuery({
     queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
     queryFn: ({ pageParam }) =>
-      fetchProjectsPaginated({ limit: 10, lastDocId: pageParam, cityEnName, developerId }),
+      fetchProjectsPaginated({ limit: 20, lastDocId: pageParam, cityEnName, developerId }),
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,
-    staleTime: 1000 * 60 * 30, // 30 minutes - cached for the session
+    staleTime: 1000 * 60 * 1, // 1 minute - cached for the session
     refetchOnWindowFocus: false,
   });
 }
