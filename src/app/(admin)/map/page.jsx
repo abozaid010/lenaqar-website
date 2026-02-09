@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import MapView from "./_components/map-view";
+import { canManageTeamFromToken } from "@/lib/getRoleFromToken";
 
 export const metadata = {
   title: "Projects Map - Real Estate Projects by Location | LENAAI AI Sales Agent",
@@ -29,7 +31,12 @@ export const metadata = {
   },
 };
 
-export default function MapPage() {
+export default async function MapPage() {
+  const canAccessMap = await canManageTeamFromToken();
+  if (!canAccessMap) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <BreadcrumbSchema
