@@ -221,7 +221,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const rowVirtualizer = useVirtualizer({
     count: parsedData?.rows?.length || 0,
     getScrollElement: () => tableScrollRef.current,
-    estimateSize: () => 40, // Estimated row height
+    estimateSize: () => 52, // Increased row height for better field visibility
     overscan: 5, // Render 5 extra rows outside viewport
     enabled: !!parsedData && !isProcessing,
   });
@@ -1032,8 +1032,20 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     )}
                   </div>
 
-                  <div className="border rounded-lg overflow-hidden flex-1 flex flex-col" dir="ltr">
+                  <div className="border rounded-lg overflow-hidden flex-1 flex flex-col relative" dir="ltr">
                     <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr" style={{ position: 'relative' }}>
+                      {/* Loading overlay on table when uploading */}
+                      {isUploading && (
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-lg">
+                          <Loader2 className="animate-spin text-primary" size={40} />
+                          <p className="mt-3 text-sm font-medium text-gray-700">
+                            {t.uploadExcel?.uploading || "Uploading..."}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {t.uploadExcel?.pleaseWait || "Please wait"}
+                          </p>
+                        </div>
+                      )}
                       <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
                         <colgroup>
                           <col style={{ width: "50px" }} />
@@ -1189,7 +1201,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       transform: `translateY(${virtualRow.start}px)`,
                                     }}
                                   >
-                                    <td className="px-2 py-2 text-gray-600 border-b font-medium text-center" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
+                                    <td className="px-2 py-3 text-gray-600 border-b font-medium text-center" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                                       {rowIndex + 1}
                                     </td>
                                     {excelTemplateColumns.map((templateCol, colIndex) => {
@@ -1208,7 +1220,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       return (
                                         <td
                                           key={colIndex}
-                                          className="px-2 py-2 text-gray-700 border-b overflow-hidden text-center"
+                                          className="px-2 py-3 text-gray-700 border-b overflow-hidden text-center"
                                           style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                         >
                                           <div className="truncate text-center" title={cellValue}>
@@ -1229,7 +1241,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"
                                   }
                                 >
-                                  <td className="px-2 py-2 text-gray-600 border-b font-medium text-center" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
+                                  <td className="px-2 py-3 text-gray-600 border-b font-medium text-center" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
                                     {rowIndex + 1}
                                   </td>
                                   {excelTemplateColumns.map((templateCol, colIndex) => {
@@ -1248,7 +1260,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     return (
                                       <td
                                         key={colIndex}
-                                        className="px-2 py-2 text-gray-700 border-b overflow-hidden text-center"
+                                        className="px-2 py-3 text-gray-700 border-b overflow-hidden text-center"
                                         style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
                                       >
                                         <div className="truncate text-center" title={cellValue}>
@@ -1269,117 +1281,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               );
             })()}
 
-            {/* Upload Status */}
-            {uploadStatus.length > 0 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-gray-800">
-                    {t.uploadExcel?.uploadProgress || "Upload Progress"}
-                  </h3>
-                  <span className="text-sm text-gray-600">
-                    {uploadStatus.filter((s) => s.status === "success").length}{" "}
-                    / {uploadStatus.length}{" "}
-                    {t.uploadExcel?.completed || "completed"}
-                  </span>
-                </div>
-
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="max-h-[300px] overflow-y-auto">
-                    {uploadStatus.map((item) => (
-                      <div
-                        key={item.index}
-                        className={`flex items-center justify-between px-4 py-3 border-b last:border-b-0 ${item.status === "success"
-                            ? "bg-green-50"
-                            : item.status === "failed"
-                              ? "bg-red-50"
-                              : item.status === "uploading"
-                                ? "bg-blue-50"
-                                : "bg-gray-50"
-                          }`}
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-600 flex-shrink-0">
-                            #{item.index + 1}
-                          </span>
-                          <span className="text-sm text-gray-700 truncate">
-                            {item.unitTitle}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          {item.status === "pending" && (
-                            <span className="text-xs text-gray-500">
-                              {t.uploadExcel?.pending || "Pending"}
-                            </span>
-                          )}
-                          {item.status === "uploading" && (
-                            <>
-                              <Loader2
-                                className="animate-spin text-blue-600"
-                                size={18}
-                              />
-                              <span className="text-xs text-blue-600">
-                                {t.uploadExcel?.uploading || "Uploading..."}
-                              </span>
-                            </>
-                          )}
-                          {item.status === "success" && (
-                            <>
-                              <CheckCircle
-                                className="text-green-600"
-                                size={18}
-                              />
-                              <span className="text-xs text-green-600">
-                                {t.uploadExcel?.success || "Success"}
-                              </span>
-                            </>
-                          )}
-                          {item.status === "failed" && (
-                            <>
-                              <XCircle className="text-red-600" size={18} />
-                              <span className="text-xs text-red-600">
-                                {t.uploadExcel?.failed || "Failed"}
-                              </span>
-                              {item.error && (
-                                <span className="text-xs text-red-500 ml-2">
-                                  ({item.error})
-                                </span>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Summary Stats */}
-                {!isUploading && uploadStatus.length > 0 && (
-                  <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="text-green-600" size={20} />
-                      <span className="text-sm font-medium text-gray-700">
-                        {
-                          uploadStatus.filter((s) => s.status === "success")
-                            .length
-                        }{" "}
-                        {t.uploadExcel?.successful || "Successful"}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <XCircle className="text-red-600" size={20} />
-                      <span className="text-sm font-medium text-gray-700">
-                        {
-                          uploadStatus.filter((s) => s.status === "failed")
-                            .length
-                        }{" "}
-                        {t.uploadExcel?.failed || "Failed"}
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
 
