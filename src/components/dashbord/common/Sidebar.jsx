@@ -21,7 +21,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 
-const Sidebar = () => {
+const Sidebar = ({ canAccessMap = false }) => {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
@@ -283,22 +283,24 @@ const Sidebar = () => {
             )}
           </Link>
 
-          <Link
-            href="/map"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/map", e)}
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/map") || pendingPath === "/map"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/map" ? "opacity-70" : ""}`}
-          >
-            <MapPin className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.map}</span>
-            {isPending && pendingPath === "/map" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+          {canAccessMap && (
+            <Link
+              href="/map"
+              prefetch={true}
+              onClick={(e) => handleNavigation("/map", e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/map") || pendingPath === "/map"
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === "/map" ? "opacity-70" : ""}`}
+            >
+              <MapPin className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.map}</span>
+              {isPending && pendingPath === "/map" && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
+          )}
         </div>
       </div>
     </>
