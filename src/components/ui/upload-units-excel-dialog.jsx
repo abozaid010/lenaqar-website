@@ -1041,7 +1041,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       onClick={handleUploadClick}
                       className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
-                      {t.uploadExcel?.browseFiles || "Submit"}
+                      {t.uploadExcel?.browseFiles ||
+                        t.uploadExcel?.chooseFile ||
+                        "Choose file"}
                     </button>
 
                     <div className="flex items-center justify-center gap-3 flex-wrap">
