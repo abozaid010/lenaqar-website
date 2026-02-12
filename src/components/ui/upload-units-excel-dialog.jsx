@@ -33,6 +33,8 @@ import {
   excelTemplateExampleRow,
 } from "@/constants/excel-template-example";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
 
 const downloadTemplateFile = () => {
@@ -64,12 +66,16 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [isInfoBoxCollapsed, setIsInfoBoxCollapsed] = useState(false);
+  const [selectedDeveloper, setSelectedDeveloper] = useState("");
   const fileInputRef = useRef(null);
   const tableScrollRef = useRef(null);
   const exampleTableScrollRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
   const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
+
+  const { data: developersData, isLoading: developersLoading } = useDevelopers(clientId);
+  const developers = developersData || [];
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
@@ -409,6 +415,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
+    if (file && !selectedDeveloper) {
+      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      e.target.value = "";
+      return;
+    }
     if (file) {
       const validTypes = [
         "application/vnd.ms-excel",
@@ -436,6 +447,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   };
 
   const handleUploadClick = () => {
+    if (!selectedDeveloper) {
+      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      return;
+    }
     fileInputRef.current?.click();
   };
 
@@ -452,6 +467,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
     setIsInfoBoxCollapsed(false);
+    setSelectedDeveloper("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -469,6 +485,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
+    setSelectedDeveloper("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -486,6 +503,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   };
 
   const handleSubmit = async () => {
+    if (!selectedDeveloper) {
+      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before uploading.");
+      return;
+    }
     if (!selectedFile || !parsedData) {
       alert(t.uploadExcel?.noFileSelected || "Please select a file first");
       return;
@@ -533,8 +554,19 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setUploadStatus(initialStatus);
 
     try {
-      // Send all units in a single request
-      const response = await addUnitViaExcel(parsedData.units);
+      const selectedDev = developers.find((d) => d.id === selectedDeveloper);
+      const developerName =
+        locale === "ar"
+          ? selectedDev?.ar_name || selectedDev?.en_name || ""
+          : selectedDev?.en_name || selectedDev?.ar_name || "";
+
+      // Add selected developer (id and name) to each unit
+      const unitsWithDeveloper = parsedData.units.map((unit) => ({
+        ...unit,
+        developer: selectedDeveloper,
+        developer_name: developerName,
+      }));
+      const response = await addUnitViaExcel(unitsWithDeveloper);
 
       console.log("Upload response:", response);
 
@@ -715,11 +747,34 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between py-4 px-6 border-b">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between py-4 px-6 border-b flex-wrap gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-xl font-semibold text-gray-800">
               {t.uploadExcel?.title || "Upload Units Excel Sheet"}
             </h2>
+            <div className="min-w-[200px] max-w-[280px]">
+              <SearchableDropdownSelect
+                options={developers}
+                value={selectedDeveloper}
+                onChange={(e) => setSelectedDeveloper(e.target.value)}
+                name="developer"
+                required
+                placeholder={
+                  developersLoading
+                    ? (locale === "ar" ? "جاري التحميل..." : "Loading...")
+                    : t.uploadExcel?.selectDeveloper || t.formLabels?.selectDeveloper || "Select developer"
+                }
+                getValue={(option) => option.id}
+                getLabel={(option, loc) =>
+                  loc === "ar" ? option.ar_name || option.en_name : option.en_name || option.ar_name
+                }
+                searchFields={["ar_name", "en_name"]}
+                className="w-full"
+                buttonClassName="rounded-md"
+                disabled={developersLoading}
+                isLoading={developersLoading}
+              />
+            </div>
             {parsedData && (
               <span className="text-sm text-gray-600">
                 ({parsedData.summary.totalUnits} {t.uploadExcel?.units || "units"})
@@ -776,9 +831,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               <button
                 onClick={handleSubmit}
                 disabled={
-                  !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
+                  !selectedDeveloper || !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                 }
-                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
+                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedDeveloper || !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:opacity-90"
                   }`}
