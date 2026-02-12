@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
@@ -162,7 +162,7 @@ const defaultSort = (options, locale, getLabel) => {
  * @param {string} buttonClassName - Additional CSS classes for the button element
  * @param {boolean} disabled - Whether the select is disabled
  */
-export default function SearchableDropdownSelect({
+const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   options = [],
   value = "",
   onChange,
@@ -188,7 +188,7 @@ export default function SearchableDropdownSelect({
   buttonClassName = "",
   disabled = false,
   ...rest
-}) {
+}, ref) {
   const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -196,7 +196,11 @@ export default function SearchableDropdownSelect({
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
-  
+
+  useImperativeHandle(ref, () => ({
+    open: () => setIsOpen(true),
+  }));
+
   // Check if button should use primary color styling
   const usePrimaryStyle = buttonClassName.includes("text-primary");
 
@@ -396,7 +400,7 @@ export default function SearchableDropdownSelect({
             disabled={disabled}
             className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start ${
               error
-                ? "border-red-500 ring-red-500"
+                ? "border-red-500 ring-2 ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
             } ${
               disabled
@@ -550,4 +554,6 @@ export default function SearchableDropdownSelect({
       )}
     </div>
   );
-}
+});
+
+export default SearchableDropdownSelect;

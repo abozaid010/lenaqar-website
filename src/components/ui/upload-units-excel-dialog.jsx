@@ -32,6 +32,7 @@ import {
   excelTemplateColumns,
   excelTemplateExampleRow,
 } from "@/constants/excel-template-example";
+import toast from "react-hot-toast";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
@@ -67,7 +68,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [isInfoBoxCollapsed, setIsInfoBoxCollapsed] = useState(false);
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
+  const [showDeveloperError, setShowDeveloperError] = useState(false);
   const fileInputRef = useRef(null);
+  const developerDropdownRef = useRef(null);
   const tableScrollRef = useRef(null);
   const exampleTableScrollRef = useRef(null);
 
@@ -416,7 +419,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
     if (file && !selectedDeveloper) {
-      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      toast.error(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
       e.target.value = "";
       return;
     }
@@ -448,9 +453,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const handleUploadClick = () => {
     if (!selectedDeveloper) {
-      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      const message = t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.";
+      toast.error(message);
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
       return;
     }
+    setShowDeveloperError(false);
     fileInputRef.current?.click();
   };
 
@@ -504,7 +513,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const handleSubmit = async () => {
     if (!selectedDeveloper) {
-      alert(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before uploading.");
+      toast.error(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before uploading.");
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
       return;
     }
     if (!selectedFile || !parsedData) {
@@ -560,10 +571,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           ? selectedDev?.ar_name || selectedDev?.en_name || ""
           : selectedDev?.en_name || selectedDev?.ar_name || "";
 
-      // Add selected developer (id and name) to each unit
+      // Add selected developer (id and name) to each unit for /v1/import_units API
       const unitsWithDeveloper = parsedData.units.map((unit) => ({
         ...unit,
         developer: selectedDeveloper,
+        developer_id: selectedDeveloper,
         developer_name: developerName,
       }));
       const response = await addUnitViaExcel(unitsWithDeveloper);
@@ -754,11 +766,17 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
             </h2>
             <div className="min-w-[200px] max-w-[280px]">
               <SearchableDropdownSelect
+                ref={developerDropdownRef}
                 options={developers}
                 value={selectedDeveloper}
-                onChange={(e) => setSelectedDeveloper(e.target.value)}
+                onChange={(e) => {
+                  setSelectedDeveloper(e.target.value);
+                  setShowDeveloperError(false);
+                }}
                 name="developer"
                 required
+                error={showDeveloperError}
+                errorMessage={showDeveloperError ? (t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.") : ""}
                 placeholder={
                   developersLoading
                     ? (locale === "ar" ? "جاري التحميل..." : "Loading...")
@@ -1303,21 +1321,26 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       }}
                                     >
                                     <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px", height: `${virtualRow.size}px` }}>
-                                      <div className={`flex flex-col h-full ${isFailed ? "justify-between" : "justify-center items-center gap-1"}`}>
-                                        <div className="flex flex-col items-center gap-1">
-                                          {isSuccess ? (
-                                            <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
-                                          ) : null}
-                                          <span>{rowIndex + 1}</span>
-                                        </div>
-                                        {isFailed && itemStatus?.error ? (
-                                          <span className="text-xs text-red-600 font-normal text-left w-full mt-auto pt-1 break-words border-t border-red-200" title={itemStatus.error}>
-                                            {itemStatus.error}
-                                          </span>
+                                      <div className="flex flex-col h-full justify-center items-center gap-1">
+                                        {isSuccess ? (
+                                          <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
                                         ) : null}
+                                        <span>{rowIndex + 1}</span>
                                       </div>
                                     </td>
-                                    {excelTemplateColumns.map((templateCol, colIndex) => {
+                                    {isFailed && itemStatus?.error ? (
+                                      <td
+                                        colSpan={excelTemplateColumns.length}
+                                        className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
+                                        style={{ height: `${virtualRow.size}px`, minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                      >
+                                        <div className="flex items-center h-full">
+                                          <span className="text-sm text-red-700 break-words" title={itemStatus.error}>
+                                            {itemStatus.error}
+                                          </span>
+                                        </div>
+                                      </td>
+                                    ) : excelTemplateColumns.map((templateCol, colIndex) => {
                                       const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                                       const excelHeader = status.excelHeader;
                                       let cellValue = "-";
@@ -1365,21 +1388,26 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     className={rowBgF}
                                   >
                                   <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccessF ? "border-r border-b border-emerald-200" : isFailedF ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
-                                    <div className={`flex flex-col min-h-[52px] ${isFailedF ? "justify-between" : "justify-center items-center gap-1"}`}>
-                                      <div className="flex flex-col items-center gap-1">
-                                        {isSuccessF ? (
-                                          <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
-                                        ) : null}
-                                        <span>{rowIndex + 1}</span>
-                                      </div>
-                                      {isFailedF && itemStatusF?.error ? (
-                                        <span className="text-xs text-red-600 font-normal text-left w-full mt-auto pt-1 break-words border-t border-red-200" title={itemStatusF.error}>
-                                          {itemStatusF.error}
-                                        </span>
+                                    <div className="flex flex-col min-h-[52px] justify-center items-center gap-1">
+                                      {isSuccessF ? (
+                                        <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
                                       ) : null}
+                                      <span>{rowIndex + 1}</span>
                                     </div>
                                   </td>
-                                  {excelTemplateColumns.map((templateCol, colIndex) => {
+                                  {isFailedF && itemStatusF?.error ? (
+                                    <td
+                                      colSpan={excelTemplateColumns.length}
+                                      className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
+                                      style={{ minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                    >
+                                      <div className="flex items-center min-h-[52px]">
+                                        <span className="text-sm text-red-700 break-words" title={itemStatusF.error}>
+                                          {itemStatusF.error}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  ) : excelTemplateColumns.map((templateCol, colIndex) => {
                                     const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                                     const excelHeader = status.excelHeader;
                                     let cellValue = "-";
