@@ -88,7 +88,19 @@ export default function ProjectsNotUpdatedDialog({
                   typeof project.units_count === "number"
                     ? project.units_count
                     : null;
-                const displayName = count !== null ? `${name} (${count})` : name;
+                const primaryLabel =
+                  t.uploadExcel?.projectsNotUpdatedPrimaryLabel ||
+                  "primary units";
+
+                const displayName =
+                  count !== null
+                    ? (t.uploadExcel?.projectsNotUpdatedItemLabel?.(
+                        name,
+                        count,
+                        primaryLabel
+                      ) ||
+                        `${name} (${count}) - ${primaryLabel}`)
+                    : name;
 
                 return (
                   <label
