@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import { deletePrimaryUnits } from "@/utils/api";
 import {
   VALIDATED_KEYS,
   excelFieldMapper,
@@ -34,6 +35,7 @@ import {
 } from "@/constants/excel-template-example";
 import toast from "react-hot-toast";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import ProjectsNotUpdatedDialog from "@/components/ui/projects-not-updated-dialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
@@ -69,6 +71,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [isInfoBoxCollapsed, setIsInfoBoxCollapsed] = useState(false);
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
   const [showDeveloperError, setShowDeveloperError] = useState(false);
+  const [projectsNotUpdated, setProjectsNotUpdated] = useState([]);
+  const [selectedProjectsForDeletion, setSelectedProjectsForDeletion] = useState([]);
+  const [isProjectsNotUpdatedDialogOpen, setIsProjectsNotUpdatedDialogOpen] = useState(false);
+  const [isDeletingProjects, setIsDeletingProjects] = useState(false);
   const fileInputRef = useRef(null);
   const developerDropdownRef = useRef(null);
   const tableScrollRef = useRef(null);
@@ -476,6 +482,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
     setIsInfoBoxCollapsed(false);
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
+    setIsDeletingProjects(false);
     setSelectedDeveloper("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -495,6 +505,10 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
     setSelectedDeveloper("");
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
+    setIsDeletingProjects(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -554,6 +568,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setMissingProjects([]);
     setIsMissingProjectsDialogOpen(false);
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
@@ -571,27 +588,33 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           ? selectedDev?.ar_name || selectedDev?.en_name || ""
           : selectedDev?.en_name || selectedDev?.ar_name || "";
 
-      // Add selected developer (id and name) to each unit for /v1/import_units API
+      // Add selected developer (id and name) to each unit (still useful metadata for BE)
       const unitsWithDeveloper = parsedData.units.map((unit) => ({
         ...unit,
         developer: selectedDeveloper,
         developer_id: selectedDeveloper,
         developer_name: developerName,
       }));
-      const response = await addUnitViaExcel(unitsWithDeveloper);
+      const response = await addUnitViaExcel({
+        developer_id: selectedDeveloper,
+        units: unitsWithDeveloper,
+      });
 
       console.log("Upload response:", response);
 
       // Check if the upload was successful
       if (response?.status && response?.data) {
+        const apiData = response.data;
+
         const insertedIds =
-          response.data.inserted_ids || response.data?.summary?.inserted_ids || [];
+          apiData.inserted_ids || apiData?.summary?.inserted_ids || [];
         const failedUnits =
-          response.data.failed_units || response.data?.summary?.failed_units || [];
+          apiData.failed_units || apiData?.summary?.failed_units || [];
         const missingProjectsFromApi =
-          response.data.missing_projects ||
-          response.data?.summary?.missing_projects ||
-          [];
+          apiData.missing_projects || apiData?.summary?.missing_projects || [];
+        const projectsNotUpdatedFromApiRaw = Array.isArray(apiData.projects_not_updated)
+          ? apiData.projects_not_updated
+          : [];
 
         const normalizedMissingProjects = Array.from(
           new Set(
@@ -606,44 +629,109 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           setMissingProjects(normalizedMissingProjects);
           setIsMissingProjectsDialogOpen(true);
         }
+
+        if (projectsNotUpdatedFromApiRaw.length > 0) {
+          // Normalize to array of objects: { id, en_name?, ar_name?, units_count? }
+          const normalized = projectsNotUpdatedFromApiRaw
+            .map((p) => {
+              if (!p) return null;
+
+              const id = p.id || "";
+              if (!id) return null;
+              return {
+                id: String(id).trim(),
+                en_name: p.en_name || "",
+                ar_name: p.ar_name || "",
+                units_count:
+                  typeof p.units_count === "number"
+                    ? p.units_count
+                    : undefined,
+              };
+            })
+            .filter(Boolean);
+
+          const seen = new Set();
+          const uniqueProjects = [];
+          normalized.forEach((proj) => {
+            if (!proj.id || seen.has(proj.id)) return;
+            seen.add(proj.id);
+            uniqueProjects.push(proj);
+          });
+
+          if (uniqueProjects.length > 0) {
+            setProjectsNotUpdated(uniqueProjects);
+            setSelectedProjectsForDeletion(uniqueProjects.map((p) => p.id));
+            setIsProjectsNotUpdatedDialogOpen(true);
+          }
+        }
+
         const totalSent = parsedData.units.length;
         const totalInserted = insertedIds.length;
 
         // Create a map of failed units for quick lookup
         const failedUnitsMap = new Map(
-          failedUnits.map((failed) => [failed.unit_id, failed.error_message])
+          (failedUnits || []).map((failed) => [failed.unit_id, failed.error_message])
         );
+
+        const hasInsertedIds = Array.isArray(insertedIds) && insertedIds.length > 0;
+        const hasFailedUnits = Array.isArray(failedUnits) && failedUnits.length > 0;
 
         setUploadStatus((prev) =>
           prev.map((item) => {
-            const wasInserted = insertedIds.includes(item.unitId);
             const failureReason = failedUnitsMap.get(item.unitId);
 
-            if (wasInserted) {
-              return {
-                ...item,
-                status: "success",
-                error: null,
-              };
-            } else if (failureReason) {
-              return {
-                ...item,
-                status: "failed",
-                error: failureReason,
-              };
-            } else {
-              // Fallback for units not in either list
+            if (hasInsertedIds) {
+              const wasInserted = insertedIds.includes(item.unitId);
+              if (wasInserted) {
+                return {
+                  ...item,
+                  status: "success",
+                  error: null,
+                };
+              }
+              if (failureReason) {
+                return {
+                  ...item,
+                  status: "failed",
+                  error: failureReason,
+                };
+              }
               return {
                 ...item,
                 status: "failed",
                 error: "Unit was rejected by the server",
               };
             }
+
+            if (hasFailedUnits) {
+              if (failureReason) {
+                return {
+                  ...item,
+                  status: "failed",
+                  error: failureReason,
+                };
+              }
+              return {
+                ...item,
+                status: "success",
+                error: null,
+              };
+            }
+
+            // No per-unit info from API: treat all as successful
+            return {
+              ...item,
+              status: "success",
+              error: null,
+            };
           })
         );
 
         // Mark if all uploads were successful (don't auto-close, let user dismiss)
-        if (totalInserted === totalSent && failedUnits.length === 0) {
+        if (
+          (hasInsertedIds && totalInserted === totalSent && failedUnits.length === 0) ||
+          (!hasInsertedIds && !hasFailedUnits)
+        ) {
           setAllUploadsSuccessful(true);
         }
       } else {
@@ -1556,6 +1644,74 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           </div>
         </div>
       )}
+
+      {/* Projects Not Updated Dialog (cleanup primary units) */}
+      <ProjectsNotUpdatedDialog
+        isOpen={isProjectsNotUpdatedDialogOpen}
+        projectsNotUpdated={projectsNotUpdated}
+        selectedProjectsForDeletion={selectedProjectsForDeletion}
+        isDeletingProjects={isDeletingProjects}
+        t={t}
+        locale={locale}
+        onClose={() => setIsProjectsNotUpdatedDialogOpen(false)}
+        onToggleSelectAll={() => {
+          if (selectedProjectsForDeletion.length === projectsNotUpdated.length) {
+            setSelectedProjectsForDeletion([]);
+          } else {
+            setSelectedProjectsForDeletion(projectsNotUpdated.map((p) => p.id));
+          }
+        }}
+        onToggleProject={(projectId, checked) => {
+          if (checked) {
+            setSelectedProjectsForDeletion((prev) =>
+              prev.includes(projectId) ? prev : [...prev, projectId]
+            );
+          } else {
+            setSelectedProjectsForDeletion((prev) =>
+              prev.filter((id) => id !== projectId)
+            );
+          }
+        }}
+        onConfirmDelete={async () => {
+          if (!selectedProjectsForDeletion.length || isDeletingProjects) {
+            return;
+          }
+          try {
+            setIsDeletingProjects(true);
+            const res = await deletePrimaryUnits(selectedProjectsForDeletion);
+
+            if (!res?.status) {
+              throw new Error(
+                res?.error_message ||
+                t.uploadExcel?.deletePrimaryUnitsError ||
+                "Failed to delete primary units"
+              );
+            }
+
+            const deletedUnitsCount = res?.data?.total_units_deleted ?? 0;
+            const successfulProjects = res?.data?.successful_deletions ?? 0;
+
+            toast.success(
+              t.uploadExcel?.deletePrimaryUnitsSuccess?.(
+                deletedUnitsCount,
+                successfulProjects
+              ) ||
+              `Deleted ${deletedUnitsCount} primary units from ${successfulProjects} projects.`
+            );
+
+            setIsProjectsNotUpdatedDialogOpen(false);
+          } catch (err) {
+            console.error("Failed to delete primary units:", err);
+            toast.error(
+              err.message ||
+              t.uploadExcel?.deletePrimaryUnitsError ||
+              "Failed to delete primary units"
+            );
+          } finally {
+            setIsDeletingProjects(false);
+          }
+        }}
+      />
     </div>
   );
 }
