@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { downloadExcelFile } from "@/utils/excel-utils";
 import { useAddUnit } from "@/hooks/use-unit-mutations";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import { deletePrimaryUnits } from "@/utils/api";
 import {
   VALIDATED_KEYS,
   excelFieldMapper,
@@ -32,7 +33,11 @@ import {
   excelTemplateColumns,
   excelTemplateExampleRow,
 } from "@/constants/excel-template-example";
+import toast from "react-hot-toast";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import ProjectsNotUpdatedDialog from "@/components/ui/projects-not-updated-dialog";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
 
 const downloadTemplateFile = () => {
@@ -64,12 +69,22 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [allUploadsSuccessful, setAllUploadsSuccessful] = useState(false);
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [isInfoBoxCollapsed, setIsInfoBoxCollapsed] = useState(false);
+  const [selectedDeveloper, setSelectedDeveloper] = useState("");
+  const [showDeveloperError, setShowDeveloperError] = useState(false);
+  const [projectsNotUpdated, setProjectsNotUpdated] = useState([]);
+  const [selectedProjectsForDeletion, setSelectedProjectsForDeletion] = useState([]);
+  const [isProjectsNotUpdatedDialogOpen, setIsProjectsNotUpdatedDialogOpen] = useState(false);
+  const [isDeletingProjects, setIsDeletingProjects] = useState(false);
   const fileInputRef = useRef(null);
+  const developerDropdownRef = useRef(null);
   const tableScrollRef = useRef(null);
   const exampleTableScrollRef = useRef(null);
 
   const clientId = LenaCookiesManager.getClientId() || null;
   const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
+
+  const { data: developersData, isLoading: developersLoading } = useDevelopers(clientId);
+  const developers = developersData || [];
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);
 
@@ -409,6 +424,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0];
+    if (file && !selectedDeveloper) {
+      toast.error(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.");
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
+      e.target.value = "";
+      return;
+    }
     if (file) {
       const validTypes = [
         "application/vnd.ms-excel",
@@ -436,6 +458,14 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   };
 
   const handleUploadClick = () => {
+    if (!selectedDeveloper) {
+      const message = t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.";
+      toast.error(message);
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
+      return;
+    }
+    setShowDeveloperError(false);
     fileInputRef.current?.click();
   };
 
@@ -452,6 +482,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
     setIsInfoBoxCollapsed(false);
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
+    setIsDeletingProjects(false);
+    setSelectedDeveloper("");
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -469,6 +504,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setShowMissingColumnsWarning(false);
     setValidationErrors([]);
+    setSelectedDeveloper("");
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
+    setIsDeletingProjects(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -486,6 +526,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   };
 
   const handleSubmit = async () => {
+    if (!selectedDeveloper) {
+      toast.error(t.uploadExcel?.selectDeveloperFirst || "Please select a developer before uploading.");
+      setShowDeveloperError(true);
+      developerDropdownRef.current?.open?.();
+      return;
+    }
     if (!selectedFile || !parsedData) {
       alert(t.uploadExcel?.noFileSelected || "Please select a file first");
       return;
@@ -522,6 +568,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setAllUploadsSuccessful(false);
     setMissingProjects([]);
     setIsMissingProjectsDialogOpen(false);
+    setProjectsNotUpdated([]);
+    setSelectedProjectsForDeletion([]);
+    setIsProjectsNotUpdatedDialogOpen(false);
 
     const initialStatus = parsedData.units.map((unit, index) => ({
       index,
@@ -533,21 +582,39 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setUploadStatus(initialStatus);
 
     try {
-      // Send all units in a single request
-      const response = await addUnitViaExcel(parsedData.units);
+      const selectedDev = developers.find((d) => d.id === selectedDeveloper);
+      const developerName =
+        locale === "ar"
+          ? selectedDev?.ar_name || selectedDev?.en_name || ""
+          : selectedDev?.en_name || selectedDev?.ar_name || "";
+
+      // Add selected developer (id and name) to each unit (still useful metadata for BE)
+      const unitsWithDeveloper = parsedData.units.map((unit) => ({
+        ...unit,
+        developer: selectedDeveloper,
+        developer_id: selectedDeveloper,
+        developer_name: developerName,
+      }));
+      const response = await addUnitViaExcel({
+        developer_id: selectedDeveloper,
+        units: unitsWithDeveloper,
+      });
 
       console.log("Upload response:", response);
 
       // Check if the upload was successful
       if (response?.status && response?.data) {
+        const apiData = response.data;
+
         const insertedIds =
-          response.data.inserted_ids || response.data?.summary?.inserted_ids || [];
+          apiData.inserted_ids || apiData?.summary?.inserted_ids || [];
         const failedUnits =
-          response.data.failed_units || response.data?.summary?.failed_units || [];
+          apiData.failed_units || apiData?.summary?.failed_units || [];
         const missingProjectsFromApi =
-          response.data.missing_projects ||
-          response.data?.summary?.missing_projects ||
-          [];
+          apiData.missing_projects || apiData?.summary?.missing_projects || [];
+        const projectsNotUpdatedFromApiRaw = Array.isArray(apiData.projects_not_updated)
+          ? apiData.projects_not_updated
+          : [];
 
         const normalizedMissingProjects = Array.from(
           new Set(
@@ -562,44 +629,109 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           setMissingProjects(normalizedMissingProjects);
           setIsMissingProjectsDialogOpen(true);
         }
+
+        if (projectsNotUpdatedFromApiRaw.length > 0) {
+          // Normalize to array of objects: { id, en_name?, ar_name?, units_count? }
+          const normalized = projectsNotUpdatedFromApiRaw
+            .map((p) => {
+              if (!p) return null;
+
+              const id = p.id || "";
+              if (!id) return null;
+              return {
+                id: String(id).trim(),
+                en_name: p.en_name || "",
+                ar_name: p.ar_name || "",
+                units_count:
+                  typeof p.units_count === "number"
+                    ? p.units_count
+                    : undefined,
+              };
+            })
+            .filter(Boolean);
+
+          const seen = new Set();
+          const uniqueProjects = [];
+          normalized.forEach((proj) => {
+            if (!proj.id || seen.has(proj.id)) return;
+            seen.add(proj.id);
+            uniqueProjects.push(proj);
+          });
+
+          if (uniqueProjects.length > 0) {
+            setProjectsNotUpdated(uniqueProjects);
+            setSelectedProjectsForDeletion(uniqueProjects.map((p) => p.id));
+            setIsProjectsNotUpdatedDialogOpen(true);
+          }
+        }
+
         const totalSent = parsedData.units.length;
         const totalInserted = insertedIds.length;
 
         // Create a map of failed units for quick lookup
         const failedUnitsMap = new Map(
-          failedUnits.map((failed) => [failed.unit_id, failed.error_message])
+          (failedUnits || []).map((failed) => [failed.unit_id, failed.error_message])
         );
+
+        const hasInsertedIds = Array.isArray(insertedIds) && insertedIds.length > 0;
+        const hasFailedUnits = Array.isArray(failedUnits) && failedUnits.length > 0;
 
         setUploadStatus((prev) =>
           prev.map((item) => {
-            const wasInserted = insertedIds.includes(item.unitId);
             const failureReason = failedUnitsMap.get(item.unitId);
 
-            if (wasInserted) {
-              return {
-                ...item,
-                status: "success",
-                error: null,
-              };
-            } else if (failureReason) {
-              return {
-                ...item,
-                status: "failed",
-                error: failureReason,
-              };
-            } else {
-              // Fallback for units not in either list
+            if (hasInsertedIds) {
+              const wasInserted = insertedIds.includes(item.unitId);
+              if (wasInserted) {
+                return {
+                  ...item,
+                  status: "success",
+                  error: null,
+                };
+              }
+              if (failureReason) {
+                return {
+                  ...item,
+                  status: "failed",
+                  error: failureReason,
+                };
+              }
               return {
                 ...item,
                 status: "failed",
                 error: "Unit was rejected by the server",
               };
             }
+
+            if (hasFailedUnits) {
+              if (failureReason) {
+                return {
+                  ...item,
+                  status: "failed",
+                  error: failureReason,
+                };
+              }
+              return {
+                ...item,
+                status: "success",
+                error: null,
+              };
+            }
+
+            // No per-unit info from API: treat all as successful
+            return {
+              ...item,
+              status: "success",
+              error: null,
+            };
           })
         );
 
         // Mark if all uploads were successful (don't auto-close, let user dismiss)
-        if (totalInserted === totalSent && failedUnits.length === 0) {
+        if (
+          (hasInsertedIds && totalInserted === totalSent && failedUnits.length === 0) ||
+          (!hasInsertedIds && !hasFailedUnits)
+        ) {
           setAllUploadsSuccessful(true);
         }
       } else {
@@ -715,11 +847,40 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between py-4 px-6 border-b">
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between py-4 px-6 border-b flex-wrap gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <h2 className="text-xl font-semibold text-gray-800">
               {t.uploadExcel?.title || "Upload Units Excel Sheet"}
             </h2>
+            <div className="min-w-[200px] max-w-[280px]">
+              <SearchableDropdownSelect
+                ref={developerDropdownRef}
+                options={developers}
+                value={selectedDeveloper}
+                onChange={(e) => {
+                  setSelectedDeveloper(e.target.value);
+                  setShowDeveloperError(false);
+                }}
+                name="developer"
+                required
+                error={showDeveloperError}
+                errorMessage={showDeveloperError ? (t.uploadExcel?.selectDeveloperFirst || "Please select a developer before choosing a file.") : ""}
+                placeholder={
+                  developersLoading
+                    ? (locale === "ar" ? "جاري التحميل..." : "Loading...")
+                    : t.uploadExcel?.selectDeveloper || t.formLabels?.selectDeveloper || "Select developer"
+                }
+                getValue={(option) => option.id}
+                getLabel={(option, loc) =>
+                  loc === "ar" ? option.ar_name || option.en_name : option.en_name || option.ar_name
+                }
+                searchFields={["ar_name", "en_name"]}
+                className="w-full"
+                buttonClassName="rounded-md"
+                disabled={developersLoading}
+                isLoading={developersLoading}
+              />
+            </div>
             {parsedData && (
               <span className="text-sm text-gray-600">
                 ({parsedData.summary.totalUnits} {t.uploadExcel?.units || "units"})
@@ -776,9 +937,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               <button
                 onClick={handleSubmit}
                 disabled={
-                  !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
+                  !selectedDeveloper || !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                 }
-                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
+                className={`px-6 py-1 bg-primary text-white rounded-md transition-opacity flex items-center gap-2 ${!selectedDeveloper || !selectedFile || !parsedData || isProcessing || isReapplyingMapping || isUploading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:opacity-90"
                   }`}
@@ -880,7 +1041,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                       onClick={handleUploadClick}
                       className="px-16 py-3 bg-primary text-white rounded-md hover:opacity-90 transition-opacity text-base font-semibold shadow-md"
                     >
-                      {t.uploadExcel?.browseFiles || "Submit"}
+                      {t.uploadExcel?.browseFiles ||
+                        t.uploadExcel?.chooseFile ||
+                        "Choose file"}
                     </button>
 
                     <div className="flex items-center justify-center gap-3 flex-wrap">
@@ -1248,21 +1411,26 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       }}
                                     >
                                     <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px", height: `${virtualRow.size}px` }}>
-                                      <div className={`flex flex-col h-full ${isFailed ? "justify-between" : "justify-center items-center gap-1"}`}>
-                                        <div className="flex flex-col items-center gap-1">
-                                          {isSuccess ? (
-                                            <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
-                                          ) : null}
-                                          <span>{rowIndex + 1}</span>
-                                        </div>
-                                        {isFailed && itemStatus?.error ? (
-                                          <span className="text-xs text-red-600 font-normal text-left w-full mt-auto pt-1 break-words border-t border-red-200" title={itemStatus.error}>
-                                            {itemStatus.error}
-                                          </span>
+                                      <div className="flex flex-col h-full justify-center items-center gap-1">
+                                        {isSuccess ? (
+                                          <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
                                         ) : null}
+                                        <span>{rowIndex + 1}</span>
                                       </div>
                                     </td>
-                                    {excelTemplateColumns.map((templateCol, colIndex) => {
+                                    {isFailed && itemStatus?.error ? (
+                                      <td
+                                        colSpan={excelTemplateColumns.length}
+                                        className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
+                                        style={{ height: `${virtualRow.size}px`, minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                      >
+                                        <div className="flex items-center h-full">
+                                          <span className="text-sm text-red-700 break-words" title={itemStatus.error}>
+                                            {itemStatus.error}
+                                          </span>
+                                        </div>
+                                      </td>
+                                    ) : excelTemplateColumns.map((templateCol, colIndex) => {
                                       const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                                       const excelHeader = status.excelHeader;
                                       let cellValue = "-";
@@ -1310,21 +1478,26 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     className={rowBgF}
                                   >
                                   <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccessF ? "border-r border-b border-emerald-200" : isFailedF ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
-                                    <div className={`flex flex-col min-h-[52px] ${isFailedF ? "justify-between" : "justify-center items-center gap-1"}`}>
-                                      <div className="flex flex-col items-center gap-1">
-                                        {isSuccessF ? (
-                                          <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
-                                        ) : null}
-                                        <span>{rowIndex + 1}</span>
-                                      </div>
-                                      {isFailedF && itemStatusF?.error ? (
-                                        <span className="text-xs text-red-600 font-normal text-left w-full mt-auto pt-1 break-words border-t border-red-200" title={itemStatusF.error}>
-                                          {itemStatusF.error}
-                                        </span>
+                                    <div className="flex flex-col min-h-[52px] justify-center items-center gap-1">
+                                      {isSuccessF ? (
+                                        <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
                                       ) : null}
+                                      <span>{rowIndex + 1}</span>
                                     </div>
                                   </td>
-                                  {excelTemplateColumns.map((templateCol, colIndex) => {
+                                  {isFailedF && itemStatusF?.error ? (
+                                    <td
+                                      colSpan={excelTemplateColumns.length}
+                                      className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
+                                      style={{ minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                    >
+                                      <div className="flex items-center min-h-[52px]">
+                                        <span className="text-sm text-red-700 break-words" title={itemStatusF.error}>
+                                          {itemStatusF.error}
+                                        </span>
+                                      </div>
+                                    </td>
+                                  ) : excelTemplateColumns.map((templateCol, colIndex) => {
                                     const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                                     const excelHeader = status.excelHeader;
                                     let cellValue = "-";
@@ -1473,6 +1646,74 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           </div>
         </div>
       )}
+
+      {/* Projects Not Updated Dialog (cleanup primary units) */}
+      <ProjectsNotUpdatedDialog
+        isOpen={isProjectsNotUpdatedDialogOpen}
+        projectsNotUpdated={projectsNotUpdated}
+        selectedProjectsForDeletion={selectedProjectsForDeletion}
+        isDeletingProjects={isDeletingProjects}
+        t={t}
+        locale={locale}
+        onClose={() => setIsProjectsNotUpdatedDialogOpen(false)}
+        onToggleSelectAll={() => {
+          if (selectedProjectsForDeletion.length === projectsNotUpdated.length) {
+            setSelectedProjectsForDeletion([]);
+          } else {
+            setSelectedProjectsForDeletion(projectsNotUpdated.map((p) => p.id));
+          }
+        }}
+        onToggleProject={(projectId, checked) => {
+          if (checked) {
+            setSelectedProjectsForDeletion((prev) =>
+              prev.includes(projectId) ? prev : [...prev, projectId]
+            );
+          } else {
+            setSelectedProjectsForDeletion((prev) =>
+              prev.filter((id) => id !== projectId)
+            );
+          }
+        }}
+        onConfirmDelete={async () => {
+          if (!selectedProjectsForDeletion.length || isDeletingProjects) {
+            return;
+          }
+          try {
+            setIsDeletingProjects(true);
+            const res = await deletePrimaryUnits(selectedProjectsForDeletion);
+
+            if (!res?.status) {
+              throw new Error(
+                res?.error_message ||
+                t.uploadExcel?.deletePrimaryUnitsError ||
+                "Failed to delete primary units"
+              );
+            }
+
+            const deletedUnitsCount = res?.data?.total_units_deleted ?? 0;
+            const successfulProjects = res?.data?.successful_deletions ?? 0;
+
+            toast.success(
+              t.uploadExcel?.deletePrimaryUnitsSuccess?.(
+                deletedUnitsCount,
+                successfulProjects
+              ) ||
+              `Deleted ${deletedUnitsCount} primary units from ${successfulProjects} projects.`
+            );
+
+            setIsProjectsNotUpdatedDialogOpen(false);
+          } catch (err) {
+            console.error("Failed to delete primary units:", err);
+            toast.error(
+              err.message ||
+              t.uploadExcel?.deletePrimaryUnitsError ||
+              "Failed to delete primary units"
+            );
+          } finally {
+            setIsDeletingProjects(false);
+          }
+        }}
+      />
     </div>
   );
 }

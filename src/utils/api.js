@@ -337,14 +337,46 @@ export async function addUnitRent(unitData) {
 
 export async function addUnitSaleViaExcel(formData) {
   try {
+    // v2: import units by developer and return extended summary,
+    // including projects_not_updated for optional cleanup.
     const response = await axiosInstance.post(
-      `/units/v1/import_units`,
+      `/units/v2/import_units_by_developer`,
       formData
     );
     return response.data;
   } catch (error) {
     console.error("Failed to add units via excel:", error.message);
-    return { error: error.response?.data?.message || error.message };
+    return {
+      status: false,
+      data: null,
+      error_message: error.response?.data?.error_message || error.response?.data?.message || error.message,
+    };
+  }
+}
+
+/**
+ * Delete only primary units (isPrimary=true) for the given project IDs.
+ * Used as a cleanup step after importing developer units when some
+ * projects were not updated.
+ */
+export async function deletePrimaryUnits(projectIds) {
+  try {
+    const response = await axiosInstance.delete(
+      `/units/v2/delete_primary_units`,
+      {
+        data: {
+          project_ids: projectIds,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete primary units:", error.message);
+    return {
+      status: false,
+      data: null,
+      error_message: error.response?.data?.error_message || error.response?.data?.message || error.message,
+    };
   }
 }
 
