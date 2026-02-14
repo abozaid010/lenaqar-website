@@ -263,8 +263,8 @@ export default function RentalDetailsStep({
         </div>
       </div>
 
-      {/* Owner Details - Only show for brokers */}
-      {clientType === "brocker" && (
+      {/* Owner Details */}
+      {(
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-4 text-slate-800">
             {t.steps.ownerDetails || "Owner Details"}
