@@ -23,7 +23,7 @@ const Footer = () => {
     "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
 
   // Facebook link
-  const facebookLink = "https://www.facebook.com/profile.php?id=61575040225107";
+  const facebookLink = "https://www.facebook.com/profile.php?id=61587419182034";
 
   return (
     <footer className="bg-primary text-white py-10 relative">
@@ -109,10 +109,10 @@ const Footer = () => {
                         {t.footer.contact.support} :
                       </span>
                       <a
-                        href="tel:01020914828"
+                        href="tel:01016080323"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
                       >
-                        01020914828
+                        01016080323
                       </a>
                     </div>
                   </div>
