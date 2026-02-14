@@ -11,7 +11,7 @@ export const DEFAULT_PAYMENT_PLANS = [
     description: "",
     downpayment_percentage: 0.05, // 5%
     reservation_amount_percentage: 0.0,
-    installment_years: 10,
+    installments_years: 10,
     maintenance_fee: 0.0,
     cache_discount: 0.4, // 40%
     is_default: false,
@@ -23,7 +23,7 @@ export const DEFAULT_PAYMENT_PLANS = [
     description: "",
     downpayment_percentage: 0.05, // 5%
     reservation_amount_percentage: 0.0,
-    installment_years: 12,
+    installments_years: 12,
     maintenance_fee: 0.0,
     cache_discount: 0.4, // 40%
     is_default: false,
@@ -35,7 +35,7 @@ export const DEFAULT_PAYMENT_PLANS = [
     description: "",
     downpayment_percentage: 0.05, // 5%
     reservation_amount_percentage: 0.0,
-    installment_years: 8,
+    installments_years: 8,
     maintenance_fee: 0.0,
     cache_discount: 0.4, // 40%
     is_default: false,
@@ -47,7 +47,7 @@ export const DEFAULT_PAYMENT_PLANS = [
     description: "",
     downpayment_percentage: 0.0, // 0%
     reservation_amount_percentage: 0.0,
-    installment_years: 10,
+    installments_years: 10,
     maintenance_fee: 0.0,
     cache_discount: 0.4, // 40%
     is_default: false,

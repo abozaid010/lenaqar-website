@@ -3,8 +3,10 @@
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import { useI18n } from "@/context/translate-api";
 import { getDefaultPaymentPlans } from "@/data/default-payment-plans";
+import { createPaymentPlan, updatePaymentPlan } from "@/utils/api";
 import { Edit2, Plus, Trash2, Check, ChevronDown } from "lucide-react";
 import { useState, useMemo } from "react";
+import toast from "react-hot-toast";
 
 export default function PaymentPlansList({
   plans = [],
@@ -53,34 +55,60 @@ export default function PaymentPlansList({
     onChange(newPlans);
   };
 
-  const handleSavePlan = (plan, isEdit) => {
-    let newPlans;
-
-    if (isEdit) {
-      // Update existing plan
-      newPlans = [...plans];
-      newPlans[editingIndex] = plan;
-    } else {
-      // Add new plan
-      newPlans = [...plans, plan];
-    }
-
-    // Ensure only one payment plan can be default at a time
-    if (plan.is_default === true) {
-      newPlans = newPlans.map((p, index) => {
-        // If this is the plan being saved, keep its is_default value
-        if (isEdit && index === editingIndex) {
-          return p;
+  const handleSavePlan = async (plan, isEdit) => {
+    try {
+      let savedPlan;
+      
+      if (isEdit && editingPlan?.id) {
+        // Update existing plan in API
+        const result = await updatePaymentPlan(editingPlan.id, plan);
+        if (result.error) {
+          toast.error(result.error);
+          return;
         }
-        if (!isEdit && index === newPlans.length - 1) {
-          return p;
+        savedPlan = result.data || plan;
+      } else {
+        // Create new plan in API
+        const result = await createPaymentPlan(plan);
+        if (result.error) {
+          toast.error(result.error);
+          return;
         }
-        // Otherwise, set is_default to false
-        return { ...p, is_default: false };
-      });
-    }
+        savedPlan = result.data || plan;
+      }
+      
+      let newPlans;
 
-    onChange(newPlans);
+      if (isEdit) {
+        // Update existing plan in local state
+        newPlans = [...plans];
+        newPlans[editingIndex] = savedPlan;
+      } else {
+        // Add new plan to local state
+        newPlans = [...plans, savedPlan];
+      }
+
+      // Ensure only one payment plan can be default at a time
+      if (savedPlan.is_default === true) {
+        newPlans = newPlans.map((p, index) => {
+          // If this is the plan being saved, keep its is_default value
+          if (isEdit && index === editingIndex) {
+            return p;
+          }
+          if (!isEdit && index === newPlans.length - 1) {
+            return p;
+          }
+          // Otherwise, set is_default to false
+          return { ...p, is_default: false };
+        });
+      }
+
+      onChange(newPlans);
+      toast.success(isEdit ? "Payment plan updated successfully" : "Payment plan created successfully");
+    } catch (error) {
+      console.error("Failed to save payment plan:", error);
+      toast.error("Failed to save payment plan");
+    }
   };
 
   const formatPercentage = (value) => {
@@ -187,7 +215,7 @@ export default function PaymentPlansList({
                         </div>
                         <div>
                           <span className="font-medium">Yrs:</span>{" "}
-                          {defaultPlan.installment_years}
+                          {defaultPlan.installments_years}
                         </div>
                       </div>
                     </button>
@@ -254,7 +282,7 @@ export default function PaymentPlansList({
                           </div>
                           <div>
                             <span className="font-medium">Yrs:</span>{" "}
-                            {plan.installment_years}
+                            {plan.installments_years}
                           </div>
                           {plan.maintenance_fee > 0 && (
                             <div>

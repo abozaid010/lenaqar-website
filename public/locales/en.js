@@ -1141,6 +1141,8 @@ export default {
     deliveryFee: "Delivery Fee (%)",
     contractFee: "Contract Fee (EGP)",
     deliveryInYears: "Delivery (years)",
+    installmentsIncreasingPercentage: "Installments Increasing (%)",
+    deliveryPaymentPercentage: "Delivery Payment (%)",
     // Existing project preview dialog
     existingProject: "Existing Project",
     projectName: "Project Name",

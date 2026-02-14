@@ -1105,6 +1105,8 @@ export default {
     contractFee: "رسوم العقد (جنيه)",
     description: "الوصف",
     deliveryInYears: "التسليم (بالسنوات)",
+    installmentsIncreasingPercentage: "معدل زيادة الأقساط (%)",
+    deliveryPaymentPercentage: "رسوم التسليم (%)",
     // Existing project preview dialog
     existingProject: "المشروع الموجود",
     projectName: "اسم المشروع",
