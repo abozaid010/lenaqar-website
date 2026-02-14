@@ -348,7 +348,7 @@ export default function AddPaymentPlanDialog({
           onChange={handleChange}
           required
           placeholder="5"
-          min="0"
+          min="-1"
           max="100"
           step="0.1"
           error={errors.downpayment_percentage}
@@ -363,7 +363,7 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="8"
-            min="0"
+            min="-1"
             step="0.1"
             error={errors.installment_years}
           />
@@ -376,7 +376,7 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="5"
-            min="0"
+            min="-1"
             max="100"
             step="0.1"
             error={errors.installments_increasing_percentage}
@@ -415,7 +415,7 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="8"
-            min="0"
+            min="-1"
             max="100"
             step="0.1"
             error={errors.delivery_payment_percentage}
@@ -429,7 +429,7 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="5"
-            min="0"
+            min="-1"
             max="100"
             step="0.1"
             error={errors.maintenance_fee}
@@ -447,7 +447,7 @@ export default function AddPaymentPlanDialog({
           onChange={handleChange}
           required
           placeholder="40"
-          min="0"
+          min="-1"
           max="100"
           step="0.1"
           error={errors.cache_discount}
