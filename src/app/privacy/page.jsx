@@ -193,7 +193,7 @@ export default function PrivacyPage() {
           please contact us at:
         </p>
         {/* <p className="text-[#3926A7] mb-1">Email: abozaid@lenaai.net</p> */}
-        <p className="text-[#3926A7] mb-1">Phone: 01020914828</p>
+        <p className="text-[#3926A7] mb-1">Phone: 01016080323</p>
         <p className="text-[#3926A7]">
           Company Address: 505 Siac Building, ARCHPLAN Square, New Capital,
           Cairo, Egypt

@@ -3,7 +3,7 @@
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useI18n } from "@/context/translate-api";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
-import { Plus, Trash2Icon } from "lucide-react";
+import { Trash2Icon } from "lucide-react";
 
 export default function SaleDetailsStep({
   formData,
@@ -58,66 +58,9 @@ export default function SaleDetailsStep({
     updateCommonFormData({ [name]: value });
   };
 
-  const addPaymentPlan = () => {
-    updateFormData({
-      paymentPlans: [
-        ...formData.paymentPlans,
-        {
-          years: 1,
-          price: "",
-          maintenance: "",
-          downPayment: "",
-          installment_amount_yearly: "",
-        },
-      ],
-    });
-  };
-
-  const updatePaymentPlan = (index, field, value) => {
-    const englishValue = convertArabicToEnglishNumbers(value);
-    const rawValue = englishValue.replace(/\D/g, "");
-    const updatedPlans = [...formData.paymentPlans];
-    updatedPlans[index] = {
-      ...updatedPlans[index],
-      [field]: rawValue === "" ? "" : Number(rawValue),
-    };
-    updateFormData({ paymentPlans: updatedPlans });
-
-    setInvalidFields((prev) => {
-      if (
-        (field === "price" ||
-          field === "downPayment" ||
-          field === "installment_amount_yearly") &&
-        value === ""
-      ) {
-        return [...prev, `${field}-${index}`];
-      } else {
-        return prev.filter((f) => f !== `${field}-${index}`);
-      }
-    });
-  };
-
-  const removePaymentPlan = (index) => {
-    const updatedPlans = formData.paymentPlans.filter((_, i) => i !== index);
-    updateFormData({ paymentPlans: updatedPlans });
-  };
-
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
-        {/* Total Price */}
-        <LenaTextField
-          label={t.saleDetails.totalPrice}
-          name="totalPrice"
-          required
-          value={formData.totalPrice}
-          onChange={(e) => handleChange(e, "money")}
-          placeholder="5000000"
-          error={invalidFields.includes("totalPrice")}
-          type="money"
-          adornment="EGP"
-        />
-
         {/* Delivery Date */}
         <LenaTextField
           label={t.saleDetails.deliveryDate}
@@ -161,124 +104,73 @@ export default function SaleDetailsStep({
         </div>
       )}
 
-      {/* Payment Plans */}
+      {/* Payment Details */}
       <div className="mt-6">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xl font-semibold text-slate-800">
-            {t.saleDetails.paymentPlans}
-          </h3>
-          <button
-            type="button"
-            onClick={addPaymentPlan}
-            className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-          >
-            <Plus size={18} />
-            {t.saleDetails.addPlan}
-          </button>
+        <h3 className="text-xl font-semibold text-slate-800 mb-4">
+          {t.saleDetails.paymentPlans || "Payment Details"}
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
+          <LenaTextField
+            label={t.saleDetails.totalPrice || "Total Price"}
+            name="totalPrice"
+            value={formData.totalPrice}
+            onChange={handleChange}
+            placeholder="0"
+            type="money"
+            adornment="EGP"
+          />
+          
+          <LenaTextField
+            label={t.saleDetails.downPayment || "Down Payment"}
+            name="downPayment"
+            value={formData.downPayment}
+            onChange={handleChange}
+            placeholder="0"
+            type="money"
+            adornment="EGP"
+          />
+          
+          <LenaTextField
+            label={t.saleDetails.paid_amount || "Paid Amount"}
+            name="paid_amount"
+            value={formData.paid_amount}
+            onChange={handleChange}
+            placeholder="0"
+            type="money"
+            adornment="EGP"
+          />
+          
+          <LenaTextField
+            label={t.saleDetails.remaining_amount || "Remaining Amount"}
+            name="remaining_amount"
+            value={formData.remaining_amount}
+            onChange={handleChange}
+            placeholder="0"
+            type="money"
+            adornment="EGP"
+          />
+          
+          <LenaTextField
+            label={t.saleDetails.installment_years || "Installment Years"}
+            name="installment_years"
+            value={formData.installment_years}
+            onChange={handleChange}
+            placeholder="0"
+            type="number"
+            error={invalidFields.includes("installment_years")}
+          />
+          
+          <LenaTextField
+            label={t.saleDetails.over_price || "Offer Price"}
+            name="over_price"
+            value={formData.over_price}
+            onChange={handleChange}
+            placeholder="0"
+            type="money"
+            adornment="EGP"
+          />
         </div>
-
-        {formData.paymentPlans.length === 0 ? (
-          <p className="text-gray-500 italic">{t.saleDetails.noPlans}</p>
-        ) : (
-          <div className="space-y-3">
-            {formData?.paymentPlans?.map((plan, index) => (
-              <div
-                key={index}
-                className="flex items-center py-1 border-b border-gray-300 pb-4"
-              >
-                <div className="flex-grow grid grid-cols-1 md:grid-cols-9 gap-1.5">
-                  <LenaTextField
-                    label={t.saleDetails.years}
-                    placeholder={"1"}
-                    name={`years-${index}`}
-                    required
-                    value={plan.years}
-                    onChange={(e) =>
-                      updatePaymentPlan(index, "years", e.target.value)
-                    }
-                    error={invalidFields.includes(`years-${index}`)}
-                    type="number"
-                  />
-
-                  <div className="col-span-2">
-                    <LenaTextField
-                      label={t.saleDetails.price}
-                      name={`price-${index}`}
-                      required
-                      value={plan.price}
-                      onChange={(e) =>
-                        updatePaymentPlan(index, "price", e.target.value)
-                      }
-                      placeholder="500000"
-                      error={invalidFields.includes(`price-${index}`)}
-                      type="money"
-                      adornment="EGP"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <LenaTextField
-                      label={t.saleDetails.downPayment}
-                      name={`downPayment-${index}`}
-                      required
-                      value={plan.downPayment}
-                      onChange={(e) =>
-                        updatePaymentPlan(index, "downPayment", e.target.value)
-                      }
-                      placeholder="20000"
-                      error={invalidFields.includes(`downPayment-${index}`)}
-                      type="money"
-                      adornment="EGP"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <LenaTextField
-                      label={t.saleDetails.installment}
-                      name={`installment_amount_yearly-${index}`}
-                      required
-                      value={plan.installment_amount_yearly}
-                      onChange={(e) =>
-                        updatePaymentPlan(
-                          index,
-                          "installment_amount_yearly",
-                          e.target.value
-                        )
-                      }
-                      placeholder="20000"
-                      error={invalidFields.includes(
-                        `installment_amount_yearly-${index}`
-                      )}
-                      type="money"
-                      adornment="EGP"
-                    />
-                  </div>
-
-                  <div className="col-span-2">
-                    <LenaTextField
-                      label={t.saleDetails.maintenance}
-                      name={`maintenance-${index}`}
-                      value={plan.maintenance}
-                      onChange={(e) =>
-                        updatePaymentPlan(index, "maintenance", e.target.value)
-                      }
-                      placeholder="2000"
-                      type="money"
-                      adornment="EGP"
-                    />
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => removePaymentPlan(index)}
-                  className="text-red-500 hover:text-red-600 ltr:ml-2 rtl:mr-2 mt-5"
-                >
-                  <Trash2Icon size={18} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </>
   );
