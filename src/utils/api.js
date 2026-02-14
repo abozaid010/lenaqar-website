@@ -129,6 +129,32 @@ export async function fetchDevelopers(isPublic = false) {
   }
 }
 
+/**
+ * Fetches a single project by ID (full details).
+ * Response: { status, code, message, data: project, error_message }
+ */
+export async function fetchProjectById(projectId, isPublic = false) {
+  if (!projectId) {
+    throw new Error("projectId is required");
+  }
+  const path = isPublic ? `/public/projects/id/${projectId}` : `/projects/id/${projectId}`;
+  try {
+    const response = await axiosInstance.get(path);
+    if (!response.data) {
+      throw new Error("Invalid response format from server: missing response.data");
+    }
+    if (response.data.data) {
+      return response.data;
+    }
+    throw new Error(
+      `Unexpected response structure. Expected { data: project }, got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
+  } catch (error) {
+    console.error("Failed to fetch project by id:", error.message);
+    throw error;
+  }
+}
+
 /** Fetches all projects in one request (no pagination). For paginated list use fetchProjectsPaginated. */
 export async function fetchProjects(isPublic = false) {
   const url = isPublic ? "/public/projects" : "/projects/all";

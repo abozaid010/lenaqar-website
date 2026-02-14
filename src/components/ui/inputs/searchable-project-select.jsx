@@ -1,16 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useI18n } from "@/context/translate-api";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
+import { fetchProjectById } from "@/utils/api";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
 
 /**
  * SearchableProjectSelect - A reusable project selection component with search functionality
  * Wrapper around SearchableDropdownSelect with project-specific configuration
- * 
+ * Loads all projects (via fetchProjectsNames). Optional onProjectSelect: when user selects
+ * a project, fetches full project by id and calls onProjectSelect(fullProject).
+ *
  * @param {string} value - Selected project value (en_name)
  * @param {Function} onChange - Callback when project changes: (event) => void
+ * @param {Function} onProjectSelectStart - Optional: (option) => void. Called immediately when user selects an option (before fetch), so parent can show loading at position 0.
+ * @param {Function} onProjectSelect - Optional: (fullProject) => void. When set, on selection fetches project by id and calls with full project (for appending to list without affecting pagination).
  * @param {string} name - Input name attribute
  * @param {string} label - Label text (optional)
  * @param {boolean} required - Whether field is required
@@ -28,6 +33,8 @@ import SearchableDropdownSelect from "./searchable-dropdown-select";
 export default function SearchableProjectSelect({
   value = "",
   onChange,
+  onProjectSelectStart,
+  onProjectSelect,
   name = "project",
   label,
   required = false,
@@ -44,14 +51,38 @@ export default function SearchableProjectSelect({
   ...rest
 }) {
   const { t, locale } = useI18n();
-  
-  // Fetch lightweight projects if not provided as prop
+  const [fetchingId, setFetchingId] = useState(null);
+
+  // Fetch lightweight projects if not provided as prop (all project names for search)
   const { data: fetchedProjects, isLoading: fetchedLoading } = useProjectsNames(
     isPublic
   );
-  
+
   const projects = projectsProp || fetchedProjects || [];
   const isLoading = isLoadingProp !== undefined ? isLoadingProp : fetchedLoading;
+
+  const handleChange = useCallback(
+    (e) => {
+      onChange?.(e);
+      if (!onProjectSelect || !e?.target?.value) return;
+      const selectedValue = e.target.value;
+      const option = projects.find(
+        (p) => (p.en_name === selectedValue) || (p.ar_name === selectedValue)
+      );
+      if (!option?.id) return;
+      onProjectSelectStart?.(option);
+      setFetchingId(option.id);
+      fetchProjectById(option.id, isPublic)
+        .then((res) => {
+          if (res?.data) onProjectSelect(res.data);
+        })
+        .catch(() => {
+          onProjectSelect(null);
+        })
+        .finally(() => setFetchingId(null));
+    },
+    [onChange, onProjectSelectStart, onProjectSelect, projects, isPublic]
+  );
 
   // Custom sort function for projects
   const sortProjects = useMemo(() => {
@@ -66,11 +97,13 @@ export default function SearchableProjectSelect({
     };
   }, []);
 
+  const isDisabled = disabled || !!fetchingId;
+
   return (
     <SearchableDropdownSelect
       options={projects}
       value={value}
-      onChange={onChange}
+      onChange={handleChange}
       name={name}
       label={label}
       required={required}
@@ -102,7 +135,8 @@ export default function SearchableProjectSelect({
       noResultsText={locale === "ar" ? "لا توجد نتائج" : "No projects found"}
       searchPlaceholder={locale === "ar" ? "ابحث عن المشروع..." : "Search projects..."}
       className={className}
-      disabled={disabled}
+      disabled={isDisabled}
+      isLoading={isLoading || !!fetchingId}
       {...rest}
     />
   );

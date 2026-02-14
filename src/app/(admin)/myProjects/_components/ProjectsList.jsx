@@ -30,6 +30,7 @@ import ImportProjectsDialog from "@/components/ui/import-projects-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
@@ -37,7 +38,7 @@ import { deletePhase, deleteProject } from "@/utils/api";
 import { paginatedProjectKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
 import "swiper/css/pagination";
@@ -211,6 +212,11 @@ export default function ProjectsList({ clientId }) {
   const [phaseImageLoading, setPhaseImageLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isImportOpen, setIsImportOpen] = useState(false);
+  // Projects added via "Add project" select (fetched by id); merged with paginated list without affecting pagination
+  const [appendedProjects, setAppendedProjects] = useState([]);
+  const [addProjectSelectValue, setAddProjectSelectValue] = useState("");
+  // Shown at position 0 while fetchProjectById is in progress
+  const [pendingProject, setPendingProject] = useState(null);
 
   // Load all translations in one go
   useEffect(() => {
@@ -372,19 +378,68 @@ export default function ProjectsList({ clientId }) {
     }
   }, [isLoading, isError, projectsList, locale, searchQuery, selectedCities, translations.cities]);
 
-  // Update selected project if it's not in the filtered list
-  useEffect(() => {
-    if (projectList.length > 0 && selectedProject) {
-      const isSelectedInList = projectList.some(
-        (p) => p.id === selectedProject.id
-      );
-      if (!isSelectedInList) {
-        setSelectedProject(projectList[0]);
-      }
-    } else if (projectList.length === 0) {
-      setSelectedProject(null);
+  // Merge paginated/filtered list with appended projects. Appended at position 0 (newest first). Does not affect pagination.
+  const displayList = useMemo(() => {
+    const appendedIds = new Set(appendedProjects.map((p) => p.id));
+    const rest = projectList.filter((p) => !appendedIds.has(p.id));
+    const restSorted = [...rest].sort((a, b) => {
+      const rawA =
+        (locale === "ar" ? a?.ar_name : a?.en_name) ??
+        (locale === "ar" ? a?.en_name : a?.ar_name) ??
+        "";
+      const rawB =
+        (locale === "ar" ? b?.ar_name : b?.en_name) ??
+        (locale === "ar" ? b?.en_name : b?.ar_name) ??
+        "";
+      return String(rawA).trim().localeCompare(String(rawB).trim(), locale, {
+        sensitivity: "base",
+      });
+    });
+    const merged = [...appendedProjects, ...restSorted];
+    if (pendingProject) {
+      return [
+        pendingProject,
+        ...merged.filter((p) => p.id !== pendingProject.id),
+      ];
     }
-  }, [projectList, selectedProject]);
+    return merged;
+  }, [projectList, appendedProjects, pendingProject, locale]);
+
+  const handleProjectSelectStart = useCallback((option) => {
+    setPendingProject({
+      id: option.id,
+      en_name: option.en_name,
+      ar_name: option.ar_name,
+      _pending: true,
+    });
+  }, []);
+
+  const handleAppendProject = useCallback((fullProject) => {
+    setPendingProject(null);
+    if (!fullProject?.id) return;
+    setAppendedProjects((prev) => [
+      fullProject,
+      ...prev.filter((p) => p.id !== fullProject.id),
+    ]);
+    setSelectedProject(fullProject);
+    setAddProjectSelectValue("");
+  }, []);
+
+  // Keep selected project in sync with displayed list
+  useEffect(() => {
+    if (displayList.length === 0) {
+      setSelectedProject(null);
+      return;
+    }
+    if (!selectedProject) {
+      setSelectedProject(displayList[0]);
+      return;
+    }
+    const isSelectedInList = displayList.some((p) => p.id === selectedProject.id);
+    if (!isSelectedInList) {
+      setSelectedProject(displayList[0]);
+    }
+  }, [displayList, selectedProject]);
 
   // Handle project selection with loading state
   const handleProjectSelection = (project) => {
@@ -406,20 +461,22 @@ export default function ProjectsList({ clientId }) {
   };
 
   const handleProject = (data) => {
+    setAppendedProjects((prev) =>
+      prev.some((p) => p.id === data.id)
+        ? prev.map((p) => (p.id === data.id ? data : p))
+        : prev
+    );
     setProjectList((prev) => {
       const exists = prev.some((p) => p.id === data.id);
       let updatedList;
       if (exists) {
-        // Edit: update the project
         updatedList = prev.map((p) => (p.id === data.id ? data : p));
       } else {
-        // Add: append the new project
         updatedList = [...prev, data];
       }
       return updatedList;
     });
     setSelectedProject(data);
-    // Invalidate paginated cache so fresh data loads on next fetch
     queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
   };
 
@@ -452,6 +509,7 @@ export default function ProjectsList({ clientId }) {
         toast.error(t.associateProject);
       } else if (res.code === 200) {
         toast.success(t.projectDelete);
+        setAppendedProjects((prev) => prev.filter((p) => p.id !== project_id));
         setProjectList((prev) => {
           const updatedList = prev.filter((p) => p.id !== project_id);
           if (selectedProject?.id === project_id) {
@@ -778,6 +836,24 @@ export default function ProjectsList({ clientId }) {
                     isLoading={developersLoading}
                   />
                 </div>
+                {/* Add project by name: loads all projects, fetches by id on select, appends to list without affecting pagination */}
+                <div className="min-w-[200px]">
+                  <SearchableProjectSelect
+                    value={addProjectSelectValue}
+                    onChange={(e) => setAddProjectSelectValue(e.target.value)}
+                    onProjectSelectStart={handleProjectSelectStart}
+                    onProjectSelect={handleAppendProject}
+                    name="add_project"
+                    placeholder={
+                      locale === "ar"
+                        ? "ابحث بالاسم..."
+                        : "Search by name..."
+                    }
+                    className="w-full"
+                    buttonClassName="rounded-lg border-0 px-4 py-2 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
+                    isPublic={false}
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <button
@@ -838,7 +914,7 @@ export default function ProjectsList({ clientId }) {
                 }
                 retryLabel={t.projectsPage?.retryLabel || "Retry"}
               />
-            ) : projectList.length === 0 ? (
+            ) : displayList.length === 0 ? (
               // <div className="flex flex-col items-center justify-center p-6">
               //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               //     <svg
@@ -862,16 +938,35 @@ export default function ProjectsList({ clientId }) {
               <EmptyStateVideo variant="projects" autoPlay showControls loop />
             ) : (
               <div className="space-y-3 p-4">
-                {projectList.map((project) => (
+                {displayList.map((project) => (
                   <div
                     key={project.id}
-                    className={`rounded-lg p-3 border-2 transition-all duration-200 cursor-pointer relative ${
-                      selectedProject?.id === project.id
-                        ? "border-primary shadow-lg bg-[#E2DBFF33]"
-                        : "bg-gray-50 border-gray-200 hover:shadow-md hover:border-gray-300"
+                    className={`rounded-lg p-3 border-2 transition-all duration-200 relative ${
+                      project._pending
+                        ? "border-primary/50 bg-[#E2DBFF20] cursor-wait"
+                        : "cursor-pointer " +
+                          (selectedProject?.id === project.id
+                            ? "border-primary shadow-lg bg-[#E2DBFF33]"
+                            : "bg-gray-50 border-gray-200 hover:shadow-md hover:border-gray-300")
                     }`}
-                    onClick={() => handleProjectSelection(project)}
+                    onClick={() => !project._pending && handleProjectSelection(project)}
                   >
+                    {project._pending ? (
+                      <>
+                        <div className="flex items-center gap-3">
+                          <LoadingSpinner containerClassName="flex-shrink-0" size={24} />
+                          <h3 className="font-semibold text-lg text-primary">
+                            {(locale === "ar"
+                              ? project?.ar_name ?? project?.en_name
+                              : project?.en_name ?? project?.ar_name) ?? ""}
+                          </h3>
+                          <span className="text-sm text-gray-500">
+                            {locale === "ar" ? "جاري التحميل..." : "Loading..."}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
                     {/* Visual indicator arrow pointing to details */}
                     {selectedProject?.id === project.id && (
                       <div className="hidden xl:block absolute -right-6 top-1/2 -translate-y-1/2 z-10">
@@ -994,6 +1089,8 @@ export default function ProjectsList({ clientId }) {
                           </div>
                         )}
                     </div>
+                      </>
+                    )}
                   </div>
                 ))}
 
@@ -1020,7 +1117,7 @@ export default function ProjectsList({ clientId }) {
           </div>
 
           {/* Right Panel - Details/Map/etc */}
-        {projectList.length > 0 && (
+        {displayList.length > 0 && (
           <div
             className={`flex-1 h-fit overflow-hidden bg-white rounded-lg shadow-sm border-2 transition-all duration-300 ${
               selectedProject
@@ -1628,7 +1725,7 @@ export default function ProjectsList({ clientId }) {
         onClose={() => setIsImportOpen(false)}
         clientId={clientId}
         onImported={handleImported}
-        existingProjectIds={projectList.map((p) => p.id)}
+        existingProjectIds={displayList.map((p) => p.id)}
       />
     </>
   );
