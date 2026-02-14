@@ -340,7 +340,7 @@ export default function AddPaymentPlanDialog({
         className="space-y-3 -mb-4"
       >
         {/* Basic Information */}
-        <FormInput
+        <LenaTextField
           type="number"
           name="downpayment_percentage"
           label={t.formLabels?.downpaymentPercentage || "Down Payment (%)"}
@@ -355,7 +355,7 @@ export default function AddPaymentPlanDialog({
         />
 
         <div className="grid grid-cols-2 gap-1.5">
-          <FormInput
+          <LenaTextField
             type="number"
             name="installment_years"
             label={t.formLabels?.installmentYears || "Installment Years"}
@@ -368,7 +368,7 @@ export default function AddPaymentPlanDialog({
             error={errors.installment_years}
           />
 
-          <FormInput
+          <LenaTextField
             type="number"
             name="installments_increasing_percentage"
             label={t.formLabels?.installmentsIncreasingPercentage || "Installments Increasing (%)"}
@@ -385,35 +385,6 @@ export default function AddPaymentPlanDialog({
 
 
 
-      <div className="grid grid-cols-2 gap-1.5">
-          <FormInput
-            type="number"
-            name="delivery_payment_percentage"
-            label={t.formLabels?.deliveryPaymentPercentage || "Delivery Payment (%)"}
-            value={formData.delivery_payment_percentage}
-            onChange={handleChange}
-            required
-            placeholder="8"
-            min="0"
-            max="100"
-            step="0.1"
-            error={errors.delivery_payment_percentage}
-          />
-
-          <FormInput
-            type="number"
-            name="maintenance_fee"
-            label={t.formLabels?.maintenanceFee || "Maintenance Fee (%)"}
-            value={formData.maintenance_fee}
-            onChange={handleChange}
-            required
-            placeholder="5"
-            min="0"
-            max="100"
-            step="0.1"
-            error={errors.maintenance_fee}
-          />
-        </div>
 
 
 
@@ -438,32 +409,34 @@ export default function AddPaymentPlanDialog({
         <div className="grid grid-cols-2 gap-1.5">
           <LenaTextField
             type="number"
-            name="installments_increasing_percentage"
-            label={t.formLabels?.installmentsIncreasingPercentage || "Installments Increasing (%)"}
-            value={formData.installments_increasing_percentage}
-            onChange={handleChange}
-            placeholder="0"
-            min="0"
-            max="100"
-            step="0.1"
-            error={errors.installments_increasing_percentage}
-          />
-
-          <LenaTextField
-            type="number"
             name="delivery_payment_percentage"
             label={t.formLabels?.deliveryPaymentPercentage || "Delivery Payment (%)"}
             value={formData.delivery_payment_percentage}
             onChange={handleChange}
-            placeholder="0"
+            required
+            placeholder="8"
             min="0"
             max="100"
             step="0.1"
             error={errors.delivery_payment_percentage}
           />
+
+          <LenaTextField
+            type="number"
+            name="maintenance_fee"
+            label={t.formLabels?.maintenanceFee || "Maintenance Fee (%)"}
+            value={formData.maintenance_fee}
+            onChange={handleChange}
+            required
+            placeholder="5"
+            min="0"
+            max="100"
+            step="0.1"
+            error={errors.maintenance_fee}
+          />
         </div>
 
-        <FormInput
+        <LenaTextField
           type="number"
           name="cache_discount"
           label={
@@ -480,7 +453,7 @@ export default function AddPaymentPlanDialog({
           error={errors.cache_discount}
         />
 
-        <FormInput
+        <LenaTextField
           name="name"
           label={t.formLabels?.planName || "Plan Name"}
           value={formData.name}
