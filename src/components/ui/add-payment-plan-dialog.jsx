@@ -244,7 +244,6 @@ export default function AddPaymentPlanDialog({
         description: "", // Always send empty string
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
-        reservation_amount_percentage: 0, // Always send 0
         installment_years: parseFloat(formData.installment_years),
         delivery_in_years:
           formData.delivery_in_years === "" ||
@@ -364,7 +363,7 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="8"
-            min="0.0"
+            min="0"
             step="0.1"
             error={errors.installment_years}
           />
@@ -376,10 +375,10 @@ export default function AddPaymentPlanDialog({
             value={formData.installments_increasing_percentage}
             onChange={handleChange}
             required
-            placeholder="0.05"
-            min="0.0"
-            max="1.0"
-            step="0.01"
+            placeholder="5"
+            min="0"
+            max="100"
+            step="0.1"
             error={errors.installments_increasing_percentage}
           />
         </div>
@@ -394,10 +393,10 @@ export default function AddPaymentPlanDialog({
             value={formData.delivery_payment_percentage}
             onChange={handleChange}
             required
-            placeholder="0.08"
-            min="0.0"
-            max="1.0"
-            step="0.01"
+            placeholder="8"
+            min="0"
+            max="100"
+            step="0.1"
             error={errors.delivery_payment_percentage}
           />
 
@@ -408,10 +407,10 @@ export default function AddPaymentPlanDialog({
             value={formData.maintenance_fee}
             onChange={handleChange}
             required
-            placeholder="0.05"
-            min="0.0"
-            max="1.0"
-            step="0.01"
+            placeholder="5"
+            min="0"
+            max="100"
+            step="0.1"
             error={errors.maintenance_fee}
           />
         </div>
