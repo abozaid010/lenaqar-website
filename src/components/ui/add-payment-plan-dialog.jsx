@@ -29,6 +29,8 @@ export default function AddPaymentPlanDialog({
     delivery_in_years: "",
     maintenance_fee: "",
     cache_discount: "40",
+    installments_increasing_percentage: "",
+    delivery_payment_percentage: "",
     is_default: false,
   });
 
@@ -64,6 +66,16 @@ export default function AddPaymentPlanDialog({
             existingPlan.cache_discount !== null
               ? (existingPlan.cache_discount * 100).toString()
               : "40",
+          installments_increasing_percentage:
+            existingPlan.installments_increasing_percentage !== undefined &&
+            existingPlan.installments_increasing_percentage !== null
+              ? (existingPlan.installments_increasing_percentage * 100).toString()
+              : "",
+          delivery_payment_percentage:
+            existingPlan.delivery_payment_percentage !== undefined &&
+            existingPlan.delivery_payment_percentage !== null
+              ? (existingPlan.delivery_payment_percentage * 100).toString()
+              : "",
           is_default: existingPlan.is_default || false,
         });
       } else {
@@ -77,6 +89,8 @@ export default function AddPaymentPlanDialog({
           delivery_in_years: "",
           maintenance_fee: "",
           cache_discount: "40",
+          installments_increasing_percentage: "",
+          delivery_payment_percentage: "",
           is_default: false,
         });
       }
@@ -92,6 +106,8 @@ export default function AddPaymentPlanDialog({
       "downpayment_percentage",
       "maintenance_fee",
       "cache_discount",
+      "installments_increasing_percentage",
+      "delivery_payment_percentage",
     ];
 
     // Validate percentage inputs to stay within 0-100 range
@@ -164,6 +180,8 @@ export default function AddPaymentPlanDialog({
       "downpayment_percentage",
       "maintenance_fee",
       "cache_discount",
+      "installments_increasing_percentage",
+      "delivery_payment_percentage",
     ];
 
     percentageFields.forEach((field) => {
@@ -226,7 +244,6 @@ export default function AddPaymentPlanDialog({
         description: "", // Always send empty string
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
-        reservation_amount_percentage: 0, // Always send 0
         installment_years: parseFloat(formData.installment_years),
         delivery_in_years:
           formData.delivery_in_years === "" ||
@@ -239,6 +256,16 @@ export default function AddPaymentPlanDialog({
           isNaN(parseFloat(formData.cache_discount))
             ? 0.4
             : parseFloat(formData.cache_discount) / 100,
+        installments_increasing_percentage:
+          formData.installments_increasing_percentage === "" ||
+          isNaN(parseFloat(formData.installments_increasing_percentage))
+            ? 0
+            : parseFloat(formData.installments_increasing_percentage) / 100,
+        delivery_payment_percentage:
+          formData.delivery_payment_percentage === "" ||
+          isNaN(parseFloat(formData.delivery_payment_percentage))
+            ? 0
+            : parseFloat(formData.delivery_payment_percentage) / 100,
         is_default: formData.is_default,
       };
 
@@ -313,7 +340,7 @@ export default function AddPaymentPlanDialog({
         className="space-y-3 -mb-4"
       >
         {/* Basic Information */}
-        <FormInput
+        <LenaTextField
           type="number"
           name="downpayment_percentage"
           label={t.formLabels?.downpaymentPercentage || "Down Payment (%)"}
@@ -321,14 +348,14 @@ export default function AddPaymentPlanDialog({
           onChange={handleChange}
           required
           placeholder="5"
-          min="0"
+          min="-1"
           max="100"
           step="0.1"
           error={errors.downpayment_percentage}
         />
 
         <div className="grid grid-cols-2 gap-1.5">
-          <FormInput
+          <LenaTextField
             type="number"
             name="installment_years"
             label={t.formLabels?.installmentYears || "Installment Years"}
@@ -336,25 +363,31 @@ export default function AddPaymentPlanDialog({
             onChange={handleChange}
             required
             placeholder="8"
-            min="1"
+            min="-1"
             step="0.1"
             error={errors.installment_years}
           />
 
-          <FormInput
+          <LenaTextField
             type="number"
-            name="maintenance_fee"
-            label={t.formLabels?.maintenanceFee || "Maintenance Fee (%)"}
-            value={formData.maintenance_fee}
+            name="installments_increasing_percentage"
+            label={t.formLabels?.installmentsIncreasingPercentage || "Installments Increasing (%)"}
+            value={formData.installments_increasing_percentage}
             onChange={handleChange}
             required
             placeholder="5"
-            min="0"
+            min="-1"
             max="100"
             step="0.1"
-            error={errors.maintenance_fee}
+            error={errors.installments_increasing_percentage}
           />
         </div>
+
+
+
+
+
+
 
         <LenaTextField
           type="number"
@@ -373,7 +406,37 @@ export default function AddPaymentPlanDialog({
           }
         />
 
-        <FormInput
+        <div className="grid grid-cols-2 gap-1.5">
+          <LenaTextField
+            type="number"
+            name="delivery_payment_percentage"
+            label={t.formLabels?.deliveryPaymentPercentage || "Delivery Payment (%)"}
+            value={formData.delivery_payment_percentage}
+            onChange={handleChange}
+            required
+            placeholder="8"
+            min="-1"
+            max="100"
+            step="0.1"
+            error={errors.delivery_payment_percentage}
+          />
+
+          <LenaTextField
+            type="number"
+            name="maintenance_fee"
+            label={t.formLabels?.maintenanceFee || "Maintenance Fee (%)"}
+            value={formData.maintenance_fee}
+            onChange={handleChange}
+            required
+            placeholder="5"
+            min="-1"
+            max="100"
+            step="0.1"
+            error={errors.maintenance_fee}
+          />
+        </div>
+
+        <LenaTextField
           type="number"
           name="cache_discount"
           label={
@@ -384,13 +447,13 @@ export default function AddPaymentPlanDialog({
           onChange={handleChange}
           required
           placeholder="40"
-          min="0"
+          min="-1"
           max="100"
           step="0.1"
           error={errors.cache_discount}
         />
 
-        <FormInput
+        <LenaTextField
           name="name"
           label={t.formLabels?.planName || "Plan Name"}
           value={formData.name}

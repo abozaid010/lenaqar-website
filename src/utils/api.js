@@ -861,6 +861,48 @@ export async function fetchNews() {
   }
 }
 
+// Payment Plans API //
+export async function fetchPaymentPlans({ limit = 100 } = {}) {
+  try {
+    const response = await axiosInstance.get(`/payment-plans/?limit=${limit}`);
+    
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch payment plans:", error.message);
+    throw error;
+  }
+}
+
+export async function createPaymentPlan(paymentPlanData) {
+  try {
+    const response = await axiosInstance.post('/payment-plans/', paymentPlanData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create payment plan:", error.message);
+    return { 
+      error: error.response?.data?.error_message || error.message,
+      status: false
+    };
+  }
+}
+
+export async function updatePaymentPlan(id, paymentPlanData) {
+  try {
+    const response = await axiosInstance.patch(`/payment-plans/${id}`, paymentPlanData);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update payment plan:", error.message);
+    return { 
+      error: error.response?.data?.error_message || error.message,
+      status: false
+    };
+  }
+}
+
 // Data Projection API (Map) //
 
 

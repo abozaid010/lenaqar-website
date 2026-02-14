@@ -94,12 +94,15 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   // specific sell form data
   const [SellFormData, setSellFormData] = useState(() => ({
-    downPayment: unitData?.downPayment || "",
     totalPrice: unitData?.totalPrice || "",
+    downPayment: unitData?.downPayment || "",
     deliveryDate: unitData?.deliveryDate
       ? new Date(unitData.deliveryDate).toISOString().split("T")[0]
       : "",
-    paymentPlans: unitData?.paymentPlans || [],
+    paid_amount: unitData?.paid_amount || "",
+    remaining_amount: unitData?.remaining_amount || "",
+    installment_years: unitData?.installment_years || "",
+    over_price: unitData?.over_price || "",
   }));
 
   // specific rent form data
@@ -297,7 +300,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Validate required fields for step 2
     if (currentStep === 2) {
       if (formData.purpose === "sell") {
-        const requiredFields = ["totalPrice", "deliveryDate"];
+        const requiredFields = ["deliveryDate"];
         const missingFields = requiredFields.filter(
           (field) => !SellFormData[field]
         );
@@ -316,25 +319,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           );
         }
 
-        // Validate paymentPlans
-        if (Array.isArray(SellFormData.paymentPlans) && SellFormData.paymentPlans.length > 0) {
-          SellFormData.paymentPlans.forEach((plan, index) => {
-            if (plan.years === "" || plan.years === 0) {
-              missingFields.push(`years-${index}`);
-            }
-            if (!plan.price || plan.price === 0) {
-              missingFields.push(`price-${index}`);
-            }
-            if (!plan.downPayment || plan.downPayment === 0) {
-              missingFields.push(`downPayment-${index}`);
-            }
-            if (
-              !plan.installment_amount_yearly ||
-              plan.installment_amount_yearly === 0
-            ) {
-              missingFields.push(`installment_amount_yearly-${index}`);
-            }
-          });
+        // Validate payment plan fields
+        if (SellFormData.installment_years && SellFormData.installment_years <= 0) {
+          missingFields.push("installment_years");
         }
 
         if (missingFields.length > 0) {
@@ -343,33 +330,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         }
 
         // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const zeroFields = ["downPayment"];
+        const zeroFields = ["totalPrice", "downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
         const sanitizedData = { ...SellFormData };
         zeroFields.forEach((field) => {
           if (!sanitizedData[field] || sanitizedData[field] === "") {
             sanitizedData[field] = 0;
           }
         });
-        const sanitizedPaymentPlans = Array.isArray(sanitizedData.paymentPlans)
-          ? sanitizedData.paymentPlans.map((plan) => {
-            return {
-              years: plan.years === "" ? 0 : plan.years,
-              price: plan.price === "" ? 0 : plan.price,
-              maintenance: plan.maintenance === "" ? 0 : plan.maintenance,
-              downPayment: plan.downPayment === "" ? 0 : plan.downPayment,
-              installment_amount_yearly:
-                plan.installment_amount_yearly === ""
-                  ? 0
-                  : plan.installment_amount_yearly,
-            };
-          })
-          : [];
-
-        setSellFormData((prev) => ({
-          ...prev,
-          downPayment: sanitizedData.downPayment,
-          paymentPlans: sanitizedPaymentPlans,
-        }));
       } else if (formData.purpose === "rent") {
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
