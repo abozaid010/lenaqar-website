@@ -582,18 +582,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setUploadStatus(initialStatus);
 
     try {
-      const selectedDev = developers.find((d) => d.id === selectedDeveloper);
-      const developerName =
-        locale === "ar"
-          ? selectedDev?.ar_name || selectedDev?.en_name || ""
-          : selectedDev?.en_name || selectedDev?.ar_name || "";
-
-      // Add selected developer (id and name) to each unit (still useful metadata for BE)
+      // Add developer_id to each unit; do not send developer_name inside the unit (API: /v2/import_units_by_developer)
       const unitsWithDeveloper = parsedData.units.map((unit) => ({
         ...unit,
         developer: selectedDeveloper,
         developer_id: selectedDeveloper,
-        developer_name: developerName,
       }));
       const response = await addUnitViaExcel({
         developer_id: selectedDeveloper,
