@@ -18,7 +18,7 @@ import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
-import { addCompound, updatecompound } from "@/utils/api";
+import { addCompound, updatecompound, getClientid } from "@/utils/api";
 import { parseExistingProjectData, parseValidationErrors } from "@/utils/error-parser";
 import { compoundKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
@@ -186,6 +186,15 @@ export default function AddCompoundDialog({
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
+        // Ensure client_id is extracted from token for new projects
+        const tokenClientId = getClientid();
+        const initClientId = tokenClientId || clientId || "";
+        console.log("[useEffect] Initializing new project form with client_id:", {
+          tokenClientId,
+          propClientId: clientId,
+          initClientId,
+        });
+        
         setFormData({
           ar_name: "",
           en_name: "",
@@ -200,7 +209,7 @@ export default function AddCompoundDialog({
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
-          client_id: clientId || "",
+          client_id: initClientId,
           images: [],
           properties_types: [],
           payment_plans: [],
@@ -211,6 +220,8 @@ export default function AddCompoundDialog({
       }
       setErrors({});
     } else {
+      // Ensure client_id is set from token when resetting form
+      const resetClientId = getClientid() || clientId || "";
       setFormData({
         ar_name: "",
         en_name: "",
@@ -227,7 +238,7 @@ export default function AddCompoundDialog({
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
-        client_id: clientId || "",
+        client_id: resetClientId,
         images: [],
         building_types_images: {},
         finishing_type: [],
@@ -594,13 +605,39 @@ export default function AddCompoundDialog({
           )
         : {};
 
+      // Ensure client_id is extracted from token and validated
+      const tokenClientId = getClientid();
+      let finalClientId;
+      
+      if (editMode) {
+        // For edit mode, use existing client_id but validate it's not empty
+        // If existing client_id is empty, fall back to token
+        finalClientId = formData.client_id || tokenClientId || clientId;
+      } else {
+        // For new projects, prioritize token extraction
+        finalClientId = tokenClientId || formData.client_id || clientId;
+      }
+      
       const submissionData = {
         ...formData,
+        client_id: finalClientId,
         images: imagesForApi,
         building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
       };
+
+      console.log("[handleSubmit] Client ID info:", {
+        editMode,
+        tokenClientId,
+        propClientId: clientId,
+        formClientId: formData.client_id,
+        finalClientId,
+        clientIdSource: editMode 
+          ? (formData.client_id ? 'existing_form' : (tokenClientId ? 'token_fallback' : 'prop_fallback'))
+          : (tokenClientId ? 'token' : (formData.client_id ? 'form' : 'prop')),
+        submissionDataKeys: Object.keys(submissionData),
+      });
 
       console.log("[handleSubmit] Submission data prepared:", {
         editMode,
@@ -615,6 +652,7 @@ export default function AddCompoundDialog({
           delivery_date: submissionData.delivery_date,
           gated: submissionData.gated,
           is_active: submissionData.is_active,
+          client_id: submissionData.client_id,
           imagesCount: submissionData.images?.length || 0,
           paymentPlansCount: submissionData.payment_plans?.length || 0,
           propertiesTypesCount: submissionData.properties_types?.length || 0,
@@ -777,6 +815,8 @@ export default function AddCompoundDialog({
 
       console.log("[handleSubmit] Closing dialog and resetting form");
       onClose();
+      // Ensure client_id is set from token when resetting form
+      const resetClientId = getClientid() || clientId || "";
       setFormData({
         ar_name: "",
         en_name: "",
@@ -791,7 +831,7 @@ export default function AddCompoundDialog({
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
-        client_id: clientId || "ai",
+        client_id: resetClientId,
         properties_types: [],
         payment_plans: [],
         building_types_images: {},

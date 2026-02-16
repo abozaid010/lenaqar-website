@@ -3,7 +3,7 @@
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { useI18n } from "@/context/translate-api";
-import { addDeveloper, updateDeveloper } from "@/utils/api";
+import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -19,7 +19,8 @@ export default function AddDeveloperDialog({
   const isEdit = !!developer;
 
   const getClientId = () => {
-    return client_id || LenaCookiesManager.getClientId() || "";
+    // Prioritize token extraction for consistency with add-compound-dialog
+    return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
   };
 
   const [missingLang, setMissingLang] = useState(null);
@@ -209,10 +210,25 @@ export default function AddDeveloperDialog({
     setIsSubmitting(true);
     try {
       let res;
+      
+      // Ensure client_id is extracted from token for new developers
+      const tokenClientId = getClientid();
+      const finalClientId = isEdit ? formData.client_id : (tokenClientId || formData.client_id || client_id);
+      
       const submittedData = {
         ...formData,
+        client_id: finalClientId,
         name: formData.en_name,
       };
+
+      console.log("[handleSubmit] Developer Client ID info:", {
+        isEdit,
+        tokenClientId,
+        propClientId: client_id,
+        formClientId: formData.client_id,
+        finalClientId,
+      });
+
       if (isEdit) {
         res = await updateDeveloper(submittedData, developer.id);
       } else {
