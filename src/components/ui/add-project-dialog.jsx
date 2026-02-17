@@ -114,6 +114,7 @@ export default function AddCompoundDialog({
     en_name: projectData?.en_name || projectData?.project?.en_name || "",
     description: projectData?.description || projectData?.project?.description || "",
     developer_id: projectData?.developer_id || projectData?.project?.developer_id || "",
+    developer_name: projectData?.developer_name || projectData?.project?.developer_name || "",
     city: projectData?.city || projectData?.project?.city || defaultCity || "",
     country: projectData?.country || projectData?.project?.country || "Egypt",
     district: projectData?.district || projectData?.project?.district || defaultDistrict || "",
@@ -155,6 +156,7 @@ export default function AddCompoundDialog({
           en_name: projectData?.en_name || projectData?.project?.en_name || "",
           description: projectData.description || projectData?.project?.description || "",
           developer_id: projectData.developer_id || projectData?.project?.developer_id || "",
+          developer_name: projectData.developer_name || projectData?.project?.developer_name || "",
           city: projectData.city || projectData?.project?.city || defaultCity || "",
           country: projectData.country || projectData?.project?.country || "Egypt",
           district: projectData.district || projectData?.project?.district || defaultDistrict || "",
@@ -200,6 +202,7 @@ export default function AddCompoundDialog({
           en_name: "",
           description: "",
           developer_id: "",
+          developer_name: "",
           city: defaultCity || "",
           country: "Egypt",
           district: defaultDistrict || "",
@@ -227,6 +230,7 @@ export default function AddCompoundDialog({
         en_name: "",
         description: "",
         developer_id: "",
+        developer_name: "",
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
@@ -259,6 +263,7 @@ export default function AddCompoundDialog({
         en_name: projectData?.en_name || projectData?.project?.en_name || prev.en_name || "",
         description: projectData?.description || projectData?.project?.description || prev.description || "",
         developer_id: projectData?.developer_id || projectData?.project?.developer_id || prev.developer_id || "",
+        developer_name: projectData?.developer_name || projectData?.project?.developer_name || prev.developer_name || "",
         city: projectData?.city || projectData?.project?.city || prev.city || defaultCity || "",
         country: projectData?.country || projectData?.project?.country || prev.country || "Egypt",
         district: projectData?.district || projectData?.project?.district || prev.district || defaultDistrict || "",
@@ -352,6 +357,16 @@ export default function AddCompoundDialog({
         city: value,
         district: "", // Reset district when city changes
       });
+    } 
+    if (name === "developer_id") {
+      // When developer changes, set both developer_id and developer_name for API
+      const selectedDeveloper = developers?.find((dev) => dev.id === value);
+      const developerName = selectedDeveloper?.en_name || "";
+      setFormData({
+        ...formData,
+        developer_id: value,
+        developer_name: developerName,
+      });
     } else {
       setFormData({
         ...formData,
@@ -441,12 +456,12 @@ export default function AddCompoundDialog({
     const newErrors = {};
 
     if (!formData.ar_name.trim()) {
-      newErrors.ar_name = "Arabic compound name is required";
+      newErrors.ar_name = "Arabic project name is required";
       setMissingLang("ar");
     }
 
     if (!formData.en_name.trim()) {
-      newErrors.en_name = "English compound name is required";
+      newErrors.en_name = "English project name is required";
       setMissingLang("en");
     }
 
@@ -618,9 +633,9 @@ export default function AddCompoundDialog({
         finalClientId = tokenClientId || formData.client_id || clientId;
       }
 
-      // Find the developer_name from the developer_id
+      // API expects both developer_id and developer_name
       const selectedDeveloper = developers?.find(dev => dev.id === formData.developer_id);
-      const developerName = selectedDeveloper?.en_name || "";
+      const developerName = formData.developer_name || selectedDeveloper?.en_name || "";
 
       const submissionData = {
         ...formData,
@@ -830,6 +845,7 @@ export default function AddCompoundDialog({
         en_name: "",
         description: "",
         developer_id: "",
+        developer_name: "",
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
@@ -948,6 +964,7 @@ export default function AddCompoundDialog({
       return {
         ...prev,
         developer_id: newDeveloper.id,
+        developer_name: newDeveloper.en_name || "",
       };
     });
   };
