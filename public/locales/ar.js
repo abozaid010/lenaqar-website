@@ -787,7 +787,7 @@ export default {
   phases: "المراحل",
   viewInCRM: "عرض في لوحة التحكم",
   noPhsesProject: "لا تتوفر مراحل لهذا المشروع",
-  compoundUpdated: "تم تعديل المشروع بنجاح",
+  projectUpdated: "تم تعديل المشروع بنجاح",
   compoundAdded: "تم اضافة المشروع بنجاح",
   updating: "تعديل...",
   updatesuccess: "",

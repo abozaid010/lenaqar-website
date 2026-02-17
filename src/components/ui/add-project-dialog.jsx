@@ -18,9 +18,9 @@ import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
-import { addCompound, updatecompound, getClientid } from "@/utils/api";
+import { addCompound as addProject, updatecompound as updateProject, getClientid } from "@/utils/api";
 import { parseExistingProjectData, parseValidationErrors } from "@/utils/error-parser";
-import { compoundKeys } from "@/utils/query-utils";
+import { compoundKeys as projectKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -30,14 +30,14 @@ export default function AddCompoundDialog({
   clientId,
   isOpen,
   onClose,
-  compoundData,
-  onAdd = () => {},
+  compoundData: projectData,
+  onAdd = () => { },
   defaultCity,
   defaultDistrict,
 }) {
   const GOOGLE_MAPS_REQUIRED_PREFIX = "https://maps.app.goo.gl";
   const queryClient = useQueryClient();
-  
+
   const { isLoading: delveloperLoading, data: developersData } =
     useDevelopers(clientId);
 
@@ -71,7 +71,7 @@ export default function AddCompoundDialog({
     });
   }, []);
 
-  const editMode = !!(compoundData && compoundData.id);
+  const editMode = !!(projectData && projectData.id);
 
   // Helper function to normalize finishing_type to always be an array
   const normalizeFinishingType = (value) => {
@@ -101,7 +101,7 @@ export default function AddCompoundDialog({
     delivery_date: null,
     area: null,
     payment_plans: null,
-    developer_name: null,
+    developer_id: null,
     google_map_link: null,
     master_plan: null,
     properties_types: null,
@@ -110,79 +110,79 @@ export default function AddCompoundDialog({
   });
 
   const [formData, setFormData] = useState({
-    ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || "",
-    en_name: compoundData?.en_name || compoundData?.project?.en_name || "",
-    description: compoundData?.description || compoundData?.project?.description || "",
-    developer_name: compoundData?.developer_name || compoundData?.project?.developer_name || "",
-    city: compoundData?.city || compoundData?.project?.city || defaultCity || "",
-    country: compoundData?.country || compoundData?.project?.country || "Egypt",
-    district: compoundData?.district || compoundData?.project?.district || defaultDistrict || "",
-    area: compoundData?.area || compoundData?.project?.area || "",
-    gated: compoundData?.gated !== undefined && compoundData?.gated !== null 
-      ? compoundData.gated 
-      : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
-        ? compoundData.project.gated 
+    ar_name: projectData?.ar_name || projectData?.project?.ar_name || "",
+    en_name: projectData?.en_name || projectData?.project?.en_name || "",
+    description: projectData?.description || projectData?.project?.description || "",
+    developer_id: projectData?.developer_id || projectData?.project?.developer_id || "",
+    city: projectData?.city || projectData?.project?.city || defaultCity || "",
+    country: projectData?.country || projectData?.project?.country || "Egypt",
+    district: projectData?.district || projectData?.project?.district || defaultDistrict || "",
+    area: projectData?.area || projectData?.project?.area || "",
+    gated: projectData?.gated !== undefined && projectData?.gated !== null
+      ? projectData.gated
+      : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
+        ? projectData.project.gated
         : true),
-    is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null 
-      ? compoundData.is_active 
-      : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
-        ? compoundData.project.is_active 
+    is_active: projectData?.is_active !== undefined && projectData?.is_active !== null
+      ? projectData.is_active
+      : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
+        ? projectData.project.is_active
         : true),
-    video_url: compoundData?.video_url || compoundData?.project?.video_url || "",
-    google_map_link: compoundData?.google_map_link || compoundData?.project?.google_map_link || "",
-    master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || { url: null, fileId: null },
-    client_id: compoundData?.client_id || compoundData?.project?.client_id || clientId || "",
-    images: compoundData?.images || compoundData?.project?.images || [],
-    properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || [],
-    payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || [],
-    building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
-    finishing_type: normalizeFinishingType(compoundData?.finishing_type || compoundData?.project?.finishing_type),
-    delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
-      ? compoundData.delivery_date 
-      : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
-        ? compoundData.project.delivery_date 
+    video_url: projectData?.video_url || projectData?.project?.video_url || "",
+    google_map_link: projectData?.google_map_link || projectData?.project?.google_map_link || "",
+    master_plan: projectData?.master_plan || projectData?.project?.master_plan || { url: null, fileId: null },
+    client_id: projectData?.client_id || projectData?.project?.client_id || clientId || "",
+    images: projectData?.images || projectData?.project?.images || [],
+    properties_types: projectData?.properties_types || projectData?.project?.properties_types || [],
+    payment_plans: projectData?.payment_plans || projectData?.project?.payment_plans || [],
+    building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || {},
+    finishing_type: normalizeFinishingType(projectData?.finishing_type || projectData?.project?.finishing_type),
+    delivery_date: projectData?.delivery_date !== undefined && projectData?.delivery_date !== null
+      ? projectData.delivery_date
+      : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
+        ? projectData.project.delivery_date
         : 4),
   });
 
   useEffect(() => {
     if (isOpen) {
       // When the dialog is opening
-      if (editMode && compoundData) {
+      if (editMode && projectData) {
         // Load existing data for editing
         setFormData((prev) => ({
           ...prev,
-          ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || "",
-          en_name: compoundData?.en_name || compoundData?.project?.en_name || "",
-          description: compoundData.description || compoundData?.project?.description || "",
-          developer_name: compoundData.developer_name || compoundData?.project?.developer_name || "",
-          city: compoundData.city || compoundData?.project?.city || defaultCity || "",
-          country: compoundData.country || compoundData?.project?.country || "Egypt",
-          district: compoundData.district || compoundData?.project?.district || defaultDistrict || "",
-          area: compoundData.area || compoundData?.project?.area || "",
-          gated: compoundData.gated !== undefined && compoundData.gated !== null 
-            ? compoundData.gated 
-            : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
-              ? compoundData.project.gated 
+          ar_name: projectData?.ar_name || projectData?.project?.ar_name || "",
+          en_name: projectData?.en_name || projectData?.project?.en_name || "",
+          description: projectData.description || projectData?.project?.description || "",
+          developer_id: projectData.developer_id || projectData?.project?.developer_id || "",
+          city: projectData.city || projectData?.project?.city || defaultCity || "",
+          country: projectData.country || projectData?.project?.country || "Egypt",
+          district: projectData.district || projectData?.project?.district || defaultDistrict || "",
+          area: projectData.area || projectData?.project?.area || "",
+          gated: projectData.gated !== undefined && projectData.gated !== null
+            ? projectData.gated
+            : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
+              ? projectData.project.gated
               : true),
-          is_active: compoundData.is_active !== undefined && compoundData.is_active !== null 
-            ? compoundData.is_active 
-            : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
-              ? compoundData.project.is_active 
+          is_active: projectData.is_active !== undefined && projectData.is_active !== null
+            ? projectData.is_active
+            : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
+              ? projectData.project.is_active
               : true),
-          video_url: compoundData.video_url || compoundData?.project?.video_url || "",
-          google_map_link: compoundData.google_map_link || compoundData?.project?.google_map_link || "",
-          master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || { url: null, fileId: null },
-          client_id: compoundData.client_id || compoundData?.project?.client_id || clientId || "",
-        images: compoundData.images || compoundData?.project?.images || [],
-        properties_types: compoundData.properties_types || compoundData?.project?.properties_types || [],
-        payment_plans: compoundData.payment_plans || compoundData?.project?.payment_plans || [],
-        building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || {},
-        finishing_type: compoundData.finishing_type || compoundData?.project?.finishing_type || [],
-        delivery_date: compoundData.delivery_date !== undefined && compoundData.delivery_date !== null 
-          ? compoundData.delivery_date 
-          : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
-            ? compoundData.project.delivery_date 
-            : 4),
+          video_url: projectData.video_url || projectData?.project?.video_url || "",
+          google_map_link: projectData.google_map_link || projectData?.project?.google_map_link || "",
+          master_plan: projectData?.master_plan || projectData?.project?.master_plan || { url: null, fileId: null },
+          client_id: projectData.client_id || projectData?.project?.client_id || clientId || "",
+          images: projectData.images || projectData?.project?.images || [],
+          properties_types: projectData.properties_types || projectData?.project?.properties_types || [],
+          payment_plans: projectData.payment_plans || projectData?.project?.payment_plans || [],
+          building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || {},
+          finishing_type: projectData.finishing_type || projectData?.project?.finishing_type || [],
+          delivery_date: projectData.delivery_date !== undefined && projectData.delivery_date !== null
+            ? projectData.delivery_date
+            : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
+              ? projectData.project.delivery_date
+              : 4),
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -194,12 +194,12 @@ export default function AddCompoundDialog({
           propClientId: clientId,
           initClientId,
         });
-        
+
         setFormData({
           ar_name: "",
           en_name: "",
           description: "",
-          developer_name: "",
+          developer_id: "",
           city: defaultCity || "",
           country: "Egypt",
           district: defaultDistrict || "",
@@ -226,7 +226,7 @@ export default function AddCompoundDialog({
         ar_name: "",
         en_name: "",
         description: "",
-        developer_name: "",
+        developer_id: "",
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
@@ -247,49 +247,49 @@ export default function AddCompoundDialog({
 
       setErrors({});
     }
-  }, [isOpen, editMode, compoundData, defaultCity, defaultDistrict, clientId]);
+  }, [isOpen, editMode, projectData, defaultCity, defaultDistrict, clientId]);
 
   // Additional effect to update form when compoundData changes while dialog is open
   useEffect(() => {
-    if (isOpen && editMode && compoundData) {
+    if (isOpen && editMode && projectData) {
       // Update form data when compoundData changes
       setFormData((prev) => ({
         ...prev,
-        ar_name: compoundData?.ar_name || compoundData?.project?.ar_name || prev.ar_name || "",
-        en_name: compoundData?.en_name || compoundData?.project?.en_name || prev.en_name || "",
-        description: compoundData?.description || compoundData?.project?.description || prev.description || "",
-        developer_name: compoundData?.developer_name || compoundData?.project?.developer_name || prev.developer_name || "",
-        city: compoundData?.city || compoundData?.project?.city || prev.city || defaultCity || "",
-        country: compoundData?.country || compoundData?.project?.country || prev.country || "Egypt",
-        district: compoundData?.district || compoundData?.project?.district || prev.district || defaultDistrict || "",
-        area: compoundData?.area || compoundData?.project?.area || prev.area || "",
-        gated: compoundData?.gated !== undefined && compoundData?.gated !== null 
-          ? compoundData.gated 
-          : (compoundData?.project?.gated !== undefined && compoundData?.project?.gated !== null 
-            ? compoundData.project.gated 
+        ar_name: projectData?.ar_name || projectData?.project?.ar_name || prev.ar_name || "",
+        en_name: projectData?.en_name || projectData?.project?.en_name || prev.en_name || "",
+        description: projectData?.description || projectData?.project?.description || prev.description || "",
+        developer_id: projectData?.developer_id || projectData?.project?.developer_id || prev.developer_id || "",
+        city: projectData?.city || projectData?.project?.city || prev.city || defaultCity || "",
+        country: projectData?.country || projectData?.project?.country || prev.country || "Egypt",
+        district: projectData?.district || projectData?.project?.district || prev.district || defaultDistrict || "",
+        area: projectData?.area || projectData?.project?.area || prev.area || "",
+        gated: projectData?.gated !== undefined && projectData?.gated !== null
+          ? projectData.gated
+          : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
+            ? projectData.project.gated
             : prev.gated !== undefined ? prev.gated : true),
-        is_active: compoundData?.is_active !== undefined && compoundData?.is_active !== null 
-          ? compoundData.is_active 
-          : (compoundData?.project?.is_active !== undefined && compoundData?.project?.is_active !== null 
-            ? compoundData.project.is_active 
+        is_active: projectData?.is_active !== undefined && projectData?.is_active !== null
+          ? projectData.is_active
+          : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
+            ? projectData.project.is_active
             : prev.is_active !== undefined ? prev.is_active : true),
-        video_url: compoundData?.video_url || compoundData?.project?.video_url || prev.video_url || "",
-        google_map_link: compoundData?.google_map_link || compoundData?.project?.google_map_link || prev.google_map_link || "",
-        master_plan: compoundData?.master_plan || compoundData?.project?.master_plan || prev.master_plan || { url: null, fileId: null },
-        client_id: compoundData?.client_id || compoundData?.project?.client_id || prev.client_id || clientId || "",
-        images: compoundData?.images || compoundData?.project?.images || prev.images || [],
-        properties_types: compoundData?.properties_types || compoundData?.project?.properties_types || prev.properties_types || [],
-        payment_plans: compoundData?.payment_plans || compoundData?.project?.payment_plans || prev.payment_plans || [],
-        building_types_images: compoundData?.building_types_images || compoundData?.project?.building_types_images || prev.building_types_images || {},
-        finishing_type: compoundData?.finishing_type || compoundData?.project?.finishing_type || prev.finishing_type || [],
-        delivery_date: compoundData?.delivery_date !== undefined && compoundData?.delivery_date !== null 
-          ? compoundData.delivery_date 
-          : (compoundData?.project?.delivery_date !== undefined && compoundData?.project?.delivery_date !== null 
-            ? compoundData.project.delivery_date 
+        video_url: projectData?.video_url || projectData?.project?.video_url || prev.video_url || "",
+        google_map_link: projectData?.google_map_link || projectData?.project?.google_map_link || prev.google_map_link || "",
+        master_plan: projectData?.master_plan || projectData?.project?.master_plan || prev.master_plan || { url: null, fileId: null },
+        client_id: projectData?.client_id || projectData?.project?.client_id || prev.client_id || clientId || "",
+        images: projectData?.images || projectData?.project?.images || prev.images || [],
+        properties_types: projectData?.properties_types || projectData?.project?.properties_types || prev.properties_types || [],
+        payment_plans: projectData?.payment_plans || projectData?.project?.payment_plans || prev.payment_plans || [],
+        building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || prev.building_types_images || {},
+        finishing_type: projectData?.finishing_type || projectData?.project?.finishing_type || prev.finishing_type || [],
+        delivery_date: projectData?.delivery_date !== undefined && projectData?.delivery_date !== null
+          ? projectData.delivery_date
+          : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
+            ? projectData.project.delivery_date
             : prev.delivery_date !== undefined ? prev.delivery_date : 4),
       }));
     }
-  }, [compoundData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
+  }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
 
   // Load districts when city changes
   useEffect(() => {
@@ -383,7 +383,7 @@ export default function AddCompoundDialog({
       "delivery_date",
       "area",
       "payment_plans",
-      "developer_name",
+      "developer_id",
       "google_map_link",
       "master_plan",
       "properties_types",
@@ -400,7 +400,7 @@ export default function AddCompoundDialog({
 
     // Try to find the actual input/textarea/select element within the container
     let targetElement = fieldRef;
-    
+
     // Check if the container has a child component with ref methods (LenaTextField, LenaTextarea)
     const inputSelectors = [
       'input',
@@ -428,7 +428,7 @@ export default function AddCompoundDialog({
     // via useEffect when error prop changes, so we don't need to manually add classes
     // But we can add a visual indicator to the container
     fieldRef.classList.add("ring-2", "ring-red-500", "rounded-md", "p-1");
-    
+
     // Remove ring after animation completes
     setTimeout(() => {
       if (fieldRef) {
@@ -541,8 +541,8 @@ export default function AddCompoundDialog({
       }
     }
 
-    if (!formData.developer_name || !formData.developer_name.trim()) {
-      newErrors.developer_name =
+    if (!formData.developer_id || !formData.developer_id.trim()) {
+      newErrors.developer_id =
         t.formValidation?.developerRequired ||
         "Developer is required";
     }
@@ -574,7 +574,7 @@ export default function AddCompoundDialog({
 
     console.log("[handleSubmit] Form submission started", {
       editMode,
-      compoundDataId: compoundData?.id,
+      compoundDataId: projectData?.id,
     });
 
     const formErrors = validateForm();
@@ -596,19 +596,19 @@ export default function AddCompoundDialog({
       }));
       const buildingTypesImagesForApi = formData.building_types_images
         ? Object.fromEntries(
-            Object.entries(formData.building_types_images).map(
-              ([key, arr]) => [
-                key,
-                (arr || []).map(({ url, fileId }) => ({ url, fileId })),
-              ]
-            )
+          Object.entries(formData.building_types_images).map(
+            ([key, arr]) => [
+              key,
+              (arr || []).map(({ url, fileId }) => ({ url, fileId })),
+            ]
           )
+        )
         : {};
 
       // Ensure client_id is extracted from token and validated
       const tokenClientId = getClientid();
       let finalClientId;
-      
+
       if (editMode) {
         // For edit mode, use existing client_id but validate it's not empty
         // If existing client_id is empty, fall back to token
@@ -617,9 +617,15 @@ export default function AddCompoundDialog({
         // For new projects, prioritize token extraction
         finalClientId = tokenClientId || formData.client_id || clientId;
       }
-      
+
+      // Find the developer_name from the developer_id
+      const selectedDeveloper = developers?.find(dev => dev.id === formData.developer_id);
+      const developerName = selectedDeveloper?.en_name || "";
+
       const submissionData = {
         ...formData,
+        developer_id: formData.developer_id,
+        developer_name: developerName,
         client_id: finalClientId,
         images: imagesForApi,
         building_types_images: buildingTypesImagesForApi,
@@ -633,7 +639,7 @@ export default function AddCompoundDialog({
         propClientId: clientId,
         formClientId: formData.client_id,
         finalClientId,
-        clientIdSource: editMode 
+        clientIdSource: editMode
           ? (formData.client_id ? 'existing_form' : (tokenClientId ? 'token_fallback' : 'prop_fallback'))
           : (tokenClientId ? 'token' : (formData.client_id ? 'form' : 'prop')),
         submissionDataKeys: Object.keys(submissionData),
@@ -641,11 +647,13 @@ export default function AddCompoundDialog({
 
       console.log("[handleSubmit] Submission data prepared:", {
         editMode,
-        projectId: compoundData?.id,
+        projectId: projectData?.id,
         submissionDataKeys: Object.keys(submissionData),
         submissionDataSummary: {
           ar_name: submissionData.ar_name,
           en_name: submissionData.en_name,
+          developer_id: submissionData.developer_id,
+          developer_name: submissionData.developer_name,
           city: submissionData.city,
           district: submissionData.district,
           area: submissionData.area,
@@ -661,20 +669,20 @@ export default function AddCompoundDialog({
 
       let res;
       if (editMode) {
-        if (!compoundData?.id) {
+        if (!projectData?.id) {
           console.error("[handleSubmit] Missing project ID for update:", {
-            compoundData,
-            compoundDataId: compoundData?.id,
+            projectData: projectData,
+            projectDataId: projectData?.id,
           });
           toast.error("Project ID is missing. Cannot update project.");
           setIsSubmitting(false);
           return;
         }
-        console.log("[handleSubmit] Calling updatecompound with ID:", compoundData.id);
-        res = await updatecompound(submissionData, compoundData.id);
+        console.log("[handleSubmit] Calling updatecompound with ID:", projectData.id);
+        res = await updateProject(submissionData, projectData.id);
       } else {
         console.log("[handleSubmit] Calling addCompound...");
-        res = await addCompound(submissionData);
+        res = await addProject(submissionData);
       }
 
       console.log("[handleSubmit] API Response received:", {
@@ -704,7 +712,7 @@ export default function AddCompoundDialog({
         setIsSubmitting(false);
         return; // Don't show toast, just show preview
       }
-      
+
       // Check for validation errors from API
       if (res?.statusCode === 400 && res?.validation_errors) {
         console.log("[handleSubmit] Found validation errors in response:", res.validation_errors);
@@ -728,7 +736,7 @@ export default function AddCompoundDialog({
         }, 100);
         return; // Don't show generic toast
       }
-      
+
       // Also check if res itself has existing_project_data (in case statusCode wasn't set)
       if (res?.existing_project_data && (res?.error || res?.error_message)) {
         console.log("[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:", {
@@ -739,25 +747,25 @@ export default function AddCompoundDialog({
         setIsSubmitting(false);
         return; // Don't show toast, just show preview
       }
-      
+
       // Check for success - handle different response formats
       // Format 1: { status: true, data: {...} }
       // Format 2: { status: 200, data: {...} }
       // Format 3: { id: ..., name: ..., ... } (direct data object)
       // Format 4: { error: "..." } (error response)
-      
+
       const hasError = res?.error || res?.error_message;
       const hasSuccessStatus = res?.status === true || res?.status === 200;
       const hasDataObject = res?.data && typeof res.data === 'object';
       const hasDirectData = res?.id || (res && !hasError && typeof res === 'object' && !res.status);
-      
+
       if (hasError) {
         const errorMessage =
-          res?.error || 
+          res?.error ||
           res?.error_message ||
           res?.message ||
           "An error occurred while processing your request.";
-        
+
         // Check for validation errors in the error message
         const validationErrorKeys = parseValidationErrors(errorMessage);
         if (Object.keys(validationErrorKeys).length > 0) {
@@ -782,7 +790,7 @@ export default function AddCompoundDialog({
           }, 100);
           return; // Don't show generic toast
         }
-        
+
         console.error("[handleSubmit] Update failed with error (no preview available):", {
           errorMessage,
           fullResponse: res,
@@ -796,13 +804,13 @@ export default function AddCompoundDialog({
         const projectData = res?.data || res;
         console.log("[handleSubmit] Update successful, calling onAdd with:", projectData);
         onAdd(projectData);
-        
+
         // Invalidate projects query cache to refetch from API
-        queryClient.invalidateQueries({ queryKey: compoundKeys.all });
-        
+        queryClient.invalidateQueries({ queryKey: projectKeys.all });
+
         toast.success(
           editMode
-            ? t.compoundUpdated || "project updated successfully!"
+            ? t.projectUpdated || "project updated successfully!"
             : t.compoundAdded || "project added successfully!"
         );
       } else {
@@ -821,7 +829,7 @@ export default function AddCompoundDialog({
         ar_name: "",
         en_name: "",
         description: "",
-        developer_name: "",
+        developer_id: "",
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
@@ -846,7 +854,7 @@ export default function AddCompoundDialog({
         errorResponse: error.response,
         errorResponseData: error.response?.data,
       });
-      
+
       // Check if the error response contains existing_project_data
       const errorResponseData = error.response?.data;
       if (error.response?.status === 400 && errorResponseData?.error_message) {
@@ -861,7 +869,7 @@ export default function AddCompoundDialog({
           setIsSubmitting(false);
           return; // Don't show toast
         }
-        
+
         // Check for validation errors
         const validationErrorKeys = parseValidationErrors(errorResponseData.error_message);
         if (Object.keys(validationErrorKeys).length > 0) {
@@ -887,7 +895,7 @@ export default function AddCompoundDialog({
           return; // Don't show generic toast
         }
       }
-      
+
       // If we have error response data with error_message, try to parse it
       if (error.response?.data?.error_message) {
         const validationErrorKeys = parseValidationErrors(error.response.data.error_message);
@@ -914,7 +922,7 @@ export default function AddCompoundDialog({
           return;
         }
       }
-      
+
       toast.error(
         editMode
           ? "Failed to update compound. Please try again."
@@ -939,7 +947,7 @@ export default function AddCompoundDialog({
     setFormData((prev) => {
       return {
         ...prev,
-        developer_name: newDeveloper.en_name,
+        developer_id: newDeveloper.id,
       };
     });
   };
@@ -1014,16 +1022,16 @@ export default function AddCompoundDialog({
             disabled={isSubmitting || isUploading || isMasterPlanUploading}
             className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
           >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin" />
-                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
-                </span>
-              ) : editMode ? (
-                t.updateProject
-              ) : (
-                t.buttons?.saveProject || "Save Project"
-              )}
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+              </span>
+            ) : editMode ? (
+              t.updateProject
+            ) : (
+              t.buttons?.saveProject || "Save Project"
+            )}
           </button>
         }
         title={
@@ -1035,7 +1043,7 @@ export default function AddCompoundDialog({
         <div>
           <div className="space-y-2">
             {/* Basic Information */}
-            <div 
+            <div
               className="grid grid-cols-1 gap-2"
               ref={(el) => (fieldRefs.current.ar_name = el)}
             >
@@ -1124,9 +1132,8 @@ export default function AddCompoundDialog({
               <div ref={(el) => (fieldRefs.current.finishing_type = el)} className="flex items-center gap-2 flex-1 min-w-[200px]">
                 <label
                   htmlFor="finishing_type"
-                  className={`text-sm font-medium whitespace-nowrap ${
-                    errors.finishing_type ? "text-red-500" : "text-gray-700"
-                  }`}
+                  className={`text-sm font-medium whitespace-nowrap ${errors.finishing_type ? "text-red-500" : "text-gray-700"
+                    }`}
                 >
                   {t.formLabels?.finishingType || t.finishingType || "Finishing Type"}
                   <span className="text-red-500">*</span>
@@ -1249,12 +1256,11 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Developer */}
-            <div className="relative" ref={(el) => (fieldRefs.current.developer_name = el)}>
+            <div className="relative" ref={(el) => (fieldRefs.current.developer_id = el)}>
               <div className="flex justify-between items-center mb-1">
                 <label
-                  className={`block text-sm font-medium ${
-                    errors.developer_name ? "text-red-500" : "text-gray-700"
-                  }`}
+                  className={`block text-sm font-medium ${errors.developer_id ? "text-red-500" : "text-gray-700"
+                    }`}
                 >
                   {t.formLabels?.developer || "Developer"}{" "}
                   <span className="text-red-500">*</span>
@@ -1268,15 +1274,15 @@ export default function AddCompoundDialog({
                 </button>
               </div>
               <SearchableDropdownSelect
-                name="developer_name"
-                value={formData.developer_name}
+                name="developer_id"
+                value={formData.developer_id}
                 onChange={handleChange}
                 required
-                error={!!errors.developer_name}
-                errorMessage={typeof errors.developer_name === "string" ? errors.developer_name : ""}
+                error={!!errors.developer_id}
+                errorMessage={typeof errors.developer_id === "string" ? errors.developer_id : ""}
                 placeholder={t.formLabels?.selectDeveloper || "Select developer"}
                 options={developers || []}
-                getValue={(developer) => developer.en_name || ""}
+                getValue={(developer) => developer.id || ""}
                 getLabel={(developer, loc) => {
                   if (loc === "ar" && developer.ar_name) {
                     return developer.ar_name;
@@ -1368,11 +1374,10 @@ export default function AddCompoundDialog({
                 {formData.properties_types.map((propertyType) => (
                   <div key={propertyType}>
                     <label
-                      className={`block text-sm font-medium mb-1 ${
-                        errors.building_types_images?.[propertyType]
-                          ? "text-red-600"
-                          : "text-gray-700"
-                      }`}
+                      className={`block text-sm font-medium mb-1 ${errors.building_types_images?.[propertyType]
+                        ? "text-red-600"
+                        : "text-gray-700"
+                        }`}
                     >
                       {getPropertyTypeLabel(propertyType)}
                       <span className="text-xs font-normal text-gray-500 ml-2">
@@ -1413,7 +1418,7 @@ export default function AddCompoundDialog({
               </label>
               <ImageUploader
                 maxImages={8}
-                initialImages={editMode ? compoundData?.images || [] : []}
+                initialImages={editMode ? projectData?.images || [] : []}
                 onImagesChange={(images) =>
                   setFormData((prev) => ({ ...prev, images }))
                 }

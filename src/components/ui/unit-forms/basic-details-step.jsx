@@ -1,6 +1,6 @@
 "use client";
 
-import AddCompoundDialog from "@/components/ui/add-compound-dialog";
+import AddCompoundDialog from "@/components/ui/add-project-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
@@ -22,7 +22,7 @@ export default function BasicDetailsStep({
   updateFormData,
   citiesAndDistricts: _citiesAndDistricts, // Keep for backward compatibility but don't use
   invalidFields = [],
-  setInvalidFields = () => {},
+  setInvalidFields = () => { },
 }) {
   const { t, locale } = useI18n();
   const { getBuildingTypes, getViewTypes } = useLocaleConstants();
