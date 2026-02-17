@@ -852,11 +852,36 @@ export async function getChatHistory(userId) {
 
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
+// Client-side decode JWT payload (no verification; API verifies when token is sent).
+function decodeJwtPayloadClient(token) {
+  if (!token || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+    const payload = JSON.parse(atob(padded));
+    return typeof payload === "object" && payload !== null ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Prefer client_id from access token; fallback to CLIENT_ID cookie. */
+function getClientIdFromToken() {
+  if (typeof window === "undefined") return null;
+  const token = LenaCookiesManager.getAccessToken();
+  const payload = decodeJwtPayloadClient(token);
+  return payload?.client_id ?? payload?.sub ?? null;
+}
+
 // HELPER FUNCTIONS //
 export function getClientid() {
+  const fromToken = getClientIdFromToken();
+  if (fromToken) return fromToken;
   const clientId = LenaCookiesManager.getClientId();
   if (!clientId) {
-    console.error("Client ID not found in cookies");
+    console.error("Client ID not found in access token or cookies");
     return null;
   }
   return clientId;
