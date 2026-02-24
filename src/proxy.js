@@ -19,6 +19,12 @@ const protectedRoutes = [
 export function proxy(request) {
   const { pathname } = request.nextUrl;
 
+  // Subdomain: contact.lenaai.net → serve /contact (CEO digital business card)
+  const host = request.headers.get("host") || "";
+  if (host === "contact.lenaai.net") {
+    return NextResponse.rewrite(new URL("/contact", request.url));
+  }
+
   // Handle image requests with proper MIME types
   if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
     const response = NextResponse.next();
