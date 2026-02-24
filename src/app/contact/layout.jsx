@@ -1,3 +1,6 @@
+// Allow CDN (e.g. Cloudflare) and Next.js to cache this static page
+export const revalidate = 86400; // 24 hours
+
 export const metadata = {
   title: "Abozaid Ibrahim | CEO – Lena AI",
   description:
