@@ -71,11 +71,10 @@ export default function ContactPage() {
         <div className="w-full flex flex-col gap-3">
           <a
             href="/api/contact.vcf"
-            download="Abozaid-Ibrahim.vcf"
             className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-lg border border-white/30 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
           >
             <Download className="w-4 h-4" strokeWidth={1.5} />
-            Save Contact
+            Add to Contacts
           </a>
           <a
             href={appLink}
@@ -89,7 +88,7 @@ export default function ContactPage() {
         </div>
 
         {/* Contact info */}
-        <div className="flex flex-col items-center gap-2 pt-4 border-t border-white/20 w-full text-center">
+        <div className="flex flex-col items-center gap-4 pt-4 border-t border-white/20 w-full text-center">
           <a
             href="mailto:abozaid@lenaai.net"
             className="flex items-center gap-2 text-xs text-white/70 hover:text-white transition-colors"

@@ -9,7 +9,7 @@ export async function GET() {
     return new NextResponse(content, {
       headers: {
         "Content-Type": "text/vcard",
-        "Content-Disposition": 'attachment; filename="Abozaid-Ibrahim.vcf"',
+        "Content-Disposition": 'inline; filename="Abozaid-Ibrahim.vcf"',
       },
     });
   } catch (err) {
