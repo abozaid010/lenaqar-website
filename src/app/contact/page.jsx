@@ -48,18 +48,6 @@ export default function ContactPage() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        {/* Lena AI Logo */}
-        <div className="flex justify-center">
-          <Image
-            src="/images/logo-5.png"
-            alt="Lena AI"
-            width={120}
-            height={120}
-            priority
-            className="object-contain"
-          />
-        </div>
-
         {/* Hero */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-24 h-24 rounded-full border border-white/20 flex-shrink-0 overflow-hidden bg-white/10">
@@ -116,6 +104,17 @@ export default function ContactPage() {
             <Phone className="w-3.5 h-3.5" strokeWidth={1.5} />
             01016080323
           </a>
+        </div>
+
+        {/* Lena AI Logo */}
+        <div className="flex justify-center pt-4">
+          <Image
+            src="/images/logo-5.png"
+            alt="Lena AI"
+            width={100}
+            height={100}
+            className="object-contain opacity-90"
+          />
         </div>
       </motion.div>
     </div>
