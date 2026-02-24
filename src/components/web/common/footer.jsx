@@ -16,9 +16,9 @@ import Link from "next/link";
 const Footer = () => {
   const { t } = useI18n();
 
-  // App Store links
+  // App Store links (region-agnostic so Apple redirects to user's local store)
   const appStoreLink =
-    "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
+    "https://apps.apple.com/app/lenaai-dashboard/id6745050088";
   const playStoreLink =
     "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
 
@@ -53,8 +53,8 @@ const Footer = () => {
                 <span>{t.footer.connect.privacyPolicy}</span>
               </Link>
             </div>
-            {/* iOS App Store Link - MOVED HERE */}
-            {/* <Link
+            {/* iOS App Store Link */}
+            <Link
               href={appStoreLink}
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
               target="_blank"
@@ -63,11 +63,10 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Apple size={20} />
               </div>
-
               <span>{t.footer.connect.dowenloadios} </span>
-            </Link> */}
+            </Link>
 
-            {/* Google Play Store Link - MOVED HERE */}
+            {/* Google Play Store Link */}
             <Link
               href={playStoreLink}
               className="flex items-center space-x-3 hover:text-blue-200 transition-colors group"
