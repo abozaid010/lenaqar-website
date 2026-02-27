@@ -102,6 +102,7 @@ export default function AddCompoundDialog({
     area: null,
     payment_plans: null,
     developer_id: null,
+    video_url: null,
     google_map_link: null,
     master_plan: null,
     properties_types: null,
@@ -332,6 +333,11 @@ export default function AddCompoundDialog({
       return;
     }
 
+    // Clear video_url error when user types
+    if (name === "video_url") {
+      setErrors((prev) => (prev.video_url ? { ...prev, video_url: null } : prev));
+    }
+
     // Validate Google Maps link prefix while typing
     if (name === "google_map_link") {
       const trimmed = (value || "").trim();
@@ -399,6 +405,7 @@ export default function AddCompoundDialog({
       "area",
       "payment_plans",
       "developer_id",
+      "video_url",
       "google_map_link",
       "master_plan",
       "properties_types",
@@ -560,6 +567,12 @@ export default function AddCompoundDialog({
       newErrors.developer_id =
         t.formValidation?.developerRequired ||
         "Developer is required";
+    }
+
+    if (!formData.video_url || !formData.video_url.trim()) {
+      newErrors.video_url =
+        t.formValidation?.videoURLRequired ||
+        "Video URL is required";
     }
 
     if (!formData.google_map_link || !formData.google_map_link.trim()) {
@@ -1312,14 +1325,19 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Links */}
-            <LenaTextField
-              type="url"
-              name="video_url"
-              label={t.formLabels?.videoURL || "Video URL"}
-              value={formData.video_url}
-              onChange={handleChange}
-              placeholder="https://example.com/video"
-            />
+            <div ref={(el) => (fieldRefs.current.video_url = el)}>
+              <LenaTextField
+                type="url"
+                name="video_url"
+                label={t.formLabels?.videoURL || "Video URL"}
+                value={formData.video_url}
+                onChange={handleChange}
+                placeholder="https://example.com/video"
+                required
+                error={errors.video_url}
+                errorMessage={errors.video_url}
+              />
+            </div>
             <div ref={(el) => (fieldRefs.current.google_map_link = el)}>
               <LenaTextField
                 type="url"

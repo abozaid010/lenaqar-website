@@ -1152,6 +1152,11 @@ export default {
     cancelPaymentPlan: "إلغاء",
     addPlan: "إضافة خطة",
     noPlans: "لم يتم إضافة أي خطط دفع بعد",
+    customPayments: "الدفعات الإضافية",
+    customPaymentName: "الاسم (مثال: بعد 3 أشهر)",
+    customPaymentNamePlaceholder: "بعد 3 أشهر",
+    customPaymentPercentage: "النسبة (%)",
+    customPaymentMonths: "بعد (أشهر)",
   },
   buttons: {
     addNew: "إضافة جديد",
@@ -1167,6 +1172,8 @@ export default {
     back: "رجوع",
     next: "التالي",
     saveUnit: "حفظ الوحدة",
+    addCustomPayment: "+ إضافة دفعة",
+    remove: "إزالة",
   },
   modal: {
     addNewProject: "إضافة مشروع جديد",

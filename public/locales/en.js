@@ -1161,6 +1161,11 @@ export default {
     setDefault: "Set Default",
     setAsDefault: "Set as default",
     selectDefaultPlanWarning: "Please select a default payment plan. Click 'Set Default' on one of the plans below.",
+    customPayments: "Custom Payments",
+    customPaymentName: "Name (e.g. after 3 months)",
+    customPaymentNamePlaceholder: "after 3 months",
+    customPaymentPercentage: "Percentage (%)",
+    customPaymentMonths: "After (months)",
   },
   buttons: {
     addNew: "Add New",
@@ -1177,6 +1182,8 @@ export default {
     back: "Back",
     next: "Next",
     saveUnit: "Save Unit",
+    addCustomPayment: "+ Add payment",
+    remove: "Remove",
   },
   modal: {
     addNewUnit: "Add New Unit",

@@ -913,9 +913,11 @@ export async function fetchNews() {
 }
 
 // Payment Plans API //
-export async function fetchPaymentPlans({ limit = 100 } = {}) {
+export async function fetchPaymentPlans({ limit = 100, is_common } = {}) {
   try {
-    const response = await axiosInstance.get(`/payment-plans/?limit=${limit}`);
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (is_common === true) params.set("is_common", "true");
+    const response = await axiosInstance.get(`/payment-plans/?${params.toString()}`);
     
     if (!response.data || !response.data.data) {
       throw new Error("Invalid response format from server");

@@ -40,7 +40,13 @@ export const BUILDING_TYPE_VALUES = [
  "farm",
   "beauty salon", 
   "cafe",
-  "gym"
+  "gym",
+  "parking",
+  "garage",
+  "workspace",
+  "storage",
+  "hotel",
+  "hostel"
  ];
 
 export const VIEW_TYPE_VALUES = [
