@@ -19,6 +19,7 @@ export default function AddPaymentPlanDialog({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [extraPayments, setExtraPayments] = useState([]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -78,6 +79,30 @@ export default function AddPaymentPlanDialog({
               : "",
           is_default: existingPlan.is_default || false,
         });
+
+        // Load existing extra payments (custom installments) if present
+        let existingExtra = existingPlan.extra_payments;
+        if (existingExtra && !Array.isArray(existingExtra) && typeof existingExtra === "object") {
+          existingExtra = Object.values(existingExtra);
+        }
+        if (Array.isArray(existingExtra)) {
+          setExtraPayments(
+            existingExtra.map((p) => ({
+              id: p.id,
+              name: p.name || "",
+              percentage:
+                typeof p.percentage === "number"
+                  ? (p.percentage * 100).toString()
+                  : "",
+              after_months:
+                p.after_months !== undefined && p.after_months !== null
+                  ? String(p.after_months)
+                  : "",
+            }))
+          );
+        } else {
+          setExtraPayments([]);
+        }
       } else {
         // Reset form with empty values for all fields
         setFormData({
@@ -93,6 +118,7 @@ export default function AddPaymentPlanDialog({
           delivery_payment_percentage: "",
           is_default: false,
         });
+        setExtraPayments([]);
       }
       setErrors({});
     }
@@ -166,6 +192,38 @@ export default function AddPaymentPlanDialog({
     }
   };
 
+  const handleExtraPaymentChange = (index, field, value) => {
+    const updated = [...extraPayments];
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
+    setExtraPayments(updated);
+
+    if (errors.extra_payments) {
+      setErrors({
+        ...errors,
+        extra_payments: null,
+      });
+    }
+  };
+
+  const handleAddExtraPayment = () => {
+    setExtraPayments([
+      ...extraPayments,
+      {
+        id: undefined,
+        name: "",
+        percentage: "",
+        after_months: "",
+      },
+    ]);
+  };
+
+  const handleRemoveExtraPayment = (index) => {
+    setExtraPayments(extraPayments.filter((_, i) => i !== index));
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -215,6 +273,49 @@ export default function AddPaymentPlanDialog({
       newErrors.delivery_in_years =
         t.formValidation?.deliveryInYearsInvalid ||
         "Delivery (years) must be between 0 and 10";
+    }
+
+    // Validate custom extra payments (optional section)
+    const nonEmptyExtraPayments = extraPayments.filter(
+      (p) =>
+        (p.name && p.name.trim() !== "") ||
+        (p.percentage !== "" && p.percentage !== null && p.percentage !== undefined) ||
+        (p.after_months !== "" && p.after_months !== null && p.after_months !== undefined)
+    );
+
+    if (nonEmptyExtraPayments.length > 0) {
+      for (const payment of nonEmptyExtraPayments) {
+        if (!payment.name || payment.name.trim() === "") {
+          newErrors.extra_payments =
+            t.formValidation?.extraPaymentsNameRequired ||
+            "Custom payment name is required for all rows.";
+          break;
+        }
+
+        const percentValue = parseFloat(payment.percentage);
+        if (
+          !Number.isFinite(percentValue) ||
+          percentValue < 0 ||
+          percentValue > 100
+        ) {
+          newErrors.extra_payments =
+            t.formValidation?.extraPaymentsPercentageInvalid ||
+            "Custom payment percentage must be between 0 and 100.";
+          break;
+        }
+
+        const monthsValue = parseFloat(payment.after_months);
+        if (
+          !Number.isFinite(monthsValue) ||
+          monthsValue < 0 ||
+          monthsValue >= 100
+        ) {
+          newErrors.extra_payments =
+            t.formValidation?.extraPaymentsMonthsInvalid ||
+            "Custom payment months must be between 0 and 100.";
+          break;
+        }
+      }
     }
 
     setErrors(newErrors);
@@ -268,6 +369,25 @@ export default function AddPaymentPlanDialog({
             : parseFloat(formData.delivery_payment_percentage) / 100,
         is_default: formData.is_default,
       };
+
+      // Normalize custom extra payments
+      const normalizedExtraPayments = extraPayments
+        .filter(
+          (p) =>
+            p &&
+            p.name &&
+            p.name.trim() !== "" &&
+            p.percentage !== "" &&
+            p.after_months !== ""
+        )
+        .map((p) => ({
+          id: p.id,
+          name: p.name.trim(),
+          percentage: parseFloat(p.percentage) / 100,
+          after_months: parseFloat(p.after_months),
+        }));
+
+      processedData.extra_payments = normalizedExtraPayments;
 
       // Add updated_at when updating a payment plan
       if (editMode) {
@@ -389,22 +509,40 @@ export default function AddPaymentPlanDialog({
 
 
 
-        <LenaTextField
-          type="number"
-          name="delivery_in_years"
-          label={t.formLabels?.deliveryInYears || "Delivery (years)"}
-          value={formData.delivery_in_years}
-          onChange={handleChange}
-          placeholder="0"
-          min={0}
-          max={10}
-          step="0.1"
-          error={errors.delivery_in_years}
-          helperText={
-            t.formValidation?.deliveryInYearsHelper ||
-            "Value between 0 and 10 (e.g. 2.5)"
-          }
-        />
+        <div className="grid grid-cols-2 gap-1.5">
+          <LenaTextField
+            type="number"
+            name="delivery_in_years"
+            label={t.formLabels?.deliveryInYears || "Delivery (years)"}
+            value={formData.delivery_in_years}
+            onChange={handleChange}
+            placeholder="0"
+            min={0}
+            max={10}
+            step="0.1"
+            error={errors.delivery_in_years}
+            helperText={
+              t.formValidation?.deliveryInYearsHelper ||
+              "Value between 0 and 10 (e.g. 2.5)"
+            }
+          />
+          <LenaTextField
+            type="number"
+            name="cache_discount"
+            label={
+              t.formLabels?.cacheDiscount ||
+              "Cache Discount (%)"
+            }
+            value={formData.cache_discount ?? ""}
+            onChange={handleChange}
+            required
+            placeholder="40"
+            min="-1"
+            max="100"
+            step="0.1"
+            error={errors.cache_discount}
+          />
+        </div>
 
         <div className="grid grid-cols-2 gap-1.5">
           <LenaTextField
@@ -437,23 +575,6 @@ export default function AddPaymentPlanDialog({
         </div>
 
         <LenaTextField
-          type="number"
-          name="cache_discount"
-          label={
-            t.formLabels?.cacheDiscount ||
-            "Cache Discount (%)"
-          }
-          value={formData.cache_discount ?? ""}
-          onChange={handleChange}
-          required
-          placeholder="40"
-          min="-1"
-          max="100"
-          step="0.1"
-          error={errors.cache_discount}
-        />
-
-        <LenaTextField
           name="name"
           label={t.formLabels?.planName || "Plan Name"}
           value={formData.name}
@@ -464,6 +585,108 @@ export default function AddPaymentPlanDialog({
           }
           error={errors.name}
         />
+
+        {/* Custom Payments (extra_payments) */}
+        <div className="pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+              {t.formLabels?.customPayments || "Custom Payments"}
+            </span>
+            <button
+              type="button"
+              onClick={handleAddExtraPayment}
+              className="text-xs font-medium text-blue-600 hover:text-blue-700"
+            >
+              {t.buttons?.addCustomPayment ?? "+ Add payment"}
+            </button>
+          </div>
+
+          {extraPayments.length > 0 && (
+            <div className="space-y-1.5">
+              {extraPayments.map((payment, index) => (
+                <div
+                  key={payment.id ?? index}
+                  className="flex flex-nowrap items-start gap-2"
+                >
+                  <div className="flex-[2] min-w-0">
+                    <LenaTextField
+                      name={`extra_payment_name_${index}`}
+                      label={
+                        t.formLabels?.customPaymentName ??
+                        "Name (e.g. after 3 months)"
+                      }
+                      value={payment.name}
+                      onChange={(e) =>
+                        handleExtraPaymentChange(index, "name", e.target.value)
+                      }
+                      placeholder={
+                        t.formLabels?.customPaymentNamePlaceholder ?? "after 3 months"
+                      }
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 max-w-[7rem]">
+                    <LenaTextField
+                      type="number"
+                      name={`extra_payment_percentage_${index}`}
+                      label={
+                        t.formLabels?.customPaymentPercentage ?? "Percentage (%)"
+                      }
+                      value={payment.percentage}
+                      onChange={(e) =>
+                        handleExtraPaymentChange(
+                          index,
+                          "percentage",
+                          e.target.value
+                        )
+                      }
+                      placeholder="5"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0 max-w-[7rem]">
+                    <LenaTextField
+                      type="number"
+                      name={`extra_payment_months_${index}`}
+                      label={
+                        t.formLabels?.customPaymentMonths ?? "After (months)"
+                      }
+                      value={payment.after_months}
+                      onChange={(e) =>
+                        handleExtraPaymentChange(
+                          index,
+                          "after_months",
+                          e.target.value
+                        )
+                      }
+                      placeholder="3"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                  </div>
+                  <div className="shrink-0 flex items-center pt-6">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExtraPayment(index)}
+                      className="text-xs text-gray-400 hover:text-red-500"
+                      title={t.buttons?.remove ?? "Remove"}
+                    >
+                      {t.buttons?.remove ?? "✕"}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {errors.extra_payments && (
+            <p className="mt-1 text-xs text-red-500">
+              {errors.extra_payments}
+            </p>
+          )}
+        </div>
 
         <div className="pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2">

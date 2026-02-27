@@ -2,11 +2,15 @@
 
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import { useI18n } from "@/context/translate-api";
-import { getDefaultPaymentPlans } from "@/data/default-payment-plans";
-import { createPaymentPlan, updatePaymentPlan } from "@/utils/api";
-import { Edit2, Plus, Trash2, Check, ChevronDown } from "lucide-react";
-import { useState, useMemo } from "react";
+import { createPaymentPlan, updatePaymentPlan, fetchPaymentPlans } from "@/utils/api";
+import { Edit2, Plus, Trash2, Check, ChevronDown, Loader2 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
 import toast from "react-hot-toast";
+
+/** Normalize years field: API uses installment_years, legacy used installments_years */
+function getPlanYears(plan) {
+  return plan?.installment_years ?? plan?.installments_years ?? 0;
+}
 
 export default function PaymentPlansList({
   plans = [],
@@ -21,16 +25,35 @@ export default function PaymentPlansList({
   const [editingIndex, setEditingIndex] = useState(null);
   const [isDefaultPlansOpen, setIsDefaultPlansOpen] = useState(false); // collapsed by default
 
-  // Get default payment plans
-  const defaultPlans = useMemo(() => getDefaultPaymentPlans(), []);
+  // Fetch default payment plans from backend
+  const [defaultPlans, setDefaultPlans] = useState([]);
+  const [defaultPlansLoading, setDefaultPlansLoading] = useState(true);
+  const [defaultPlansError, setDefaultPlansError] = useState(null);
 
-  // Check which default plans are already selected
+  useEffect(() => {
+    let cancelled = false;
+    setDefaultPlansLoading(true);
+    setDefaultPlansError(null);
+    fetchPaymentPlans({ limit: 100 })
+      .then((res) => {
+        if (cancelled) return;
+        const list = res?.data?.payment_plans;
+        setDefaultPlans(Array.isArray(list) ? list : []);
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setDefaultPlansError(err?.message || "Failed to load payment plans");
+        setDefaultPlans([]);
+      })
+      .finally(() => {
+        if (!cancelled) setDefaultPlansLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Check which default plans are already selected (by id)
   const selectedDefaultPlanIds = useMemo(() => {
-    return new Set(
-      plans
-        .filter((plan) => plan.id && plan.id.startsWith("default_"))
-        .map((plan) => plan.id)
-    );
+    return new Set(plans.filter((plan) => plan.id).map((plan) => plan.id));
   }, [plans]);
 
   const handleOpenAddDialog = () => {
@@ -40,9 +63,9 @@ export default function PaymentPlansList({
   };
 
   const handleOpenEditDialog = (plan, index) => {
-    // When editing a default plan, remove the default ID so it becomes a custom plan
-    const planToEdit = plan.id && plan.id.startsWith("default_")
-      ? { ...plan, id: undefined } // Remove default ID when editing
+    // When editing a legacy default plan (default_ prefix), remove the ID so it becomes a custom plan
+    const planToEdit = plan.id && String(plan.id).startsWith("default_")
+      ? { ...plan, id: undefined }
       : plan;
     setEditingPlan(planToEdit);
     setEditingIndex(index);
@@ -186,42 +209,57 @@ export default function PaymentPlansList({
 
           {isDefaultPlansOpen ? (
             <div className="px-3 pb-3">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {defaultPlans.map((defaultPlan) => {
-                  const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
-                  return (
-                    <button
-                      key={defaultPlan.id}
-                      type="button"
-                      onClick={() => handleToggleDefaultPlan(defaultPlan)}
-                      className={`relative p-2 rounded-md border transition-all text-left ${
-                        isSelected
-                          ? "border-blue-500 bg-blue-50"
-                          : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <h4 className="font-medium text-gray-900 text-xs">
-                          {defaultPlan.name}
-                        </h4>
-                        {isSelected && (
-                          <Check size={12} className="text-blue-600 flex-shrink-0" />
-                        )}
-                      </div>
-                      <div className="text-[10px] text-gray-600">
-                        <div>
-                          <span className="font-medium">DP:</span>{" "}
-                          {formatPercentage(defaultPlan.downpayment_percentage)}
+              {defaultPlansLoading ? (
+                <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
+                  <Loader2 size={18} className="animate-spin" />
+                  {t.formLabels?.loadingPaymentPlans ?? "Loading payment plans…"}
+                </div>
+              ) : defaultPlansError ? (
+                <div className="py-3 text-sm text-red-600">
+                  {defaultPlansError}
+                </div>
+              ) : defaultPlans.length === 0 ? (
+                <div className="py-3 text-sm text-gray-500">
+                  {t.formLabels?.noDefaultPaymentPlans ?? "No payment plans available."}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {defaultPlans.map((defaultPlan) => {
+                    const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
+                    return (
+                      <button
+                        key={defaultPlan.id}
+                        type="button"
+                        onClick={() => handleToggleDefaultPlan(defaultPlan)}
+                        className={`relative p-2 rounded-md border transition-all text-left ${
+                          isSelected
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <h4 className="font-medium text-gray-900 text-xs">
+                            {defaultPlan.name}
+                          </h4>
+                          {isSelected && (
+                            <Check size={12} className="text-blue-600 flex-shrink-0" />
+                          )}
                         </div>
-                        <div>
-                          <span className="font-medium">Yrs:</span>{" "}
-                          {defaultPlan.installments_years}
+                        <div className="text-[10px] text-gray-600">
+                          <div>
+                            <span className="font-medium">DP:</span>{" "}
+                            {formatPercentage(defaultPlan.downpayment_percentage)}
+                          </div>
+                          <div>
+                            <span className="font-medium">Yrs:</span>{" "}
+                            {getPlanYears(defaultPlan)}
+                          </div>
                         </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           ) : null}
         </div>
@@ -282,7 +320,7 @@ export default function PaymentPlansList({
                           </div>
                           <div>
                             <span className="font-medium">Yrs:</span>{" "}
-                            {plan.installments_years}
+                            {getPlanYears(plan)}
                           </div>
                           {plan.maintenance_fee > 0 && (
                             <div>
