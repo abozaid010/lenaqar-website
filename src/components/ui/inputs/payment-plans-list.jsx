@@ -12,6 +12,18 @@ function getPlanYears(plan) {
   return plan?.installment_years ?? plan?.installments_years ?? 0;
 }
 
+/** Ensure extra_payments is always an array (API may return object/map keyed by id) */
+function normalizePlanExtraPayments(plan) {
+  if (!plan) return plan;
+  let extra = plan.extra_payments;
+  if (Array.isArray(extra)) return { ...plan, extra_payments: extra };
+  if (extra && typeof extra === "object" && !Array.isArray(extra)) {
+    extra = Object.values(extra);
+    return { ...plan, extra_payments: Array.isArray(extra) ? extra : [] };
+  }
+  return { ...plan, extra_payments: [] };
+}
+
 export default function PaymentPlansList({
   plans = [],
   onChange,
@@ -34,12 +46,14 @@ export default function PaymentPlansList({
     let cancelled = false;
     setDefaultPlansLoading(true);
     setDefaultPlansError(null);
-    fetchPaymentPlans({ limit: 100 })
+    fetchPaymentPlans({ is_common: true, limit: 100 })
       .then((res) => {
         if (cancelled) return;
+        // API returns { data: { payment_plans: [...], count } }; each plan may have extra_payments as array or object
         const list = res?.data?.payment_plans;
         const all = Array.isArray(list) ? list : [];
-        const commonOnly = all.filter((plan) => plan?.is_common === true);
+        const commonOnly = all
+          .map(normalizePlanExtraPayments);
         setDefaultPlans(commonOnly);
       })
       .catch((err) => {
@@ -101,7 +115,8 @@ export default function PaymentPlansList({
         }
         savedPlan = result.data || plan;
       }
-      
+      savedPlan = normalizePlanExtraPayments(savedPlan);
+
       let newPlans;
 
       if (isEdit) {
@@ -150,13 +165,12 @@ export default function PaymentPlansList({
       const updatedPlans = newPlans.map((p) => ({ ...p, is_default: false }));
       onChange(updatedPlans);
     } else {
-      // Add the plan if it's not selected
-      // Create a copy to avoid mutating the default plan
-      const planToAdd = {
+      // Add the plan if it's not selected (ensure extra_payments is always an array)
+      const planToAdd = normalizePlanExtraPayments({
         ...defaultPlan,
         id: defaultPlan.id, // Keep the default ID to track it
         is_default: false, // New plans are not default by default
-      };
+      });
       const newPlans = [...plans, planToAdd];
       
       // If this is the first plan, make it default automatically
