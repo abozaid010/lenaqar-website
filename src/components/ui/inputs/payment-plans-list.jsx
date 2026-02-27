@@ -38,7 +38,9 @@ export default function PaymentPlansList({
       .then((res) => {
         if (cancelled) return;
         const list = res?.data?.payment_plans;
-        setDefaultPlans(Array.isArray(list) ? list : []);
+        const all = Array.isArray(list) ? list : [];
+        const commonOnly = all.filter((plan) => plan?.is_common === true);
+        setDefaultPlans(commonOnly);
       })
       .catch((err) => {
         if (cancelled) return;
