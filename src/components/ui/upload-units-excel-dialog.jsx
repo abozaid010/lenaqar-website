@@ -40,6 +40,9 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
 
+const MIN_LAND_AREA = 9;
+const MIN_TOTAL_PRICE = 200000;
+
 const downloadTemplateFile = () => {
   window.open(
     "https://docs.google.com/spreadsheets/d/137hGxNGjDWjM-QfuDsEeozmJx4xFw9I9J7PFWqDzAXw/edit?usp=sharing",
@@ -359,17 +362,17 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       const unitNumber = index + 1;
       
       // Check landArea > 15
-      if (unit.landArea === undefined || unit.landArea === null || unit.landArea <= 15) {
+      if (unit.landArea === undefined || unit.landArea === null || unit.landArea <= MIN_LAND_AREA) {
         errors.push({
           field: 'landArea',
           label: 'Land Area',
           type: 'invalid_value',
-          message: `Unit ${unitNumber}: Land Area must be greater than 15 (current value: ${unit.landArea})`,
+          message: `Unit ${unitNumber}: Land Area must be greater than ${MIN_LAND_AREA} (current value: ${unit.landArea})`,
         });
       }
       
       // Check totalPrice > 200000
-      if (unit.totalPrice === undefined || unit.totalPrice === null || unit.totalPrice <= 200000) {
+      if (unit.totalPrice === undefined || unit.totalPrice === null || unit.totalPrice <= MIN_TOTAL_PRICE) {
         errors.push({
           field: 'totalPrice',
           label: 'Total Price',
