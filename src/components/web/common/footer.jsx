@@ -18,7 +18,7 @@ const Footer = () => {
 
   // App Store links (region-agnostic so Apple redirects to user's local store)
   const appStoreLink =
-    "https://apps.apple.com/app/lenaai-dashboard/id6745050088";
+    "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
   const playStoreLink =
     "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp&pli=1";
 
