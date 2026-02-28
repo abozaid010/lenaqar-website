@@ -311,7 +311,8 @@ export async function createCampaign(payload) {
 
 export async function updateCampaign(id, payload) {
   try {
-    const response = await axiosInstance.patch(`/campaign/${id}`, payload);
+    const body = { ...payload, campaign_id: id };
+    const response = await axiosInstance.patch(`/campaign/${id}`, body);
     return response.data;
   } catch (error) {
     console.error("Failed to update campaign:", error.message);
