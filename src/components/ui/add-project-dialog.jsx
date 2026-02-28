@@ -650,6 +650,12 @@ export default function AddCompoundDialog({
       const selectedDeveloper = developers?.find(dev => dev.id === formData.developer_id);
       const developerName = formData.developer_name || selectedDeveloper?.en_name || "";
 
+      // API expects extra_payments to be a list; normalize null/undefined to []
+      const paymentPlansForApi = (formData.payment_plans || []).map((plan) => ({
+        ...plan,
+        extra_payments: Array.isArray(plan.extra_payments) ? plan.extra_payments : [],
+      }));
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -659,6 +665,7 @@ export default function AddCompoundDialog({
         building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
+        payment_plans: paymentPlansForApi,
       };
 
       console.log("[handleSubmit] Client ID info:", {
