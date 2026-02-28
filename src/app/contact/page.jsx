@@ -14,7 +14,7 @@ export default function ContactPage() {
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor;
     if (/iPad|iPhone|iPod/.test(userAgent)) {
-      setAppLink("https://apps.apple.com/app/lenaai-dashboard/id6745050088");
+      setAppLink("https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088");
     } else if (/android/i.test(userAgent)) {
       setAppLink(
         "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp"
