@@ -11,7 +11,7 @@ import {
   SUPPORTED_IMAGE_ACCEPT,
 } from "@/config/imageUpload";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function ImageUploader({
@@ -30,6 +30,11 @@ export default function ImageUploader({
   const [selectedImages, setSelectedImages] = useState([]);
   const [uploadedImages, setUploadedImages] = useState(initialImages);
   const [uploadStatus, setUploadStatus] = useState({});
+
+  // Sync when initialImages changes (e.g. opening edit with existing campaign images)
+  useEffect(() => {
+    setUploadedImages(Array.isArray(initialImages) ? initialImages : []);
+  }, [initialImages]);
 
   const totalImagesCount = selectedImages.length + uploadedImages.length;
 
@@ -177,7 +182,7 @@ export default function ImageUploader({
         <div className="relative w-full h-full">
           <ImageWithLoader
             src={image.url || "/placeholder.svg"}
-            alt={`Image ${image.name}`}
+            alt={image.name ? `Image ${image.name}` : (image.fileId ? `Image ${image.fileId}` : "Campaign image")}
             className="w-full h-full object-cover rounded-md"
             priority={false}
             loadingVariant="minimal"

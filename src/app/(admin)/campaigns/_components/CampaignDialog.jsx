@@ -69,7 +69,13 @@ export default function CampaignDialog({
       setMode(isUnitMode ? "unit" : "text");
       setClientPhoneNumber(campaign?.client_phone_number || "");
       setTextValue(campaign?.text || "");
-      setTextImages(Array.isArray(campaign?.images) ? campaign.images : []);
+      // Normalize images to { url, fileId } for ImageUploader (API may return file_id)
+      const rawImages = Array.isArray(campaign?.images) ? campaign.images : [];
+      const normalizedImages = rawImages.map((img) => ({
+        url: img?.url || img?.image_url || "",
+        fileId: img?.fileId ?? img?.file_id ?? img?.id ?? "",
+      })).filter((img) => img.url && img.fileId);
+      setTextImages(normalizedImages);
       setSelectedUnit(campaign?.unit || null);
       setSuggestedAns(normalizeSuggestedAnswers(campaign?.suggested_ans));
     } else {
