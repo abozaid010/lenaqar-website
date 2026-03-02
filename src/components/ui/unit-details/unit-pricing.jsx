@@ -4,10 +4,21 @@ import { useI18n } from "@/context/translate-api";
 import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
 
-export default function UnitPricing({ unit }) {
+const MISSING_FIELD_CLASS =
+  "ring-2 ring-red-500 rounded-md bg-red-50/70 border border-red-200";
+
+export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t } = useI18n();
-  const isSale = unit.purpose === "sell";
+  const u = unit || {};
+  const missing = missingRequiredFields || [];
+  const isMissing = (field) => missing.includes(field);
+  const isSale = u.purpose === "sell";
+  const rentDurationType = u.rentDurationType || {};
+  const durationKeys = Object.keys(rentDurationType);
+  const activeRent = durationKeys.length > 0 && rentDurationType[activeDuration] != null
+    ? rentDurationType[activeDuration]
+    : rentDurationType.daily ?? rentDurationType.weekly ?? rentDurationType.monthly ?? {};
 
   // Helper function to safely get translations with fallbacks
   const getTranslation = (path, fallback) => {
@@ -59,28 +70,32 @@ export default function UnitPricing({ unit }) {
   return (
     <div className="mt-2">
       {isSale ? (
-        <div>
+        <div
+          className={
+            isMissing("totalPrice") ? MISSING_FIELD_CLASS + " p-3 mt-1" : ""
+          }
+        >
           <div className="text-3xl font-bold text-primary">
-            {formatCurrency(unit.totalPrice)}{" "}
+            {formatCurrency(u.totalPrice)}{" "}
             <span className="text-sm font-normal">
               {getTranslation("unitDetails.unit_pricing.currency", "EGP")}
             </span>
           </div>
 
-          {unit.downPayment > 0 && (
+          {(u.downPayment != null && Number(u.downPayment) > 0) && (
             <div className="mt-2 text-sm text-gray-600">
               {getTranslation(
                 "unitDetails.unit_pricing.down_payment",
                 "Down Payment"
               )}
-              : {formatCurrency(unit.downPayment)}{" "}
+              : {formatCurrency(u.downPayment)}{" "}
               {getTranslation("unitDetails.unit_pricing.currency", "EGP")}
             </div>
           )}
 
-          {unit.paymentPlans.length > 0 && (
+          {(u.paymentPlans?.length ?? 0) > 0 && (
             <div className="mt-4 max-h-77 overflow-y-auto space-y-2">
-              {unit.paymentPlans.map((p, index) => (
+              {(u.paymentPlans || []).filter(Boolean).map((p, index) => (
                 <div
                   key={index}
                   className="p-3 bg-gradient-to-r from-[#e2dbff] to-[#f0ebff] rounded-lg border border-purple-200"
@@ -152,10 +167,15 @@ export default function UnitPricing({ unit }) {
           )}
         </div>
       ) : (
-        <div className="max-w-sm">
+        <div
+          className={`max-w-sm ${
+            isMissing("rentDurationType") ? MISSING_FIELD_CLASS + " p-3" : ""
+          }`}
+        >
           {/* Rental Duration Tabs */}
+          {durationKeys.length > 0 && (
           <div className="flex border-b border-gray-200 mb-4">
-            {Object.keys(unit.rentDurationType || {}).map((duration) => (
+            {durationKeys.map((duration) => (
               <button
                 key={duration}
                 className={`py-2 px-4 text-sm font-medium ${
@@ -164,18 +184,19 @@ export default function UnitPricing({ unit }) {
                     : "text-gray-500 hover:text-gray-700"
                 } disabled:opacity-50`}
                 onClick={() => setActiveDuration(duration)}
-                disabled={unit.rentDurationType[duration]?.price <= 0}
+                disabled={(rentDurationType[duration]?.price ?? 0) <= 0}
               >
                 {getDurationLabel(duration)}
               </button>
             ))}
           </div>
+          )}
 
           {/* Price Display */}
           <div className="text-3xl font-bold text-primary">
-            {formatCurrency(unit.rentDurationType[activeDuration]?.price || 0)}{" "}
+            {formatCurrency(activeRent?.price ?? 0)}{" "}
             <span className="text-sm font-normal">
-              {unit.rentDurationType[activeDuration]?.currency ||
+              {activeRent?.currency ||
                 getTranslation("unitDetails.common.na", "N/A")}
             </span>
           </div>
@@ -186,7 +207,7 @@ export default function UnitPricing({ unit }) {
 
           {/* Additional Fees */}
           <div className="mt-3 space-y-1">
-            {unit.rentDurationType[activeDuration]?.securityDeposit > 0 && (
+            {(activeRent?.securityDeposit ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">
                   {getTranslation(
@@ -195,15 +216,13 @@ export default function UnitPricing({ unit }) {
                   )}
                 </span>
                 <span className="font-medium">
-                  {formatCurrency(
-                    unit.rentDurationType[activeDuration]?.securityDeposit
-                  )}{" "}
-                  {unit.rentDurationType[activeDuration]?.currency}
+                  {formatCurrency(activeRent?.securityDeposit)}{" "}
+                  {activeRent?.currency}
                 </span>
               </div>
             )}
 
-            {unit.rentDurationType[activeDuration]?.cleaningFee > 0 && (
+            {(activeRent?.cleaningFee ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">
                   {getTranslation(
@@ -212,15 +231,13 @@ export default function UnitPricing({ unit }) {
                   )}
                 </span>
                 <span className="font-medium">
-                  {formatCurrency(
-                    unit.rentDurationType[activeDuration]?.cleaningFee
-                  )}{" "}
-                  {unit.rentDurationType[activeDuration]?.currency}
+                  {formatCurrency(activeRent?.cleaningFee)}{" "}
+                  {activeRent?.currency}
                 </span>
               </div>
             )}
 
-            {unit.rentDurationType[activeDuration]?.serviceFee > 0 && (
+            {(activeRent?.serviceFee ?? 0) > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">
                   {getTranslation(
@@ -229,17 +246,15 @@ export default function UnitPricing({ unit }) {
                   )}
                 </span>
                 <span className="font-medium">
-                  {formatCurrency(
-                    unit.rentDurationType[activeDuration]?.serviceFee
-                  )}{" "}
-                  {unit.rentDurationType[activeDuration]?.currency}
+                  {formatCurrency(activeRent?.serviceFee)}{" "}
+                  {activeRent?.currency}
                 </span>
               </div>
             )}
           </div>
 
           {/* Availability */}
-          {unit.isAvailable && (
+          {u.isAvailable && (
             <div className="mt-3 p-2 bg-green-50 rounded-md">
               <div className="text-sm font-medium text-green-900">
                 {getTranslation(
@@ -249,12 +264,12 @@ export default function UnitPricing({ unit }) {
               </div>
               <div className="mt-1 text-sm text-green-700">
                 {getTranslation("unitDetails.unit_pricing.from", "من")}{" "}
-                {formatDate(unit.availabilityDate)}
+                {formatDate(u.availabilityDate)}
               </div>
             </div>
           )}
 
-          {!unit.isAvailable && (
+          {!u.isAvailable && (
             <div className="mt-4 p-3 bg-red-50 rounded-md">
               <div className="text-sm font-medium text-red-900">
                 {getTranslation(

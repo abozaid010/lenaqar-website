@@ -86,6 +86,76 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   }
 }
 
+  /**
+   * Fetches units from /units/all for the Pending Approval page.
+   * All unit fields are optional; response is normalized so missing/empty data does not throw.
+   * By default visibility is "pending_approval", but can be overridden via searchParams.visibility
+   * to support filtering (e.g. "visible", "hidden", "pending_approval").
+   */
+export async function fetchPendingApprovalUnits(searchParams = {}) {
+  try {
+    const parsed =
+      typeof searchParams === "string"
+        ? (() => {
+            try {
+              return JSON.parse(searchParams);
+            } catch {
+              return {};
+            }
+          })()
+        : { ...(searchParams || {}) };
+
+    const params = {
+      page_size: Number(parsed.page_size) || 16,
+      visibility: parsed.visibility || "pending_approval",
+      direction: parsed.direction || "forward",
+      ...(parsed.cursor != null && parsed.cursor !== ""
+        ? { cursor: parsed.cursor }
+        : {}),
+    };
+
+    const response = await axiosInstance.get("/units/all", { params });
+
+    if (!response.data || !response.data.data) {
+      return {
+        status: true,
+        code: 200,
+        data: {
+          units: [],
+          count: 0,
+          pagination: {
+            next_cursor: null,
+            prev_cursor: null,
+            has_more_next: false,
+            has_more_prev: false,
+          },
+        },
+      };
+    }
+
+    const data = response.data.data;
+    const units = Array.isArray(data.units) ? data.units : [];
+    const pagination = data.pagination || {
+      next_cursor: null,
+      prev_cursor: null,
+      has_more_next: false,
+      has_more_prev: false,
+    };
+
+    return {
+      ...response.data,
+      data: {
+        units,
+        count: data.count ?? units.length,
+        pagination,
+      },
+    };
+  } catch (error) {
+    console.error("Failed to fetch pending approval units:", error.message);
+    throw error;
+  }
+}
+
 export async function fetchDevelopers(isPublic = false) {
   const url = isPublic ? "/public/developers" : "/developers/";
 

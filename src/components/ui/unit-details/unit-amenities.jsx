@@ -248,10 +248,12 @@ export default function UnitAmenities({ amenities, t }) {
     ),
   };
 
+  const safeAmenities = (amenities || []).filter((a) => a != null && String(a).trim() !== "");
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 my-4">
-      {amenities.map((amenity) => (
-        <div key={amenity} className="flex items-center gap-2">
+      {safeAmenities.map((amenity) => (
+        <div key={String(amenity)} className="flex items-center gap-2">
           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#e2dbff] flex items-center justify-center text-blue-950">
             {amenityIcons[amenity] || (
               <svg
@@ -272,8 +274,8 @@ export default function UnitAmenities({ amenities, t }) {
           </div>
           <div className="">
             <p className="text-sm font-medium text-primary">
-              {t?.unitDetails?.amenitiesTypes?.[amenity] || 
-                amenity
+              {t?.unitDetails?.amenitiesTypes?.[amenity] ||
+                String(amenity ?? "")
                   .split("_")
                   .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
                   .join(" ")}

@@ -3,20 +3,23 @@ import { SITE_URL } from "@/app/metadata";
 export default function UnitSchema({ unit, isPublic = false }) {
   if (!unit) return null;
 
+  const id = unit.unitId ?? unit.id;
+  if (!id) return null;
+
   const baseUrl = isPublic
-    ? `${SITE_URL}/allProberties/${unit.id}`
-    : `${SITE_URL}/units/${unit.id}`;
+    ? `${SITE_URL}/allProberties/${id}`
+    : `${SITE_URL}/units/${id}`;
 
   const schema = {
     "@context": "https://schema.org",
     "@type": "Residence",
-    name: `${unit.type || "Property"} - ${unit.area || ""} sqm`,
+    name: `${unit.type || "Property"} - ${unit.area ?? ""} sqm`,
     floorSize: {
       "@type": "QuantitativeValue",
-      value: unit.area || 0,
+      value: unit.area ?? 0,
       unitCode: "MTK",
     },
-    numberOfRooms: unit.rooms || unit.bedrooms || 0,
+    numberOfRooms: unit.rooms ?? unit.bedrooms ?? unit.roomsCount ?? 0,
     url: baseUrl,
     ...(unit.image && {
       image: Array.isArray(unit.image)
@@ -25,7 +28,7 @@ export default function UnitSchema({ unit, isPublic = false }) {
     }),
     offers: {
       "@type": "Offer",
-      price: unit.price || "0",
+      price: String(unit.price ?? unit.totalPrice ?? "0"),
       priceCurrency: "EGP",
       availability: unit.isAvailable
         ? "https://schema.org/InStock"

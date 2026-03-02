@@ -1,6 +1,7 @@
 "use client";
 
 import { useUnitDetailsPageData } from "@/hooks/use-unit-details-data";
+import { getMissingRequiredFields } from "@/utils/unit-required-fields";
 import Link from "next/link";
 
 import ImageGallary from "@/components/ui/unit-details/image-gallary";
@@ -11,7 +12,11 @@ import UnitPageHeader from "@/components/ui/unit-forms/unit-page-header";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
-export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
+export default function UnitDetailsPageQuery({
+  unitId,
+  isPublic = false,
+  highlightMissing = false,
+}) {
   const client_id = !isPublic ? LenaCookiesManager.getClientId() : null;
   const { unit, hasAccess, isInitialLoading, errorMessage } =
     useUnitDetailsPageData(unitId, isPublic);
@@ -73,20 +78,28 @@ export default function UnitDetailsPageQuery({ unitId, isPublic = false }) {
     );
   }
 
-  // Show unit details
+  // Show unit details (unit.data may have missing fields for pending/broken units)
   if (hasAccess && unit.data) {
+    const data = unit.data;
+    const safeUnitId = data.unitId ?? data.id ?? unitId;
+    const missingRequiredFields =
+      highlightMissing && data ? getMissingRequiredFields(data) : [];
     return (
       <div className="container h-full">
-        {!isPublic && <UnitPageHeader unit={unit.data} />}
+        {!isPublic && <UnitPageHeader unit={data} />}
 
         <div className="bg-white rounded-lg shadow-md overflow-hidden p-3 lg:p-6">
           <div className="flex flex-col md:flex-row gap-4 lg:gap-6 flex-1">
             <ImageGallary
-              images={unit.data.images}
-              unitName={unit.data.unitTitle}
-              unitId={unit.data.unitId}
+              images={data.images ?? []}
+              unitName={data.unitTitle ?? ""}
+              unitId={safeUnitId}
+              missingRequiredFields={missingRequiredFields}
             />
-            <UnitBasicInfo unit={unit.data} />
+            <UnitBasicInfo
+              unit={data}
+              missingRequiredFields={missingRequiredFields}
+            />
 
             {/* Desktop ChatBot - Inline */}
             {isPublic && (

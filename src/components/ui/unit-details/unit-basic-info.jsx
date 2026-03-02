@@ -21,8 +21,21 @@ import toast from "react-hot-toast";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
 
-export default function UnitBasicInfo({ unit }) {
+const MISSING_FIELD_CLASS =
+  "ring-2 ring-red-500 rounded-md bg-red-50/70 border border-red-200";
+
+export default function UnitBasicInfo({
+  unit,
+  missingRequiredFields = [],
+}) {
   const { t, locale } = useI18n();
+  const missing = missingRequiredFields || [];
+  const isMissing = (field) => missing.includes(field);
+
+  // Guard: allow incomplete/broken units (e.g. from pending approval) so user can edit
+  const u = unit || {};
+  const safeBuildingType = (u.buildingType || "").toString().toLowerCase();
+  const safePurpose = u.purpose || "sell";
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -62,37 +75,65 @@ export default function UnitBasicInfo({ unit }) {
 
   return (
     <div className="flex-1">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-          {t.purpose?.[unit.purpose] || unit.purpose}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            isMissing("purpose")
+              ? "bg-red-100 text-red-800 ring-2 ring-red-500"
+              : "bg-blue-100 text-blue-800"
+          }`}
+        >
+          {t.purpose?.[safePurpose] || safePurpose}
         </span>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {BUILDING_TYPES.find(
-            (type) => type.value === unit.buildingType.toLowerCase()
-          )?.[locale === "ar" ? "ar_label" : "en_label"] || unit.buildingType}
+        <span
+          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            isMissing("buildingType")
+              ? "bg-red-100 text-red-800 ring-2 ring-red-500"
+              : "bg-gray-100 text-gray-800"
+          }`}
+        >
+          {BUILDING_TYPES.find((type) => type.value === safeBuildingType)?.[
+            locale === "ar" ? "ar_label" : "en_label"
+          ] || u.buildingType || "—"}
         </span>
       </div>
 
-      <h1 className="mt-2 text-3xl font-bold text-primary">{unit.unitTitle}</h1>
+      <h1
+        className={`mt-2 text-3xl font-bold text-primary ${
+          isMissing("unitTitle") ? MISSING_FIELD_CLASS : ""
+        } ${isMissing("unitTitle") ? "p-2" : ""}`}
+      >
+        {u.unitTitle || t.unitDetails?.title || "Unit Details"}
+      </h1>
 
-      <div className="flex flex-wrap gap-2 mt-2">
+      <div
+        className={`flex flex-wrap gap-2 mt-2 ${
+          isMissing("city") || isMissing("district") || isMissing("project")
+            ? MISSING_FIELD_CLASS + " p-2"
+            : ""
+        }`}
+      >
         <span className="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
           {[
-            unit.city,
-            unit.district,
-            locale === "ar" ? unit.project_ar : unit.project,
-            unit.phase,
+            u.city,
+            u.district,
+            locale === "ar" ? u.project_ar : u.project,
+            u.phase,
           ]
             .filter(Boolean)
-            .join(" , ")}
+            .join(" , ") || "—"}
         </span>
       </div>
 
-      <UnitPricing unit={unit} />
+      <UnitPricing unit={u} missingRequiredFields={missing} />
 
       {/* Additional Features */}
       <div className="mt-5 grid grid-cols-3 gap-x-8 gap-y-2 max-w-lg">
-        <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-2 ${
+            isMissing("developer") ? MISSING_FIELD_CLASS + " p-2" : ""
+          }`}
+        >
           <Building2 className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs text-gray-500">
@@ -100,101 +141,114 @@ export default function UnitBasicInfo({ unit }) {
             </span>
             <p className="font-medium text-xs">
               {locale === "ar"
-                ? unit.developer_ar || unit.developer
-                : unit.developer}
+                ? u.developer_ar || u.developer
+                : u.developer}
+              {!(u.developer_ar || u.developer) && "—"}
             </p>
           </div>
         </div>
 
-        {unit.purpose === "sell" && (
-          <div className="flex items-center gap-2">
+        {safePurpose === "sell" && (
+          <div
+            className={`flex items-center gap-2 ${
+              isMissing("deliveryDate") ? MISSING_FIELD_CLASS + " p-2" : ""
+            }`}
+          >
             <Calendar className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-gray-500 text-xs line-clamp-1">
                 {t.unitDetails?.deliveryDate}
               </span>
               <p className="font-medium text-xs whitespace-nowrap">
-                {formatDate(unit.deliveryDate) || t.unitDetails.notAvailable}
+                {formatDate(u.deliveryDate) || t.unitDetails?.notAvailable}
               </p>
             </div>
           </div>
         )}
 
-        {unit.floor !== 0 && (
+        {u.floor != null && u.floor !== 0 && (
           <div className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs line-clamp-1 text-gray-500">
-                {t.unitDetails.floor}
+                {t.unitDetails?.floor}
               </span>
               <p className="font-medium text-xs">
-                {getFloorLabel(unit.floor, t)}
+                {getFloorLabel(u.floor, t)}
               </p>
             </div>
           </div>
         )}
 
-        <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-2 ${
+            isMissing("finishing") ? MISSING_FIELD_CLASS + " p-2" : ""
+          }`}
+        >
           <Paintbrush className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
               {t.unitDetails?.finishing}
             </span>
             <p className="font-medium text-xs whitespace-nowrap ">
-              {unit.finishing
+              {u.finishing
                 ? t.unitDetails?.finishingTypes?.[
-                    unit.finishing.toLowerCase()
-                  ] || unit.finishing
+                    (u.finishing || "").toString().toLowerCase()
+                  ] || u.finishing
                 : t.unitDetails?.notAvailable}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div
+          className={`flex items-center gap-2 ${
+            isMissing("furnishing") ? MISSING_FIELD_CLASS + " p-2" : ""
+          }`}
+        >
           <Package className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
-              {t.unitDetails.finishing}
+              {t.unitDetails?.finishing}
             </span>
             <p className="font-medium text-xs whitespace-nowrap ">
-              {unit.furnishing
+              {u.furnishing
                 ? t.unitDetails?.furnishingTypes?.[
-                    unit.furnishing.toLowerCase()
-                  ] || unit.furnishing
+                    (u.furnishing || "").toString().toLowerCase()
+                  ] || u.furnishing
                 : t.unitDetails?.notAvailable}
             </p>
           </div>
         </div>
 
-        {unit.code && (
+        {(u.code != null && u.code !== "") && (
           <div className="flex items-center gap-2">
             <Hash className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs text-gray-500 whitespace-nowrap">
-                {t.basicDetails.code}
+                {t.basicDetails?.code}
               </span>
               <p
                 className="font-medium text-xs max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap"
-                title={unit.code}
+                title={u.code}
               >
-                {unit.code}
+                {u.code}
               </p>
             </div>
           </div>
         )}
 
-        {unit.model && (
+        {(u.model != null && u.model !== "") && (
           <div className="flex items-center gap-2">
             <Box className="h-5 w-5 text-primary shrink-0" />
             <div>
               <span className="text-xs text-gray-500 whitespace-nowrap">
-                {t.basicDetails.model}
+                {t.basicDetails?.model}
               </span>
               <p
                 className="font-medium text-xs max-w-[100px] overflow-hidden text-ellipsis whitespace-nowrap"
-                title={unit.model}
+                title={u.model}
               >
-                {unit.model}
+                {u.model}
               </p>
             </div>
           </div>
@@ -202,24 +256,24 @@ export default function UnitBasicInfo({ unit }) {
       </div>
 
       {/* Owner Details - Only show for brokers when owner info is available */}
-      {(unit.owner_name || unit.owner_mobile) && (
+      {(u.owner_name || u.owner_mobile) && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-3 text-slate-800">
             {t.steps?.ownerDetails || "Owner Information"}
           </h3>
 
-          {unit.owner_name && unit.owner_mobile ? (
+          {u.owner_name && u.owner_mobile ? (
             <div className="flex items-center gap-2 text-sm">
-              <span className="font-medium">{unit.owner_name}</span>
+              <span className="font-medium">{u.owner_name}</span>
               <button
-                onClick={() => copyToClipboard(unit.owner_mobile)}
+                onClick={() => copyToClipboard(u.owner_mobile)}
                 className="font-mono text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
                 title="Click to copy phone number"
               >
-                {unit.owner_mobile}
+                {u.owner_mobile}
               </button>
               <button
-                onClick={() => openWhatsApp(unit.owner_mobile)}
+                onClick={() => openWhatsApp(u.owner_mobile)}
                 className="w-5 h-5 bg-green-500 hover:bg-green-600 rounded flex items-center justify-center transition-colors"
                 title="Open WhatsApp"
               >
@@ -233,22 +287,22 @@ export default function UnitBasicInfo({ unit }) {
                 </svg>
               </button>
             </div>
-          ) : unit.owner_name ? (
+          ) : u.owner_name ? (
             <div className="text-sm">
-              <span className="font-medium">{unit.owner_name}</span>
+              <span className="font-medium">{u.owner_name}</span>
             </div>
-          ) : unit.owner_mobile ? (
+          ) : u.owner_mobile ? (
             <div className="flex items-center gap-2 text-sm">
               <button
-                onClick={() => copyToClipboard(unit.owner_mobile)}
+                onClick={() => copyToClipboard(u.owner_mobile)}
                 className="font-mono text-blue-600 hover:text-blue-800 cursor-pointer transition-colors"
                 title="Click to copy phone number"
               >
-                {unit.owner_mobile}
+                {u.owner_mobile}
               </button>
               <span className="text-gray-400">:</span>
               <button
-                onClick={() => openWhatsApp(unit.owner_mobile)}
+                onClick={() => openWhatsApp(u.owner_mobile)}
                 className="w-5 h-5 bg-green-500 hover:bg-green-600 rounded flex items-center justify-center transition-colors"
                 title="Open WhatsApp"
               >
@@ -269,52 +323,72 @@ export default function UnitBasicInfo({ unit }) {
       {/* Key Features */}
       <div className="mt-5 grid grid-cols-4 gap-x-1.5 gap-y-2 max-w-lg">
         {/* Land Area */}
-        {unit.landArea > 0 && (
+        {(u.landArea != null && Number(u.landArea) > 0) && (
           <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
             <Ruler className="h-6 w-6 text-primary" />
             <span className="mt-1 text-sm text-gray-500">
-              {t.unitDetails.area}
+              {t.unitDetails?.area}
             </span>
             <p className="font-medium text-center text-sm">
-              {unit.landArea} m²
+              {u.landArea} m²
             </p>
           </div>
         )}
 
         {/* View */}
-        <div className="flex flex-col items-center justify-between py-1.5 bg-white rounded-md border border-gray-200 h-20">
+        <div
+          className={`flex flex-col items-center justify-between py-1.5 rounded-md border h-20 ${
+            isMissing("view")
+              ? "bg-red-50/70 border-red-300 ring-2 ring-red-500"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <Eye className="h-5 w-5 text-primary flex-shrink-0" />
           <span className="mt-1 text-sm text-gray-500">
-            {t.unitDetails.view}
+            {t.unitDetails?.view}
           </span>
           <p className="font-medium text-center break-words text-sm">
-            {unit.view
-              ? t.unitDetails?.viewTypes?.[unit.view.toLowerCase()] || unit.view
+            {u.view
+              ? t.unitDetails?.viewTypes?.[(u.view || "").toString().toLowerCase()] || u.view
               : t.unitDetails?.notAvailable}
           </p>
         </div>
 
         {/* Rooms */}
-        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
+        <div
+          className={`flex flex-col items-center py-1.5 rounded-md border h-20 ${
+            isMissing("roomsCount")
+              ? "bg-red-50/70 border-red-300 ring-2 ring-red-500"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <BedDouble className="h-6 w-6 text-primary" />
           <span className="mt-1 text-sm text-gray-500">
-            {t.unitDetails.rooms}
+            {t.unitDetails?.rooms}
           </span>
-          <p className="font-medium text-center text-sm">{unit.roomsCount}</p>
+          <p className="font-medium text-center text-sm">
+            {u.roomsCount != null && u.roomsCount !== "" ? u.roomsCount : "—"}
+          </p>
         </div>
 
         {/* Bathrooms */}
-        <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
+        <div
+          className={`flex flex-col items-center py-1.5 rounded-md border h-20 ${
+            isMissing("bathroomCount")
+              ? "bg-red-50/70 border-red-300 ring-2 ring-red-500"
+              : "bg-white border-gray-200"
+          }`}
+        >
           <Bath className="h-6 w-6 text-primary" />
           <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
           <p className="font-medium text-center text-sm">
-            {unit.bathroomCount}
+            {u.bathroomCount != null && u.bathroomCount !== "" ? u.bathroomCount : "—"}
           </p>
         </div>
       </div>
 
-      {unit.purpose === "rent" && unit?.amenities.length > 0 && (
-        <UnitAmenities amenities={unit.amenities} t={t} />
+      {safePurpose === "rent" && (u?.amenities?.length ?? 0) > 0 && (
+        <UnitAmenities amenities={u.amenities} t={t} />
       )}
     </div>
   );

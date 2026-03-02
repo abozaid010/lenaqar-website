@@ -203,7 +203,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             prefetch={true}
             onClick={(e) => handleNavigation("/units", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/units") || pendingPath === "/units"
+              (pathname === "/units" || (pathname?.startsWith("/units") && !pathname?.startsWith("/units/pending-approval"))) || pendingPath === "/units"
                 ? SELECTION_COLORS.SELECTED
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/units" ? "opacity-70" : ""}`}
@@ -211,6 +211,23 @@ const Sidebar = ({ canAccessMap = false }) => {
             <Home className="h-5 w-5 mr-3" />
             <span>{t.sidebar.units}</span>
             {isPending && pendingPath === "/units" && (
+              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+            )}
+          </Link>
+
+          <Link
+            href="/units/pending-approval"
+            prefetch={true}
+            onClick={(e) => handleNavigation("/units/pending-approval", e)}
+            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
+              isLinkActive("/units/pending-approval") || pendingPath === "/units/pending-approval"
+                ? SELECTION_COLORS.SELECTED
+                : "text-gray-700 hover:bg-gray-100"
+            } ${isPending && pendingPath === "/units/pending-approval" ? "opacity-70" : ""}`}
+          >
+            <Home className="h-5 w-5 mr-3" />
+            <span>{t.sidebar.pendingApproval ?? "Pending approval"}</span>
+            {isPending && pendingPath === "/units/pending-approval" && (
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>

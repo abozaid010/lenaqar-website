@@ -19,19 +19,29 @@ import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
-import { extractUnitsFromText } from "@/utils/api";
+import { extractUnitsFromText, getClientid } from "@/utils/api";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
-  const clientId = LenaCookiesManager.getClientId() || null;
+  // Temp: fallback to client ID from access token when unit/cookie is missing clientId
+  const clientId =
+    LenaCookiesManager.getClientId() || getClientid() || null;
 
   if (!clientId) {
     return (
       <>
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-          <div className="bg-white rounded-md shadow-xl p-6">
-            <h2 className="text-lg font-semibold">Client ID not found</h2>
-            <p>Please ensure you are logged in with a valid client.</p>
+          <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+
+            <h2 className="text-lg font-semibold pr-8">Client ID not found</h2>
+            <p className="text-gray-600 mt-2 mb-4">Please ensure you are logged in with a valid client.</p>
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+            >
+              Close
+            </button>
           </div>
         </div>
       </>
@@ -382,15 +392,20 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
     // Validate step 3 fields
     if (currentStep === 3) {
-      // Check if at least one image is uploaded
-      if (formData.images.length === 0) {
+      // Images optional when dataSource === "ai_generated" and visibility === "pending_approval"
+      const dataSource = unitData?.dataSource ?? unitData?.data_source;
+      const visibility = unitData?.visibility ?? unitData?.status;
+      const isAiGeneratedPending =
+        dataSource === "ai_generated" && visibility === "pending_approval";
+      if (formData.images.length === 0 && !isAiGeneratedPending) {
         toast.error(t.toasts.uploadImage);
         return;
       }
 
+      // Furnishing required only for rent; for sell only finishing + developer
       let requiredFields;
       if (formData.purpose === "sell") {
-        requiredFields = ["finishing", "developer", "furnishing"];
+        requiredFields = ["finishing", "developer"];
       } else {
         requiredFields = ["finishing", "furnishing"];
       }
@@ -437,11 +452,28 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   if (sharedData.isSharedDataLoading) {
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full">
-          <div className="flex items-center justify-center">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="flex items-center justify-center pr-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             <span className="ml-3 text-lg">Loading form data...</span>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+          >
+            Cancel
+          </button>
         </div>
       </div>,
       document.body
