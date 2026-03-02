@@ -86,11 +86,12 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   }
 }
 
-/**
- * Fetches units with visibility=pending_approval from /units/all.
- * All unit fields are optional; response is normalized so missing/empty data does not throw.
- * visibility is always "pending_approval"; only cursor and direction are taken from searchParams (for pagination).
- */
+  /**
+   * Fetches units from /units/all for the Pending Approval page.
+   * All unit fields are optional; response is normalized so missing/empty data does not throw.
+   * By default visibility is "pending_approval", but can be overridden via searchParams.visibility
+   * to support filtering (e.g. "visible", "hidden", "pending_approval").
+   */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
     const parsed =
@@ -106,7 +107,7 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
 
     const params = {
       page_size: Number(parsed.page_size) || 16,
-      visibility: "pending_approval",
+      visibility: parsed.visibility || "pending_approval",
       direction: parsed.direction || "forward",
       ...(parsed.cursor != null && parsed.cursor !== ""
         ? { cursor: parsed.cursor }
