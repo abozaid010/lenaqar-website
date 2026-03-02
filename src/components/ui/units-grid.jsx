@@ -22,6 +22,8 @@ export default function UnitsGrid({
   pagination,
   readonly = false,
   allowMissingFields = false,
+  /** When set (e.g. "?pending=1"), appended to unit detail links so details page can highlight missing fields */
+  linkQueryParams = "",
 }) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
@@ -61,9 +63,9 @@ export default function UnitsGrid({
             <Link
               href={
                 u.unitId
-                  ? readonly
-                    ? `/allProberties/${u.unitId}`
-                    : `/units/${u.unitId}`
+                  ? (readonly
+                      ? `/allProberties/${u.unitId}`
+                      : `/units/${u.unitId}`) + (linkQueryParams || "")
                   : "#"
               }
               key={u.unitId ?? u.code ?? idx}

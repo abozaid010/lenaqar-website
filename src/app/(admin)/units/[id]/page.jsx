@@ -59,9 +59,16 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function PrivateUnitDetailsPage({ params }) {
+export default async function PrivateUnitDetailsPage({
+  params,
+  searchParams: rawSearchParams,
+}) {
   const { id } = await params;
+  const searchParams =
+    rawSearchParams != null ? await rawSearchParams : {};
   const unit = await fetchUnitData(id);
+  const highlightMissing =
+    (searchParams && (searchParams.pending === "1" || searchParams.pending === true)) ?? false;
 
   return (
     <>
@@ -78,7 +85,11 @@ export default async function PrivateUnitDetailsPage({ params }) {
         ]}
       />
       {unit && <UnitSchema unit={unit} isPublic={false} />}
-      <UnitDetailsPageQuery unitId={id} isPublic={false} />
+      <UnitDetailsPageQuery
+        unitId={id}
+        isPublic={false}
+        highlightMissing={highlightMissing}
+      />
     </>
   );
 }

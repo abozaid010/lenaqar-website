@@ -15,13 +15,25 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import shareButton from "../../../../public/share.svg";
 import { createSafeImageSource, handleImageError, getFirstValidImage, filterValidImages } from "@/utils/imageUtils";
 
-export default function ImageGallary({ images, unitName, unitId, readOnly }) {
+const MISSING_FIELD_CLASS =
+  "ring-2 ring-red-500 rounded-md bg-red-50/70 border-2 border-red-300";
+
+export default function ImageGallary({
+  images,
+  unitName,
+  unitId,
+  readOnly,
+  missingRequiredFields = [],
+}) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
 
   const [mainImageIndex, setMainImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const isImagesMissing =
+    (missingRequiredFields || []).includes("images");
 
   // Filter out broken images to prevent repeated failed requests
   const validImages = filterValidImages(images?.map(img => img?.url) || []);
@@ -51,13 +63,15 @@ export default function ImageGallary({ images, unitName, unitId, readOnly }) {
   return (
     <div className="space-y-2 w-full md:w-1/2 xl:w-2/5">
       <div
-        className="relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group"
+        className={`relative h-[600px] w-full rounded-md overflow-hidden cursor-pointer shadow-lg group ${
+          isImagesMissing ? MISSING_FIELD_CLASS : ""
+        }`}
         onClick={() => setIsFullscreen(true)}
       >
         <ImageWithLoader
           src={hasValidImages ? validImages[mainImageIndex] || validImages[0] : getFirstValidImage(images?.map(img => img?.url) || [], 'property')}
           onError={(e) => {
-            const originalSrc = hasValidImages ? validImages[mainImageIndex] || validImages[0] : images[mainImageIndex]?.url;
+            const originalSrc = hasValidImages ? validImages[mainImageIndex] || validImages[0] : images?.[mainImageIndex]?.url;
             const fallbackSrc = handleImageError(e, originalSrc, 'property');
             if (fallbackSrc !== originalSrc) {
               e.currentTarget.src = fallbackSrc;

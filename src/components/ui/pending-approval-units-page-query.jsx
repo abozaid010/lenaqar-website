@@ -47,6 +47,7 @@ export default function PendingApprovalUnitsPageQuery({ searchParams }) {
           pagination={pagination}
           readonly={false}
           allowMissingFields
+          linkQueryParams="?pending=1"
         />
       )}
     </div>
