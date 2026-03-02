@@ -59,10 +59,11 @@ export function getMissingRequiredFields(unit) {
     }
   }
 
-  // Step 3 - Images (optional when AI-generated + pending approval)
+  // Step 3 - Images (optional when dataSource === "ai_generated" and visibility === "pending_approval")
+  const dataSource = unit.dataSource ?? unit.data_source;
+  const visibility = unit.visibility ?? unit.status;
   const isAiGeneratedPending =
-    (unit.data_source || unit.dataSource) === "ai_generated" &&
-    (unit.visibility === "pending_approval" || unit.status === "pending_approval");
+    dataSource === "ai_generated" && visibility === "pending_approval";
   const images = unit.images;
   if (
     (!images || !Array.isArray(images) || images.length === 0) &&

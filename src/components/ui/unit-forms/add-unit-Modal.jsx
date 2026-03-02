@@ -392,11 +392,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
     // Validate step 3 fields
     if (currentStep === 3) {
-      // Images optional when unit is AI-generated and pending approval
+      // Images optional when dataSource === "ai_generated" and visibility === "pending_approval"
+      const dataSource = unitData?.dataSource ?? unitData?.data_source;
+      const visibility = unitData?.visibility ?? unitData?.status;
       const isAiGeneratedPending =
-        unitData?.data_source === "ai_generated" &&
-        (unitData?.visibility === "pending_approval" ||
-          unitData?.status === "pending_approval");
+        dataSource === "ai_generated" && visibility === "pending_approval";
       if (formData.images.length === 0 && !isAiGeneratedPending) {
         toast.error(t.toasts.uploadImage);
         return;
