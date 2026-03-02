@@ -59,9 +59,15 @@ export function getMissingRequiredFields(unit) {
     }
   }
 
-  // Step 3 - Images and finishing
+  // Step 3 - Images (optional when AI-generated + pending approval)
+  const isAiGeneratedPending =
+    (unit.data_source || unit.dataSource) === "ai_generated" &&
+    (unit.visibility === "pending_approval" || unit.status === "pending_approval");
   const images = unit.images;
-  if (!images || !Array.isArray(images) || images.length === 0) {
+  if (
+    (!images || !Array.isArray(images) || images.length === 0) &&
+    !isAiGeneratedPending
+  ) {
     missing.push("images");
   }
 
@@ -69,9 +75,12 @@ export function getMissingRequiredFields(unit) {
   if (finishing === undefined || finishing === null || String(finishing).trim() === "") {
     missing.push("finishing");
   }
-  const furnishing = unit.furnishing;
-  if (furnishing === undefined || furnishing === null || String(furnishing).trim() === "") {
-    missing.push("furnishing");
+  // Furnishing required only for rent
+  if (purpose === "rent") {
+    const furnishing = unit.furnishing;
+    if (furnishing === undefined || furnishing === null || String(furnishing).trim() === "") {
+      missing.push("furnishing");
+    }
   }
   if (purpose === "sell") {
     const developer = unit.developer;

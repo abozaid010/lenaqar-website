@@ -54,7 +54,7 @@ export default function ImagesStep({
           <option value="core & shell">{t.coreAndShell}</option>
         </FormSelect>
 
-        {/* Furnishing Type */}
+        {/* Furnishing Type - required only for rent */}
         <div>
           <label
             className={`block text-sm font-medium mb-1 ${
@@ -64,7 +64,7 @@ export default function ImagesStep({
             }`}
           >
             {t.furnishingType}
-            <span className="text-red-500">*</span>
+            {formData.purpose === "rent" && <span className="text-red-500">*</span>}
           </label>
           <div className="relative">
             <select

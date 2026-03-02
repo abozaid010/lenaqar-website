@@ -392,15 +392,20 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
     // Validate step 3 fields
     if (currentStep === 3) {
-      // Check if at least one image is uploaded
-      if (formData.images.length === 0) {
+      // Images optional when unit is AI-generated and pending approval
+      const isAiGeneratedPending =
+        unitData?.data_source === "ai_generated" &&
+        (unitData?.visibility === "pending_approval" ||
+          unitData?.status === "pending_approval");
+      if (formData.images.length === 0 && !isAiGeneratedPending) {
         toast.error(t.toasts.uploadImage);
         return;
       }
 
+      // Furnishing required only for rent; for sell only finishing + developer
       let requiredFields;
       if (formData.purpose === "sell") {
-        requiredFields = ["finishing", "developer", "furnishing"];
+        requiredFields = ["finishing", "developer"];
       } else {
         requiredFields = ["finishing", "furnishing"];
       }
