@@ -21,7 +21,7 @@ export const BUILDING_TYPE_VALUES = [
   "clinic",
   "cabinet",
   "commercial",
-  "service apartment",
+  "serviced apartment",
   "loft",
   "office villa",
   "condo",

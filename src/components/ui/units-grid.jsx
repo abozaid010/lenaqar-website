@@ -17,7 +17,12 @@ import {
 } from "@/utils/imageUtils";
 import EmptyStateVideo from "./empty-state-video";
 
-export default function UnitsGrid({ units, pagination, readonly = false }) {
+export default function UnitsGrid({
+  units,
+  pagination,
+  readonly = false,
+  allowMissingFields = false,
+}) {
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
@@ -54,8 +59,14 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
           {units.map((u, idx) => (
             <Link
-              href={readonly ? `/allProberties/${u.unitId}` : `/units/${u.unitId}`}
-              key={idx}
+              href={
+                u.unitId
+                  ? readonly
+                    ? `/allProberties/${u.unitId}`
+                    : `/units/${u.unitId}`
+                  : "#"
+              }
+              key={u.unitId ?? u.code ?? idx}
               className="relative"
             >
               {/* Image Section */}
@@ -116,13 +127,15 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                 {/* Share Button */}
                 {!readonly ? (
                   <div className="  ">
-                    <button
-                      type="button"
-                      onClick={(e) => handleShareClick(u.unitId, e)}
-                      className="absolute top-2 right-5 cursor-pointer group"
-                    >
-                      <img src={shareButton.src} alt="share" />
-                    </button>
+                    {u.unitId ? (
+                      <button
+                        type="button"
+                        onClick={(e) => handleShareClick(u.unitId, e)}
+                        className="absolute top-2 right-5 cursor-pointer group"
+                      >
+                        <img src={shareButton.src} alt="share" />
+                      </button>
+                    ) : null}
                     <p
                       style={{
                         fontWeight: "500",
@@ -131,7 +144,13 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     >
                       {" "}
                       {t.for}
-                      {u.purpose === "rent" ? t.rent : t.sell}
+                      {u.purpose === "rent" || u.purpose === "Rent"
+                        ? t.rent
+                        : u.purpose === "sell" || u.purpose === "Sell"
+                          ? t.sell
+                          : allowMissingFields
+                            ? "—"
+                            : t.sell}
                     </p>
                   </div>
                 ) : (
@@ -151,7 +170,7 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     {t.city}{" "}
                   </p>
                   <span className="line-clamp-1 text-[14px] font-bold">
-                    {u.city || "Location not specified"}
+                    {u.city ?? (allowMissingFields ? "—" : "Location not specified")}
                   </span>
                 </div>
 
@@ -161,11 +180,9 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                     {t.project}
                   </p>
                   <div>
-                    {u.project && (
-                      <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
-                        {u.project}
-                      </span>
-                    )}
+                    <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
+                      {u.project ?? (allowMissingFields ? "—" : "")}
+                    </span>
                   </div>
                 </div>
 
@@ -189,16 +206,18 @@ export default function UnitsGrid({ units, pagination, readonly = false }) {
                       </div>
                     </div>
                   ) : (
-                    u.totalPrice && (
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-normal text-[16px]">
-                          {t.totalPrice}
-                        </span>
-                        <span className=" font-semibold text-[14px]">
-                          {formatPrice(u.totalPrice)} EGP
-                        </span>
-                      </div>
-                    )
+                    <div className="flex items-center justify-between w-full">
+                      <span className="font-normal text-[16px]">
+                        {t.totalPrice}
+                      </span>
+                      <span className=" font-semibold text-[14px]">
+                        {u.totalPrice != null && u.totalPrice !== ""
+                          ? `${formatPrice(u.totalPrice)} EGP`
+                          : allowMissingFields
+                            ? "—"
+                            : "Price not specified"}
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
