@@ -5,6 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { useMemo, useState } from "react";
 
 const VISIBILITY_OPTIONS = [
@@ -79,7 +80,7 @@ export default function PendingApprovalUnitsPageQuery({ searchParams }) {
           pagination={pagination}
           readonly={false}
           allowMissingFields
-          linkQueryParams="?pending=1"
+          linkQueryParams={unitsSourcePendingQueryString(true)}
         />
       )}
     </div>

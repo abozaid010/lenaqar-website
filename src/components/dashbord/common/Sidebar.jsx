@@ -20,11 +20,13 @@ import { useEffect, useState, useTransition } from "react";
 
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
+import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 
 const Sidebar = ({ canAccessMap = false }) => {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
+  const unitsSection = useUnitsSectionSource();
   const [isOpen, setIsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -48,6 +50,10 @@ const Sidebar = ({ canAccessMap = false }) => {
     if (path === "/dashboard" && pathname === "/dashboard") return true;
     return pathname.startsWith(path) && path !== "/dashboard";
   };
+
+  // Modular: unit detail and edit unit (modal) both respect URL source (pending=1 → Pending approval)
+  const isUnitsLinkActive = unitsSection === "units";
+  const isPendingApprovalLinkActive = unitsSection === "pending_approval";
 
   if (typeof window !== "undefined") {
     window.toggleSidebar = toggleSidebar;
@@ -203,7 +209,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             prefetch={true}
             onClick={(e) => handleNavigation("/units", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              (pathname === "/units" || (pathname?.startsWith("/units") && !pathname?.startsWith("/units/pending-approval"))) || pendingPath === "/units"
+              (isUnitsLinkActive || pendingPath === "/units")
                 ? SELECTION_COLORS.SELECTED
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/units" ? "opacity-70" : ""}`}
@@ -220,7 +226,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             prefetch={true}
             onClick={(e) => handleNavigation("/units/pending-approval", e)}
             className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/units/pending-approval") || pendingPath === "/units/pending-approval"
+              isPendingApprovalLinkActive || pendingPath === "/units/pending-approval"
                 ? SELECTION_COLORS.SELECTED
                 : "text-gray-700 hover:bg-gray-100"
             } ${isPending && pendingPath === "/units/pending-approval" ? "opacity-70" : ""}`}

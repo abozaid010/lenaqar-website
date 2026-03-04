@@ -20,7 +20,11 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
+import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
+
+/** Toggle extraction strategy: true = client-side UnitTextExtractor, false = server API */
+const USE_LOCAL_EXTRACTOR = true;
 
 /** Parse value to number for API (strip commas/formatting). */
 function toAmount(value) {
@@ -241,19 +245,31 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.gardenSize != null && { gardenSize: apiUnit.gardenSize }),
       ...(apiUnit.garageArea != null && { garageArea: apiUnit.garageArea }),
       ...(apiUnit.furnishing != null && { furnishing: String(apiUnit.furnishing) }),
+      ...(apiUnit.finishing != null && { finishing: String(apiUnit.finishing) }),
       ...(apiUnit.view != null && { view: String(apiUnit.view) }),
+      ...(apiUnit.floor != null && { floor: apiUnit.floor }),
       ...(purpose != null && { purpose }),
       ...(apiUnit.code != null && { code: String(apiUnit.code) }),
+      ...(apiUnit.phase != null && { phase: String(apiUnit.phase) }),
+      ...(apiUnit.model != null && { model: String(apiUnit.model) }),
+      ...(apiUnit.owner_name != null && { owner_name: String(apiUnit.owner_name) }),
+      ...(apiUnit.owner_mobile != null && { owner_mobile: String(apiUnit.owner_mobile) }),
+      ...(apiUnit.deliveryStatus != null && { deliveryStatus: String(apiUnit.deliveryStatus) }),
       ...(apiUnit.unitId != null && { unitId: apiUnit.unitId }),
       ...(apiUnit.clientId != null && { clientId: apiUnit.clientId }),
       ...(apiUnit.clientName != null && { clientName: apiUnit.clientName }),
       ...(apiUnit.dataSource != null && { dataSource: apiUnit.dataSource }),
       ...(apiUnit.images != null && Array.isArray(apiUnit.images) && { images: apiUnit.images }),
     };
-    const sellPartial =
-      (purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null
-        ? { totalPrice: apiUnit.totalPrice }
-        : {};
+    const sellPartial = {};
+    if ((purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null) {
+      sellPartial.totalPrice = apiUnit.totalPrice;
+    }
+    if (apiUnit.downPayment != null) sellPartial.downPayment = apiUnit.downPayment;
+    if (apiUnit.remaining_amount != null) sellPartial.remaining_amount = apiUnit.remaining_amount;
+    if (apiUnit.deliveryDate != null) sellPartial.deliveryDate = apiUnit.deliveryDate;
+    if (apiUnit.installment_years != null) sellPartial.installment_years = apiUnit.installment_years;
+    if (apiUnit.over_price != null) sellPartial.over_price = apiUnit.over_price;
     return { formDataPartial, sellPartial };
   };
 
@@ -278,10 +294,19 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
     setExtractingFromText(true);
     try {
+      if (USE_LOCAL_EXTRACTOR) {
+        const extracted = UnitTextExtractor.extractFlat(text);
+        if (extracted && Object.keys(extracted).length > 0) {
+          applyExtractedUnit(extracted, text);
+          return true;
+        }
+        // Zero extracted keys — fallback to API
+      }
+
       const res = await extractUnitsFromText(text);
       if (!res?.status) {
         toast.error(
-          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+          res?.error_message || "Failed to extract"
         );
         return false;
       }
@@ -294,7 +319,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       const units = data.extracted_units;
       if (!Array.isArray(units) || units.length === 0) {
         toast.error(
-          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+          res?.error_message || " Array Failed to extract"
         );
         return false;
       }
@@ -308,7 +333,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
       return true;
     } catch (err) {
-      toast.error(t.modal?.fillFromText?.failedExtract || "Failed to extract");
+      console.error("[ExtractFromText] extraction failed:", err);
+      toast.error("Exception: Failed to extract");
       return false;
     } finally {
       setExtractingFromText(false);

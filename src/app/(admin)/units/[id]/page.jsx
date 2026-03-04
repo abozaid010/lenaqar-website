@@ -4,6 +4,7 @@ import { SITE_URL } from "../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import UnitSchema from "@/components/schema/UnitSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { UNITS_SOURCE_PENDING_PARAM } from "@/utils/units-navigation-source";
 //...
 import axiosInstance from "@/utils/axiosInstance";
 
@@ -68,7 +69,7 @@ export default async function PrivateUnitDetailsPage({
     rawSearchParams != null ? await rawSearchParams : {};
   const unit = await fetchUnitData(id);
   const highlightMissing =
-    (searchParams && (searchParams.pending === "1" || searchParams.pending === true)) ?? false;
+    (searchParams && (searchParams[UNITS_SOURCE_PENDING_PARAM] === "1" || searchParams.pending === true)) ?? false;
 
   return (
     <>
