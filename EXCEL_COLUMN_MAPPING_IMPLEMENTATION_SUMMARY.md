@@ -282,6 +282,7 @@ Row 2: [221, two bedroom, 2, palm hills, apartment, 2, 10]
 - [x] Green/red colors display correctly
 - [x] Missing columns warning works
 - [x] Upload validation checks required fields
+- [x] Validation thresholds centralized (MIN_LAND_AREA) in src/data/constants.js
 
 ---
 
@@ -348,4 +349,3 @@ For questions or issues:
 This implementation successfully inverts the column mapping approach, making it more intuitive for end users. Instead of seeing their Excel headers and figuring out what they map to, users now see what the system expects and can easily select which of their Excel columns provides that data.
 
 **Result:** More user-friendly, less confusion, same powerful flexibility!
-

@@ -12,6 +12,7 @@ import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import UnitSelectorDialog from "./UnitSelectorDialog";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 
 function normalizeSuggestedAnswers(raw) {
   const arr = Array.isArray(raw) ? raw : [];
@@ -40,6 +41,12 @@ export default function CampaignDialog({
   const [textImages, setTextImages] = useState([]); // [{url,fileId}]
   const [selectedUnit, setSelectedUnit] = useState(null); // full unit object
   const [suggestedAns, setSuggestedAns] = useState(["", "", ""]);
+  const [signupForum, setSignupForum] = useState("");
+  const SIGNUP_FORUM_OPTIONS = useMemo(() => ([
+    { value: "hidden", label: c.signupForumOptions?.hidden || "Hidden" },
+    { value: "optional", label: c.signupForumOptions?.optional || "Optional" },
+    { value: "required", label: c.signupForumOptions?.required || "Required" },
+  ]), [c]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
@@ -78,6 +85,7 @@ export default function CampaignDialog({
       setTextImages(normalizedImages);
       setSelectedUnit(campaign?.unit || null);
       setSuggestedAns(normalizeSuggestedAnswers(campaign?.suggested_ans));
+      setSignupForum(campaign?.signup_forum || "optional");
     } else {
       setMode("text");
       setClientPhoneNumber("");
@@ -85,6 +93,7 @@ export default function CampaignDialog({
       setTextImages([]);
       setSelectedUnit(null);
       setSuggestedAns(["", "", ""]);
+      setSignupForum("optional");
     }
   }, [isOpen, campaign]);
 
@@ -96,6 +105,7 @@ export default function CampaignDialog({
     const base = {
       client_phone_number: (clientPhoneNumber || "").trim(),
       suggested_ans: cleanSuggested,
+      signup_forum: signupForum || "optional",
     };
 
     if (mode === "unit") {
@@ -110,7 +120,7 @@ export default function CampaignDialog({
       text: (textValue || "").trim(),
       images: Array.isArray(textImages) ? textImages : [],
     };
-  }, [clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue]);
+  }, [clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue, signupForum]);
 
   const validate = () => {
     if (!payload.client_phone_number) {
@@ -224,6 +234,23 @@ export default function CampaignDialog({
             required
           />
 
+          <div>
+            <div className="text-sm font-medium text-gray-800 mb-2">
+              {c.signupForumLabel || "Signup form"}
+            </div>
+            <SearchableDropdownSelect
+              options={SIGNUP_FORUM_OPTIONS}
+              value={signupForum}
+              onChange={(e) => setSignupForum(e.target.value)}
+              name="signup_forum"
+              placeholder={c.signupForumPlaceholder || "Select visibility"}
+              className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            />
+            <div className="text-xs text-gray-500 mt-1">
+              {c.signupForumNote || "Only included in the request if you change it."}
+            </div>
+          </div>
+
           {/* Mode selector */}
           <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
             <div className="text-sm font-medium text-gray-800 mb-2">
@@ -261,7 +288,6 @@ export default function CampaignDialog({
                 onChange={(e) => setTextValue(e.target.value)}
                 rows={5}
                 dir={locale === "ar" ? "rtl" : "ltr"}
-                required
               />
 
               <div>
@@ -364,4 +390,3 @@ export default function CampaignDialog({
     </Dialog>
   );
 }
-

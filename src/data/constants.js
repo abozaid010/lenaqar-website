@@ -1,6 +1,8 @@
 // Centralized enum constants for the application
 // All enum values are defined here and can be transformed with translations from locale files
 
+export const MIN_LAND_AREA = 9;
+
 // Raw enum value arrays
 export const BUILDING_TYPE_VALUES = [
   "apartment",

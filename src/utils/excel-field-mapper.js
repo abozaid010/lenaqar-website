@@ -11,6 +11,7 @@ import {
   FINISHING_TYPE_VALUES,
   VIEW_TYPE_VALUES,
   FURNISHING_TYPE_VALUES,
+  MIN_LAND_AREA,
 } from '@/data/constants';
 
 // Required field keys that MUST be present for unit uploads
@@ -388,13 +389,13 @@ function isValidFloor(value) {
 }
 
 /**
- * Validates land area: valid number strictly greater than 15
+ * Validates land area: valid number strictly greater than 9
  */
 function isValidLandArea(value) {
   if (value === null || value === undefined || value === '') return false;
   let numStr = String(value).trim().replace(/[, ]/g, '');
   const parsed = parseFloat(numStr);
-  return !isNaN(numStr) && !isNaN(parsed) && isFinite(parsed) && parsed > 15;
+  return !isNaN(numStr) && !isNaN(parsed) && isFinite(parsed) && parsed > MIN_LAND_AREA;
 }
 
 // Extended finishing values (including "finished" and "not finished")
@@ -412,7 +413,7 @@ const EXPECTED_VALUES_MAP = {
   buildingType: BUILDING_TYPE_VALUES, // Unit type: must match at least 0.6 with one of BUILDING_TYPE_VALUES
   project: isValidProjectString, // Function - string length > 2
   roomsCount: isValidRoomsCount, // Function - integer >= 0 or word number
-  landArea: isValidLandArea, // Function - valid number > 15
+  landArea: isValidLandArea, // Function - valid number > 159
   totalPrice: isValidNumber, // Function - any valid number
   deliveryDate: isValidDate, // Function - any valid date
   

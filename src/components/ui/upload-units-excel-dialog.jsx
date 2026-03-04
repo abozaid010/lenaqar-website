@@ -39,8 +39,8 @@ import ProjectsNotUpdatedDialog from "@/components/ui/projects-not-updated-dialo
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
+import { MIN_LAND_AREA } from "@/data/constants";
 
-const MIN_LAND_AREA = 9;
 const MIN_TOTAL_PRICE = 200000;
 
 const downloadTemplateFile = () => {
