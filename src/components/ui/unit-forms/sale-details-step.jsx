@@ -119,6 +119,8 @@ export default function SaleDetailsStep({
             placeholder="0"
             type="money"
             adornment="EGP"
+            required
+            error={invalidFields.includes("totalPrice")}
           />
           
           <LenaTextField

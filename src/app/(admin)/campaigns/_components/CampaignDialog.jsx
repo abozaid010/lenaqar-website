@@ -34,6 +34,7 @@ export default function CampaignDialog({
   const didInitRef = useRef(false);
 
   const [mode, setMode] = useState("text"); // 'text' | 'unit'
+  const [campaignIdInput, setCampaignIdInput] = useState(""); // create only: user-defined campaign_id (4–16 chars, no spaces)
   const [clientPhoneNumber, setClientPhoneNumber] = useState("");
 
   // Preserve state between toggles
@@ -74,6 +75,7 @@ export default function CampaignDialog({
     if (campaign?.id) {
       const isUnitMode = !!campaign?.unit;
       setMode(isUnitMode ? "unit" : "text");
+      setCampaignIdInput(""); // not editable in edit mode
       setClientPhoneNumber(campaign?.client_phone_number || "");
       setTextValue(campaign?.text || "");
       // Normalize images to { url, fileId } for ImageUploader (API may return file_id)
@@ -88,6 +90,7 @@ export default function CampaignDialog({
       setSignupForum(campaign?.signup_forum || "optional");
     } else {
       setMode("text");
+      setCampaignIdInput("");
       setClientPhoneNumber("");
       setTextValue("");
       setTextImages([]);
@@ -108,6 +111,11 @@ export default function CampaignDialog({
       signup_forum: signupForum || "optional",
     };
 
+    // Include campaign_id only when creating (cannot be updated)
+    if (!editMode && campaignIdInput.trim()) {
+      base.campaign_id = campaignIdInput.trim();
+    }
+
     if (mode === "unit") {
       return {
         ...base,
@@ -120,9 +128,25 @@ export default function CampaignDialog({
       text: (textValue || "").trim(),
       images: Array.isArray(textImages) ? textImages : [],
     };
-  }, [clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue, signupForum]);
+  }, [editMode, campaignIdInput, clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue, signupForum]);
 
   const validate = () => {
+    if (!editMode) {
+      const raw = (campaignIdInput || "").trim();
+      if (!raw) {
+        toast.error(c.errors?.campaignIdRequired || "Campaign ID is required.");
+        return false;
+      }
+      if (raw.length < 4 || raw.length > 16) {
+        toast.error(c.errors?.campaignIdLength || "Campaign ID must be 4–16 characters.");
+        return false;
+      }
+      if (/\s/.test(raw)) {
+        toast.error(c.errors?.campaignIdNoSpaces || "Campaign ID must be one word (no spaces).");
+        return false;
+      }
+    }
+
     if (!payload.client_phone_number) {
       toast.error(c.errors?.clientPhoneRequired || "Client phone number is required.");
       return false;
@@ -146,7 +170,7 @@ export default function CampaignDialog({
 
   const handleSubmit = async () => {
     if (isSubmitting) return;
-    if (isUploadingImages) {
+    if (mode === "text" && isUploadingImages) {
       toast.error(c.errors?.waitForImages || "Please wait for images to finish uploading.");
       return;
     }
@@ -208,7 +232,7 @@ export default function CampaignDialog({
             type="button"
             onClick={handleSubmit}
             className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
-            disabled={isSubmitting || isUploadingImages}
+            disabled={isSubmitting || (mode === "text" && isUploadingImages)}
           >
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
@@ -225,6 +249,20 @@ export default function CampaignDialog({
     >
       <div className="max-w-3xl mx-auto">
         <div className="space-y-4">
+          {!editMode && (
+            <LenaTextField
+              label={c.campaignIdLabel || "Campaign ID"}
+              name="campaign_id"
+              value={campaignIdInput}
+              onChange={(e) => setCampaignIdInput((e.target.value || "").replace(/\s/g, ""))}
+              dir="ltr"
+              placeholder={c.campaignIdPlaceholder || "e.g. my-campaign"}
+              required
+              maxLength={16}
+              helperText={c.campaignIdHelp || "4–16 characters, one word, no spaces. Used in the campaign URL."}
+            />
+          )}
+
           <LenaTextField
             label={c.clientPhoneNumber || "Client phone number"}
             name="client_phone_number"

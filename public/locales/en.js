@@ -1201,6 +1201,7 @@ export default {
       failedExtract: "Failed to extract",
       noUnitsFound: "No units found",
       back: "Back",
+      sourceTextGuide: "Reference: enter all values accurately based on the source text below",
     },
   },
   team: {

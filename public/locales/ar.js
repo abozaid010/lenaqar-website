@@ -1191,6 +1191,7 @@ export default {
       failedExtract: "فشل الاستخراج",
       noUnitsFound: "لم يتم العثور على وحدات",
       back: "رجوع",
+      sourceTextGuide: "مرجع: أدخل جميع القيم بدقة وفقاً للنص المصدر أدناه",
     },
   },
   team: {

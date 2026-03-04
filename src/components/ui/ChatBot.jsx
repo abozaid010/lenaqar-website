@@ -7,7 +7,7 @@ const ChatBot = () => {
   const [isChatOpen, setIsChatOpen] = useState(true);
 
   // LenaAI Chat URL
-  const chatUrl = "https://chat.lenaai.net/?client=public";
+  const chatUrl = "https://chat.lenaai.net/?campaign=lenaai_website";
 
   const openChat = () => setIsChatOpen(true);
   const closeChat = () => setIsChatOpen(false);
