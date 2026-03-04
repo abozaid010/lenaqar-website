@@ -20,7 +20,64 @@ import { v4 as uuidv4 } from "uuid";
 
 import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
+import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
+
+/** Toggle extraction strategy: true = client-side UnitTextExtractor, false = server API */
+const USE_LOCAL_EXTRACTOR = true;
+
+/** Parse value to number for API (strip commas/formatting). */
+function toAmount(value) {
+  if (value === "" || value === null || value === undefined) return 0;
+  if (typeof value === "number" && !Number.isNaN(value)) return value;
+  const stripped = String(value).replace(/[^\d.]/g, "");
+  const n = parseFloat(stripped);
+  return Number.isNaN(n) ? 0 : n;
+}
+
+/** Clean source text for extra_info: normalize newlines, trim lines, drop empty. */
+function cleanExtraInfo(text) {
+  if (text == null || typeof text !== "string") return "";
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+}
+
+/** Ensure all price/amount fields in form data are sent as numbers to the API. */
+function sanitizeAmountsForApi(data) {
+  const out = { ...data };
+  const sellAmountFields = [
+    "totalPrice",
+    "downPayment",
+    "paid_amount",
+    "remaining_amount",
+    "over_price",
+  ];
+  sellAmountFields.forEach((field) => {
+    if (field in out && (out[field] !== "" || out[field] != null)) {
+      out[field] = toAmount(out[field]);
+    }
+  });
+  if (out.installment_years !== "" && out.installment_years != null) {
+    out.installment_years = Math.floor(toAmount(out.installment_years)) || 0;
+  }
+  if (out.purpose === "rent" && out.rentDurationType && typeof out.rentDurationType === "object") {
+    out.rentDurationType = { ...out.rentDurationType };
+    Object.keys(out.rentDurationType).forEach((duration) => {
+      const block = out.rentDurationType[duration];
+      if (block && typeof block === "object" && "price" in block) {
+        out.rentDurationType[duration] = {
+          ...block,
+          price: toAmount(block.price),
+        };
+      }
+    });
+  }
+  return out;
+}
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
   // Temp: fallback to client ID from access token when unit/cookie is missing clientId
@@ -57,7 +114,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const updateUnitMutation = useUpdateUnit();
 
   const sharedData = useAdminSharedData();
-  const rowDevelopers = sharedData.developers.data || [];
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -68,6 +124,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   const [showFillFromTextDialog, setShowFillFromTextDialog] = useState(false);
   const [extractingFromText, setExtractingFromText] = useState(false);
+  const [extractedSourceText, setExtractedSourceText] = useState(() =>
+    unitData?.extra_info != null ? String(unitData.extra_info).trim() : ""
+  );
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
     clientId: unitData?.clientId || clientId,
@@ -151,6 +210,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     setFormData((prev) => ({ ...prev, ...newData }));
   };
 
+  /** Build unit title from area, bedroom, type, project when extracting from text */
+  const buildTitleFromExtracted = (apiUnit) => {
+    const parts = [
+      apiUnit.project != null ? String(apiUnit.project).trim() : null,
+      apiUnit.buildingType != null ? String(apiUnit.buildingType).trim() : null,
+      apiUnit.roomsCount != null ? `${apiUnit.roomsCount} bed` : null,
+      apiUnit.landArea != null ? `${apiUnit.landArea} m²` : null,
+    ].filter(Boolean);
+    return parts.length > 0 ? parts.join(" · ") : null;
+  };
+
   /** Map API extracted unit to formData + SellFormData/rentFormData */
   const mapApiUnitToForm = (apiUnit) => {
     const purpose =
@@ -159,13 +229,15 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         : apiUnit.totalPrice != null
           ? "sell"
           : undefined;
+    const builtTitle = buildTitleFromExtracted(apiUnit);
     const formDataPartial = {
       ...(apiUnit.country != null && { country: String(apiUnit.country) }),
       ...(apiUnit.city != null && { city: String(apiUnit.city) }),
       ...(apiUnit.district != null && { district: String(apiUnit.district) }),
       ...(apiUnit.project != null && { project: String(apiUnit.project) }),
       ...(apiUnit.developer != null && { developer: String(apiUnit.developer) }),
-      ...(apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
+      ...(builtTitle != null && { unitTitle: builtTitle }),
+      ...(builtTitle == null && apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
       ...(apiUnit.bathroomCount != null && { bathroomCount: apiUnit.bathroomCount }),
       ...(apiUnit.roomsCount != null && { roomsCount: apiUnit.roomsCount }),
       ...(apiUnit.buildingType != null && { buildingType: String(apiUnit.buildingType) }),
@@ -173,28 +245,41 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.gardenSize != null && { gardenSize: apiUnit.gardenSize }),
       ...(apiUnit.garageArea != null && { garageArea: apiUnit.garageArea }),
       ...(apiUnit.furnishing != null && { furnishing: String(apiUnit.furnishing) }),
+      ...(apiUnit.finishing != null && { finishing: String(apiUnit.finishing) }),
       ...(apiUnit.view != null && { view: String(apiUnit.view) }),
+      ...(apiUnit.floor != null && { floor: apiUnit.floor }),
       ...(purpose != null && { purpose }),
       ...(apiUnit.code != null && { code: String(apiUnit.code) }),
+      ...(apiUnit.phase != null && { phase: String(apiUnit.phase) }),
+      ...(apiUnit.model != null && { model: String(apiUnit.model) }),
+      ...(apiUnit.owner_name != null && { owner_name: String(apiUnit.owner_name) }),
+      ...(apiUnit.owner_mobile != null && { owner_mobile: String(apiUnit.owner_mobile) }),
+      ...(apiUnit.deliveryStatus != null && { deliveryStatus: String(apiUnit.deliveryStatus) }),
       ...(apiUnit.unitId != null && { unitId: apiUnit.unitId }),
       ...(apiUnit.clientId != null && { clientId: apiUnit.clientId }),
       ...(apiUnit.clientName != null && { clientName: apiUnit.clientName }),
       ...(apiUnit.dataSource != null && { dataSource: apiUnit.dataSource }),
       ...(apiUnit.images != null && Array.isArray(apiUnit.images) && { images: apiUnit.images }),
     };
-    const sellPartial =
-      (purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null
-        ? { totalPrice: apiUnit.totalPrice }
-        : {};
+    const sellPartial = {};
+    if ((purpose === "sell" || apiUnit.totalPrice != null) && apiUnit.totalPrice != null) {
+      sellPartial.totalPrice = apiUnit.totalPrice;
+    }
+    if (apiUnit.downPayment != null) sellPartial.downPayment = apiUnit.downPayment;
+    if (apiUnit.remaining_amount != null) sellPartial.remaining_amount = apiUnit.remaining_amount;
+    if (apiUnit.deliveryDate != null) sellPartial.deliveryDate = apiUnit.deliveryDate;
+    if (apiUnit.installment_years != null) sellPartial.installment_years = apiUnit.installment_years;
+    if (apiUnit.over_price != null) sellPartial.over_price = apiUnit.over_price;
     return { formDataPartial, sellPartial };
   };
 
-  const applyExtractedUnit = (unit) => {
+  const applyExtractedUnit = (unit, sourceText) => {
     const { formDataPartial, sellPartial } = mapApiUnitToForm(unit);
     setFormData((prev) => ({ ...prev, ...formDataPartial }));
     if (Object.keys(sellPartial).length) {
       setSellFormData((prev) => ({ ...prev, ...sellPartial }));
     }
+    if (sourceText) setExtractedSourceText(sourceText);
     setCurrentStep(1);
     toast.success(t.modal?.fillFromText?.extractButton || "Fields filled.");
   };
@@ -209,28 +294,37 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
     setExtractingFromText(true);
     try {
+      if (USE_LOCAL_EXTRACTOR) {
+        const extracted = UnitTextExtractor.extractFlat(text);
+        if (extracted && Object.keys(extracted).length > 0) {
+          applyExtractedUnit(extracted, text);
+          return true;
+        }
+        // Zero extracted keys — fallback to API
+      }
+
       const res = await extractUnitsFromText(text);
       if (!res?.status) {
         toast.error(
-          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+          res?.error_message || "Failed to extract"
         );
         return false;
       }
       const data = res?.data ?? {};
       const singleExtracted = data.extracted_data;
       if (singleExtracted != null && typeof singleExtracted === "object") {
-        applyExtractedUnit(singleExtracted);
+        applyExtractedUnit(singleExtracted, text);
         return true;
       }
       const units = data.extracted_units;
       if (!Array.isArray(units) || units.length === 0) {
         toast.error(
-          res?.error_message || t.modal?.fillFromText?.failedExtract || "Failed to extract"
+          res?.error_message || " Array Failed to extract"
         );
         return false;
       }
       if (units.length === 1) {
-        applyExtractedUnit(units[0]);
+        applyExtractedUnit(units[0], text);
         return true;
       }
       onClose();
@@ -239,7 +333,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
       return true;
     } catch (err) {
-      toast.error(t.modal?.fillFromText?.failedExtract || "Failed to extract");
+      console.error("[ExtractFromText] extraction failed:", err);
+      toast.error("Exception: Failed to extract");
       return false;
     } finally {
       setExtractingFromText(false);
@@ -268,13 +363,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Validate required fields for step 1
     if (currentStep === 1) {
       const requiredFields = [
-        "unitTitle",
         "project",
         "buildingType",
         "purpose",
-        "city",
-        "view",
-        "district",
+        "landArea", // area
       ];
       // Add rooms and bathroom count only if building type is not office
       if (formData.buildingType !== "office") {
@@ -310,7 +402,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Validate required fields for step 2
     if (currentStep === 2) {
       if (formData.purpose === "sell") {
-        const requiredFields = ["deliveryDate"];
+        const requiredFields = ["deliveryDate", "totalPrice"]; // price
         const missingFields = requiredFields.filter(
           (field) => !SellFormData[field]
         );
@@ -392,20 +484,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
     // Validate step 3 fields
     if (currentStep === 3) {
-      // Images optional when dataSource === "ai_generated" and visibility === "pending_approval"
-      const dataSource = unitData?.dataSource ?? unitData?.data_source;
-      const visibility = unitData?.visibility ?? unitData?.status;
-      const isAiGeneratedPending =
-        dataSource === "ai_generated" && visibility === "pending_approval";
-      if (formData.images.length === 0 && !isAiGeneratedPending) {
-        toast.error(t.toasts.uploadImage);
-        return;
-      }
-
-      // Furnishing required only for rent; for sell only finishing + developer
+      // Images are optional; send empty array to API if none uploaded
+      // Furnishing required only for rent; for sell only finishing (developer is optional)
       let requiredFields;
       if (formData.purpose === "sell") {
-        requiredFields = ["finishing", "developer"];
+        requiredFields = ["finishing"];
       } else {
         requiredFields = ["finishing", "furnishing"];
       }
@@ -427,16 +510,21 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         finalFormData = { ...finalFormData, ...rentFormData };
       }
 
+      let payload = sanitizeAmountsForApi(finalFormData);
+      const cleanedExtra = cleanExtraInfo(extractedSourceText);
+      if (cleanedExtra) {
+        payload = { ...payload, extra_info: cleanedExtra };
+      }
+
       if (!isEdit) {
-        // Use TanStack Query mutation for adding
-        await addUnitMutation.mutateAsync(finalFormData);
+        await addUnitMutation.mutateAsync(payload);
         toast.success(t.toasts.unitAdded);
       } else {
-        // Use TanStack Query mutation for updating
-        await updateUnitMutation.mutateAsync(finalFormData);
+        await updateUnitMutation.mutateAsync(payload);
         toast.success(t.toasts.unitUpdated);
       }
 
+      setExtractedSourceText("");
       onClose();
     } catch (error) {
       toast.error(`${t.toasts.errorProcessing}: ${error.message}`);
@@ -447,6 +535,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   };
 
   const modalTitle = isEdit ? t.modal.editUnit : t.modal.addNewUnit;
+
+  const handleClose = () => {
+    setExtractedSourceText("");
+    onClose();
+  };
 
   // Add loading and error states to the modal
   if (sharedData.isSharedDataLoading) {
@@ -555,20 +648,21 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     <>
       <UnifiedDialog
         isOpen={true}
-        onClose={onClose}
+        onClose={handleClose}
         title={modalTitle}
         cancelLabel={t.cancel}
-        onCancel={onClose}
+        onCancel={handleClose}
         headerLeading={headerLeading}
         headerTrailing={headerTrailing}
         closeOnOutsideClick={false}
         closeOnEscape={false}
         bodyClassName="p-0"
       >
-        {/* Step Indicator */}
-        <div className="p-3 md:p-5">
+        {/* Step Indicator — right below header */}
+        <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
           <StepIndicator
             currentStep={currentStep}
+            onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
             steps={[
               { number: 1, label: t.steps.basicDetails },
               {
@@ -582,6 +676,17 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             ]}
           />
         </div>
+
+        {/* Source text reference (when filled from text or editing unit with extra_info) */}
+        {extractedSourceText && (
+          <div className="px-2 pt-2 md:px-3 md:pt-2">
+            <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-2 shadow-sm">
+              <div className="min-h-[120px] max-h-40 overflow-y-auto rounded border border-amber-200/80 bg-white/80 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
+                {cleanExtraInfo(extractedSourceText)}
+              </div>
+            </div>
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -628,7 +733,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             <ImagesStep
               formData={formData}
               updateFormData={updateFormData}
-              developersSet={rowDevelopers}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
               isUploading={isUploading}

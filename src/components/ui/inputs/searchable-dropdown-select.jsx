@@ -398,7 +398,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
             onClick={handleToggle}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            className={`block w-full rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start ${
+            className={`block w-full min-h-[40px] rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start ${
               error
                 ? "border-red-500 ring-2 ring-red-500"
                 : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"

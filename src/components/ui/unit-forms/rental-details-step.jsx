@@ -132,7 +132,7 @@ export default function RentalDetailsStep({
             value={formData.availabilityDate}
             disabled={formData.isAvailable}
             onChange={handleChange}
-            className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`block w-full min-h-[40px] rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
               formData.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""
             }`}
           />

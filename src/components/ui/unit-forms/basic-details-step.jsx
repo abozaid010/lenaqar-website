@@ -1,20 +1,17 @@
 "use client";
 
-import AddCompoundDialog from "@/components/ui/add-project-dialog";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
+import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import { useI18n } from "@/context/translate-api";
 import { useLocaleConstants } from "@/utils/localeConstants";
-import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
 import { useEffect, useMemo, useState } from "react";
-import { toast } from "react-hot-toast";
 
 export default function BasicDetailsStep({
   clientId,
@@ -26,39 +23,9 @@ export default function BasicDetailsStep({
 }) {
   const { t, locale } = useI18n();
   const { getBuildingTypes, getViewTypes } = useLocaleConstants();
-  const { getDistrictsWithLabels, isLoading: citiesLoading } = useCitiesDistricts();
-
-  // State for districts
-  const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
-  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
-
-  // Load districts when city changes
-  useEffect(() => {
-    const loadDistricts = async () => {
-      if (!formData.city) {
-        setDistrictsWithLabels([]);
-        return;
-      }
-
-      try {
-        setIsLoadingDistricts(true);
-        const districts = await getDistrictsWithLabels(formData.city);
-        setDistrictsWithLabels(districts || []);
-      } catch (error) {
-        console.error("Failed to load districts:", error);
-        setDistrictsWithLabels([]);
-      } finally {
-        setIsLoadingDistricts(false);
-      }
-    };
-
-    loadDistricts();
-  }, [formData.city, getDistrictsWithLabels]);
 
   const [projectId, setProjectId] = useState(null);
-  const [isAddCompoundDialogOpen, setIsAddCompoundDialogOpen] = useState(false);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
-  const [addedCompounds, setAddedCompounds] = useState([]);
   const [projectPhasesMap, setProjectPhasesMap] = useState({});
 
   const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
@@ -69,26 +36,12 @@ export default function BasicDetailsStep({
     }
   }, [projectsData]);
 
-  const filteredFromApi = useMemo(() => {
-    if (!formData.city || !formData.district || !Array.isArray(projectsData)) return [];
-    const normalizedCity = String(formData.city).toLowerCase().trim();
-    const normalizedDistrict = String(formData.district).toLowerCase().trim();
-    return projectsData.filter(
-      (p) =>
-        p.city?.toLowerCase() === normalizedCity &&
-        p.district?.toLowerCase() === normalizedDistrict
-    );
-  }, [formData.city, formData.district, projectsData]);
-
-  const dataProject = useMemo(
-    () => [...filteredFromApi, ...addedCompounds],
-    [filteredFromApi, addedCompounds]
-  );
+  const allProjects = useMemo(() => Array.isArray(projectsData) ? projectsData : [], [projectsData]);
 
   useEffect(() => {
-    const selected = dataProject.find((p) => p.en_name === formData.project);
+    const selected = allProjects.find((p) => p.en_name === formData.project);
     if (selected?.id) setProjectId(selected.id);
-  }, [formData.project, dataProject]);
+  }, [formData.project, allProjects]);
 
   const handleChange = (e, dataInput = "") => {
     const { name, value, type, checked } = e.target;
@@ -104,43 +57,31 @@ export default function BasicDetailsStep({
       updatedValue = value;
     }
 
-    // If city or district changed, only clear project if the new value is different
-    if (name === "city" || name === "district") {
-      if (formData[name] !== updatedValue) {
-        setAddedCompounds([]);
-        if (name === "city") {
-          updateFormData({ [name]: updatedValue, district: "", project: "", project_ar: "" });
-        } else {
-          updateFormData({ [name]: updatedValue, project: "", project_ar: "" });
-        }
-      } else {
-        updateFormData({ [name]: updatedValue });
-      }
-    } else {
-      updateFormData({ [name]: updatedValue });
-    }
+    updateFormData({ [name]: updatedValue });
 
     if (invalidFields.includes(name) && updatedValue) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
+  };
 
-    if (name === "project") {
-      const project_ar = dataProject.find(
-        (project) => project.en_name === updatedValue
-      );
-
-      updateFormData({ phase: "", project_ar: project_ar?.ar_name || "" });
+  const handleProjectChange = (e) => {
+    const value = e?.target?.value ?? "";
+    const proj = allProjects.find((p) => p.en_name === value);
+    updateFormData({
+      project: value,
+      project_ar: proj?.ar_name ?? "",
+      city: proj?.city ?? "",
+      district: proj?.district ?? "",
+      phase: "",
+    });
+    if (invalidFields.includes("project") && value) {
+      setInvalidFields((prev) => prev.filter((field) => field !== "project"));
     }
   };
 
-  const handleAddCompound = (newCompound) => {
-    setAddedCompounds((prev) => [...prev, newCompound]);
-    updateFormData({ project: newCompound.en_name, project_ar: newCompound.ar_name || "" });
-  };
-
   const selectedProjectFromList = useMemo(
-    () => dataProject.find((p) => p.en_name === formData.project || p.name === formData.project),
-    [dataProject, formData.project]
+    () => allProjects.find((p) => p.en_name === formData.project || p.name === formData.project),
+    [allProjects, formData.project]
   );
 
   const phases = useMemo(() => {
@@ -187,87 +128,17 @@ export default function BasicDetailsStep({
           placeholder={t.basicDetails.buildingType}
         />
 
-        {/* City */}
-        <SearchableCitySelect
-          name="city"
-          value={formData.city || ""}
-          onChange={handleChange}
+        {/* Project (all projects; city & district are set from selected project and sent to API) */}
+        <SearchableProjectSelect
+          name="project"
+          value={formData.project || ""}
+          onChange={handleProjectChange}
+          projects={allProjects}
+          isLoading={isLoadingProjectsFromApi}
           required
-          error={invalidFields.includes("city")}
-          placeholder={t.basicDetails.selectCity}
+          error={invalidFields.includes("project")}
+          placeholder={t.basicDetails.selectCompound}
         />
-
-        {/* District */}
-        <SearchableDropdownSelect
-          name="district"
-          value={formData.district || ""}
-          onChange={handleChange}
-          disabled={!formData.city}
-          required
-          error={invalidFields.includes("district")}
-          options={districtsWithLabels}
-          getValue={(opt) => opt.value}
-          getLabel={(opt) => opt.label}
-          placeholder={
-            formData.city
-              ? t.formLabels.selectDistrict
-              : t.formLabels.cityFirst
-          }
-          isLoading={formData.city && isLoadingDistricts}
-          loadingText={locale === "ar" ? "جاري التحميل..." : "Loading districts..."}
-          noResultsText={
-            formData.city && districtsWithLabels.length === 0 && !isLoadingDistricts
-              ? (locale === "ar"
-                ? `لا توجد مناطق لـ ${formData.city}`
-                : `No districts found for ${formData.city}`)
-              : undefined
-          }
-        />
-
-        {/* Project */}
-        <div className="relative">
-          <SearchableDropdownSelect
-            name="project"
-            value={formData.project || ""}
-            onChange={handleChange}
-            disabled={!formData.district}
-            required
-            error={invalidFields.includes("project")}
-            options={dataProject}
-            getValue={(opt) => opt.en_name}
-            getLabel={(opt) => (locale === "ar" ? opt.ar_name : opt.en_name)}
-            placeholder={
-              formData.city && formData.district && isLoadingProjectsFromApi
-                ? t.basicDetails.placeholders.loadingProjects
-                : t.basicDetails.selectCompound
-            }
-            isLoading={!!(formData.city && formData.district && isLoadingProjectsFromApi)}
-            loadingText={locale === "ar" ? "جاري التحميل..." : "Loading..."}
-            noResultsText={
-              !isLoadingProjectsFromApi && dataProject.length === 0 && formData.district
-                ? t.basicDetails.placeholders.noProjects
-                : undefined
-            }
-          />
-
-          <button
-            type="button"
-            onClick={() => {
-              if (!formData.city) {
-                toast.error(t.formLabels.cityFirst);
-                return;
-              }
-              if (!formData.district) {
-                toast.error(t.formLabels.districtFirst);
-                return;
-              }
-              setIsAddCompoundDialogOpen(true);
-            }}
-            className="text-blue-600 absolute top-0 rtl:left-0 ltr:right-0 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
-          >
-            + {t.addNew}
-          </button>
-        </div>
 
         {/* Phase */}
         <SearchableDropdownSelect
@@ -390,7 +261,7 @@ export default function BasicDetailsStep({
           type="number"
         />
 
-        {/* Land Area */}
+        {/* Land Area (area) - required */}
         <LenaTextField
           label={`${t.basicDetails.landArea} (m²)`}
           name="landArea"
@@ -398,6 +269,8 @@ export default function BasicDetailsStep({
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
+          required
+          error={invalidFields.includes("landArea")}
         />
 
         {/* Garden Size */}
@@ -423,24 +296,6 @@ export default function BasicDetailsStep({
         />
       </div>
 
-      {/* Add Compound Dialog */}
-      {isAddCompoundDialogOpen && (
-        <AddCompoundDialog
-          clientId={clientId}
-          projectId={projectId}
-          setProjectId={setProjectId}
-          isOpen={isAddCompoundDialogOpen}
-          onClose={() => setIsAddCompoundDialogOpen(false)}
-          onAdd={handleAddCompound}
-          defaultCity={formData.city}
-          defaultDistrict={formData.district}
-          onProjectsLoaded={(projects) => {
-            if (projects && projects.length > 0) {
-              setDataProject(projects);
-            }
-          }}
-        />
-      )}
     </>
   );
 }
