@@ -13,6 +13,11 @@ import {
 } from "@/utils/formatters";
 import { useEffect, useMemo, useState } from "react";
 
+/** Display value for numeric fields – 0 is valid; empty shows "". */
+function numericValue(v) {
+  return v === 0 || (v != null && v !== "") ? String(v) : "";
+}
+
 export default function BasicDetailsStep({
   clientId,
   formData,
@@ -59,7 +64,7 @@ export default function BasicDetailsStep({
 
     updateFormData({ [name]: updatedValue });
 
-    if (invalidFields.includes(name) && updatedValue) {
+    if (invalidFields.includes(name) && (updatedValue === 0 || updatedValue)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
   };
@@ -230,7 +235,7 @@ export default function BasicDetailsStep({
                 label={t.basicDetails.rooms}
                 name="roomsCount"
                 required
-                value={formData.roomsCount || ""}
+                value={numericValue(formData.roomsCount)}
                 onChange={handleChange}
                 placeholder="0"
                 error={invalidFields.includes("roomsCount")}
@@ -242,7 +247,7 @@ export default function BasicDetailsStep({
               label={t.basicDetails.bathrooms}
               name="bathroomCount"
               required
-              value={formData.bathroomCount || ""}
+              value={numericValue(formData.bathroomCount)}
               onChange={(e) => handleChange(e, "number")}
               placeholder="0"
               error={invalidFields.includes("bathroomCount")}
@@ -255,7 +260,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={t.basicDetails.floor}
           name="floor"
-          value={formData.floor === 0 || formData.floor ? String(formData.floor) : ""}
+          value={numericValue(formData.floor)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
@@ -265,7 +270,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={`${t.basicDetails.landArea} (m²)`}
           name="landArea"
-          value={formData.landArea || ""}
+          value={numericValue(formData.landArea)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
@@ -278,7 +283,7 @@ export default function BasicDetailsStep({
           <LenaTextField
             label={`${t.basicDetails.gardenSize} (m²)`}
             name="gardenSize"
-            value={formData.gardenSize || ""}
+            value={numericValue(formData.gardenSize)}
             onChange={(e) => handleChange(e, "number")}
             placeholder="0"
             type="number"
@@ -289,7 +294,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={`${t.basicDetails.garageArea} (m²)`}
           name="garageArea"
-          value={formData.garageArea || ""}
+          value={numericValue(formData.garageArea)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"

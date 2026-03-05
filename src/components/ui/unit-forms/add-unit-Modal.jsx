@@ -389,7 +389,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
       setFormData(sanitizedData);
 
-      const missingFields = requiredFields.filter((field) => !formData[field]);
+      // 0 is valid for numeric fields (landArea, roomsCount, bathroomCount)
+      const missingFields = requiredFields.filter(
+        (field) => formData[field] !== 0 && !formData[field]
+      );
 
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);
@@ -401,8 +404,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     if (currentStep === 2) {
       if (formData.purpose === "sell") {
         const requiredFields = ["deliveryDate", "totalPrice"]; // price
+        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
         const missingFields = requiredFields.filter(
-          (field) => !SellFormData[field]
+          (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
         if (
