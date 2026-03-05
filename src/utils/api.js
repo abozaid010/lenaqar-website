@@ -107,12 +107,18 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
 
     const params = {
       page_size: Number(parsed.page_size) || 16,
-      visibility: parsed.visibility || "pending_approval",
       direction: parsed.direction || "forward",
       ...(parsed.cursor != null && parsed.cursor !== ""
         ? { cursor: parsed.cursor }
         : {}),
     };
+
+    // Mutual exclusivity: dataSource filter XOR visibility filter
+    if (parsed.dataSource === "ai_generated") {
+      params.dataSource = "ai_generated";
+    } else {
+      params.visibility = parsed.visibility || "pending_approval";
+    }
 
     const response = await axiosInstance.get("/units/all", { params });
 

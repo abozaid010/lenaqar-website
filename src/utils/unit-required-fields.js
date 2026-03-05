@@ -60,7 +60,7 @@ export function getMissingRequiredFields(unit) {
   }
 
   // Step 3 - Images (optional when dataSource === "ai_generated" and visibility === "pending_approval")
-  const dataSource = unit.dataSource ?? unit.data_source;
+  const dataSource = unit.dataSource ?? unit.dataSource;
   const visibility = unit.visibility ?? unit.status;
   const isAiGeneratedPending =
     dataSource === "ai_generated" && visibility === "pending_approval";

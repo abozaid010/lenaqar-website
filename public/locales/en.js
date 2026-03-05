@@ -1195,6 +1195,8 @@ export default {
     editUnit: "Edit Unit",
     fillFromText: {
       buttonLabel: "Fill from text",
+      useLocalExtractor: "Regex",
+      useServerExtractor: "LLM",
       placeholder: "Paste text here from WhatsApp/Facebook to auto-fill these fields",
       extractButton: "Extract",
       extracting: "Extracting...",

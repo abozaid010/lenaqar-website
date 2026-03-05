@@ -13,6 +13,11 @@ import {
 } from "@/utils/formatters";
 import { useEffect, useMemo, useState } from "react";
 
+/** Display value for numeric fields – 0 is valid; empty shows "". */
+function numericValue(v) {
+  return v === 0 || (v != null && v !== "") ? String(v) : "";
+}
+
 export default function BasicDetailsStep({
   clientId,
   formData,
@@ -20,6 +25,8 @@ export default function BasicDetailsStep({
   citiesAndDistricts: _citiesAndDistricts, // Keep for backward compatibility but don't use
   invalidFields = [],
   setInvalidFields = () => { },
+  developers = [],
+  developersLoading = false,
 }) {
   const { t, locale } = useI18n();
   const { getBuildingTypes, getViewTypes } = useLocaleConstants();
@@ -39,9 +46,18 @@ export default function BasicDetailsStep({
   const allProjects = useMemo(() => Array.isArray(projectsData) ? projectsData : [], [projectsData]);
 
   useEffect(() => {
-    const selected = allProjects.find((p) => p.en_name === formData.project);
-    if (selected?.id) setProjectId(selected.id);
-  }, [formData.project, allProjects]);
+    const selected = allProjects.find(
+      (p) => p.en_name === formData.project || p.name === formData.project
+    );
+    if (selected?.id) {
+      setProjectId(selected.id);
+      const idStr = String(selected.id);
+      // Sync project_id when project name matches (e.g. editing ai_generated unit)
+      if (!formData.project_id || String(formData.project_id) !== idStr) {
+        updateFormData({ project_id: idStr });
+      }
+    }
+  }, [formData.project, formData.project_id, allProjects]);
 
   const handleChange = (e, dataInput = "") => {
     const { name, value, type, checked } = e.target;
@@ -59,17 +75,18 @@ export default function BasicDetailsStep({
 
     updateFormData({ [name]: updatedValue });
 
-    if (invalidFields.includes(name) && updatedValue) {
+    if (invalidFields.includes(name) && (updatedValue === 0 || updatedValue)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
     }
   };
 
   const handleProjectChange = (e) => {
     const value = e?.target?.value ?? "";
-    const proj = allProjects.find((p) => p.en_name === value);
+    const proj = allProjects.find((p) => p.en_name === value || p.name === value);
     updateFormData({
       project: value,
       project_ar: proj?.ar_name ?? "",
+      project_id: proj?.id ?? "",
       city: proj?.city ?? "",
       district: proj?.district ?? "",
       phase: "",
@@ -77,6 +94,23 @@ export default function BasicDetailsStep({
     if (invalidFields.includes("project") && value) {
       setInvalidFields((prev) => prev.filter((field) => field !== "project"));
     }
+  };
+
+  const getDeveloperValue = (dev) => (dev?.id ?? dev?.developer_id ?? "")?.toString() ?? "";
+  const getDeveloperLabel = (dev, loc) => {
+    const l = loc ?? locale;
+    return l === "ar"
+      ? (dev?.ar_name || dev?.developer_name || dev?.en_name || dev?.name || "")
+      : (dev?.en_name || dev?.developer_name || dev?.ar_name || dev?.name || "");
+  };
+
+  const handleDeveloperChange = (e) => {
+    const value = e?.target?.value ?? "";
+    const dev = developers.find((d) => getDeveloperValue(d) === value);
+    updateFormData({
+      developer_id: value,
+      developer: dev ? getDeveloperLabel(dev, locale) : value || "",
+    });
   };
 
   const selectedProjectFromList = useMemo(
@@ -138,6 +172,38 @@ export default function BasicDetailsStep({
           required
           error={invalidFields.includes("project")}
           placeholder={t.basicDetails.selectCompound}
+        />
+
+        {/* Developer */}
+        <SearchableDropdownSelect
+          name="developer_id"
+          value={formData.developer_id || ""}
+          onChange={handleDeveloperChange}
+          options={developers}
+          getValue={getDeveloperValue}
+          getLabel={getDeveloperLabel}
+          searchFields={["ar_name", "en_name", "developer_name", "name"]}
+          placeholder={t.basicDetails?.selectDeveloper || "Select developer"}
+          isLoading={developersLoading}
+          loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
+          noResultsText={locale === "ar" ? "لا توجد نتائج" : "No developers found"}
+          searchPlaceholder={locale === "ar" ? "ابحث عن المطور..." : "Search developers..."}
+        />
+
+        {/* City & District (editable; project selection can auto-fill these) */}
+        <LenaTextField
+          label={t.basicDetails?.city || "City"}
+          name="city"
+          value={formData.city || ""}
+          onChange={handleChange}
+          placeholder={t.basicDetails?.placeholders?.city || "City"}
+        />
+        <LenaTextField
+          label={t.basicDetails?.district || "District"}
+          name="district"
+          value={formData.district || ""}
+          onChange={handleChange}
+          placeholder={t.basicDetails?.placeholders?.district || "District"}
         />
 
         {/* Phase */}
@@ -230,7 +296,7 @@ export default function BasicDetailsStep({
                 label={t.basicDetails.rooms}
                 name="roomsCount"
                 required
-                value={formData.roomsCount || ""}
+                value={numericValue(formData.roomsCount)}
                 onChange={handleChange}
                 placeholder="0"
                 error={invalidFields.includes("roomsCount")}
@@ -242,7 +308,7 @@ export default function BasicDetailsStep({
               label={t.basicDetails.bathrooms}
               name="bathroomCount"
               required
-              value={formData.bathroomCount || ""}
+              value={numericValue(formData.bathroomCount)}
               onChange={(e) => handleChange(e, "number")}
               placeholder="0"
               error={invalidFields.includes("bathroomCount")}
@@ -255,7 +321,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={t.basicDetails.floor}
           name="floor"
-          value={formData.floor || ""}
+          value={numericValue(formData.floor)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
@@ -265,7 +331,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={`${t.basicDetails.landArea} (m²)`}
           name="landArea"
-          value={formData.landArea || ""}
+          value={numericValue(formData.landArea)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
@@ -278,7 +344,7 @@ export default function BasicDetailsStep({
           <LenaTextField
             label={`${t.basicDetails.gardenSize} (m²)`}
             name="gardenSize"
-            value={formData.gardenSize || ""}
+            value={numericValue(formData.gardenSize)}
             onChange={(e) => handleChange(e, "number")}
             placeholder="0"
             type="number"
@@ -289,7 +355,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={`${t.basicDetails.garageArea} (m²)`}
           name="garageArea"
-          value={formData.garageArea || ""}
+          value={numericValue(formData.garageArea)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"

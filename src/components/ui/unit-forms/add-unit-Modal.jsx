@@ -23,9 +23,6 @@ import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 
-/** Toggle extraction strategy: true = client-side UnitTextExtractor, false = server API */
-const USE_LOCAL_EXTRACTOR = true;
-
 /** Parse value to number for API (strip commas/formatting). */
 function toAmount(value) {
   if (value === "" || value === null || value === undefined) return 0;
@@ -124,6 +121,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   const [showFillFromTextDialog, setShowFillFromTextDialog] = useState(false);
   const [extractingFromText, setExtractingFromText] = useState(false);
+  const [useLocalExtractor, setUseLocalExtractor] = useState(true);
   const [extractedSourceText, setExtractedSourceText] = useState(() =>
     unitData?.extra_info != null ? String(unitData.extra_info).trim() : ""
   );
@@ -137,11 +135,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     purpose: unitData?.purpose || "",
     project: unitData?.project || "",
     project_ar: unitData?.project_ar || "",
+    project_id: unitData?.project_id || unitData?.projectId || "",
     view: unitData?.view || "",
     phase: unitData?.phase || "",
     city: unitData?.city || "",
     district: unitData?.district || "",
     developer: unitData?.developer || "",
+    developer_id: unitData?.developer_id || unitData?.developerId || "",
     unitId: unitData?.unitId || uuidv4(),
     unitTitle: unitData?.unitTitle || "",
     deliveryStatus: unitData?.deliveryStatus || "",
@@ -235,7 +235,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.city != null && { city: String(apiUnit.city) }),
       ...(apiUnit.district != null && { district: String(apiUnit.district) }),
       ...(apiUnit.project != null && { project: String(apiUnit.project) }),
+      ...(apiUnit.project_id != null && { project_id: String(apiUnit.project_id) }),
+      ...(apiUnit.projectId != null && { project_id: String(apiUnit.projectId) }),
       ...(apiUnit.developer != null && { developer: String(apiUnit.developer) }),
+      ...(apiUnit.developer_id != null && { developer_id: String(apiUnit.developer_id) }),
+      ...(apiUnit.developerId != null && { developer_id: String(apiUnit.developerId) }),
       ...(builtTitle != null && { unitTitle: builtTitle }),
       ...(builtTitle == null && apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
       ...(apiUnit.bathroomCount != null && { bathroomCount: apiUnit.bathroomCount }),
@@ -294,7 +298,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
     setExtractingFromText(true);
     try {
-      if (USE_LOCAL_EXTRACTOR) {
+      if (useLocalExtractor) {
         const extracted = UnitTextExtractor.extractFlat(text);
         if (extracted && Object.keys(extracted).length > 0) {
           applyExtractedUnit(extracted, text);
@@ -391,7 +395,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
       setFormData(sanitizedData);
 
-      const missingFields = requiredFields.filter((field) => !formData[field]);
+      // 0 is valid for numeric fields (landArea, roomsCount, bathroomCount)
+      const missingFields = requiredFields.filter(
+        (field) => formData[field] !== 0 && !formData[field]
+      );
 
       if (missingFields.length > 0) {
         setInvalidFields(missingFields);
@@ -403,8 +410,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     if (currentStep === 2) {
       if (formData.purpose === "sell") {
         const requiredFields = ["deliveryDate", "totalPrice"]; // price
+        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
         const missingFields = requiredFields.filter(
-          (field) => !SellFormData[field]
+          (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
         if (
@@ -700,6 +708,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
               updateFormData={updateFormData}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
+              developers={sharedData.developers?.data ?? []}
+              developersLoading={sharedData.developers?.isLoading ?? false}
             />
           )}
 
@@ -747,6 +757,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         onClose={() => setShowFillFromTextDialog(false)}
         onExtract={(text) => handleExtractFromText(null, text)}
         extracting={extractingFromText}
+        useLocalExtractor={useLocalExtractor}
+        onUseLocalExtractorChange={setUseLocalExtractor}
         t={t}
       />
     </>,
