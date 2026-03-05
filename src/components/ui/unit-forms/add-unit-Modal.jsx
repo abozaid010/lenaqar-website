@@ -135,11 +135,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     purpose: unitData?.purpose || "",
     project: unitData?.project || "",
     project_ar: unitData?.project_ar || "",
+    project_id: unitData?.project_id || unitData?.projectId || "",
     view: unitData?.view || "",
     phase: unitData?.phase || "",
     city: unitData?.city || "",
     district: unitData?.district || "",
     developer: unitData?.developer || "",
+    developer_id: unitData?.developer_id || unitData?.developerId || "",
     unitId: unitData?.unitId || uuidv4(),
     unitTitle: unitData?.unitTitle || "",
     deliveryStatus: unitData?.deliveryStatus || "",
@@ -233,7 +235,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.city != null && { city: String(apiUnit.city) }),
       ...(apiUnit.district != null && { district: String(apiUnit.district) }),
       ...(apiUnit.project != null && { project: String(apiUnit.project) }),
+      ...(apiUnit.project_id != null && { project_id: String(apiUnit.project_id) }),
+      ...(apiUnit.projectId != null && { project_id: String(apiUnit.projectId) }),
       ...(apiUnit.developer != null && { developer: String(apiUnit.developer) }),
+      ...(apiUnit.developer_id != null && { developer_id: String(apiUnit.developer_id) }),
+      ...(apiUnit.developerId != null && { developer_id: String(apiUnit.developerId) }),
       ...(builtTitle != null && { unitTitle: builtTitle }),
       ...(builtTitle == null && apiUnit.unitTitle != null && { unitTitle: String(apiUnit.unitTitle) }),
       ...(apiUnit.bathroomCount != null && { bathroomCount: apiUnit.bathroomCount }),
@@ -702,6 +708,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
               updateFormData={updateFormData}
               invalidFields={invalidFields}
               setInvalidFields={setInvalidFields}
+              developers={sharedData.developers?.data ?? []}
+              developersLoading={sharedData.developers?.isLoading ?? false}
             />
           )}
 
