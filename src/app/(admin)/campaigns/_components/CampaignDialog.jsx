@@ -87,7 +87,7 @@ export default function CampaignDialog({
       setTextImages(normalizedImages);
       setSelectedUnit(campaign?.unit || null);
       setSuggestedAns(normalizeSuggestedAnswers(campaign?.suggested_ans));
-      setSignupForum(campaign?.signup_forum || "optional");
+      setSignupForum((campaign?.signup_forum || "optional").toLowerCase());
     } else {
       setMode("text");
       setCampaignIdInput("");
@@ -108,7 +108,7 @@ export default function CampaignDialog({
     const base = {
       client_phone_number: (clientPhoneNumber || "").trim(),
       suggested_ans: cleanSuggested,
-      signup_forum: signupForum || "optional",
+      signup_forum: (signupForum || "optional").toLowerCase(),
     };
 
     // Include campaign_id only when creating (cannot be updated)
@@ -279,7 +279,7 @@ export default function CampaignDialog({
             <SearchableDropdownSelect
               options={SIGNUP_FORUM_OPTIONS}
               value={signupForum}
-              onChange={(e) => setSignupForum(e.target.value)}
+              onChange={(e) => setSignupForum((e.target.value || "").toLowerCase())}
               name="signup_forum"
               placeholder={c.signupForumPlaceholder || "Select visibility"}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"

@@ -23,9 +23,6 @@ import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 
-/** Toggle extraction strategy: true = client-side UnitTextExtractor, false = server API */
-const USE_LOCAL_EXTRACTOR = true;
-
 /** Parse value to number for API (strip commas/formatting). */
 function toAmount(value) {
   if (value === "" || value === null || value === undefined) return 0;
@@ -124,6 +121,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const [invalidFields, setInvalidFields] = useState([]); // New state for invalid fields
   const [showFillFromTextDialog, setShowFillFromTextDialog] = useState(false);
   const [extractingFromText, setExtractingFromText] = useState(false);
+  const [useLocalExtractor, setUseLocalExtractor] = useState(true);
   const [extractedSourceText, setExtractedSourceText] = useState(() =>
     unitData?.extra_info != null ? String(unitData.extra_info).trim() : ""
   );
@@ -294,7 +292,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     }
     setExtractingFromText(true);
     try {
-      if (USE_LOCAL_EXTRACTOR) {
+      if (useLocalExtractor) {
         const extracted = UnitTextExtractor.extractFlat(text);
         if (extracted && Object.keys(extracted).length > 0) {
           applyExtractedUnit(extracted, text);
@@ -747,6 +745,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         onClose={() => setShowFillFromTextDialog(false)}
         onExtract={(text) => handleExtractFromText(null, text)}
         extracting={extractingFromText}
+        useLocalExtractor={useLocalExtractor}
+        onUseLocalExtractorChange={setUseLocalExtractor}
         t={t}
       />
     </>,

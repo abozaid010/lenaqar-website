@@ -13,6 +13,8 @@ export default function FillFromTextDialog({
   onClose,
   onExtract,
   extracting = false,
+  useLocalExtractor = true,
+  onUseLocalExtractorChange,
   t = {},
 }) {
   const [text, setText] = useState("");
@@ -33,6 +35,39 @@ export default function FillFromTextDialog({
     onClose();
   };
 
+  const headerTrailing = (
+    <div className="flex items-center gap-3">
+      {typeof onUseLocalExtractorChange === "function" && (
+        <label className="inline-flex items-center gap-2 cursor-pointer shrink-0" title={useLocalExtractor ? (t.modal?.fillFromText?.useLocalExtractor ?? "Local extraction") : (t.modal?.fillFromText?.useServerExtractor ?? "Server API")}>
+          <input
+            type="checkbox"
+            checked={!!useLocalExtractor}
+            onChange={(e) => onUseLocalExtractorChange(e.target.checked)}
+            className="rounded border-white/30 bg-white/10"
+          />
+          <span className="text-sm text-white/90 whitespace-nowrap">
+            {useLocalExtractor ? (t.modal?.fillFromText?.useLocalExtractor ?? "Local") : (t.modal?.fillFromText?.useServerExtractor ?? "Server")}
+          </span>
+        </label>
+      )}
+      <button
+        type="button"
+        onClick={handleExtract}
+        disabled={!text?.trim() || extracting}
+        className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none inline-flex items-center justify-center gap-2"
+      >
+        {extracting ? (
+          <>
+            <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            {t.modal?.fillFromText?.extracting ?? "Extracting..."}
+          </>
+        ) : (
+          t.modal?.fillFromText?.extractButton ?? "Extract"
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <UnifiedDialog
       isOpen={isOpen}
@@ -40,10 +75,7 @@ export default function FillFromTextDialog({
       title={t.modal?.fillFromText?.dialogTitle ?? "Fill from text"}
       cancelLabel={t.cancel ?? "Cancel"}
       onCancel={handleCancel}
-      submitLabel={extracting ? (t.modal?.fillFromText?.extracting ?? "Extracting...") : (t.modal?.fillFromText?.extractButton ?? "Extract")}
-      onSubmit={handleExtract}
-      submitDisabled={!text?.trim() || extracting}
-      submitLoading={extracting}
+      headerTrailing={headerTrailing}
       closeOnOutsideClick={false}
       closeOnEscape={true}
     >

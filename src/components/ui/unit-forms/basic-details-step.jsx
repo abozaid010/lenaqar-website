@@ -255,7 +255,7 @@ export default function BasicDetailsStep({
         <LenaTextField
           label={t.basicDetails.floor}
           name="floor"
-          value={formData.floor || ""}
+          value={formData.floor === 0 || formData.floor ? String(formData.floor) : ""}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"

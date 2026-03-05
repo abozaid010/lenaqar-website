@@ -1185,6 +1185,8 @@ export default {
     updatePaymentPlan: "تحديث خطة الدفع",
     fillFromText: {
       buttonLabel: "تعبئة من نص",
+      useLocalExtractor: "Regex",
+      useServerExtractor: "LLM",
       placeholder: "الصق النص هنا من واتساب أو فيسبوك لملء هذه الحقول تلقائياً",
       extractButton: "استخراج",
       extracting: "جاري الاستخراج...",
