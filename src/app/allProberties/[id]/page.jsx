@@ -1,5 +1,4 @@
 import UnitDetailsPageQuery from "@/components/ui/unit-details/unit-details-page-query";
-import { cookies } from "next/headers";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import UnitSchema from "@/components/schema/UnitSchema";
@@ -15,9 +14,15 @@ async function fetchUnitData(id) {
   }
 }
 
+function getFirstImageUrl(unit) {
+  const firstImg = unit?.images?.[0];
+  return typeof firstImg === "string" ? firstImg : firstImg?.url;
+}
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const unit = await fetchUnitData(id);
+  const firstImageUrl = getFirstImageUrl(unit);
 
   const title = unit?.unitTitle
     ? `${unit.unitTitle} - Property Details | LENAAI AI Sales Agent`
@@ -43,10 +48,10 @@ export async function generateMetadata({ params }) {
       description,
       url: `${SITE_URL}/allProberties/${id}`,
       type: "website",
-      ...(unit?.images?.[0] && {
+      ...(firstImageUrl && {
         images: [
           {
-            url: unit.images[0],
+            url: firstImageUrl,
             width: 1200,
             height: 630,
             alt: unit.unitTitle || "Property Image",
@@ -58,8 +63,8 @@ export async function generateMetadata({ params }) {
       card: "summary_large_image",
       title,
       description,
-      ...(unit?.images?.[0] && {
-        images: [unit.images[0]],
+      ...(firstImageUrl && {
+        images: [firstImageUrl],
       }),
     },
     alternates: {
