@@ -417,6 +417,10 @@ export default {
     title: "Real Estate Properties",
     subtitle: "Explore our exclusive listings",
   },
+  resalePage: {
+    filterByUpdatedAt: "Updated date",
+    propertyTypeLabel: "Property type",
+  },
   unitsFilter: {
     allDevelopers: "All Developers",
     allCompounds: "All Projects",

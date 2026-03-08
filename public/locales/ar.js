@@ -414,6 +414,10 @@ export default {
     noData: "لا توجد بيانات للمشاركة.",
     noImage: "لا توجد صور للمشاركة.",
   },
+  resalePage: {
+    filterByUpdatedAt: "تاريخ التحديث",
+    propertyTypeLabel: "نوع العقار",
+  },
   unitsFilter: {
     allDevelopers: "جميع المطورين",
     allCompounds: "جميع المجمعات",

@@ -120,6 +120,21 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
       params.visibility = parsed.visibility;
     }
 
+    // Filter by updated_at (ISO 8601, e.g. '2024-01-01T00:00:00Z')
+    if (parsed.updated_at) {
+      params.updated_at = parsed.updated_at;
+    }
+
+    if (parsed.property_type) {
+      params.property_type = parsed.property_type;
+    }
+    if (parsed.min_price != null && parsed.min_price !== "") {
+      params.min_price = parsed.min_price;
+    }
+    if (parsed.max_price != null && parsed.max_price !== "") {
+      params.max_price = parsed.max_price;
+    }
+
     const response = await axiosInstance.get("/units/all", { params });
 
     if (!response.data || !response.data.data) {

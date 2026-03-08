@@ -35,6 +35,15 @@ export default function AddPaymentPlanDialog({
     is_default: false,
   });
 
+  // Resolve delivery years from model/API (support both delivery_in_years and delivery_years)
+  const getDeliveryInYears = (plan) => {
+    const raw =
+      plan?.delivery_in_years 
+    if (raw === undefined || raw === null) return "";
+    const num = Number(raw);
+    return Number.isFinite(num) ? String(raw) : "";
+  };
+
   useEffect(() => {
     if (isOpen) {
       if (editMode && existingPlan) {
@@ -54,11 +63,7 @@ export default function AddPaymentPlanDialog({
             existingPlan.installment_years !== null
               ? String(existingPlan.installment_years)
               : "",
-          delivery_in_years:
-            existingPlan.delivery_in_years !== undefined &&
-            existingPlan.delivery_in_years !== null
-              ? String(existingPlan.delivery_in_years)
-              : "",
+          delivery_in_years: getDeliveryInYears(existingPlan),
           maintenance_fee: existingPlan.maintenance_fee
             ? (existingPlan.maintenance_fee * 100).toString()
             : "",
@@ -340,17 +345,20 @@ export default function AddPaymentPlanDialog({
 
     try {
       // Convert string values to numbers and convert percentages from 0-100 to 0-1
+      // delivery_in_years is always sent for create/update (0 when empty)
+      const deliveryInYearsNum =
+        formData.delivery_in_years === "" ||
+        isNaN(parseFloat(formData.delivery_in_years))
+          ? 0
+          : parseFloat(formData.delivery_in_years);
+
       const processedData = {
         name: formData.name,
         description: "", // Always send empty string
         downpayment_percentage:
           parseFloat(formData.downpayment_percentage) / 100,
         installment_years: parseFloat(formData.installment_years),
-        delivery_in_years:
-          formData.delivery_in_years === "" ||
-          isNaN(parseFloat(formData.delivery_in_years))
-            ? 0
-            : parseFloat(formData.delivery_in_years),
+        delivery_in_years: deliveryInYearsNum,
         maintenance_fee: parseFloat(formData.maintenance_fee) / 100,
         cache_discount:
           formData.cache_discount === "" ||
