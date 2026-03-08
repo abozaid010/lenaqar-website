@@ -4,6 +4,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -11,14 +12,18 @@ export default function UnitsPageQueryOptimized({
   clientId,
   publicUnits = false,
 }) {
-  // Prepare search params with client ID
-  const searchParamsWithClient = useMemo(
-    () => ({
-      ...searchParams,
-      ...(publicUnits ? {} : { client_id: clientId || "" }),
-    }),
-    [searchParams, clientId]
-  );
+  // Client object is stored locally (cookie); don't send client_id when client_type is broker
+  const searchParamsWithClient = useMemo(() => {
+    const clientInfo = LenaCookiesManager.getClientInfo();
+    const isBroker = (clientInfo?.client_type ?? "").toLowerCase() === "broker";
+    const base = { ...searchParams };
+    if (publicUnits) return base;
+    return {
+      ...base,
+      is_primary: true,
+      ...(isBroker ? {} : { client_id: clientId || "" }),
+    };
+  }, [searchParams, clientId, publicUnits]);
 
   // Stringify searchParams for query key - this changes when filters change
   const searchParamsKey = useMemo(

@@ -72,6 +72,12 @@ export function getMissingRequiredFields(unit) {
     missing.push("images");
   }
 
+  // Phone number (owner_mobile) is required
+  const ownerMobile = unit.owner_mobile ?? unit.ownerMobile;
+  if (ownerMobile === undefined || ownerMobile === null || String(ownerMobile).trim() === "") {
+    missing.push("owner_mobile");
+  }
+
   const finishing = unit.finishing;
   if (finishing === undefined || finishing === null || String(finishing).trim() === "") {
     missing.push("finishing");

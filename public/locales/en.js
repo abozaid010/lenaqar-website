@@ -207,6 +207,7 @@ export default {
     campaigns: "Campaigns",
     analytics: "Analytics",
     units: "Units",
+    pendingApproval: "Resale",
     team: "Team",
     darkMode: "Dark Mode",
     logout: "Log Out",
@@ -415,6 +416,10 @@ export default {
   identifierUnit: {
     title: "Real Estate Properties",
     subtitle: "Explore our exclusive listings",
+  },
+  resalePage: {
+    filterByUpdatedAt: "Updated date",
+    propertyTypeLabel: "Property type",
   },
   unitsFilter: {
     allDevelopers: "All Developers",

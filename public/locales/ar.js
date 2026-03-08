@@ -215,6 +215,7 @@ export default {
     campaigns: "الحملات",
     analytics: "التحليلات",
     units: "الوحدات",
+    pendingApproval: "إعادة البيع",
     team: "الفريق",
     darkMode: "الوضع المظلم",
     logout: "تسجيل الخروج",
@@ -412,6 +413,10 @@ export default {
     copyLink: "نسخ مع الرابط",
     noData: "لا توجد بيانات للمشاركة.",
     noImage: "لا توجد صور للمشاركة.",
+  },
+  resalePage: {
+    filterByUpdatedAt: "تاريخ التحديث",
+    propertyTypeLabel: "نوع العقار",
   },
   unitsFilter: {
     allDevelopers: "جميع المطورين",
