@@ -99,6 +99,7 @@ export default function SaleDetailsStep({
               placeholder="01234567890"
               error={invalidFields.includes("owner_mobile")}
               type="tel"
+              required
             />
           </div>
         </div>

@@ -29,6 +29,8 @@ export default function RentalDetailsStep({
   clientType,
   updateFormData,
   updateCommonFormData,
+  invalidFields = [],
+  setInvalidFields = () => {},
 }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t } = useI18n();
@@ -67,6 +69,10 @@ export default function RentalDetailsStep({
 
   const handleOwnerChange = (e) => {
     const { name, value } = e.target;
+
+    if (invalidFields.includes(name)) {
+      setInvalidFields((prev) => prev.filter((field) => field !== name));
+    }
 
     // For mobile number, ensure it's numeric
     if (name === "owner_mobile") {
@@ -287,6 +293,8 @@ export default function RentalDetailsStep({
               onChange={handleOwnerChange}
               placeholder="01234567890"
               type="tel"
+              required
+              error={invalidFields?.includes("owner_mobile")}
             />
           </div>
         </div>

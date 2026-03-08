@@ -415,6 +415,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
+        // Phone number (owner_mobile) is required
+        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+          missingFields.push("owner_mobile");
+        }
+
         if (
           SellFormData.deliveryDate &&
           !validateDeliveryDate(SellFormData.deliveryDate)
@@ -448,6 +453,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
+        // Phone number (owner_mobile) is required
+        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+          setInvalidFields(["owner_mobile"]);
+          return;
+        }
+
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
           (duration) => duration.price > 0
@@ -736,6 +747,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
                 setRentFormData((prev) => ({ ...prev, ...newData }))
               }
               updateCommonFormData={updateFormData}
+              invalidFields={invalidFields}
+              setInvalidFields={setInvalidFields}
             />
           )}
 
