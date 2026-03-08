@@ -207,6 +207,7 @@ export default {
     campaigns: "Campaigns",
     analytics: "Analytics",
     units: "Units",
+    pendingApproval: "Resale",
     team: "Team",
     darkMode: "Dark Mode",
     logout: "Log Out",

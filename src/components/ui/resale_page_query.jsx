@@ -9,17 +9,22 @@ import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { useMemo, useState, useEffect } from "react";
 
 const VISIBILITY_OPTIONS = [
-  { value: "pending_approval", label: "Pending approval" },
+  { value: "all", label: "All" },
+  { value: "pending_approval", label: "Pending Approval" },
   { value: "visible", label: "Visible" },
   { value: "hidden", label: "Hidden" },
-  { value: "ai_generated", label: "AI generated" },
+  { value: "ai_generated", label: "AI Generated" },
 ];
 
-export default function PendingApprovalUnitsPageQuery({ searchParams }) {
-  const [filter, setFilter] = useState("pending_approval");
+export default function ResalePageQuery({ searchParams }) {
+  const [filter, setFilter] = useState("all");
 
   const searchParamsKey = useMemo(() => {
     const base = searchParams || {};
+    // "all" = only is_primary: false (no visibility/dataSource)
+    if (filter === "all") {
+      return JSON.stringify(base);
+    }
     if (filter === "ai_generated") {
       return JSON.stringify({ ...base, dataSource: "ai_generated" });
     }
@@ -36,11 +41,11 @@ export default function PendingApprovalUnitsPageQuery({ searchParams }) {
 
   const handleFilterChange = (e) => {
     const next = e?.target?.value || "";
-    setFilter(next || "pending_approval");
+    setFilter(next || "all");
   };
 
   if (isLoading || isFetching) {
-    return <LoadingSpinner message="Loading pending approval units..." />;
+    return <LoadingSpinner message="Loading resale units..." />;
   }
 
   if (isError) {
@@ -50,7 +55,7 @@ export default function PendingApprovalUnitsPageQuery({ searchParams }) {
           error={error}
           refetch={refetch}
           isFetching={isFetching}
-          title="Error loading pending approval units"
+          title="Error loading resale units"
           message="Failed to load units. Please try again."
           retryLabel="Retry"
         />

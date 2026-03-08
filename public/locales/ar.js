@@ -215,6 +215,7 @@ export default {
     campaigns: "الحملات",
     analytics: "التحليلات",
     units: "الوحدات",
+    pendingApproval: "إعادة البيع",
     team: "الفريق",
     darkMode: "الوضع المظلم",
     logout: "تسجيل الخروج",

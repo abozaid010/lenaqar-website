@@ -51,7 +51,7 @@ const Sidebar = ({ canAccessMap = false }) => {
     return pathname.startsWith(path) && path !== "/dashboard";
   };
 
-  // Modular: unit detail and edit unit (modal) both respect URL source (pending=1 → Pending approval)
+  // Modular: unit detail and edit unit (modal) both respect URL source (pending=1 → Resale)
   const isUnitsLinkActive = unitsSection === "units";
   const isPendingApprovalLinkActive = unitsSection === "pending_approval";
 
@@ -232,7 +232,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             } ${isPending && pendingPath === "/units/pending-approval" ? "opacity-70" : ""}`}
           >
             <Home className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.pendingApproval ?? "Pending approval"}</span>
+            <span>{t.sidebar.pendingApproval ?? "Resale"}</span>
             {isPending && pendingPath === "/units/pending-approval" && (
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}

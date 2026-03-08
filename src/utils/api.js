@@ -87,10 +87,9 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
 }
 
   /**
-   * Fetches units from /units/all for the Pending Approval page.
-   * All unit fields are optional; response is normalized so missing/empty data does not throw.
-   * By default visibility is "pending_approval", but can be overridden via searchParams.visibility
-   * to support filtering (e.g. "visible", "hidden", "pending_approval").
+   * Fetches units from /units/all for the Resale page.
+   * Always sends is_primary: false. When filter is "all", only is_primary is sent; otherwise
+   * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
    */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
@@ -108,16 +107,17 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     const params = {
       page_size: Number(parsed.page_size) || 16,
       direction: parsed.direction || "forward",
+      is_primary: false,
       ...(parsed.cursor != null && parsed.cursor !== ""
         ? { cursor: parsed.cursor }
         : {}),
     };
 
-    // Mutual exclusivity: dataSource filter XOR visibility filter
+    // "All" = only is_primary: false. Otherwise: dataSource XOR visibility
     if (parsed.dataSource === "ai_generated") {
       params.dataSource = "ai_generated";
-    } else {
-      params.visibility = parsed.visibility || "pending_approval";
+    } else if (parsed.visibility != null && parsed.visibility !== "") {
+      params.visibility = parsed.visibility;
     }
 
     const response = await axiosInstance.get("/units/all", { params });
