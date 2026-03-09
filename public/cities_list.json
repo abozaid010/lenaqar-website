@@ -266,10 +266,38 @@
         ]
       },
       {
+        "en_name": "Second District",
+        "ar_name": "الحي الثاني",
+        "aliases": [
+          "District 2"
+        ]
+      },
+      {
+        "en_name": "Third District",
+        "ar_name": "الحي الثالث",
+        "aliases": [
+          "District 3"
+        ]
+      },
+      {
         "en_name": "Fourth District",
         "ar_name": "الحي الرابع",
         "aliases": [
           "District 4"
+        ]
+      },
+      {
+        "en_name": "Fifth District",
+        "ar_name": "الحي الخامس",
+        "aliases": [
+          "District 5"
+        ]
+      },
+      {
+        "en_name": "Seventh District",
+        "ar_name": "الحي السابع",
+        "aliases": [
+          "District 7"
         ]
       },
       {
@@ -278,6 +306,32 @@
         "aliases": [
           "District 8",
           "حي الفيلات"
+        ]
+      },
+      {
+        "en_name": "Green Belt",
+        "ar_name": "الحزام الأخضر",
+        "aliases": []
+      },
+      {
+        "en_name": "Ninth District",
+        "ar_name": "الحي التاسع",
+        "aliases": [
+          "District 9"
+        ]
+      },
+      {
+        "en_name": "Tenth District",
+        "ar_name": "الحي العاشر",
+        "aliases": [
+          "District 10"
+        ]
+      },
+      {
+        "en_name": "Eleventh District",
+        "ar_name": "الحي الحادي عشر",
+        "aliases": [
+          "District 11"
         ]
       },
       {
@@ -442,35 +496,125 @@
     ],
     "districts": [
       {
+        "en_name": "R1 District",
+        "ar_name": "حي R1",
+        "aliases": [
+          "الحي السكني الأول"
+        ]
+      },
+      {
         "en_name": "R2 District",
         "ar_name": "حي R2",
-        "aliases": []
+        "aliases": [
+          "الحي السكني الثاني"
+        ]
+      },
+      {
+        "en_name": "R3 District",
+        "ar_name": "حي R3",
+        "aliases": [
+          "الحي السكني الثالث"
+        ]
+      },
+      {
+        "en_name": "R4 District",
+        "ar_name": "حي R4",
+        "aliases": [
+          "الحي السكني الرابع"
+        ]
+      },
+      {
+        "en_name": "R5 District",
+        "ar_name": "حي R5",
+        "aliases": [
+          "الحي السكني الخامس",
+          "جاردن سيتي الجديدة",
+          "New Garden City"
+        ]
+      },
+      {
+        "en_name": "R6 District",
+        "ar_name": "حي R6",
+        "aliases": [
+          "الحي السكني السادس"
+        ]
+      },
+      {
+        "en_name": "R7 District",
+        "ar_name": "حي R7",
+        "aliases": [
+          "الحي السكني السابع"
+        ]
+      },
+      {
+        "en_name": "R8 District",
+        "ar_name": "حي R8",
+        "aliases": [
+          "الحي السكني الثامن"
+        ]
       },
       {
         "en_name": "Central Business District",
         "ar_name": "حي الأعمال المركزي",
-        "aliases": []
+        "aliases": [
+          "CBD"
+        ]
       },
       {
-        "en_name": "Investor Area",
-        "ar_name": "منطقة المستثمرين",
-        "aliases": []
+        "en_name": "Downtown",
+        "ar_name": "الداون تاون",
+        "aliases": [
+          "وسط المدينة",
+          "منطقة الداون تاون",
+          "Downtown New Capital",
+          "حي الازياء والموضه",
+          "حي التراث والفنون",
+          "حي التنزه والتسوق",
+          "سوق الدهب"
+        ]
       },
       {
-        "en_name": "R7",
-        "ar_name": "حي R7",
-        "aliases": []
-      },
-     
-      {
-        "en_name": "Diplomatic District",
-        "ar_name": "الحي الدبلوماسي",
-        "aliases": []
+        "en_name": "Financial District",
+        "ar_name": "الحي المالي",
+        "aliases": [
+          "حي المال والأعمال"
+        ]
       },
       {
         "en_name": "Government District",
         "ar_name": "الحي الحكومي",
-        "aliases": []
+        "aliases": [
+          "حي الوزارات"
+        ]
+      },
+      {
+        "en_name": "Diplomatic District",
+        "ar_name": "الحي الدبلوماسي",
+        "aliases": [
+          "حي السفارات"
+        ]
+      },
+      {
+        "en_name": "Investor Area",
+        "ar_name": "منطقة المستثمرين",
+        "aliases": [
+          "Investors Area",
+          "منطقة الطرح الأول"
+        ]
+      },
+      {
+        "en_name": "MU-23",
+        "ar_name": "منطقة MU-23",
+        "aliases": [
+          "محور الأمل"
+        ]
+      },
+      {
+        "en_name": "Green River",
+        "ar_name": "النهر الأخضر",
+        "aliases": [
+          "The Green River"
+        ]
       },
       {
         "en_name": "Knowledge City",
@@ -478,55 +622,69 @@
         "aliases": []
       },
       {
+        "en_name": "Cultural District",
+        "ar_name": "الحي الثقافي",
+        "aliases": [
+          "مدينة الفنون والثقافة",
+          "City of Arts and Culture"
+        ]
+      },
+      {
+        "en_name": "Sports City",
+        "ar_name": "مدينة الرياضة",
+        "aliases": [
+          "Sports Hub"
+        ]
+      },
+      {
+        "en_name": "Medical City",
+        "ar_name": "المدينة الطبية",
+        "aliases": [
+          "Capital Medical City"
+        ]
+      },
+      {
+        "en_name": "Masa Hotel Area",
+        "ar_name": "منطقة فندق الماسة",
+        "aliases": [
+          "Al Masa Hotel"
+        ]
+      },
+      {
+        "en_name": "Expo City",
+        "ar_name": "مدينة المعارض",
+        "aliases": [
+          "Expo New Capital",
+          "إكسبو سيتي"
+        ]
+      },
+      {
+        "en_name": "Mosque of Egypt Area",
+        "ar_name": "منطقة مسجد مصر",
+        "aliases": [
+          "مركز مصر الثقافي الإسلامي",
+          "Misr Mosque"
+        ]
+      },
+      {
+        "en_name": "Fattah Al-Alim Mosque Area",
+        "ar_name": "منطقة مسجد الفتاح العليم",
+        "aliases": [
+          "Al Fattah Al Alim Mosque"
+        ]
+      },
+      {
         "en_name": "Residential Districts",
         "ar_name": "الأحياء السكنية",
         "aliases": []
       },
       {
-        "en_name": "Downtown",
-        "ar_name": "وسط المدينة",
-        "aliases": []
-      },
-      {
-        "en_name": "Green River",
-        "ar_name": "النهر الأخضر",
-        "aliases": []
-      },
-      {
-        "en_name": "R3",
-        "ar_name": "R3 حي",
-        "aliases": []
-      },
-      {
-        "en_name": "R8",
-        "ar_name": "R8 حي",
-        "aliases": []
-      },
-      
-      {
-        "en_name": "Cultural District",
-        "ar_name": "الحي الثقافي",
-        "aliases": []
-      },
-      {
-        "en_name": "Financial District",
-        "ar_name": "الحي المالي",
-        "aliases": []
-      },
-      {
-        "en_name": "Sports City",
-        "ar_name": "مدينة الرياضة",
-        "aliases": []
-      },
-      {
-        "en_name": "Medical City",
-        "ar_name": "المدينة الطبية",
-        "aliases": []
-      },
-      {
-        "en_name": "R1",
-        "ar_name": "حي R1",
-        "aliases": []
+        "en_name": "Mega Mall Area",
+        "ar_name": "منطقة الميجا مول",
+        "aliases": [
+          "Pyramids City",
+          "بيراميدز سيتي"
+        ]
       }
     ],
     "ar_name": "العاصمة الإدارية الجديدة",
@@ -624,7 +782,9 @@
       {
         "en_name": "Mahram Bek",
         "ar_name": "محرم بيك",
-        "aliases": ["محرم بك"]
+        "aliases": [
+          "محرم بك"
+        ]
       },
       {
         "en_name": "Stanley",
@@ -782,11 +942,11 @@
         "ar_name": "جمصة",
         "aliases": []
       },
-      {"en_name": "New Mansoura",
+      {
+        "en_name": "New Mansoura",
         "ar_name": "المنصورة الجديدة",
         "aliases": []
       }
-
     ],
     "ar_name": "الدقهلية",
     "id": "Dakahlia",
