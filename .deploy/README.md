@@ -25,7 +25,7 @@ This directory contains the secure deployment setup for lenaAI-website using GCP
 If needed, you can run the deployment manually:
 
 ```bash
-gcloud compute ssh lenaai-prod-vm-7gx4\\
+gcloud compute ssh lenaai-prod-vm-7gx4 \
   --zone=europe-west3-a \
   --tunnel-through-iap \
   --command='bash ~/lenaai-website/.deploy/deploy.sh'
