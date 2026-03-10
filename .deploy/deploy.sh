@@ -26,17 +26,17 @@ docker network inspect lenaai_network >/dev/null 2>&1 || \
 
 # ─── 2. Build latest image ────────────────────────────────────────
 echo "🔨 Building Docker image..."
-docker build -t lenaai_nextjs_app:latest .
+docker build -t lenaai_website:latest .
 
 # ─── 3. Stop old container if exists ──────────────────────────────
 echo "🧹 Stopping old container if exists..."
-docker rm -f lenaai_nextjs_app || true
+docker rm -f lenaai_website || true
 
 # ─── 4. Start new container ───────────────────────────────────────
 echo "🚀 Starting new container..."
 DOCKER_RUN_ARGS=(
   -d
-  --name lenaai_nextjs_app
+  --name lenaai_website
   --restart=always
   --network lenaai_network
   --network-alias website-active
@@ -49,16 +49,16 @@ if [ -f "$REPO_PATH/.env" ]; then
   echo "📝 Using .env file from repository"
 fi
 
-DOCKER_RUN_ARGS+=(lenaai_nextjs_app:latest)
+DOCKER_RUN_ARGS+=(lenaai_website:latest)
 
 docker run "${DOCKER_RUN_ARGS[@]}"
 
 # ─── 5. Wait for container to be healthy ──────────────────────────
 echo "🩺 Waiting for container to be ready..."
 for i in {1..10}; do
-  if docker ps --format '{{.Names}}' | grep -q '^lenaai_nextjs_app$'; then
-    if docker exec lenaai_nextjs_app wget -q --spider http://localhost:3000/api/health 2>/dev/null || \
-       docker exec lenaai_nextjs_app curl -f http://localhost:3000 >/dev/null 2>&1 || \
+  if docker ps --format '{{.Names}}' | grep -q '^lenaai_website$'; then
+    if docker exec lenaai_website wget -q --spider http://localhost:3000/api/health 2>/dev/null || \
+       docker exec lenaai_website curl -f http://localhost:3000 >/dev/null 2>&1 || \
        [ "$i" -ge 5 ]; then
       echo "✅ Container is running"
       break
@@ -68,7 +68,7 @@ for i in {1..10}; do
   sleep 5
 done
 
-if ! docker ps --format '{{.Names}}' | grep -q '^lenaai_nextjs_app$'; then
+if ! docker ps --format '{{.Names}}' | grep -q '^lenaai_website$'; then
   echo "❌ Container failed to start"
   exit 1
 fi
