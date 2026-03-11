@@ -1,7 +1,12 @@
 import { useI18n } from "@/context/translate-api";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
-import { getMaxSizeBytes, getMaxSizeMB, isSupportedImageFile, SUPPORTED_IMAGE_ACCEPT } from "@/config/imageUpload";
+import {
+  getMaxSizeBytes,
+  getMaxSizeMB,
+  isSupportedImageFile,
+  SUPPORTED_IMAGE_ACCEPT,
+} from "@/config/imageUpload";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -17,7 +22,7 @@ export default function SingleImageUploader({
   uploading = false,
   setUploading,
   placeholder,
-  imageType = 'normal', // 'normal' | 'masterPlan'
+  imageType = "normal", // 'normal' | 'masterPlan'
   required = false,
   error = false,
 }) {
@@ -46,11 +51,16 @@ export default function SingleImageUploader({
     const maxSizeMB = getMaxSizeMB(imageType);
 
     if (file && file.size > maxSizeBytes) {
-      toast.error(`File size exceeds ${maxSizeMB}MB. Please select a smaller file.`);
+      toast.error(
+        `File size exceeds ${maxSizeMB}MB. Please select a smaller file.`
+      );
       return;
     }
     if (file && !isSupportedImageFile(file)) {
-      toast.error(t?.invalidFileType || "Invalid file type. Please select a JPEG, PNG, or WEBP image.");
+      toast.error(
+        t?.invalidFileType ||
+          "Invalid file type. Please select a JPEG, PNG, or WEBP image."
+      );
       return;
     }
 
@@ -66,6 +76,8 @@ export default function SingleImageUploader({
       formDataToUpload.append("file", compressedFile);
 
       const res = await uploadImages(formDataToUpload, clinetId);
+      console.log(res);
+      console.log(selectedImage);
 
       if (res && res.url) {
         setSelectedImage((prev) => ({ ...(prev || {}), imageId: res.fileId }));
@@ -108,7 +120,9 @@ export default function SingleImageUploader({
   return (
     <div>
       {label && (
-        <label className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700"}`}>
+        <label
+          className={`block text-sm font-medium mb-1 ${error ? "text-red-500" : "text-gray-700"}`}
+        >
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -187,7 +201,9 @@ export default function SingleImageUploader({
             </div>
           </div>
         ) : (
-          <div className={`flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 rounded-md border-2 border-dashed ${error ? "border-red-500" : "border-gray-300"}`}>
+          <div
+            className={`flex flex-col items-center justify-center w-full min-h-[200px] bg-gray-50 rounded-md border-2 border-dashed ${error ? "border-red-500" : "border-gray-300"}`}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-12 w-12 text-gray-400 mb-4"
@@ -214,7 +230,7 @@ export default function SingleImageUploader({
           </div>
         )}
       </div>
-      {error && typeof error === 'string' && (
+      {error && typeof error === "string" && (
         <p className="text-xs text-red-500 mt-1">{error}</p>
       )}
     </div>

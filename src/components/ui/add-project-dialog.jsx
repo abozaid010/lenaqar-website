@@ -18,8 +18,15 @@ import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
-import { addCompound as addProject, updatecompound as updateProject, getClientid } from "@/utils/api";
-import { parseExistingProjectData, parseValidationErrors } from "@/utils/error-parser";
+import {
+  addCompound as addProject,
+  updatecompound as updateProject,
+  getClientid,
+} from "@/utils/api";
+import {
+  parseExistingProjectData,
+  parseValidationErrors,
+} from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef } from "react";
@@ -31,7 +38,7 @@ export default function AddCompoundDialog({
   isOpen,
   onClose,
   compoundData: projectData,
-  onAdd = () => { },
+  onAdd = () => {},
   defaultCity,
   defaultDistrict,
 }) {
@@ -113,37 +120,68 @@ export default function AddCompoundDialog({
   const [formData, setFormData] = useState({
     ar_name: projectData?.ar_name || projectData?.project?.ar_name || "",
     en_name: projectData?.en_name || projectData?.project?.en_name || "",
-    description: projectData?.description || projectData?.project?.description || "",
-    developer_id: projectData?.developer_id || projectData?.project?.developer_id || "",
-    developer_name: projectData?.developer_name || projectData?.project?.developer_name || "",
+    description:
+      projectData?.description || projectData?.project?.description || "",
+    developer_id:
+      projectData?.developer_id || projectData?.project?.developer_id || "",
+    developer_name:
+      projectData?.developer_name || projectData?.project?.developer_name || "",
     city: projectData?.city || projectData?.project?.city || defaultCity || "",
     country: projectData?.country || projectData?.project?.country || "Egypt",
-    district: projectData?.district || projectData?.project?.district || defaultDistrict || "",
+    district:
+      projectData?.district ||
+      projectData?.project?.district ||
+      defaultDistrict ||
+      "",
     area: projectData?.area || projectData?.project?.area || "",
-    gated: projectData?.gated !== undefined && projectData?.gated !== null
-      ? projectData.gated
-      : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
-        ? projectData.project.gated
-        : true),
-    is_active: projectData?.is_active !== undefined && projectData?.is_active !== null
-      ? projectData.is_active
-      : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
-        ? projectData.project.is_active
-        : true),
+    gated:
+      projectData?.gated !== undefined && projectData?.gated !== null
+        ? projectData.gated
+        : projectData?.project?.gated !== undefined &&
+            projectData?.project?.gated !== null
+          ? projectData.project.gated
+          : true,
+    is_active:
+      projectData?.is_active !== undefined && projectData?.is_active !== null
+        ? projectData.is_active
+        : projectData?.project?.is_active !== undefined &&
+            projectData?.project?.is_active !== null
+          ? projectData.project.is_active
+          : true,
     video_url: projectData?.video_url || projectData?.project?.video_url || "",
-    google_map_link: projectData?.google_map_link || projectData?.project?.google_map_link || "",
-    master_plan: projectData?.master_plan || projectData?.project?.master_plan || { url: null, fileId: null },
-    client_id: projectData?.client_id || projectData?.project?.client_id || clientId || "",
+    google_map_link:
+      projectData?.google_map_link ||
+      projectData?.project?.google_map_link ||
+      "",
+    master_plan: projectData?.master_plan ||
+      projectData?.project?.master_plan || { url: null, fileId: null },
+    client_id:
+      projectData?.client_id ||
+      projectData?.project?.client_id ||
+      clientId ||
+      "",
     images: projectData?.images || projectData?.project?.images || [],
-    properties_types: projectData?.properties_types || projectData?.project?.properties_types || [],
-    payment_plans: projectData?.payment_plans || projectData?.project?.payment_plans || [],
-    building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || {},
-    finishing_type: normalizeFinishingType(projectData?.finishing_type || projectData?.project?.finishing_type),
-    delivery_date: projectData?.delivery_date !== undefined && projectData?.delivery_date !== null
-      ? projectData.delivery_date
-      : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
-        ? projectData.project.delivery_date
-        : 4),
+    properties_types:
+      projectData?.properties_types ||
+      projectData?.project?.properties_types ||
+      [],
+    payment_plans:
+      projectData?.payment_plans || projectData?.project?.payment_plans || [],
+    building_types_images:
+      projectData?.building_types_images ||
+      projectData?.project?.building_types_images ||
+      {},
+    finishing_type: normalizeFinishingType(
+      projectData?.finishing_type || projectData?.project?.finishing_type
+    ),
+    delivery_date:
+      projectData?.delivery_date !== undefined &&
+      projectData?.delivery_date !== null
+        ? projectData.delivery_date
+        : projectData?.project?.delivery_date !== undefined &&
+            projectData?.project?.delivery_date !== null
+          ? projectData.project.delivery_date
+          : 4,
   });
 
   useEffect(() => {
@@ -155,48 +193,93 @@ export default function AddCompoundDialog({
           ...prev,
           ar_name: projectData?.ar_name || projectData?.project?.ar_name || "",
           en_name: projectData?.en_name || projectData?.project?.en_name || "",
-          description: projectData.description || projectData?.project?.description || "",
-          developer_id: projectData.developer_id || projectData?.project?.developer_id || "",
-          developer_name: projectData.developer_name || projectData?.project?.developer_name || "",
-          city: projectData.city || projectData?.project?.city || defaultCity || "",
-          country: projectData.country || projectData?.project?.country || "Egypt",
-          district: projectData.district || projectData?.project?.district || defaultDistrict || "",
+          description:
+            projectData.description || projectData?.project?.description || "",
+          developer_id:
+            projectData.developer_id ||
+            projectData?.project?.developer_id ||
+            "",
+          developer_name:
+            projectData.developer_name ||
+            projectData?.project?.developer_name ||
+            "",
+          city:
+            projectData.city || projectData?.project?.city || defaultCity || "",
+          country:
+            projectData.country || projectData?.project?.country || "Egypt",
+          district:
+            projectData.district ||
+            projectData?.project?.district ||
+            defaultDistrict ||
+            "",
           area: projectData.area || projectData?.project?.area || "",
-          gated: projectData.gated !== undefined && projectData.gated !== null
-            ? projectData.gated
-            : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
-              ? projectData.project.gated
-              : true),
-          is_active: projectData.is_active !== undefined && projectData.is_active !== null
-            ? projectData.is_active
-            : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
-              ? projectData.project.is_active
-              : true),
-          video_url: projectData.video_url || projectData?.project?.video_url || "",
-          google_map_link: projectData.google_map_link || projectData?.project?.google_map_link || "",
-          master_plan: projectData?.master_plan || projectData?.project?.master_plan || { url: null, fileId: null },
-          client_id: projectData.client_id || projectData?.project?.client_id || clientId || "",
+          gated:
+            projectData.gated !== undefined && projectData.gated !== null
+              ? projectData.gated
+              : projectData?.project?.gated !== undefined &&
+                  projectData?.project?.gated !== null
+                ? projectData.project.gated
+                : true,
+          is_active:
+            projectData.is_active !== undefined &&
+            projectData.is_active !== null
+              ? projectData.is_active
+              : projectData?.project?.is_active !== undefined &&
+                  projectData?.project?.is_active !== null
+                ? projectData.project.is_active
+                : true,
+          video_url:
+            projectData.video_url || projectData?.project?.video_url || "",
+          google_map_link:
+            projectData.google_map_link ||
+            projectData?.project?.google_map_link ||
+            "",
+          master_plan: projectData?.master_plan ||
+            projectData?.project?.master_plan || { url: null, fileId: null },
+          client_id:
+            projectData.client_id ||
+            projectData?.project?.client_id ||
+            clientId ||
+            "",
           images: projectData.images || projectData?.project?.images || [],
-          properties_types: projectData.properties_types || projectData?.project?.properties_types || [],
-          payment_plans: projectData.payment_plans || projectData?.project?.payment_plans || [],
-          building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || {},
-          finishing_type: projectData.finishing_type || projectData?.project?.finishing_type || [],
-          delivery_date: projectData.delivery_date !== undefined && projectData.delivery_date !== null
-            ? projectData.delivery_date
-            : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
-              ? projectData.project.delivery_date
-              : 4),
+          properties_types:
+            projectData.properties_types ||
+            projectData?.project?.properties_types ||
+            [],
+          payment_plans:
+            projectData.payment_plans ||
+            projectData?.project?.payment_plans ||
+            [],
+          building_types_images:
+            projectData?.building_types_images ||
+            projectData?.project?.building_types_images ||
+            {},
+          finishing_type:
+            projectData.finishing_type ||
+            projectData?.project?.finishing_type ||
+            [],
+          delivery_date:
+            projectData.delivery_date !== undefined &&
+            projectData.delivery_date !== null
+              ? projectData.delivery_date
+              : projectData?.project?.delivery_date !== undefined &&
+                  projectData?.project?.delivery_date !== null
+                ? projectData.project.delivery_date
+                : 4,
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
         // Ensure client_id is extracted from token for new projects
         const tokenClientId = getClientid();
         const initClientId = tokenClientId || clientId || "";
-        console.log("[useEffect] Initializing new project form with client_id:", {
-          tokenClientId,
-          propClientId: clientId,
-          initClientId,
-        });
+        console.log(
+          "[useEffect] Initializing new project form with client_id:",
+          {
+            tokenClientId,
+            propClientId: clientId,
+            initClientId,
+          }
+        );
 
         setFormData({
           ar_name: "",
@@ -260,39 +343,123 @@ export default function AddCompoundDialog({
       // Update form data when compoundData changes
       setFormData((prev) => ({
         ...prev,
-        ar_name: projectData?.ar_name || projectData?.project?.ar_name || prev.ar_name || "",
-        en_name: projectData?.en_name || projectData?.project?.en_name || prev.en_name || "",
-        description: projectData?.description || projectData?.project?.description || prev.description || "",
-        developer_id: projectData?.developer_id || projectData?.project?.developer_id || prev.developer_id || "",
-        developer_name: projectData?.developer_name || projectData?.project?.developer_name || prev.developer_name || "",
-        city: projectData?.city || projectData?.project?.city || prev.city || defaultCity || "",
-        country: projectData?.country || projectData?.project?.country || prev.country || "Egypt",
-        district: projectData?.district || projectData?.project?.district || prev.district || defaultDistrict || "",
-        area: projectData?.area || projectData?.project?.area || prev.area || "",
-        gated: projectData?.gated !== undefined && projectData?.gated !== null
-          ? projectData.gated
-          : (projectData?.project?.gated !== undefined && projectData?.project?.gated !== null
-            ? projectData.project.gated
-            : prev.gated !== undefined ? prev.gated : true),
-        is_active: projectData?.is_active !== undefined && projectData?.is_active !== null
-          ? projectData.is_active
-          : (projectData?.project?.is_active !== undefined && projectData?.project?.is_active !== null
-            ? projectData.project.is_active
-            : prev.is_active !== undefined ? prev.is_active : true),
-        video_url: projectData?.video_url || projectData?.project?.video_url || prev.video_url || "",
-        google_map_link: projectData?.google_map_link || projectData?.project?.google_map_link || prev.google_map_link || "",
-        master_plan: projectData?.master_plan || projectData?.project?.master_plan || prev.master_plan || { url: null, fileId: null },
-        client_id: projectData?.client_id || projectData?.project?.client_id || prev.client_id || clientId || "",
-        images: projectData?.images || projectData?.project?.images || prev.images || [],
-        properties_types: projectData?.properties_types || projectData?.project?.properties_types || prev.properties_types || [],
-        payment_plans: projectData?.payment_plans || projectData?.project?.payment_plans || prev.payment_plans || [],
-        building_types_images: projectData?.building_types_images || projectData?.project?.building_types_images || prev.building_types_images || {},
-        finishing_type: projectData?.finishing_type || projectData?.project?.finishing_type || prev.finishing_type || [],
-        delivery_date: projectData?.delivery_date !== undefined && projectData?.delivery_date !== null
-          ? projectData.delivery_date
-          : (projectData?.project?.delivery_date !== undefined && projectData?.project?.delivery_date !== null
-            ? projectData.project.delivery_date
-            : prev.delivery_date !== undefined ? prev.delivery_date : 4),
+        ar_name:
+          projectData?.ar_name ||
+          projectData?.project?.ar_name ||
+          prev.ar_name ||
+          "",
+        en_name:
+          projectData?.en_name ||
+          projectData?.project?.en_name ||
+          prev.en_name ||
+          "",
+        description:
+          projectData?.description ||
+          projectData?.project?.description ||
+          prev.description ||
+          "",
+        developer_id:
+          projectData?.developer_id ||
+          projectData?.project?.developer_id ||
+          prev.developer_id ||
+          "",
+        developer_name:
+          projectData?.developer_name ||
+          projectData?.project?.developer_name ||
+          prev.developer_name ||
+          "",
+        city:
+          projectData?.city ||
+          projectData?.project?.city ||
+          prev.city ||
+          defaultCity ||
+          "",
+        country:
+          projectData?.country ||
+          projectData?.project?.country ||
+          prev.country ||
+          "Egypt",
+        district:
+          projectData?.district ||
+          projectData?.project?.district ||
+          prev.district ||
+          defaultDistrict ||
+          "",
+        area:
+          projectData?.area || projectData?.project?.area || prev.area || "",
+        gated:
+          projectData?.gated !== undefined && projectData?.gated !== null
+            ? projectData.gated
+            : projectData?.project?.gated !== undefined &&
+                projectData?.project?.gated !== null
+              ? projectData.project.gated
+              : prev.gated !== undefined
+                ? prev.gated
+                : true,
+        is_active:
+          projectData?.is_active !== undefined &&
+          projectData?.is_active !== null
+            ? projectData.is_active
+            : projectData?.project?.is_active !== undefined &&
+                projectData?.project?.is_active !== null
+              ? projectData.project.is_active
+              : prev.is_active !== undefined
+                ? prev.is_active
+                : true,
+        video_url:
+          projectData?.video_url ||
+          projectData?.project?.video_url ||
+          prev.video_url ||
+          "",
+        google_map_link:
+          projectData?.google_map_link ||
+          projectData?.project?.google_map_link ||
+          prev.google_map_link ||
+          "",
+        master_plan: projectData?.master_plan ||
+          projectData?.project?.master_plan ||
+          prev.master_plan || { url: null, fileId: null },
+        client_id:
+          projectData?.client_id ||
+          projectData?.project?.client_id ||
+          prev.client_id ||
+          clientId ||
+          "",
+        images:
+          projectData?.images ||
+          projectData?.project?.images ||
+          prev.images ||
+          [],
+        properties_types:
+          projectData?.properties_types ||
+          projectData?.project?.properties_types ||
+          prev.properties_types ||
+          [],
+        payment_plans:
+          projectData?.payment_plans ||
+          projectData?.project?.payment_plans ||
+          prev.payment_plans ||
+          [],
+        building_types_images:
+          projectData?.building_types_images ||
+          projectData?.project?.building_types_images ||
+          prev.building_types_images ||
+          {},
+        finishing_type:
+          projectData?.finishing_type ||
+          projectData?.project?.finishing_type ||
+          prev.finishing_type ||
+          [],
+        delivery_date:
+          projectData?.delivery_date !== undefined &&
+          projectData?.delivery_date !== null
+            ? projectData.delivery_date
+            : projectData?.project?.delivery_date !== undefined &&
+                projectData?.project?.delivery_date !== null
+              ? projectData.project.delivery_date
+              : prev.delivery_date !== undefined
+                ? prev.delivery_date
+                : 4,
       }));
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
@@ -335,7 +502,9 @@ export default function AddCompoundDialog({
 
     // Clear video_url error when user types
     if (name === "video_url") {
-      setErrors((prev) => (prev.video_url ? { ...prev, video_url: null } : prev));
+      setErrors((prev) =>
+        prev.video_url ? { ...prev, video_url: null } : prev
+      );
     }
 
     // Validate Google Maps link prefix while typing
@@ -363,7 +532,7 @@ export default function AddCompoundDialog({
         city: value,
         district: "", // Reset district when city changes
       });
-    } 
+    }
     if (name === "developer_id") {
       // When developer changes, set both developer_id and developer_name for API
       const selectedDeveloper = developers?.find((dev) => dev.id === value);
@@ -414,7 +583,9 @@ export default function AddCompoundDialog({
     ];
 
     // Find first error field in priority order
-    const firstErrorField = fieldOrder.find((field) => errorFields.includes(field));
+    const firstErrorField = fieldOrder.find((field) =>
+      errorFields.includes(field)
+    );
     if (!firstErrorField) return;
 
     const fieldRef = fieldRefs.current[firstErrorField];
@@ -425,9 +596,9 @@ export default function AddCompoundDialog({
 
     // Check if the container has a child component with ref methods (LenaTextField, LenaTextarea)
     const inputSelectors = [
-      'input',
-      'textarea',
-      'select',
+      "input",
+      "textarea",
+      "select",
       '[role="button"]', // For custom dropdowns
       'button[type="button"]', // For custom selects
     ];
@@ -454,7 +625,12 @@ export default function AddCompoundDialog({
     // Remove ring after animation completes
     setTimeout(() => {
       if (fieldRef) {
-        fieldRef.classList.remove("ring-2", "ring-red-500", "rounded-md", "p-1");
+        fieldRef.classList.remove(
+          "ring-2",
+          "ring-red-500",
+          "rounded-md",
+          "p-1"
+        );
       }
     }, 1000);
   };
@@ -496,14 +672,20 @@ export default function AddCompoundDialog({
         t.formValidation?.districtRequired || "District is required";
     }
 
-    if (formData.delivery_date === undefined || formData.delivery_date === null || formData.delivery_date === "") {
+    if (
+      formData.delivery_date === undefined ||
+      formData.delivery_date === null ||
+      formData.delivery_date === ""
+    ) {
       newErrors.delivery_date =
-        t.formValidation?.deliveryDateRequired || "Delivery in years is required";
+        t.formValidation?.deliveryDateRequired ||
+        "Delivery in years is required";
     } else {
       const deliveryValue = parseFloat(formData.delivery_date);
       if (isNaN(deliveryValue) || deliveryValue < 0) {
         newErrors.delivery_date =
-          t.formValidation?.deliveryDateInvalid || "Delivery in years must be a valid number (0 or greater)";
+          t.formValidation?.deliveryDateInvalid ||
+          "Delivery in years must be a valid number (0 or greater)";
       }
     }
 
@@ -547,7 +729,9 @@ export default function AddCompoundDialog({
         "At least one payment plan is required";
     } else if (formData.payment_plans.length > 1) {
       // If multiple plans, ensure one is marked as default
-      const hasDefault = formData.payment_plans.some((plan) => plan.is_default === true);
+      const hasDefault = formData.payment_plans.some(
+        (plan) => plan.is_default === true
+      );
       if (!hasDefault) {
         newErrors.payment_plans =
           t.formValidation?.defaultPaymentPlanRequired ||
@@ -565,14 +749,12 @@ export default function AddCompoundDialog({
 
     if (!formData.developer_id || !formData.developer_id.trim()) {
       newErrors.developer_id =
-        t.formValidation?.developerRequired ||
-        "Developer is required";
+        t.formValidation?.developerRequired || "Developer is required";
     }
 
     if (!formData.video_url || !formData.video_url.trim()) {
       newErrors.video_url =
-        t.formValidation?.videoURLRequired ||
-        "Video URL is required";
+        t.formValidation?.videoURLRequired || "Video URL is required";
     }
 
     if (!formData.google_map_link || !formData.google_map_link.trim()) {
@@ -589,8 +771,7 @@ export default function AddCompoundDialog({
 
     if (!formData.master_plan || !formData.master_plan.url) {
       newErrors.master_plan =
-        t.formValidation?.masterPlanRequired ||
-        "Master plan image is required";
+        t.formValidation?.masterPlanRequired || "Master plan image is required";
     }
 
     setErrors(newErrors);
@@ -624,13 +805,11 @@ export default function AddCompoundDialog({
       }));
       const buildingTypesImagesForApi = formData.building_types_images
         ? Object.fromEntries(
-          Object.entries(formData.building_types_images).map(
-            ([key, arr]) => [
+            Object.entries(formData.building_types_images).map(([key, arr]) => [
               key,
               (arr || []).map(({ url, fileId }) => ({ url, fileId })),
-            ]
+            ])
           )
-        )
         : {};
 
       // Ensure client_id is extracted from token and validated
@@ -647,13 +826,18 @@ export default function AddCompoundDialog({
       }
 
       // API expects both developer_id and developer_name
-      const selectedDeveloper = developers?.find(dev => dev.id === formData.developer_id);
-      const developerName = formData.developer_name || selectedDeveloper?.en_name || "";
+      const selectedDeveloper = developers?.find(
+        (dev) => dev.id === formData.developer_id
+      );
+      const developerName =
+        formData.developer_name || selectedDeveloper?.en_name || "";
 
       // API expects extra_payments to be a list; normalize null/undefined to []
       const paymentPlansForApi = (formData.payment_plans || []).map((plan) => ({
         ...plan,
-        extra_payments: Array.isArray(plan.extra_payments) ? plan.extra_payments : [],
+        extra_payments: Array.isArray(plan.extra_payments)
+          ? plan.extra_payments
+          : [],
       }));
 
       const submissionData = {
@@ -675,8 +859,16 @@ export default function AddCompoundDialog({
         formClientId: formData.client_id,
         finalClientId,
         clientIdSource: editMode
-          ? (formData.client_id ? 'existing_form' : (tokenClientId ? 'token_fallback' : 'prop_fallback'))
-          : (tokenClientId ? 'token' : (formData.client_id ? 'form' : 'prop')),
+          ? formData.client_id
+            ? "existing_form"
+            : tokenClientId
+              ? "token_fallback"
+              : "prop_fallback"
+          : tokenClientId
+            ? "token"
+            : formData.client_id
+              ? "form"
+              : "prop",
         submissionDataKeys: Object.keys(submissionData),
       });
 
@@ -713,7 +905,10 @@ export default function AddCompoundDialog({
           setIsSubmitting(false);
           return;
         }
-        console.log("[handleSubmit] Calling updatecompound with ID:", projectData.id);
+        console.log(
+          "[handleSubmit] Calling updatecompound with ID:",
+          projectData.id
+        );
         res = await updateProject(submissionData, projectData.id);
       } else {
         console.log("[handleSubmit] Calling addCompound...");
@@ -738,10 +933,15 @@ export default function AddCompoundDialog({
       // Check for 400 status code with existing_project_data FIRST (before checking other errors)
       // This ensures we show preview dialog instead of toast
       if (res?.statusCode === 400 && res?.existing_project_data) {
-        console.log("[handleSubmit] Project already exists, showing preview dialog:", {
-          existingProjectData: res.existing_project_data,
-          existingProjectDataKeys: res.existing_project_data ? Object.keys(res.existing_project_data) : null,
-        });
+        console.log(
+          "[handleSubmit] Project already exists, showing preview dialog:",
+          {
+            existingProjectData: res.existing_project_data,
+            existingProjectDataKeys: res.existing_project_data
+              ? Object.keys(res.existing_project_data)
+              : null,
+          }
+        );
         setExistingProjectData(res.existing_project_data);
         setPreviewDialogOpen(true);
         setIsSubmitting(false);
@@ -750,14 +950,18 @@ export default function AddCompoundDialog({
 
       // Check for validation errors from API
       if (res?.statusCode === 400 && res?.validation_errors) {
-        console.log("[handleSubmit] Found validation errors in response:", res.validation_errors);
+        console.log(
+          "[handleSubmit] Found validation errors in response:",
+          res.validation_errors
+        );
         // Convert translation keys to actual error messages
         const validationErrors = {};
-        Object.keys(res.validation_errors).forEach(fieldName => {
+        Object.keys(res.validation_errors).forEach((fieldName) => {
           const translationKey = res.validation_errors[fieldName];
           // Check if it's a translation key (string without spaces or with camelCase)
           if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
-            validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+            validationErrors[fieldName] =
+              t.formValidation?.[translationKey] || translationKey;
           } else {
             // It's already a message, use it as-is
             validationErrors[fieldName] = translationKey;
@@ -774,9 +978,12 @@ export default function AddCompoundDialog({
 
       // Also check if res itself has existing_project_data (in case statusCode wasn't set)
       if (res?.existing_project_data && (res?.error || res?.error_message)) {
-        console.log("[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:", {
-          existingProjectData: res.existing_project_data,
-        });
+        console.log(
+          "[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:",
+          {
+            existingProjectData: res.existing_project_data,
+          }
+        );
         setExistingProjectData(res.existing_project_data);
         setPreviewDialogOpen(true);
         setIsSubmitting(false);
@@ -791,8 +998,9 @@ export default function AddCompoundDialog({
 
       const hasError = res?.error || res?.error_message;
       const hasSuccessStatus = res?.status === true || res?.status === 200;
-      const hasDataObject = res?.data && typeof res.data === 'object';
-      const hasDirectData = res?.id || (res && !hasError && typeof res === 'object' && !res.status);
+      const hasDataObject = res?.data && typeof res.data === "object";
+      const hasDirectData =
+        res?.id || (res && !hasError && typeof res === "object" && !res.status);
 
       if (hasError) {
         const errorMessage =
@@ -804,14 +1012,18 @@ export default function AddCompoundDialog({
         // Check for validation errors in the error message
         const validationErrorKeys = parseValidationErrors(errorMessage);
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log("[handleSubmit] Found validation errors in response:", validationErrorKeys);
+          console.log(
+            "[handleSubmit] Found validation errors in response:",
+            validationErrorKeys
+          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
-          Object.keys(validationErrorKeys).forEach(fieldName => {
+          Object.keys(validationErrorKeys).forEach((fieldName) => {
             const translationKey = validationErrorKeys[fieldName];
             // Check if it's a translation key (string without spaces or with camelCase)
             if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
-              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+              validationErrors[fieldName] =
+                t.formValidation?.[translationKey] || translationKey;
             } else {
               // It's already a message, use it as-is
               validationErrors[fieldName] = translationKey;
@@ -826,18 +1038,24 @@ export default function AddCompoundDialog({
           return; // Don't show generic toast
         }
 
-        console.error("[handleSubmit] Update failed with error (no preview available):", {
-          errorMessage,
-          fullResponse: res,
-          statusCode: res?.statusCode,
-        });
+        console.error(
+          "[handleSubmit] Update failed with error (no preview available):",
+          {
+            errorMessage,
+            fullResponse: res,
+            statusCode: res?.statusCode,
+          }
+        );
         toast.error(errorMessage);
         setIsSubmitting(false);
         return;
       } else if (hasSuccessStatus || hasDataObject || hasDirectData) {
         // Success - extract the data
         const projectData = res?.data || res;
-        console.log("[handleSubmit] Update successful, calling onAdd with:", projectData);
+        console.log(
+          "[handleSubmit] Update successful, calling onAdd with:",
+          projectData
+        );
         onAdd(projectData);
 
         // Invalidate projects query cache to refetch from API
@@ -895,11 +1113,16 @@ export default function AddCompoundDialog({
       const errorResponseData = error.response?.data;
       if (error.response?.status === 400 && errorResponseData?.error_message) {
         // First check for existing project data
-        const existingProjectData = parseExistingProjectData(errorResponseData.error_message);
+        const existingProjectData = parseExistingProjectData(
+          errorResponseData.error_message
+        );
         if (existingProjectData) {
-          console.log("[handleSubmit] Found existing_project_data in exception, showing preview:", {
-            existingProjectData,
-          });
+          console.log(
+            "[handleSubmit] Found existing_project_data in exception, showing preview:",
+            {
+              existingProjectData,
+            }
+          );
           setExistingProjectData(existingProjectData);
           setPreviewDialogOpen(true);
           setIsSubmitting(false);
@@ -907,16 +1130,22 @@ export default function AddCompoundDialog({
         }
 
         // Check for validation errors
-        const validationErrorKeys = parseValidationErrors(errorResponseData.error_message);
+        const validationErrorKeys = parseValidationErrors(
+          errorResponseData.error_message
+        );
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log("[handleSubmit] Found validation errors:", validationErrorKeys);
+          console.log(
+            "[handleSubmit] Found validation errors:",
+            validationErrorKeys
+          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
-          Object.keys(validationErrorKeys).forEach(fieldName => {
+          Object.keys(validationErrorKeys).forEach((fieldName) => {
             const translationKey = validationErrorKeys[fieldName];
             // Check if it's a translation key (string without spaces or with camelCase)
             if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
-              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+              validationErrors[fieldName] =
+                t.formValidation?.[translationKey] || translationKey;
             } else {
               // It's already a message, use it as-is
               validationErrors[fieldName] = translationKey;
@@ -934,16 +1163,22 @@ export default function AddCompoundDialog({
 
       // If we have error response data with error_message, try to parse it
       if (error.response?.data?.error_message) {
-        const validationErrorKeys = parseValidationErrors(error.response.data.error_message);
+        const validationErrorKeys = parseValidationErrors(
+          error.response.data.error_message
+        );
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log("[handleSubmit] Found validation errors in error_message:", validationErrorKeys);
+          console.log(
+            "[handleSubmit] Found validation errors in error_message:",
+            validationErrorKeys
+          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
-          Object.keys(validationErrorKeys).forEach(fieldName => {
+          Object.keys(validationErrorKeys).forEach((fieldName) => {
             const translationKey = validationErrorKeys[fieldName];
             // Check if it's a translation key (string without spaces or with camelCase)
             if (translationKey && /^[a-z][a-zA-Z0-9]*$/.test(translationKey)) {
-              validationErrors[fieldName] = t.formValidation?.[translationKey] || translationKey;
+              validationErrors[fieldName] =
+                t.formValidation?.[translationKey] || translationKey;
             } else {
               // It's already a message, use it as-is
               validationErrors[fieldName] = translationKey;
@@ -1015,7 +1250,10 @@ export default function AddCompoundDialog({
 
     // Clear error for this building type when user uploads images
     setErrors((prev) => {
-      if (!prev?.building_types_images || !prev.building_types_images[propertyType]) {
+      if (
+        !prev?.building_types_images ||
+        !prev.building_types_images[propertyType]
+      ) {
         return prev;
       }
 
@@ -1024,7 +1262,8 @@ export default function AddCompoundDialog({
 
       return {
         ...prev,
-        building_types_images: Object.keys(nextTypeErrors).length > 0 ? nextTypeErrors : null,
+        building_types_images:
+          Object.keys(nextTypeErrors).length > 0 ? nextTypeErrors : null,
       };
     });
   };
@@ -1166,20 +1405,28 @@ export default function AddCompoundDialog({
                   {t.formLabels?.soldOut || "Sold out"}
                 </label>
               </div>
-              <div ref={(el) => (fieldRefs.current.finishing_type = el)} className="flex items-center gap-2 flex-1 min-w-[200px]">
+              <div
+                ref={(el) => (fieldRefs.current.finishing_type = el)}
+                className="flex items-center gap-2 flex-1 min-w-[200px]"
+              >
                 <label
                   htmlFor="finishing_type"
-                  className={`text-sm font-medium whitespace-nowrap ${errors.finishing_type ? "text-red-500" : "text-gray-700"
-                    }`}
+                  className={`text-sm font-medium whitespace-nowrap ${
+                    errors.finishing_type ? "text-red-500" : "text-gray-700"
+                  }`}
                 >
-                  {t.formLabels?.finishingType || t.finishingType || "Finishing Type"}
+                  {t.formLabels?.finishingType ||
+                    t.finishingType ||
+                    "Finishing Type"}
                   <span className="text-red-500">*</span>
                 </label>
                 <div className="flex-1">
                   <FormMultiSelect
                     name="finishing_type"
                     placeholder={
-                      locale === "ar" ? "اختر نوع التشطيب" : "Select finishing type"
+                      locale === "ar"
+                        ? "اختر نوع التشطيب"
+                        : "Select finishing type"
                     }
                     value={formData.finishing_type}
                     onChange={handleChange}
@@ -1241,11 +1488,7 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Hidden country field - always set to Egypt */}
-            <input
-              type="hidden"
-              name="country"
-              value="Egypt"
-            />
+            <input type="hidden" name="country" value="Egypt" />
 
             {/* Delivery and Area on same line */}
             <div className="grid grid-cols-2 gap-4">
@@ -1293,11 +1536,15 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Developer */}
-            <div className="relative" ref={(el) => (fieldRefs.current.developer_id = el)}>
+            <div
+              className="relative"
+              ref={(el) => (fieldRefs.current.developer_id = el)}
+            >
               <div className="flex justify-between items-center mb-1">
                 <label
-                  className={`block text-sm font-medium ${errors.developer_id ? "text-red-500" : "text-gray-700"
-                    }`}
+                  className={`block text-sm font-medium ${
+                    errors.developer_id ? "text-red-500" : "text-gray-700"
+                  }`}
                 >
                   {t.formLabels?.developer || "Developer"}{" "}
                   <span className="text-red-500">*</span>
@@ -1316,8 +1563,14 @@ export default function AddCompoundDialog({
                 onChange={handleChange}
                 required
                 error={!!errors.developer_id}
-                errorMessage={typeof errors.developer_id === "string" ? errors.developer_id : ""}
-                placeholder={t.formLabels?.selectDeveloper || "Select developer"}
+                errorMessage={
+                  typeof errors.developer_id === "string"
+                    ? errors.developer_id
+                    : ""
+                }
+                placeholder={
+                  t.formLabels?.selectDeveloper || "Select developer"
+                }
                 options={developers || []}
                 getValue={(developer) => developer.id || ""}
                 getLabel={(developer, loc) => {
@@ -1361,6 +1614,7 @@ export default function AddCompoundDialog({
 
             {/* Master Plan Image - Now mandatory */}
             <div ref={(el) => (fieldRefs.current.master_plan = el)}>
+              {console.log(formData?.master_plan)}
               <SingleImageUploader
                 label={t.formLabels.masterPlanImage || "Master Plan Image"}
                 value={formData.master_plan.url || null}
@@ -1408,47 +1662,51 @@ export default function AddCompoundDialog({
             </div>
 
             {/* Building Types Images */}
-            {formData.properties_types && formData.properties_types.length > 0 && (
-              <div
-                className="space-y-4"
-                ref={(el) => (fieldRefs.current.building_types_images = el)}
-              >
-                {formData.properties_types.map((propertyType) => (
-                  <div key={propertyType}>
-                    <label
-                      className={`block text-sm font-medium mb-1 ${errors.building_types_images?.[propertyType]
-                        ? "text-red-600"
-                        : "text-gray-700"
+            {formData.properties_types &&
+              formData.properties_types.length > 0 && (
+                <div
+                  className="space-y-4"
+                  ref={(el) => (fieldRefs.current.building_types_images = el)}
+                >
+                  {formData.properties_types.map((propertyType) => (
+                    <div key={propertyType}>
+                      <label
+                        className={`block text-sm font-medium mb-1 ${
+                          errors.building_types_images?.[propertyType]
+                            ? "text-red-600"
+                            : "text-gray-700"
                         }`}
-                    >
-                      {getPropertyTypeLabel(propertyType)}
-                      <span className="text-xs font-normal text-gray-500 ml-2">
-                        (
-                        {(formData.building_types_images[propertyType] || [])
-                          .length}{" "}
-                        / 4)
-                      </span>
-                    </label>
-                    {errors.building_types_images?.[propertyType] && (
-                      <p className="text-xs text-red-600 mb-2">
-                        {errors.building_types_images[propertyType]}
-                      </p>
-                    )}
-                    <ImageUploader
-                      maxImages={4}
-                      initialImages={
-                        formData.building_types_images[propertyType] || []
-                      }
-                      onImagesChange={(images) =>
-                        handleBuildingTypeImagesChange(propertyType, images)
-                      }
-                      isUploading={isUploading}
-                      setIsUploading={setIsUploading}
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+                      >
+                        {getPropertyTypeLabel(propertyType)}
+                        <span className="text-xs font-normal text-gray-500 ml-2">
+                          (
+                          {
+                            (formData.building_types_images[propertyType] || [])
+                              .length
+                          }{" "}
+                          / 4)
+                        </span>
+                      </label>
+                      {errors.building_types_images?.[propertyType] && (
+                        <p className="text-xs text-red-600 mb-2">
+                          {errors.building_types_images[propertyType]}
+                        </p>
+                      )}
+                      <ImageUploader
+                        maxImages={4}
+                        initialImages={
+                          formData.building_types_images[propertyType] || []
+                        }
+                        onImagesChange={(images) =>
+                          handleBuildingTypeImagesChange(propertyType, images)
+                        }
+                        isUploading={isUploading}
+                        setIsUploading={setIsUploading}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
 
             {/* Project Images */}
             <div>
@@ -1460,7 +1718,7 @@ export default function AddCompoundDialog({
               </label>
               <ImageUploader
                 maxImages={8}
-                initialImages={editMode ? projectData?.images || [] : []}
+                initialImages={formData.images || []}
                 onImagesChange={(images) =>
                   setFormData((prev) => ({ ...prev, images }))
                 }
@@ -1468,7 +1726,6 @@ export default function AddCompoundDialog({
                 setIsUploading={setIsUploading}
               />
             </div>
-
           </div>
         </div>
       </Dialog>
