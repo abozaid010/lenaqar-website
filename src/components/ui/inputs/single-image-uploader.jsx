@@ -112,9 +112,6 @@ export default function SingleImageUploader({
 
     setSelectedImage(null);
     onChange("");
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-    }
   };
 
   return (

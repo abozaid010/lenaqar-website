@@ -61,11 +61,6 @@ export default function ImageUploader({
     if (e.target.files && e.target.files.length > 0) {
       handleFiles(e.target.files);
     }
-    // مسح قيمة المدخل للسماح باختيار نفس الصورة مرة أخرى
-    // Clear the input value to allow selecting the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
-    }
   };
 
   const handleFiles = async (files) => {
