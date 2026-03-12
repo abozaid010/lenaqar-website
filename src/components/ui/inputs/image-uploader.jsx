@@ -18,7 +18,7 @@ export default function ImageUploader({
   maxImages = 8,
   initialImages = [],
   imageType = "normal", // 'normal' | 'masterPlan' (campaigns use 10MB via masterPlan)
-  onImagesChange = () => { },
+  onImagesChange = () => {},
   isUploading,
   setIsUploading,
 }) {
@@ -182,7 +182,13 @@ export default function ImageUploader({
         <div className="relative w-full h-full">
           <ImageWithLoader
             src={image.url || "/placeholder.svg"}
-            alt={image.name ? `Image ${image.name}` : (image.fileId ? `Image ${image.fileId}` : "Campaign image")}
+            alt={
+              image.name
+                ? `Image ${image.name}`
+                : image.fileId
+                  ? `Image ${image.fileId}`
+                  : "Campaign image"
+            }
             className="w-full h-full object-cover rounded-md"
             priority={false}
             loadingVariant="minimal"
@@ -190,14 +196,15 @@ export default function ImageUploader({
           />
           {isSelected && uploadStatus[imageId] && (
             <div
-              className={`absolute inset-0 flex items-center justify-center rounded-md ${uploadStatus[imageId] === "compressing"
+              className={`absolute inset-0 flex items-center justify-center rounded-md ${
+                uploadStatus[imageId] === "compressing"
                   ? "bg-yellow-500/50"
                   : uploadStatus[imageId] === "uploading"
                     ? "bg-black/50"
                     : uploadStatus[imageId] === "success"
                       ? "bg-green-500/50"
                       : "bg-red-500/50"
-                }`}
+              }`}
             >
               {uploadStatus[imageId] === "uploading" && (
                 <svg
