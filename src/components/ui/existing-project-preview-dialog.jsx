@@ -2,6 +2,7 @@
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { getBuildingTypes } from "@/data/constants";
 import { CreditCard, Home, Tag } from "lucide-react";
 import en from "../../../public/locales/en";
@@ -95,7 +96,7 @@ export default function ExistingProjectPreviewDialog({
             {projectData.master_plan?.url && (
               <div className="relative h-64 w-full rounded-lg overflow-hidden border border-gray-200">
                 <ImageWithLoader
-                  src={projectData.master_plan.url}
+                  src={getDisplayImageUrl(projectData.master_plan.url)}
                   alt={projectData.ar_name || projectData.en_name || "Master Plan"}
                   className="w-full h-full object-cover"
                   priority={true}

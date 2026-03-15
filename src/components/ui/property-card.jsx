@@ -15,6 +15,7 @@ import {
   Square,
 } from "lucide-react";
 import ImageWithLoader from "./image-with-loader";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -32,7 +33,7 @@ export default function PropertyCard({ data }) {
   const [hoveredImage, setHoveredImage] = useState(null);
   const handleImageHover = () => {
     if (data.images?.length > 1) {
-      setHoveredImage(data.images[1].url);
+      setHoveredImage(getDisplayImageUrl(data.images[1].url));
     }
   };
 
@@ -60,7 +61,7 @@ export default function PropertyCard({ data }) {
           <ImageWithLoader
             onMouseEnter={handleImageHover}
             onMouseLeave={() => setHoveredImage(null)}
-            src={hoveredImage || data.images[0].url}
+            src={hoveredImage || getDisplayImageUrl(data.images[0].url)}
             alt="property_image"
             className="w-full h-full object-cover transition-all duration-300 hover:scale-105"
           />

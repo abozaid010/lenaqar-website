@@ -12,6 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import CampaignDialog from "./CampaignDialog";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 function CampaignCard({ campaign, onEdit }) {
   const { t, locale } = useI18n();
@@ -164,7 +165,7 @@ function CampaignCard({ campaign, onEdit }) {
                   title={img?.fileId || ""}
                 >
                   <ImageWithLoader
-                    src={img?.url || "/placeholder.svg"}
+                    src={getDisplayImageUrl(img?.url) || "/placeholder.svg"}
                     alt={`campaign_image_${idx}`}
                     className="w-full h-full object-cover"
                     priority={false}

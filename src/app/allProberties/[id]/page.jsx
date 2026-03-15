@@ -3,6 +3,7 @@ import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import UnitSchema from "@/components/schema/UnitSchema";
 import axiosInstance from "@/utils/axiosInstance";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 async function fetchUnitData(id) {
   try {
@@ -22,7 +23,7 @@ function getFirstImageUrl(unit) {
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const unit = await fetchUnitData(id);
-  const firstImageUrl = getFirstImageUrl(unit);
+  const firstImageUrl = getDisplayImageUrl(getFirstImageUrl(unit));
 
   const title = unit?.unitTitle
     ? `${unit.unitTitle} - Property Details | LENAAI AI Sales Agent`

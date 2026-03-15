@@ -11,6 +11,7 @@ import {
   SUPPORTED_IMAGE_ACCEPT,
 } from "@/config/imageUpload";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -181,7 +182,7 @@ export default function ImageUploader({
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
           <ImageWithLoader
-            src={image.url || "/placeholder.svg"}
+            src={getDisplayImageUrl(image.url) || "/placeholder.svg"}
             alt={
               image.name
                 ? `Image ${image.name}`

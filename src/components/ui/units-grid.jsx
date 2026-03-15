@@ -14,6 +14,7 @@ import {
   handleImageError,
   getFirstValidImage,
   getFallbackImage,
+  getDisplayImageUrl,
 } from "@/utils/imageUtils";
 import EmptyStateVideo from "./empty-state-video";
 
@@ -75,10 +76,10 @@ export default function UnitsGrid({
               <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100">
                 {u.images && u.images.length > 0 ? (
                   <ImageWithLoader
-                    src={getFirstValidImage(
+                    src={getDisplayImageUrl(getFirstValidImage(
                       u.images.map((img) => img?.url),
                       "property"
-                    )}
+                    ))}
                     alt={u.name || u.compound || "Property"}
                     className="w-full h-full object-cover"
                     onError={(e) => {

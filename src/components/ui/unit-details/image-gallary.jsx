@@ -13,7 +13,7 @@ import "swiper/css/thumbs";
 import { Navigation, Thumbs } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import shareButton from "../../../../public/share.svg";
-import { createSafeImageSource, handleImageError, getFirstValidImage, filterValidImages } from "@/utils/imageUtils";
+import { createSafeImageSource, handleImageError, getFirstValidImage, filterValidImages, getDisplayImageUrl } from "@/utils/imageUtils";
 
 const MISSING_FIELD_CLASS =
   "ring-2 ring-red-500 rounded-md bg-red-50/70 border-2 border-red-300";
@@ -69,7 +69,7 @@ export default function ImageGallary({
         onClick={() => setIsFullscreen(true)}
       >
         <ImageWithLoader
-          src={hasValidImages ? validImages[mainImageIndex] || validImages[0] : getFirstValidImage(images?.map(img => img?.url) || [], 'property')}
+          src={getDisplayImageUrl(hasValidImages ? validImages[mainImageIndex] || validImages[0] : getFirstValidImage(images?.map(img => img?.url) || [], 'property'))}
           onError={(e) => {
             const originalSrc = hasValidImages ? validImages[mainImageIndex] || validImages[0] : images?.[mainImageIndex]?.url;
             const fallbackSrc = handleImageError(e, originalSrc, 'property');

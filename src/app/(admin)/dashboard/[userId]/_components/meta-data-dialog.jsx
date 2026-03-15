@@ -1,5 +1,6 @@
 import React from 'react';
 import { Building2, Home, Square, Bath, Bed, Eye, Landmark, Calendar, DollarSign, MapPin, User } from 'lucide-react';
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 export default function ChatMetaDataModal({ onClose, metaData }) {
     return (
@@ -150,7 +151,7 @@ export default function ChatMetaDataModal({ onClose, metaData }) {
                                     {property.metadata.images.map((image, index) => (
                                         <img
                                             key={index}
-                                            src={image.url}
+                                            src={getDisplayImageUrl(image.url)}
                                             alt={`Property image ${index + 1}`}
                                             className="w-full h-24 object-cover rounded-md"
                                         />

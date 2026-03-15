@@ -38,6 +38,7 @@ import { deletePhase, deleteProject } from "@/utils/api";
 import { paginatedProjectKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import "swiper/css";
@@ -1126,17 +1127,22 @@ export default function ProjectsList({ clientId }) {
                       <div
                         className="h-80 relative cursor-pointer group"
                         onClick={() => {
-                          setFullScreenImages(selectedProject.images || []);
+                          setFullScreenImages(
+                            (selectedProject.images || []).map((img) => ({
+                              ...img,
+                              url: getDisplayImageUrl(img?.url) || img?.url,
+                            }))
+                          );
                           setFullScreenMasterPlan(
-                            selectedProject.master_plan?.url || null
+                            getDisplayImageUrl(selectedProject.master_plan?.url) || null
                           );
                           setShowFullScreenSwiper(true);
                         }}
                       >
                         <ImageWithLoader
                           src={
-                            selectedProject.master_plan?.url ||
-                            selectedProject?.images[0]?.url ||
+                            getDisplayImageUrl(selectedProject.master_plan?.url) ||
+                            getDisplayImageUrl(selectedProject?.images[0]?.url) ||
                             "/images/defaultImage.jpg"
                           }
                           alt={selectedProject.name || "Project Master Plan"}
@@ -1277,13 +1283,16 @@ export default function ProjectsList({ clientId }) {
                                         onClick={() => {
                                           setBuildingTypeImagesModal({
                                             open: true,
-                                            images: typeImages,
+                                            images: typeImages.map((img) => ({
+                                              ...img,
+                                              url: getDisplayImageUrl(img?.url) || img?.url,
+                                            })),
                                             title: typeLabel,
                                           });
                                         }}
                                       >
                                         <ImageWithLoader
-                                          src={img.url || "/images/defaultImage.jpg"}
+                                          src={getDisplayImageUrl(img.url) || "/images/defaultImage.jpg"}
                                           alt={`${typeLabel} - ${idx + 1}`}
                                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                                           priority={false}
@@ -1302,7 +1311,10 @@ export default function ProjectsList({ clientId }) {
                                       onClick={() => {
                                         setBuildingTypeImagesModal({
                                           open: true,
-                                          images: typeImages,
+                                          images: typeImages.map((img) => ({
+                                            ...img,
+                                            url: getDisplayImageUrl(img?.url) || img?.url,
+                                          })),
                                           title: typeLabel,
                                         });
                                       }}
@@ -1524,16 +1536,21 @@ export default function ProjectsList({ clientId }) {
                           <div className="h-96 relative overflow-hidden bg-gray-50 group">
                             <ImageWithLoader
                               src={
-                                selectedProject.phases[selectedPhaseIdx]
-                                  ?.master_plan?.url ||
+                                getDisplayImageUrl(
+                                  selectedProject.phases[selectedPhaseIdx]
+                                    ?.master_plan?.url
+                                ) ||
                                 (Array.isArray(
                                   selectedProject.phases[selectedPhaseIdx]?.images
                                 ) &&
                                   selectedProject.phases[selectedPhaseIdx]?.images
                                     .length > 0
-                                  ? selectedProject.phases[selectedPhaseIdx]
-                                    ?.images[0].url
-                                  : "/images/defaultImage.jpg")
+                                  ? getDisplayImageUrl(
+                                      selectedProject.phases[selectedPhaseIdx]
+                                        ?.images[0]?.url
+                                    )
+                                  : null) ||
+                                "/images/defaultImage.jpg"
                               }
                               alt={
                                 selectedProject.phases[selectedPhaseIdx]?.name ||
@@ -1555,12 +1572,19 @@ export default function ProjectsList({ clientId }) {
                                   className={`absolute inset-0 flex flex-col cursor-pointer items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity`}
                                   onClick={() => {
                                     setFullScreenImages(
-                                      selectedProject.phases[selectedPhaseIdx]
-                                        .images || []
+                                      (
+                                        selectedProject.phases[selectedPhaseIdx]
+                                          ?.images || []
+                                      ).map((img) => ({
+                                        ...img,
+                                        url: getDisplayImageUrl(img?.url) || img?.url,
+                                      }))
                                     );
                                     setFullScreenMasterPlan(
-                                      selectedProject.phases[selectedPhaseIdx]
-                                        ?.master_plan?.url || null
+                                      getDisplayImageUrl(
+                                        selectedProject.phases[selectedPhaseIdx]
+                                          ?.master_plan?.url
+                                      ) || null
                                     );
                                     setShowFullScreenSwiper(true);
                                   }}
@@ -1650,11 +1674,12 @@ export default function ProjectsList({ clientId }) {
                               >
                                 <ImageWithLoader
                                   src={
-                                    phase.master_plan?.url ||
+                                    getDisplayImageUrl(phase.master_plan?.url) ||
                                     (Array.isArray(phase?.images) &&
                                       phase?.images.length > 0
-                                      ? phase.images[0].url
-                                      : "/images/defaultImage.jpg")
+                                      ? getDisplayImageUrl(phase.images[0]?.url)
+                                      : null) ||
+                                    "/images/defaultImage.jpg"
                                   }
                                   alt={phase.name || "Phase Thumbnail"}
                                   className="w-full h-full object-cover"
