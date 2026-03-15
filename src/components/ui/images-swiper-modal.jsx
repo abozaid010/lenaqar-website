@@ -1,6 +1,7 @@
 "use client";
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
@@ -72,7 +73,7 @@ export default function ImageSwiperModal({
                 className="flex items-center justify-center"
               >
                 <ImageWithLoader
-                  src={image.url || "/images/defaultImage.jpg"}
+                  src={getDisplayImageUrl(image.url) || "/images/defaultImage.jpg"}
                   alt={`Project Image ${index + 1}`}
                   className="w-full h-full object-contain bg-stone-100 rounded-lg"
                   priority={index === 0} // Load first image with priority

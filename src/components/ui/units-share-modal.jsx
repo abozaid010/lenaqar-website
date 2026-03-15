@@ -12,6 +12,7 @@ import {
   Type,
 } from "lucide-react";
 import { useI18n } from "@/context/translate-api";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 export default function ShareModal({
   showModal,
@@ -222,9 +223,11 @@ export default function ShareModal({
                               <div className="w-full h-full flex items-center justify-center">
                                 <img
                                   src={
-                                    typeof imageUrl === "string"
-                                      ? imageUrl
-                                      : "/api/placeholder/600/400"
+                                    getDisplayImageUrl(
+                                      typeof imageUrl === "string"
+                                        ? imageUrl
+                                        : imageUrl?.url
+                                    ) || "/api/placeholder/600/400"
                                   }
                                   alt={`Image ${index + 1}`}
                                   className="object-contain w-full h-full"

@@ -5,6 +5,7 @@ import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
 import { formatTimestamp } from "@/utils/formateDate";
 import SafeImage from "@/components/ui/safe-image";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -159,12 +160,12 @@ export default function BotMessageCard({ message }) {
 
           {project_data.master_plan?.url && (
             <SafeImage
-              src={project_data.master_plan.url}
+              src={getDisplayImageUrl(project_data.master_plan.url)}
               alt="Master Plan"
               width={400}
               height={200}
               className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-              onClick={() => setFullscreenImg(project_data.master_plan.url)}
+              onClick={() => setFullscreenImg(getDisplayImageUrl(project_data.master_plan.url))}
               title={t.clickToViewFullscreen}
             />
           )}
@@ -177,7 +178,7 @@ export default function BotMessageCard({ message }) {
                 {project_data.images.slice(0, 4).map((img, idx) => (
                   <div key={img.fileId || idx} className="relative">
                     <SafeImage
-                      src={img.url}
+                      src={getDisplayImageUrl(img.url)}
                       alt={`Project Image ${idx + 1}`}
                       width={80}
                       height={80}
@@ -262,12 +263,12 @@ export default function BotMessageCard({ message }) {
                 </div>
                 {phase.master_plan && (
                   <SafeImage
-                    src={phase.master_plan}
+                    src={getDisplayImageUrl(typeof phase.master_plan === "string" ? phase.master_plan : phase.master_plan?.url)}
                     alt="Master Plan"
                     width={400}
                     height={200}
                     className="w-full max-w-full h-auto rounded-md border mx-auto cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
-                    onClick={() => setFullscreenImg(phase.master_plan)}
+                    onClick={() => setFullscreenImg(getDisplayImageUrl(typeof phase.master_plan === "string" ? phase.master_plan : phase.master_plan?.url))}
                     title={t.clickToViewFullscreen}
                   />
                 )}
@@ -279,7 +280,7 @@ export default function BotMessageCard({ message }) {
                       {phase.images.slice(0, 4).map((img, idx) => (
                         <div key={img.fileId || idx} className="relative">
                           <SafeImage
-                            src={img.url}
+                            src={getDisplayImageUrl(img.url)}
                             alt={`Phase Image ${idx + 1}`}
                             width={80}
                             height={80}

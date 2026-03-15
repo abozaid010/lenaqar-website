@@ -2,7 +2,27 @@
  * Image utility functions for handling various image loading scenarios
  */
 
-import { IMAGE_HOSTNAME } from "@/lib/apiConfig";
+import { IMAGE_HOSTNAME, IMAGE_BASE_URL } from "@/lib/apiConfig";
+
+/**
+ * For presentation only: given a full image URL from the API, use IMAGE_BASE_URL
+ * (NEXT_PUBLIC_IMAGE_BASE_URL) as base and replace /images/ with /gcs/ in the path.
+ * Returns url unchanged if not a full URL or if path doesn't contain /images/.
+ */
+export function getDisplayImageUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  if (!url.startsWith("http://") && !url.startsWith("https://")) return url;
+  try {
+    const u = new URL(url);
+    const pathname = u.pathname;
+    if (!pathname.includes("/images")) return url;
+    const newPath = pathname.replace(/\/images\//, "/gcs/");
+    const base = IMAGE_BASE_URL ? new URL(IMAGE_BASE_URL) : u;
+    return `${base.origin}${newPath}${u.search}`;
+  } catch {
+    return url;
+  }
+}
 
 // Cache for known broken images to avoid repeated failed requests
 const brokenImageCache = new Set();

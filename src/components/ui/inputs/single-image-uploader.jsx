@@ -8,6 +8,7 @@ import {
   SUPPORTED_IMAGE_ACCEPT,
 } from "@/config/imageUpload";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -147,7 +148,7 @@ export default function SingleImageUploader({
           <div className="relative group w-full flex flex-col gap-1 items-center justify-center">
             <div className="relative w-full h-[240px]">
               <ImageWithLoader
-                src={value || "/images/property_placeholder.jpg"}
+                src={getDisplayImageUrl(value) || "/images/property_placeholder.jpg"}
                 alt={`Image ${selectedImage?.name || "uploaded"}`}
                 className="w-full h-full object-cover rounded-md"
                 priority={true}
