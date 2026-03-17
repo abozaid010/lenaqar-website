@@ -24,7 +24,25 @@ export default function LoginForm() {
   useEffect(() => {
     if (state.success) {
       toast.success(t.login.successMessage);
-      router.replace("/dashboard");
+      // Use multiple redirect methods for Safari compatibility
+      setTimeout(() => {
+        // Method 1: Direct window.location change
+        window.location.href = "/dashboard";
+        
+        // Method 2: Fallback with window.location.replace
+        setTimeout(() => {
+          if (window.location.pathname === "/login") {
+            window.location.replace("/dashboard");
+          }
+        }, 100);
+        
+        // Method 3: Final fallback using router
+        setTimeout(() => {
+          if (window.location.pathname === "/login") {
+            router.replace("/dashboard");
+          }
+        }, 200);
+      }, 500);
     } else if (state.success === false) {
       toast.error(t.login.errorMessage);
     }
