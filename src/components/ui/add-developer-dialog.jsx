@@ -2,6 +2,7 @@
 
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
+import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
 import { useI18n } from "@/context/translate-api";
 import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -1025,335 +1026,268 @@ export default function AddDeveloperDialog({
 
           {/* Financial State */}
           <div className="space-y-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.financialState || "Financial State"} (EN)
-              </label>
-              <textarea
-                name="profile_reviews.financial_state.en"
-                value={formData.profile_reviews?.financial_state?.en || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      financial_state: {
-                        ...formData.profile_reviews.financial_state,
-                        en: e.target.value
-                      }
+            <LenaTextarea
+              label={`${t.formLabels?.financialState || "Financial State"} (EN)`}
+              name="profile_reviews.financial_state.en"
+              value={formData.profile_reviews?.financial_state?.en || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    financial_state: {
+                      ...formData.profile_reviews.financial_state,
+                      en: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter financial state in English"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.financialState || "Financial State"} (AR)
-              </label>
-              <textarea
-                name="profile_reviews.financial_state.ar"
-                value={formData.profile_reviews?.financial_state?.ar || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      financial_state: {
-                        ...formData.profile_reviews.financial_state,
-                        ar: e.target.value
-                      }
+                  }
+                });
+              }}
+              rows={4}
+              placeholder="Enter financial state in English"
+            />
+            <LenaTextarea
+              label={`${t.formLabels?.financialState || "Financial State"} (AR)`}
+              name="profile_reviews.financial_state.ar"
+              value={formData.profile_reviews?.financial_state?.ar || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    financial_state: {
+                      ...formData.profile_reviews.financial_state,
+                      ar: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                dir="rtl"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="أدخل الحالة المالية بالعربية"
-              />
-            </div>
+                  }
+                });
+              }}
+              rows={4}
+              dir="rtl"
+              placeholder="أدخل الحالة المالية بالعربية"
+            />
           </div>
 
           {/* Developer Reputation */}
           <div className="space-y-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.developerReputation || "Developer Reputation"} (EN)
-              </label>
-              <textarea
-                name="profile_reviews.developer_reputation.en"
-                value={formData.profile_reviews?.developer_reputation?.en || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      developer_reputation: {
-                        ...formData.profile_reviews.developer_reputation,
-                        en: e.target.value
-                      }
+            <LenaTextarea
+              label={`${t.formLabels?.developerReputation || "Developer Reputation"} (EN)`}
+              name="profile_reviews.developer_reputation.en"
+              value={formData.profile_reviews?.developer_reputation?.en || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    developer_reputation: {
+                      ...formData.profile_reviews.developer_reputation,
+                      en: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter developer reputation in English"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.developerReputation || "Developer Reputation"} (AR)
-              </label>
-              <textarea
-                name="profile_reviews.developer_reputation.ar"
-                value={formData.profile_reviews?.developer_reputation?.ar || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      developer_reputation: {
-                        ...formData.profile_reviews.developer_reputation,
-                        ar: e.target.value
-                      }
+                  }
+                });
+              }}
+              rows={4}
+              placeholder="Enter developer reputation in English"
+            />
+            <LenaTextarea
+              label={`${t.formLabels?.developerReputation || "Developer Reputation"} (AR)`}
+              name="profile_reviews.developer_reputation.ar"
+              value={formData.profile_reviews?.developer_reputation?.ar || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    developer_reputation: {
+                      ...formData.profile_reviews.developer_reputation,
+                      ar: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                dir="rtl"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="أدخل سمعة المطور بالعربية"
-              />
-            </div>
+                  }
+                });
+              }}
+              rows={4}
+              dir="rtl"
+              placeholder="أدخل سمعة المطور بالعربية"
+            />
           </div>
 
           {/* Legal Compliance */}
           <div className="space-y-2">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.legalCompliance || "Legal Compliance"} (EN)
-              </label>
-              <textarea
-                name="profile_reviews.legal_compliance_clients.en"
-                value={formData.profile_reviews?.legal_compliance_clients?.en || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      legal_compliance_clients: {
-                        ...formData.profile_reviews.legal_compliance_clients,
-                        en: e.target.value
-                      }
+            <LenaTextarea
+              label={`${t.formLabels?.legalCompliance || "Legal Compliance"} (EN)`}
+              name="profile_reviews.legal_compliance_clients.en"
+              value={formData.profile_reviews?.legal_compliance_clients?.en || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    legal_compliance_clients: {
+                      ...formData.profile_reviews.legal_compliance_clients,
+                      en: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter legal compliance information in English"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.legalCompliance || "Legal Compliance"} (AR)
-              </label>
-              <textarea
-                name="profile_reviews.legal_compliance_clients.ar"
-                value={formData.profile_reviews?.legal_compliance_clients?.ar || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      legal_compliance_clients: {
-                        ...formData.profile_reviews.legal_compliance_clients,
-                        ar: e.target.value
-                      }
+                  }
+                });
+              }}
+              rows={4}
+              placeholder="Enter legal compliance information in English"
+            />
+            <LenaTextarea
+              label={`${t.formLabels?.legalCompliance || "Legal Compliance"} (AR)`}
+              name="profile_reviews.legal_compliance_clients.ar"
+              value={formData.profile_reviews?.legal_compliance_clients?.ar || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    legal_compliance_clients: {
+                      ...formData.profile_reviews.legal_compliance_clients,
+                      ar: e.target.value
                     }
-                  });
-                }}
-                rows={4}
-                dir="rtl"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="أدخل معلومات الامتثال القانوني بالعربية"
-              />
-            </div>
+                  }
+                });
+              }}
+              rows={4}
+              dir="rtl"
+              placeholder="أدخل معلومات الامتثال القانوني بالعربية"
+            />
           </div>
 
           {/* Projects */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.inProgressProjects || "In Progress Projects"}
-              </label>
-              <textarea
-                name="profile_reviews.in_progress_projects"
-                value={formData.profile_reviews?.in_progress_projects?.join('\n') || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      in_progress_projects: e.target.value.split('\n').filter(p => p.trim())
-                    }
-                  });
-                }}
-                rows={4}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter in-progress projects (one per line)"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.deliveredProjects || "Delivered Projects"}
-              </label>
-              <textarea
-                name="profile_reviews.delivered_projects"
-                value={formData.profile_reviews?.delivered_projects?.join('\n') || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      delivered_projects: e.target.value.split('\n').filter(p => p.trim())
-                    }
-                  });
-                }}
-                rows={4}
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Enter delivered projects (one per line)"
-              />
-            </div>
+            <LenaTextarea
+              label={t.formLabels?.inProgressProjects || "In Progress Projects"}
+              name="profile_reviews.in_progress_projects"
+              value={formData.profile_reviews?.in_progress_projects?.join('\n') || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    in_progress_projects: e.target.value.split('\n').filter(p => p.trim())
+                  }
+                });
+              }}
+              rows={4}
+              placeholder="Enter in-progress projects (one per line)"
+            />
+            <LenaTextarea
+              label={t.formLabels?.deliveredProjects || "Delivered Projects"}
+              name="profile_reviews.delivered_projects"
+              value={formData.profile_reviews?.delivered_projects?.join('\n') || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    delivered_projects: e.target.value.split('\n').filter(p => p.trim())
+                  }
+                });
+              }}
+              rows={4}
+              placeholder="Enter delivered projects (one per line)"
+            />
           </div>
 
           {/* Scores */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.financialStateRate || "Financial State Rate"} (0-10)
-              </label>
-              <input
-                type="number"
-                name="profile_reviews.financial_state_rate"
-                value={formData.profile_reviews?.financial_state_rate || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      financial_state_rate: e.target.value ? parseInt(e.target.value) : null
-                    }
-                  });
-                }}
-                min="0"
-                max="10"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-10"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.reputationRate || "Reputation Rate"} (0-10)
-              </label>
-              <input
-                type="number"
-                name="profile_reviews.developer_reputation_rate"
-                value={formData.profile_reviews?.developer_reputation_rate || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      developer_reputation_rate: e.target.value ? parseInt(e.target.value) : null
-                    }
-                  });
-                }}
-                min="0"
-                max="10"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-10"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.deliveryOnTimeScore || "Delivery On Time Score"} (0-10)
-              </label>
-              <input
-                type="number"
-                name="profile_reviews.delivery_on_time_score"
-                value={formData.profile_reviews?.delivery_on_time_score || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      delivery_on_time_score: e.target.value ? parseInt(e.target.value) : null
-                    }
-                  });
-                }}
-                min="0"
-                max="10"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-10"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.legalComplianceScore || "Legal Compliance Score"} (0-10)
-              </label>
-              <input
-                type="number"
-                name="profile_reviews.legal_compliance_score"
-                value={formData.profile_reviews?.legal_compliance_score || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      legal_compliance_score: e.target.value ? parseInt(e.target.value) : null
-                    }
-                  });
-                }}
-                min="0"
-                max="10"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-10"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.maintenanceRate || "Maintenance After Delivery Rate"} (0-10)
-              </label>
-              <input
-                type="number"
-                name="profile_reviews.maintenance_after_delivery_rate"
-                value={formData.profile_reviews?.maintenance_after_delivery_rate || ""}
-                onChange={(e) => {
-                  setFormData({
-                    ...formData,
-                    profile_reviews: {
-                      ...formData.profile_reviews,
-                      maintenance_after_delivery_rate: e.target.value ? parseFloat(e.target.value) : null
-                    }
-                  });
-                }}
-                min="0"
-                max="10"
-                step="0.1"
-                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="0-10"
-              />
-            </div>
+            <LenaTextField
+              label={`${t.formLabels?.financialStateRate || "Financial State Rate"} (0-10)`}
+              type="number"
+              name="profile_reviews.financial_state_rate"
+              value={formData.profile_reviews?.financial_state_rate || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    financial_state_rate: e.target.value ? parseInt(e.target.value) : null
+                  }
+                });
+              }}
+              min="0"
+              max="10"
+              placeholder="0-10"
+            />
+            <LenaTextField
+              label={`${t.formLabels?.reputationRate || "Reputation Rate"} (0-10)`}
+              type="number"
+              name="profile_reviews.developer_reputation_rate"
+              value={formData.profile_reviews?.developer_reputation_rate || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    developer_reputation_rate: e.target.value ? parseInt(e.target.value) : null
+                  }
+                });
+              }}
+              min="0"
+              max="10"
+              placeholder="0-10"
+            />
+            <LenaTextField
+              label={`${t.formLabels?.deliveryOnTimeScore || "Delivery On Time Score"} (0-10)`}
+              type="number"
+              name="profile_reviews.delivery_on_time_score"
+              value={formData.profile_reviews?.delivery_on_time_score || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    delivery_on_time_score: e.target.value ? parseInt(e.target.value) : null
+                  }
+                });
+              }}
+              min="0"
+              max="10"
+              placeholder="0-10"
+            />
+            <LenaTextField
+              label={`${t.formLabels?.legalComplianceScore || "Legal Compliance Score"} (0-10)`}
+              type="number"
+              name="profile_reviews.legal_compliance_score"
+              value={formData.profile_reviews?.legal_compliance_score || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    legal_compliance_score: e.target.value ? parseInt(e.target.value) : null
+                  }
+                });
+              }}
+              min="0"
+              max="10"
+              placeholder="0-10"
+            />
+            <LenaTextField
+              label={`${t.formLabels?.maintenanceRate || "Maintenance After Delivery Rate"} (0-10)`}
+              type="number"
+              name="profile_reviews.maintenance_after_delivery_rate"
+              value={formData.profile_reviews?.maintenance_after_delivery_rate || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    maintenance_after_delivery_rate: e.target.value ? parseFloat(e.target.value) : null
+                  }
+                });
+              }}
+              min="0"
+              max="10"
+              step="0.1"
+              placeholder="0-10"
+            />
           </div>
 
           {/* Sources */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.sources || "Sources"} (one URL per line)
-            </label>
-            <textarea
+            <LenaTextarea
+              label={`${t.formLabels?.sources || "Sources"} (one URL per line)`}
               name="profile_reviews.sources"
               value={formData.profile_reviews?.sources?.join('\n') || ""}
               onChange={(e) => {
@@ -1366,8 +1300,7 @@ export default function AddDeveloperDialog({
                 });
               }}
               rows={5}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="https://example.com/source1&#10;https://example.com/source2"
+              placeholder={"https://example.com/source1\nhttps://example.com/source2"}
             />
           </div>
         </div>
