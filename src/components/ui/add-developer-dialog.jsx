@@ -979,10 +979,9 @@ export default function AddDeveloperDialog({
             )}
           </div>
         </div>
-      </div>
 
-      {/* Profile Reviews Section - Admin Only */}
-      {isAdmin && (
+        {/* Profile Reviews Section - Admin Only */}
+        {isAdmin && (
         <div className="space-y-4 border-t pt-4">
           <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
             {t.developerPage?.profileReviews || "Profile Reviews"}
@@ -1290,6 +1289,7 @@ export default function AddDeveloperDialog({
           </div>
         </div>
       )}
+      </div>
     );
   };
 
