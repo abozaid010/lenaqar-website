@@ -1354,7 +1354,7 @@ export default function AddDeveloperDialog({
           : t.developerPage.addDeveloper
       }
     >
-      {isEdit && !isEditing ? <ViewMode /> : <EditMode />}
+      {isEdit && !isEditing ? ViewMode() : EditMode()}
     </UnifiedDialog>
   );
 }
