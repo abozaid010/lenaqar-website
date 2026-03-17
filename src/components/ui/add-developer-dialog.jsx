@@ -8,6 +8,7 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
+import { useClientInfo } from "@/hooks/useClientInfo";
 import {
   Pencil,
   Globe,
@@ -30,6 +31,8 @@ export default function AddDeveloperDialog({
 }) {
   const isEdit = !!developer;
   const [isEditing, setIsEditing] = useState(false);
+  const clientInfo = useClientInfo();
+  const isAdmin = clientInfo?.client_type === "admin";
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -53,6 +56,19 @@ export default function AddDeveloperDialog({
     facebook: "",
     founded_year: "",
     client_id: getClientId(),
+    profile_reviews: {
+      financial_state: { ar: "", en: "" },
+      developer_reputation: { ar: "", en: "" },
+      legal_compliance_clients: { ar: "", en: "" },
+      in_progress_projects: [],
+      delivered_projects: [],
+      financial_state_rate: null,
+      developer_reputation_rate: null,
+      delivery_on_time_score: null,
+      legal_compliance_score: null,
+      maintenance_after_delivery_rate: null,
+      sources: []
+    }
   });
 
   useEffect(() => {
@@ -77,6 +93,19 @@ export default function AddDeveloperDialog({
           ? String(developer.founded_year)
           : "",
         client_id: developer.client_id || getClientId(),
+        profile_reviews: developer.profile_reviews || {
+          financial_state: { ar: "", en: "" },
+          developer_reputation: { ar: "", en: "" },
+          legal_compliance_clients: { ar: "", en: "" },
+          in_progress_projects: [],
+          delivered_projects: [],
+          financial_state_rate: null,
+          developer_reputation_rate: null,
+          delivery_on_time_score: null,
+          legal_compliance_score: null,
+          maintenance_after_delivery_rate: null,
+          sources: []
+        }
       });
       setIsEditing(false); // Always start in view mode for existing developers
     } else {
@@ -98,6 +127,19 @@ export default function AddDeveloperDialog({
         facebook: "",
         founded_year: "",
         client_id: getClientId(),
+        profile_reviews: {
+          financial_state: { ar: "", en: "" },
+          developer_reputation: { ar: "", en: "" },
+          legal_compliance_clients: { ar: "", en: "" },
+          in_progress_projects: [],
+          delivered_projects: [],
+          financial_state_rate: null,
+          developer_reputation_rate: null,
+          delivery_on_time_score: null,
+          legal_compliance_score: null,
+          maintenance_after_delivery_rate: null,
+          sources: []
+        }
       });
       setErrors({});
       setMissingLang(null);
@@ -111,10 +153,23 @@ export default function AddDeveloperDialog({
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    
+    // Handle nested profile_reviews fields
+    if (name.startsWith('profile_reviews.')) {
+      const [_, field] = name.split('.');
+      setFormData({
+        ...formData,
+        profile_reviews: {
+          ...formData.profile_reviews,
+          [field]: value
+        }
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
 
     if (errors[name]) {
       setErrors({
@@ -543,6 +598,147 @@ export default function AddDeveloperDialog({
             </div>
           </div>
         )}
+
+        {/* Profile Reviews Section - Admin Only */}
+        {isAdmin && formData.profile_reviews && (
+          <div className="bg-gray-50 rounded-lg p-4 space-y-4">
+            <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
+              {t.developerPage?.profileReviews || "Profile Reviews"}
+            </h4>
+
+            {/* Financial State */}
+            {(formData.profile_reviews.financial_state?.en || formData.profile_reviews.financial_state?.ar) && (
+              <div>
+                <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                  {t.formLabels?.financialState || "Financial State"}
+                </h5>
+                <div className="text-sm text-gray-700 whitespace-pre-line">
+                  {locale === "ar" && formData.profile_reviews.financial_state?.ar ? (
+                    <div dir="rtl">{formData.profile_reviews.financial_state.ar}</div>
+                  ) : (
+                    formData.profile_reviews.financial_state.en
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Developer Reputation */}
+            {(formData.profile_reviews.developer_reputation?.en || formData.profile_reviews.developer_reputation?.ar) && (
+              <div>
+                <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                  {t.formLabels?.developerReputation || "Developer Reputation"}
+                </h5>
+                <div className="text-sm text-gray-700 whitespace-pre-line">
+                  {locale === "ar" && formData.profile_reviews.developer_reputation?.ar ? (
+                    <div dir="rtl">{formData.profile_reviews.developer_reputation.ar}</div>
+                  ) : (
+                    formData.profile_reviews.developer_reputation.en
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Legal Compliance */}
+            {(formData.profile_reviews.legal_compliance_clients?.en || formData.profile_reviews.legal_compliance_clients?.ar) && (
+              <div>
+                <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                  {t.formLabels?.legalCompliance || "Legal Compliance"}
+                </h5>
+                <div className="text-sm text-gray-700 whitespace-pre-line">
+                  {locale === "ar" && formData.profile_reviews.legal_compliance_clients?.ar ? (
+                    <div dir="rtl">{formData.profile_reviews.legal_compliance_clients.ar}</div>
+                  ) : (
+                    formData.profile_reviews.legal_compliance_clients.en
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Projects */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* In Progress Projects */}
+              {formData.profile_reviews.in_progress_projects && formData.profile_reviews.in_progress_projects.length > 0 && (
+                <div>
+                  <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                    {t.formLabels?.inProgressProjects || "In Progress Projects"}
+                  </h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    {formData.profile_reviews.in_progress_projects.map((project, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        {project}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Delivered Projects */}
+              {formData.profile_reviews.delivered_projects && formData.profile_reviews.delivered_projects.length > 0 && (
+                <div>
+                  <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                    {t.formLabels?.deliveredProjects || "Delivered Projects"}
+                  </h5>
+                  <ul className="text-sm text-gray-700 space-y-1">
+                    {formData.profile_reviews.delivered_projects.map((project, index) => (
+                      <li key={index} className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        {project}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Scores */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {formData.profile_reviews.financial_state_rate !== null && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {formData.profile_reviews.financial_state_rate}/10
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {t.formLabels?.financialStateRate || "Financial State"}
+                  </div>
+                </div>
+              )}
+              
+              {formData.profile_reviews.developer_reputation_rate !== null && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {formData.profile_reviews.developer_reputation_rate}/10
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {t.formLabels?.reputationRate || "Reputation"}
+                  </div>
+                </div>
+              )}
+              
+              {formData.profile_reviews.delivery_on_time_score !== null && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {formData.profile_reviews.delivery_on_time_score}/10
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {t.formLabels?.deliveryOnTime || "Delivery On Time"}
+                  </div>
+                </div>
+              )}
+              
+              {formData.profile_reviews.legal_compliance_score !== null && (
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary">
+                    {formData.profile_reviews.legal_compliance_score}/10
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {t.formLabels?.legalComplianceScore || "Legal Compliance"}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     );
   };
@@ -784,6 +980,316 @@ export default function AddDeveloperDialog({
           </div>
         </div>
       </div>
+
+      {/* Profile Reviews Section - Admin Only */}
+      {isAdmin && (
+        <div className="space-y-4 border-t pt-4">
+          <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
+            {t.developerPage?.profileReviews || "Profile Reviews"}
+          </h4>
+
+          {/* Financial State */}
+          <div className="space-y-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.financialState || "Financial State"} (EN)
+              </label>
+              <textarea
+                name="profile_reviews.financial_state.en"
+                value={formData.profile_reviews?.financial_state?.en || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      financial_state: {
+                        ...formData.profile_reviews.financial_state,
+                        en: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter financial state in English"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.financialState || "Financial State"} (AR)
+              </label>
+              <textarea
+                name="profile_reviews.financial_state.ar"
+                value={formData.profile_reviews?.financial_state?.ar || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      financial_state: {
+                        ...formData.profile_reviews.financial_state,
+                        ar: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                dir="rtl"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="أدخل الحالة المالية بالعربية"
+              />
+            </div>
+          </div>
+
+          {/* Developer Reputation */}
+          <div className="space-y-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.developerReputation || "Developer Reputation"} (EN)
+              </label>
+              <textarea
+                name="profile_reviews.developer_reputation.en"
+                value={formData.profile_reviews?.developer_reputation?.en || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      developer_reputation: {
+                        ...formData.profile_reviews.developer_reputation,
+                        en: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter developer reputation in English"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.developerReputation || "Developer Reputation"} (AR)
+              </label>
+              <textarea
+                name="profile_reviews.developer_reputation.ar"
+                value={formData.profile_reviews?.developer_reputation?.ar || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      developer_reputation: {
+                        ...formData.profile_reviews.developer_reputation,
+                        ar: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                dir="rtl"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="أدخل سمعة المطور بالعربية"
+              />
+            </div>
+          </div>
+
+          {/* Legal Compliance */}
+          <div className="space-y-2">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.legalCompliance || "Legal Compliance"} (EN)
+              </label>
+              <textarea
+                name="profile_reviews.legal_compliance_clients.en"
+                value={formData.profile_reviews?.legal_compliance_clients?.en || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      legal_compliance_clients: {
+                        ...formData.profile_reviews.legal_compliance_clients,
+                        en: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter legal compliance information in English"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.legalCompliance || "Legal Compliance"} (AR)
+              </label>
+              <textarea
+                name="profile_reviews.legal_compliance_clients.ar"
+                value={formData.profile_reviews?.legal_compliance_clients?.ar || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      legal_compliance_clients: {
+                        ...formData.profile_reviews.legal_compliance_clients,
+                        ar: e.target.value
+                      }
+                    }
+                  });
+                }}
+                rows={4}
+                dir="rtl"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="أدخل معلومات الامتثال القانوني بالعربية"
+              />
+            </div>
+          </div>
+
+          {/* Projects */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.inProgressProjects || "In Progress Projects"}
+              </label>
+              <textarea
+                name="profile_reviews.in_progress_projects"
+                value={formData.profile_reviews?.in_progress_projects?.join('\n') || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      in_progress_projects: e.target.value.split('\n').filter(p => p.trim())
+                    }
+                  });
+                }}
+                rows={4}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter in-progress projects (one per line)"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.deliveredProjects || "Delivered Projects"}
+              </label>
+              <textarea
+                name="profile_reviews.delivered_projects"
+                value={formData.profile_reviews?.delivered_projects?.join('\n') || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      delivered_projects: e.target.value.split('\n').filter(p => p.trim())
+                    }
+                  });
+                }}
+                rows={4}
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter delivered projects (one per line)"
+              />
+            </div>
+          </div>
+
+          {/* Scores */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.financialStateRate || "Financial State Rate"} (0-10)
+              </label>
+              <input
+                type="number"
+                name="profile_reviews.financial_state_rate"
+                value={formData.profile_reviews?.financial_state_rate || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      financial_state_rate: e.target.value ? parseInt(e.target.value) : null
+                    }
+                  });
+                }}
+                min="0"
+                max="10"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0-10"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.reputationRate || "Reputation Rate"} (0-10)
+              </label>
+              <input
+                type="number"
+                name="profile_reviews.developer_reputation_rate"
+                value={formData.profile_reviews?.developer_reputation_rate || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      developer_reputation_rate: e.target.value ? parseInt(e.target.value) : null
+                    }
+                  });
+                }}
+                min="0"
+                max="10"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0-10"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.deliveryOnTimeScore || "Delivery On Time Score"} (0-10)
+              </label>
+              <input
+                type="number"
+                name="profile_reviews.delivery_on_time_score"
+                value={formData.profile_reviews?.delivery_on_time_score || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      delivery_on_time_score: e.target.value ? parseInt(e.target.value) : null
+                    }
+                  });
+                }}
+                min="0"
+                max="10"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0-10"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.legalComplianceScore || "Legal Compliance Score"} (0-10)
+              </label>
+              <input
+                type="number"
+                name="profile_reviews.legal_compliance_score"
+                value={formData.profile_reviews?.legal_compliance_score || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      legal_compliance_score: e.target.value ? parseInt(e.target.value) : null
+                    }
+                  });
+                }}
+                min="0"
+                max="10"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0-10"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     );
   };
 
