@@ -28,11 +28,13 @@ export default function AddDeveloperDialog({
   onEdit,
   client_id,
   developer,
+  isAdminView = false,
 }) {
   const isEdit = !!developer;
   const [isEditing, setIsEditing] = useState(false);
   const clientInfo = useClientInfo();
   const isAdmin = clientInfo?.client_type === "admin";
+  const effectiveIsAdmin = isAdmin || isAdminView;
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -600,15 +602,75 @@ export default function AddDeveloperDialog({
         )}
 
         {/* Profile Reviews Section - Admin Only */}
-        {isAdmin && formData.profile_reviews && (
+        {effectiveIsAdmin && formData.profile_reviews && (
           <div className="bg-gray-50 rounded-lg p-4 space-y-4">
             <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
               {t.developerPage?.profileReviews || "Profile Reviews"}
             </h4>
 
+            {/* Scores */}
+            {(formData.profile_reviews.financial_state_rate !== null ||
+              formData.profile_reviews.developer_reputation_rate !== null ||
+              formData.profile_reviews.delivery_on_time_score !== null ||
+              formData.profile_reviews.legal_compliance_score !== null ||
+              formData.profile_reviews.maintenance_after_delivery_rate !== null) && (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                {formData.profile_reviews.financial_state_rate !== null && (
+                  <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="text-2xl font-bold text-primary">
+                      {formData.profile_reviews.financial_state_rate}/10
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t.formLabels?.financialStateRate || "Financial State"}
+                    </div>
+                  </div>
+                )}
+                {formData.profile_reviews.developer_reputation_rate !== null && (
+                  <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="text-2xl font-bold text-primary">
+                      {formData.profile_reviews.developer_reputation_rate}/10
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t.formLabels?.reputationRate || "Reputation"}
+                    </div>
+                  </div>
+                )}
+                {formData.profile_reviews.delivery_on_time_score !== null && (
+                  <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="text-2xl font-bold text-primary">
+                      {formData.profile_reviews.delivery_on_time_score}/10
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t.formLabels?.deliveryOnTime || "Delivery On Time"}
+                    </div>
+                  </div>
+                )}
+                {formData.profile_reviews.legal_compliance_score !== null && (
+                  <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="text-2xl font-bold text-primary">
+                      {formData.profile_reviews.legal_compliance_score}/10
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t.formLabels?.legalComplianceScore || "Legal Compliance"}
+                    </div>
+                  </div>
+                )}
+                {formData.profile_reviews.maintenance_after_delivery_rate !== null && (
+                  <div className="text-center bg-white rounded-lg p-3 border border-gray-200">
+                    <div className="text-2xl font-bold text-primary">
+                      {formData.profile_reviews.maintenance_after_delivery_rate}/10
+                    </div>
+                    <div className="text-xs text-gray-600 mt-1">
+                      {t.formLabels?.maintenanceRate || "Maintenance"}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Financial State */}
             {(formData.profile_reviews.financial_state?.en || formData.profile_reviews.financial_state?.ar) && (
-              <div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
                 <h5 className="text-sm font-semibold text-gray-700 mb-2">
                   {t.formLabels?.financialState || "Financial State"}
                 </h5>
@@ -624,7 +686,7 @@ export default function AddDeveloperDialog({
 
             {/* Developer Reputation */}
             {(formData.profile_reviews.developer_reputation?.en || formData.profile_reviews.developer_reputation?.ar) && (
-              <div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
                 <h5 className="text-sm font-semibold text-gray-700 mb-2">
                   {t.formLabels?.developerReputation || "Developer Reputation"}
                 </h5>
@@ -640,7 +702,7 @@ export default function AddDeveloperDialog({
 
             {/* Legal Compliance */}
             {(formData.profile_reviews.legal_compliance_clients?.en || formData.profile_reviews.legal_compliance_clients?.ar) && (
-              <div>
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
                 <h5 className="text-sm font-semibold text-gray-700 mb-2">
                   {t.formLabels?.legalCompliance || "Legal Compliance"}
                 </h5>
@@ -656,16 +718,15 @@ export default function AddDeveloperDialog({
 
             {/* Projects */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* In Progress Projects */}
               {formData.profile_reviews.in_progress_projects && formData.profile_reviews.in_progress_projects.length > 0 && (
-                <div>
+                <div className="bg-white rounded-lg p-3 border border-gray-200">
                   <h5 className="text-sm font-semibold text-gray-700 mb-2">
                     {t.formLabels?.inProgressProjects || "In Progress Projects"}
                   </h5>
                   <ul className="text-sm text-gray-700 space-y-1">
                     {formData.profile_reviews.in_progress_projects.map((project, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
                         {project}
                       </li>
                     ))}
@@ -673,16 +734,15 @@ export default function AddDeveloperDialog({
                 </div>
               )}
 
-              {/* Delivered Projects */}
               {formData.profile_reviews.delivered_projects && formData.profile_reviews.delivered_projects.length > 0 && (
-                <div>
+                <div className="bg-white rounded-lg p-3 border border-gray-200">
                   <h5 className="text-sm font-semibold text-gray-700 mb-2">
                     {t.formLabels?.deliveredProjects || "Delivered Projects"}
                   </h5>
                   <ul className="text-sm text-gray-700 space-y-1">
                     {formData.profile_reviews.delivered_projects.map((project, index) => (
                       <li key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
                         {project}
                       </li>
                     ))}
@@ -691,52 +751,28 @@ export default function AddDeveloperDialog({
               )}
             </div>
 
-            {/* Scores */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {formData.profile_reviews.financial_state_rate !== null && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {formData.profile_reviews.financial_state_rate}/10
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {t.formLabels?.financialStateRate || "Financial State"}
-                  </div>
-                </div>
-              )}
-              
-              {formData.profile_reviews.developer_reputation_rate !== null && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {formData.profile_reviews.developer_reputation_rate}/10
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {t.formLabels?.reputationRate || "Reputation"}
-                  </div>
-                </div>
-              )}
-              
-              {formData.profile_reviews.delivery_on_time_score !== null && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {formData.profile_reviews.delivery_on_time_score}/10
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {t.formLabels?.deliveryOnTime || "Delivery On Time"}
-                  </div>
-                </div>
-              )}
-              
-              {formData.profile_reviews.legal_compliance_score !== null && (
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary">
-                    {formData.profile_reviews.legal_compliance_score}/10
-                  </div>
-                  <div className="text-xs text-gray-600">
-                    {t.formLabels?.legalComplianceScore || "Legal Compliance"}
-                  </div>
-                </div>
-              )}
-            </div>
+            {/* Sources */}
+            {formData.profile_reviews.sources && formData.profile_reviews.sources.length > 0 && (
+              <div className="bg-white rounded-lg p-3 border border-gray-200">
+                <h5 className="text-sm font-semibold text-gray-700 mb-2">
+                  {t.formLabels?.sources || "Sources"}
+                </h5>
+                <ul className="text-sm space-y-1">
+                  {formData.profile_reviews.sources.map((source, index) => (
+                    <li key={index}>
+                      <a
+                        href={source}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline break-all"
+                      >
+                        {source}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -981,7 +1017,7 @@ export default function AddDeveloperDialog({
         </div>
 
         {/* Profile Reviews Section - Admin Only */}
-        {isAdmin && (
+        {effectiveIsAdmin && (
         <div className="space-y-4 border-t pt-4">
           <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
             {t.developerPage?.profileReviews || "Profile Reviews"}
@@ -1193,7 +1229,7 @@ export default function AddDeveloperDialog({
           </div>
 
           {/* Scores */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 {t.formLabels?.financialStateRate || "Financial State Rate"} (0-10)
@@ -1286,6 +1322,53 @@ export default function AddDeveloperDialog({
                 placeholder="0-10"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t.formLabels?.maintenanceRate || "Maintenance After Delivery Rate"} (0-10)
+              </label>
+              <input
+                type="number"
+                name="profile_reviews.maintenance_after_delivery_rate"
+                value={formData.profile_reviews?.maintenance_after_delivery_rate || ""}
+                onChange={(e) => {
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      maintenance_after_delivery_rate: e.target.value ? parseFloat(e.target.value) : null
+                    }
+                  });
+                }}
+                min="0"
+                max="10"
+                step="0.1"
+                className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="0-10"
+              />
+            </div>
+          </div>
+
+          {/* Sources */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t.formLabels?.sources || "Sources"} (one URL per line)
+            </label>
+            <textarea
+              name="profile_reviews.sources"
+              value={formData.profile_reviews?.sources?.join('\n') || ""}
+              onChange={(e) => {
+                setFormData({
+                  ...formData,
+                  profile_reviews: {
+                    ...formData.profile_reviews,
+                    sources: e.target.value.split('\n').filter(s => s.trim())
+                  }
+                });
+              }}
+              rows={5}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              placeholder="https://example.com/source1&#10;https://example.com/source2"
+            />
           </div>
         </div>
       )}
