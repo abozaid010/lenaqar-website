@@ -9,7 +9,6 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
-import { useClientInfo } from "@/hooks/useClientInfo";
 import {
   Pencil,
   Globe,
@@ -21,6 +20,7 @@ import {
   Facebook,
 } from "lucide-react";
 import ImageWithLoader from "@/components/ui/image-with-loader";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 
 export default function AddDeveloperDialog({
   isOpen,
@@ -29,13 +29,11 @@ export default function AddDeveloperDialog({
   onEdit,
   client_id,
   developer,
-  isAdminView = false,
 }) {
   const isEdit = !!developer;
   const [isEditing, setIsEditing] = useState(false);
-  const clientInfo = useClientInfo();
-  const isAdmin = clientInfo?.client_type === "admin";
-  const effectiveIsAdmin = isAdmin || isAdminView;
+  const roleFromToken = getRoleFromToken();
+  const effectiveIsAdmin = roleFromToken === "admin" || roleFromToken === "owner";
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -293,8 +291,9 @@ export default function AddDeveloperDialog({
         ? formData.client_id
         : tokenClientId || formData.client_id || client_id;
 
+      const { profile_reviews, ...formDataWithoutReviews } = formData;
       const submittedData = {
-        ...formData,
+        ...(effectiveIsAdmin ? formData : formDataWithoutReviews),
         client_id: finalClientId,
         name: formData.en_name,
       };
