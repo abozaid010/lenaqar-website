@@ -9,7 +9,7 @@ import { useI18n } from "@/context/translate-api";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
-import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, ChevronDown, ChevronUp, Globe, Instagram, Linkedin, Facebook, Calendar, Search } from "lucide-react";
+import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
@@ -33,7 +33,6 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
-  const [expandedDeveloperId, setExpandedDeveloperId] = useState(null);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const menuRefs = useRef({});
   const searchInputRef = useRef(null);
@@ -232,9 +231,10 @@ export default function DevelopersClientWrapper({ clientId }) {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  // Toggle expand/collapse
-  const toggleExpand = (developerId) => {
-    setExpandedDeveloperId(expandedDeveloperId === developerId ? null : developerId);
+  // Handle row click to view developer details
+  const handleRowClick = (developer) => {
+    setSelectedDeveloper(developer);
+    setIsOpen(true);
   };
 
   return (
@@ -344,16 +344,15 @@ export default function DevelopersClientWrapper({ clientId }) {
             ) : (
               <div className="space-y-3 p-4">
                 {developers.map((d) => {
-                  const isExpanded = expandedDeveloperId === d.id;
                   const displayDescription = locale === "ar" && d.ar_description ? d.ar_description : d.description;
 
                   return (
                     <div
                       key={d.id}
-                      onClick={() => toggleExpand(d.id)}
+                      onClick={() => handleRowClick(d)}
                       className="bg-gray-50 rounded-lg p-3 border border-gray-200 hover:shadow-md transition-all duration-300 cursor-pointer"
                     >
-                      {/* Collapsed Content */}
+                      {/* Content */}
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-lg mb-1" style={{ color: '#030250' }}>
@@ -466,140 +465,8 @@ export default function DevelopersClientWrapper({ clientId }) {
                               </div>
                             )}
                           </div>
-
-                          {/* Chevron Icon */}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleExpand(d.id);
-                            }}
-                            className="h-8 w-8 p-2 text-gray-500 hover:text-gray-700 transition-colors flex items-center justify-center aspect-square flex-shrink-0"
-                            style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                            title={isExpanded ? "Collapse" : "Expand"}
-                          >
-                            {isExpanded ? (
-                              <ChevronUp size={20} />
-                            ) : (
-                              <ChevronDown size={20} />
-                            )}
-                          </button>
                         </div>
                       </div>
-
-                      {/* Expanded Content */}
-                      {isExpanded && (
-                        <div className="mt-4 pt-4 border-t border-gray-200 space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                          {/* Logo */}
-                          {d.logo && d.logo.trim() !== "" && (
-                            <div className="flex justify-center">
-                              <div className="w-32 h-32 relative rounded-lg overflow-hidden border border-gray-200">
-                                <ImageWithLoader
-                                  src={d.logo}
-                                  alt={locale === "ar" ? d.ar_name : d.en_name}
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Arabic Description (if different from English) */}
-                          {locale === "en" && d.ar_description && d.ar_description.trim() !== "" && (
-                            <div>
-                              <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                                {t.formLabels?.description || "Description"} ({t.common?.arabic || "Arabic"})
-                              </h4>
-                              <p className="text-sm text-gray-700 whitespace-pre-line" dir="rtl">
-                                {d.ar_description}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* English Description (if Arabic is shown in collapsed) */}
-                          {locale === "ar" && d.description && d.description.trim() !== "" && (
-                            <div>
-                              <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                                {t.formLabels?.description || "Description"} ({t.common?.english || "English"})
-                              </h4>
-                              <p className="text-sm text-gray-700 whitespace-pre-line">
-                                {d.description}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Founded Year */}
-                          {d.founded_year && (
-                            <div className="flex items-center gap-2">
-                              <Calendar size={16} className="text-gray-500" />
-                              <span className="text-sm text-gray-700">
-                                <strong>{t.formLabels?.foundedYear || "Founded Year"}:</strong> {d.founded_year}
-                              </span>
-                            </div>
-                          )}
-
-                          {/* Social Media & Website Links */}
-                          <div className="flex flex-wrap items-center gap-2">
-                            {/* Website */}
-                            {d.website && d.website.trim() !== "" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleWebsite(d.website);
-                                }}
-                                className="h-8 w-8 p-2 bg-gray-600 hover:bg-gray-700 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
-                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                                title="Visit Website"
-                              >
-                                <Globe size={16} className="text-white" />
-                              </button>
-                            )}
-
-                            {/* Instagram */}
-                            {d.instagram && d.instagram.trim() !== "" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleInstagram(d.instagram);
-                                }}
-                                className="h-8 w-8 p-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
-                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                                title="Visit Instagram"
-                              >
-                                <Instagram size={16} className="text-white" />
-                              </button>
-                            )}
-
-                            {/* LinkedIn */}
-                            {d.linkedin && d.linkedin.trim() !== "" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleLinkedIn(d.linkedin);
-                                }}
-                                className="h-8 w-8 p-2 bg-[#0077b5] hover:bg-[#006399] rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
-                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                                title="Visit LinkedIn"
-                              >
-                                <Linkedin size={16} className="text-white" />
-                              </button>
-                            )}
-
-                            {/* Facebook */}
-                            {d.facebook && d.facebook.trim() !== "" && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleFacebook(d.facebook);
-                                }}
-                                className="h-8 w-8 p-2 bg-[#1877f2] hover:bg-[#166fe5] rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
-                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                                title="Visit Facebook"
-                              >
-                                <Facebook size={16} className="text-white" />
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
