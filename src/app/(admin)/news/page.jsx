@@ -40,7 +40,9 @@ export default function NewsPage() {
           },
         ]}
       />
-      <NewsFeed />
+      <div className="bg-gray-50 min-h-screen py-6">
+        <NewsFeed />
+      </div>
     </>
   );
 }
