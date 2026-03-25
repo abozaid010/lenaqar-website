@@ -56,6 +56,19 @@ const NewsFeed = () => {
     refetchOnWindowFocus: false,
   });
 
+  const sortedNews = useMemo(() => {
+    if (!news || !Array.isArray(news)) return [];
+    return [...news].sort((a, b) => {
+      const dateA = new Date(a.created_at || a.date_str || a.dateStr || 0).getTime();
+      const dateB = new Date(b.created_at || b.date_str || b.dateStr || 0).getTime();
+      // Handle invalid dates by pushing them to the bottom
+      if (isNaN(dateA) && isNaN(dateB)) return 0;
+      if (isNaN(dateA)) return 1;
+      if (isNaN(dateB)) return -1;
+      return dateB - dateA; // Newest first
+    });
+  }, [news]);
+
   const [formOpen, setFormOpen] = useState(false);
   const [mode, setMode] = useState("add"); // "add" | "edit"
   const [submitting, setSubmitting] = useState(false);
@@ -298,7 +311,7 @@ const NewsFeed = () => {
         </button>
       </div>
 
-      {!news || news.length === 0 ? (
+      {!sortedNews || sortedNews.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-[calc(100vh-260px)] p-4">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md text-center w-full">
             <p className="text-gray-600 text-lg mb-4">
@@ -316,7 +329,7 @@ const NewsFeed = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {news.map((item, index) => {
+          {sortedNews.map((item, index) => {
             const imageUrl = resolveImageUrl(getNewsImageUrl(item));
             const id = getNewsId(item) ?? index;
             const dateValue = item?.created_at ?? item?.date_str ?? item?.dateStr ?? "";
