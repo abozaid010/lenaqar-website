@@ -498,7 +498,6 @@ export default function DevelopersClientWrapper({ clientId }) {
         onAdd={handleAdd}
         onEdit={handleEdit}
         developer={selectedDeveloper}
-        isAdminView={true}
       />
 
       <ImportDevelopersDialog
