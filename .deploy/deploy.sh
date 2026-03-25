@@ -21,8 +21,8 @@ cd "$REPO_PATH" || {
 
 # ─── 1. Ensure shared Docker network exists ─────────────────────────
 echo "🌐 Ensuring shared network exists..."
-docker network inspect lenaai_network >/dev/null 2>&1 || \
-  docker network create lenaai_network
+docker network inspect lenaai-network >/dev/null 2>&1 || \
+  docker network create lenaai-network
 
 # ─── 2. Build latest image ────────────────────────────────────────
 echo "🔨 Building Docker image..."
@@ -38,7 +38,7 @@ DOCKER_RUN_ARGS=(
   -d
   --name lenaai_website
   --restart=always
-  --network lenaai_network
+  --network lenaai-network
   --network-alias website-active
   -p 3002:3000
 )
