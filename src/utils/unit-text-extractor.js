@@ -368,6 +368,11 @@ const NUMERIC_FIELDS = {
     unitPatterns: ["sqm", "sq\\.?\\s*m", "m[²2]"],
     min: 1,
   },
+  outdoor_area: {
+    keywords: ["outdoor area", "outdoor space", "outdoor living area", "patio area", "patio space", "deck area", "deck space", "terrace area", "terrace space"],
+    unitPatterns: ["sqm", "sq\\.?\\s*m", "m[²2]"],
+    min: 1,
+  },
   installment_years: {
     keywords: ["installment", "installments", "payment plan"],
     unitPatterns: ["years?", "yrs?"],

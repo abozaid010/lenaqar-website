@@ -355,6 +355,10 @@ export async function applyMappingToData(rawExcelData, manualMapping = {}) {
         transformed.roof_area = unit.roof_area || unit.roofArea;
       }
       
+      if (unit.outdoor_area) {
+        transformed.outdoor_area = unit.outdoor_area;
+      }
+      
       // Add optional string fields only if they have values (omit empty strings)
       if (unit.unit_number || unit.unitNumber) {
         transformed.unit_number = unit.unit_number || unit.unitNumber;

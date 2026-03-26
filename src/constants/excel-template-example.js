@@ -102,6 +102,11 @@ export const excelTemplateColumns = [
     label: "Roof Area",
     is_required: false,
   },
+  {
+    key: "outdoor_area",
+    label: "Outdoor Area",
+    is_required: false,
+  },
 ];
 
 export const excelTemplateExampleRow = {
@@ -127,5 +132,6 @@ export const excelTemplateExampleRow = {
   unit_number: "101",
   building_number: "B5",
   roof_area: "30",
+  outdoor_area: "25",
 };
 

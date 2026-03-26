@@ -78,6 +78,21 @@ const testCases = [
       "Total Finishing Price": "totalPrice",
       "Unit Total with Finishing Price": "totalPrice"
     }
+  },
+  {
+    name: "Outdoor area headers",
+    headers: [
+      "Outdoor Area",
+      "Outdoor Space", 
+      "Patio Area",
+      "Deck Area"
+    ],
+    expectedMappings: {
+      "Outdoor Area": "outdoor_area",
+      "Outdoor Space": "outdoor_area",
+      "Patio Area": "outdoor_area",
+      "Deck Area": "outdoor_area"
+    }
   }
 ];
 
