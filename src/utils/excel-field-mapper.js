@@ -303,6 +303,26 @@ export const FIELD_ALIASES = {
     "terracearea",
     "terrace",
   ],
+  outdoor_area: [
+    "outdoor area",
+    "outdoor-area",
+    "outdoor_area",
+    "outdoor",
+    "outdoor space",
+    "outdoor-space",
+    "outdoorspace",
+    "outdoor living area",
+    "outdoor-living-area",
+    "outdoor living area",
+    "patio area",
+    "patio-area",
+    "patioarea",
+    "patio",
+    "deck area",
+    "deck-area",
+    "deckarea",
+    "deck",
+  ],
 };
 
 // Word to number mapping for roomsCount validation
@@ -427,6 +447,7 @@ const EXPECTED_VALUES_MAP = {
   garageArea: isValidNumber, // Function - any valid number
   roof_area: isValidNumber, // Function - any valid number
   downPayment: isValidNumber, // Function - any valid number
+  outdoor_area: isValidNumber, // Function - any valid number
   
   // Optional fields without strict validation (accept any string)
   phase: isValidString, // Function - any valid string
