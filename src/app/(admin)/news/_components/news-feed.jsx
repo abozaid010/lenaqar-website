@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { axiosInstance } from "@/lib/axiosInstance";
 import { IMAGE_BASE_URL } from "@/lib/apiConfig";
+import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 const resolveImageUrl = (url) => {
   if (!url) return null;
@@ -133,7 +134,7 @@ const NewsFeed = () => {
   };
 
   const openEditDialog = (item) => {
-    const imgUrl = resolveImageUrl(getNewsImageUrl(item));
+    const imgUrl = getDisplayImageUrl(resolveImageUrl(getNewsImageUrl(item)));
     setMode("edit");
     setSelectedNews(item);
 
@@ -155,7 +156,6 @@ const NewsFeed = () => {
     fd.append("title", title ?? "");
     fd.append("desc", desc ?? "");
     fd.append("source_url", sourceUrl ?? "");
-    fd.append("date_str", dateStr ?? "");
 
     // curl schema: send the selected file directly as multipart field `image`.
     if (imageFile) {
@@ -330,7 +330,7 @@ const NewsFeed = () => {
       ) : (
         <div className="space-y-4">
           {sortedNews.map((item, index) => {
-            const imageUrl = resolveImageUrl(getNewsImageUrl(item));
+            const imageUrl = getDisplayImageUrl(resolveImageUrl(getNewsImageUrl(item)));
             const id = getNewsId(item) ?? index;
             const dateValue = item?.created_at ?? item?.date_str ?? item?.dateStr ?? "";
 
@@ -456,8 +456,8 @@ const NewsFeed = () => {
 
       {formOpen ? (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full overflow-hidden">
-            <div className="bg-primary px-6 py-4 flex items-center justify-between gap-3">
+          <div className="bg-white rounded-xl shadow-xl w-[90vw] h-[90vh] flex flex-col overflow-hidden">
+            <div className="bg-primary px-6 py-4 flex items-center justify-between gap-3 flex-shrink-0">
               <h2 className="text-white text-lg font-semibold">
                 {mode === "add" ? t.addNews || "Add News" : t.editNews || "Edit News"}
               </h2>
@@ -471,8 +471,8 @@ const NewsFeed = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit}>
-              <div className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+              <div className="p-6 space-y-4 overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <label className="flex flex-col gap-2">
                     <span className="text-sm font-medium text-gray-700">
@@ -512,35 +512,21 @@ const NewsFeed = () => {
                   />
                 </label>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <label className="flex flex-col gap-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      {t.dateStr || "Date"}
-                    </span>
-                    <input
-                      value={dateStr}
-                      onChange={(e) => setDateStr(e.target.value)}
-                      className="border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
-                      placeholder="YYYY-MM-DD or ISO string"
-                    />
-                  </label>
-
-                  <div className="flex flex-col gap-2">
-                    <span className="text-sm font-medium text-gray-700">Image (optional)</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      multiple={false}
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-                        handleSelectImage(file);
-                      }}
-                      className="border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
-                    />
-                    <p className="text-xs text-gray-500">
-                      {t.singleImageHelp || "Only one image is allowed per news item."}
-                    </p>
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm font-medium text-gray-700">Image (optional)</span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple={false}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      handleSelectImage(file);
+                    }}
+                    className="border border-gray-200 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                  <p className="text-xs text-gray-500">
+                    {t.singleImageHelp || "Only one image is allowed per news item."}
+                  </p>
                 </div>
 
                 {previewUrl ? (
@@ -569,7 +555,7 @@ const NewsFeed = () => {
                 )}
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2">
+              <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-2 flex-shrink-0">
                 <button
                   type="button"
                   onClick={() => setFormOpen(false)}
