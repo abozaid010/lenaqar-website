@@ -33,6 +33,7 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [openInEditMode, setOpenInEditMode] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
   const menuRefs = useRef({});
   const searchInputRef = useRef(null);
@@ -443,6 +444,7 @@ export default function DevelopersClientWrapper({ clientId }) {
                                 <button
                                   onClick={() => {
                                     setSelectedDeveloper(d);
+                                    setOpenInEditMode(true);
                                     setIsOpen(true);
                                     setOpenMenuId(null);
                                   }}
@@ -494,10 +496,12 @@ export default function DevelopersClientWrapper({ clientId }) {
         onClose={() => {
           setIsOpen(false);
           setSelectedDeveloper(null);
+          setOpenInEditMode(false);
         }}
         onAdd={handleAdd}
         onEdit={handleEdit}
         developer={selectedDeveloper}
+        initialEditMode={openInEditMode}
       />
 
       <ImportDevelopersDialog

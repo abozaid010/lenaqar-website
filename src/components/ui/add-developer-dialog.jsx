@@ -6,7 +6,7 @@ import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
 import { useI18n } from "@/context/translate-api";
 import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -29,6 +29,7 @@ export default function AddDeveloperDialog({
   onEdit,
   client_id,
   developer,
+  initialEditMode = false,
 }) {
   const isEdit = !!developer;
   const [isEditing, setIsEditing] = useState(false);
@@ -49,7 +50,7 @@ export default function AddDeveloperDialog({
     ar_description: "",
     logo: "",
     website: "",
-    sales_email: "",
+    sales_name: "",
     sales_phone: "",
     whatsapp: "",
     instagram: "",
@@ -84,7 +85,7 @@ export default function AddDeveloperDialog({
         ar_description: developer.ar_description || "",
         logo: developer.logo || "",
         website: developer.website || "",
-        sales_email: developer.sales_email || "",
+        sales_name: developer.sales_name || "",
         sales_phone: developer.sales_phone || "",
         whatsapp: developer.whatsapp || "",
         instagram: developer.instagram || "",
@@ -108,7 +109,11 @@ export default function AddDeveloperDialog({
           sources: []
         }
       });
-      setIsEditing(false); // Always start in view mode for existing developers
+      setIsEditing(initialEditMode); // start in edit mode if triggered from Edit button
+      const pr = developer.profile_reviews || {};
+      setInProgressRaw((pr.in_progress_projects || []).join(', '));
+      setDeliveredRaw((pr.delivered_projects || []).join(', '));
+      originalProfileReviewsRef.current = JSON.stringify(pr);
     } else {
       // New developer - start in edit mode
       setFormData({
@@ -120,7 +125,7 @@ export default function AddDeveloperDialog({
         ar_description: "",
         logo: "",
         website: "",
-        sales_email: "",
+        sales_name: "",
         sales_phone: "",
         whatsapp: "",
         instagram: "",
@@ -145,12 +150,18 @@ export default function AddDeveloperDialog({
       setErrors({});
       setMissingLang(null);
       setIsEditing(true); // Start in edit mode for new developers
+      setInProgressRaw('');
+      setDeliveredRaw('');
+      originalProfileReviewsRef.current = null;
     }
   }, [developer, isOpen]);
 
   const { t } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [inProgressRaw, setInProgressRaw] = useState('');
+  const [deliveredRaw, setDeliveredRaw] = useState('');
+  const originalProfileReviewsRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -205,8 +216,8 @@ export default function AddDeveloperDialog({
       newErrors.ar_description = t.errors?.required || "Required";
     }
 
-    if (!formData.sales_email?.trim()) {
-      newErrors.sales_email = t.errors?.required || "Required";
+    if (!formData.sales_name?.trim()) {
+      newErrors.sales_name = t.errors?.required || "Required";
     }
 
     if (!formData.sales_phone?.trim()) {
@@ -219,14 +230,6 @@ export default function AddDeveloperDialog({
 
     if (!formData.founded_year?.trim()) {
       newErrors.founded_year = t.errors?.required || "Required";
-    }
-
-    if (formData.sales_email && formData.sales_email.trim() !== "") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(formData.sales_email)) {
-        newErrors.sales_email =
-          t.errors?.invalidEmail || "Invalid email format";
-      }
     }
 
     if (formData.sales_phone && formData.sales_phone.trim() !== "") {
@@ -270,6 +273,15 @@ export default function AddDeveloperDialog({
       }
     }
 
+    // Validate comma-separated format for project fields
+    const badCommaSep = /,\s*,|^,|,\s*$/;
+    if (inProgressRaw.trim() && badCommaSep.test(inProgressRaw.trim())) {
+      newErrors['profile_reviews.in_progress_projects'] = 'Invalid format: use comma-separated values (e.g., Project A, Project B)';
+    }
+    if (deliveredRaw.trim() && badCommaSep.test(deliveredRaw.trim())) {
+      newErrors['profile_reviews.delivered_projects'] = 'Invalid format: use comma-separated values (e.g., Project A, Project B)';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -291,9 +303,24 @@ export default function AddDeveloperDialog({
         ? formData.client_id
         : tokenClientId || formData.client_id || client_id;
 
+      const parsedInProgress = inProgressRaw.split(',').map(p => p.trim()).filter(Boolean);
+      const parsedDelivered = deliveredRaw.split(',').map(p => p.trim()).filter(Boolean);
+      const updatedProfileReviews = {
+        ...formData.profile_reviews,
+        in_progress_projects: parsedInProgress,
+        delivered_projects: parsedDelivered,
+      };
+      const profileReviewsChanged = isEdit &&
+        originalProfileReviewsRef.current !== null &&
+        JSON.stringify(updatedProfileReviews) !== originalProfileReviewsRef.current;
+      const finalProfileReviews = {
+        ...updatedProfileReviews,
+        ...(profileReviewsChanged ? { reviewed_by_human: true } : {}),
+      };
+
       const { profile_reviews, ...formDataWithoutReviews } = formData;
       const submittedData = {
-        ...(effectiveIsAdmin ? formData : formDataWithoutReviews),
+        ...(effectiveIsAdmin ? { ...formData, profile_reviews: finalProfileReviews } : formDataWithoutReviews),
         client_id: finalClientId,
         name: formData.en_name,
       };
@@ -476,23 +503,17 @@ export default function AddDeveloperDialog({
           </h4>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {formData.sales_email && (
-              <button
-                onClick={() => handleEmail(formData.sales_email)}
-                className="flex items-center gap-2 p-2 bg-white rounded-lg border hover:bg-gray-100 transition-colors text-left"
-              >
-                <div className="h-8 w-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Mail size={14} className="text-white" />
-                </div>
+            {formData.sales_name && (
+              <div className="flex items-center gap-2 p-2 bg-white rounded-lg border text-left">
                 <div className="min-w-0">
                   <p className="text-xs text-gray-500">
-                    {t.formLabels?.salesEmail || "Email"}
+                    {t.formLabels?.salesName || "Sales Name"}
                   </p>
                   <p className="text-sm text-gray-900 truncate">
-                    {formData.sales_email}
+                    {formData.sales_name}
                   </p>
                 </div>
-              </button>
+              </div>
             )}
 
             {formData.sales_phone && (
@@ -723,14 +744,9 @@ export default function AddDeveloperDialog({
                   <h5 className="text-sm font-semibold text-gray-700 mb-2">
                     {t.formLabels?.inProgressProjects || "In Progress Projects"}
                   </h5>
-                  <ul className="text-sm text-gray-700 space-y-1">
-                    {formData.profile_reviews.in_progress_projects.map((project, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0"></div>
-                        {project}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-sm text-gray-700">
+                    {formData.profile_reviews.in_progress_projects.join(', ')}
+                  </p>
                 </div>
               )}
 
@@ -739,14 +755,9 @@ export default function AddDeveloperDialog({
                   <h5 className="text-sm font-semibold text-gray-700 mb-2">
                     {t.formLabels?.deliveredProjects || "Delivered Projects"}
                   </h5>
-                  <ul className="text-sm text-gray-700 space-y-1">
-                    {formData.profile_reviews.delivered_projects.map((project, index) => (
-                      <li key={index} className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0"></div>
-                        {project}
-                      </li>
-                    ))}
-                  </ul>
+                  <p className="text-sm text-gray-700">
+                    {formData.profile_reviews.delivered_projects.join(', ')}
+                  </p>
                 </div>
               )}
             </div>
@@ -867,20 +878,20 @@ export default function AddDeveloperDialog({
         <div className="space-y-2">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesEmail || "Sales Email"} *
+              {t.formLabels?.salesName || "Sales Name"} *
             </label>
             <input
-              type="email"
-              name="sales_email"
-              value={formData.sales_email || ""}
+              type="text"
+              name="sales_name"
+              value={formData.sales_name || ""}
               onChange={handleChange}
               className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.sales_email ? "border-red-500" : "border-gray-300"
+                errors.sales_name ? "border-red-500" : "border-gray-300"
               }`}
-              placeholder={t.placeholders?.email || "example@email.com"}
+              placeholder={t.placeholders?.salesName || "Sales representative name"}
             />
-            {errors.sales_email && (
-              <p className="text-xs text-red-500 mt-1">{errors.sales_email}</p>
+            {errors.sales_name && (
+              <p className="text-xs text-red-500 mt-1">{errors.sales_name}</p>
             )}
           </div>
 
@@ -1154,38 +1165,48 @@ export default function AddDeveloperDialog({
 
           {/* Projects */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <LenaTextarea
-              label={t.formLabels?.inProgressProjects || "In Progress Projects"}
-              name="profile_reviews.in_progress_projects"
-              value={formData.profile_reviews?.in_progress_projects?.join('\n') || ""}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  profile_reviews: {
-                    ...formData.profile_reviews,
-                    in_progress_projects: e.target.value.split('\n').filter(p => p.trim())
-                  }
-                });
-              }}
-              rows={4}
-              placeholder="Enter in-progress projects (one per line)"
-            />
-            <LenaTextarea
-              label={t.formLabels?.deliveredProjects || "Delivered Projects"}
-              name="profile_reviews.delivered_projects"
-              value={formData.profile_reviews?.delivered_projects?.join('\n') || ""}
-              onChange={(e) => {
-                setFormData({
-                  ...formData,
-                  profile_reviews: {
-                    ...formData.profile_reviews,
-                    delivered_projects: e.target.value.split('\n').filter(p => p.trim())
-                  }
-                });
-              }}
-              rows={4}
-              placeholder="Enter delivered projects (one per line)"
-            />
+            <div>
+              <LenaTextarea
+                label={t.formLabels?.inProgressProjects || "In Progress Projects"}
+                name="profile_reviews.in_progress_projects"
+                value={inProgressRaw}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  setInProgressRaw(raw);
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      in_progress_projects: raw.split(',').map(p => p.trim()).filter(Boolean)
+                    }
+                  });
+                }}
+                rows={4}
+                error={errors['profile_reviews.in_progress_projects']}
+                placeholder="Enter in-progress projects (comma-separated, e.g., Project A, Project B)"
+              />
+            </div>
+            <div>
+              <LenaTextarea
+                label={t.formLabels?.deliveredProjects || "Delivered Projects"}
+                name="profile_reviews.delivered_projects"
+                value={deliveredRaw}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  setDeliveredRaw(raw);
+                  setFormData({
+                    ...formData,
+                    profile_reviews: {
+                      ...formData.profile_reviews,
+                      delivered_projects: raw.split(',').map(p => p.trim()).filter(Boolean)
+                    }
+                  });
+                }}
+                rows={4}
+                error={errors['profile_reviews.delivered_projects']}
+                placeholder="Enter delivered projects (comma-separated, e.g., Project A, Project B)"
+              />
+            </div>
           </div>
 
           {/* Scores */}
