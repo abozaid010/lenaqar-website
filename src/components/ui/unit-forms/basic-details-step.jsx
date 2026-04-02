@@ -351,11 +351,11 @@ export default function BasicDetailsStep({
           />
         )}
 
-        {/* Garage Area */}
+        {/* Outdoor Area */}
         <LenaTextField
-          label={`${t.basicDetails.garageArea} (m²)`}
-          name="garageArea"
-          value={numericValue(formData.garageArea)}
+          label={`${t.basicDetails.outdoorArea || "Outdoor Area"} (m²)`}
+          name="outdoor_area"
+          value={numericValue(formData.outdoor_area)}
           onChange={(e) => handleChange(e, "number")}
           placeholder="0"
           type="number"
