@@ -8,6 +8,7 @@ import { defaultMetadata } from "./metadata";
 import OrganizationSchema from "@/components/schema/OrganizationSchema";
 import LocalBusinessSchema from "@/components/schema/LocalBusinessSchema";
 import WebSiteSchema from "@/components/schema/WebSiteSchema";
+import Script from "next/script";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -56,6 +57,18 @@ export default async function RootLayout({ children }) {
       dir={initialLocale === "ar" ? "rtl" : "ltr"}
     >
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-L76Z647950"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-L76Z647950');
+          `}
+        </Script>
         <OrganizationSchema />
         <LocalBusinessSchema />
         <WebSiteSchema />
