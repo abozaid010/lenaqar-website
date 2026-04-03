@@ -1,67 +1,97 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Download, Smartphone, Star, ArrowRight } from "lucide-react";
+
+// Constants
+const COUNTDOWN_DURATION = 3;
+const APP_STORE_URLS = {
+  ios: "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088",
+  android: "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp",
+  desktop: "https://lenaai.net"
+};
+
+const USER_AGENT_PATTERNS = {
+  ios: /iPad|iPhone|iPod/,
+  android: /android/i
+};
 
 export default function DownloadPage() {
   const [appLink, setAppLink] = useState("#");
   const [platform, setPlatform] = useState("unknown");
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [redirectCountdown, setRedirectCountdown] = useState(3);
+  const [redirectCountdown, setRedirectCountdown] = useState(COUNTDOWN_DURATION);
+  const [imagesLoaded, setImagesLoaded] = useState({
+    logo: false,
+    screen1: false,
+    screen2: false
+  });
 
   // Device detection
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor;
     let detectedPlatform = "unknown";
-    let detectedLink = "#";
+    let detectedLink = APP_STORE_URLS.desktop;
 
-    if (/iPad|iPhone|iPod/.test(userAgent)) {
+    if (USER_AGENT_PATTERNS.ios.test(userAgent)) {
       detectedPlatform = "ios";
-      detectedLink = "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088";
-    } else if (/android/i.test(userAgent)) {
+      detectedLink = APP_STORE_URLS.ios;
+    } else if (USER_AGENT_PATTERNS.android.test(userAgent)) {
       detectedPlatform = "android";
-      detectedLink = "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp";
+      detectedLink = APP_STORE_URLS.android;
     } else {
       detectedPlatform = "desktop";
-      detectedLink = "https://lenaai.net";
+      detectedLink = APP_STORE_URLS.desktop;
     }
 
     setPlatform(detectedPlatform);
     setAppLink(detectedLink);
 
-    // Auto-redirect for mobile users
+    // Auto-redirect for mobile users with proper cleanup
     if (detectedPlatform !== "desktop") {
       setIsRedirecting(true);
+      let isMounted = true;
+      
       const countdown = setInterval(() => {
         setRedirectCountdown((prev) => {
-          if (prev <= 1) {
+          if (prev <= 1 && isMounted) {
             clearInterval(countdown);
-            window.location.href = detectedLink;
+            // Use current state value instead of closure reference
+            setAppLink(currentLink => {
+              if (isMounted && currentLink !== "#") {
+                window.location.href = currentLink;
+              }
+              return currentLink;
+            });
             return 0;
           }
           return prev - 1;
         });
       }, 1000);
 
-      return () => clearInterval(countdown);
+      return () => {
+        isMounted = false;
+        clearInterval(countdown);
+      };
     }
   }, []);
 
   // Google Analytics tracking
-  const trackDownload = (platform) => {
+  const trackDownload = useCallback((platform, buttonType = 'primary') => {
     if (typeof gtag !== 'undefined') {
       gtag('event', 'download_click', {
         platform: platform,
+        button_type: buttonType,
         source: new URLSearchParams(window.location.search).get('utm_source') || 'direct',
         campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'none',
         timestamp: new Date().toISOString()
       });
     }
-  };
+  }, []);
 
-  const trackPageLoad = () => {
+  const trackPageLoad = useCallback(() => {
     if (typeof gtag !== 'undefined') {
       gtag('event', 'page_load', {
         page: 'download',
@@ -69,22 +99,31 @@ export default function DownloadPage() {
         source: new URLSearchParams(window.location.search).get('utm_source') || 'direct'
       });
     }
-  };
+  }, [platform]);
 
   useEffect(() => {
     trackPageLoad();
   }, [platform]);
 
-  const handleDownloadClick = () => {
-    trackDownload(platform);
+  // Initialize image loading states
+  useEffect(() => {
+    setImagesLoaded({
+      logo: true,
+      screen1: true,
+      screen2: true
+    });
+  }, []);
+
+  const handleDownloadClick = useCallback((buttonType = 'primary') => {
+    trackDownload(platform, buttonType);
     if (platform !== "desktop") {
       window.location.href = appLink;
     } else {
-      window.open(appLink, '_blank');
+      window.open(appLink, '_blank', 'noopener,noreferrer');
     }
-  };
+  }, [platform, appLink]);
 
-  const getStoreButtonText = () => {
+  const getStoreButtonText = useCallback(() => {
     switch (platform) {
       case "ios":
         return "Download on Apple App Store";
@@ -93,11 +132,11 @@ export default function DownloadPage() {
       default:
         return "Download App";
     }
-  };
+  }, [platform]);
 
-  const getStoreIcon = () => {
-    return <Download className="w-5 h-5" strokeWidth={1.5} />;
-  };
+  const storeIcon = useMemo(() => 
+    <Download className="w-5 h-5" strokeWidth={1.5} />
+  , []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary to-primary/90 text-primary-foreground flex flex-col items-center justify-center p-4">
@@ -113,13 +152,23 @@ export default function DownloadPage() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
         >
-          <Image
-            src="/images/logo-5.png"
-            alt="Lena AI"
-            width={80}
-            height={80}
-            className="object-contain opacity-95"
-          />
+          {imagesLoaded.logo ? (
+            <Image
+              src="/images/logo-5.png"
+              alt="Lena AI"
+              width={80}
+              height={80}
+              className="object-contain opacity-95"
+              onError={(e) => {
+                console.error('Logo image failed to load:', e);
+                setImagesLoaded(prev => ({ ...prev, logo: false }));
+              }}
+            />
+          ) : (
+            <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-xl">LA</span>
+            </div>
+          )}
         </motion.div>
 
         {/* Hero Section */}
@@ -158,10 +207,11 @@ export default function DownloadPage() {
           transition={{ delay: 0.5, duration: 0.4 }}
         >
           <button
-            onClick={handleDownloadClick}
+            onClick={() => handleDownloadClick('primary')}
+            aria-label={`Download Lena AI app for ${platform}`}
             className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-xl bg-white text-primary font-semibold hover:bg-white/90 transition-all transform hover:scale-105 shadow-lg"
           >
-            {getStoreIcon()}
+            {storeIcon}
             {getStoreButtonText()}
             <ArrowRight className="w-4 h-4" strokeWidth={2} />
           </button>
@@ -192,22 +242,42 @@ export default function DownloadPage() {
         >
           <div className="grid grid-cols-2 gap-3">
             <div className="relative aspect-[9/19] rounded-xl overflow-hidden bg-white/10 border border-white/20">
-              <Image
-                src="/images/app_screen1.jpg"
-                alt="App screenshot 1"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 200px"
-              />
+              {imagesLoaded.screen1 ? (
+                <Image
+                  src="/images/app_screen1.jpg"
+                  alt="App screenshot 1"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 200px"
+                  onError={(e) => {
+                    console.error('App screenshot 1 failed to load:', e);
+                    setImagesLoaded(prev => ({ ...prev, screen1: false }));
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                  <Smartphone className="w-8 h-8 text-white/50" />
+                </div>
+              )}
             </div>
             <div className="relative aspect-[9/19] rounded-xl overflow-hidden bg-white/10 border border-white/20">
-              <Image
-                src="/images/app_screen2.jpg"
-                alt="App screenshot 2"
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 50vw, 200px"
-              />
+              {imagesLoaded.screen2 ? (
+                <Image
+                  src="/images/app_screen2.jpg"
+                  alt="App screenshot 2"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 50vw, 200px"
+                  onError={(e) => {
+                    console.error('App screenshot 2 failed to load:', e);
+                    setImagesLoaded(prev => ({ ...prev, screen2: false }));
+                  }}
+                />
+              ) : (
+                <div className="w-full h-full bg-white/20 flex items-center justify-center">
+                  <Smartphone className="w-8 h-8 text-white/50" />
+                </div>
+              )}
             </div>
           </div>
         </motion.div>
@@ -221,7 +291,8 @@ export default function DownloadPage() {
             transition={{ delay: 0.8, duration: 0.4 }}
           >
             <button
-              onClick={handleDownloadClick}
+              onClick={() => handleDownloadClick('backup')}
+              aria-label={`Download Lena AI app manually for ${platform}`}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-white/30 bg-white/10 text-white text-sm font-medium hover:bg-white/20 transition-colors"
             >
               <Smartphone className="w-4 h-4" strokeWidth={1.5} />
