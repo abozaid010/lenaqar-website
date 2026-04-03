@@ -23,6 +23,7 @@ export default function DownloadPage() {
   const [platform, setPlatform] = useState("unknown");
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [redirectCountdown, setRedirectCountdown] = useState(COUNTDOWN_DURATION);
+  // Start with all images as false for fast initial load
   const [imagesLoaded, setImagesLoaded] = useState({
     logo: false,
     screen1: false,
@@ -105,13 +106,55 @@ export default function DownloadPage() {
     trackPageLoad();
   }, [platform]);
 
-  // Initialize image loading states
+  // Image loading handlers with lazy loading support
+  const handleImageLoad = useCallback((imageKey) => {
+    setImagesLoaded(prev => ({ ...prev, [imageKey]: true }));
+  }, []);
+
+  const handleImageError = useCallback((imageKey) => {
+    console.error(`${imageKey} image failed to load`);
+    setImagesLoaded(prev => ({ ...prev, [imageKey]: false }));
+  }, []);
+
+  // Intersection observer for lazy loading screenshots
+  const [screenshotVisible, setScreenshotVisible] = useState(false);
+  
   useEffect(() => {
-    setImagesLoaded({
-      logo: true,
-      screen1: true,
-      screen2: true
-    });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setScreenshotVisible(true);
+            // Trigger screenshot loading when visible
+            setImagesLoaded(prev => ({ 
+              ...prev, 
+              screen1: 'loading',
+              screen2: 'loading'
+            }));
+            observer.disconnect();
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const screenshotElement = document.getElementById('screenshots-section');
+    if (screenshotElement) {
+      observer.observe(screenshotElement);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
+  // Trigger logo loading after component mounts for better performance
+  useEffect(() => {
+    // Small delay to ensure page loads quickly, then load logo
+    const logoTimer = setTimeout(() => {
+      // Set logo to loading state to trigger the Image component
+      setImagesLoaded(prev => ({ ...prev, logo: 'loading' }));
+    }, 100);
+    
+    return () => clearTimeout(logoTimer);
   }, []);
 
   const handleDownloadClick = useCallback((buttonType = 'primary') => {
@@ -152,17 +195,17 @@ export default function DownloadPage() {
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, duration: 0.3 }}
         >
-          {imagesLoaded.logo ? (
+          {imagesLoaded.logo === 'loading' || imagesLoaded.logo === true ? (
             <Image
               src="/images/logo-5.png"
               alt="Lena AI"
               width={80}
               height={80}
               className="object-contain opacity-95"
-              onError={(e) => {
-                console.error('Logo image failed to load:', e);
-                setImagesLoaded(prev => ({ ...prev, logo: false }));
-              }}
+              priority={false}
+              loading="lazy"
+              onLoad={() => handleImageLoad('logo')}
+              onError={() => handleImageError('logo')}
             />
           ) : (
             <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
@@ -235,6 +278,7 @@ export default function DownloadPage() {
 
         {/* App Screenshots */}
         <motion.div
+          id="screenshots-section"
           className="w-full space-y-3"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -242,17 +286,17 @@ export default function DownloadPage() {
         >
           <div className="grid grid-cols-2 gap-3">
             <div className="relative aspect-[9/19] rounded-xl overflow-hidden bg-white/10 border border-white/20">
-              {imagesLoaded.screen1 ? (
+              {screenshotVisible && (imagesLoaded.screen1 === 'loading' || imagesLoaded.screen1 === true) ? (
                 <Image
                   src="/images/app_screen1.jpg"
                   alt="App screenshot 1"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 200px"
-                  onError={(e) => {
-                    console.error('App screenshot 1 failed to load:', e);
-                    setImagesLoaded(prev => ({ ...prev, screen1: false }));
-                  }}
+                  priority={false}
+                  loading="lazy"
+                  onLoad={() => handleImageLoad('screen1')}
+                  onError={() => handleImageError('screen1')}
                 />
               ) : (
                 <div className="w-full h-full bg-white/20 flex items-center justify-center">
@@ -261,17 +305,17 @@ export default function DownloadPage() {
               )}
             </div>
             <div className="relative aspect-[9/19] rounded-xl overflow-hidden bg-white/10 border border-white/20">
-              {imagesLoaded.screen2 ? (
+              {screenshotVisible && (imagesLoaded.screen2 === 'loading' || imagesLoaded.screen2 === true) ? (
                 <Image
                   src="/images/app_screen2.jpg"
                   alt="App screenshot 2"
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 50vw, 200px"
-                  onError={(e) => {
-                    console.error('App screenshot 2 failed to load:', e);
-                    setImagesLoaded(prev => ({ ...prev, screen2: false }));
-                  }}
+                  priority={false}
+                  loading="lazy"
+                  onLoad={() => handleImageLoad('screen2')}
+                  onError={() => handleImageError('screen2')}
                 />
               ) : (
                 <div className="w-full h-full bg-white/20 flex items-center justify-center">
