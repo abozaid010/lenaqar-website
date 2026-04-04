@@ -12,6 +12,7 @@ import {
   Loader2,
   Newspaper,
   MapPin,
+  MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +22,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
+import { getRoleFromToken, getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 
 const Sidebar = ({ canAccessMap = false }) => {
   const { t } = useI18n();
@@ -31,6 +33,7 @@ const Sidebar = ({ canAccessMap = false }) => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pendingPath, setPendingPath] = useState(null);
+  const [canAccessCampaignChat, setCanAccessCampaignChat] = useState(false);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
@@ -67,6 +70,33 @@ const Sidebar = ({ canAccessMap = false }) => {
     if (pendingPath && pathname === pendingPath) {
       setPendingPath(null);
     }
+
+    // Check if user can access Campaign Chat
+    const checkCampaignChatAccess = () => {
+      try {
+        const role = getRoleFromToken();
+        const clientId = getClientIdFromToken();
+        
+        const isAdmin = ["admin", "owner"].includes(role?.toLowerCase());
+        const isPublicClient = clientId === "public";
+        const canAccess = isAdmin && isPublicClient;
+        
+        console.log('Campaign Chat Access Check:', {
+          role,
+          clientId,
+          isAdmin,
+          isPublicClient,
+          canAccess
+        });
+        
+        setCanAccessCampaignChat(canAccess);
+      } catch (error) {
+        console.error("Error checking Campaign Chat access:", error);
+        setCanAccessCampaignChat(false);
+      }
+    };
+
+    checkCampaignChatAccess();
   }, [pathname, isOpen, pendingPath]);
 
   return (
@@ -169,6 +199,25 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+
+          {canAccessCampaignChat && (
+            <Link
+              href="/campaign-chat"
+              prefetch={true}
+              onClick={(e) => handleNavigation("/campaign-chat", e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/campaign-chat") || pendingPath === "/campaign-chat"
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === "/campaign-chat" ? "opacity-70" : ""}`}
+            >
+              <MessageCircle className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.campaignChat || "Campaign Chat"}</span>
+              {isPending && pendingPath === "/campaign-chat" && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
+          )}
 
           <Link
             href="/schedule"

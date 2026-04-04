@@ -38,3 +38,17 @@ export function getRoleFromToken() {
   const role = payload.client_type ?? payload.role ?? null;
   return role != null && typeof role === "string" ? role : null;
 }
+
+/**
+ * Get the client_id from the access token cookie (client-side).
+ * Reads client_id or sub from the JWT payload.
+ *
+ * @returns {string|null} Client ID from JWT, or null if not logged in
+ */
+export function getClientIdFromToken() {
+  const token = LenaCookiesManager.getAccessToken();
+  const payload = decodeJwtPayload(token);
+  if (!payload) return null;
+  const clientId = payload.client_id ?? payload.sub ?? null;
+  return clientId != null && typeof clientId === "string" ? clientId : null;
+}

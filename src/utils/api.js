@@ -1077,3 +1077,182 @@ export async function fetchDataProjection() {
     throw error;
   }
 }
+
+// Campaign Chat API //
+export async function fetchCampaignSessions({ 
+  client_id = "public", 
+  search = "", 
+  ai_reply_enabled = null, 
+  page = 1, 
+  page_size = 20 
+} = {}) {
+  try {
+    const params = new URLSearchParams({ 
+      client_id, 
+      page: String(page), 
+      page_size: String(page_size) 
+    });
+    
+    if (search) params.set("search", search);
+    if (ai_reply_enabled !== null) params.set("ai_reply_enabled", String(ai_reply_enabled));
+
+    const response = await axiosInstance.get(`/campaign/sessions?${params.toString()}`, {
+      headers: {
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+      }
+    });
+
+    // Debug logging
+    console.log('Campaign Sessions API Call:', {
+      url: `/campaign/sessions?${params.toString()}`,
+      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
+      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key,
+      allEnvVars: Object.keys(process.env).filter(key => key.includes('API'))
+    });
+
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch campaign sessions:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchCampaignSession({ 
+  client_id = "public", 
+  phone_number, 
+  history_page = 1, 
+  history_page_size = 50 
+} = {}) {
+  if (!phone_number) {
+    throw new Error("phone_number is required");
+  }
+
+  try {
+    const params = new URLSearchParams({ 
+      client_id, 
+      phone_number, 
+      history_page: String(history_page), 
+      history_page_size: String(history_page_size) 
+    });
+
+    const response = await axiosInstance.get(`/campaign/session?${params.toString()}`, {
+      headers: {
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+      }
+    });
+
+    // Debug logging
+    console.log('Campaign Session API Call:', {
+      url: `/campaign/session?${params.toString()}`,
+      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
+      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
+    });
+
+    if (!response.data || !response.data.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to fetch campaign session:", error.message);
+    throw error;
+  }
+}
+
+export async function toggleCampaignAIReply({ 
+  client_id = "public", 
+  phone_number, 
+  ai_reply_enabled 
+} = {}) {
+  if (!phone_number || ai_reply_enabled === undefined) {
+    throw new Error("phone_number and ai_reply_enabled are required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/campaign/ai-reply-toggle", {
+      client_id,
+      phone_number,
+      ai_reply_enabled
+    }, {
+      headers: {
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+      }
+    });
+
+    // Debug logging
+    console.log('Campaign AI Toggle API Call:', {
+      url: '/campaign/ai-reply-toggle',
+      payload: { client_id, phone_number, ai_reply_enabled },
+      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
+      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to toggle campaign AI reply:", error.message);
+    return { 
+      error: error.response?.data?.error || error.message,
+      success: false
+    };
+  }
+}
+
+export async function sendCampaignReply({ 
+  client_id = "public", 
+  phone_number, 
+  admin_reply_text = null, 
+  admin_reply_image_url = null, 
+  admin_reply_template_name = null, 
+  admin_reply_language_code = null 
+} = {}) {
+  if (!phone_number) {
+    throw new Error("phone_number is required");
+  }
+
+  // At least one reply type must be provided for admin replies
+  if (!admin_reply_text && !admin_reply_image_url && !admin_reply_template_name) {
+    throw new Error("At least one of admin_reply_text, admin_reply_image_url, or admin_reply_template_name is required");
+  }
+
+  try {
+    const payload = {
+      client_id,
+      phone_number,
+      admin_reply_text,
+      admin_reply_image_url,
+      admin_reply_template_name,
+      admin_reply_language_code
+    };
+
+    // Remove null values
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === null) delete payload[key];
+    });
+
+    const response = await axiosInstance.post("/campaign/unified-reply", payload, {
+      headers: {
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+      }
+    });
+
+    // Debug logging
+    console.log('Campaign Reply API Call:', {
+      url: '/campaign/unified-reply',
+      payload,
+      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
+      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to send campaign reply:", error.message);
+    return { 
+      error: error.response?.data?.error || error.message,
+      success: false
+    };
+  }
+}
