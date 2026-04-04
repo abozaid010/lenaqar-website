@@ -306,7 +306,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     setManualHeaderMapping(prev => {
       const updated = { ...prev };
       
-      // If user clicked on "Select..." (empty value), remove the mapping to cancel/unselect
+      // If user clicked on "Unselect" (empty value), remove the mapping to cancel/unselect
       // This works for both manually mapped fields and auto-mapped fields
       if (!excelHeader) {
         // Remove from manual mapping if it exists
@@ -893,7 +893,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               />
             </div>
             {parsedData && (
-              <span className="text-sm text-gray-600">
+              <span className="text-sm text-gray-500">
                 ({parsedData.summary.totalUnits} {t.uploadExcel?.units || "units"})
               </span>
             )}
@@ -1333,7 +1333,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     <div className="flex flex-col gap-1">
                                       <div className="flex items-center justify-center gap-1 flex-wrap">
                                         <span className="text-xs font-semibold break-words text-center" title={templateCol.label}>
-                                          {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "✓" : ""}
+                                          {templateCol.label} {templateCol.is_required ? "*" : ""} {isResolved ? "" : ""}
                                         </span>
                                         {valueWarning && (
                                           <AlertCircle
@@ -1359,7 +1359,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         }`}
                                         style={{ paddingTop: "2px", paddingBottom: "2px" }}
                                       >
-                                      <option value="">Select...</option>
+                                       <option value="">🚫 Unselect</option>
                                       {excelHeaders.map((header, idx) => {
                                         const isUsed = usedExcelHeaders.has(header) && excelHeader !== header;
                                         return (

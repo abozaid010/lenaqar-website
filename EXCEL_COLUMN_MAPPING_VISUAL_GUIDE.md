@@ -107,7 +107,7 @@ The system maps your Excel headers to the template columns automatically when po
 ┣━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━┫
 ┃   │   ✓ (Green)     │ ✓ (Green)   │   ✗ (Red)      │   ✗ (Red)      │   ✓ (Green)    │ ✓(Grn)│   ✗ (Red)   │  ✓ (Green) ┃
 ┃   │ ← buildingType  │ ← project   │  Dropdown:     │  Dropdown:     │ ← bathroomCount│← floor│  Dropdown:  │← gardenSize┃
-┃   │  [buildingType▼]│  [project▼] │  [Select...]   │  [Select...]   │  [bathrooms▼]  │[floor▼]│[Select...] │[gardenSize▼]┃
+┃   │  [buildingType▼]│  [project▼] │  [🚫 Unselect] │  [🚫 Unselect] │  [bathrooms▼]  │[floor▼]│[🚫 Unselect] │[gardenSize▼]┃
 ┣━━━┿━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━┿━━━━━━━━━━━━┫
 ┃ 1 │   apartment     │ palm hills  │       -        │       -        │       2        │   2   │      -      │     10     ┃
 ┃ 2 │     villa       │   madinty   │       -        │       -        │       3        │   3   │      -      │     50     ┃
