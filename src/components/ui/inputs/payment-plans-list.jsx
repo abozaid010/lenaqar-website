@@ -37,16 +37,16 @@ export default function PaymentPlansList({
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
 
-  // Fetch default payment plans from backend
-  const [defaultPlans, setDefaultPlans] = useState([]);
-  const [defaultPlansLoading, setDefaultPlansLoading] = useState(true);
-  const [defaultPlansError, setDefaultPlansError] = useState(null);
+  // Fetch all payment plans from backend
+  const [allPlans, setAllPlans] = useState([]);
+  const [allPlansLoading, setAllPlansLoading] = useState(true);
+  const [allPlansError, setAllPlansError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    setDefaultPlansLoading(true);
-    setDefaultPlansError(null);
-    fetchPaymentPlans({ is_common: true, limit: 100 })
+    setAllPlansLoading(true);
+    setAllPlansError(null);
+    fetchPaymentPlans({ limit: 100 })
       .then((res) => {
         if (cancelled) return;
         // API returns { data: { payment_plans: [...], count } }; each plan may have extra_payments as array or object
@@ -54,15 +54,15 @@ export default function PaymentPlansList({
         const all = Array.isArray(list) ? list : [];
         const commonOnly = all
           .map(normalizePlanExtraPayments);
-        setDefaultPlans(commonOnly);
+        setAllPlans(commonOnly);
       })
       .catch((err) => {
         if (cancelled) return;
-        setDefaultPlansError(err?.message || "Failed to load payment plans");
-        setDefaultPlans([]);
+        setAllPlansError(err?.message || "Failed to load payment plans");
+        setAllPlans([]);
       })
       .finally(() => {
-        if (!cancelled) setDefaultPlansLoading(false);
+        if (!cancelled) setAllPlansLoading(false);
       });
     return () => { cancelled = true; };
   }, []);
@@ -275,10 +275,10 @@ export default function PaymentPlansList({
         </div>
         
         <SearchableDropdownSelect
-          options={defaultPlans}
+          options={allPlans}
           value=""
           onChange={(e) => {
-            const selectedPlan = defaultPlans.find(plan => plan.id === e.target.value);
+            const selectedPlan = allPlans.find(plan => plan.id === e.target.value);
             if (selectedPlan && !selectedDefaultPlanIds.has(selectedPlan.id)) {
               handleToggleDefaultPlan(selectedPlan);
             }
@@ -289,23 +289,23 @@ export default function PaymentPlansList({
           getValue={(plan) => plan.id}
           searchFields={paymentPlanSearchFields}
           renderOption={renderPaymentPlanOption}
-          isLoading={defaultPlansLoading}
+          isLoading={allPlansLoading}
           loadingText={t.formLabels?.loadingPaymentPlans ?? "Loading payment plans…"}
           noResultsText={t.formLabels?.noDefaultPaymentPlans ?? "No payment plans available."}
           searchPlaceholder="Search by name, downpayment, years..."
           className="mb-3"
-          disabled={defaultPlansLoading || defaultPlansError || defaultPlans.length === 0}
+          disabled={allPlansLoading || allPlansError || allPlans.length === 0}
         />
 
-        {defaultPlansError && (
+        {allPlansError && (
           <div className="py-3 text-sm text-red-600">
-            {defaultPlansError}
+            {allPlansError}
           </div>
         )}
 
-        {defaultPlans.length > 0 && (
+        {allPlans.length > 0 && (
           <div className="text-xs text-gray-500 text-center">
-            {defaultPlans.length} payment plans available • Click to add multiple plans
+            {allPlans.length} payment plans available • Click to add multiple plans
           </div>
         )}
       </div>
