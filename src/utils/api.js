@@ -1102,14 +1102,6 @@ export async function fetchCampaignSessions({
       }
     });
 
-    // Debug logging
-    console.log('Campaign Sessions API Call:', {
-      url: `/campaign/sessions?${params.toString()}`,
-      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
-      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key,
-      allEnvVars: Object.keys(process.env).filter(key => key.includes('API'))
-    });
-
     if (!response.data || !response.data.data) {
       throw new Error("Invalid response format from server");
     }
@@ -1145,13 +1137,6 @@ export async function fetchCampaignSession({
       }
     });
 
-    // Debug logging
-    console.log('Campaign Session API Call:', {
-      url: `/campaign/session?${params.toString()}`,
-      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
-      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
-    });
-
     if (!response.data || !response.data.data) {
       throw new Error("Invalid response format from server");
     }
@@ -1181,14 +1166,6 @@ export async function toggleCampaignAIReply({
       headers: {
         'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
       }
-    });
-
-    // Debug logging
-    console.log('Campaign AI Toggle API Call:', {
-      url: '/campaign/ai-reply-toggle',
-      payload: { client_id, phone_number, ai_reply_enabled },
-      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
-      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
     });
 
     return response.data;
@@ -1237,14 +1214,6 @@ export async function sendCampaignReply({
       headers: {
         'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
       }
-    });
-
-    // Debug logging
-    console.log('Campaign Reply API Call:', {
-      url: '/campaign/unified-reply',
-      payload,
-      apiKey: process.env.NEXT_PUBLIC_X_API_Key,
-      apiKeyType: typeof process.env.NEXT_PUBLIC_X_API_Key
     });
 
     return response.data;

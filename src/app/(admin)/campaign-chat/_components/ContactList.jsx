@@ -3,6 +3,8 @@
 import { formatDistanceToNow } from "date-fns";
 import { Bot, User, MessageCircle } from "lucide-react";
 import { SELECTION_COLORS } from "@/constants/colors";
+import { ContactListSkeleton } from "@/components/ui/loading-states";
+import ErrorBoundary from "@/components/ui/error-boundary";
 
 const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) => {
   const formatPhoneNumber = (phone) => {
@@ -27,21 +29,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) =>
   };
 
   if (loading) {
-    return (
-      <div className="flex-1 overflow-y-auto">
-        {[...Array(8)].map((_, i) => (
-          <div key={i} className="p-4 border-b border-gray-100 animate-pulse">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
-              <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    );
+    return <ContactListSkeleton count={8} />;
   }
 
   if (!sessions || sessions.length === 0) {

@@ -1,9 +1,10 @@
 "use client";
 
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/context/translate-api";
 import { createPaymentPlan, updatePaymentPlan, fetchPaymentPlans } from "@/utils/api";
-import { Edit2, Plus, Trash2, Check, ChevronDown, Loader2 } from "lucide-react";
+import { Edit2, Plus, Trash2, Check } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -35,7 +36,6 @@ export default function PaymentPlansList({
   const [isAddPlanDialogOpen, setIsAddPlanDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
-  const [isDefaultPlansOpen, setIsDefaultPlansOpen] = useState(false); // collapsed by default
 
   // Fetch default payment plans from backend
   const [defaultPlans, setDefaultPlans] = useState([]);
@@ -155,6 +155,68 @@ export default function PaymentPlansList({
     return (value * 100).toFixed(1) + "%";
   };
 
+  // Custom label function to show all payment plan details
+  const getPaymentPlanLabel = (plan, locale) => {
+    if (!plan) return "";
+    const name = plan.name || "Unnamed Plan";
+    const dp = formatPercentage(plan.downpayment_percentage || 0);
+    const years = getPlanYears(plan);
+    const maintenance = plan.maintenance_fee > 0 ? formatPercentage(plan.maintenance_fee) : "0%";
+    
+    return `${name} - DP: ${dp}, Years: ${years}, Maintenance: ${maintenance}`;
+  };
+
+  // Custom search fields for payment plans
+  const paymentPlanSearchFields = ["name", "downpayment_percentage", "installment_years", "installments_years", "maintenance_fee"];
+
+  // Custom renderer for payment plan options
+  const renderPaymentPlanOption = (plan, index, isSelected, isHighlighted) => {
+    const alreadySelected = selectedDefaultPlanIds.has(plan.id);
+    
+    return (
+      <div className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <h4 className="font-medium text-gray-900 text-sm">
+            {plan.name}
+          </h4>
+          <div className="flex items-center gap-2">
+            {alreadySelected && (
+              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded">
+                Added
+              </span>
+            )}
+            {isSelected && (
+              <Check size={16} className="text-blue-600 flex-shrink-0" />
+            )}
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-3 text-xs text-gray-600">
+          <div>
+            <span className="font-medium">Downpayment:</span>{" "}
+            <span className="text-gray-900">
+              {formatPercentage(plan.downpayment_percentage)}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium">Years:</span>{" "}
+            <span className="text-gray-900">
+              {getPlanYears(plan)}
+            </span>
+          </div>
+          <div>
+            <span className="font-medium">Maintenance:</span>{" "}
+            <span className="text-gray-900">
+              {plan.maintenance_fee > 0 
+                ? formatPercentage(plan.maintenance_fee)
+                : "None"
+              }
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const handleToggleDefaultPlan = (defaultPlan) => {
     const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
     
@@ -184,7 +246,6 @@ export default function PaymentPlansList({
   };
 
   const hasPlans = Array.isArray(plans) && plans.length > 0;
-  const showDefaultPlansSection = !hasPlans; // show only when empty payment plans
 
   return (
     <div className="space-y-4">
@@ -205,81 +266,49 @@ export default function PaymentPlansList({
         </button>
       </div>
 
-      {/* Default Payment Plans Selection */}
-      {showDefaultPlansSection ? (
-        <div className="border border-gray-200 rounded-md bg-gray-50">
-          <button
-            type="button"
-            onClick={() => setIsDefaultPlansOpen((v) => !v)}
-            className="w-full flex items-center justify-between gap-3 px-3 py-2 text-left"
-            aria-expanded={isDefaultPlansOpen}
-          >
-            <span className="text-xs text-gray-700">
-              {t.formLabels?.selectDefaultPlans || "Select from common payment plans:"}
-            </span>
-            <ChevronDown
-              size={16}
-              className={`text-gray-500 transition-transform ${isDefaultPlansOpen ? "rotate-180" : ""}`}
-            />
-          </button>
-
-          {isDefaultPlansOpen ? (
-            <div className="px-3 pb-3">
-              {defaultPlansLoading ? (
-                <div className="flex items-center justify-center gap-2 py-4 text-gray-500 text-sm">
-                  <Loader2 size={18} className="animate-spin" />
-                  {t.formLabels?.loadingPaymentPlans ?? "Loading payment plans…"}
-                </div>
-              ) : defaultPlansError ? (
-                <div className="py-3 text-sm text-red-600">
-                  {defaultPlansError}
-                </div>
-              ) : defaultPlans.length === 0 ? (
-                <div className="py-3 text-sm text-gray-500">
-                  {t.formLabels?.noDefaultPaymentPlans ?? "No payment plans available."}
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {defaultPlans.map((defaultPlan) => {
-                    const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
-                    return (
-                      <button
-                        key={defaultPlan.id}
-                        type="button"
-                        onClick={() => handleToggleDefaultPlan(defaultPlan)}
-                        className={`relative p-2 rounded-md border transition-all text-left ${
-                          isSelected
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                        }`}
-                      >
-                        <div className="flex items-center gap-1.5 mb-1">
-                          <h4 className="font-medium text-gray-900 text-xs">
-                            {defaultPlan.name}
-                          </h4>
-                          {isSelected && (
-                            <Check size={12} className="text-blue-600 flex-shrink-0" />
-                          )}
-                        </div>
-                        <div className="text-[10px] text-gray-600">
-                          <div>
-                            <span className="font-medium">DP:</span>{" "}
-                            {formatPercentage(defaultPlan.downpayment_percentage)}
-                          </div>
-                          <div>
-                            <span className="font-medium">Yrs:</span>{" "}
-                            {getPlanYears(defaultPlan)}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ) : null}
+      {/* Payment Plans Selection - Always Visible */}
+      <div className="border border-gray-200 rounded-md bg-gray-50 p-3">
+        <div className="mb-3">
+          <span className="text-xs text-gray-700 font-medium">
+            {t.formLabels?.selectDefaultPlans || "Select from common payment plans:"}
+          </span>
         </div>
-      ) : null}
+        
+        <SearchableDropdownSelect
+          options={defaultPlans}
+          value=""
+          onChange={(e) => {
+            const selectedPlan = defaultPlans.find(plan => plan.id === e.target.value);
+            if (selectedPlan && !selectedDefaultPlanIds.has(selectedPlan.id)) {
+              handleToggleDefaultPlan(selectedPlan);
+            }
+          }}
+          name="payment-plan-select"
+          placeholder="Search and select payment plans..."
+          getLabel={getPaymentPlanLabel}
+          getValue={(plan) => plan.id}
+          searchFields={paymentPlanSearchFields}
+          renderOption={renderPaymentPlanOption}
+          isLoading={defaultPlansLoading}
+          loadingText={t.formLabels?.loadingPaymentPlans ?? "Loading payment plans…"}
+          noResultsText={t.formLabels?.noDefaultPaymentPlans ?? "No payment plans available."}
+          searchPlaceholder="Search by name, downpayment, years..."
+          className="mb-3"
+          disabled={defaultPlansLoading || defaultPlansError || defaultPlans.length === 0}
+        />
+
+        {defaultPlansError && (
+          <div className="py-3 text-sm text-red-600">
+            {defaultPlansError}
+          </div>
+        )}
+
+        {defaultPlans.length > 0 && (
+          <div className="text-xs text-gray-500 text-center">
+            {defaultPlans.length} payment plans available • Click to add multiple plans
+          </div>
+        )}
+      </div>
 
       {/* Selected Plans List */}
       {plans.length > 0 ? (
@@ -393,8 +422,7 @@ export default function PaymentPlansList({
           className={`border ${error ? "border-red-300" : "border-gray-200"} rounded-md p-4 text-center text-gray-500 text-sm`}
         >
           {t.formLabels?.noPaymentPlansHint ||
-            t.noPaymentPlans ||
-            "No payment plans selected. Choose from common plans above or create a custom plan."}
+            "No payment plans selected yet. Select from the available plans above or create a custom plan."}
         </div>
       )}
 

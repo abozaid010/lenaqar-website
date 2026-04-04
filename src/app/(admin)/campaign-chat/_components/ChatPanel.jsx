@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Bot, User, Send, ToggleLeft, ToggleRight, ArrowLeft } from "lucide-react";
 import { SELECTION_COLORS } from "@/constants/colors";
+import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
+import ErrorBoundary from "@/components/ui/error-boundary";
 import MessageBubble from "./MessageBubble";
 
 const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, refetchSession }) => {
@@ -39,6 +41,7 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
       await onToggleAI(contact.phone_number, newEnabled);
     } catch (error) {
       console.error("Failed to toggle AI:", error);
+      // Could show toast notification here
     } finally {
       setIsToggling(false);
     }
@@ -56,6 +59,7 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
       await refetchSession();
     } catch (error) {
       console.error("Failed to send reply:", error);
+      // Could show toast notification here
     } finally {
       setIsSending(false);
     }
@@ -126,21 +130,18 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
           </div>
 
           {/* AI Toggle */}
-          <button
+          <LoadingButton
             onClick={handleToggleAI}
-            disabled={loading || isToggling}
+            isLoading={isToggling}
+            loadingText="Switching..."
+            disabled={loading}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              (sessionData?.ai_reply_enabled ?? contact.ai_reply_enabled)
+              currentAIStatus
                 ? "bg-green-100 text-green-700 hover:bg-green-200"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            } ${(loading || isToggling) ? "opacity-50 cursor-not-allowed" : ""}`}
+            }`}
           >
-            {isToggling ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-2 border-current border-t-transparent"></div>
-                Switching...
-              </>
-            ) : (sessionData?.ai_reply_enabled ?? contact.ai_reply_enabled) ? (
+            {currentAIStatus ? (
               <>
                 <ToggleRight className="h-4 w-4" />
                 AI On
@@ -151,7 +152,7 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
                 AI Off
               </>
             )}
-          </button>
+          </LoadingButton>
         </div>
       </div>
 
@@ -181,7 +182,8 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-200 bg-white">
+      <div className="p-4 border-t border-gray-200 bg-white relative">
+        <LoadingOverlay isVisible={isSending} message="Sending message..." />
         <div className="flex gap-3">
           <textarea
             ref={textareaRef}
@@ -194,8 +196,10 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
             rows={1}
             style={{ minHeight: '40px', maxHeight: '120px' }}
           />
-          <button
+          <LoadingButton
             onClick={handleSendReply}
+            isLoading={isSending}
+            loadingText="Sending..."
             disabled={!message.trim() || isSending}
             className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
               message.trim() && !isSending
@@ -214,7 +218,7 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
                 Send
               </>
             )}
-          </button>
+          </LoadingButton>
         </div>
       </div>
     </div>

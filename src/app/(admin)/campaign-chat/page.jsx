@@ -4,9 +4,10 @@ import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Search, ToggleLeft, ToggleRight } from "lucide-react";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply } from "@/utils/api";
-import { getRoleFromToken, getClientIdFromToken } from "@/lib/getRoleFromToken.client";
+import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
-import LoadingSpinner from "@/components/ui/loading-spinner";
+import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
+import ErrorBoundary from "@/components/ui/error-boundary";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -17,30 +18,11 @@ const CampaignChat = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [aiFilter, setAiFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [clientId, setClientId] = useState(null);
   const [isTogglingAI, setIsTogglingAI] = useState(false);
   const queryClient = useQueryClient();
 
-  // Check admin role and client_id on mount
-  useEffect(() => {
-    const checkAccess = () => {
-      try {
-        const role = getRoleFromToken();
-        const currentClientId = getClientIdFromToken();
-        
-        const hasAdminAccess = ["admin", "owner"].includes(role?.toLowerCase());
-        
-        setIsAdmin(hasAdminAccess);
-        setClientId(currentClientId);
-      } catch (error) {
-        console.error("Error checking access:", error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAccess();
-  }, []);
+  // Use shared access control hook
+  const { isAdmin, clientId, canAccessCampaignChat, isLoading: accessLoading } = useCampaignChatAccess();
 
   // Fetch sessions list
   const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError } = useQuery({
@@ -51,7 +33,7 @@ const CampaignChat = () => {
       page: currentPage,
       page_size: 20
     }),
-    enabled: isAdmin && clientId === "public",
+    enabled: canAccessCampaignChat,
     keepPreviousData: true
   });
 
@@ -125,7 +107,7 @@ const CampaignChat = () => {
   };
 
   // Access denied state
-  if (!isAdmin || clientId !== "public") {
+  if (!accessLoading && !canAccessCampaignChat) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
@@ -134,6 +116,16 @@ const CampaignChat = () => {
           <p className="text-gray-500">This feature is only available to administrators with public client access.</p>
         </div>
       </div>
+    );
+  }
+
+  if (accessLoading) {
+    return (
+      <LoadingSpinner
+        message="Checking access..."
+        containerClassName="flex items-center justify-center h-full"
+        size="large"
+      />
     );
   }
 
@@ -216,12 +208,14 @@ const CampaignChat = () => {
         </div>
 
         {/* Contact List */}
-        <ContactList
-          sessions={sessionsData?.sessions || []}
-          selectedContact={selectedContact}
-          onContactSelect={handleContactSelect}
-          loading={sessionsLoading || isTogglingAI} // Add isTogglingAI to loading state
-        />
+        <ErrorBoundary errorMessage="Failed to load conversations. Please try again.">
+          <ContactList
+            sessions={sessionsData?.sessions || []}
+            selectedContact={selectedContact}
+            onContactSelect={handleContactSelect}
+            loading={sessionsLoading || isTogglingAI}
+          />
+        </ErrorBoundary>
 
         {/* Pagination */}
         {sessionsData?.total_pages > 1 && (
@@ -251,24 +245,26 @@ const CampaignChat = () => {
 
       {/* Right Panel - Chat */}
       <div className="flex-1 flex flex-col">
-        {selectedContact ? (
-          <ChatPanel
-            contact={selectedContact}
-            sessionData={sessionData}
-            loading={sessionLoading}
-            onToggleAI={handleToggleAI}
-            onSendReply={handleSendReply}
-            refetchSession={refetchSession}
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center bg-gray-50">
-            <div className="text-center">
-              <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-600 mb-2">Select a conversation</h3>
-              <p className="text-gray-500">Choose a contact from the list to start chatting</p>
+        <ErrorBoundary errorMessage="Failed to load conversation. Please try again.">
+          {selectedContact ? (
+            <ChatPanel
+              contact={selectedContact}
+              sessionData={sessionData}
+              loading={sessionLoading}
+              onToggleAI={handleToggleAI}
+              onSendReply={handleSendReply}
+              refetchSession={refetchSession}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center bg-gray-50">
+              <div className="text-center">
+                <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-600 mb-2">Select a conversation</h3>
+                <p className="text-gray-500">Choose a contact from the list to start chatting</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </ErrorBoundary>
       </div>
     </div>
   );
