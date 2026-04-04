@@ -41,6 +41,7 @@ export default function PaymentPlansList({
   const [allPlans, setAllPlans] = useState([]);
   const [allPlansLoading, setAllPlansLoading] = useState(true);
   const [allPlansError, setAllPlansError] = useState(null);
+  const [isProcessingSelection, setIsProcessingSelection] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +96,27 @@ export default function PaymentPlansList({
   };
 
   const handleSavePlan = async (plan, isEdit) => {
+    // Input validation
+    if (!plan || typeof plan !== 'object') {
+      console.error("Invalid plan data provided:", plan);
+      toast.error("Invalid payment plan data");
+      return;
+    }
+
+    if (!plan.name || typeof plan.name !== 'string' || plan.name.trim() === '') {
+      console.error("Plan name is required and must be a non-empty string");
+      toast.error("Plan name is required");
+      return;
+    }
+
+    if (typeof plan.downpayment_percentage !== 'number' || 
+        plan.downpayment_percentage < 0 || 
+        plan.downpayment_percentage > 1) {
+      console.error("Invalid downpayment percentage:", plan.downpayment_percentage);
+      toast.error("Downpayment percentage must be between 0 and 100");
+      return;
+    }
+
     try {
       let savedPlan;
       
@@ -156,7 +178,7 @@ export default function PaymentPlansList({
   };
 
   // Custom label function to show all payment plan details
-  const getPaymentPlanLabel = (plan, locale) => {
+  const getPaymentPlanLabel = (plan) => {
     if (!plan) return "";
     const name = plan.name || "Unnamed Plan";
     const dp = formatPercentage(plan.downpayment_percentage || 0);
@@ -218,30 +240,49 @@ export default function PaymentPlansList({
   };
 
   const handleToggleDefaultPlan = (defaultPlan) => {
+    // Input validation
+    if (!defaultPlan || !defaultPlan.id) {
+      console.error("Invalid payment plan provided:", defaultPlan);
+      return;
+    }
+
+    // Prevent race conditions
+    if (isProcessingSelection) {
+      return;
+    }
+
     const isSelected = selectedDefaultPlanIds.has(defaultPlan.id);
     
-    if (isSelected) {
-      // Remove the plan if it's already selected
-      const newPlans = plans.filter((plan) => plan.id !== defaultPlan.id);
-      // If the removed plan was the default, clear default from all plans
-      const updatedPlans = newPlans.map((p) => ({ ...p, is_default: false }));
-      onChange(updatedPlans);
-    } else {
-      // Add the plan if it's not selected (ensure extra_payments is always an array)
-      const planToAdd = normalizePlanExtraPayments({
-        ...defaultPlan,
-        id: defaultPlan.id, // Keep the default ID to track it
-        is_default: false, // New plans are not default by default
-      });
-      const newPlans = [...plans, planToAdd];
-      
-      // If this is the first plan, make it default automatically
-      // Otherwise, if no plan is default, prompt user (handled in UI)
-      if (newPlans.length === 1) {
-        newPlans[0].is_default = true;
+    setIsProcessingSelection(true);
+    
+    try {
+      if (isSelected) {
+        // Remove the plan if it's already selected
+        const newPlans = plans.filter((plan) => plan.id !== defaultPlan.id);
+        // If the removed plan was the default, clear default from all plans
+        const updatedPlans = newPlans.map((p) => ({ ...p, is_default: false }));
+        onChange(updatedPlans);
+      } else {
+        // Add the plan if it's not selected (ensure extra_payments is always an array)
+        const planToAdd = normalizePlanExtraPayments({
+          ...defaultPlan,
+          id: defaultPlan.id, // Keep the default ID to track it
+          is_default: false, // New plans are not default by default
+        });
+        const newPlans = [...plans, planToAdd];
+        
+        // If this is the first plan, make it default automatically
+        // Otherwise, if no plan is default, prompt user (handled in UI)
+        if (newPlans.length === 1) {
+          newPlans[0].is_default = true;
+        }
+        
+        onChange(newPlans);
       }
-      
-      onChange(newPlans);
+    } catch (error) {
+      console.error("Error toggling payment plan:", error);
+    } finally {
+      setIsProcessingSelection(false);
     }
   };
 
@@ -279,7 +320,7 @@ export default function PaymentPlansList({
           value=""
           onChange={(e) => {
             const selectedPlan = allPlans.find(plan => plan.id === e.target.value);
-            if (selectedPlan && !selectedDefaultPlanIds.has(selectedPlan.id)) {
+            if (selectedPlan && !selectedDefaultPlanIds.has(selectedPlan.id) && !isProcessingSelection) {
               handleToggleDefaultPlan(selectedPlan);
             }
           }}
@@ -294,7 +335,7 @@ export default function PaymentPlansList({
           noResultsText={t.formLabels?.noDefaultPaymentPlans ?? "No payment plans available."}
           searchPlaceholder="Search by name, downpayment, years..."
           className="mb-3"
-          disabled={allPlansLoading || allPlansError || allPlans.length === 0}
+          disabled={allPlansLoading || allPlansError || allPlans.length === 0 || isProcessingSelection}
         />
 
         {allPlansError && (

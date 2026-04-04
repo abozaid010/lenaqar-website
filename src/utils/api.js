@@ -4,6 +4,8 @@ import { axiosInstance } from "@/lib/axiosInstance";
 import { safeMergeParams } from "./safeJsonParser";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
+import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -874,11 +876,9 @@ export async function toggleAutoReply(user_id, client_id, value, source) {
       success: true,
       message: "Auto-reply toggled successfully",
     };
-  } catch (e) {
-    return {
-      success: false,
-      message: "Failed to toggle auto-reply",
-    };
+  } catch (error) {
+    console.error("Failed to toggle auto-reply:", error.message);
+    throw error; // Consistent with other API functions
   }
 }
 
@@ -936,16 +936,13 @@ export async function resetUnreadMessagesCount(userId) {
 
 export async function getChatHistory(userId) {
   try {
-    const response = await axiosInstance.get(
-      `/messages/conversation/${userId}`
-    );
+    const response = await axiosInstance.get(`/messages/chat-history?user_id=${userId}`);
     return response.data;
   } catch (error) {
-    return error;
+    console.error("Failed to fetch chat history:", error.message);
+    return { error: error.message };
   }
 }
-
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 // Client-side decode JWT payload (no verification; API verifies when token is sent).
 function decodeJwtPayloadClient(token) {
@@ -1080,11 +1077,11 @@ export async function fetchDataProjection() {
 
 // Campaign Chat API //
 export async function fetchCampaignSessions({ 
-  client_id = "public", 
+  client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   search = "", 
   ai_reply_enabled = null, 
-  page = 1, 
-  page_size = 20 
+  page = CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE, 
+  page_size = CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE 
 } = {}) {
   try {
     const params = new URLSearchParams({ 
@@ -1096,7 +1093,7 @@ export async function fetchCampaignSessions({
     if (search) params.set("search", search);
     if (ai_reply_enabled !== null) params.set("ai_reply_enabled", String(ai_reply_enabled));
 
-    const response = await axiosInstance.get(`/campaign/sessions?${params.toString()}`, {
+    const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSIONS}?${params.toString()}`, {
       headers: {
         'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
       }
@@ -1114,10 +1111,10 @@ export async function fetchCampaignSessions({
 }
 
 export async function fetchCampaignSession({ 
-  client_id = "public", 
+  client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   phone_number, 
-  history_page = 1, 
-  history_page_size = 50 
+  history_page = CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE, 
+  history_page_size = CAMPAIGN_CHAT_PAGINATION.DEFAULT_HISTORY_PAGE_SIZE 
 } = {}) {
   if (!phone_number) {
     throw new Error("phone_number is required");
@@ -1131,7 +1128,7 @@ export async function fetchCampaignSession({
       history_page_size: String(history_page_size) 
     });
 
-    const response = await axiosInstance.get(`/campaign/session?${params.toString()}`, {
+    const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSION}?${params.toString()}`, {
       headers: {
         'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
       }
@@ -1149,7 +1146,7 @@ export async function fetchCampaignSession({
 }
 
 export async function toggleCampaignAIReply({ 
-  client_id = "public", 
+  client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   phone_number, 
   ai_reply_enabled 
 } = {}) {
@@ -1158,7 +1155,7 @@ export async function toggleCampaignAIReply({
   }
 
   try {
-    const response = await axiosInstance.post("/campaign/ai-reply-toggle", {
+    const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.AI_REPLY_TOGGLE, {
       client_id,
       phone_number,
       ai_reply_enabled
@@ -1171,15 +1168,12 @@ export async function toggleCampaignAIReply({
     return response.data;
   } catch (error) {
     console.error("Failed to toggle campaign AI reply:", error.message);
-    return { 
-      error: error.response?.data?.error || error.message,
-      success: false
-    };
+    throw error; // Consistent with other API functions
   }
 }
 
 export async function sendCampaignReply({ 
-  client_id = "public", 
+  client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   phone_number, 
   admin_reply_text = null, 
   admin_reply_image_url = null, 
@@ -1210,7 +1204,7 @@ export async function sendCampaignReply({
       if (payload[key] === null) delete payload[key];
     });
 
-    const response = await axiosInstance.post("/campaign/unified-reply", payload, {
+    const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UNIFIED_REPLY, payload, {
       headers: {
         'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
       }
@@ -1219,9 +1213,6 @@ export async function sendCampaignReply({
     return response.data;
   } catch (error) {
     console.error("Failed to send campaign reply:", error.message);
-    return { 
-      error: error.response?.data?.error || error.message,
-      success: false
-    };
+    throw error; // Consistent with other API functions
   }
 }

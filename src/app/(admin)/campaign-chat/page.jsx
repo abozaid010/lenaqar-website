@@ -6,6 +6,7 @@ import { MessageCircle, Search, ToggleLeft, ToggleRight } from "lucide-react";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
+import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
 
@@ -24,6 +25,15 @@ const CampaignChat = () => {
   // Use shared access control hook
   const { isAdmin, clientId, canAccessCampaignChat, isLoading: accessLoading } = useCampaignChatAccess();
 
+  // Cleanup function for component unmount
+  useEffect(() => {
+    return () => {
+      // Clean up any ongoing queries when component unmounts
+      queryClient.cancelQueries({ queryKey: ["campaignSessions"] });
+      queryClient.cancelQueries({ queryKey: ["campaignSession"] });
+    };
+  }, [queryClient]);
+
   // Fetch sessions list
   const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError } = useQuery({
     queryKey: ["campaignSessions", searchQuery, aiFilter, currentPage],
@@ -31,7 +41,7 @@ const CampaignChat = () => {
       search: searchQuery,
       ai_reply_enabled: aiFilter,
       page: currentPage,
-      page_size: 20
+      page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE
     }),
     enabled: canAccessCampaignChat,
     keepPreviousData: true
@@ -41,7 +51,9 @@ const CampaignChat = () => {
   const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery({
     queryKey: ["campaignSession", selectedContact?.phone_number],
     queryFn: () => fetchCampaignSession({
-      phone_number: selectedContact?.phone_number
+      phone_number: selectedContact?.phone_number,
+      history_page: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE,
+      history_page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_HISTORY_PAGE_SIZE
     }),
     enabled: !!selectedContact?.phone_number,
     keepPreviousData: true
@@ -56,14 +68,10 @@ const CampaignChat = () => {
   const handleToggleAI = async (phoneNumber, enabled) => {
     setIsTogglingAI(true);
     try {
-      console.log('Toggling AI:', { phoneNumber, enabled });
-      
       const result = await toggleCampaignAIReply({
         phone_number: phoneNumber,
         ai_reply_enabled: enabled
       });
-      
-      console.log('Toggle AI Result:', result);
       
       // Update the selected contact state immediately for better UX
       if (selectedContact && selectedContact.phone_number === phoneNumber) {
@@ -73,10 +81,12 @@ const CampaignChat = () => {
         }));
       }
       
-      // Refetch both sessions list and current session
-      refetchSession();
-      // Trigger sessions refetch by invalidating the query
-      queryClient.invalidateQueries(["campaignSessions"]);
+      // Refetch both sessions list and current session with proper cleanup
+      await refetchSession();
+      queryClient.invalidateQueries({ 
+        queryKey: ["campaignSessions"],
+        refetchType: 'active' // Only refetch active queries to prevent memory leaks
+      });
     } catch (error) {
       console.error("Failed to toggle AI:", error);
       // Revert the state on error
@@ -86,6 +96,7 @@ const CampaignChat = () => {
           ai_reply_enabled: !enabled
         }));
       }
+      // Could show toast notification here
     } finally {
       setIsTogglingAI(false);
     }
@@ -100,9 +111,10 @@ const CampaignChat = () => {
       });
       
       // Refetch session to show new message
-      refetchSession();
+      await refetchSession();
     } catch (error) {
       console.error("Failed to send reply:", error);
+      // Could show toast notification here
     }
   };
 
