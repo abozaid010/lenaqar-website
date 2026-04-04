@@ -154,6 +154,7 @@ const defaultSort = (options, locale, getLabel) => {
  * @param {Function} getKey - Optional function to extract unique key from option: (option) => string|number (default: uses getValue)
  * @param {Array|Function} searchFields - Array of field names to search OR function: (option, query) => boolean
  * @param {Function} sortOptions - Optional custom sort function: (options, locale) => options
+ * @param {Function} renderOption - Optional custom option renderer: (option, index, isSelected, highlighted) => ReactNode
  * @param {boolean} isLoading - Loading state
  * @param {string} loadingText - Loading text (default: "Loading...")
  * @param {string} noResultsText - No results text (default: "No results found")
@@ -180,6 +181,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   getKey,
   searchFields,
   sortOptions,
+  renderOption,
   isLoading = false,
   loadingText,
   noResultsText,
@@ -510,6 +512,29 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                       ? getKey(option) 
                       : (optionValue && optionValue !== '' ? `${optionValue}-${index}` : (option?.id || `option-${index}`));
                     const isSelected = value === optionValue;
+                    const isHighlighted = highlightedIndex === index;
+
+                    // Use custom renderer if provided, otherwise use default rendering
+                    if (renderOption && typeof renderOption === 'function') {
+                      return (
+                        <div
+                          key={optionKey}
+                          onClick={() => handleSelect(optionValue)}
+                          className={`w-full text-left hover:bg-gray-100 transition-colors cursor-pointer ${
+                            isSelected
+                              ? "bg-blue-50 text-blue-600 font-medium"
+                              : "text-gray-900"
+                          } ${
+                            isHighlighted ? "bg-gray-100" : ""
+                          }`}
+                          onMouseEnter={() => setHighlightedIndex(index)}
+                          role="option"
+                          aria-selected={isSelected}
+                        >
+                          {renderOption(option, index, isSelected, isHighlighted)}
+                        </div>
+                      );
+                    }
 
                     return (
                       <button
@@ -521,7 +546,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                             ? "bg-blue-50 text-blue-600 font-medium"
                             : "text-gray-900"
                         } ${
-                          highlightedIndex === index ? "bg-gray-100" : ""
+                          isHighlighted ? "bg-gray-100" : ""
                         }`}
                         onMouseEnter={() => setHighlightedIndex(index)}
                         role="option"

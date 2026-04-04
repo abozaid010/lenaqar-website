@@ -12,6 +12,7 @@ import {
   Loader2,
   Newspaper,
   MapPin,
+  MessageCircle,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -21,6 +22,8 @@ import { useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
+import { getRoleFromToken, getClientIdFromToken } from "@/lib/getRoleFromToken.client";
+import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 
 const Sidebar = ({ canAccessMap = false }) => {
   const { t } = useI18n();
@@ -28,9 +31,13 @@ const Sidebar = ({ canAccessMap = false }) => {
   const pathname = usePathname();
   const unitsSection = useUnitsSectionSource();
   const [isOpen, setIsOpen] = useState(false);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [canAccessCampaignChat, setCanAccessCampaignChat] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [pendingPath, setPendingPath] = useState(null);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  // Use shared access control hook
+  const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
@@ -67,7 +74,10 @@ const Sidebar = ({ canAccessMap = false }) => {
     if (pendingPath && pathname === pendingPath) {
       setPendingPath(null);
     }
-  }, [pathname, isOpen, pendingPath]);
+
+    // Update campaign chat access based on shared hook
+    setCanAccessCampaignChat(hasAccess);
+  }, [pathname, isOpen, pendingPath, hasAccess]);
 
   return (
     <>
@@ -169,6 +179,25 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+
+          {canAccessCampaignChat && (
+            <Link
+              href="/campaign-chat"
+              prefetch={true}
+              onClick={(e) => handleNavigation("/campaign-chat", e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/campaign-chat") || pendingPath === "/campaign-chat"
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === "/campaign-chat" ? "opacity-70" : ""}`}
+            >
+              <MessageCircle className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.campaignChat || "Campaign Chat"}</span>
+              {isPending && pendingPath === "/campaign-chat" && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
+          )}
 
           <Link
             href="/schedule"

@@ -323,6 +323,23 @@ export const FIELD_ALIASES = {
     "deckarea",
     "deck",
   ],
+  payment_plan: [
+    "payment plan",
+    "payment-plan",
+    "paymentplan",
+    "payment method",
+    "payment-method",
+    "paymentmethod",
+    "payment type",
+    "payment-type",
+    "paymenttype",
+    "installment plan",
+    "installment-plan",
+    "installmentplan",
+    "payment scheme",
+    "payment-scheme",
+    "paymentscheme",
+  ],
 };
 
 // Word to number mapping for roomsCount validation
@@ -456,6 +473,7 @@ const EXPECTED_VALUES_MAP = {
   city: isValidString, // Function - any valid string
   unit_number: isValidString, // Function - any valid string (can be alphanumeric)
   building_number: isValidString, // Function - any valid string (can be alphanumeric)
+  payment_plan: isValidString, // Function - any valid string
 };
 
 // Semantic matching removed for performance optimization
