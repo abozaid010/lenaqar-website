@@ -107,6 +107,11 @@ export const excelTemplateColumns = [
     label: "Outdoor Area",
     is_required: false,
   },
+  {
+    key: "payment_plan",
+    label: "Payment Plan",
+    is_required: false,
+  },
 ];
 
 export const excelTemplateExampleRow = {
@@ -133,5 +138,6 @@ export const excelTemplateExampleRow = {
   building_number: "B5",
   roof_area: "30",
   outdoor_area: "25",
+  payment_plan: "cash",
 };
 

@@ -382,6 +382,11 @@ export async function applyMappingToData(rawExcelData, manualMapping = {}) {
       if (unit.city) {
         transformed.city = unit.city;
       }
+      
+      // Add payment_plan only if it has a value
+      if (unit.payment_plan) {
+        transformed.payment_plan = unit.payment_plan;
+      }
 
       // Convert all string fields to lowercase (backend expects lowercase)
       return convertStringsToLowercase(transformed);
