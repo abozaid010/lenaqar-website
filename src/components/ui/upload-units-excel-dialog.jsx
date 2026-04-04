@@ -305,19 +305,34 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const handleHeaderMappingChange = useCallback((templateKey, excelHeader) => {
     setManualHeaderMapping(prev => {
       const updated = { ...prev };
-      if (excelHeader) {
-        updated[templateKey] = excelHeader;
-      } else {
-        delete updated[templateKey];
-      }
       
-      // Debounce the re-apply mapping (doesn't re-parse file, just re-applies mapping)
-      // Pass the updated mapping directly to avoid React state closure issue
-      debouncedReapplyMapping(updated);
+      // If user clicked on "Select..." (empty value), remove the mapping to cancel/unselect
+      // This works for both manually mapped fields and auto-mapped fields
+      if (!excelHeader) {
+        // Remove from manual mapping if it exists
+        delete updated[templateKey];
+        
+        // For auto-mapped fields, we need to explicitly set them to null to override the auto-mapping
+        // But we'll keep it as null (not remove it) to maintain the unselected state
+        const currentStatus = getTemplateColumnStatus(templateKey);
+        if (currentStatus.isResolved && !currentStatus.isManual) {
+          // This is an auto-mapped field, set to null to override
+          updated[templateKey] = null;
+        }
+        
+        // Apply the mapping change
+        debouncedReapplyMapping(updated);
+      } else {
+        updated[templateKey] = excelHeader;
+        
+        // Debounce the re-apply mapping (doesn't re-parse file, just re-applies mapping)
+        // Pass the updated mapping directly to avoid React state closure issue
+        debouncedReapplyMapping(updated);
+      }
       
       return updated;
     });
-  }, [debouncedReapplyMapping]);
+  }, [debouncedReapplyMapping, getTemplateColumnStatus]);
 
   /**
    * Validates all required fields before upload
