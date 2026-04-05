@@ -5,39 +5,123 @@ import Dialog from "@/components/ui/Dialog";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { API_BASE_URL } from "@/lib/apiConfig";
-import { Plus, Send } from "lucide-react";
+import { Send } from "lucide-react";
 
 const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
-  const [contacts, setContacts] = useState('[\n  {\n    "phone": "Nada",\n    "name": "+20 102 0914828"\n  }\n]');
+  const [contacts, setContacts] = useState('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
   const [languageCode, setLanguageCode] = useState("ar_EG");
   const [templateName, setTemplateName] = useState("download_app_message1");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const validateForm = () => {
-    if (!contacts.trim()) {
+  const validatePhoneNumber = (phone) => {
+    // Basic phone number validation - should start with + and contain 8-15 digits
+    return phone.trim().length > 0;
+  };
+
+  const validateLanguageCode = (code) => {
+    // Language code format: ll_CC (e.g., ar_EG, en_US)
+    const langRegex = /^[a-z]{2}_[A-Z]{2}$/;
+    return langRegex.test(code.trim());
+  };
+
+  const validateContacts = (contactsStr) => {
+    if (!contactsStr.trim()) {
       setError("Contacts field is required");
       return false;
     }
     
     try {
-      JSON.parse(contacts);
+      const parsedContacts = JSON.parse(contactsStr);
+      
+      // Check if it's an array
+      if (!Array.isArray(parsedContacts)) {
+        setError("Contacts must be a JSON array");
+        return false;
+      }
+      
+      // Check if array is not empty
+      if (parsedContacts.length === 0) {
+        setError("Contacts array cannot be empty");
+        return false;
+      }
+      
+      // Validate each contact object
+      for (let i = 0; i < parsedContacts.length; i++) {
+        const contact = parsedContacts[i];
+        
+        // Check if contact is an object
+        if (typeof contact !== 'object' || contact === null) {
+          setError(`Contact at index ${i} must be an object`);
+          return false;
+        }
+        
+        // Check required fields
+        if (!contact.phone || !contact.name) {
+          setError(`Contact at index ${i} must have both 'phone' and 'name' fields`);
+          return false;
+        }
+        
+        // Validate phone number format
+        if (!validatePhoneNumber(contact.phone)) {
+          setError(`Invalid phone number format for contact at index ${i}. Phone should start with + followed by 8-15 digits`);
+          return false;
+        }
+        
+        // Check name is not empty
+        if (!contact.name.trim()) {
+          setError(`Name cannot be empty for contact at index ${i}`);
+          return false;
+        }
+      }
+      
+      return true;
     } catch (e) {
       setError("Contacts must be valid JSON array");
       return false;
     }
+  };
+
+  const validateForm = () => {
+    // Clear previous messages
+    setError("");
+    setSuccess("");
     
+    // Validate contacts
+    if (!validateContacts(contacts)) {
+      return false;
+    }
+    
+    // Validate language code
     if (!languageCode.trim()) {
       setError("Language code is required");
       return false;
     }
     
+    if (!validateLanguageCode(languageCode)) {
+      setError("Invalid language code format. Use format: ll_CC (e.g., ar_EG, en_US)");
+      return false;
+    }
+    
+    // Validate template name
     if (!templateName.trim()) {
       setError("Template name is required");
       return false;
     }
     
-    setError("");
+    if (templateName.trim().length < 2) {
+      setError("Template name must be at least 2 characters long");
+      return false;
+    }
+    
+    // Template name should only contain letters, numbers, underscores, and hyphens
+    const templateNameRegex = /^[a-zA-Z0-9_-]+$/;
+    if (!templateNameRegex.test(templateName.trim())) {
+      setError("Template name can only contain letters, numbers, underscores, and hyphens");
+      return false;
+    }
+    
     return true;
   };
 
@@ -75,43 +159,49 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
       console.log("Campaign sent successfully:", result);
       
       // Reset form
-      setContacts('[\n  {\n    "phone": "Nada",\n    "name": "+20 102 0914828"\n  }\n]');
+      setContacts('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
       setLanguageCode("ar_EG");
       setTemplateName("download_app_message1");
       
-      // Close dialog
-      onClose();
+      // Show success message
+      setSuccess("Campaign sent successfully!");
       
-      // You could show a success toast here
-      alert("Campaign sent successfully!");
+      // Close dialog after a short delay
+      setTimeout(() => {
+        onClose();
+        setSuccess("");
+      }, 1500);
       
     } catch (err) {
-      console.error("Error sending campaign:", err);
+      setSuccess("");
       setError(err.message || "Failed to send campaign. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleContactsChange = (e) => {
-    setContacts(e.target.value);
-    if (error && error.includes("Contacts")) {
+  const clearError = (field) => {
+    if (error && error.toLowerCase().includes(field.toLowerCase())) {
       setError("");
     }
+    if (success) {
+      setSuccess("");
+    }
+  };
+
+  const handleContactsChange = (e) => {
+    setContacts(e.target.value);
+    clearError("contacts");
   };
 
   const handleLanguageCodeChange = (e) => {
     setLanguageCode(e.target.value);
-    if (error && error.includes("Language")) {
-      setError("");
-    }
+    clearError("language");
   };
 
   const handleTemplateNameChange = (e) => {
     setTemplateName(e.target.value);
-    if (error && error.includes("Template")) {
-      setError("");
-    }
+    clearError("template");
   };
 
   return (
@@ -131,6 +221,13 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
           </div>
         )}
 
+        {/* Success Message */}
+        {success && (
+          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
+            <p className="text-sm text-green-600">{success}</p>
+          </div>
+        )}
+
         {/* Contacts Field - 80% of parent view */}
         <div className="mb-6 flex-1">
           <LenaTextarea
@@ -141,7 +238,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
             required
             error={error && error.includes("Contacts")}
             errorMessage={error && error.includes("Contacts") ? error : ""}
-            helperText="Enter contacts as JSON array with phone and name fields"
+            helperText="Enter contacts as JSON array with phone and name fields. Phone should start with + followed by digits (e.g., +20 102 0914828)"
             rows={12}
             className="font-mono text-sm"
             dir="ltr"
