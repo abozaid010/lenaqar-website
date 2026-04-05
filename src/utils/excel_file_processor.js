@@ -315,77 +315,82 @@ export async function applyMappingToData(rawExcelData, manualMapping = {}) {
 
     // Step 4: Transform to final structure matching API schema
     const finalTransformTimer = perfLog.start("Final Transformation");
-    const parseNumericValue = (value) => {
-      // Send values as is, BE will clean it.
-      return value;
+
+    /**
+     * Converts a value to a string for API fields that expect strings.
+     * Handles Excel error objects (e.g. {error: "#VALUE!"}) by returning "".
+     */
+    const toApiString = (value) => {
+      if (value === null || value === undefined) return "";
+      // Excel formula errors come through as objects like { error: "#VALUE!" }
+      if (typeof value === "object") return "";
+      return String(value);
     };
 
     const transformedUnits = units.map((unit) => {
-      // Build object matching API schema exactly
+      // Build object matching API schema exactly — all fields must be strings
       const transformed = {
         unitId: uuidv4(),
-        project: unit.project || "",
-        buildingType: unit.buildingType || "",
-        roomsCount: parseNumericValue(unit.roomsCount),
-        landArea: parseNumericValue(unit.landArea),
+        project: toApiString(unit.project),
+        buildingType: toApiString(unit.buildingType),
+        roomsCount: toApiString(unit.roomsCount),
+        landArea: toApiString(unit.landArea),
         deliveryDate: unit.deliveryDate || "",
-        totalPrice: parseNumericValue(unit.totalPrice),
-        finishing: unit.finishing || "",
-        unitTitle: unit.unitTitle || "",
+        totalPrice: toApiString(unit.totalPrice),
+        finishing: toApiString(unit.finishing),
+        unitTitle: toApiString(unit.unitTitle),
       };
-      
-      // Add optional numeric fields only if they have valid values
+
+      // Add optional fields only if they have valid values
       if (unit.bathroomCount) {
-        transformed.bathroomCount = unit.bathroomCount;
+        transformed.bathroomCount = toApiString(unit.bathroomCount);
       }
-      
+
       if (unit.floor) {
-        transformed.floor = unit.floor;
+        transformed.floor = toApiString(unit.floor);
       }
-      
+
       if (unit.gardenSize) {
-        transformed.gardenSize = unit.gardenSize;
+        transformed.gardenSize = toApiString(unit.gardenSize);
       }
-      
+
       if (unit.garageArea) {
-        transformed.garageArea = unit.garageArea;
+        transformed.garageArea = toApiString(unit.garageArea);
       }
-      
+
       if (unit.roof_area || unit.roofArea) {
-        transformed.roof_area = unit.roof_area || unit.roofArea;
+        transformed.roof_area = toApiString(unit.roof_area || unit.roofArea);
       }
-      
-      if (unit.outdoor_area) {
-        transformed.outdoor_area = unit.outdoor_area;
+
+      const outdoorVal = toApiString(unit.outdoor_area);
+      if (outdoorVal) {
+        transformed.outdoor_area = outdoorVal;
       }
-      
+
       // Add optional string fields only if they have values (omit empty strings)
       if (unit.unit_number || unit.unitNumber) {
-        transformed.unit_number = unit.unit_number || unit.unitNumber;
+        transformed.unit_number = toApiString(unit.unit_number || unit.unitNumber);
       }
-      
+
       if (unit.building_number || unit.buildingNumber) {
-        transformed.building_number = unit.building_number || unit.buildingNumber;
+        transformed.building_number = toApiString(unit.building_number || unit.buildingNumber);
       }
       
       // Add view only if valid (will be validated in convertStringsToLowercase)
       if (unit.view) {
-        transformed.view = unit.view;
+        transformed.view = toApiString(unit.view);
       }
-      
-      // Add phase only if it has a value
+
       if (unit.phase) {
-        transformed.phase = unit.phase;
+        transformed.phase = toApiString(unit.phase);
       }
-      
-      // Add city only if it has a value
+
       if (unit.city) {
-        transformed.city = unit.city;
+        transformed.city = toApiString(unit.city);
       }
-      
-      // Add payment_plan only if it has a value
+
       if (unit.payment_plan) {
-        transformed.payment_plan = unit.payment_plan;
+        transformed.payment_plan = toApiString(unit.payment_plan);
       }
 
       // Convert all string fields to lowercase (backend expects lowercase)
