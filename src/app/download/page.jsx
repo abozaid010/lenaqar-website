@@ -80,30 +80,51 @@ export default function DownloadPage() {
   }, []);
 
   // Google Analytics tracking
+  const getUtmParams = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      utm_source: params.get('utm_source') || 'direct',
+      utm_campaign: params.get('utm_campaign') || 'none',
+    };
+  }, []);
+
   const trackDownload = useCallback((platform, buttonType = 'primary') => {
     if (typeof gtag !== 'undefined') {
+      const { utm_source, utm_campaign } = getUtmParams();
       gtag('event', 'download_click', {
-        platform: platform,
+        platform,
         button_type: buttonType,
-        source: new URLSearchParams(window.location.search).get('utm_source') || 'direct',
-        campaign: new URLSearchParams(window.location.search).get('utm_campaign') || 'none',
+        utm_source,
+        utm_campaign,
         timestamp: new Date().toISOString()
       });
     }
-  }, []);
+  }, [getUtmParams]);
 
   const trackPageLoad = useCallback(() => {
     if (typeof gtag !== 'undefined') {
-      gtag('event', 'page_load', {
+      const { utm_source, utm_campaign } = getUtmParams();
+      gtag('event', 'download_page_view', {
         page: 'download',
-        platform: platform,
-        source: new URLSearchParams(window.location.search).get('utm_source') || 'direct'
+        platform,
+        utm_source,
+        utm_campaign,
       });
+      // Fire a dedicated campaign arrival event only when UTM params are present
+      if (utm_source !== 'direct' || utm_campaign !== 'none') {
+        gtag('event', 'campaign_arrival', {
+          utm_source,
+          utm_campaign,
+          platform,
+        });
+      }
     }
-  }, [platform]);
+  }, [platform, getUtmParams]);
 
   useEffect(() => {
-    trackPageLoad();
+    if (platform !== 'unknown') {
+      trackPageLoad();
+    }
   }, [platform]);
 
   // Image loading handlers with lazy loading support
