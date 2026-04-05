@@ -313,11 +313,11 @@ export default function AddPaymentPlanDialog({
         if (
           !Number.isFinite(monthsValue) ||
           monthsValue < 0 ||
-          monthsValue >= 100
+          monthsValue > 200
         ) {
           newErrors.extra_payments =
             t.formValidation?.extraPaymentsMonthsInvalid ||
-            "Custom payment months must be between 0 and 100.";
+            "Custom payment months must be between 0 and 200.";
           break;
         }
       }
@@ -670,7 +670,7 @@ export default function AddPaymentPlanDialog({
                       }
                       placeholder="3"
                       min="0"
-                      max="100"
+                      max="200"
                       step="0.1"
                     />
                   </div>
