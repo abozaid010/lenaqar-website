@@ -934,14 +934,11 @@ export async function resetUnreadMessagesCount(userId) {
   }
 }
 
-export async function getChatHistory(userId) {
-  try {
-    const response = await axiosInstance.get(`/messages/chat-history?user_id=${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch chat history:", error.message);
-    return { error: error.message };
-  }
+export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
+  const response = await axiosInstance.get(`/messages/conversation/${userId}`, {
+    params: { limit, offset },
+  });
+  return response.data;
 }
 
 // Client-side decode JWT payload (no verification; API verifies when token is sent).

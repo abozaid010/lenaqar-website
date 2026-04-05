@@ -33,7 +33,7 @@ export default function ChatClientWrapper({ userId }) {
     async function resetUnread(userId) {
       await resetUnreadMessagesCount(userId);
     }
-    if (!isLoading && data) {
+    if (!isLoading && data?.data) {
       setChatHistory(data.data.messages || []);
 
       if (data.data.unread_messages_count !== 0) {
