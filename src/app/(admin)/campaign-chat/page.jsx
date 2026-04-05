@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, Search, ToggleLeft, ToggleRight } from "lucide-react";
+import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus } from "lucide-react";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
@@ -13,6 +13,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 // Components
 import ContactList from "./_components/ContactList";
 import ChatPanel from "./_components/ChatPanel";
+import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
 
 const CampaignChat = () => {
   const [selectedContact, setSelectedContact] = useState(null);
@@ -20,6 +21,7 @@ const CampaignChat = () => {
   const [aiFilter, setAiFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isTogglingAI, setIsTogglingAI] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // Use shared access control hook
@@ -168,7 +170,16 @@ const CampaignChat = () => {
       <div className="w-80 border-r border-gray-200 flex flex-col bg-white">
         {/* Header */}
         <div className="p-4 border-b border-gray-200">
-          <h1 className="text-lg font-semibold text-gray-800 mb-4">Campaign Chat</h1>
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-lg font-semibold text-gray-800">Campaign Chat</h1>
+            <button
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+            >
+              <Plus size={16} />
+              Create
+            </button>
+          </div>
           
           {/* Search */}
           <div className="relative mb-3">
@@ -278,6 +289,12 @@ const CampaignChat = () => {
           )}
         </ErrorBoundary>
       </div>
+
+      {/* WhatsApp Campaign Dialog */}
+      <AddNewWhatsappCampaignDialog
+        isOpen={isCreateDialogOpen}
+        onClose={() => setIsCreateDialogOpen(false)}
+      />
     </div>
   );
 };
