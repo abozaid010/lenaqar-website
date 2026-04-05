@@ -9,6 +9,11 @@ const WHATSAPP_NUMBER = "201016080323";
 const WHATSAPP_MESSAGE = "Hi Abozaid, I got your card";
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
 
+const TAGLINE = {
+  ar: "باستخدام الذكاء الاصطناعى ضاعف مبيعاتك وقلل الوقت اللى بيضيع ف كل خطوه, دعنا نتواصل!",
+  en: "Helping you boost your real estate business with AI-powered insights and tools. Let's connect!",
+};
+
 const APP_STORE_URLS = {
   ios: "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088",
   android: "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp",
@@ -23,6 +28,13 @@ const USER_AGENT_PATTERNS = {
 export default function ContactPage() {
   const [platform, setPlatform] = useState("unknown");
   const [appLink, setAppLink] = useState(APP_STORE_URLS.desktop);
+  const [lang, setLang] = useState("en");
+
+  // Browser language detection
+  useEffect(() => {
+    const browserLang = (navigator.language || navigator.userLanguage || "en").toLowerCase();
+    setLang(browserLang.startsWith("ar") ? "ar" : "en");
+  }, []);
 
   // Device detection
   useEffect(() => {
@@ -93,7 +105,7 @@ export default function ContactPage() {
             </h1>
             <p className="text-sm text-white/70 mt-0.5">CEO, Lena AI</p>
             <p className="text-xs text-white/60 mt-2 max-w-xs">
-              Helping you boost your realestate business with AI-powered insights and tools. Let's connect!
+              {TAGLINE[lang]}
             </p>
           </div>
         </motion.div>
