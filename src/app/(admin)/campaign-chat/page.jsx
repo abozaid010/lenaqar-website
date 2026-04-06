@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
-import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply } from "@/utils/api";
+import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
@@ -113,12 +113,50 @@ const CampaignChat = () => {
         phone_number: phoneNumber,
         admin_reply_text: message
       });
-      
-      // Refetch session to show new message
       await refetchSession();
     } catch (error) {
       console.error("Failed to send reply:", error);
-      // Could show toast notification here
+    }
+  };
+
+  // Handle rename
+  const handleRename = async (phoneNumber, userName) => {
+    try {
+      await updateCampaignSessionName({ phone_number: phoneNumber, user_name: userName });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, user_name: userName }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+      await refetchSession();
+    } catch (error) {
+      console.error("Failed to rename session:", error);
+    }
+  };
+
+  // Handle favorite toggle
+  const handleToggleFavorite = async (phoneNumber, isFavorite) => {
+    try {
+      await toggleCampaignFavorite({ phone_number: phoneNumber, is_favorite: isFavorite });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, is_favorite: isFavorite }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+      await refetchSession();
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    }
+  };
+
+  // Handle notes update
+  const handleUpdateNotes = async (phoneNumber, notes) => {
+    try {
+      await updateCampaignNotes({ phone_number: phoneNumber, notes });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, notes }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+    } catch (error) {
+      console.error("Failed to update notes:", error);
     }
   };
 
@@ -291,6 +329,8 @@ const CampaignChat = () => {
             selectedContact={selectedContact}
             onContactSelect={handleContactSelect}
             loading={sessionsLoading || isTogglingAI}
+            onRename={handleRename}
+            onToggleFavorite={handleToggleFavorite}
           />
         </ErrorBoundary>
 
@@ -331,6 +371,9 @@ const CampaignChat = () => {
               onToggleAI={handleToggleAI}
               onSendReply={handleSendReply}
               refetchSession={refetchSession}
+              onRename={handleRename}
+              onToggleFavorite={handleToggleFavorite}
+              onUpdateNotes={handleUpdateNotes}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gray-50">

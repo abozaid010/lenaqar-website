@@ -1,15 +1,18 @@
 "use client";
 
+import { useState, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, User, MessageCircle } from "lucide-react";
+import { Bot, User, MessageCircle, Star, Pencil, Check, X } from "lucide-react";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { ContactListSkeleton } from "@/components/ui/loading-states";
-import ErrorBoundary from "@/components/ui/error-boundary";
 
-const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) => {
+const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite }) => {
+  const [editingPhone, setEditingPhone] = useState(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef(null);
+
   const formatPhoneNumber = (phone) => {
     if (!phone) return "Unknown";
-    // Format phone number for display (e.g., +20 100 123 4567)
     if (phone.startsWith('+')) {
       const cleaned = phone.substring(1);
       if (cleaned.length >= 12 && cleaned.startsWith('20')) {
@@ -26,6 +29,38 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) =>
     } catch {
       return "Unknown time";
     }
+  };
+
+  const startEdit = (e, session) => {
+    e.stopPropagation();
+    setEditingPhone(session.phone_number);
+    setEditValue(session.user_name || "");
+    setTimeout(() => inputRef.current?.focus(), 0);
+  };
+
+  const commitEdit = async (e, session) => {
+    e?.stopPropagation();
+    const trimmed = editValue.trim();
+    if (trimmed && trimmed !== session.user_name) {
+      await onRename?.(session.phone_number, trimmed);
+    }
+    setEditingPhone(null);
+  };
+
+  const cancelEdit = (e) => {
+    e?.stopPropagation();
+    setEditingPhone(null);
+  };
+
+  const handleInputKeyDown = (e, session) => {
+    e.stopPropagation();
+    if (e.key === "Enter") commitEdit(e, session);
+    if (e.key === "Escape") cancelEdit(e);
+  };
+
+  const handleFavorite = (e, session) => {
+    e.stopPropagation();
+    onToggleFavorite?.(session.phone_number, !session.is_favorite);
   };
 
   if (loading) {
@@ -47,15 +82,14 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) =>
     <div className="flex-1 overflow-y-auto">
       {sessions.map((session) => {
         const isSelected = selectedContact?.phone_number === session.phone_number;
-        
+        const isEditing = editingPhone === session.phone_number;
+
         return (
           <div
             key={session.phone_number}
-            onClick={() => onContactSelect(session)}
-            className={`p-4 border-b border-gray-100 cursor-pointer transition-colors ${
-              isSelected 
-                ? SELECTION_COLORS.SELECTED 
-                : "hover:bg-gray-50"
+            onClick={() => !isEditing && onContactSelect(session)}
+            className={`group p-4 border-b border-gray-100 cursor-pointer transition-colors ${
+              isSelected ? SELECTION_COLORS.SELECTED : "hover:bg-gray-50"
             }`}
           >
             <div className="flex items-start gap-3">
@@ -74,37 +108,89 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading }) =>
 
               {/* Contact Info */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className={`font-medium truncate ${
-                    isSelected ? "text-primary" : "text-gray-900"
-                  }`}>
-                    {session.user_name || formatPhoneNumber(session.phone_number)}
-                  </h3>
-                  
-                  {/* AI Status Indicator */}
-                  <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                    session.ai_reply_enabled ? "bg-green-500" : "bg-gray-400"
-                  }`} title={session.ai_reply_enabled ? "AI Enabled" : "AI Disabled"} />
+                <div className="flex items-center justify-between mb-1 gap-1">
+                  {/* Inline rename */}
+                  {isEditing ? (
+                    <div className="flex items-center gap-1 flex-1" onClick={e => e.stopPropagation()}>
+                      <input
+                        ref={inputRef}
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onKeyDown={e => handleInputKeyDown(e, session)}
+                        onBlur={e => commitEdit(e, session)}
+                        className="flex-1 text-sm border border-primary rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-primary min-w-0"
+                      />
+                      <button
+                        onMouseDown={e => { e.preventDefault(); commitEdit(e, session); }}
+                        className="text-green-600 hover:text-green-700 flex-shrink-0"
+                        aria-label="Save name"
+                      >
+                        <Check className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onMouseDown={e => { e.preventDefault(); cancelEdit(e); }}
+                        className="text-gray-400 hover:text-gray-600 flex-shrink-0"
+                        aria-label="Cancel rename"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 min-w-0">
+                      <h3 className={`font-medium truncate text-sm ${isSelected ? "text-primary" : "text-gray-900"}`}>
+                        {session.user_name || formatPhoneNumber(session.phone_number)}
+                      </h3>
+                      <button
+                        onClick={e => startEdit(e, session)}
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 flex-shrink-0 transition-opacity"
+                        aria-label="Rename contact"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Favorite + AI dot */}
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button
+                      onClick={e => handleFavorite(e, session)}
+                      aria-label={session.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                      className="transition-colors"
+                    >
+                      <Star
+                        className={`h-3.5 w-3.5 ${
+                          session.is_favorite
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-gray-300 hover:text-yellow-300 opacity-0 group-hover:opacity-100"
+                        }`}
+                      />
+                    </button>
+                    <div
+                      className={`w-2 h-2 rounded-full ${session.ai_reply_enabled ? "bg-green-500" : "bg-gray-400"}`}
+                      title={session.ai_reply_enabled ? "AI Enabled" : "AI Disabled"}
+                    />
+                  </div>
                 </div>
 
-                {/* Phone Number */}
+                {/* Phone Number (when name exists) */}
                 {session.user_name && (
-                  <p className="text-sm text-gray-500 mb-1">
-                    {formatPhoneNumber(session.phone_number)}
+                  <p className="text-xs text-gray-500 mb-1">{formatPhoneNumber(session.phone_number)}</p>
+                )}
+
+                {/* Notes preview */}
+                {session.notes && (
+                  <p className="text-xs text-gray-400 italic truncate mb-1">
+                    {session.notes.length > 50 ? session.notes.slice(0, 50) + "…" : session.notes}
                   </p>
                 )}
 
                 {/* Message Count and Time */}
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    {session.ai_reply_enabled && (
-                      <Bot className="h-3 w-3" title="AI Auto-Reply Enabled" />
-                    )}
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    {session.ai_reply_enabled && <Bot className="h-3 w-3" title="AI Auto-Reply Enabled" />}
                     <span>{session.total_messages_received} messages</span>
                   </div>
-                  <span className="text-xs text-gray-400">
-                    {getRelativeTime(session.last_user_message_at)}
-                  </span>
+                  <span className="text-xs text-gray-400">{getRelativeTime(session.last_user_message_at)}</span>
                 </div>
               </div>
             </div>

@@ -1,19 +1,65 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
-import { Bot, User, Send, ToggleLeft, ToggleRight, ArrowLeft } from "lucide-react";
-import { SELECTION_COLORS } from "@/constants/colors";
+import {
+  Bot, User, Send, ToggleLeft, ToggleRight,
+  Star, Pencil, Check, X, StickyNote, Trash2, Save
+} from "lucide-react";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
-import ErrorBoundary from "@/components/ui/error-boundary";
 import MessageBubble from "./MessageBubble";
 
-const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, refetchSession }) => {
+const NOTES_MAX_LENGTH = 500;
+
+const ChatPanel = ({
+  contact,
+  sessionData,
+  loading,
+  onToggleAI,
+  onSendReply,
+  refetchSession,
+  onRename,
+  onToggleFavorite,
+  onUpdateNotes,
+}) => {
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  // Inline rename state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState("");
+  const [isSavingName, setIsSavingName] = useState(false);
+  const nameInputRef = useRef(null);
+
+  // Favorite state
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+
+  // Notes state
+  const [notesOpen, setNotesOpen] = useState(false);
+  const [notesValue, setNotesValue] = useState("");
+  const [notesDraft, setNotesDraft] = useState(""); // what user is currently typing
+  const [notesEditing, setNotesEditing] = useState(false);
+  const [isSavingNotes, setIsSavingNotes] = useState(false);
+  const [notesSaved, setNotesSaved] = useState(false);
+
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+
+  // Sync favorite from sessionData/contact when contact changes
+  useEffect(() => {
+    const src = sessionData ?? contact;
+    setIsFavorite(!!src?.is_favorite);
+  }, [sessionData?.phone_number, contact?.phone_number]);
+
+  // Sync notes whenever sessionData loads or updates (including initial load)
+  useEffect(() => {
+    const loaded = sessionData?.notes ?? contact?.notes ?? "";
+    setNotesValue(loaded);
+    setNotesDraft(loaded);
+    setNotesEditing(false);
+    setNotesSaved(false);
+  }, [sessionData?.notes, sessionData?.phone_number, contact?.phone_number]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -24,24 +70,17 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
   useEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
     }
   }, [message]);
 
   const handleToggleAI = async () => {
     if (loading || isToggling) return;
-    
-    // Use sessionData's ai_reply_enabled if available, otherwise fall back to contact
     const currentEnabled = sessionData?.ai_reply_enabled ?? contact.ai_reply_enabled;
-    const newEnabled = !currentEnabled;
-    
     setIsToggling(true);
     try {
-      await onToggleAI(contact.phone_number, newEnabled);
-    } catch (error) {
-      console.error("Failed to toggle AI:", error);
-      // Could show toast notification here
+      await onToggleAI(contact.phone_number, !currentEnabled);
     } finally {
       setIsToggling(false);
     }
@@ -49,35 +88,114 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
 
   const handleSendReply = async () => {
     if (!message.trim() || isSending) return;
-
     setIsSending(true);
     try {
       await onSendReply(contact.phone_number, message.trim());
       setMessage("");
-      
-      // Refetch session to show the new message
       await refetchSession();
     } catch (error) {
       console.error("Failed to send reply:", error);
-      // Could show toast notification here
     } finally {
       setIsSending(false);
     }
   };
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSendReply();
     }
   };
 
-  // Use sessionData's ai_reply_enabled if available, otherwise fall back to contact
+  // --- Rename ---
+  const startEditName = () => {
+    const current = sessionData?.user_name ?? contact?.user_name ?? "";
+    setNameValue(current);
+    setIsEditingName(true);
+    setTimeout(() => nameInputRef.current?.focus(), 0);
+  };
+
+  const commitName = async () => {
+    const trimmed = nameValue.trim();
+    if (!trimmed) { setIsEditingName(false); return; }
+    const current = sessionData?.user_name ?? contact?.user_name ?? "";
+    if (trimmed === current) { setIsEditingName(false); return; }
+    setIsSavingName(true);
+    try {
+      await onRename?.(contact.phone_number, trimmed);
+    } finally {
+      setIsSavingName(false);
+      setIsEditingName(false);
+    }
+  };
+
+  const cancelName = () => setIsEditingName(false);
+
+  const handleNameKeyDown = (e) => {
+    if (e.key === "Enter") { e.preventDefault(); commitName(); }
+    if (e.key === "Escape") cancelName();
+  };
+
+  // --- Favorite ---
+  const handleToggleFavorite = async () => {
+    if (isTogglingFavorite) return;
+    const next = !isFavorite;
+    setIsFavorite(next); // optimistic
+    setIsTogglingFavorite(true);
+    try {
+      await onToggleFavorite?.(contact.phone_number, next);
+    } catch {
+      setIsFavorite(!next); // revert
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
+
+  // --- Notes ---
+  const handleNotesDraftChange = (e) => {
+    setNotesDraft(e.target.value.slice(0, NOTES_MAX_LENGTH));
+    setNotesSaved(false);
+  };
+
+  const startEditNotes = () => {
+    setNotesDraft(notesValue);
+    setNotesEditing(true);
+    setNotesSaved(false);
+  };
+
+  const cancelEditNotes = () => {
+    setNotesDraft(notesValue);
+    setNotesEditing(false);
+    setNotesSaved(false);
+  };
+
+  const saveNotes = async (val) => {
+    setIsSavingNotes(true);
+    try {
+      await onUpdateNotes?.(contact.phone_number, val || null);
+      setNotesValue(val ?? "");
+      setNotesDraft(val ?? "");
+      setNotesEditing(false);
+      setNotesSaved(true);
+      setTimeout(() => setNotesSaved(false), 2500);
+    } finally {
+      setIsSavingNotes(false);
+    }
+  };
+
+  const handleSaveNotes = () => saveNotes(notesDraft);
+
+  const handleClearNotes = async () => {
+    setNotesDraft("");
+    await saveNotes(null);
+  };
+
   const currentAIStatus = sessionData?.ai_reply_enabled ?? contact.ai_reply_enabled;
+  const displayName = sessionData?.user_name ?? contact?.user_name;
 
   const formatPhoneNumber = (phone) => {
     if (!phone) return "Unknown";
-    if (phone.startsWith('+') && phone.length > 12 && phone.substring(1).startsWith('20')) {
+    if (phone.startsWith("+") && phone.length > 12 && phone.substring(1).startsWith("20")) {
       return `+20 ${phone.substring(3, 6)} ${phone.substring(6, 9)} ${phone.substring(9, 13)}`;
     }
     return phone;
@@ -105,55 +223,205 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
   return (
     <div className="flex-1 flex flex-col bg-white">
       {/* Chat Header */}
-      <div className="p-4 border-b border-gray-200 bg-white">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center">
-              {sessionData?.user_name ? (
-                <span className="text-sm font-medium">
-                  {sessionData.user_name.charAt(0).toUpperCase()}
-                </span>
+      <div className="border-b border-gray-200 bg-white">
+        <div className="p-4 flex items-center justify-between gap-3">
+          {/* Avatar + Name */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center flex-shrink-0">
+              {displayName ? (
+                <span className="text-sm font-medium">{displayName.charAt(0).toUpperCase()}</span>
               ) : (
                 <User className="h-5 w-5" />
               )}
             </div>
-            <div>
-              <h2 className="font-semibold text-gray-900">
-                {sessionData?.user_name || formatPhoneNumber(contact.phone_number)}
-              </h2>
-              {sessionData?.user_name && (
-                <p className="text-sm text-gray-500">
-                  {formatPhoneNumber(contact.phone_number)}
-                </p>
+
+            <div className="min-w-0">
+              {/* Inline rename */}
+              {isEditingName ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    ref={nameInputRef}
+                    value={nameValue}
+                    onChange={e => setNameValue(e.target.value)}
+                    onKeyDown={handleNameKeyDown}
+                    onBlur={commitName}
+                    disabled={isSavingName}
+                    className="text-sm font-semibold border-b border-primary focus:outline-none bg-transparent w-40"
+                  />
+                  {isSavingName ? (
+                    <div className="w-3.5 h-3.5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <>
+                      <button onMouseDown={e => { e.preventDefault(); commitName(); }} aria-label="Save name" className="text-green-600 hover:text-green-700">
+                        <Check className="h-3.5 w-3.5" />
+                      </button>
+                      <button onMouseDown={e => { e.preventDefault(); cancelName(); }} aria-label="Cancel" className="text-gray-400 hover:text-gray-600">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 group/name">
+                  <h2 className="font-semibold text-gray-900 truncate">
+                    {displayName || formatPhoneNumber(contact.phone_number)}
+                  </h2>
+                  <button
+                    onClick={startEditName}
+                    className="opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity flex-shrink-0"
+                    aria-label="Rename contact"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {displayName && (
+                <p className="text-sm text-gray-500">{formatPhoneNumber(contact.phone_number)}</p>
               )}
             </div>
           </div>
 
-          {/* AI Toggle */}
-          <LoadingButton
-            onClick={handleToggleAI}
-            isLoading={isToggling}
-            loadingText="Switching..."
-            disabled={loading}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-              currentAIStatus
-                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-            }`}
-          >
-            {currentAIStatus ? (
-              <>
-                <ToggleRight className="h-4 w-4" />
-                AI On
-              </>
-            ) : (
-              <>
-                <ToggleLeft className="h-4 w-4" />
-                AI Off
-              </>
-            )}
-          </LoadingButton>
+          {/* Right actions */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Favorite */}
+            <button
+              onClick={handleToggleFavorite}
+              disabled={isTogglingFavorite}
+              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50"
+            >
+              <Star
+                className={`h-5 w-5 transition-colors ${
+                  isFavorite ? "fill-yellow-400 text-yellow-400" : "text-gray-400 hover:text-yellow-300"
+                }`}
+              />
+            </button>
+
+            {/* Notes toggle */}
+            <button
+              onClick={() => setNotesOpen(o => !o)}
+              aria-label="Toggle notes"
+              className={`relative p-1.5 rounded-full hover:bg-gray-100 transition-colors ${notesOpen ? "text-primary" : "text-gray-400"}`}
+            >
+              <StickyNote className="h-5 w-5" />
+              {notesValue && (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-yellow-400 rounded-full" />
+              )}
+            </button>
+
+            {/* AI Toggle */}
+            <LoadingButton
+              onClick={handleToggleAI}
+              isLoading={isToggling}
+              loadingText="Switching..."
+              disabled={loading}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                currentAIStatus
+                  ? "bg-green-100 text-green-700 hover:bg-green-200"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              {currentAIStatus ? (
+                <><ToggleRight className="h-4 w-4" />AI On</>
+              ) : (
+                <><ToggleLeft className="h-4 w-4" />AI Off</>
+              )}
+            </LoadingButton>
+          </div>
         </div>
+
+        {/* Notes panel */}
+        {notesOpen && (
+          <div className="px-4 pb-3 border-t border-gray-100 bg-gray-50">
+            <div className="pt-3">
+              {/* Header row */}
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-gray-600 flex items-center gap-1">
+                  <StickyNote className="h-3.5 w-3.5" /> Notes
+                </span>
+                <div className="flex items-center gap-2">
+                  {notesSaved && !isSavingNotes && (
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <Check className="h-3 w-3" /> Saved
+                    </span>
+                  )}
+                  {!notesEditing && notesValue && (
+                    <button
+                      onClick={handleClearNotes}
+                      disabled={isSavingNotes}
+                      className="text-xs text-red-400 hover:text-red-600 flex items-center gap-0.5 disabled:opacity-50"
+                      aria-label="Clear notes"
+                    >
+                      <Trash2 className="h-3 w-3" /> Clear
+                    </button>
+                  )}
+                  {!notesEditing && (
+                    <button
+                      onClick={startEditNotes}
+                      className="text-xs text-primary hover:text-primary/80 flex items-center gap-0.5"
+                      aria-label="Edit notes"
+                    >
+                      <Pencil className="h-3 w-3" /> Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Read mode */}
+              {!notesEditing ? (
+                <div
+                  onClick={startEditNotes}
+                  className="min-h-[60px] text-sm text-gray-700 bg-white border border-gray-200 rounded-md px-3 py-2 cursor-text whitespace-pre-wrap"
+                >
+                  {notesValue || (
+                    <span className="text-gray-400 italic">No notes yet. Click Edit to add notes.</span>
+                  )}
+                </div>
+              ) : (
+                /* Edit mode */
+                <div>
+                  <textarea
+                    value={notesDraft}
+                    onChange={handleNotesDraftChange}
+                    placeholder="Add notes about this contact..."
+                    rows={4}
+                    autoFocus
+                    className="w-full text-sm border border-primary rounded-md px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                  />
+                  <div className="flex items-center justify-between mt-1.5">
+                    <span className="text-xs text-gray-400">{notesDraft.length}/{NOTES_MAX_LENGTH}</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={cancelEditNotes}
+                        disabled={isSavingNotes}
+                        className="text-xs text-gray-500 hover:text-gray-700 px-2 py-1 rounded border border-gray-300 bg-white disabled:opacity-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveNotes}
+                        disabled={isSavingNotes}
+                        className="text-xs text-white bg-primary hover:bg-primary/90 px-3 py-1 rounded flex items-center gap-1 disabled:opacity-50"
+                      >
+                        {isSavingNotes ? (
+                          <>
+                            <div className="w-2.5 h-2.5 border border-white border-t-transparent rounded-full animate-spin" />
+                            Saving...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-3 w-3" /> Save
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Messages Area */}
@@ -171,10 +439,9 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
               <Bot className="h-12 w-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-500">No messages yet</p>
               <p className="text-sm text-gray-400 mt-1">
-                {currentAIStatus 
+                {currentAIStatus
                   ? "AI replies are enabled. Messages will appear here."
-                  : "Send a message to start the conversation."
-                }
+                  : "Send a message to start the conversation."}
               </p>
             </div>
           </div>
@@ -194,7 +461,7 @@ const ChatPanel = ({ contact, sessionData, loading, onToggleAI, onSendReply, ref
             disabled={isSending}
             className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
             rows={1}
-            style={{ minHeight: '40px', maxHeight: '120px' }}
+            style={{ minHeight: "40px", maxHeight: "120px" }}
           />
           <LoadingButton
             onClick={handleSendReply}
