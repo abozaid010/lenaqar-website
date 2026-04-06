@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Dialog from "@/components/ui/Dialog";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -14,6 +14,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [jobResult, setJobResult] = useState(null);
+  const [isFormValid, setIsFormValid] = useState(false);
 
   const validatePhoneNumber = (phone) => {
     // Basic phone number validation - should start with + and contain 8-15 digits
@@ -86,7 +87,6 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   const validateForm = () => {
     // Clear previous messages
     setError("");
-    setSuccess("");
     
     // Validate contacts
     if (!validateContacts(contacts)) {
@@ -124,6 +124,47 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
     
     return true;
   };
+
+  // Real-time form validation
+  useEffect(() => {
+    const checkFormValidity = () => {
+      // Check contacts
+      try {
+        const parsedContacts = JSON.parse(contacts);
+        if (!Array.isArray(parsedContacts) || parsedContacts.length === 0) {
+          setIsFormValid(false);
+          return;
+        }
+        
+        // Validate each contact
+        for (const contact of parsedContacts) {
+          if (!contact?.phone || !contact?.name) {
+            setIsFormValid(false);
+            return;
+          }
+        }
+      } catch {
+        setIsFormValid(false);
+        return;
+      }
+      
+      // Check language code
+      if (!languageCode.trim() || !validateLanguageCode(languageCode)) {
+        setIsFormValid(false);
+        return;
+      }
+      
+      // Check template name
+      if (!templateName.trim() || templateName.trim().length < 2) {
+        setIsFormValid(false);
+        return;
+      }
+      
+      setIsFormValid(true);
+    };
+
+    checkFormValidity();
+  }, [contacts, languageCode, templateName]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -329,7 +370,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
           </button>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isFormValid}
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
           >
             {isSubmitting ? (

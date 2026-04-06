@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
@@ -18,6 +18,7 @@ import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDi
 const CampaignChat = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [aiFilter, setAiFilter] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isTogglingAI, setIsTogglingAI] = useState(false);
@@ -26,8 +27,28 @@ const CampaignChat = () => {
   const [sortOrder, setSortOrder] = useState("desc");
   const queryClient = useQueryClient();
 
+  // Debounce utility function
+  const debounce = (func, delay) => {
+    let timeoutId;
+    return (...args) => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => func.apply(null, args), delay);
+    };
+  };
+
   // Use shared access control hook
   const { isAdmin, clientId, canAccessCampaignChat, isLoading: accessLoading } = useCampaignChatAccess();
+
+  // Debounced search effect
+  const debouncedSearch = useCallback(
+    debounce((query) => setDebouncedSearchQuery(query), 400),
+    []
+  );
+
+  // Update debounced search when searchQuery changes
+  useEffect(() => {
+    debouncedSearch(searchQuery);
+  }, [searchQuery, debouncedSearch]);
 
   // Cleanup function for component unmount
   useEffect(() => {
@@ -40,15 +61,17 @@ const CampaignChat = () => {
 
   // Fetch sessions list
   const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError } = useQuery({
-    queryKey: ["campaignSessions", searchQuery, aiFilter, currentPage],
+    queryKey: ["campaignSessions", debouncedSearchQuery, aiFilter, currentPage],
     queryFn: () => fetchCampaignSessions({
-      search: searchQuery,
+      search: debouncedSearchQuery,
       ai_reply_enabled: aiFilter,
       page: currentPage,
       page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE
     }),
     enabled: canAccessCampaignChat,
-    keepPreviousData: true
+    keepPreviousData: true,
+    staleTime: 30000, // Cache for 30 seconds to reduce refetches
+    refetchOnWindowFocus: false // Don't refetch on window focus for better UX
   });
 
   // Fetch selected session details
@@ -160,17 +183,20 @@ const CampaignChat = () => {
     }
   };
 
-  const sortedSessions = [...(sessionsData?.sessions || [])].sort((a, b) => {
-    if (sortBy === "last_user_message_at") {
-      const aTime = a.last_user_message_at ? new Date(a.last_user_message_at).getTime() : 0;
-      const bTime = b.last_user_message_at ? new Date(b.last_user_message_at).getTime() : 0;
-      return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
-    }
-    // total_messages_received
-    const aCount = a.total_messages_received || 0;
-    const bCount = b.total_messages_received || 0;
-    return sortOrder === "desc" ? bCount - aCount : aCount - bCount;
-  });
+  const sortedSessions = useMemo(() => {
+    const sessions = [...(sessionsData?.sessions || [])];
+    return sessions.sort((a, b) => {
+      if (sortBy === "last_user_message_at") {
+        const aTime = a.last_user_message_at ? new Date(a.last_user_message_at).getTime() : 0;
+        const bTime = b.last_user_message_at ? new Date(b.last_user_message_at).getTime() : 0;
+        return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
+      }
+      // total_messages_received
+      const aCount = a.total_messages_received || 0;
+      const bCount = b.total_messages_received || 0;
+      return sortOrder === "desc" ? bCount - aCount : aCount - bCount;
+    });
+  }, [sessionsData?.sessions, sortBy, sortOrder]);
 
   const handleSortChange = (field) => {
     if (sortBy === field) {
