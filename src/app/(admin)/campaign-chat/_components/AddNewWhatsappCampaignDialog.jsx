@@ -5,7 +5,7 @@ import Dialog from "@/components/ui/Dialog";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { API_BASE_URL } from "@/lib/apiConfig";
-import { Send } from "lucide-react";
+import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 
 const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   const [contacts, setContacts] = useState('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
@@ -13,7 +13,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   const [templateName, setTemplateName] = useState("download_app_message1");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [jobResult, setJobResult] = useState(null);
 
   const validatePhoneNumber = (phone) => {
     // Basic phone number validation - should start with + and contain 8-15 digits
@@ -156,24 +156,16 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
       }
 
       const result = await response.json();
-      console.log("Campaign sent successfully:", result);
-      
+
       // Reset form
       setContacts('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
       setLanguageCode("ar_EG");
       setTemplateName("download_app_message1");
-      
-      // Show success message
-      setSuccess("Campaign sent successfully!");
-      
-      // Close dialog after a short delay
-      setTimeout(() => {
-        onClose();
-        setSuccess("");
-      }, 1500);
+
+      // Show job result
+      setJobResult(result);
       
     } catch (err) {
-      setSuccess("");
       setError(err.message || "Failed to send campaign. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -184,9 +176,12 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
     if (error && error.toLowerCase().includes(field.toLowerCase())) {
       setError("");
     }
-    if (success) {
-      setSuccess("");
-    }
+  };
+
+  const handleClose = () => {
+    setJobResult(null);
+    setError("");
+    onClose();
   };
 
   const handleContactsChange = (e) => {
@@ -207,24 +202,69 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   return (
     <Dialog
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title="Add New WhatsApp Campaign"
       showCloseButton={!isSubmitting}
       closeOnOutsideClick={!isSubmitting}
       closeOnEscape={!isSubmitting}
     >
+      {/* Job Result View */}
+      {jobResult ? (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="font-medium text-green-800">{jobResult.message || "Campaign created successfully"}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-500 mb-1">Status</p>
+              <div className="flex items-center gap-1.5">
+                <Clock className="h-4 w-4 text-yellow-500" />
+                <span className="font-medium text-gray-800 capitalize">{jobResult.status}</span>
+              </div>
+            </div>
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-500 mb-1">Total Contacts</p>
+              <div className="flex items-center gap-1.5">
+                <Users className="h-4 w-4 text-blue-500" />
+                <span className="font-medium text-gray-800">{jobResult.total}</span>
+              </div>
+            </div>
+            {jobResult.invalid_numbers > 0 && (
+              <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-xs text-red-500 mb-1">Invalid Numbers</p>
+                <div className="flex items-center gap-1.5">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span className="font-medium text-red-700">{jobResult.invalid_numbers}</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <p className="text-xs text-gray-500 mb-1">Job ID</p>
+            <p className="font-mono text-sm text-gray-700 break-all">{jobResult.job_id}</p>
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={handleClose}
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      ) : (
       <form onSubmit={handleSubmit} className="h-full flex flex-col">
         {/* Error Message */}
         {error && (
           <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
             <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-md">
-            <p className="text-sm text-green-600">{success}</p>
           </div>
         )}
 
@@ -281,7 +321,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             disabled={isSubmitting}
             className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -306,6 +346,7 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
           </button>
         </div>
       </form>
+      )}
     </Dialog>
   );
 };

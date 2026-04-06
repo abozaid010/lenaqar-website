@@ -1072,7 +1072,6 @@ export async function fetchDataProjection() {
   }
 }
 
-// Campaign Chat API //
 export async function fetchCampaignSessions({ 
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   search = "", 
