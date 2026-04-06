@@ -174,6 +174,14 @@ export default function AddCompoundDialog({
     finishing_type: normalizeFinishingType(
       projectData?.finishing_type || projectData?.project?.finishing_type
     ),
+    facility_management:
+      projectData?.facility_management ||
+      projectData?.project?.facility_management ||
+      null,
+    orientation_url:
+      projectData?.orientation_url ||
+      projectData?.project?.orientation_url ||
+      "",
     delivery_date:
       projectData?.delivery_date !== undefined &&
       projectData?.delivery_date !== null
@@ -258,6 +266,14 @@ export default function AddCompoundDialog({
             projectData.finishing_type ||
             projectData?.project?.finishing_type ||
             [],
+          facility_management:
+            projectData.facility_management ||
+            projectData?.project?.facility_management ||
+            null,
+          orientation_url:
+            projectData.orientation_url ||
+            projectData?.project?.orientation_url ||
+            "",
           delivery_date:
             projectData.delivery_date !== undefined &&
             projectData.delivery_date !== null
@@ -302,6 +318,8 @@ export default function AddCompoundDialog({
           payment_plans: [],
           building_types_images: {},
           finishing_type: [],
+          facility_management: null,
+          orientation_url: "",
           delivery_date: 4,
         });
       }
@@ -330,6 +348,8 @@ export default function AddCompoundDialog({
         images: [],
         building_types_images: {},
         finishing_type: [],
+        facility_management: null,
+        orientation_url: "",
         delivery_date: 4,
       });
 
@@ -450,6 +470,17 @@ export default function AddCompoundDialog({
           projectData?.project?.finishing_type ||
           prev.finishing_type ||
           [],
+        facility_management:
+          projectData?.facility_management !== undefined
+            ? projectData.facility_management
+            : projectData?.project?.facility_management !== undefined
+              ? projectData.project.facility_management
+              : prev.facility_management,
+        orientation_url:
+          projectData?.orientation_url ||
+          projectData?.project?.orientation_url ||
+          prev.orientation_url ||
+          "",
         delivery_date:
           projectData?.delivery_date !== undefined &&
           projectData?.delivery_date !== null
@@ -840,6 +871,20 @@ export default function AddCompoundDialog({
           : [],
       }));
 
+      // Only include facility_management when name is provided
+      const facilityManagementForApi = formData.facility_management?.name?.trim()
+        ? {
+            name: formData.facility_management.name,
+            ...(formData.facility_management.description?.trim() && {
+              description: formData.facility_management.description,
+            }),
+            ...(formData.facility_management.rating !== "" &&
+              formData.facility_management.rating !== undefined && {
+                rating: parseFloat(formData.facility_management.rating),
+              }),
+          }
+        : null;
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -850,6 +895,8 @@ export default function AddCompoundDialog({
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
         payment_plans: paymentPlansForApi,
+        facility_management: facilityManagementForApi,
+        orientation_url: formData.orientation_url?.trim() || null,
       };
 
       console.log("[handleSubmit] Client ID info:", {
@@ -1098,6 +1145,8 @@ export default function AddCompoundDialog({
         payment_plans: [],
         building_types_images: {},
         finishing_type: [],
+        facility_management: null,
+        orientation_url: "",
         delivery_date: 4,
       });
     } catch (error) {
@@ -1707,6 +1756,110 @@ export default function AddCompoundDialog({
                   ))}
                 </div>
               )}
+
+            {/* Orientation URL */}
+            <div>
+              <LenaTextField
+                type="url"
+                name="orientation_url"
+                label={t.formLabels?.orientationUrl || "Orientation Video URL"}
+                value={formData.orientation_url}
+                onChange={handleChange}
+                placeholder="https://example.com/orientation-image.jpg"
+              />
+            </div>
+
+            {/* Facility Management */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t.formLabels?.facilityManagement || "Facility Management"}
+                </label>
+                {formData.facility_management ? (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        facility_management: null,
+                      }))
+                    }
+                    className="text-red-500 text-sm hover:text-red-600"
+                  >
+                    {t.buttons?.remove || "Remove"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        facility_management: { name: "", description: "", rating: "" },
+                      }))
+                    }
+                    className="text-blue-600 text-sm hover:text-blue-700"
+                  >
+                    + {t.buttons?.addNew || "Add"}
+                  </button>
+                )}
+              </div>
+              {formData.facility_management && (
+                <div className="space-y-2 p-3 border border-gray-200 rounded-md">
+                  <LenaTextField
+                    type="text"
+                    name="facility_management_name"
+                    label={t.formLabels?.facilityManagementName || "Company Name"}
+                    value={formData.facility_management.name}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        facility_management: {
+                          ...prev.facility_management,
+                          name: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="Elite Facility Management"
+                    required
+                  />
+                  <LenaTextarea
+                    name="facility_management_description"
+                    label={t.formLabels?.facilityManagementDescription || "Description"}
+                    value={formData.facility_management.description}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        facility_management: {
+                          ...prev.facility_management,
+                          description: e.target.value,
+                        },
+                      }))
+                    }
+                    rows={3}
+                    placeholder="Describe facility management services..."
+                  />
+                  <LenaTextField
+                    type="number"
+                    name="facility_management_rating"
+                    label={t.formLabels?.facilityManagementRating || "Rating (0–5)"}
+                    value={formData.facility_management.rating}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        facility_management: {
+                          ...prev.facility_management,
+                          rating: e.target.value,
+                        },
+                      }))
+                    }
+                    placeholder="4.5"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+              )}
+            </div>
 
             {/* Project Images */}
             <div>

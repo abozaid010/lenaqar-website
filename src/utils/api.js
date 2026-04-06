@@ -1072,7 +1072,6 @@ export async function fetchDataProjection() {
   }
 }
 
-// Campaign Chat API //
 export async function fetchCampaignSessions({ 
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   search = "", 
@@ -1169,7 +1168,79 @@ export async function toggleCampaignAIReply({
   }
 }
 
-export async function sendCampaignReply({ 
+export async function updateCampaignSessionName({
+  client_id = CAMPAIGN_CHAT_CLIENT_ID,
+  phone_number,
+  user_name
+} = {}) {
+  if (!phone_number || !user_name) {
+    throw new Error("phone_number and user_name are required");
+  }
+
+  try {
+    const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UPDATE_NAME, {
+      client_id,
+      phone_number,
+      user_name
+    }, {
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update session name:", error.message);
+    throw error;
+  }
+}
+
+export async function toggleCampaignFavorite({
+  client_id = CAMPAIGN_CHAT_CLIENT_ID,
+  phone_number,
+  is_favorite
+} = {}) {
+  if (!phone_number || is_favorite === undefined) {
+    throw new Error("phone_number and is_favorite are required");
+  }
+
+  try {
+    const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.TOGGLE_FAVORITE, {
+      client_id,
+      phone_number,
+      is_favorite
+    }, {
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to toggle favorite:", error.message);
+    throw error;
+  }
+}
+
+export async function updateCampaignNotes({
+  client_id = CAMPAIGN_CHAT_CLIENT_ID,
+  phone_number,
+  notes = null
+} = {}) {
+  if (!phone_number) {
+    throw new Error("phone_number is required");
+  }
+
+  try {
+    const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UPDATE_NOTES, {
+      client_id,
+      phone_number,
+      notes
+    }, {
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update notes:", error.message);
+    throw error;
+  }
+}
+
+export async function sendCampaignReply({
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   phone_number, 
   admin_reply_text = null, 

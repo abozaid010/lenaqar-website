@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus } from "lucide-react";
-import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply } from "@/utils/api";
+import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
+import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
@@ -22,6 +22,8 @@ const CampaignChat = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isTogglingAI, setIsTogglingAI] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [sortBy, setSortBy] = useState("last_user_message_at");
+  const [sortOrder, setSortOrder] = useState("desc");
   const queryClient = useQueryClient();
 
   // Use shared access control hook
@@ -111,12 +113,71 @@ const CampaignChat = () => {
         phone_number: phoneNumber,
         admin_reply_text: message
       });
-      
-      // Refetch session to show new message
       await refetchSession();
     } catch (error) {
       console.error("Failed to send reply:", error);
-      // Could show toast notification here
+    }
+  };
+
+  // Handle rename
+  const handleRename = async (phoneNumber, userName) => {
+    try {
+      await updateCampaignSessionName({ phone_number: phoneNumber, user_name: userName });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, user_name: userName }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+      await refetchSession();
+    } catch (error) {
+      console.error("Failed to rename session:", error);
+    }
+  };
+
+  // Handle favorite toggle
+  const handleToggleFavorite = async (phoneNumber, isFavorite) => {
+    try {
+      await toggleCampaignFavorite({ phone_number: phoneNumber, is_favorite: isFavorite });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, is_favorite: isFavorite }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+      await refetchSession();
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    }
+  };
+
+  // Handle notes update
+  const handleUpdateNotes = async (phoneNumber, notes) => {
+    try {
+      await updateCampaignNotes({ phone_number: phoneNumber, notes });
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSelectedContact(prev => ({ ...prev, notes }));
+      }
+      queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
+    } catch (error) {
+      console.error("Failed to update notes:", error);
+    }
+  };
+
+  const sortedSessions = [...(sessionsData?.sessions || [])].sort((a, b) => {
+    if (sortBy === "last_user_message_at") {
+      const aTime = a.last_user_message_at ? new Date(a.last_user_message_at).getTime() : 0;
+      const bTime = b.last_user_message_at ? new Date(b.last_user_message_at).getTime() : 0;
+      return sortOrder === "desc" ? bTime - aTime : aTime - bTime;
+    }
+    // total_messages_received
+    const aCount = a.total_messages_received || 0;
+    const bCount = b.total_messages_received || 0;
+    return sortOrder === "desc" ? bCount - aCount : aCount - bCount;
+  });
+
+  const handleSortChange = (field) => {
+    if (sortBy === field) {
+      setSortOrder(prev => prev === "desc" ? "asc" : "desc");
+    } else {
+      setSortBy(field);
+      setSortOrder("desc");
     }
   };
 
@@ -194,12 +255,12 @@ const CampaignChat = () => {
           </div>
 
           {/* AI Filter */}
-          <div className="flex gap-2">
+          <div className="flex gap-2 mb-3">
             <button
               onClick={() => setAiFilter(null)}
               className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                aiFilter === null 
-                  ? SELECTION_COLORS.SELECTED 
+                aiFilter === null
+                  ? SELECTION_COLORS.SELECTED
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -208,8 +269,8 @@ const CampaignChat = () => {
             <button
               onClick={() => setAiFilter(true)}
               className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === true 
-                  ? SELECTION_COLORS.SELECTED 
+                aiFilter === true
+                  ? SELECTION_COLORS.SELECTED
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -219,8 +280,8 @@ const CampaignChat = () => {
             <button
               onClick={() => setAiFilter(false)}
               className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === false 
-                  ? SELECTION_COLORS.SELECTED 
+                aiFilter === false
+                  ? SELECTION_COLORS.SELECTED
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
@@ -228,15 +289,48 @@ const CampaignChat = () => {
               AI Off
             </button>
           </div>
+
+          {/* Sort Controls */}
+          <div className="flex items-center gap-1">
+            <ArrowDownUp className="h-3 w-3 text-gray-400 flex-shrink-0" />
+            <button
+              onClick={() => handleSortChange("last_user_message_at")}
+              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+                sortBy === "last_user_message_at"
+                  ? SELECTION_COLORS.SELECTED
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              Last Message
+              {sortBy === "last_user_message_at" && (
+                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+              )}
+            </button>
+            <button
+              onClick={() => handleSortChange("total_messages_received")}
+              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+                sortBy === "total_messages_received"
+                  ? SELECTION_COLORS.SELECTED
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              Most Messages
+              {sortBy === "total_messages_received" && (
+                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Contact List */}
         <ErrorBoundary errorMessage="Failed to load conversations. Please try again.">
           <ContactList
-            sessions={sessionsData?.sessions || []}
+            sessions={sortedSessions}
             selectedContact={selectedContact}
             onContactSelect={handleContactSelect}
             loading={sessionsLoading || isTogglingAI}
+            onRename={handleRename}
+            onToggleFavorite={handleToggleFavorite}
           />
         </ErrorBoundary>
 
@@ -277,6 +371,9 @@ const CampaignChat = () => {
               onToggleAI={handleToggleAI}
               onSendReply={handleSendReply}
               refetchSession={refetchSession}
+              onRename={handleRename}
+              onToggleFavorite={handleToggleFavorite}
+              onUpdateNotes={handleUpdateNotes}
             />
           ) : (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
