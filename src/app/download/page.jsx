@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { ANALYTICS, getGAScriptUrl, getGAConfig } from '@/constants/analytics';
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Download, Smartphone, Star, ArrowRight } from "lucide-react";

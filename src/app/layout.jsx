@@ -8,6 +8,7 @@ import { defaultMetadata } from "./metadata";
 import OrganizationSchema from "@/components/schema/OrganizationSchema";
 import LocalBusinessSchema from "@/components/schema/LocalBusinessSchema";
 import WebSiteSchema from "@/components/schema/WebSiteSchema";
+import { ANALYTICS, getGAScriptUrl, getGAConfig } from '@/constants/analytics';
 import Script from "next/script";
 
 const montserrat = Montserrat({
@@ -58,7 +59,7 @@ export default async function RootLayout({ children }) {
     >
       <body>
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-L76Z647950"
+          src={getGAScriptUrl()}
           strategy="afterInteractive"
         />
         <Script id="google-analytics" strategy="afterInteractive">
@@ -66,7 +67,7 @@ export default async function RootLayout({ children }) {
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
-            gtag('config', 'G-L76Z647950');
+            gtag('config', '${getGAConfig()}');
           `}
         </Script>
         <OrganizationSchema />
