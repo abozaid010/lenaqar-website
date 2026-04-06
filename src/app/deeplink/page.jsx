@@ -23,6 +23,7 @@ export default function DeeplinkPage() {
     });
   }, [type, id, trackEvent]);
 
+  
   return (
     <>
       <Head>
