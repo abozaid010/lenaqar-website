@@ -1034,7 +1034,7 @@ export async function createPaymentPlan(paymentPlanData) {
 
 export async function updatePaymentPlan(id, paymentPlanData) {
   try {
-    const response = await axiosInstance.patch(`/payment-plans/${id}`, paymentPlanData);
+    const response = await axiosInstance.put(`/payment-plans/${id}`, paymentPlanData);
     return response.data;
   } catch (error) {
     console.error("Failed to update payment plan:", error.message);
