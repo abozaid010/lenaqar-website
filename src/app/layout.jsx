@@ -57,7 +57,7 @@ export default async function RootLayout({ children }) {
       className={`${montserrat.variable} ${cairo.className}`}
       dir={initialLocale === "ar" ? "rtl" : "ltr"}
     >
-      <body>
+      <head>
         <Script
           src={getGAScriptUrl()}
           strategy="afterInteractive"
@@ -65,11 +65,16 @@ export default async function RootLayout({ children }) {
         <Script id="google-analytics" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
+            function gtag(){window.dataLayer.push(arguments);}
+            window.gtag = gtag;
             gtag('js', new Date());
-            gtag('config', '${getGAConfig()}');
+            gtag('config', '${getGAConfig()}', {
+              page_location: window.location.href
+            });
           `}
         </Script>
+      </head>
+      <body>
         <OrganizationSchema />
         <LocalBusinessSchema />
         <WebSiteSchema />

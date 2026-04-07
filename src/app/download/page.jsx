@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { ANALYTICS, getGAScriptUrl, getGAConfig } from '@/constants/analytics';
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Download, Smartphone, Star, ArrowRight } from "lucide-react";
 
 // Constants
-const COUNTDOWN_DURATION = 3;
+const COUNTDOWN_DURATION = 30;
 const APP_STORE_URLS = {
   ios: "https://apps.apple.com/eg/app/lenaai-dashboard/id6745050088",
   android: "https://play.google.com/store/apps/details?id=net.lenaai.LenaAIDashboardApp",
@@ -86,37 +85,41 @@ export default function DownloadPage() {
     return {
       utm_source: params.get('utm_source') || 'direct',
       utm_campaign: params.get('utm_campaign') || 'none',
+      phone: params.get('phone') || null,
     };
   }, []);
 
   const trackDownload = useCallback((platform, buttonType = 'primary') => {
-    if (typeof gtag !== 'undefined') {
-      const { utm_source, utm_campaign } = getUtmParams();
-      gtag('event', 'download_click', {
+    if (typeof window.gtag !== 'undefined') {
+      const { utm_source, utm_campaign, phone } = getUtmParams();
+      window.gtag('event', 'download_click', {
         platform,
         button_type: buttonType,
         utm_source,
         utm_campaign,
+        phone,
         timestamp: new Date().toISOString()
       });
     }
   }, [getUtmParams]);
 
   const trackPageLoad = useCallback(() => {
-    if (typeof gtag !== 'undefined') {
-      const { utm_source, utm_campaign } = getUtmParams();
-      gtag('event', 'download_page_view', {
+    if (typeof window.gtag !== 'undefined') {
+      const { utm_source, utm_campaign, phone } = getUtmParams();
+      window.gtag('event', 'download_page_view', {
         page: 'download',
         platform,
         utm_source,
         utm_campaign,
+        phone,
       });
       // Fire a dedicated campaign arrival event only when UTM params are present
-      if (utm_source !== 'direct' || utm_campaign !== 'none') {
-        gtag('event', 'campaign_arrival', {
+      if (utm_source !== 'direct' || utm_campaign !== 'none' || phone) {
+        window.gtag('event', 'campaign_arrival', {
           utm_source,
           utm_campaign,
           platform,
+          phone,
         });
       }
     }
