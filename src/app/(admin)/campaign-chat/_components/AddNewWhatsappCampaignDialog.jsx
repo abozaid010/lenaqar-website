@@ -8,7 +8,7 @@ import { API_BASE_URL } from "@/lib/apiConfig";
 import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 
 const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
-  const [contacts, setContacts] = useState('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
+  const [contacts, setContacts] = useState('[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]');
   const [languageCode, setLanguageCode] = useState("ar_EG");
   const [templateName, setTemplateName] = useState("download_app_message1");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -22,9 +22,9 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   };
 
   const validateLanguageCode = (code) => {
-    // Language code format: ll_CC (e.g., ar_EG, en_US)
-    const langRegex = /^[a-z]{2}_[A-Z]{2}$/;
-    return langRegex.test(code.trim());
+    // Accept any text with length > 0, no format restrictions
+    const trimmedCode = code.trim();
+    return trimmedCode.length > 0;
   };
 
   const validateContacts = (contactsStr) => {
@@ -93,32 +93,26 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
       return false;
     }
     
-    // Validate language code
+    // Validate language code - more flexible
     if (!languageCode.trim()) {
       setError("Language code is required");
       return false;
     }
     
+    // Only show validation error on submit if format is clearly wrong
     if (!validateLanguageCode(languageCode)) {
-      setError("Invalid language code format. Use format: ll_CC (e.g., ar_EG, en_US)");
+      setError("Invalid language code format. Use format: ll (e.g., ar, en) or ll_CC (e.g., ar_EG, en_US)");
       return false;
     }
     
-    // Validate template name
+    // Validate template name - more flexible
     if (!templateName.trim()) {
       setError("Template name is required");
       return false;
     }
     
-    if (templateName.trim().length < 2) {
-      setError("Template name must be at least 2 characters long");
-      return false;
-    }
-    
-    // Template name should only contain letters, numbers, underscores, and hyphens
-    const templateNameRegex = /^[a-zA-Z0-9_-]+$/;
-    if (!templateNameRegex.test(templateName.trim())) {
-      setError("Template name can only contain letters, numbers, underscores, and hyphens");
+    if (templateName.trim().length < 1) {
+      setError("Template name must be at least 1 character long");
       return false;
     }
     
@@ -148,14 +142,14 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
         return;
       }
       
-      // Check language code
-      if (!languageCode.trim() || !validateLanguageCode(languageCode)) {
+      // Check language code - more flexible validation
+      if (!languageCode.trim()) {
         setIsFormValid(false);
         return;
       }
       
-      // Check template name
-      if (!templateName.trim() || templateName.trim().length < 2) {
+      // Check template name - more flexible validation
+      if (!templateName.trim() || templateName.trim().length < 1) {
         setIsFormValid(false);
         return;
       }
