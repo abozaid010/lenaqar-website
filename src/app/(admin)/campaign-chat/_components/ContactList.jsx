@@ -6,10 +6,31 @@ import { Bot, User, MessageCircle, Star, Pencil, Check, X } from "lucide-react";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { ContactListSkeleton } from "@/components/ui/loading-states";
 
-const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite }) => {
+const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails }) => {
   const [editingPhone, setEditingPhone] = useState(null);
   const [editValue, setEditValue] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState("all");
   const inputRef = useRef(null);
+
+  // Derive all distinct template names from loaded session details
+  const allTemplates = sessionDetails 
+    ? [...new Set(
+        Object.values(sessionDetails)
+          .flatMap(session => 
+            (session.history ?? [])
+              .filter(entry => entry.template_name)
+              .map(entry => entry.template_name)
+          )
+      )]
+    : [];
+
+  // Filter sessions based on selected template
+  const filteredSessions = selectedTemplate === "all" 
+    ? sessions 
+    : sessions.filter(session => {
+        const details = sessionDetails?.[session.phone_number];
+        return details?.history?.some(entry => entry.template_name === selectedTemplate);
+      });
 
   const formatPhoneNumber = (phone) => {
     if (!phone) return "Unknown";
@@ -80,7 +101,38 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
 
   return (
     <div className="flex-1 overflow-y-auto">
-      {sessions.map((session) => {
+      {/* Template Filter Pills */}
+      {allTemplates.length > 0 && (
+        <div className="p-3 border-b border-gray-100 bg-gray-50">
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setSelectedTemplate("all")}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                selectedTemplate === "all"
+                  ? "bg-primary text-white"
+                  : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              All
+            </button>
+            {allTemplates.map(template => (
+              <button
+                key={template}
+                onClick={() => setSelectedTemplate(template)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  selectedTemplate === template
+                    ? "bg-primary text-white"
+                    : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {template}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      
+      {filteredSessions.map((session) => {
         const isSelected = selectedContact?.phone_number === session.phone_number;
         const isEditing = editingPhone === session.phone_number;
 

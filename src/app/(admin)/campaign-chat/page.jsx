@@ -25,6 +25,7 @@ const CampaignChat = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState("last_user_message_at");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [sessionDetails, setSessionDetails] = useState({});
   const queryClient = useQueryClient();
 
   // Debounce utility function
@@ -85,6 +86,16 @@ const CampaignChat = () => {
     enabled: !!selectedContact?.phone_number,
     keepPreviousData: true
   });
+
+  // Update sessionDetails when sessionData is loaded
+  useEffect(() => {
+    if (sessionData && selectedContact?.phone_number) {
+      setSessionDetails(prev => ({
+        ...prev,
+        [selectedContact.phone_number]: sessionData
+      }));
+    }
+  }, [sessionData, selectedContact?.phone_number]);
 
   // Handle contact selection
   const handleContactSelect = (contact) => {
@@ -357,6 +368,7 @@ const CampaignChat = () => {
             loading={sessionsLoading || isTogglingAI}
             onRename={handleRename}
             onToggleFavorite={handleToggleFavorite}
+            sessionDetails={sessionDetails}
           />
         </ErrorBoundary>
 

@@ -41,6 +41,9 @@ const MessageBubble = ({ message }) => {
     });
   };
 
+  // Only show template tag for admin messages that have template_name
+  const showTemplateTag = isAdmin && message.template_name;
+
   if (!isUser && !isAssistant && !isAdmin) {
     return null;
   }
@@ -70,6 +73,17 @@ const MessageBubble = ({ message }) => {
 
         {/* Message Content */}
         <div className={`flex flex-col ${isRightSide ? "items-end" : "items-start"}`}>
+          {/* Template Tag */}
+          {showTemplateTag && (
+            <div className="mb-2 px-2 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-mono flex items-center gap-1">
+              <span>Tag</span>
+              {message.template_name}
+              {message.language_code && (
+                <span className="text-xs bg-slate-200 px-1 rounded">[{message.language_code}]</span>
+              )}
+            </div>
+          )}
+
           {/* Role Label for non-user messages */}
           {!isUser && (
             <span className={`text-xs mb-1 px-2 ${
@@ -79,6 +93,15 @@ const MessageBubble = ({ message }) => {
             }`}>
               {isAssistant ? "AI Assistant" : "Admin"}
             </span>
+          )}
+
+          {/* Image */}
+          {message.image_url && (
+            <img 
+              src={message.image_url} 
+              alt="Message media" 
+              className="max-w-[200px] max-h-[200px] rounded-lg mb-2 object-cover"
+            />
           )}
 
           {/* Bubble */}
