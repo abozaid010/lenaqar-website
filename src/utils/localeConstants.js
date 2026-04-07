@@ -12,6 +12,7 @@ import {
   getPropertyIntent,
 } from "@/data/constants";
 
+
 export const useLocaleConstants = () => {
   const { t, locale } = useI18n();
 
