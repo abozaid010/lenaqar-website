@@ -45,6 +45,8 @@ import "swiper/css";
 import "swiper/css/pagination";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
+import OwnerActions from "@/components/ui/owner-actions";
+import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -127,6 +129,7 @@ const PaymentPlansBadges = ({ plans, locale, maxDisplay = 2 }) => {
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
   const { t, locale } = useI18n();
+  const { isDeveloper } = useBrokerPermission();
 
   // City filter state (declared early so cityEnName can be derived for the hook)
   const [selectedCities, setSelectedCities] = useState([]);
@@ -862,13 +865,15 @@ export default function ProjectsList({ clientId }) {
                   <Plus size={20} />
                   <span>{t.projectPage?.add || t.addNewProject || "Add"}</span>
                 </button>
-                <button
-                  onClick={() => setIsImportOpen(true)}
-                  className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
-                >
-                  <Plus size={20} />
-                  <span>{t.projectPage?.importButton || "Import"}</span>
-                </button>
+                {!isDeveloper && (
+                  <button
+                    onClick={() => setIsImportOpen(true)}
+                    className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
+                  >
+                    <Plus size={20} />
+                    <span>{t.projectPage?.importButton || "Import"}</span>
+                  </button>
+                )}
                 <VideoInstructionsDialog
                   variant="projects"
                   iconSize="lg"
@@ -1030,22 +1035,24 @@ export default function ProjectsList({ clientId }) {
                               {getDistrictDisplayName(project.district, project.city)}
                             </div>
                             <div className="flex-1"></div>
-                            <button
-                              onClick={() => handleEditClick(project)}
-                              className="ml-2 h-8 w-8 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
-                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                              title="Edit Project"
-                            >
-                              <Pencil size={16} />
-                            </button>
-                            <button
-                              onClick={(e) => handleDeleteClick(project, e)}
-                              className="ml-1 h-8 w-8 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
-                              style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                              title="Delete Project"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                            <OwnerActions item={project}>
+                              <button
+                                onClick={() => handleEditClick(project)}
+                                className="ml-2 h-8 w-8 p-2 bg-white/90 text-gray-700 rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
+                                title="Edit Project"
+                              >
+                                <Pencil size={16} />
+                              </button>
+                              <button
+                                onClick={(e) => handleDeleteClick(project, e)}
+                                className="ml-1 h-8 w-8 p-2 bg-white/90 hover:bg-red-600 text-gray-700 hover:text-white rounded-full shadow transition-all duration-200 aspect-square flex-shrink-0"
+                                style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
+                                title="Delete Project"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </OwnerActions>
                           </div>
 
                           {/* Property Types and Payment Plans */}
@@ -1617,32 +1624,34 @@ export default function ProjectsList({ clientId }) {
                                 </div>
                               )}
 
-                            <div className="absolute top-4 right-4 flex gap-2">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPhaseToEdit(
-                                    selectedProject.phases[selectedPhaseIdx]
-                                  );
-                                  setShowPhaseDialog(true);
-                                }}
-                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
-                              >
-                                <Pencil size={18} />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setPhaseToDelete(
-                                    selectedProject.phases[selectedPhaseIdx]
-                                  );
-                                  setShowDeleteDialog(true);
-                                }}
-                                className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
-                              >
-                                <Trash2 size={18} />
-                              </button>
-                            </div>
+                            <OwnerActions item={selectedProject}>
+                              <div className="absolute top-4 right-4 flex gap-2">
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPhaseToEdit(
+                                      selectedProject.phases[selectedPhaseIdx]
+                                    );
+                                    setShowPhaseDialog(true);
+                                  }}
+                                  className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-primary hover:text-white transition-all duration-200"
+                                >
+                                  <Pencil size={18} />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setPhaseToDelete(
+                                      selectedProject.phases[selectedPhaseIdx]
+                                    );
+                                    setShowDeleteDialog(true);
+                                  }}
+                                  className="p-2 bg-white/90 text-gray-700 rounded-full shadow hover:bg-red-600 hover:text-white transition-all duration-200"
+                                >
+                                  <Trash2 size={18} />
+                                </button>
+                              </div>
+                            </OwnerActions>
 
                             <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-6 py-4">
                               <div className="text-white">
