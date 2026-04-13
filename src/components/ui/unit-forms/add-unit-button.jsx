@@ -5,13 +5,14 @@ import { Edit, Plus } from "lucide-react";
 import { useState } from "react";
 import AddUnitModal from "./add-unit-Modal";
 
-export default function AddUnitButton({ isEdit = false, unitData }) {
+export default function AddUnitButton({ isEdit = false, unitData, disabled = false }) {
   const { t } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [extractedQueue, setExtractedQueue] = useState([]);
   const [initialUnitData, setInitialUnitData] = useState(null);
 
   const openModal = () => {
+    if (disabled) return;
     setInitialUnitData(null);
     setExtractedQueue([]);
     setIsOpen(true);
@@ -42,9 +43,11 @@ export default function AddUnitButton({ isEdit = false, unitData }) {
       <button
         type="button"
         onClick={openModal}
-        className={`flex-shrink-0 sm:w-auto  px-[16px] py-[10px] h-[40px] bg-primary hover:opacity-90 text-white rounded-[5px]  flex items-center justify-center transition duration-300 ${
+        disabled={disabled}
+        title={disabled ? "You can only edit your own units" : undefined}
+        className={`flex-shrink-0 sm:w-auto px-[16px] py-[10px] h-[40px] bg-primary text-white rounded-[5px] flex items-center justify-center transition duration-300 ${
           t.dir === "rtl" ? "flex-row-reverse" : ""
-        }`}
+        } ${disabled ? "opacity-40 cursor-not-allowed" : "hover:opacity-90"}`}
       >
         {isEdit ? (
           <span className="flex items-center gap-2">

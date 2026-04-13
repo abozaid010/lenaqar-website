@@ -15,7 +15,9 @@ import { useEffect, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
+import OwnerActions from "@/components/ui/owner-actions";
 import ImageWithLoader from "@/components/ui/image-with-loader";
+import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 
 export default function DevelopersClientWrapper({ clientId }) {
   // This page should use ONE source of truth.
@@ -26,6 +28,7 @@ export default function DevelopersClientWrapper({ clientId }) {
     true
   );
   const { t, locale } = useI18n();
+  const { isDeveloper } = useBrokerPermission();
   const [developers, setDevelopers] = useState([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -280,13 +283,15 @@ export default function DevelopersClientWrapper({ clientId }) {
                   <Plus size={20} />
                   <span>{t.developerPage.addDeveloper}</span>
                 </button>
-                <button
-                  onClick={() => setIsImportOpen(true)}
-                  className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
-                >
-                  <Plus size={20} />
-                  <span>{t.developerPage?.importButton || "Import"}</span>
-                </button>
+                {!isDeveloper && (
+                  <button
+                    onClick={() => setIsImportOpen(true)}
+                    className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
+                  >
+                    <Plus size={20} />
+                    <span>{t.developerPage?.importButton || "Import"}</span>
+                  </button>
+                )}
                 <VideoInstructionsDialog
                   variant="developers"
                   iconSize="lg"
@@ -438,33 +443,35 @@ export default function DevelopersClientWrapper({ clientId }) {
                               <MoreVertical size={16} />
                             </button>
                             {openMenuId === d.id && (
-                              <div
-                                className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden`}
-                              >
-                                <button
-                                  onClick={() => {
-                                    setSelectedDeveloper(d);
-                                    setOpenInEditMode(true);
-                                    setIsOpen(true);
-                                    setOpenMenuId(null);
-                                  }}
-                                  className="w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                              <OwnerActions item={d}>
+                                <div
+                                  className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden`}
                                 >
-                                  <Pencil size={14} />
-                                  {t.developerPage?.editDeveloper || "Edit"}
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setSelectedDeveloper(d);
-                                    setShowDeleteDialog(true);
-                                    setOpenMenuId(null);
-                                  }}
-                                  className="w-full text-left py-2 px-4 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 flex items-center gap-2"
-                                >
-                                  <Trash2 size={14} />
-                                  {t.deleteButton || "Delete"}
-                                </button>
-                              </div>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedDeveloper(d);
+                                      setOpenInEditMode(true);
+                                      setIsOpen(true);
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                                  >
+                                    <Pencil size={14} />
+                                    {t.developerPage?.editDeveloper || "Edit"}
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setSelectedDeveloper(d);
+                                      setShowDeleteDialog(true);
+                                      setOpenMenuId(null);
+                                    }}
+                                    className="w-full text-left py-2 px-4 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 flex items-center gap-2"
+                                  >
+                                    <Trash2 size={14} />
+                                    {t.deleteButton || "Delete"}
+                                  </button>
+                                </div>
+                              </OwnerActions>
                             )}
                           </div>
                         </div>

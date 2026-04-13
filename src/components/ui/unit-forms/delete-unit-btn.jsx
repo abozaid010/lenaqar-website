@@ -8,7 +8,7 @@ import { useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import toast from "react-hot-toast";
 
-export default function DeleteUnitBtn({ unitId }) {
+export default function DeleteUnitBtn({ unitId, disabled = false }) {
   const modalRef = useRef(null);
   const router = useRouter();
   const { t } = useI18n();
@@ -40,8 +40,12 @@ export default function DeleteUnitBtn({ unitId }) {
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
-        className="cursor-pointer bg-red-500   px-[16px] py-[10px] h-[40px] hover:bg-red-600 text-white rounded-md flex items-center gap-2"
+        onClick={disabled ? undefined : () => setIsOpen(true)}
+        disabled={disabled}
+        title={disabled ? "You can only delete your own units" : undefined}
+        className={`px-[16px] py-[10px] h-[40px] text-white rounded-md flex items-center gap-2 bg-red-500 ${
+          disabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer hover:bg-red-600"
+        }`}
       >
         <Trash2Icon size={18} />{" "}
         <span className="hidden sm:block">{t.unitPage.deleteUnit}</span>

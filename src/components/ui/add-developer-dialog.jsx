@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
+import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 
 export default function AddDeveloperDialog({
   isOpen,
@@ -35,6 +36,8 @@ export default function AddDeveloperDialog({
   const [isEditing, setIsEditing] = useState(false);
   const roleFromToken = getRoleFromToken();
   const effectiveIsAdmin = roleFromToken === "admin" || roleFromToken === "owner";
+  const { canModify } = useBrokerPermission();
+  const canEditThisDeveloper = canModify(developer);
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -72,6 +75,10 @@ export default function AddDeveloperDialog({
       sources: []
     }
   });
+
+  // Profile Reviews are only relevant for the shared public developer directory.
+  // Derived after formData is declared so it re-evaluates correctly on state changes.
+  const isPublicDeveloper = formData.client_id === "public";
 
   useEffect(() => {
     if (developer) {
@@ -320,7 +327,7 @@ export default function AddDeveloperDialog({
 
       const { profile_reviews, ...formDataWithoutReviews } = formData;
       const submittedData = {
-        ...(effectiveIsAdmin ? { ...formData, profile_reviews: finalProfileReviews } : formDataWithoutReviews),
+        ...(finalClientId === "public" ? { ...formData, profile_reviews: finalProfileReviews } : formDataWithoutReviews),
         client_id: finalClientId,
         name: formData.en_name,
       };
@@ -622,8 +629,8 @@ export default function AddDeveloperDialog({
           </div>
         )}
 
-        {/* Profile Reviews Section - Admin Only */}
-        {effectiveIsAdmin && formData.profile_reviews && (
+        {/* Profile Reviews Section - Public developers only */}
+        {isPublicDeveloper && formData.profile_reviews && (
           <div className="bg-gray-50 rounded-lg p-4 space-y-4">
             <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
               {t.developerPage?.profileReviews || "Profile Reviews"}
@@ -1027,8 +1034,8 @@ export default function AddDeveloperDialog({
           </div>
         </div>
 
-        {/* Profile Reviews Section - Admin Only */}
-        {effectiveIsAdmin && (
+        {/* Profile Reviews Section - Public developers only */}
+        {isPublicDeveloper && (
         <div className="space-y-4 border-t pt-4">
           <h4 className="text-lg font-semibold text-primary border-b pb-2 mb-4">
             {t.developerPage?.profileReviews || "Profile Reviews"}
@@ -1341,8 +1348,14 @@ export default function AddDeveloperDialog({
   const HeaderEditButton = () => (
     <button
       type="button"
-      onClick={() => setIsEditing(true)}
-      className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm font-medium inline-flex items-center justify-center gap-2"
+      onClick={canEditThisDeveloper ? () => setIsEditing(true) : undefined}
+      disabled={!canEditThisDeveloper}
+      title={!canEditThisDeveloper ? "You can only edit your own developers" : undefined}
+      className={`px-3 py-1.5 rounded-md bg-white text-primary text-sm font-medium inline-flex items-center justify-center gap-2 ${
+        canEditThisDeveloper
+          ? "hover:bg-white/90"
+          : "opacity-40 cursor-not-allowed"
+      }`}
     >
       <Pencil size={14} />
       {t.developerPage?.editDeveloper || "Edit"}
