@@ -1307,3 +1307,28 @@ export async function updateUserName(userId, name) {
     throw error;
   }
 }
+
+/**
+ * Delete user via the user/delete-user endpoint
+ * @param {string} userId - The user ID to delete
+ * @param {string} clientId - The client ID (should be 'public')
+ * @returns {Promise<Object>} The API response
+ */
+export async function deleteUser(userId, clientId = "public") {
+  if (!userId || !clientId) {
+    throw new Error("userId and clientId are required");
+  }
+
+  try {
+    const response = await axiosInstance.delete("/user/delete-user", {
+      data: {
+        user_id: userId,
+        client_id: clientId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete user:", error.message);
+    throw error;
+  }
+}
