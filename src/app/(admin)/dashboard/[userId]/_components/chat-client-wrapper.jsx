@@ -1,10 +1,10 @@
 "use client";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { getChatHistory, resetUnreadMessagesCount } from "@/utils/api";
+import { getChatHistory, resetUnreadMessagesCount, deleteUser } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { useQuery } from "@tanstack/react-query";
-import { CircleX, Copy } from "lucide-react";
+import { CircleX, Copy, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -17,6 +17,9 @@ import ShowRequirementBtn from "./showRequirementBtn";
 
 export default function ChatClientWrapper({ userId }) {
   const [chatHistory, setChatHistory] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["chatHistory", userId],
@@ -29,12 +32,39 @@ export default function ChatClientWrapper({ userId }) {
     setChatHistory((prev) => [...prev, newMessage]);
   };
 
+  const handleDeleteUser = async () => {
+    if (!userId || !data?.data?.client_id) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteUser(userId, data.data.client_id);
+      toast.success("User deleted successfully");
+      // Redirect to dashboard after successful deletion
+      window.location.href = "/dashboard";
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast.error(error?.message || "Failed to delete user");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
+
   useEffect(() => {
     async function resetUnread(userId) {
       await resetUnreadMessagesCount(userId);
     }
     if (!isLoading && data?.data) {
       setChatHistory(data.data.messages || []);
+      setUserName(data.data.name || "");
 
       if (data.data.unread_messages_count !== 0) {
         resetUnread(userId);
@@ -79,7 +109,19 @@ export default function ChatClientWrapper({ userId }) {
       <div className="flex items-center justify-between bg-white px-4 py-2 rounded-md shadow-md h-auto">
         <div className="flex items-center gap-3">
           <NavigationButtons id={userId} />
-          <ChatWith name={data.data.name} />
+          <div className="flex items-center gap-2">
+            <ChatWith name={userName || data.data.name} userId={userId} onNameUpdate={setUserName} />
+            {data?.data?.client_id === "public" && (
+              <button
+                onClick={handleDeleteClick}
+                disabled={isDeleting}
+                className="p-1 text-red-500 hover:text-red-600 hover:bg-red-50 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Delete user"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
+            )}
+          </div>
           {phoneNumber && (
             <div className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-md">
               <a
@@ -105,12 +147,12 @@ export default function ChatClientWrapper({ userId }) {
               </button>
               <button
                 onClick={(e) => handleOpenWhatsApp(e, phoneNumber)}
-                className="p-1 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                className="flex items-center justify-center"
                 title="Open WhatsApp"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4 text-white"
+                  className="w-5 h-5 text-white bg-green-500 hover:bg-green-600 rounded-full"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
@@ -149,6 +191,60 @@ export default function ChatClientWrapper({ userId }) {
           <SendNewMessageForm userId={userId} onNewMessage={onNewMessage} />
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/95 backdrop-blur-md rounded-lg p-6 max-w-sm w-full mx-4 shadow-2xl border border-white/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <Trash2 className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Delete User</h3>
+                <p className="text-sm text-gray-500">This action cannot be undone</p>
+              </div>
+            </div>
+            
+            <p className="text-gray-700 mb-6">
+              Are you sure you want to delete this user and all their conversation history? This will permanently remove:
+            </p>
+            
+            <ul className="text-sm text-gray-600 mb-6 space-y-1">
+              <li>· User profile and contact information</li>
+              <li>· All chat messages and history</li>
+              <li>· Any associated data and notes</li>
+            </ul>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={handleCancelDelete}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteUser}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4" />
+                    Delete User
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

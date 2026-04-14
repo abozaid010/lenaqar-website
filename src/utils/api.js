@@ -1284,3 +1284,51 @@ export async function sendCampaignReply({
     throw error; // Consistent with other API functions
   }
 }
+
+/**
+ * Update user name via the action/user/update endpoint
+ * @param {string} userId - The user ID to update
+ * @param {string} name - The new name for the user
+ * @returns {Promise<Object>} The API response with updated user data
+ */
+export async function updateUserName(userId, name) {
+  if (!userId || !name?.trim()) {
+    throw new Error("userId and name are required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/action/user/update", {
+      user_id: userId,
+      name: name.trim()
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update user name:", error.message);
+    throw error;
+  }
+}
+
+/**
+ * Delete user via the user/delete-user endpoint
+ * @param {string} userId - The user ID to delete
+ * @param {string} clientId - The client ID (should be 'public')
+ * @returns {Promise<Object>} The API response
+ */
+export async function deleteUser(userId, clientId = "public") {
+  if (!userId || !clientId) {
+    throw new Error("userId and clientId are required");
+  }
+
+  try {
+    const response = await axiosInstance.delete("/user/delete-user", {
+      data: {
+        user_id: userId,
+        client_id: clientId
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete user:", error.message);
+    throw error;
+  }
+}
