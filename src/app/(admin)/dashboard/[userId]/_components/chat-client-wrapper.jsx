@@ -17,6 +17,7 @@ import ShowRequirementBtn from "./showRequirementBtn";
 
 export default function ChatClientWrapper({ userId }) {
   const [chatHistory, setChatHistory] = useState([]);
+  const [userName, setUserName] = useState("");
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["chatHistory", userId],
@@ -35,6 +36,7 @@ export default function ChatClientWrapper({ userId }) {
     }
     if (!isLoading && data?.data) {
       setChatHistory(data.data.messages || []);
+      setUserName(data.data.name || "");
 
       if (data.data.unread_messages_count !== 0) {
         resetUnread(userId);
@@ -79,7 +81,7 @@ export default function ChatClientWrapper({ userId }) {
       <div className="flex items-center justify-between bg-white px-4 py-2 rounded-md shadow-md h-auto">
         <div className="flex items-center gap-3">
           <NavigationButtons id={userId} />
-          <ChatWith name={data.data.name} />
+          <ChatWith name={userName || data.data.name} userId={userId} onNameUpdate={setUserName} />
           {phoneNumber && (
             <div className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-md">
               <a
@@ -105,12 +107,12 @@ export default function ChatClientWrapper({ userId }) {
               </button>
               <button
                 onClick={(e) => handleOpenWhatsApp(e, phoneNumber)}
-                className="p-1 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center"
+                className="flex items-center justify-center"
                 title="Open WhatsApp"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4 text-white"
+                  className="w-5 h-5 text-white bg-green-500 hover:bg-green-600 rounded-full"
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >

@@ -1284,3 +1284,26 @@ export async function sendCampaignReply({
     throw error; // Consistent with other API functions
   }
 }
+
+/**
+ * Update user name via the action/user/update endpoint
+ * @param {string} userId - The user ID to update
+ * @param {string} name - The new name for the user
+ * @returns {Promise<Object>} The API response with updated user data
+ */
+export async function updateUserName(userId, name) {
+  if (!userId || !name?.trim()) {
+    throw new Error("userId and name are required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/action/user/update", {
+      user_id: userId,
+      name: name.trim()
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update user name:", error.message);
+    throw error;
+  }
+}
