@@ -107,6 +107,9 @@ export default function AddCompoundDialog({
     district: null,
     delivery_date: null,
     area: null,
+    latitude: null,
+    longitude: null,
+    location_landmark: null,
     payment_plans: null,
     developer_id: null,
     video_url: null,
@@ -190,6 +193,9 @@ export default function AddCompoundDialog({
             projectData?.project?.delivery_date !== null
           ? projectData.project.delivery_date
           : 4,
+    latitude: projectData?.latitude || projectData?.project?.latitude || "",
+    longitude: projectData?.longitude || projectData?.project?.longitude || "",
+    location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || "",
   });
 
   useEffect(() => {
@@ -320,7 +326,10 @@ export default function AddCompoundDialog({
           finishing_type: [],
           facility_management: null,
           orientation_url: "",
-          delivery_date: 4,
+          delivery_date: "",
+          latitude: "",
+          longitude: "",
+          location_landmark: "",
         });
       }
       setErrors({});
@@ -350,7 +359,10 @@ export default function AddCompoundDialog({
         finishing_type: [],
         facility_management: null,
         orientation_url: "",
-        delivery_date: 4,
+        delivery_date: "",
+        latitude: "",
+        longitude: "",
+        location_landmark: "",
       });
 
       setErrors({});
@@ -491,6 +503,9 @@ export default function AddCompoundDialog({
               : prev.delivery_date !== undefined
                 ? prev.delivery_date
                 : 4,
+        latitude: projectData?.latitude || projectData?.project?.latitude || prev.latitude || "",
+        longitude: projectData?.longitude || projectData?.project?.longitude || prev.longitude || "",
+        location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || prev.location_landmark || "",
       }));
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
@@ -603,6 +618,9 @@ export default function AddCompoundDialog({
       "district",
       "delivery_date",
       "area",
+      "latitude",
+      "longitude",
+      "location_landmark",
       "payment_plans",
       "developer_id",
       "video_url",
@@ -722,6 +740,28 @@ export default function AddCompoundDialog({
 
     if (!formData.area || Number(formData.area) <= 0) {
       newErrors.area = "Area must be greater than 0";
+    }
+
+    if (!formData.latitude || formData.latitude.trim() === "") {
+      newErrors.latitude = "Latitude is required";
+    } else {
+      const latValue = parseFloat(formData.latitude);
+      if (isNaN(latValue)) {
+        newErrors.latitude = "Latitude must be a valid number";
+      }
+    }
+
+    if (!formData.longitude || formData.longitude.trim() === "") {
+      newErrors.longitude = "Longitude is required";
+    } else {
+      const lngValue = parseFloat(formData.longitude);
+      if (isNaN(lngValue)) {
+        newErrors.longitude = "Longitude must be a valid number";
+      }
+    }
+
+    if (!formData.location_landmark || formData.location_landmark.trim() === "") {
+      newErrors.location_landmark = "Location landmark is required";
     }
 
     if (!formData.properties_types || formData.properties_types.length === 0) {
@@ -894,6 +934,9 @@ export default function AddCompoundDialog({
         building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
+        latitude: parseFloat(formData.latitude),
+        longitude: parseFloat(formData.longitude),
+        location_landmark: formData.location_landmark?.trim() || null,
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
@@ -1572,6 +1615,53 @@ export default function AddCompoundDialog({
                   errorMessage={errors.area}
                 />
               </div>
+
+            {/* Location Fields */}
+            <div className="grid grid-cols-1 gap-4">
+              <div ref={(el) => (fieldRefs.current.latitude = el)}>
+                <LenaTextField
+                  type="number"
+                  name="latitude"
+                  label="Latitude"
+                  value={formData.latitude}
+                  onChange={handleChange}
+                  required
+                  placeholder="30.0444"
+                  step="any"
+                  error={errors.latitude}
+                  errorMessage={errors.latitude}
+                />
+              </div>
+              
+              <div ref={(el) => (fieldRefs.current.longitude = el)}>
+                <LenaTextField
+                  type="number"
+                  name="longitude"
+                  label="Longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  required
+                  placeholder="31.2357"
+                  step="any"
+                  error={errors.longitude}
+                  errorMessage={errors.longitude}
+                />
+              </div>
+              
+              <div ref={(el) => (fieldRefs.current.location_landmark = el)}>
+                <LenaTextarea
+                  name="location_landmark"
+                  label="Location Landmark"
+                  value={formData.location_landmark}
+                  onChange={handleChange}
+                  required
+                  rows={3}
+                  placeholder="Nearby landmarks, famous places, or reference points..."
+                  error={errors.location_landmark}
+                  errorMessage={errors.location_landmark}
+                />
+              </div>
+            </div>
             </div>
 
             {/* Payment Plans */}
