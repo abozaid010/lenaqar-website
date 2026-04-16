@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
@@ -20,7 +20,11 @@ const CampaignChat = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [aiFilter, setAiFilter] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [allSessions, setAllSessions] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [page, setPage] = useState(1);
+  const observerRef = useRef();
   const [isTogglingAI, setIsTogglingAI] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [sortBy, setSortBy] = useState("last_user_message_at");
@@ -57,16 +61,20 @@ const CampaignChat = () => {
       // Clean up any ongoing queries when component unmounts
       queryClient.cancelQueries({ queryKey: ["campaignSessions"] });
       queryClient.cancelQueries({ queryKey: ["campaignSession"] });
+      // Clean up intersection observer
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
     };
   }, [queryClient]);
 
   // Fetch sessions list
-  const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError } = useQuery({
-    queryKey: ["campaignSessions", debouncedSearchQuery, aiFilter, currentPage],
+  const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError, refetch: refetchSessions } = useQuery({
+    queryKey: ["campaignSessions", debouncedSearchQuery, aiFilter, page],
     queryFn: () => fetchCampaignSessions({
       search: debouncedSearchQuery,
       ai_reply_enabled: aiFilter,
-      page: currentPage,
+      page: page,
       page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE
     }),
     enabled: canAccessCampaignChat,
@@ -96,6 +104,130 @@ const CampaignChat = () => {
       }));
     }
   }, [sessionData, selectedContact?.phone_number]);
+
+  // Reset infinite scroll when filters change
+  useEffect(() => {
+    // Clean up previous observer before resetting
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+    setAllSessions([]);
+    setPage(1);
+    setHasMore(true);
+    setIsFetchingMore(false);
+  }, [debouncedSearchQuery, aiFilter]);
+
+  // Update allSessions when new data is fetched
+  useEffect(() => {
+    if (sessionsData) {
+      // Handle case where API returns data but sessions array is missing
+      const sessions = sessionsData.sessions || sessionsData.data || [];
+      
+      // Debug logging
+      console.log("[Infinite Scroll] Received sessions data:", {
+        page,
+        sessionsCount: sessions.length,
+        rawSessionsData: sessionsData,
+        currentPage: sessionsData.current_page || sessionsData.page,
+        totalPages: sessionsData.total_pages || sessionsData.totalPages,
+        total: sessionsData.total,
+        hasMoreData: sessionsData.has_more,
+        allKeys: Object.keys(sessionsData)
+      });
+      
+      if (sessions.length === 0) {
+        console.log("[Infinite Scroll] No sessions in response, setting hasMore to false");
+        setHasMore(false);
+        setIsFetchingMore(false);
+        return;
+      }
+      
+      // Prevent duplicate data by checking if we already have these sessions
+      if (page === 1) {
+        setAllSessions(sessions);
+      } else {
+        setAllSessions(prev => {
+          const existingPhoneNumbers = new Set(prev.map(s => s.phone_number));
+          const newSessions = sessions.filter(s => !existingPhoneNumbers.has(s.phone_number));
+          return [...prev, ...newSessions];
+        });
+      }
+      
+      // Handle different API response field names
+      const currentPage = sessionsData.current_page || sessionsData.page || page;
+      const totalPages = sessionsData.total_pages || sessionsData.totalPages || sessionsData.total;
+      
+      // Determine if there are more pages
+      let hasMorePages;
+      if (totalPages !== undefined) {
+        // API provided total pages info
+        hasMorePages = currentPage < totalPages;
+      } else {
+        // Fallback: if we received a full page of results, assume there might be more
+        // This is a heuristic - if sessions.length == page_size, likely more exist
+        const receivedFullPage = sessions.length >= CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE;
+        hasMorePages = receivedFullPage;
+      }
+      
+      console.log("[Infinite Scroll] Pagination status:", {
+        currentPage,
+        totalPages,
+        receivedSessions: sessions.length,
+        pageSize: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE,
+        hasMorePages,
+        nextPage: hasMorePages ? page + 1 : null
+      });
+      
+      setHasMore(hasMorePages);
+      setIsFetchingMore(false);
+    }
+  }, [sessionsData, page]);
+
+  // Handle API errors for infinite scroll
+  useEffect(() => {
+    if (sessionsError && page > 1) {
+      setIsFetchingMore(false);
+      // Don't reset page on error, just stop fetching more
+    }
+  }, [sessionsError, page]);
+
+  // Infinite scroll observer
+  const loadMoreRef = useCallback((node) => {
+    if (isFetchingMore || !hasMore || !canAccessCampaignChat || sessionsError) return;
+    
+    if (observerRef.current) observerRef.current.disconnect();
+    
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isFetchingMore && !sessionsError) {
+          setIsFetchingMore(true);
+          setPage(prev => prev + 1);
+        }
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
+    
+    if (node) observerRef.current.observe(node);
+  }, [isFetchingMore, hasMore, canAccessCampaignChat, sessionsError]);
+
+  // Manual load more function with debouncing to prevent rapid clicks
+  const handleLoadMore = useCallback(() => {
+    if (!isFetchingMore && hasMore && canAccessCampaignChat && !sessionsError) {
+      setIsFetchingMore(true);
+      // Small delay to prevent rapid successive calls
+      setTimeout(() => {
+        setPage(prev => prev + 1);
+      }, 100);
+    }
+  }, [isFetchingMore, hasMore, canAccessCampaignChat, sessionsError]);
+
+  // Retry function for failed loads
+  const handleRetry = useCallback(() => {
+    if (!isFetchingMore) {
+      setIsFetchingMore(true);
+      refetchSessions();
+    }
+  }, [isFetchingMore, refetchSessions]);
 
   // Handle contact selection
   const handleContactSelect = (contact) => {
@@ -195,8 +327,8 @@ const CampaignChat = () => {
   };
 
   const sortedSessions = useMemo(() => {
-    const sessions = [...(sessionsData?.sessions || [])];
-    return sessions.sort((a, b) => {
+    const sessions = [...allSessions];
+    const sorted = sessions.sort((a, b) => {
       if (sortBy === "last_user_message_at") {
         const aTime = a.last_user_message_at ? new Date(a.last_user_message_at).getTime() : 0;
         const bTime = b.last_user_message_at ? new Date(b.last_user_message_at).getTime() : 0;
@@ -207,7 +339,15 @@ const CampaignChat = () => {
       const bCount = b.total_messages_received || 0;
       return sortOrder === "desc" ? bCount - aCount : aCount - bCount;
     });
-  }, [sessionsData?.sessions, sortBy, sortOrder]);
+    
+    console.log("[ContactList] Sorted sessions:", {
+      totalSessions: sorted.length,
+      hasMore,
+      page
+    });
+    
+    return sorted;
+  }, [allSessions, sortBy, sortOrder, hasMore, page]);
 
   const handleSortChange = (field) => {
     if (sortBy === field) {
@@ -241,7 +381,8 @@ const CampaignChat = () => {
     );
   }
 
-  if (sessionsLoading) {
+  // Only show full-screen loading on initial load (no sessions yet)
+  if (sessionsLoading && allSessions.length === 0) {
     return (
       <LoadingSpinner
         message="Loading conversations..."
@@ -250,13 +391,19 @@ const CampaignChat = () => {
     );
   }
 
-  if (sessionsError) {
+  if (sessionsError && page === 1) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <MessageCircle className="h-16 w-16 text-red-400 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-red-700 mb-2">Error Loading Conversations</h2>
-          <p className="text-red-500">{sessionsError.message}</p>
+          <p className="text-red-500 mb-4">{sessionsError.message || "Failed to load conversations"}</p>
+          <button
+            onClick={handleRetry}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
@@ -365,37 +512,19 @@ const CampaignChat = () => {
             sessions={sortedSessions}
             selectedContact={selectedContact}
             onContactSelect={handleContactSelect}
-            loading={sessionsLoading || isTogglingAI}
+            loading={false}
             onRename={handleRename}
             onToggleFavorite={handleToggleFavorite}
             sessionDetails={sessionDetails}
+            hasMore={hasMore}
+            isFetchingMore={isFetchingMore}
+            onLoadMore={handleLoadMore}
+            loadMoreRef={loadMoreRef}
+            sessionsError={sessionsError && page > 1}
+            onRetry={handleRetry}
           />
         </ErrorBoundary>
 
-        {/* Pagination */}
-        {sessionsData?.total_pages > 1 && (
-          <div className="p-4 border-t border-gray-200">
-            <div className="flex justify-between items-center">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-600">
-                Page {currentPage} of {sessionsData.total_pages}
-              </span>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(sessionsData.total_pages, prev + 1))}
-                disabled={currentPage === sessionsData.total_pages}
-                className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Right Panel - Chat */}

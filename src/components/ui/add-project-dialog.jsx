@@ -29,7 +29,7 @@ import {
 } from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -90,6 +90,10 @@ export default function AddCompoundDialog({
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Ref to track submission state and prevent duplicate submissions
+  const isSubmittingRef = useRef(false);
+  const lastSubmitTimeRef = useRef(0);
 
   const [errors, setErrors] = useState({});
   const [missingLang, setMissingLang] = useState(null);
@@ -684,7 +688,7 @@ export default function AddCompoundDialog({
     }, 1000);
   };
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (!formData.ar_name.trim()) {
@@ -742,25 +746,31 @@ export default function AddCompoundDialog({
       newErrors.area = "Area must be greater than 0";
     }
 
-    if (!formData.latitude || formData.latitude.trim() === "") {
+    // Validate latitude - handle both string and number types
+    const latString = formData.latitude != null ? String(formData.latitude).trim() : "";
+    if (!latString) {
       newErrors.latitude = "Latitude is required";
     } else {
-      const latValue = parseFloat(formData.latitude);
+      const latValue = parseFloat(latString);
       if (isNaN(latValue)) {
         newErrors.latitude = "Latitude must be a valid number";
       }
     }
 
-    if (!formData.longitude || formData.longitude.trim() === "") {
+    // Validate longitude - handle both string and number types
+    const lngString = formData.longitude != null ? String(formData.longitude).trim() : "";
+    if (!lngString) {
       newErrors.longitude = "Longitude is required";
     } else {
-      const lngValue = parseFloat(formData.longitude);
+      const lngValue = parseFloat(lngString);
       if (isNaN(lngValue)) {
         newErrors.longitude = "Longitude must be a valid number";
       }
     }
 
-    if (!formData.location_landmark || formData.location_landmark.trim() === "") {
+    // Validate location_landmark - handle null/undefined safely
+    const landmarkString = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
+    if (!landmarkString) {
       newErrors.location_landmark = "Location landmark is required";
     }
 
@@ -847,10 +857,33 @@ export default function AddCompoundDialog({
 
     setErrors(newErrors);
     return newErrors;
-  };
+  }, [
+    formData,
+    t,
+    locale,
+    developers,
+    GOOGLE_MAPS_REQUIRED_PREFIX
+  ]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (e) => {
+    // Prevent default form submission if event exists
+    e?.preventDefault();
+    
+    // Debounce: prevent submissions within 500ms of each other
+    const now = Date.now();
+    if (now - lastSubmitTimeRef.current < 500) {
+      console.log("[handleSubmit] Debounced: submission too soon after previous");
+      return;
+    }
+    
+    // Prevent duplicate submissions using ref
+    if (isSubmittingRef.current || isSubmitting) {
+      console.log("[handleSubmit] Already submitting, ignoring duplicate");
+      return;
+    }
+    
+    isSubmittingRef.current = true;
+    lastSubmitTimeRef.current = now;
 
     console.log("[handleSubmit] Form submission started", {
       editMode,
@@ -925,6 +958,11 @@ export default function AddCompoundDialog({
           }
         : null;
 
+      // Safely convert fields to strings for submission
+      const latValue = formData.latitude != null ? String(formData.latitude).trim() : "";
+      const lngValue = formData.longitude != null ? String(formData.longitude).trim() : "";
+      const landmarkValue = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -934,9 +972,9 @@ export default function AddCompoundDialog({
         building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
-        latitude: parseFloat(formData.latitude),
-        longitude: parseFloat(formData.longitude),
-        location_landmark: formData.location_landmark?.trim() || null,
+        latitude: latValue ? parseFloat(latValue) : null,
+        longitude: lngValue ? parseFloat(lngValue) : null,
+        location_landmark: landmarkValue || null,
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
@@ -1300,9 +1338,24 @@ export default function AddCompoundDialog({
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
       console.log("[handleSubmit] Form submission completed");
     }
-  };
+  }, [
+    editMode,
+    projectData,
+    formData,
+    developers,
+    clientId,
+    t,
+    locale,
+    onAdd,
+    onClose,
+    queryClient,
+    GOOGLE_MAPS_REQUIRED_PREFIX,
+    validateForm,
+    isSubmitting
+  ]);
 
   const handleAddDeveloper = (newDeveloper) => {
     setDevelopers([...developers, newDeveloper]);
@@ -1385,10 +1438,15 @@ export default function AddCompoundDialog({
         }
         headerActions={
           <button
-            type="button"
-            onClick={handleSubmit}
+            type="submit"
+            form="add-project-form"
             disabled={isSubmitting || isUploading || isMasterPlanUploading}
-            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
+            style={{ 
+              minWidth: '120px',
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
@@ -1396,7 +1454,7 @@ export default function AddCompoundDialog({
                 {editMode ? t.updating : t.buttons?.saving || "Saving..."}
               </span>
             ) : editMode ? (
-              t.updateProject
+              t.updateProject || "Update Project"
             ) : (
               t.buttons?.saveProject || "Save Project"
             )}
@@ -1408,7 +1466,7 @@ export default function AddCompoundDialog({
             : t.modal?.addNewProject || "Add New Project"
         }
       >
-        <div>
+        <form id="add-project-form" onSubmit={handleSubmit} className="contents">
           <div className="space-y-2">
             {/* Basic Information */}
             <div
@@ -1970,7 +2028,7 @@ export default function AddCompoundDialog({
               />
             </div>
           </div>
-        </div>
+        </form>
       </Dialog>
 
       <AddDeveloperDialog
