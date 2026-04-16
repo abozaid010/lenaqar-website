@@ -746,25 +746,31 @@ export default function AddCompoundDialog({
       newErrors.area = "Area must be greater than 0";
     }
 
-    if (!formData.latitude || formData.latitude.trim() === "") {
+    // Validate latitude - handle both string and number types
+    const latString = formData.latitude != null ? String(formData.latitude).trim() : "";
+    if (!latString) {
       newErrors.latitude = "Latitude is required";
     } else {
-      const latValue = parseFloat(formData.latitude);
+      const latValue = parseFloat(latString);
       if (isNaN(latValue)) {
         newErrors.latitude = "Latitude must be a valid number";
       }
     }
 
-    if (!formData.longitude || formData.longitude.trim() === "") {
+    // Validate longitude - handle both string and number types
+    const lngString = formData.longitude != null ? String(formData.longitude).trim() : "";
+    if (!lngString) {
       newErrors.longitude = "Longitude is required";
     } else {
-      const lngValue = parseFloat(formData.longitude);
+      const lngValue = parseFloat(lngString);
       if (isNaN(lngValue)) {
         newErrors.longitude = "Longitude must be a valid number";
       }
     }
 
-    if (!formData.location_landmark || formData.location_landmark.trim() === "") {
+    // Validate location_landmark - handle null/undefined safely
+    const landmarkString = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
+    if (!landmarkString) {
       newErrors.location_landmark = "Location landmark is required";
     }
 
@@ -952,6 +958,11 @@ export default function AddCompoundDialog({
           }
         : null;
 
+      // Safely convert fields to strings for submission
+      const latValue = formData.latitude != null ? String(formData.latitude).trim() : "";
+      const lngValue = formData.longitude != null ? String(formData.longitude).trim() : "";
+      const landmarkValue = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -961,9 +972,9 @@ export default function AddCompoundDialog({
         building_types_images: buildingTypesImagesForApi,
         area: Number(formData.area),
         delivery_date: parseFloat(formData.delivery_date),
-        latitude: parseFloat(formData.latitude),
-        longitude: parseFloat(formData.longitude),
-        location_landmark: formData.location_landmark?.trim() || null,
+        latitude: latValue ? parseFloat(latValue) : null,
+        longitude: lngValue ? parseFloat(lngValue) : null,
+        location_landmark: landmarkValue || null,
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,

@@ -13,25 +13,17 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
   const inputRef = useRef(null);
   const loadMoreButtonRef = useRef(null);
 
-  // Derive all distinct template names from loaded session details
-  const allTemplates = sessionDetails 
-    ? [...new Set(
-        Object.values(sessionDetails)
-          .flatMap(session => 
-            (session.history ?? [])
-              .filter(entry => entry.template_name)
-              .map(entry => entry.template_name)
-          )
-      )]
-    : [];
+  // Derive all distinct template names from sessions (last_template_sent field)
+  const allTemplates = [...new Set(
+    sessions
+      .filter(session => session.last_template_sent)
+      .map(session => session.last_template_sent)
+  )];
 
   // Filter sessions based on selected template
-  const filteredSessions = selectedTemplate === "all" 
-    ? sessions 
-    : sessions.filter(session => {
-        const details = sessionDetails?.[session.phone_number];
-        return details?.history?.some(entry => entry.template_name === selectedTemplate);
-      });
+  const filteredSessions = selectedTemplate === "all"
+    ? sessions
+    : sessions.filter(session => session.last_template_sent === selectedTemplate);
 
   const formatPhoneNumber = (phone) => {
     if (!phone) return "Unknown";
@@ -227,9 +219,21 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                   </div>
                 </div>
 
-                {/* Phone Number (when name exists) */}
-                {session.user_name && (
-                  <p className="text-xs text-gray-500 mb-1">{formatPhoneNumber(session.phone_number)}</p>
+                {/* Phone Number and Template on same row */}
+                {(session.user_name || session.last_template_sent) && (
+                  <div className="flex items-center gap-2 text-xs mb-1">
+                    {session.user_name && (
+                      <span className="text-gray-500">{formatPhoneNumber(session.phone_number)}</span>
+                    )}
+                    {session.user_name && session.last_template_sent && (
+                      <span className="text-gray-300">|</span>
+                    )}
+                    {session.last_template_sent && (
+                      <span className="text-blue-600 truncate">
+                        {session.last_template_sent}
+                      </span>
+                    )}
+                  </div>
                 )}
 
                 {/* Notes preview */}
