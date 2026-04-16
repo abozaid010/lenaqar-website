@@ -96,71 +96,40 @@ export default function PaymentPlansList({
   };
 
   const handleSavePlan = async (plan, isEdit) => {
-    // Input validation
     if (!plan || typeof plan !== 'object') {
-      console.error("Invalid plan data provided:", plan);
       toast.error("Invalid payment plan data");
       return;
     }
-
     if (!plan.name || typeof plan.name !== 'string' || plan.name.trim() === '') {
-      console.error("Plan name is required and must be a non-empty string");
       toast.error("Plan name is required");
-      return;
-    }
-
-    if (typeof plan.downpayment_percentage !== 'number' || 
-        plan.downpayment_percentage < 0 || 
-        plan.downpayment_percentage > 1) {
-      console.error("Invalid downpayment percentage:", plan.downpayment_percentage);
-      toast.error("Downpayment percentage must be between 0 and 100");
       return;
     }
 
     try {
       let savedPlan;
-      
       if (isEdit && editingPlan?.id) {
-        // Update existing plan in API
         const result = await updatePaymentPlan(editingPlan.id, plan);
-        if (result.error) {
-          toast.error(result.error);
-          return;
-        }
+        if (result.error) { toast.error(result.error); return; }
         savedPlan = result.data || plan;
       } else {
-        // Create new plan in API
         const result = await createPaymentPlan(plan);
-        if (result.error) {
-          toast.error(result.error);
-          return;
-        }
+        if (result.error) { toast.error(result.error); return; }
         savedPlan = result.data || plan;
       }
       savedPlan = normalizePlanExtraPayments(savedPlan);
 
       let newPlans;
-
       if (isEdit) {
-        // Update existing plan in local state
         newPlans = [...plans];
         newPlans[editingIndex] = savedPlan;
       } else {
-        // Add new plan to local state
         newPlans = [...plans, savedPlan];
       }
 
-      // Ensure only one payment plan can be default at a time
       if (savedPlan.is_default === true) {
-        newPlans = newPlans.map((p, index) => {
-          // If this is the plan being saved, keep its is_default value
-          if (isEdit && index === editingIndex) {
-            return p;
-          }
-          if (!isEdit && index === newPlans.length - 1) {
-            return p;
-          }
-          // Otherwise, set is_default to false
+        newPlans = newPlans.map((p, i) => {
+          if (isEdit && i === editingIndex) return p;
+          if (!isEdit && i === newPlans.length - 1) return p;
           return { ...p, is_default: false };
         });
       }

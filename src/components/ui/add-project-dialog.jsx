@@ -90,6 +90,7 @@ export default function AddCompoundDialog({
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
   
   // Ref to track submission state and prevent duplicate submissions
   const isSubmittingRef = useRef(false);
@@ -337,6 +338,7 @@ export default function AddCompoundDialog({
         });
       }
       setErrors({});
+      setIsDirty(false);
     } else {
       // Ensure client_id is set from token when resetting form
       const resetClientId = getClientid() || clientId || "";
@@ -370,6 +372,7 @@ export default function AddCompoundDialog({
       });
 
       setErrors({});
+      setIsDirty(false);
     }
   }, [isOpen, editMode, projectData, defaultCity, defaultDistrict, clientId]);
 
@@ -538,6 +541,7 @@ export default function AddCompoundDialog({
   }, [formData.city, getDistrictsWithLabels]);
 
   const handleChange = (e) => {
+    setIsDirty(true);
     const { name, value, type, checked } = e.target;
 
     // Add validation for district selection
@@ -1189,6 +1193,7 @@ export default function AddCompoundDialog({
         // Invalidate projects query cache to refetch from API
         queryClient.invalidateQueries({ queryKey: projectKeys.all });
 
+        setIsDirty(false);
         toast.success(
           editMode
             ? t.projectUpdated || "project updated successfully!"
@@ -1357,6 +1362,17 @@ export default function AddCompoundDialog({
     isSubmitting
   ]);
 
+  const handleClose = useCallback(() => {
+    if (isDirty) {
+      const message =
+        locale === "ar"
+          ? "لديك تغييرات غير محفوظة. هل أنت متأكد من الإغلاق؟"
+          : "You have unsaved changes. Are you sure you want to close?";
+      if (!window.confirm(message)) return;
+    }
+    onClose();
+  }, [isDirty, onClose, locale]);
+
   const handleAddDeveloper = (newDeveloper) => {
     setDevelopers([...developers, newDeveloper]);
 
@@ -1370,6 +1386,7 @@ export default function AddCompoundDialog({
   };
 
   const handlePaymentPlansChange = (newPlans) => {
+    setIsDirty(true);
     setFormData((prev) => ({
       ...prev,
       payment_plans: newPlans,
@@ -1385,6 +1402,7 @@ export default function AddCompoundDialog({
   };
 
   const handleBuildingTypeImagesChange = (propertyType, images) => {
+    setIsDirty(true);
     setFormData((prev) => ({
       ...prev,
       building_types_images: {
@@ -1422,14 +1440,14 @@ export default function AddCompoundDialog({
     <>
       <Dialog
         isOpen={isOpen}
-        onClose={onClose}
+        onClose={handleClose}
         closeOnOutsideClick={false}
         closeOnEscape={false}
         showCloseButton={false}
         headerLeading={
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
             disabled={isSubmitting}
           >
@@ -1437,28 +1455,36 @@ export default function AddCompoundDialog({
           </button>
         }
         headerActions={
-          <button
-            type="submit"
-            form="add-project-form"
-            disabled={isSubmitting || isUploading || isMasterPlanUploading}
-            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
-            style={{ 
-              minWidth: '120px',
-              touchAction: 'manipulation',
-              WebkitTapHighlightColor: 'transparent'
-            }}
-          >
-            {isSubmitting ? (
-              <span className="inline-flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+          <div className="flex items-center gap-2">
+            {isDirty && (
+              <span className="flex items-center gap-1 px-2 py-0.5 bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 text-xs rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />
+                {locale === "ar" ? "تغييرات غير محفوظة" : "Unsaved changes"}
               </span>
-            ) : editMode ? (
-              t.updateProject || "Update Project"
-            ) : (
-              t.buttons?.saveProject || "Save Project"
             )}
-          </button>
+            <button
+              type="submit"
+              form="add-project-form"
+              disabled={isSubmitting || isUploading || isMasterPlanUploading}
+              className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
+              style={{
+                minWidth: '120px',
+                touchAction: 'manipulation',
+                WebkitTapHighlightColor: 'transparent'
+              }}
+            >
+              {isSubmitting ? (
+                <span className="inline-flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+                </span>
+              ) : editMode ? (
+                t.updateProject || "Update Project"
+              ) : (
+                t.buttons?.saveProject || "Save Project"
+              )}
+            </button>
+          </div>
         }
         title={
           editMode
@@ -1817,6 +1843,7 @@ export default function AddCompoundDialog({
                 value={formData.master_plan.url || null}
                 imageId={formData.master_plan.fileId || null}
                 onChange={(url, id) => {
+                  setIsDirty(true);
                   setFormData((prev) => ({
                     ...prev,
                     master_plan: {
@@ -1926,12 +1953,13 @@ export default function AddCompoundDialog({
                 {formData.facility_management ? (
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      setIsDirty(true);
                       setFormData((prev) => ({
                         ...prev,
                         facility_management: null,
-                      }))
-                    }
+                      }));
+                    }}
                     className="text-red-500 text-sm hover:text-red-600"
                   >
                     {t.buttons?.remove || "Remove"}
@@ -1939,12 +1967,13 @@ export default function AddCompoundDialog({
                 ) : (
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={() => {
+                      setIsDirty(true);
                       setFormData((prev) => ({
                         ...prev,
                         facility_management: { name: "", description: "", rating: "" },
-                      }))
-                    }
+                      }));
+                    }}
                     className="text-blue-600 text-sm hover:text-blue-700"
                   >
                     + {t.buttons?.addNew || "Add"}
@@ -1958,15 +1987,16 @@ export default function AddCompoundDialog({
                     name="facility_management_name"
                     label={t.formLabels?.facilityManagementName || "Company Name"}
                     value={formData.facility_management.name}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setIsDirty(true);
                       setFormData((prev) => ({
                         ...prev,
                         facility_management: {
                           ...prev.facility_management,
                           name: e.target.value,
                         },
-                      }))
-                    }
+                      }));
+                    }}
                     placeholder="Elite Facility Management"
                     required
                   />
@@ -1974,15 +2004,16 @@ export default function AddCompoundDialog({
                     name="facility_management_description"
                     label={t.formLabels?.facilityManagementDescription || "Description"}
                     value={formData.facility_management.description}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setIsDirty(true);
                       setFormData((prev) => ({
                         ...prev,
                         facility_management: {
                           ...prev.facility_management,
                           description: e.target.value,
                         },
-                      }))
-                    }
+                      }));
+                    }}
                     rows={3}
                     placeholder="Describe facility management services..."
                   />
@@ -1991,15 +2022,16 @@ export default function AddCompoundDialog({
                     name="facility_management_rating"
                     label={t.formLabels?.facilityManagementRating || "Rating (0–5)"}
                     value={formData.facility_management.rating}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      setIsDirty(true);
                       setFormData((prev) => ({
                         ...prev,
                         facility_management: {
                           ...prev.facility_management,
                           rating: e.target.value,
                         },
-                      }))
-                    }
+                      }));
+                    }}
                     placeholder="4.5"
                     min="0"
                     max="5"
@@ -2020,9 +2052,10 @@ export default function AddCompoundDialog({
               <ImageUploader
                 maxImages={8}
                 initialImages={formData.images || []}
-                onImagesChange={(images) =>
-                  setFormData((prev) => ({ ...prev, images }))
-                }
+                onImagesChange={(images) => {
+                  setIsDirty(true);
+                  setFormData((prev) => ({ ...prev, images }));
+                }}
                 isUploading={isUploading}
                 setIsUploading={setIsUploading}
               />
