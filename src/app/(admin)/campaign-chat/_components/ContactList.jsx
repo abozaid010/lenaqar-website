@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Bot, User, MessageCircle, Star, Pencil, Check, X } from "lucide-react";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { ContactListSkeleton } from "@/components/ui/loading-states";
 
-const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails }) => {
+const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails, hasMore, isFetchingMore, onLoadMore, loadMoreRef, sessionsError, onRetry }) => {
   const [editingPhone, setEditingPhone] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("all");
   const inputRef = useRef(null);
+  const loadMoreButtonRef = useRef(null);
 
   // Derive all distinct template names from loaded session details
   const allTemplates = sessionDetails 
@@ -84,11 +85,13 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
     onToggleFavorite?.(session.phone_number, !session.is_favorite);
   };
 
-  if (loading) {
-    return <ContactListSkeleton count={8} />;
-  }
-
+  // Show skeleton on initial load when no sessions yet
   if (!sessions || sessions.length === 0) {
+    // If loading, show skeleton
+    if (loading) {
+      return <ContactListSkeleton count={8} />;
+    }
+    // Not loading and no sessions = empty state
     return (
       <div className="flex-1 overflow-y-auto flex items-center justify-center">
         <div className="text-center">
@@ -249,6 +252,55 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
           </div>
         );
       })}
+      
+      {/* Load More Section */}
+      {hasMore && (
+        <div 
+          ref={loadMoreRef}
+          className="p-4 border-b border-gray-100"
+        >
+          {sessionsError ? (
+            <div className="text-center">
+              <p className="text-red-500 text-sm mb-2">Failed to load more conversations</p>
+              <button
+                onClick={onRetry}
+                disabled={isFetchingMore}
+                className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          ) : (
+            <button
+              ref={loadMoreButtonRef}
+              onClick={onLoadMore}
+              disabled={isFetchingMore}
+              className="w-full py-2 px-4 bg-gray-50 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition-colors flex items-center justify-center gap-2"
+            >
+              {isFetchingMore ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                  Loading more...
+                </>
+              ) : (
+                <>
+                  Load More
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+      
+      {/* End of data indicator */}
+      {!hasMore && filteredSessions.length > 0 && (
+        <div className="p-4 text-center text-xs text-gray-400 border-b border-gray-100">
+          {sessionsError ? "Failed to load all conversations" : "No more conversations to load"}
+        </div>
+      )}
     </div>
   );
 };

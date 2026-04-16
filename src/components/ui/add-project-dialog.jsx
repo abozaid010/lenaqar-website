@@ -29,7 +29,7 @@ import {
 } from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -90,6 +90,10 @@ export default function AddCompoundDialog({
   const [isMasterPlanUploading, setIsMasterPlanUploading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Ref to track submission state and prevent duplicate submissions
+  const isSubmittingRef = useRef(false);
+  const lastSubmitTimeRef = useRef(0);
 
   const [errors, setErrors] = useState({});
   const [missingLang, setMissingLang] = useState(null);
@@ -684,7 +688,7 @@ export default function AddCompoundDialog({
     }, 1000);
   };
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     const newErrors = {};
 
     if (!formData.ar_name.trim()) {
@@ -847,10 +851,33 @@ export default function AddCompoundDialog({
 
     setErrors(newErrors);
     return newErrors;
-  };
+  }, [
+    formData,
+    t,
+    locale,
+    developers,
+    GOOGLE_MAPS_REQUIRED_PREFIX
+  ]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(async (e) => {
+    // Prevent default form submission if event exists
+    e?.preventDefault();
+    
+    // Debounce: prevent submissions within 500ms of each other
+    const now = Date.now();
+    if (now - lastSubmitTimeRef.current < 500) {
+      console.log("[handleSubmit] Debounced: submission too soon after previous");
+      return;
+    }
+    
+    // Prevent duplicate submissions using ref
+    if (isSubmittingRef.current || isSubmitting) {
+      console.log("[handleSubmit] Already submitting, ignoring duplicate");
+      return;
+    }
+    
+    isSubmittingRef.current = true;
+    lastSubmitTimeRef.current = now;
 
     console.log("[handleSubmit] Form submission started", {
       editMode,
@@ -1300,9 +1327,24 @@ export default function AddCompoundDialog({
       });
     } finally {
       setIsSubmitting(false);
+      isSubmittingRef.current = false;
       console.log("[handleSubmit] Form submission completed");
     }
-  };
+  }, [
+    editMode,
+    projectData,
+    formData,
+    developers,
+    clientId,
+    t,
+    locale,
+    onAdd,
+    onClose,
+    queryClient,
+    GOOGLE_MAPS_REQUIRED_PREFIX,
+    validateForm,
+    isSubmitting
+  ]);
 
   const handleAddDeveloper = (newDeveloper) => {
     setDevelopers([...developers, newDeveloper]);
@@ -1385,10 +1427,15 @@ export default function AddCompoundDialog({
         }
         headerActions={
           <button
-            type="button"
-            onClick={handleSubmit}
+            type="submit"
+            form="add-project-form"
             disabled={isSubmitting || isUploading || isMasterPlanUploading}
-            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
+            style={{ 
+              minWidth: '120px',
+              touchAction: 'manipulation',
+              WebkitTapHighlightColor: 'transparent'
+            }}
           >
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
@@ -1396,7 +1443,7 @@ export default function AddCompoundDialog({
                 {editMode ? t.updating : t.buttons?.saving || "Saving..."}
               </span>
             ) : editMode ? (
-              t.updateProject
+              t.updateProject || "Update Project"
             ) : (
               t.buttons?.saveProject || "Save Project"
             )}
@@ -1408,7 +1455,7 @@ export default function AddCompoundDialog({
             : t.modal?.addNewProject || "Add New Project"
         }
       >
-        <div>
+        <form id="add-project-form" onSubmit={handleSubmit} className="contents">
           <div className="space-y-2">
             {/* Basic Information */}
             <div
@@ -1970,7 +2017,7 @@ export default function AddCompoundDialog({
               />
             </div>
           </div>
-        </div>
+        </form>
       </Dialog>
 
       <AddDeveloperDialog
