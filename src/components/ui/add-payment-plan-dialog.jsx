@@ -463,6 +463,7 @@ export default function AddPaymentPlanDialog({
         id="add-payment-plan-form"
         onSubmit={(e) => {
           e.preventDefault();
+          e.stopPropagation(); // prevent React component-tree bubbling into parent <form id="add-project-form">
           handleSubmit(e);
         }}
         className="space-y-3 -mb-4"

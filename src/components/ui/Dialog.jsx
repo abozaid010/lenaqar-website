@@ -1,7 +1,8 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function Dialog({
   isOpen,
@@ -15,6 +16,11 @@ export default function Dialog({
   closeOnEscape = true,
 }) {
   const dialogRef = useRef(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -43,9 +49,9 @@ export default function Dialog({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50"
       onClick={handleOutsideClick}
@@ -81,6 +87,7 @@ export default function Dialog({
           {children}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
