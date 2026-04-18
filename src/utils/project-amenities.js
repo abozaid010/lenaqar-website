@@ -47,6 +47,67 @@ export function normalizeAmenitiesArray(input) {
 }
 
 /**
+ * Read raw amenities/facilities from API project payload. Backend often stores selected
+ * amenities under `facilities` while the form uses `amenities` internally.
+ * Supports string[], comma-separated string, array of { name | value | slug }, or record flags.
+ */
+export function extractAmenitiesSourceFromProject(projectData) {
+  if (projectData == null) return null;
+  const nested = projectData.project;
+  const raw =
+    projectData.amenities ??
+    projectData.facilities ??
+    nested?.amenities ??
+    nested?.facilities;
+
+  if (raw == null || raw === "") return null;
+  if (typeof raw === "string") return raw;
+  if (Array.isArray(raw)) {
+    if (raw.length === 0) return [];
+    const first = raw[0];
+    if (typeof first === "string" || typeof first === "number") {
+      return raw;
+    }
+    if (typeof first === "object" && first !== null) {
+      return raw
+        .map((item) => {
+          if (item == null) return "";
+          if (typeof item === "string" || typeof item === "number") {
+            return String(item);
+          }
+          return (
+            item.name ??
+            item.value ??
+            item.slug ??
+            item.id ??
+            item.en_name ??
+            item.ar_name ??
+            item.label ??
+            ""
+          );
+        })
+        .filter((s) => s !== "" && s != null);
+    }
+  }
+  if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+    const keys = Object.keys(raw).filter(
+      (k) => raw[k] === true || raw[k] === 1 || raw[k] === "1"
+    );
+    if (keys.length > 0) return keys;
+    const vals = Object.values(raw).filter(
+      (v) => typeof v === "string" && String(v).trim()
+    );
+    if (vals.length > 0) return vals;
+  }
+  return null;
+}
+
+/** Normalized string[] for form state from `amenities` and/or `facilities` on project. */
+export function normalizeAmenitiesFromProject(projectData) {
+  return normalizeAmenitiesArray(extractAmenitiesSourceFromProject(projectData));
+}
+
+/**
  * Display label for chips / list. Uses `locale` when labels exist; otherwise title-case.
  * @param {string} key - canonical amenity value
  * @param {string} [locale] - `"ar"` | `"en"` | other → English

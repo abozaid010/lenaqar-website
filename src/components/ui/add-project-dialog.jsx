@@ -29,7 +29,10 @@ import {
   parseValidationErrors,
 } from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
-import { normalizeAmenitiesArray } from "@/utils/project-amenities";
+import {
+  normalizeAmenitiesArray,
+  normalizeAmenitiesFromProject,
+} from "@/utils/project-amenities";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -289,9 +292,7 @@ export default function AddCompoundDialog({
     latitude: projectData?.latitude || projectData?.project?.latitude || "",
     longitude: projectData?.longitude || projectData?.project?.longitude || "",
     location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || "",
-    amenities: normalizeAmenitiesArray(
-      projectData?.amenities ?? projectData?.project?.amenities
-    ),
+    amenities: normalizeAmenitiesFromProject(projectData),
   });
 
   useEffect(() => {
@@ -384,9 +385,7 @@ export default function AddCompoundDialog({
                   projectData?.project?.delivery_date !== null
                 ? projectData.project.delivery_date
                 : 4,
-          amenities: normalizeAmenitiesArray(
-            projectData?.amenities ?? projectData?.project?.amenities
-          ),
+          amenities: normalizeAmenitiesFromProject(projectData),
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -609,9 +608,7 @@ export default function AddCompoundDialog({
         latitude: projectData?.latitude || projectData?.project?.latitude || prev.latitude || "",
         longitude: projectData?.longitude || projectData?.project?.longitude || prev.longitude || "",
         location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || prev.location_landmark || "",
-        amenities: normalizeAmenitiesArray(
-          projectData?.amenities ?? projectData?.project?.amenities ?? prev.amenities
-        ),
+        amenities: normalizeAmenitiesFromProject(projectData),
       }));
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
@@ -1095,6 +1092,8 @@ export default function AddCompoundDialog({
       const lngValue = formData.longitude != null ? String(formData.longitude).trim() : "";
       const landmarkValue = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
 
+      const normalizedAmenities = normalizeAmenitiesArray(formData.amenities);
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -1110,7 +1109,8 @@ export default function AddCompoundDialog({
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
-        amenities: normalizeAmenitiesArray(formData.amenities),
+        amenities: normalizedAmenities,
+        facilities: normalizedAmenities,
       };
 
       console.log("[handleSubmit] Client ID info:", {
