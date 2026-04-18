@@ -73,6 +73,7 @@ const FIELD_TO_SECTION_KEY = {
   master_plan: "media",
   properties_types: "media",
   building_types_images: "media",
+  images: "media",
 };
 
 function collectSectionKeysFromErrors(err) {
@@ -80,7 +81,7 @@ function collectSectionKeysFromErrors(err) {
   if (!err) return keys;
   for (const [k, v] of Object.entries(err)) {
     if (k === "submit") continue;
-    if (v == null || v === false) continue;
+    if (v == null || v === false || v === "") continue;
     if (k === "building_types_images") {
       if (v && typeof v === "object" && Object.keys(v).length > 0) {
         keys.add("media");
@@ -209,6 +210,7 @@ export default function AddCompoundDialog({
     properties_types: null,
     building_types_images: null,
     finishing_type: null,
+    images: null,
   });
 
   const [formData, setFormData] = useState({
@@ -715,15 +717,24 @@ export default function AddCompoundDialog({
   };
 
   // Function to scroll to first error field and animate it
-  const scrollToFirstError = (errors) => {
-    const errorFields = Object.keys(errors).filter((key) => errors[key]);
+  const scrollToFirstError = (errorMap) => {
+    const errorFields = Object.keys(errorMap).filter((key) => {
+      if (key === "submit") return false;
+      const v = errorMap[key];
+      if (v == null || v === false || v === "") return false;
+      if (typeof v === "object" && !Array.isArray(v)) {
+        return Object.keys(v).length > 0;
+      }
+      return true;
+    });
     if (errorFields.length === 0) return;
 
-    // Priority order for error fields (top to bottom)
+    // Priority order matches on-screen form order (Concept A sections)
     const fieldOrder = [
       "ar_name",
       "en_name",
       "description",
+      "finishing_type",
       "city",
       "district",
       "delivery_date",
@@ -738,7 +749,7 @@ export default function AddCompoundDialog({
       "master_plan",
       "properties_types",
       "building_types_images",
-      "finishing_type",
+      "images",
     ];
 
     // Find first error field in priority order
@@ -747,7 +758,9 @@ export default function AddCompoundDialog({
     );
     if (!firstErrorField) return;
 
-    const fieldRef = fieldRefs.current[firstErrorField];
+    const fieldRef =
+      fieldRefs.current[firstErrorField] ||
+      (firstErrorField === "en_name" ? fieldRefs.current.ar_name : null);
     if (!fieldRef) return;
 
     // Try to find the actual input/textarea/select element within the container
@@ -959,6 +972,12 @@ export default function AddCompoundDialog({
     if (!formData.master_plan || !formData.master_plan.url) {
       newErrors.master_plan =
         t.formValidation?.masterPlanRequired || "Master plan image is required";
+    }
+
+    if (!formData.images || !Array.isArray(formData.images) || formData.images.length === 0) {
+      newErrors.images =
+        t.formValidation?.projectImagesRequired ||
+        "At least one project gallery image is required";
     }
 
     setErrors(newErrors);
@@ -1575,7 +1594,7 @@ export default function AddCompoundDialog({
     () => [
       { key: "basics", label: pf?.navBasics ?? "Basics" },
       { key: "location", label: pf?.navLocation ?? "Location" },
-      { key: "commercial", label: pf?.navCommercial ?? "Commercial" },
+      { key: "commercial", label: pf?.navCommercial ?? "Payment" },
       { key: "links", label: pf?.navLinks ?? "Links" },
       { key: "media", label: pf?.navMedia ?? "Media" },
       { key: "extras", label: pf?.navExtras ?? "Extras" },
@@ -1700,7 +1719,10 @@ export default function AddCompoundDialog({
             >
               <div
                 className="grid grid-cols-1 gap-2"
-                ref={(el) => (fieldRefs.current.ar_name = el)}
+                ref={(el) => {
+                  fieldRefs.current.ar_name = el;
+                  fieldRefs.current.en_name = el;
+                }}
               >
                 <MultiLangInput
                   label={t.formLabels?.compoundName || "Compound Name"}
@@ -1956,7 +1978,7 @@ export default function AddCompoundDialog({
 
             <FormSection
               id={PROJECT_SECTION_IDS.commercial}
-              title={pf?.sectionCommercialTitle || "Commercial"}
+              title={pf?.sectionCommercialTitle || "Payment"}
               description={pf?.sectionCommercialHint}
             >
               <div ref={(el) => (fieldRefs.current.payment_plans = el)}>
@@ -2161,19 +2183,30 @@ export default function AddCompoundDialog({
                   </div>
                 )}
 
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  {t.formLabels?.projectImages || "Project Images"}
+              <div ref={(el) => (fieldRefs.current.images = el)}>
+                <label
+                  className={`mb-1 block text-sm font-medium ${
+                    errors.images ? "text-red-600" : "text-gray-700"
+                  }`}
+                >
+                  {t.formLabels?.projectImages || "Project Images"}{" "}
+                  <span className="text-red-500">*</span>
                   <span className="text-xs font-normal text-gray-500">
                     ({formData.images?.length || 0} / 8)
                   </span>
                 </label>
+                {errors.images ? (
+                  <p className="mb-2 text-sm text-red-600">{errors.images}</p>
+                ) : null}
                 <ImageUploader
                   maxImages={8}
                   initialImages={formData.images || []}
                   onImagesChange={(images) => {
                     setIsDirty(true);
                     setFormData((prev) => ({ ...prev, images }));
+                    if (errors.images) {
+                      setErrors((prev) => ({ ...prev, images: null }));
+                    }
                   }}
                   isUploading={isUploading}
                   setIsUploading={setIsUploading}

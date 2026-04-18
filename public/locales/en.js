@@ -1040,6 +1040,7 @@ export default {
     googleMapsLinkMustStartWith:
       "Google Maps link must start with https://maps.app.goo.gl",
     masterPlanRequired: "Master plan image is required",
+    projectImagesRequired: "At least one project gallery image is required",
     arabicTextOnly: "Text must contain only Arabic letters, Arabic digits, English digits, and spaces",
     englishTextOnly: "Text must contain only English letters, digits, and spaces",
   },
@@ -1203,7 +1204,7 @@ export default {
       navAriaLabel: "Project form sections",
       navBasics: "Basics",
       navLocation: "Location",
-      navCommercial: "Commercial",
+      navCommercial: "Payment",
       navLinks: "Links",
       navMedia: "Media",
       navExtras: "Extras",
@@ -1213,7 +1214,7 @@ export default {
       sectionLocationTitle: "Location",
       sectionLocationHint:
         "City, district, site size, coordinates, and nearby landmark.",
-      sectionCommercialTitle: "Commercial",
+      sectionCommercialTitle: "Payment",
       sectionCommercialHint: "Payment plans and developer.",
       sectionLinksTitle: "Links",
       sectionLinksHint: "Promotional video, map link, and orientation URL.",
