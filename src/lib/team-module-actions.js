@@ -10,10 +10,10 @@ export const TEAM_MODULE_KEYS = [
   "chat_campaign",
   "developers",
   "projects",
-   "map", 
- "resale",
- "analytics",
- "calendar"
+  "map",
+  "resale",
+  "analytics",
+  "calendar",
 ];
 
 const ADMIN_ACTIONS = ["create", "import", "view", "update_own", "delete_own"];

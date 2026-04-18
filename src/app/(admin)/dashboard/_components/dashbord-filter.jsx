@@ -183,11 +183,11 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   return (
     <div
-      className={`flex sm:items-center flex-col sm:flex-row justify-between gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
+      className={`flex flex-col sm:flex-row items-center justify-between gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
     >
-      <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
-        <div className="flex gap-2 flex-wrap">
-          <div className="flex-1 w-52">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0 w-full">
+        <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
+          <div className="flex flex-1 w-52 min-w-[10rem] items-center">
             <FormSelect
               name="action_type"
               onChange={(e) => onFilterChange("action", e.target.value)}
@@ -204,7 +204,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
           {/* Campaign Filter Dropdown */}
           <div
-            className="relative inline-block flex-1 w-52"
+            className="relative inline-flex flex-1 w-52 min-w-[10rem] items-center"
             ref={campaignDropdownRef}
           >
             <div
@@ -258,7 +258,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             )}
           </div>
 
-          <div className="relative inline-block flex-1 w-62">
+          <div className="relative inline-flex flex-1 min-w-[14rem] max-w-[17rem] items-center">
             <div
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
               className={`relative ${DASHBOARD_TRIGGER} justify-start ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
@@ -326,7 +326,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         </div>
 
         {/* Action buttons - Print and Export */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0 self-center sm:self-auto">
           <button
             onClick={handlePrint}
             className={`${DASHBOARD_BUTTON} ${compact ? "h-9" : "h-10"}`}
@@ -338,11 +338,14 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </span>
           </button>
 
-          <ExcelExportButton searchParams={appliedFilters} />
+          <ExcelExportButton
+            searchParams={appliedFilters}
+            compact={compact}
+          />
         </div>
       </div>
 
-      <div className="flex">
+      <div className="flex items-center gap-2 shrink-0">
         <AverageScore />
         <VideoInstructionsDialog
           variant="dashboard"
