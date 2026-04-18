@@ -610,6 +610,11 @@ export default function AddCompoundDialog({
         [name]: null,
       });
     }
+
+    // Clear submit-level error once user edits anything
+    if (errors.submit) {
+      setErrors((prev) => ({ ...prev, submit: null }));
+    }
   };
 
   // Function to scroll to first error field and animate it
@@ -873,6 +878,12 @@ export default function AddCompoundDialog({
     // Prevent default form submission if event exists
     e?.preventDefault();
     
+    // Prevent duplicate submissions using ref
+    if (isSubmittingRef.current || isSubmitting) {
+      console.log("[handleSubmit] Already submitting, ignoring duplicate");
+      return;
+    }
+
     // Debounce: prevent submissions within 500ms of each other
     const now = Date.now();
     if (now - lastSubmitTimeRef.current < 500) {
@@ -880,15 +891,6 @@ export default function AddCompoundDialog({
       return;
     }
     
-    // Prevent duplicate submissions using ref
-    if (isSubmittingRef.current || isSubmitting) {
-      console.log("[handleSubmit] Already submitting, ignoring duplicate");
-      return;
-    }
-    
-    isSubmittingRef.current = true;
-    lastSubmitTimeRef.current = now;
-
     console.log("[handleSubmit] Form submission started", {
       editMode,
       compoundDataId: projectData?.id,
@@ -897,6 +899,13 @@ export default function AddCompoundDialog({
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       console.log("[handleSubmit] Validation errors:", formErrors);
+      setErrors((prev) => ({
+        ...prev,
+        submit:
+          locale === "ar"
+            ? "يرجى تصحيح الحقول المحددة باللون الأحمر ثم المحاولة مرة أخرى."
+            : "Please fix the highlighted fields and try again.",
+      }));
       // Scroll to first error and animate it
       setTimeout(() => {
         scrollToFirstError(formErrors);
@@ -904,6 +913,9 @@ export default function AddCompoundDialog({
       return;
     }
 
+    // Only lock submission AFTER validation passes
+    isSubmittingRef.current = true;
+    lastSubmitTimeRef.current = now;
     setIsSubmitting(true);
 
     try {
@@ -1494,6 +1506,11 @@ export default function AddCompoundDialog({
       >
         <form id="add-project-form" onSubmit={handleSubmit} className="contents">
           <div className="space-y-2">
+            {errors.submit && (
+              <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                {errors.submit}
+              </div>
+            )}
             {/* Basic Information */}
             <div
               className="grid grid-cols-1 gap-2"
