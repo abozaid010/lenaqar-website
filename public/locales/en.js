@@ -1199,6 +1199,31 @@ export default {
     updatePaymentPlan: "Edit Payment Plan",
     addNewUnit: "Add New Unit",
     editUnit: "Edit Unit",
+    projectForm: {
+      navAriaLabel: "Project form sections",
+      navBasics: "Basics",
+      navLocation: "Location",
+      navCommercial: "Commercial",
+      navLinks: "Links",
+      navMedia: "Media",
+      navExtras: "Extras",
+      sectionBasicsTitle: "Basics",
+      sectionBasicsHint:
+        "Project name, description, finishing type, and listing flags.",
+      sectionLocationTitle: "Location",
+      sectionLocationHint:
+        "City, district, site size, coordinates, and nearby landmark.",
+      sectionCommercialTitle: "Commercial",
+      sectionCommercialHint: "Payment plans and developer.",
+      sectionLinksTitle: "Links",
+      sectionLinksHint: "Promotional video, map link, and orientation URL.",
+      sectionMediaTitle: "Media",
+      sectionMediaHint:
+        "Master plan, property types, building images, and gallery.",
+      sectionExtrasTitle: "Extras",
+      sectionExtrasHint: "Amenities and optional facility management.",
+      issuesInSections: "Jump to section:",
+    },
     fillFromText: {
       buttonLabel: "Fill from text",
       useLocalExtractor: "Regex",

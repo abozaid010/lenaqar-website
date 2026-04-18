@@ -1189,6 +1189,31 @@ export default {
     editUnit: "تعديل الوحدة",
     addPaymentPlan: "إضافة خطة دفع",
     updatePaymentPlan: "تحديث خطة الدفع",
+    projectForm: {
+      navAriaLabel: "أقسام نموذج المشروع",
+      navBasics: "الأساسيات",
+      navLocation: "الموقع",
+      navCommercial: "تجاري",
+      navLinks: "روابط",
+      navMedia: "الوسائط",
+      navExtras: "إضافي",
+      sectionBasicsTitle: "الأساسيات",
+      sectionBasicsHint:
+        "اسم المشروع، الوصف، نوع التشطيب، وخيارات العرض.",
+      sectionLocationTitle: "الموقع",
+      sectionLocationHint:
+        "المدينة، المنطقة، المساحة، الإحداثيات، ونقطة معروفة قريبة.",
+      sectionCommercialTitle: "تجاري",
+      sectionCommercialHint: "خطط السداد والمطور.",
+      sectionLinksTitle: "روابط",
+      sectionLinksHint: "الفيديو الترويجي، رابط الخريطة، ورابط التعريف.",
+      sectionMediaTitle: "الوسائط",
+      sectionMediaHint:
+        "المخطط الرئيسي، أنواع الوحدات، صور الأنواع، ومعرض الصور.",
+      sectionExtrasTitle: "إضافي",
+      sectionExtrasHint: "المرافق وإدارة المرافق الاختيارية.",
+      issuesInSections: "انتقل إلى القسم:",
+    },
     fillFromText: {
       buttonLabel: "تعبئة من نص",
       useLocalExtractor: "Regex",
