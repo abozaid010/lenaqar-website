@@ -221,4 +221,4 @@ import { LenaTextField } from "@/components/ui/inputs";
 
 ## Examples
 
-See `src/components/ui/add-compound-dialog.jsx` for a complete implementation example.
+See `src/components/ui/add-project-dialog.jsx` for a complete implementation example.

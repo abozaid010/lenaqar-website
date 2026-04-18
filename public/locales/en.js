@@ -1104,6 +1104,7 @@ export default {
     area: "Area (fdan)",
     gatedCommunity: "Gated Community",
     soldOut: "Sold out",
+    projectAmenities: "Project amenities",
     developer: "Developer",
     selectDeveloper: "Select developer",
     videoURL: "Video URL",

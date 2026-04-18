@@ -19,3 +19,4 @@ export { default as CitySelect } from "./sorted-city-select";
 export { default as SingleImageUploader } from "./single-image-uploader";
 export { default as ImageUploader } from "./image-uploader";
 export { default as PaymentPlansList } from "./payment-plans-list";
+export { default as AmenitiesSelector } from "./amenities-selector";

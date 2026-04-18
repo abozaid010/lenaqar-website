@@ -1066,6 +1066,7 @@ export default {
     area: "المساحة (فدان)",
     gatedCommunity: "مجتمع مغلق",
     soldOut: "تم البيع",
+    projectAmenities: "مرافق المشروع",
     developer: "المطور",
     selectDeveloper: "اختر المطور",
     videoURL: "رابط الفيديو",

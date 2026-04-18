@@ -11,6 +11,7 @@ import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
+import AmenitiesSelector from "@/components/ui/inputs/amenities-selector";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
@@ -28,6 +29,7 @@ import {
   parseValidationErrors,
 } from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
+import { normalizeAmenitiesArray } from "@/utils/project-amenities";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -201,6 +203,9 @@ export default function AddCompoundDialog({
     latitude: projectData?.latitude || projectData?.project?.latitude || "",
     longitude: projectData?.longitude || projectData?.project?.longitude || "",
     location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || "",
+    amenities: normalizeAmenitiesArray(
+      projectData?.amenities ?? projectData?.project?.amenities
+    ),
   });
 
   useEffect(() => {
@@ -293,6 +298,9 @@ export default function AddCompoundDialog({
                   projectData?.project?.delivery_date !== null
                 ? projectData.project.delivery_date
                 : 4,
+          amenities: normalizeAmenitiesArray(
+            projectData?.amenities ?? projectData?.project?.amenities
+          ),
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -335,6 +343,7 @@ export default function AddCompoundDialog({
           latitude: "",
           longitude: "",
           location_landmark: "",
+          amenities: [],
         });
       }
       setErrors({});
@@ -369,6 +378,7 @@ export default function AddCompoundDialog({
         latitude: "",
         longitude: "",
         location_landmark: "",
+        amenities: [],
       });
 
       setErrors({});
@@ -513,6 +523,9 @@ export default function AddCompoundDialog({
         latitude: projectData?.latitude || projectData?.project?.latitude || prev.latitude || "",
         longitude: projectData?.longitude || projectData?.project?.longitude || prev.longitude || "",
         location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || prev.location_landmark || "",
+        amenities: normalizeAmenitiesArray(
+          projectData?.amenities ?? projectData?.project?.amenities ?? prev.amenities
+        ),
       }));
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
@@ -994,6 +1007,7 @@ export default function AddCompoundDialog({
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
+        amenities: normalizeAmenitiesArray(formData.amenities),
       };
 
       console.log("[handleSubmit] Client ID info:", {
@@ -1246,6 +1260,7 @@ export default function AddCompoundDialog({
         facility_management: null,
         orientation_url: "",
         delivery_date: 4,
+        amenities: [],
       });
     } catch (error) {
       console.error("[handleSubmit] Exception caught:", {
@@ -1443,6 +1458,14 @@ export default function AddCompoundDialog({
     });
   };
 
+  const handleAmenitiesChange = useCallback((amenities) => {
+    setIsDirty(true);
+    setFormData((prev) => ({
+      ...prev,
+      amenities: normalizeAmenitiesArray(amenities),
+    }));
+  }, []);
+
   const getPropertyTypeLabel = (value) => {
     const type = BUILDING_TYPES.find((type) => type.value === value);
     return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
@@ -1631,6 +1654,22 @@ export default function AddCompoundDialog({
                   />
                 </div>
               </div>
+            </div>
+
+            {/* Project amenities (string[] for API) */}
+            <div className="w-full">
+              <AmenitiesSelector
+                label={t.formLabels?.projectAmenities || "Project amenities"}
+                value={formData.amenities}
+                onChange={handleAmenitiesChange}
+                disabled={isSubmitting}
+                locale={locale}
+                placeholder={
+                  locale === "ar"
+                    ? "ابحث أو أضف مرافق…"
+                    : "Search or add amenities…"
+                }
+              />
             </div>
 
             {/* Location - City and District on same line */}
@@ -1854,7 +1893,6 @@ export default function AddCompoundDialog({
 
             {/* Master Plan Image - Now mandatory */}
             <div ref={(el) => (fieldRefs.current.master_plan = el)}>
-              {console.log(formData?.master_plan)}
               <SingleImageUploader
                 label={t.formLabels.masterPlanImage || "Master Plan Image"}
                 value={formData.master_plan.url || null}
