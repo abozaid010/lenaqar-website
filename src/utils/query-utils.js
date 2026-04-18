@@ -7,6 +7,7 @@ export const userKeys = {
   all: ["users"],
   lists: () => [...userKeys.all, "list"],
   list: (filters) => [...userKeys.lists(), filters],
+  infiniteList: (filters) => [...userKeys.all, "infinite", filters],
   details: () => [...userKeys.all, "detail"],
   detail: (id) => [...userKeys.details(), id],
 };

@@ -24,8 +24,11 @@ export default function NavigationButtons({ id }) {
     setPrevId(currentIndex > 0 ? usersId[currentIndex - 1] : null);
   }, [id]);
 
-  const handleNavigation = (id) => {
-    router.push(`/dashboard/${id}`);
+  const handleNavigation = (nextUserId) => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    params.set("userId", nextUserId);
+    router.push(`/dashboard?${params.toString()}`);
   };
 
   return (

@@ -3,6 +3,7 @@
 import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
+import { DASHBOARD_BUTTON, DASHBOARD_TRIGGER } from "@/constants/ui-classes";
 import { useI18n } from "@/context/translate-api";
 import { getActionLabel, getFilterActions } from "@/utils/actions";
 import { ChevronDown, Printer, X } from "lucide-react";
@@ -17,7 +18,7 @@ const formatDate = (date) => {
   return formattedDate;
 };
 
-export default function DashbordFilter({ appliedFilters }) {
+export default function DashbordFilter({ appliedFilters, compact = false }) {
   const { t, locale } = useI18n();
   const router = useRouter();
 
@@ -145,6 +146,12 @@ export default function DashbordFilter({ appliedFilters }) {
       }
     });
 
+    const prev = new URLSearchParams(window.location.search);
+    const preserveQuery = prev.get("query");
+    const preserveUserId = prev.get("userId");
+    if (preserveQuery) params.set("query", preserveQuery);
+    if (preserveUserId) params.set("userId", preserveUserId);
+
     router.push(`${window.location.pathname}?${params.toString()}`, {
       replace: true,
     });
@@ -175,7 +182,9 @@ export default function DashbordFilter({ appliedFilters }) {
   };
 
   return (
-    <div className="flex sm:items-center flex-col sm:flex-row justify-between gap-2 mb-2 no-print">
+    <div
+      className={`flex sm:items-center flex-col sm:flex-row justify-between gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
+    >
       <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
         <div className="flex gap-2 flex-wrap">
           <div className="flex-1 w-52">
@@ -183,7 +192,7 @@ export default function DashbordFilter({ appliedFilters }) {
               name="action_type"
               onChange={(e) => onFilterChange("action", e.target.value)}
               value={filters.action || "all"}
-              className="py-1.5 text-gray-700"
+              className={`text-gray-700 ${compact ? "py-1 h-9 text-sm" : "py-1.5"}`}
             >
               {ACTIONS.map((action) => (
                 <option key={action.value} value={action.value}>
@@ -200,7 +209,7 @@ export default function DashbordFilter({ appliedFilters }) {
           >
             <div
               onClick={() => setIsCampaignDropdownOpen(!isCampaignDropdownOpen)}
-              className="w-full h-10 flex items-center justify-between gap-2 px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
+              className={`${DASHBOARD_TRIGGER} ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
             >
               <span className="truncate">
                 {filters.campaign_ids.length === 0
@@ -252,7 +261,7 @@ export default function DashbordFilter({ appliedFilters }) {
           <div className="relative inline-block flex-1 w-62">
             <div
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className="relative w-full h-10 flex items-center gap-2 px-2 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-100 text-sm cursor-pointer"
+              className={`relative ${DASHBOARD_TRIGGER} justify-start ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
             >
               <span dir="ltr" className="whitespace-nowrap truncate min-w-0 flex-1">
                 {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
@@ -320,7 +329,7 @@ export default function DashbordFilter({ appliedFilters }) {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={handlePrint}
-            className="flex items-center justify-center gap-1.5 h-10 px-3 py-2 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors text-xs sm:text-sm font-medium min-w-[44px] sm:min-w-fit whitespace-nowrap"
+            className={`${DASHBOARD_BUTTON} ${compact ? "h-9" : "h-10"}`}
             title={t.dashboardFilter.actions.print}
           >
             <Printer size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />

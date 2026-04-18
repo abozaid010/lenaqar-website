@@ -6,8 +6,8 @@ export const USER_ACTIONS = [
   },
   {
     value: null,
-    en_label: "Ongoing Conversation",
-    ar_label: "محادثه جاريه",
+    en_label: "New",
+    ar_label: "جديد",
   },
   {
     value: "Make a call",
@@ -51,7 +51,7 @@ export const USER_ACTIONS = [
   },
   {
     value: "Missing requirement",
-    en_label: "Missing Requirement",
+    en_label: "Missing",
     ar_label: "متطلب مفقود",
   },
   {

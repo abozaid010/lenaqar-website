@@ -29,10 +29,23 @@ export async function loginUser(credentials) {
   return response.data;
 }
 
-export async function fetchUsersData(searchParams) {
-
+/**
+ * @param {string|object} searchParams - Query filters (JSON string or object)
+ * @param {{ cursor?: string | null }} [pageParam] - Cursor pagination: pass { cursor } from infinite query
+ */
+export async function fetchUsersData(searchParams, pageParam = {}) {
   try {
-    const params = safeMergeParams(searchParams, { limit: 20 });
+    const merged =
+      typeof searchParams === "string"
+        ? safeMergeParams(searchParams, { limit: 20 })
+        : { limit: 20, ...(searchParams || {}) };
+    const params = {
+      ...merged,
+      limit: merged.limit ?? 20,
+      ...(pageParam?.cursor
+        ? { cursor: pageParam.cursor, direction: pageParam.direction ?? "forward" }
+        : {}),
+    };
 
     const response = await axiosInstance.get(`messages/all`, {
       params,
@@ -1286,6 +1299,29 @@ export async function sendCampaignReply({
 }
 
 /**
+ * Update user profile fields via POST /action/user/update
+ * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string }} payload
+ */
+export async function updateUserInfo(payload) {
+  if (!payload?.user_id) {
+    throw new Error("user_id is required");
+  }
+  try {
+    const body = {
+      user_id: payload.user_id,
+      ...(payload.phone_number !== undefined && { phone_number: payload.phone_number }),
+      ...(payload.name !== undefined && { name: typeof payload.name === "string" ? payload.name.trim() : payload.name }),
+      ...(payload.company_name !== undefined && { company_name: payload.company_name }),
+    };
+    const response = await axiosInstance.post("/action/user/update", body);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update user info:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Update user name via the action/user/update endpoint
  * @param {string} userId - The user ID to update
  * @param {string} name - The new name for the user
@@ -1296,14 +1332,50 @@ export async function updateUserName(userId, name) {
     throw new Error("userId and name are required");
   }
 
+  return updateUserInfo({ user_id: userId, name: name.trim() });
+}
+
+/**
+ * Update requirements for a user (PUT /requirements/:userId)
+ */
+export async function updateUserRequirements(userId, payload) {
+  if (!userId) {
+    throw new Error("userId is required");
+  }
   try {
-    const response = await axiosInstance.post("/action/user/update", {
-      user_id: userId,
-      name: name.trim()
-    });
+    const response = await axiosInstance.put(`requirements/${userId}`, payload);
     return response.data;
   } catch (error) {
-    console.error("Failed to update user name:", error.message);
+    console.error("Failed to update requirements:", error.message);
+    throw error;
+  }
+}
+
+/**
+ * Create a new action (POST /action/create) — client-side helper
+ */
+export async function createUserAction(payload) {
+  const actionVal =
+    typeof payload.action === "string"
+      ? payload.action
+      : Array.isArray(payload.action)
+        ? payload.action[0]
+        : payload.action;
+  const body = {
+    phone_number: payload.phone_number ?? "",
+    name: payload.name ?? "",
+    client_id: payload.client_id,
+    user_id: payload.user_id,
+    comment: payload.comment ?? "",
+    meeting_time: payload.meeting_time ?? null,
+    created_at: payload.created_at ?? new Date().toISOString(),
+    action: actionVal,
+  };
+  try {
+    const response = await axiosInstance.post("action/create", body);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create action:", error.message);
     throw error;
   }
 }

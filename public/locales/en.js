@@ -312,7 +312,7 @@ export default {
       notInterested: "Not interested",
       notQualified: "Not qualified",
       followUpLater: "Follow up later",
-      missingRequirement: "Missing Requirement",
+      missingRequirement: "Missing",
       blocked: "blocked",
       print: "print",
       exportExcel: "Export to Excel",

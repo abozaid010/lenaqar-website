@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import ClientsListQuery from "./_components/clients-list-query";
 import DashbordFilter from "./_components/dashbord-filter";
+import DashboardSplitView from "./_components/split-view/DashboardSplitView";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { AverageScoreProvider } from "@/context/average-score";
@@ -61,19 +61,24 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className={`min-h-screen ${SELECTION_COLORS.BG}`}>
-        <div className="container bg-white rounded-md shadow-sm py-4 md:py-6">
+      <div className={`min-h-0 flex flex-col flex-1 ${SELECTION_COLORS.BG}`}>
+        <div className="container bg-white rounded-md shadow-sm py-2 flex flex-col min-h-[calc(100vh-5.5rem)] md:min-h-[calc(100vh-6rem)]">
           <AverageScoreProvider>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex-1">
-                <DashbordFilter appliedFilters={searchParams} />
+            <div className="flex items-center justify-between shrink-0 mb-1">
+              <div className="flex-1 min-w-0">
+                <DashbordFilter appliedFilters={searchParams} compact />
               </div>
             </div>
 
-            {/* <SearchBar q={searchParams.query} /> */}
-
-            <Suspense fallback={<LoadingSpinner />}>
-              <ClientsListQuery searchParams={searchParams} />
+            <Suspense
+              fallback={
+                <LoadingSpinner
+                  message="Loading leads..."
+                  containerClassName="flex items-center justify-center min-h-[400px]"
+                />
+              }
+            >
+              <DashboardSplitView />
             </Suspense>
           </AverageScoreProvider>
         </div>
