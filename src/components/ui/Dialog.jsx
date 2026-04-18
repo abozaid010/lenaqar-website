@@ -14,6 +14,8 @@ export default function Dialog({
   showCloseButton = true,
   closeOnOutsideClick = true,
   closeOnEscape = true,
+  /** Override scrollable body region (default padding + overflow) */
+  bodyClassName = "p-4 overflow-y-auto bg-white flex-1",
 }) {
   const dialogRef = useRef(null);
   const [mounted, setMounted] = useState(false);
@@ -83,7 +85,7 @@ export default function Dialog({
             ) : null}
           </div>
         </div>
-        <div className="p-4 overflow-y-auto bg-white flex-1">
+        <div className={bodyClassName}>
           {children}
         </div>
       </div>

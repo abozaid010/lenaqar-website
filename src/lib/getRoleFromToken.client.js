@@ -52,3 +52,35 @@ export function getClientIdFromToken() {
   const clientId = payload.client_id ?? payload.sub ?? null;
   return clientId != null && typeof clientId === "string" ? clientId : null;
 }
+
+/**
+ * `module_actions` from JWT, if present (per-team / per-user granular permissions).
+ * Shape: { [moduleKey: string]: string[] }
+ * Empty array = no access to that module (sidebar should hide the tab).
+ * @returns {Record<string, string[]>|null}
+ */
+export function getModuleActionsFromToken() {
+  const token = LenaCookiesManager.getAccessToken();
+  const payload = decodeJwtPayload(token);
+  if (!payload || payload.module_actions == null) return null;
+  const ma = payload.module_actions;
+  return typeof ma === "object" && !Array.isArray(ma) ? ma : null;
+}
+
+/**
+ * Whether to show a sidebar item for this module.
+ * - No `module_actions` on JWT → show all (legacy tokens without granular ACL).
+ * - Key omitted from JSON or `[]` → hide (same as empty access list).
+ * - Key present with non-empty actions → show.
+ *
+ * @param {string|null|undefined} moduleKey - e.g. "projects", "team_members"
+ * @returns {boolean}
+ */
+export function shouldShowModuleNavItem(moduleKey) {
+  if (!moduleKey) return true;
+  const ma = getModuleActionsFromToken();
+  if (!ma) return true;
+  if (!Object.prototype.hasOwnProperty.call(ma, moduleKey)) return false;
+  const actions = ma[moduleKey];
+  return Array.isArray(actions) && actions.length > 0;
+}

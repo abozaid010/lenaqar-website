@@ -11,6 +11,7 @@ import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
+import AmenitiesSelector from "@/components/ui/inputs/amenities-selector";
 import { useI18n } from "@/context/translate-api";
 import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
@@ -28,10 +29,99 @@ import {
   parseValidationErrors,
 } from "@/utils/error-parser";
 import { compoundKeys as projectKeys } from "@/utils/query-utils";
+import {
+  normalizeAmenitiesArray,
+  normalizeAmenitiesFromProject,
+} from "@/utils/project-amenities";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
+
+const PROJECT_SECTION_IDS = {
+  basics: "add-project-basics",
+  location: "add-project-location",
+  commercial: "add-project-commercial",
+  links: "add-project-links",
+  media: "add-project-media",
+  extras: "add-project-extras",
+};
+
+const SECTION_NAV_ORDER = [
+  "basics",
+  "location",
+  "commercial",
+  "links",
+  "media",
+  "extras",
+];
+
+const FIELD_TO_SECTION_KEY = {
+  ar_name: "basics",
+  en_name: "basics",
+  description: "basics",
+  finishing_type: "basics",
+  city: "location",
+  district: "location",
+  delivery_date: "location",
+  area: "location",
+  latitude: "location",
+  longitude: "location",
+  location_landmark: "location",
+  payment_plans: "commercial",
+  developer_id: "commercial",
+  video_url: "links",
+  google_map_link: "links",
+  master_plan: "media",
+  properties_types: "media",
+  building_types_images: "media",
+  images: "media",
+};
+
+function collectSectionKeysFromErrors(err) {
+  const keys = new Set();
+  if (!err) return keys;
+  for (const [k, v] of Object.entries(err)) {
+    if (k === "submit") continue;
+    if (v == null || v === false || v === "") continue;
+    if (k === "building_types_images") {
+      if (v && typeof v === "object" && Object.keys(v).length > 0) {
+        keys.add("media");
+      }
+      continue;
+    }
+    if (typeof v === "object" && v !== null && !Array.isArray(v)) {
+      continue;
+    }
+    const sk = FIELD_TO_SECTION_KEY[k];
+    if (sk) keys.add(sk);
+  }
+  return keys;
+}
+
+function FormSection({ id, title, description, children }) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className="scroll-mt-28 rounded-lg border border-gray-200 bg-white p-4 shadow-sm sm:p-5"
+    >
+      <header className="mb-4 space-y-1">
+        <h2
+          id={`${id}-heading`}
+          className="text-base font-semibold text-gray-900"
+        >
+          {title}
+        </h2>
+        {description ? (
+          <p className="text-sm text-gray-500">{description}</p>
+        ) : null}
+      </header>
+      <div className="space-y-3">{children}</div>
+    </section>
+  );
+}
 
 export default function AddCompoundDialog({
   clientId,
@@ -123,6 +213,7 @@ export default function AddCompoundDialog({
     properties_types: null,
     building_types_images: null,
     finishing_type: null,
+    images: null,
   });
 
   const [formData, setFormData] = useState({
@@ -201,6 +292,7 @@ export default function AddCompoundDialog({
     latitude: projectData?.latitude || projectData?.project?.latitude || "",
     longitude: projectData?.longitude || projectData?.project?.longitude || "",
     location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || "",
+    amenities: normalizeAmenitiesFromProject(projectData),
   });
 
   useEffect(() => {
@@ -293,6 +385,7 @@ export default function AddCompoundDialog({
                   projectData?.project?.delivery_date !== null
                 ? projectData.project.delivery_date
                 : 4,
+          amenities: normalizeAmenitiesFromProject(projectData),
         }));
       } else if (!editMode) {
         // Reset form with defaults for adding
@@ -335,6 +428,7 @@ export default function AddCompoundDialog({
           latitude: "",
           longitude: "",
           location_landmark: "",
+          amenities: [],
         });
       }
       setErrors({});
@@ -369,6 +463,7 @@ export default function AddCompoundDialog({
         latitude: "",
         longitude: "",
         location_landmark: "",
+        amenities: [],
       });
 
       setErrors({});
@@ -513,6 +608,7 @@ export default function AddCompoundDialog({
         latitude: projectData?.latitude || projectData?.project?.latitude || prev.latitude || "",
         longitude: projectData?.longitude || projectData?.project?.longitude || prev.longitude || "",
         location_landmark: projectData?.location_landmark || projectData?.project?.location_landmark || prev.location_landmark || "",
+        amenities: normalizeAmenitiesFromProject(projectData),
       }));
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
@@ -610,18 +706,32 @@ export default function AddCompoundDialog({
         [name]: null,
       });
     }
+
+    // Clear submit-level error once user edits anything
+    if (errors.submit) {
+      setErrors((prev) => ({ ...prev, submit: null }));
+    }
   };
 
   // Function to scroll to first error field and animate it
-  const scrollToFirstError = (errors) => {
-    const errorFields = Object.keys(errors).filter((key) => errors[key]);
+  const scrollToFirstError = (errorMap) => {
+    const errorFields = Object.keys(errorMap).filter((key) => {
+      if (key === "submit") return false;
+      const v = errorMap[key];
+      if (v == null || v === false || v === "") return false;
+      if (typeof v === "object" && !Array.isArray(v)) {
+        return Object.keys(v).length > 0;
+      }
+      return true;
+    });
     if (errorFields.length === 0) return;
 
-    // Priority order for error fields (top to bottom)
+    // Priority order matches on-screen form order (Concept A sections)
     const fieldOrder = [
       "ar_name",
       "en_name",
       "description",
+      "finishing_type",
       "city",
       "district",
       "delivery_date",
@@ -636,7 +746,7 @@ export default function AddCompoundDialog({
       "master_plan",
       "properties_types",
       "building_types_images",
-      "finishing_type",
+      "images",
     ];
 
     // Find first error field in priority order
@@ -645,7 +755,9 @@ export default function AddCompoundDialog({
     );
     if (!firstErrorField) return;
 
-    const fieldRef = fieldRefs.current[firstErrorField];
+    const fieldRef =
+      fieldRefs.current[firstErrorField] ||
+      (firstErrorField === "en_name" ? fieldRefs.current.ar_name : null);
     if (!fieldRef) return;
 
     // Try to find the actual input/textarea/select element within the container
@@ -859,6 +971,12 @@ export default function AddCompoundDialog({
         t.formValidation?.masterPlanRequired || "Master plan image is required";
     }
 
+    if (!formData.images || !Array.isArray(formData.images) || formData.images.length === 0) {
+      newErrors.images =
+        t.formValidation?.projectImagesRequired ||
+        "At least one project gallery image is required";
+    }
+
     setErrors(newErrors);
     return newErrors;
   }, [
@@ -873,6 +991,12 @@ export default function AddCompoundDialog({
     // Prevent default form submission if event exists
     e?.preventDefault();
     
+    // Prevent duplicate submissions using ref
+    if (isSubmittingRef.current || isSubmitting) {
+      console.log("[handleSubmit] Already submitting, ignoring duplicate");
+      return;
+    }
+
     // Debounce: prevent submissions within 500ms of each other
     const now = Date.now();
     if (now - lastSubmitTimeRef.current < 500) {
@@ -880,15 +1004,6 @@ export default function AddCompoundDialog({
       return;
     }
     
-    // Prevent duplicate submissions using ref
-    if (isSubmittingRef.current || isSubmitting) {
-      console.log("[handleSubmit] Already submitting, ignoring duplicate");
-      return;
-    }
-    
-    isSubmittingRef.current = true;
-    lastSubmitTimeRef.current = now;
-
     console.log("[handleSubmit] Form submission started", {
       editMode,
       compoundDataId: projectData?.id,
@@ -897,6 +1012,13 @@ export default function AddCompoundDialog({
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
       console.log("[handleSubmit] Validation errors:", formErrors);
+      setErrors((prev) => ({
+        ...prev,
+        submit:
+          locale === "ar"
+            ? "يرجى تصحيح الحقول المحددة باللون الأحمر ثم المحاولة مرة أخرى."
+            : "Please fix the highlighted fields and try again.",
+      }));
       // Scroll to first error and animate it
       setTimeout(() => {
         scrollToFirstError(formErrors);
@@ -904,6 +1026,9 @@ export default function AddCompoundDialog({
       return;
     }
 
+    // Only lock submission AFTER validation passes
+    isSubmittingRef.current = true;
+    lastSubmitTimeRef.current = now;
     setIsSubmitting(true);
 
     try {
@@ -967,6 +1092,8 @@ export default function AddCompoundDialog({
       const lngValue = formData.longitude != null ? String(formData.longitude).trim() : "";
       const landmarkValue = formData.location_landmark != null ? String(formData.location_landmark).trim() : "";
 
+      const normalizedAmenities = normalizeAmenitiesArray(formData.amenities);
+
       const submissionData = {
         ...formData,
         developer_id: formData.developer_id,
@@ -982,6 +1109,8 @@ export default function AddCompoundDialog({
         payment_plans: paymentPlansForApi,
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
+        amenities: normalizedAmenities,
+        facilities: normalizedAmenities,
       };
 
       console.log("[handleSubmit] Client ID info:", {
@@ -1234,6 +1363,7 @@ export default function AddCompoundDialog({
         facility_management: null,
         orientation_url: "",
         delivery_date: 4,
+        amenities: [],
       });
     } catch (error) {
       console.error("[handleSubmit] Exception caught:", {
@@ -1431,10 +1561,46 @@ export default function AddCompoundDialog({
     });
   };
 
+  const handleAmenitiesChange = useCallback((amenities) => {
+    setIsDirty(true);
+    setFormData((prev) => ({
+      ...prev,
+      amenities: normalizeAmenitiesArray(amenities),
+    }));
+  }, []);
+
   const getPropertyTypeLabel = (value) => {
     const type = BUILDING_TYPES.find((type) => type.value === value);
     return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
   };
+
+  const pf = t.modal?.projectForm;
+
+  const scrollToProjectSection = useCallback((sectionKey) => {
+    const id = PROJECT_SECTION_IDS[sectionKey];
+    if (!id || typeof document === "undefined") return;
+    document.getElementById(id)?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const errorSectionKeys = useMemo(() => {
+    const set = collectSectionKeysFromErrors(errors);
+    return SECTION_NAV_ORDER.filter((k) => set.has(k));
+  }, [errors]);
+
+  const sectionNavItems = useMemo(
+    () => [
+      { key: "basics", label: pf?.navBasics ?? "Basics" },
+      { key: "location", label: pf?.navLocation ?? "Location" },
+      { key: "commercial", label: pf?.navCommercial ?? "Payment" },
+      { key: "links", label: pf?.navLinks ?? "Links" },
+      { key: "media", label: pf?.navMedia ?? "Media" },
+      { key: "extras", label: pf?.navExtras ?? "Extras" },
+    ],
+    [pf]
+  );
 
   return (
     <>
@@ -1491,247 +1657,310 @@ export default function AddCompoundDialog({
             ? t.updateProject
             : t.modal?.addNewProject || "Add New Project"
         }
+        bodyClassName="p-0 overflow-y-auto bg-white flex-1 min-h-0"
       >
-        <form id="add-project-form" onSubmit={handleSubmit} className="contents">
-          <div className="space-y-2">
-            {/* Basic Information */}
-            <div
-              className="grid grid-cols-1 gap-2"
-              ref={(el) => (fieldRefs.current.ar_name = el)}
-            >
-              <MultiLangInput
-                label={t.formLabels?.compoundName || "Compound Name"}
-                required
-                arValue={formData.ar_name}
-                enValue={formData.en_name}
-                onChange={handleChange}
-                errors={{
-                  ar_name: errors.ar_name,
-                  en_name: errors.en_name,
-                }}
-                placeholders={{
-                  ar: "اسم المشروع (العربية)",
-                  en: "Compound Name (English)",
-                }}
-                missingLang={missingLang}
-              />
-            </div>
-
-            {/* Description */}
-            <div ref={(el) => (fieldRefs.current.description = el)}>
-              <LenaTextarea
-                label={
-                  <>
-                    {t.formLabels?.description || "Description"}{" "}
-                    <span className="text-xs text-gray-500 ml-2">
-                      ({formData.description.length}/30-1200)
-                    </span>
-                  </>
-                }
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                required
-                rows={5}
-                placeholder={t.placeholders.projectDescription}
-                error={errors.description}
-                errorMessage={errors.description}
-              />
-            </div>
-
-            {/* Gated Community, Sold Out Checkboxes, and Finishing Type */}
-            <div className="flex items-center gap-6 flex-wrap">
-              <div className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  id="gated"
-                  name="gated"
-                  checked={formData.gated}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="gated"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  {t.formLabels?.gatedCommunity || "Gated Community"}
-                </label>
-              </div>
-              <div className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  id="is_active"
-                  name="is_active"
-                  checked={!formData.is_active}
-                  onChange={(e) => {
-                    handleChange({
-                      target: {
-                        name: "is_active",
-                        type: "checkbox",
-                        checked: !e.target.checked, // Invert: checked means sold out (is_active = false)
-                      },
-                    });
-                  }}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="is_active"
-                  className="ml-2 block text-sm text-gray-700"
-                >
-                  {t.formLabels?.soldOut || "Sold out"}
-                </label>
-              </div>
-              <div
-                ref={(el) => (fieldRefs.current.finishing_type = el)}
-                className="flex items-center gap-2 flex-1 min-w-[200px]"
+        <form
+          id="add-project-form"
+          onSubmit={handleSubmit}
+          className="block w-full"
+        >
+          <nav
+            className="sticky top-0 z-20 flex flex-wrap gap-2 border-b border-gray-200 bg-white/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-white/90"
+            aria-label={pf?.navAriaLabel || "Project form sections"}
+          >
+            {sectionNavItems.map(({ key, label }) => (
+              <button
+                key={key}
+                type="button"
+                className={`${DASHBOARD_BUTTON} text-xs py-1.5 px-2.5`}
+                onClick={() => scrollToProjectSection(key)}
               >
-                <label
-                  htmlFor="finishing_type"
-                  className={`text-sm font-medium whitespace-nowrap ${
-                    errors.finishing_type ? "text-red-500" : "text-gray-700"
-                  }`}
-                >
-                  {t.formLabels?.finishingType ||
-                    t.finishingType ||
-                    "Finishing Type"}
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="flex-1">
-                  <FormMultiSelect
-                    name="finishing_type"
-                    placeholder={
-                      locale === "ar"
-                        ? "اختر نوع التشطيب"
-                        : "Select finishing type"
-                    }
-                    value={formData.finishing_type}
+                {label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-8 pt-4">
+            {errors.submit && (
+              <div className="space-y-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <p>{errors.submit}</p>
+                {errorSectionKeys.length > 0 && (
+                  <div className="border-t border-red-200/70 pt-2">
+                    <p className="mb-2 text-xs font-medium text-red-800">
+                      {pf?.issuesInSections || "Jump to section:"}
+                    </p>
+                    <ul className="flex flex-wrap gap-2">
+                      {errorSectionKeys.map((sectionKey) => {
+                        const label =
+                          sectionNavItems.find((i) => i.key === sectionKey)
+                            ?.label ?? sectionKey;
+                        return (
+                          <li key={sectionKey}>
+                            <button
+                              type="button"
+                              className={`${DASHBOARD_BUTTON} text-xs py-1.5 px-2.5`}
+                              onClick={() => scrollToProjectSection(sectionKey)}
+                            >
+                              {label}
+                            </button>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <FormSection
+              id={PROJECT_SECTION_IDS.basics}
+              title={pf?.sectionBasicsTitle || "Basics"}
+              description={pf?.sectionBasicsHint}
+            >
+              <div
+                className="grid grid-cols-1 gap-2"
+                ref={(el) => {
+                  fieldRefs.current.ar_name = el;
+                  fieldRefs.current.en_name = el;
+                }}
+              >
+                <MultiLangInput
+                  label={t.formLabels?.compoundName || "Compound Name"}
+                  required
+                  arValue={formData.ar_name}
+                  enValue={formData.en_name}
+                  onChange={handleChange}
+                  errors={{
+                    ar_name: errors.ar_name,
+                    en_name: errors.en_name,
+                  }}
+                  placeholders={{
+                    ar: "اسم المشروع (العربية)",
+                    en: "Compound Name (English)",
+                  }}
+                  missingLang={missingLang}
+                />
+              </div>
+
+              <div ref={(el) => (fieldRefs.current.description = el)}>
+                <LenaTextarea
+                  label={
+                    <>
+                      {t.formLabels?.description || "Description"}{" "}
+                      <span className="text-xs text-gray-500 ml-2">
+                        ({formData.description.length}/30-1200)
+                      </span>
+                    </>
+                  }
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  required
+                  rows={5}
+                  placeholder={t.placeholders.projectDescription}
+                  error={errors.description}
+                  errorMessage={errors.description}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-6">
+                <div className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    id="gated"
+                    name="gated"
+                    checked={formData.gated}
                     onChange={handleChange}
-                    options={FINISHING_TYPES}
-                    locale={locale}
-                    required={true}
-                    error={errors.finishing_type}
-                    errorMessage={errors.finishing_type}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="gated"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    {t.formLabels?.gatedCommunity || "Gated Community"}
+                  </label>
+                </div>
+                <div className="flex items-center gap-1">
+                  <input
+                    type="checkbox"
+                    id="is_active"
+                    name="is_active"
+                    checked={!formData.is_active}
+                    onChange={(e) => {
+                      handleChange({
+                        target: {
+                          name: "is_active",
+                          type: "checkbox",
+                          checked: !e.target.checked,
+                        },
+                      });
+                    }}
+                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label
+                    htmlFor="is_active"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    {t.formLabels?.soldOut || "Sold out"}
+                  </label>
+                </div>
+                <div
+                  ref={(el) => (fieldRefs.current.finishing_type = el)}
+                  className="flex min-w-[200px] flex-1 items-center gap-2"
+                >
+                  <label
+                    htmlFor="finishing_type"
+                    className={`whitespace-nowrap text-sm font-medium ${
+                      errors.finishing_type ? "text-red-500" : "text-gray-700"
+                    }`}
+                  >
+                    {t.formLabels?.finishingType ||
+                      t.finishingType ||
+                      "Finishing Type"}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex-1">
+                    <FormMultiSelect
+                      name="finishing_type"
+                      placeholder={
+                        locale === "ar"
+                          ? "اختر نوع التشطيب"
+                          : "Select finishing type"
+                      }
+                      value={formData.finishing_type}
+                      onChange={handleChange}
+                      options={FINISHING_TYPES}
+                      locale={locale}
+                      required={true}
+                      error={errors.finishing_type}
+                      errorMessage={errors.finishing_type}
+                    />
+                  </div>
+                </div>
+              </div>
+            </FormSection>
+
+            <FormSection
+              id={PROJECT_SECTION_IDS.location}
+              title={pf?.sectionLocationTitle || "Location"}
+              description={pf?.sectionLocationHint}
+            >
+              <input type="hidden" name="country" value="Egypt" />
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div ref={(el) => (fieldRefs.current.city = el)}>
+                  <CitySelect
+                    value={formData.city}
+                    onChange={handleChange}
+                    error={errors.city}
+                    required
+                  />
+                </div>
+
+                <div ref={(el) => (fieldRefs.current.district = el)}>
+                  <SearchableDropdownSelect
+                    name="district"
+                    label={t.formLabels?.district || "District"}
+                    value={formData.district}
+                    onChange={handleChange}
+                    required
+                    error={!!errors.district}
+                    errorMessage={errors.district}
+                    disabled={!formData.city}
+                    isLoading={isLoadingDistricts}
+                    options={districtsWithLabels}
+                    placeholder={
+                      !formData.city
+                        ? locale === "ar"
+                          ? "الرجاء اختيار المدينة أولاً"
+                          : "Please select a city first"
+                        : locale === "ar"
+                          ? t.formLabels?.district || "اختر المنطقة"
+                          : "Select district"
+                    }
+                    getValue={(option) => option.value}
+                    getLabel={(option) => option.label}
+                    getKey={(option) => option.value}
+                    searchFields={["label"]}
+                    noResultsText={
+                      districtsWithLabels.length === 0 && formData.city
+                        ? locale === "ar"
+                          ? `لا توجد مناطق لـ ${formData.city}`
+                          : `No districts found for ${formData.city}`
+                        : undefined
+                    }
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Location - City and District on same line */}
-            <div className="grid grid-cols-2 gap-4">
-              <div ref={(el) => (fieldRefs.current.city = el)}>
-                <CitySelect
-                  value={formData.city}
-                  onChange={handleChange}
-                  error={errors.city}
-                  required
-                />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div ref={(el) => (fieldRefs.current.delivery_date = el)}>
+                  <LenaTextField
+                    type="number"
+                    name="delivery_date"
+                    label={
+                      t.formLabels?.deliveryInYears || "Delivery in years:"
+                    }
+                    value={formData.delivery_date}
+                    onChange={handleChange}
+                    required
+                    placeholder="4"
+                    min="0"
+                    step="0.5"
+                    error={errors.delivery_date}
+                    errorMessage={errors.delivery_date}
+                  />
+                </div>
+
+                <div ref={(el) => (fieldRefs.current.area = el)}>
+                  <LenaTextField
+                    type="number"
+                    name="area"
+                    label={t.formLabels?.area || "Area (fdan)"}
+                    value={formData.area}
+                    onChange={handleChange}
+                    required
+                    placeholder="1000"
+                    min="0.0"
+                    step="0.01"
+                    error={errors.area}
+                    errorMessage={errors.area}
+                  />
+                </div>
               </div>
 
-              <div ref={(el) => (fieldRefs.current.district = el)}>
-                <SearchableDropdownSelect
-                  name="district"
-                  label={t.formLabels?.district || "District"}
-                  value={formData.district}
-                  onChange={handleChange}
-                  required
-                  error={!!errors.district}
-                  errorMessage={errors.district}
-                  disabled={!formData.city}
-                  isLoading={isLoadingDistricts}
-                  options={districtsWithLabels}
-                  placeholder={
-                    !formData.city
-                      ? locale === "ar"
-                        ? "الرجاء اختيار المدينة أولاً"
-                        : "Please select a city first"
-                      : locale === "ar"
-                        ? t.formLabels?.district || "اختر المنطقة"
-                        : "Select district"
-                  }
-                  getValue={(option) => option.value}
-                  getLabel={(option) => option.label}
-                  getKey={(option) => option.value}
-                  searchFields={["label"]}
-                  noResultsText={
-                    districtsWithLabels.length === 0 && formData.city
-                      ? locale === "ar"
-                        ? `لا توجد مناطق لـ ${formData.city}`
-                        : `No districts found for ${formData.city}`
-                      : undefined
-                  }
-                />
-              </div>
-            </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div ref={(el) => (fieldRefs.current.latitude = el)}>
+                  <LenaTextField
+                    type="number"
+                    name="latitude"
+                    label="Latitude"
+                    value={formData.latitude}
+                    onChange={handleChange}
+                    required
+                    placeholder="30.0444"
+                    step="any"
+                    error={errors.latitude}
+                    errorMessage={errors.latitude}
+                  />
+                </div>
 
-            {/* Hidden country field - always set to Egypt */}
-            <input type="hidden" name="country" value="Egypt" />
-
-            {/* Delivery and Area on same line */}
-            <div className="grid grid-cols-2 gap-4">
-              <div ref={(el) => (fieldRefs.current.delivery_date = el)}>
-                <LenaTextField
-                  type="number"
-                  name="delivery_date"
-                  label={t.formLabels?.deliveryInYears || "Delivery in years:"}
-                  value={formData.delivery_date}
-                  onChange={handleChange}
-                  required
-                  placeholder="4"
-                  min="0"
-                  step="0.5"
-                  error={errors.delivery_date}
-                  errorMessage={errors.delivery_date}
-                />
+                <div ref={(el) => (fieldRefs.current.longitude = el)}>
+                  <LenaTextField
+                    type="number"
+                    name="longitude"
+                    label="Longitude"
+                    value={formData.longitude}
+                    onChange={handleChange}
+                    required
+                    placeholder="31.2357"
+                    step="any"
+                    error={errors.longitude}
+                    errorMessage={errors.longitude}
+                  />
+                </div>
               </div>
 
-              <div ref={(el) => (fieldRefs.current.area = el)}>
-                <LenaTextField
-                  type="number"
-                  name="area"
-                  label={t.formLabels?.area || "Area (fdan)"}
-                  value={formData.area}
-                  onChange={handleChange}
-                  required
-                  placeholder="1000"
-                  min="0.0"
-                  step="0.01"
-                  error={errors.area}
-                  errorMessage={errors.area}
-                />
-              </div>
-
-            {/* Location Fields */}
-            <div className="grid grid-cols-1 gap-4">
-              <div ref={(el) => (fieldRefs.current.latitude = el)}>
-                <LenaTextField
-                  type="number"
-                  name="latitude"
-                  label="Latitude"
-                  value={formData.latitude}
-                  onChange={handleChange}
-                  required
-                  placeholder="30.0444"
-                  step="any"
-                  error={errors.latitude}
-                  errorMessage={errors.latitude}
-                />
-              </div>
-              
-              <div ref={(el) => (fieldRefs.current.longitude = el)}>
-                <LenaTextField
-                  type="number"
-                  name="longitude"
-                  label="Longitude"
-                  value={formData.longitude}
-                  onChange={handleChange}
-                  required
-                  placeholder="31.2357"
-                  step="any"
-                  error={errors.longitude}
-                  errorMessage={errors.longitude}
-                />
-              </div>
-              
               <div ref={(el) => (fieldRefs.current.location_landmark = el)}>
                 <LenaTextarea
                   name="location_landmark"
@@ -1745,321 +1974,374 @@ export default function AddCompoundDialog({
                   errorMessage={errors.location_landmark}
                 />
               </div>
-            </div>
-            </div>
+            </FormSection>
 
-            {/* Payment Plans */}
-            <div ref={(el) => (fieldRefs.current.payment_plans = el)}>
-              <PaymentPlansList
-                plans={formData.payment_plans}
-                onChange={handlePaymentPlansChange}
-                error={errors.payment_plans}
-                required={true}
-              />
-            </div>
-
-            {/* Developer */}
-            <div
-              className="relative"
-              ref={(el) => (fieldRefs.current.developer_id = el)}
+            <FormSection
+              id={PROJECT_SECTION_IDS.commercial}
+              title={pf?.sectionCommercialTitle || "Payment"}
+              description={pf?.sectionCommercialHint}
             >
-              <div className="flex justify-between items-center mb-1">
+              <div ref={(el) => (fieldRefs.current.payment_plans = el)}>
+                <PaymentPlansList
+                  plans={formData.payment_plans}
+                  onChange={handlePaymentPlansChange}
+                  error={errors.payment_plans}
+                  required={true}
+                />
+              </div>
+
+              <div
+                className="relative"
+                ref={(el) => (fieldRefs.current.developer_id = el)}
+              >
+                <div className="mb-1 flex items-center justify-between">
+                  <label
+                    className={`block text-sm font-medium ${
+                      errors.developer_id ? "text-red-500" : "text-gray-700"
+                    }`}
+                  >
+                    {t.formLabels?.developer || "Developer"}{" "}
+                    <span className="text-red-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddDeveloperDialogOpen(true)}
+                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    + {t.buttons?.addNew || "Add New"}
+                  </button>
+                </div>
+                <SearchableDropdownSelect
+                  name="developer_id"
+                  value={formData.developer_id}
+                  onChange={handleChange}
+                  required
+                  error={!!errors.developer_id}
+                  errorMessage={
+                    typeof errors.developer_id === "string"
+                      ? errors.developer_id
+                      : ""
+                  }
+                  placeholder={
+                    t.formLabels?.selectDeveloper || "Select developer"
+                  }
+                  options={developers || []}
+                  getValue={(developer) => developer.id || ""}
+                  getLabel={(developer, loc) => {
+                    if (loc === "ar" && developer.ar_name) {
+                      return developer.ar_name;
+                    }
+                    return developer.en_name || "";
+                  }}
+                  searchFields={["ar_name", "en_name"]}
+                  isLoading={delveloperLoading}
+                />
+              </div>
+            </FormSection>
+
+            <FormSection
+              id={PROJECT_SECTION_IDS.links}
+              title={pf?.sectionLinksTitle || "Links"}
+              description={pf?.sectionLinksHint}
+            >
+              <div ref={(el) => (fieldRefs.current.video_url = el)}>
+                <LenaTextField
+                  type="url"
+                  name="video_url"
+                  label={t.formLabels?.videoURL || "Video URL"}
+                  value={formData.video_url}
+                  onChange={handleChange}
+                  placeholder="https://example.com/video"
+                  required
+                  error={errors.video_url}
+                  errorMessage={errors.video_url}
+                />
+              </div>
+              <div ref={(el) => (fieldRefs.current.google_map_link = el)}>
+                <LenaTextField
+                  type="url"
+                  name="google_map_link"
+                  label={t.formLabels?.googleMapsLink || "Google Maps Link"}
+                  value={formData.google_map_link}
+                  onChange={handleChange}
+                  placeholder="https://maps.app.goo.gl/..."
+                  required
+                  error={errors.google_map_link}
+                  errorMessage={errors.google_map_link}
+                />
+              </div>
+              <div>
+                <LenaTextField
+                  type="url"
+                  name="orientation_url"
+                  label={
+                    t.formLabels?.orientationUrl || "Orientation Video URL"
+                  }
+                  value={formData.orientation_url}
+                  onChange={handleChange}
+                  placeholder="https://example.com/orientation-image.jpg"
+                />
+              </div>
+            </FormSection>
+
+            <FormSection
+              id={PROJECT_SECTION_IDS.media}
+              title={pf?.sectionMediaTitle || "Media"}
+              description={pf?.sectionMediaHint}
+            >
+              <div ref={(el) => (fieldRefs.current.master_plan = el)}>
+                <SingleImageUploader
+                  label={t.formLabels.masterPlanImage || "Master Plan Image"}
+                  value={formData.master_plan.url || null}
+                  imageId={formData.master_plan.fileId || null}
+                  onChange={(url, id) => {
+                    setIsDirty(true);
+                    setFormData((prev) => ({
+                      ...prev,
+                      master_plan: {
+                        url,
+                        fileId: id,
+                      },
+                    }));
+                    if (errors.master_plan) {
+                      setErrors((prev) => ({
+                        ...prev,
+                        master_plan: null,
+                      }));
+                    }
+                  }}
+                  disabled={isMasterPlanUploading || isSubmitting}
+                  isUploading={isMasterPlanUploading}
+                  setIsUploading={setIsMasterPlanUploading}
+                  imageType="masterPlan"
+                  required={true}
+                  error={errors.master_plan}
+                />
+              </div>
+
+              <div ref={(el) => (fieldRefs.current.properties_types = el)}>
+                <FormMultiSelect
+                  name="properties_types"
+                  label={t.formLabels.propertyTypes || "Property Types"}
+                  placeholder={
+                    locale === "ar"
+                      ? "اختر أنواع العقارات"
+                      : "Select options"
+                  }
+                  value={formData.properties_types}
+                  onChange={handleChange}
+                  options={BUILDING_TYPES}
+                  locale={locale}
+                  required={true}
+                  error={errors.properties_types}
+                />
+              </div>
+
+              {formData.properties_types &&
+                formData.properties_types.length > 0 && (
+                  <div
+                    className="space-y-4"
+                    ref={(el) => (fieldRefs.current.building_types_images = el)}
+                  >
+                    {formData.properties_types.map((propertyType) => (
+                      <div key={propertyType}>
+                        <label
+                          className={`mb-1 block text-sm font-medium ${
+                            errors.building_types_images?.[propertyType]
+                              ? "text-red-600"
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {getPropertyTypeLabel(propertyType)}
+                          <span className="ml-2 text-xs font-normal text-gray-500">
+                            (
+                            {
+                              (formData.building_types_images[propertyType] ||
+                                []).length
+                            }{" "}
+                            / 4)
+                          </span>
+                        </label>
+                        {errors.building_types_images?.[propertyType] && (
+                          <p className="mb-2 text-xs text-red-600">
+                            {errors.building_types_images[propertyType]}
+                          </p>
+                        )}
+                        <ImageUploader
+                          maxImages={4}
+                          initialImages={
+                            formData.building_types_images[propertyType] || []
+                          }
+                          onImagesChange={(images) =>
+                            handleBuildingTypeImagesChange(propertyType, images)
+                          }
+                          isUploading={isUploading}
+                          setIsUploading={setIsUploading}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+              <div ref={(el) => (fieldRefs.current.images = el)}>
                 <label
-                  className={`block text-sm font-medium ${
-                    errors.developer_id ? "text-red-500" : "text-gray-700"
+                  className={`mb-1 block text-sm font-medium ${
+                    errors.images ? "text-red-600" : "text-gray-700"
                   }`}
                 >
-                  {t.formLabels?.developer || "Developer"}{" "}
+                  {t.formLabels?.projectImages || "Project Images"}{" "}
                   <span className="text-red-500">*</span>
+                  <span className="text-xs font-normal text-gray-500">
+                    ({formData.images?.length || 0} / 8)
+                  </span>
                 </label>
-                <button
-                  type="button"
-                  onClick={() => setIsAddDeveloperDialogOpen(true)}
-                  className="text-blue-600 text-sm font-medium hover:text-blue-700"
-                >
-                  + {t.buttons?.addNew || "Add New"}
-                </button>
+                {errors.images ? (
+                  <p className="mb-2 text-sm text-red-600">{errors.images}</p>
+                ) : null}
+                <ImageUploader
+                  maxImages={8}
+                  initialImages={formData.images || []}
+                  onImagesChange={(images) => {
+                    setIsDirty(true);
+                    setFormData((prev) => ({ ...prev, images }));
+                    if (errors.images) {
+                      setErrors((prev) => ({ ...prev, images: null }));
+                    }
+                  }}
+                  isUploading={isUploading}
+                  setIsUploading={setIsUploading}
+                />
               </div>
-              <SearchableDropdownSelect
-                name="developer_id"
-                value={formData.developer_id}
-                onChange={handleChange}
-                required
-                error={!!errors.developer_id}
-                errorMessage={
-                  typeof errors.developer_id === "string"
-                    ? errors.developer_id
-                    : ""
-                }
-                placeholder={
-                  t.formLabels?.selectDeveloper || "Select developer"
-                }
-                options={developers || []}
-                getValue={(developer) => developer.id || ""}
-                getLabel={(developer, loc) => {
-                  if (loc === "ar" && developer.ar_name) {
-                    return developer.ar_name;
+            </FormSection>
+
+            <FormSection
+              id={PROJECT_SECTION_IDS.extras}
+              title={pf?.sectionExtrasTitle || "Extras"}
+              description={pf?.sectionExtrasHint}
+            >
+              <div className="w-full">
+                <AmenitiesSelector
+                  label={t.formLabels?.projectAmenities || "Project amenities"}
+                  value={formData.amenities}
+                  onChange={handleAmenitiesChange}
+                  disabled={isSubmitting}
+                  locale={locale}
+                  placeholder={
+                    locale === "ar"
+                      ? "ابحث أو أضف مرافق…"
+                      : "Search or add amenities…"
                   }
-                  return developer.en_name || "";
-                }}
-                searchFields={["ar_name", "en_name"]}
-                isLoading={delveloperLoading}
-              />
-            </div>
+                />
+              </div>
 
-            {/* Links */}
-            <div ref={(el) => (fieldRefs.current.video_url = el)}>
-              <LenaTextField
-                type="url"
-                name="video_url"
-                label={t.formLabels?.videoURL || "Video URL"}
-                value={formData.video_url}
-                onChange={handleChange}
-                placeholder="https://example.com/video"
-                required
-                error={errors.video_url}
-                errorMessage={errors.video_url}
-              />
-            </div>
-            <div ref={(el) => (fieldRefs.current.google_map_link = el)}>
-              <LenaTextField
-                type="url"
-                name="google_map_link"
-                label={t.formLabels?.googleMapsLink || "Google Maps Link"}
-                value={formData.google_map_link}
-                onChange={handleChange}
-                placeholder="https://maps.app.goo.gl/..."
-                required
-                error={errors.google_map_link}
-                errorMessage={errors.google_map_link}
-              />
-            </div>
-
-            {/* Master Plan Image - Now mandatory */}
-            <div ref={(el) => (fieldRefs.current.master_plan = el)}>
-              {console.log(formData?.master_plan)}
-              <SingleImageUploader
-                label={t.formLabels.masterPlanImage || "Master Plan Image"}
-                value={formData.master_plan.url || null}
-                imageId={formData.master_plan.fileId || null}
-                onChange={(url, id) => {
-                  setIsDirty(true);
-                  setFormData((prev) => ({
-                    ...prev,
-                    master_plan: {
-                      url,
-                      fileId: id,
-                    },
-                  }));
-                  // Clear error when image is uploaded
-                  if (errors.master_plan) {
-                    setErrors((prev) => ({
-                      ...prev,
-                      master_plan: null,
-                    }));
-                  }
-                }}
-                disabled={isMasterPlanUploading || isSubmitting}
-                isUploading={isMasterPlanUploading}
-                setIsUploading={setIsMasterPlanUploading}
-                imageType="masterPlan"
-                required={true}
-                error={errors.master_plan}
-              />
-            </div>
-
-            {/* Property Types */}
-            <div ref={(el) => (fieldRefs.current.properties_types = el)}>
-              <FormMultiSelect
-                name="properties_types"
-                label={t.formLabels.propertyTypes || "Property Types"}
-                placeholder={
-                  locale === "ar" ? "اختر أنواع العقارات" : "Select options"
-                }
-                value={formData.properties_types}
-                onChange={handleChange}
-                options={BUILDING_TYPES}
-                locale={locale}
-                required={true}
-                error={errors.properties_types}
-              />
-            </div>
-
-            {/* Building Types Images */}
-            {formData.properties_types &&
-              formData.properties_types.length > 0 && (
-                <div
-                  className="space-y-4"
-                  ref={(el) => (fieldRefs.current.building_types_images = el)}
-                >
-                  {formData.properties_types.map((propertyType) => (
-                    <div key={propertyType}>
-                      <label
-                        className={`block text-sm font-medium mb-1 ${
-                          errors.building_types_images?.[propertyType]
-                            ? "text-red-600"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        {getPropertyTypeLabel(propertyType)}
-                        <span className="text-xs font-normal text-gray-500 ml-2">
-                          (
-                          {
-                            (formData.building_types_images[propertyType] || [])
-                              .length
-                          }{" "}
-                          / 4)
-                        </span>
-                      </label>
-                      {errors.building_types_images?.[propertyType] && (
-                        <p className="text-xs text-red-600 mb-2">
-                          {errors.building_types_images[propertyType]}
-                        </p>
-                      )}
-                      <ImageUploader
-                        maxImages={4}
-                        initialImages={
-                          formData.building_types_images[propertyType] || []
-                        }
-                        onImagesChange={(images) =>
-                          handleBuildingTypeImagesChange(propertyType, images)
-                        }
-                        isUploading={isUploading}
-                        setIsUploading={setIsUploading}
-                      />
-                    </div>
-                  ))}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-gray-700">
+                    {t.formLabels?.facilityManagement || "Facility Management"}
+                  </label>
+                  {formData.facility_management ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDirty(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          facility_management: null,
+                        }));
+                      }}
+                      className="text-sm text-red-500 hover:text-red-600"
+                    >
+                      {t.buttons?.remove || "Remove"}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsDirty(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          facility_management: {
+                            name: "",
+                            description: "",
+                            rating: "",
+                          },
+                        }));
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-700"
+                    >
+                      + {t.buttons?.addNew || "Add"}
+                    </button>
+                  )}
                 </div>
-              )}
-
-            {/* Orientation URL */}
-            <div>
-              <LenaTextField
-                type="url"
-                name="orientation_url"
-                label={t.formLabels?.orientationUrl || "Orientation Video URL"}
-                value={formData.orientation_url}
-                onChange={handleChange}
-                placeholder="https://example.com/orientation-image.jpg"
-              />
-            </div>
-
-            {/* Facility Management */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-gray-700">
-                  {t.formLabels?.facilityManagement || "Facility Management"}
-                </label>
-                {formData.facility_management ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDirty(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        facility_management: null,
-                      }));
-                    }}
-                    className="text-red-500 text-sm hover:text-red-600"
-                  >
-                    {t.buttons?.remove || "Remove"}
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDirty(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        facility_management: { name: "", description: "", rating: "" },
-                      }));
-                    }}
-                    className="text-blue-600 text-sm hover:text-blue-700"
-                  >
-                    + {t.buttons?.addNew || "Add"}
-                  </button>
+                {formData.facility_management && (
+                  <div className="space-y-2 rounded-md border border-gray-200 p-3">
+                    <LenaTextField
+                      type="text"
+                      name="facility_management_name"
+                      label={
+                        t.formLabels?.facilityManagementName || "Company Name"
+                      }
+                      value={formData.facility_management.name}
+                      onChange={(e) => {
+                        setIsDirty(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          facility_management: {
+                            ...prev.facility_management,
+                            name: e.target.value,
+                          },
+                        }));
+                      }}
+                      placeholder="Elite Facility Management"
+                      required
+                    />
+                    <LenaTextarea
+                      name="facility_management_description"
+                      label={
+                        t.formLabels?.facilityManagementDescription ||
+                        "Description"
+                      }
+                      value={formData.facility_management.description}
+                      onChange={(e) => {
+                        setIsDirty(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          facility_management: {
+                            ...prev.facility_management,
+                            description: e.target.value,
+                          },
+                        }));
+                      }}
+                      rows={3}
+                      placeholder="Describe facility management services..."
+                    />
+                    <LenaTextField
+                      type="number"
+                      name="facility_management_rating"
+                      label={
+                        t.formLabels?.facilityManagementRating ||
+                        "Rating (0–5)"
+                      }
+                      value={formData.facility_management.rating}
+                      onChange={(e) => {
+                        setIsDirty(true);
+                        setFormData((prev) => ({
+                          ...prev,
+                          facility_management: {
+                            ...prev.facility_management,
+                            rating: e.target.value,
+                          },
+                        }));
+                      }}
+                      placeholder="4.5"
+                      min="0"
+                      max="5"
+                      step="0.1"
+                    />
+                  </div>
                 )}
               </div>
-              {formData.facility_management && (
-                <div className="space-y-2 p-3 border border-gray-200 rounded-md">
-                  <LenaTextField
-                    type="text"
-                    name="facility_management_name"
-                    label={t.formLabels?.facilityManagementName || "Company Name"}
-                    value={formData.facility_management.name}
-                    onChange={(e) => {
-                      setIsDirty(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        facility_management: {
-                          ...prev.facility_management,
-                          name: e.target.value,
-                        },
-                      }));
-                    }}
-                    placeholder="Elite Facility Management"
-                    required
-                  />
-                  <LenaTextarea
-                    name="facility_management_description"
-                    label={t.formLabels?.facilityManagementDescription || "Description"}
-                    value={formData.facility_management.description}
-                    onChange={(e) => {
-                      setIsDirty(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        facility_management: {
-                          ...prev.facility_management,
-                          description: e.target.value,
-                        },
-                      }));
-                    }}
-                    rows={3}
-                    placeholder="Describe facility management services..."
-                  />
-                  <LenaTextField
-                    type="number"
-                    name="facility_management_rating"
-                    label={t.formLabels?.facilityManagementRating || "Rating (0–5)"}
-                    value={formData.facility_management.rating}
-                    onChange={(e) => {
-                      setIsDirty(true);
-                      setFormData((prev) => ({
-                        ...prev,
-                        facility_management: {
-                          ...prev.facility_management,
-                          rating: e.target.value,
-                        },
-                      }));
-                    }}
-                    placeholder="4.5"
-                    min="0"
-                    max="5"
-                    step="0.1"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Project Images */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t.formLabels?.projectImages || "Project Images"}
-                <span className="text-xs font-normal text-gray-500">
-                  ({formData.images?.length || 0} / 8)
-                </span>
-              </label>
-              <ImageUploader
-                maxImages={8}
-                initialImages={formData.images || []}
-                onImagesChange={(images) => {
-                  setIsDirty(true);
-                  setFormData((prev) => ({ ...prev, images }));
-                }}
-                isUploading={isUploading}
-                setIsUploading={setIsUploading}
-              />
-            </div>
+            </FormSection>
           </div>
         </form>
       </Dialog>

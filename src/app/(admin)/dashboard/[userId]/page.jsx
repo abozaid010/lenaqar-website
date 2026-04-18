@@ -1,51 +1,6 @@
-import ChatClientWrapper from "./_components/chat-client-wrapper";
-import { SITE_URL } from "../../../metadata";
-import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
-
-export async function generateMetadata({ params }) {
-  const { userId } = await params;
-
-  return {
-    title: "Client Chat - LENAAI AI Sales Agent",
-    description:
-      "Chat with clients and manage conversations in LENAAI's AI Sales Agent dashboard. Engage leads, qualify buyers, and close deals faster.",
-    openGraph: {
-      title: "Client Chat - LENAAI AI Sales Agent",
-      description:
-        "Chat with clients using LENAAI's Real Estate AI Sales Agent platform.",
-      url: `${SITE_URL}/dashboard/${userId}`,
-      type: "website",
-    },
-    robots: {
-      index: false,
-      follow: false,
-    },
-    alternates: {
-      canonical: `${SITE_URL}/dashboard/${userId}`,
-    },
-  };
-}
+import { redirect } from "next/navigation";
 
 export default async function ChatPage({ params }) {
   const { userId } = await params;
-
-  return (
-    <>
-      <BreadcrumbSchema
-        items={[
-          {
-            name: "Dashboard",
-            url: `${SITE_URL}/dashboard`,
-          },
-          {
-            name: "Client Chat",
-            url: `${SITE_URL}/dashboard/${userId}`,
-          },
-        ]}
-      />
-      <div className="container flex flex-col gap-3 relative pb-4 overflow-hidden h-full">
-        <ChatClientWrapper userId={userId} />
-      </div>
-    </>
-  );
+  redirect(`/dashboard?userId=${encodeURIComponent(userId)}`);
 }

@@ -4,7 +4,7 @@ import { useI18n } from "@/context/translate-api";
 import { useExcelExport } from "@/hooks/use-excel-export";
 import { FileDown } from "lucide-react";
 
-export default function ExcelExportButton({ searchParams }) {
+export default function ExcelExportButton({ searchParams, compact = false }) {
   const { t } = useI18n();
   const { exportToExcel, isLoading, users } = useExcelExport(searchParams);
 
@@ -16,7 +16,7 @@ export default function ExcelExportButton({ searchParams }) {
     <button
       onClick={handleExport}
       disabled={isLoading || !users || users.length === 0}
-      className="flex items-center justify-center gap-1.5 h-10 px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed min-w-[44px] sm:min-w-fit whitespace-nowrap"
+      className={`flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed min-w-[44px] sm:min-w-fit whitespace-nowrap ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
       title={t.dashboardFilter.actions.exportExcel}
     >
       <FileDown size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />

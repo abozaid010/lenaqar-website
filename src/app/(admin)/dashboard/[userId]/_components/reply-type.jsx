@@ -30,10 +30,10 @@ export default function ToggleReplyType({ userId, clientID, source }) {
   };
 
   return (
-    <form onSubmit={(e) => e.preventDefault()} className="relative">
-      <div className="relative w-fit">
+    <form onSubmit={(e) => e.preventDefault()} className="relative flex items-center">
+      <div className="relative w-fit flex items-center">
         <select
-          className="appearance-none bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 pl-2 py-1 pr-8"
+          className="appearance-none block w-full min-h-[40px] rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start border-gray-300 focus:ring-blue-500 focus:border-blue-500 pr-10 text-sm disabled:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 cursor-pointer"
           name="reply_type"
           value={autoReply}
           onChange={handleChange}
@@ -43,8 +43,8 @@ export default function ToggleReplyType({ userId, clientID, source }) {
           <option value="manual_reply">{t.manual}</option>
         </select>
         <ChevronDown
-          size={20}
-          className="text-gray-500 absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none"
+          size={16}
+          className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
         />
       </div>
     </form>

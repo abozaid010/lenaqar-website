@@ -22,7 +22,9 @@ import { useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
-import { getRoleFromToken, getClientIdFromToken } from "@/lib/getRoleFromToken.client";
+import {
+  shouldShowModuleNavItem,
+} from "@/lib/getRoleFromToken.client";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 
 const Sidebar = ({ canAccessMap = false }) => {
@@ -146,23 +148,26 @@ const Sidebar = ({ canAccessMap = false }) => {
 
         {/* Navigation Menu */}
         <div className={`flex-1 ${SELECTION_COLORS.BG}`}>
-          <Link
-            href="/dashboard"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/dashboard", e)}
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/dashboard") || pendingPath === "/dashboard"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/dashboard" ? "opacity-70" : ""}`}
-          >
-            <LayoutDashboard className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.dashboard}</span>
-            {isPending && pendingPath === "/dashboard" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+          {shouldShowModuleNavItem("conversation") && (
+            <Link
+              href="/dashboard"
+              prefetch={true}
+              onClick={(e) => handleNavigation("/dashboard", e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/dashboard") || pendingPath === "/dashboard"
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === "/dashboard" ? "opacity-70" : ""}`}
+            >
+              <LayoutDashboard className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.dashboard}</span>
+              {isPending && pendingPath === "/dashboard" && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
+          )}
 
+          {shouldShowModuleNavItem("campaign") && (
           <Link
             href="/campaigns"
             prefetch={true}
@@ -179,8 +184,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
-          {canAccessCampaignChat && (
+          {canAccessCampaignChat && shouldShowModuleNavItem("chat_campaign") && (
             <Link
               href="/campaign-chat"
               prefetch={true}
@@ -199,6 +205,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             </Link>
           )}
 
+          {shouldShowModuleNavItem("calendar") && (
           <Link
             href="/schedule"
             prefetch={true}
@@ -215,7 +222,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("analytics") && (
           <Link
             href="/analytics"
             prefetch={true}
@@ -232,7 +241,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("units") && (
           <Link
             href="/units"
             prefetch={true}
@@ -249,7 +260,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("resale") && (
           <Link
             href="/units/pending-approval"
             prefetch={true}
@@ -266,7 +279,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("team_members") && (
           <Link
             href="/team"
             prefetch={true}
@@ -283,7 +298,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
           
+          {shouldShowModuleNavItem("projects") && (
           <Link
             href="/myProjects"
             prefetch={true}
@@ -300,7 +317,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("developers") && (
           <Link
             href="/developers"
             prefetch={true}
@@ -317,7 +336,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
+          {shouldShowModuleNavItem("news") && (
           <Link
             href="/news"
             prefetch={true}
@@ -334,8 +355,9 @@ const Sidebar = ({ canAccessMap = false }) => {
               <Loader2 className="h-4 w-4 ml-auto animate-spin" />
             )}
           </Link>
+          )}
 
-          {canAccessMap && (
+          {canAccessMap && shouldShowModuleNavItem("map") && (
             <Link
               href="/map"
               prefetch={true}
