@@ -69,9 +69,8 @@ export function getModuleActionsFromToken() {
 
 /**
  * Whether to show a sidebar item for this module.
- * - No `module_actions` on JWT → show (legacy tokens).
- * - Module key missing from `module_actions` → show (backward compatible).
- * - Key present with empty array → hide (explicit no access).
+ * - No `module_actions` on JWT → show all (legacy tokens without granular ACL).
+ * - Key omitted from JSON or `[]` → hide (same as empty access list).
  * - Key present with non-empty actions → show.
  *
  * @param {string|null|undefined} moduleKey - e.g. "projects", "team_members"
@@ -81,7 +80,7 @@ export function shouldShowModuleNavItem(moduleKey) {
   if (!moduleKey) return true;
   const ma = getModuleActionsFromToken();
   if (!ma) return true;
-  if (!Object.prototype.hasOwnProperty.call(ma, moduleKey)) return true;
+  if (!Object.prototype.hasOwnProperty.call(ma, moduleKey)) return false;
   const actions = ma[moduleKey];
   return Array.isArray(actions) && actions.length > 0;
 }

@@ -64,8 +64,8 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
       <div className={`min-h-0 flex flex-col flex-1 ${SELECTION_COLORS.BG}`}>
         <div className="container bg-white rounded-md shadow-sm py-2 flex flex-col min-h-[calc(100vh-5.5rem)] md:min-h-[calc(100vh-6rem)]">
           <AverageScoreProvider>
-            <div className="flex items-center justify-between shrink-0 mb-1 gap-2">
-              <div className="flex flex-1 min-w-0 items-center">
+            <div className="relative z-20 mb-1 flex shrink-0 items-center justify-between gap-2 overflow-visible">
+              <div className="flex min-w-0 flex-1 items-center overflow-visible">
                 <DashbordFilter appliedFilters={searchParams} compact />
               </div>
             </div>

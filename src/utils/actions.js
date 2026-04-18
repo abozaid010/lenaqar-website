@@ -81,7 +81,7 @@ export const getAllActions = () => {
 
 // Action colors mapping
 export const ACTIONS_COLORS = {
-  "Make a call": "text-blue-800",
+  "Make a call": "text-green-800",
   "Office visit": "text-yellow-800",
   "Property view": "text-teal-800",
   "Not interested": "text-gray-800",

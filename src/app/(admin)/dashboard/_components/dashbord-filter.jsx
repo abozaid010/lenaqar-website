@@ -202,14 +202,20 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </FormSelect>
           </div>
 
-          {/* Campaign Filter Dropdown */}
+          {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
-            className="relative inline-flex flex-1 w-52 min-w-[10rem] items-center"
+            className="relative z-[60] flex w-52 min-w-[10rem] flex-1 flex-col items-stretch"
             ref={campaignDropdownRef}
           >
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setIsCampaignDropdownOpen((o) => !o);
+              }}
               onClick={() => setIsCampaignDropdownOpen(!isCampaignDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
+              className={`${DASHBOARD_TRIGGER} w-full ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
             >
               <span className="truncate">
                 {filters.campaign_ids.length === 0
@@ -223,7 +229,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isCampaignDropdownOpen && (
-              <div className="absolute mt-2 w-full bg-white border border-gray-200 rounded-md shadow-lg p-2 z-20 max-h-64 overflow-y-auto">
+              <div className="absolute left-0 top-full z-[70] mt-1 w-full rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
                 {filters.campaign_ids.length > 0 && (
                   <button
                     onClick={clearCampaignFilters}
@@ -258,10 +264,16 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             )}
           </div>
 
-          <div className="relative inline-flex flex-1 min-w-[14rem] max-w-[17rem] items-center">
+          <div className="relative z-[60] flex min-w-[14rem] max-w-[17rem] flex-1 flex-col items-stretch">
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setIsDatePickerOpen((o) => !o);
+              }}
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className={`relative ${DASHBOARD_TRIGGER} justify-start ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
+              className={`relative ${DASHBOARD_TRIGGER} w-full justify-start ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
             >
               <span dir="ltr" className="whitespace-nowrap truncate min-w-0 flex-1">
                 {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
@@ -273,7 +285,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isDatePickerOpen && (
-              <div className="absolute mt-2 w-full sm:w-66 bg-white border border-gray-200 rounded-md shadow-lg p-3 z-10 left-0">
+              <div className="absolute left-0 top-full z-[70] mt-1 w-full rounded-md border border-gray-200 bg-white p-3 shadow-lg sm:w-66">
                 <div className="space-y-2">
                   <FormInput
                     type="date"
