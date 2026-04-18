@@ -5,6 +5,7 @@ import {
   createNewEmployee,
   editExistingEmployee,
 } from "@/components/services/serviceFetching";
+import { getModuleActionsForTeamRole } from "@/lib/team-module-actions";
 import { revalidatePath } from "next/cache";
 import { assertCanManageTeam } from "@/lib/getRoleFromToken";
 
@@ -18,12 +19,14 @@ export async function addNewSales(prevState, formData) {
 
     const payload = Object.fromEntries(formData.entries());
     const role = payload.role || "viewer";
+    const module_actions = getModuleActionsForTeamRole(role);
 
     const newSales = {
       ...payload,
       role,
       job_title: role,
       client_id: clientId,
+      module_actions,
     };
 
     await createNewEmployee(newSales);
@@ -52,12 +55,14 @@ export async function editEmployee(prevState, formData) {
 
     const payload = Object.fromEntries(formData.entries());
     const role = payload.role || "viewer";
+    const module_actions = getModuleActionsForTeamRole(role);
 
     const newSales = {
       ...payload,
       role,
       job_title: role,
       client_id: clientId,
+      module_actions,
     };
 
     await editExistingEmployee(newSales);
