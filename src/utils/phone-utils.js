@@ -12,33 +12,44 @@
  * Formats a phone number for WhatsApp URL
  * Removes spaces, dashes, parentheses, and dots
  * Handles international prefixes (00, +)
- * 
+ * Optionally appends a pre-filled message via ?text=
+ *
  * @param {string} phoneNumber - The phone number to format
+ * @param {string} [message] - Optional pre-filled message to include in the chat
  * @returns {string} WhatsApp URL (e.g., "https://wa.me/201205230618") or empty string if invalid
- * 
+ *
  * @example
  * formatPhoneForWhatsApp("+20 120 523 0618") // "https://wa.me/201205230618"
- * formatPhoneForWhatsApp("00201205230618") // "https://wa.me/201205230618"
+ * formatPhoneForWhatsApp("+201205230618", "مرحبا") // "https://wa.me/201205230618?text=..."
  */
-export function formatPhoneForWhatsApp(phoneNumber) {
+export function formatPhoneForWhatsApp(phoneNumber, message) {
   if (!phoneNumber) return "";
-  
+
   let cleaned = String(phoneNumber).trim().replace(/[\s\-\(\)\.]/g, "");
-  
+
   // Remove international prefix (00)
   if (cleaned.startsWith("00")) {
     cleaned = cleaned.slice(2);
   }
-  
+
   // Remove plus sign
   if (cleaned.startsWith("+")) {
     cleaned = cleaned.slice(1);
   }
-  
+
   // Extract only digits
   const digitsOnly = cleaned.replace(/\D/g, "");
-  
-  return digitsOnly ? `https://wa.me/${digitsOnly}` : "";
+
+  if (!digitsOnly) return "";
+
+  // Use api.whatsapp.com/send when a message is provided — it preserves the
+  // `text` param more reliably than wa.me on WhatsApp Web when a chat with
+  // the contact is already open.
+  if (message && String(message).trim()) {
+    return `https://api.whatsapp.com/send?phone=${digitsOnly}&text=${encodeURIComponent(message)}`;
+  }
+
+  return `https://wa.me/${digitsOnly}`;
 }
 
 /**
@@ -155,15 +166,77 @@ export async function copyPhoneNumber(phoneNumber, onSuccess, onError) {
 }
 
 /**
+ * Normalizes a phone number to international E.164-style format.
+ * Keeps a leading "+" when the input had one (or used "00"), strips spaces,
+ * dashes, parentheses, and dots.
+ *
+ * @param {string} phoneNumber
+ * @returns {string} e.g. "+201205230618"
+ *
+ * @example
+ * normalizeInternationalPhone("+20 120 523 0618") // "+201205230618"
+ * normalizeInternationalPhone("00201205230618")    // "+201205230618"
+ * normalizeInternationalPhone("201205230618")      // "+201205230618"
+ */
+export function normalizeInternationalPhone(phoneNumber) {
+  if (!phoneNumber) return "";
+
+  let cleaned = String(phoneNumber).trim().replace(/[\s\-\(\)\.]/g, "");
+
+  let hasPlus = cleaned.startsWith("+");
+  if (hasPlus) {
+    cleaned = cleaned.slice(1);
+  } else if (cleaned.startsWith("00")) {
+    cleaned = cleaned.slice(2);
+    hasPlus = true;
+  }
+
+  const digits = cleaned.replace(/\D/g, "");
+  if (!digits) return "";
+
+  // Assume already-international if input had + / 00, otherwise keep as-is
+  // but still prefix with "+" when it looks like it has a country code.
+  return hasPlus ? `+${digits}` : digits;
+}
+
+/**
+ * Copies the full phone number (country code included) to clipboard.
+ * Normalizes formatting (strips spaces/dashes/parens, keeps leading "+").
+ *
+ * @param {string} phoneNumber - The phone number to copy
+ * @param {Function} [onSuccess] - Optional success callback
+ * @param {Function} [onError] - Optional error callback
+ * @returns {Promise<boolean>} True if successful, false otherwise
+ *
+ * @example
+ * await copyFullPhoneNumber("+20 120 523 0618",
+ *   () => toast.success("Phone number copied"),
+ *   () => toast.error("Failed to copy")
+ * );
+ */
+export async function copyFullPhoneNumber(phoneNumber, onSuccess, onError) {
+  const normalized = normalizeInternationalPhone(phoneNumber);
+
+  if (!normalized) {
+    if (onError) onError("Invalid phone number");
+    return false;
+  }
+
+  return copyToClipboard(normalized, onSuccess, onError);
+}
+
+/**
  * Opens WhatsApp with the given phone number
- * 
+ *
  * @param {string} phoneNumber - The phone number to open WhatsApp with
  * @param {Object} options - Optional configuration
  * @param {boolean} options.newTab - Whether to open in new tab (default: true)
  * @param {string} options.target - Target window (default: "_blank")
- * 
+ * @param {string} options.message - Optional pre-filled message
+ *
  * @example
  * openWhatsApp("+201205230618");
+ * openWhatsApp("+201205230618", { message: "مرحبا" });
  * openWhatsApp("+201205230618", { newTab: false });
  */
 export function openWhatsApp(phoneNumber, options = {}) {
@@ -171,16 +244,16 @@ export function openWhatsApp(phoneNumber, options = {}) {
     console.warn("openWhatsApp: No phone number provided");
     return;
   }
-  
-  const whatsappUrl = formatPhoneForWhatsApp(phoneNumber);
-  
+
+  const { newTab = true, target = "_blank", message } = options;
+
+  const whatsappUrl = formatPhoneForWhatsApp(phoneNumber, message);
+
   if (!whatsappUrl) {
     console.warn("openWhatsApp: Invalid phone number format");
     return;
   }
-  
-  const { newTab = true, target = "_blank" } = options;
-  
+
   if (newTab) {
     window.open(whatsappUrl, target, "noopener,noreferrer");
   } else {
@@ -232,4 +305,21 @@ export async function handleCopyPhoneNumber(e, phoneNumber, onSuccess, onError) 
     e.preventDefault();
   }
   return copyPhoneNumber(phoneNumber, onSuccess, onError);
+}
+
+/**
+ * Event handler for copying the FULL phone number (country code included).
+ * Stops event propagation.
+ *
+ * @param {Event} e - The click event
+ * @param {string} phoneNumber
+ * @param {Function} [onSuccess]
+ * @param {Function} [onError]
+ */
+export async function handleCopyFullPhoneNumber(e, phoneNumber, onSuccess, onError) {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
+  return copyFullPhoneNumber(phoneNumber, onSuccess, onError);
 }

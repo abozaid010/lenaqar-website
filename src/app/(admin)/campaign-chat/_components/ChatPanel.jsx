@@ -3,12 +3,28 @@
 import { useState, useRef, useEffect } from "react";
 import {
   Bot, User, Send, ToggleLeft, ToggleRight,
-  Star, Pencil, Check, X, StickyNote, Trash2, Save
+  Star, Pencil, Check, X, StickyNote, Trash2, Save, Copy
 } from "lucide-react";
+import toast from "react-hot-toast";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
+import WhatsAppButton from "@/components/ui/whatsapp-button";
+import CallButton from "@/components/ui/call-button";
+import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubble from "./MessageBubble";
 
 const NOTES_MAX_LENGTH = 500;
+
+const DEFAULT_WHATSAPP_MESSAGE = `بعد مكالمتنا، حابب أسيب لك ملخص سريع يساعدك تبدأ فورًا 👇
+
+• نظام إدارة عملاء (CRM) ينظملك كل شغلك في مكان واحد
+• مساعد ذكي (AI) يرد على العملاء بدل ما تضيع وقتك في الرسائل
+• تحديث مستمر للوحدات علشان تبقى دايمًا جاهز
+• نشر مجاني لحد 50 وحدة ريسيل وتبدأ تجيب عملاء
+
+ابدأ دلوقتي:
+[حمّل التطبيق](https://lenaai.net/download?utm_campaign=spring_offer&utm_source=chatgpt.com)
+
+وجرّب بنفسك الفرق من أول يوم.`;
 
 const ChatPanel = ({
   contact,
@@ -123,9 +139,11 @@ const ChatPanel = ({
     setIsSavingName(true);
     try {
       await onRename?.(contact.phone_number, trimmed);
+      setIsEditingName(false);
+    } catch {
+      // Rename failed; keep the input open so the user can retry.
     } finally {
       setIsSavingName(false);
-      setIsEditingName(false);
     }
   };
 
@@ -178,6 +196,8 @@ const ChatPanel = ({
       setNotesEditing(false);
       setNotesSaved(true);
       setTimeout(() => setNotesSaved(false), 2500);
+    } catch {
+      // Keep the editor open with the user's draft so they can retry.
     } finally {
       setIsSavingNotes(false);
     }
@@ -188,6 +208,15 @@ const ChatPanel = ({
   const handleClearNotes = async () => {
     setNotesDraft("");
     await saveNotes(null);
+  };
+
+  const handleCopyPhone = (e) => {
+    handleCopyFullPhoneNumber(
+      e,
+      contact?.phone_number,
+      () => toast.success("Phone number copied"),
+      () => toast.error("Failed to copy phone number")
+    );
   };
 
   const currentAIStatus = sessionData?.ai_reply_enabled ?? contact.ai_reply_enabled;
@@ -262,13 +291,17 @@ const ChatPanel = ({
                   )}
                 </div>
               ) : (
-                <div className="flex items-center gap-1 group/name">
-                  <h2 className="font-semibold text-gray-900 truncate">
+                <div className="flex items-center gap-1">
+                  <h2
+                    onClick={startEditName}
+                    className="font-semibold text-gray-900 truncate cursor-pointer hover:text-primary transition-colors"
+                    title="Click to rename"
+                  >
                     {displayName || formatPhoneNumber(contact.phone_number)}
                   </h2>
                   <button
                     onClick={startEditName}
-                    className="opacity-0 group-hover/name:opacity-100 text-gray-400 hover:text-gray-600 transition-opacity flex-shrink-0"
+                    className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                     aria-label="Rename contact"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -277,13 +310,45 @@ const ChatPanel = ({
               )}
 
               {displayName && (
-                <p className="text-sm text-gray-500">{formatPhoneNumber(contact.phone_number)}</p>
+                <button
+                  type="button"
+                  onClick={handleCopyPhone}
+                  className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors group/phone"
+                  title="Click to copy phone number"
+                >
+                  <span>{formatPhoneNumber(contact.phone_number)}</span>
+                  <Copy className="h-3 w-3 opacity-0 group-hover/phone:opacity-100 transition-opacity" />
+                </button>
               )}
             </div>
           </div>
 
           {/* Right actions */}
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Call */}
+            <CallButton
+              phoneNumber={contact?.phone_number}
+              className="hover:text-primary"
+            />
+
+            {/* WhatsApp */}
+            <WhatsAppButton
+              phoneNumber={contact?.phone_number}
+              className="hover:text-green-600"
+              options={{ message: DEFAULT_WHATSAPP_MESSAGE }}
+              title="Open WhatsApp with default message"
+              onMessageCopied={(success) => {
+                if (success) {
+                  toast.success(
+                    "Message copied — if WhatsApp doesn't pre-fill it, just paste (Cmd/Ctrl+V).",
+                    { duration: 5000 }
+                  );
+                } else {
+                  toast.error("Couldn't copy the message to clipboard.");
+                }
+              }}
+            />
+
             {/* Favorite */}
             <button
               onClick={handleToggleFavorite}
