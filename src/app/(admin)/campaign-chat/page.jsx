@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
+import toast from "react-hot-toast";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
@@ -285,6 +286,19 @@ const CampaignChat = () => {
     }
   };
 
+  // Extracts a human-readable message from an axios/fetch error.
+  const getErrorMessage = (error, fallback) => {
+    if (error?.message === "Network Error") {
+      return "Network error — please check your connection and try again.";
+    }
+    return (
+      error?.response?.data?.error_message ||
+      error?.response?.data?.message ||
+      error?.message ||
+      fallback
+    );
+  };
+
   // Handle rename
   const handleRename = async (phoneNumber, userName) => {
     try {
@@ -294,8 +308,11 @@ const CampaignChat = () => {
       }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
       await refetchSession();
+      toast.success("Contact renamed");
     } catch (error) {
       console.error("Failed to rename session:", error);
+      toast.error(getErrorMessage(error, "Failed to rename contact"));
+      throw error;
     }
   };
 
@@ -310,6 +327,8 @@ const CampaignChat = () => {
       await refetchSession();
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
+      toast.error(getErrorMessage(error, "Failed to update favorite"));
+      throw error;
     }
   };
 
@@ -323,6 +342,8 @@ const CampaignChat = () => {
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
     } catch (error) {
       console.error("Failed to update notes:", error);
+      toast.error(getErrorMessage(error, "Failed to save notes"));
+      throw error;
     }
   };
 

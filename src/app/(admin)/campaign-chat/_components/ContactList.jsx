@@ -2,9 +2,13 @@
 
 import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { Bot, User, MessageCircle, Star, Pencil, Check, X } from "lucide-react";
+import { Bot, User, MessageCircle, Star, Pencil, Check, X, Copy } from "lucide-react";
+import toast from "react-hot-toast";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { ContactListSkeleton } from "@/components/ui/loading-states";
+import WhatsAppButton from "@/components/ui/whatsapp-button";
+import CallButton from "@/components/ui/call-button";
+import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 
 const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails, hasMore, isFetchingMore, onLoadMore, loadMoreRef, sessionsError, onRetry }) => {
   const [editingPhone, setEditingPhone] = useState(null);
@@ -56,7 +60,12 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
     e?.stopPropagation();
     const trimmed = editValue.trim();
     if (trimmed && trimmed !== session.user_name) {
-      await onRename?.(session.phone_number, trimmed);
+      try {
+        await onRename?.(session.phone_number, trimmed);
+      } catch {
+        // Keep edit mode open so the user can retry without losing input.
+        return;
+      }
     }
     setEditingPhone(null);
   };
@@ -75,6 +84,15 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
   const handleFavorite = (e, session) => {
     e.stopPropagation();
     onToggleFavorite?.(session.phone_number, !session.is_favorite);
+  };
+
+  const handleCopyPhone = (e, phoneNumber) => {
+    handleCopyFullPhoneNumber(
+      e,
+      phoneNumber,
+      () => toast.success("Phone number copied"),
+      () => toast.error("Failed to copy phone number")
+    );
   };
 
   // Show skeleton on initial load when no sessions yet
@@ -184,12 +202,23 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                     </div>
                   ) : (
                     <div className="flex items-center gap-1 min-w-0">
-                      <h3 className={`font-medium truncate text-sm ${isSelected ? "text-primary" : "text-gray-900"}`}>
-                        {session.user_name || formatPhoneNumber(session.phone_number)}
-                      </h3>
+                      {session.user_name ? (
+                        <h3 className={`font-medium truncate text-sm ${isSelected ? "text-primary" : "text-gray-900"}`}>
+                          {session.user_name}
+                        </h3>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={e => handleCopyPhone(e, session.phone_number)}
+                          className={`font-medium truncate text-sm text-left hover:underline decoration-dotted underline-offset-2 ${isSelected ? "text-primary" : "text-gray-900"}`}
+                          title="Click to copy phone number"
+                        >
+                          {formatPhoneNumber(session.phone_number)}
+                        </button>
+                      )}
                       <button
                         onClick={e => startEdit(e, session)}
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 flex-shrink-0 transition-opacity"
+                        className="text-gray-400 hover:text-gray-600 flex-shrink-0 transition-colors"
                         aria-label="Rename contact"
                       >
                         <Pencil className="h-3 w-3" />
@@ -223,7 +252,15 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                 {(session.user_name || session.last_template_sent) && (
                   <div className="flex items-center gap-2 text-xs mb-1">
                     {session.user_name && (
-                      <span className="text-gray-500">{formatPhoneNumber(session.phone_number)}</span>
+                      <button
+                        type="button"
+                        onClick={e => handleCopyPhone(e, session.phone_number)}
+                        className="inline-flex items-center gap-1 text-gray-500 hover:text-primary transition-colors group/phone"
+                        title="Click to copy phone number"
+                      >
+                        <span>{formatPhoneNumber(session.phone_number)}</span>
+                        <Copy className="h-3 w-3 opacity-0 group-hover/phone:opacity-100 transition-opacity" />
+                      </button>
                     )}
                     {session.user_name && session.last_template_sent && (
                       <span className="text-gray-300">|</span>
@@ -244,12 +281,24 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                 )}
 
                 {/* Message Count and Time */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     {session.ai_reply_enabled && <Bot className="h-3 w-3" title="AI Auto-Reply Enabled" />}
                     <span>{session.total_messages_received} messages</span>
                   </div>
-                  <span className="text-xs text-gray-400">{getRelativeTime(session.last_user_message_at)}</span>
+                  <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                    <CallButton
+                      phoneNumber={session.phone_number}
+                      size="sm"
+                      className="hover:text-primary"
+                    />
+                    <WhatsAppButton
+                      phoneNumber={session.phone_number}
+                      size="sm"
+                      className="hover:text-green-600"
+                    />
+                    <span className="text-xs text-gray-400 ml-1">{getRelativeTime(session.last_user_message_at)}</span>
+                  </div>
                 </div>
               </div>
             </div>

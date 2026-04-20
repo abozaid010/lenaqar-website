@@ -13,6 +13,16 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 const ALLOWED_MANAGE_ROLES = ["admin", "owner"];
 
+function decodeBase64UrlToString(base64Url) {
+  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
+
+  // Prefer atob when available (edge/runtime), otherwise Buffer (node).
+  if (typeof atob === "function") return atob(padded);
+  // eslint-disable-next-line no-undef
+  return Buffer.from(padded, "base64").toString("utf8");
+}
+
 /**
  * Decode JWT payload without verification (signature is verified by the API when the token is sent).
  * Use only server-side. Returns payload object or null.
@@ -22,12 +32,8 @@ function decodeJwtPayload(token) {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      "="
-    );
-    const payload = JSON.parse(atob(padded));
+    const json = decodeBase64UrlToString(parts[1]);
+    const payload = JSON.parse(json);
     return typeof payload === "object" && payload !== null ? payload : null;
   } catch {
     return null;
@@ -48,6 +54,43 @@ export async function getRoleFromToken() {
   // Backend may use client_type (from login) or role in JWT
   const role = payload.client_type ?? payload.role ?? null;
   return role != null && typeof role === "string" ? role : null;
+}
+
+/**
+ * Server-only: `module_actions` from JWT, if present (per-team / per-user granular permissions).
+ * Shape: { [moduleKey: string]: string[] }
+ * Empty array = no access to that module (sidebar should hide the tab).
+ *
+ * @returns {Promise<Record<string, string[]>|null>}
+ */
+export async function getModuleActionsFromToken() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+  const payload = decodeJwtPayload(token);
+  if (!payload || payload.module_actions == null) {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[getModuleActionsFromToken] module_actions: (missing)", {
+        hasToken: !!token,
+        hasPayload: !!payload,
+      });
+    }
+    return null;
+  }
+  const ma = payload.module_actions;
+  const normalized = typeof ma === "object" && !Array.isArray(ma) ? ma : null;
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("[getModuleActionsFromToken] module_actions extracted", {
+      hasToken: !!token,
+      keys:
+        normalized && typeof normalized === "object"
+          ? Object.keys(normalized)
+          : null,
+      sample: normalized,
+    });
+  }
+
+  return normalized;
 }
 
 /**

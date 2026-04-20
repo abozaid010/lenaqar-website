@@ -3,9 +3,14 @@ import Sidebar from "@/components/dashbord/common/Sidebar";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { I18nProvider } from "@/context/translate-api";
 import { TokenRefreshProvider } from "@/components/auth/TokenRefreshProvider";
+import ModuleActionsProvider from "@/components/auth/ModuleActionsProvider";
 import { Suspense } from "react";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { canManageTeamFromToken } from "@/lib/getRoleFromToken";
+import {
+  canManageTeamFromToken,
+  getModuleActionsFromToken,
+  getRoleFromToken,
+} from "@/lib/getRoleFromToken";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -21,7 +26,11 @@ const Layout = async ({ children }) => {
     : null;
   const clientEmail = safeCookieParse(clientInfoCookie, {})?.email;
 
-  const canAccessMap = await canManageTeamFromToken();
+  const canManageTeam = await canManageTeamFromToken();
+  const role = await getRoleFromToken();
+  const canAccessMap = canManageTeam || role?.toLowerCase() === "editor";
+  const canAccessNews = canManageTeam || role?.toLowerCase() === "editor";
+  const initialModuleActions = await getModuleActionsFromToken();
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;
@@ -34,8 +43,13 @@ const Layout = async ({ children }) => {
   return (
     <I18nProvider initialLocal={initialLocale}>
       <TokenRefreshProvider>
+        <ModuleActionsProvider initialModuleActions={initialModuleActions}>
 <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-            <Sidebar canAccessMap={canAccessMap} />
+            <Sidebar
+              canAccessMap={canAccessMap}
+              canAccessNews={canAccessNews}
+              initialModuleActions={initialModuleActions}
+            />
 
           <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
             <Header
@@ -58,6 +72,7 @@ const Layout = async ({ children }) => {
             </main>
           </div>
         </div>
+        </ModuleActionsProvider>
       </TokenRefreshProvider>
     </I18nProvider>
   );
