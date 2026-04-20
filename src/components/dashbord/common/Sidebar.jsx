@@ -22,12 +22,14 @@ import { useEffect, useState, useTransition } from "react";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
-import {
-  shouldShowModuleNavItem,
-} from "@/lib/getRoleFromToken.client";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
+import { useModuleActions } from "@/hooks/useModuleActions";
 
-const Sidebar = ({ canAccessMap = false }) => {
+const Sidebar = ({
+  canAccessMap = false,
+  canAccessNews = false,
+  initialModuleActions = undefined,
+}) => {
   const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
@@ -40,6 +42,19 @@ const Sidebar = ({ canAccessMap = false }) => {
 
   // Use shared access control hook
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
+
+  const conversation = useModuleActions("conversation");
+  const campaign = useModuleActions("campaign");
+  const chatCampaign = useModuleActions("chat_campaign");
+  const calendar = useModuleActions("calendar");
+  const analytics = useModuleActions("analytics");
+  const units = useModuleActions("units");
+  const resale = useModuleActions("resale");
+  const teamMembers = useModuleActions("team_members");
+  const projects = useModuleActions("projects");
+  const developers = useModuleActions("developers");
+  const news = useModuleActions("news");
+  const map = useModuleActions("map");
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
@@ -148,7 +163,7 @@ const Sidebar = ({ canAccessMap = false }) => {
 
         {/* Navigation Menu */}
         <div className={`flex-1 ${SELECTION_COLORS.BG}`}>
-          {shouldShowModuleNavItem("conversation") && (
+          {conversation.canView && (
             <Link
               href="/dashboard"
               prefetch={true}
@@ -167,7 +182,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             </Link>
           )}
 
-          {shouldShowModuleNavItem("campaign") && (
+          {campaign.canView && (
           <Link
             href="/campaigns"
             prefetch={true}
@@ -186,7 +201,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {canAccessCampaignChat && shouldShowModuleNavItem("chat_campaign") && (
+          {canAccessCampaignChat && chatCampaign.canView && (
             <Link
               href="/campaign-chat"
               prefetch={true}
@@ -205,7 +220,7 @@ const Sidebar = ({ canAccessMap = false }) => {
             </Link>
           )}
 
-          {shouldShowModuleNavItem("calendar") && (
+          {calendar.canView && (
           <Link
             href="/schedule"
             prefetch={true}
@@ -224,7 +239,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("analytics") && (
+          {analytics.canView && (
           <Link
             href="/analytics"
             prefetch={true}
@@ -243,7 +258,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("units") && (
+          {units.canView && (
           <Link
             href="/units"
             prefetch={true}
@@ -262,7 +277,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("resale") && (
+          {resale.canView && (
           <Link
             href="/units/pending-approval"
             prefetch={true}
@@ -281,7 +296,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("team_members") && (
+          {teamMembers.canView && (
           <Link
             href="/team"
             prefetch={true}
@@ -300,7 +315,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
           
-          {shouldShowModuleNavItem("projects") && (
+          {projects.canView && (
           <Link
             href="/myProjects"
             prefetch={true}
@@ -319,7 +334,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("developers") && (
+          {developers.canView && (
           <Link
             href="/developers"
             prefetch={true}
@@ -338,7 +353,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {shouldShowModuleNavItem("news") && (
+          {canAccessNews && news.canView && (
           <Link
             href="/news"
             prefetch={true}
@@ -357,7 +372,7 @@ const Sidebar = ({ canAccessMap = false }) => {
           </Link>
           )}
 
-          {canAccessMap && shouldShowModuleNavItem("map") && (
+          {canAccessMap && map.canView && (
             <Link
               href="/map"
               prefetch={true}

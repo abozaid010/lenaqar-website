@@ -47,6 +47,7 @@ import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
 import OwnerActions from "@/components/ui/owner-actions";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
+import { useModuleActions } from "@/hooks/useModuleActions";
 
 // Capitalize function
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
@@ -130,6 +131,11 @@ export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
   const { t, locale } = useI18n();
   const { isDeveloper } = useBrokerPermission();
+  const {
+    canCreate: canCreateProject,
+    has: hasProjectAction,
+  } = useModuleActions("projects");
+  const canImportProjects = hasProjectAction("import");
 
   // City filter state (declared early so cityEnName can be derived for the hook)
   const [selectedCities, setSelectedCities] = useState([]);
@@ -858,14 +864,16 @@ export default function ProjectsList({ clientId }) {
                 </div>
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() => setShowProjectDialog(true)}
-                  className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                >
-                  <Plus size={20} />
-                  <span>{t.projectPage?.add || t.addNewProject || "Add"}</span>
-                </button>
-                {!isDeveloper && (
+                {canCreateProject && (
+                  <button
+                    onClick={() => setShowProjectDialog(true)}
+                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                  >
+                    <Plus size={20} />
+                    <span>{t.projectPage?.add || t.addNewProject || "Add"}</span>
+                  </button>
+                )}
+                {!isDeveloper && canImportProjects && (
                   <button
                     onClick={() => setIsImportOpen(true)}
                     className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
@@ -1512,13 +1520,15 @@ export default function ProjectsList({ clientId }) {
                     <h4 className="font-semibold text-lg  text-white bg-primary">
                       {t.phases}
                     </h4>
-                    <button
-                      onClick={() => setShowPhaseDialog(true)}
-                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                    >
-                      <Plus size={20} />
-                      {t.phasee.addnew || "add new phase"}
-                    </button>
+                    {canCreateProject && (
+                      <button
+                        onClick={() => setShowPhaseDialog(true)}
+                        className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                      >
+                        <Plus size={20} />
+                        {t.phasee.addnew || "add new phase"}
+                      </button>
+                    )}
                   </div>
                   <div className="flex flex-col">
                     {(selectedProject.phases ||

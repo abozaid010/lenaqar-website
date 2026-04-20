@@ -1,6 +1,8 @@
+import { redirect } from "next/navigation";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import NewsFeed from "./_components/news-feed";
+import { canManageTeamFromToken, getRoleFromToken } from "@/lib/getRoleFromToken";
 
 export const metadata = {
   title: "News - Real Estate News & Updates | LENAAI AI Sales Agent",
@@ -29,7 +31,14 @@ export const metadata = {
   },
 };
 
-export default function NewsPage() {
+export default async function NewsPage() {
+  const canManageTeam = await canManageTeamFromToken();
+  const role = await getRoleFromToken();
+  const canAccessNews = canManageTeam || role?.toLowerCase() === "editor";
+  if (!canAccessNews) {
+    redirect("/dashboard");
+  }
+
   return (
     <>
       <BreadcrumbSchema

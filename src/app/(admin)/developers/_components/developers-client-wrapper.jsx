@@ -18,6 +18,7 @@ import QueryErrorState from "@/components/ui/query-error-state";
 import OwnerActions from "@/components/ui/owner-actions";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
+import { useModuleActions } from "@/hooks/useModuleActions";
 
 export default function DevelopersClientWrapper({ clientId }) {
   // This page should use ONE source of truth.
@@ -29,6 +30,11 @@ export default function DevelopersClientWrapper({ clientId }) {
   );
   const { t, locale } = useI18n();
   const { isDeveloper } = useBrokerPermission();
+  const {
+    canCreate: canCreateDeveloper,
+    has: hasDeveloperAction,
+  } = useModuleActions("developers");
+  const canImportDevelopers = hasDeveloperAction("import");
   const [developers, setDevelopers] = useState([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
@@ -276,14 +282,16 @@ export default function DevelopersClientWrapper({ clientId }) {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setIsOpen(true)}
-                  className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                >
-                  <Plus size={20} />
-                  <span>{t.developerPage.addDeveloper}</span>
-                </button>
-                {!isDeveloper && (
+                {canCreateDeveloper && (
+                  <button
+                    onClick={() => setIsOpen(true)}
+                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
+                  >
+                    <Plus size={20} />
+                    <span>{t.developerPage.addDeveloper}</span>
+                  </button>
+                )}
+                {!isDeveloper && canImportDevelopers && (
                   <button
                     onClick={() => setIsImportOpen(true)}
                     className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
