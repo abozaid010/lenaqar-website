@@ -7,7 +7,8 @@ import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/context/translate-api";
 import { deletePhase } from "@/utils/api";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
-import { Pencil, Plus, Trash2, Clock } from "lucide-react";
+import { Plus, Clock } from "lucide-react";
+import { EditButton, DeleteButton } from "@/components/ui/action-button";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
@@ -121,31 +122,27 @@ export default function PhasesManagerDialog({
                         loadingVariant="minimal"
                       />
                       {canEdit && (
-                        <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-                          <button
-                            type="button"
+                        <div className="absolute top-2 right-2 flex gap-1.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                          <EditButton
+                            size="sm"
+                            className="shadow-sm"
+                            title={t.buttons?.edit || "Edit"}
                             onClick={(e) => {
                               e.stopPropagation();
                               setPhaseToEdit(phase);
                               setPhaseDialogOpen(true);
                             }}
-                            className="h-8 w-8 rounded-full bg-white/95 p-2 text-gray-700 shadow hover:bg-primary hover:text-white"
-                            title={t.buttons?.edit || "Edit"}
-                          >
-                            <Pencil size={14} />
-                          </button>
-                          <button
-                            type="button"
+                          />
+                          <DeleteButton
+                            size="sm"
+                            className="shadow-sm"
+                            title={t.buttons?.delete || "Delete"}
                             onClick={(e) => {
                               e.stopPropagation();
                               setPhaseToDelete(phase);
                               setDeleteDialogOpen(true);
                             }}
-                            className="h-8 w-8 rounded-full bg-white/95 p-2 text-gray-700 shadow hover:bg-red-600 hover:text-white"
-                            title={t.buttons?.delete || "Delete"}
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          />
                         </div>
                       )}
                     </div>

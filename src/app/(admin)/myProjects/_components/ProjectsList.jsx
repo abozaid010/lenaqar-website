@@ -6,14 +6,13 @@ import CityManager from "@/utils/city_manager";
 import {
   CreditCard,
   Home,
-  Pencil,
   Plus,
-  Trash2,
   ChevronDown,
   Layers,
   MapPin,
   Building2,
 } from "lucide-react";
+import { EditButton, DeleteButton } from "@/components/ui/action-button";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 
 import AddCompoundDialog from "@/components/ui/add-project-dialog";
@@ -134,28 +133,24 @@ function ProjectCard({
             className="absolute top-2 right-2 flex gap-1.5 opacity-100 sm:opacity-0 transition-opacity sm:group-hover:opacity-100 group-focus-within:opacity-100"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
+            <EditButton
+              size="sm"
+              className="shadow-sm"
+              title={t.buttons?.edit || "Edit"}
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(project);
               }}
-              title={t.buttons?.edit || "Edit"}
-              className="h-8 w-8 rounded-full bg-white/95 p-2 text-gray-700 shadow transition hover:bg-primary hover:text-white"
-            >
-              <Pencil size={14} />
-            </button>
-            <button
-              type="button"
+            />
+            <DeleteButton
+              size="sm"
+              className="shadow-sm"
+              title={t.buttons?.delete || "Delete"}
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete(project);
               }}
-              title={t.buttons?.delete || "Delete"}
-              className="h-8 w-8 rounded-full bg-white/95 p-2 text-gray-700 shadow transition hover:bg-red-600 hover:text-white"
-            >
-              <Trash2 size={14} />
-            </button>
+            />
           </div>
         </OwnerActions>
       </div>
@@ -737,178 +732,178 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col gap-4 p-3 sm:p-4 relative flex-1 min-h-0 h-full">
+      <div className="bg-gray-50 flex flex-col gap-4 p-3 sm:p-4 relative flex-1 min-h-0 h-full w-full">
         {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="bg-primary p-4 rounded-t-lg rounded-b-lg flex flex-col gap-3">
-            <div className="flex justify-between items-center gap-3 flex-wrap">
-              <h2 className="text-white text-xl font-semibold flex-shrink-0">
-                {t.sidebar.myProjects}
-              </h2>
-              <div className="flex items-center gap-2 flex-wrap flex-1 min-w-[200px] justify-end">
-                <div className="w-full sm:w-64">
-                  <ReusableSearchInput
-                    value={searchQuery}
-                    onChange={setSearchQuery}
-                    placeholder={
-                      t.projectPage?.searchPlaceholder || "Search projects..."
-                    }
-                    variant="white"
-                    className="w-full"
-                  />
-                </div>
+        <div className="bg-primary rounded-lg shadow-sm px-3 py-3 sm:px-4 sm:py-3 flex flex-col gap-3">
+          {/* Top row: title + primary actions */}
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <h2 className="text-white text-lg sm:text-xl font-semibold leading-none whitespace-nowrap">
+              {t.sidebar.myProjects}
+            </h2>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              {canCreateProject && (
+                <button
+                  onClick={handleOpenAdd}
+                  className="inline-flex items-center gap-1.5 bg-white text-primary px-3 h-10 rounded-lg transition-colors duration-200 hover:bg-gray-50 text-sm font-medium"
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">
+                    {t.projectPage?.add || t.addNewProject || "Add"}
+                  </span>
+                </button>
+              )}
+              {!isDeveloper && canImportProjects && (
+                <button
+                  onClick={() => setIsImportOpen(true)}
+                  className="inline-flex items-center gap-1.5 bg-white/95 text-primary px-3 h-10 rounded-lg transition-colors duration-200 hover:bg-white text-sm font-medium"
+                >
+                  <Plus size={18} />
+                  <span className="hidden sm:inline">
+                    {t.projectPage?.importButton || "Import"}
+                  </span>
+                </button>
+              )}
+              <VideoInstructionsDialog
+                variant="projects"
+                iconSize="lg"
+                iconClassName="hover:bg-white/20 flex items-center justify-center h-10 w-10"
+                svgClassName="text-white"
+                tooltipText={
+                  t.projectsPage?.instructions || "How to manage projects"
+                }
+              />
+            </div>
+          </div>
 
-                {translations.cities.length > 0 && (
-                  <div className="relative" ref={cityFilterRef}>
-                    <button
-                      type="button"
-                      onClick={() => setIsCityFilterOpen(!isCityFilterOpen)}
-                      className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[150px] h-10 justify-between"
-                    >
-                      <span className="text-sm font-medium truncate">
-                        {getCityFilterDisplayText()}
-                      </span>
-                      <ChevronDown
-                        size={16}
-                        className={`text-primary transition-transform ${
-                          isCityFilterOpen ? "rotate-180" : ""
-                        }`}
-                      />
-                    </button>
-                    {isCityFilterOpen && (
-                      <div className="absolute right-0 z-50 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                        <div className="p-3 border-b border-gray-200 sticky top-0 bg-white">
-                          <div className="flex items-center justify-between mb-2">
-                            <h3 className="text-sm font-semibold text-gray-700">
-                              {locale === "ar"
-                                ? "تصفية حسب المدينة"
-                                : "Filter by City"}
-                            </h3>
-                            <button
-                              onClick={handleSelectAllCities}
-                              className="text-xs text-primary hover:underline"
-                            >
-                              {selectedCities.length ===
-                              translations.cities.length
-                                ? locale === "ar"
-                                  ? "إلغاء الكل"
-                                  : "Clear All"
-                                : locale === "ar"
-                                  ? "تحديد الكل"
-                                  : "Select All"}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="p-2">
-                          {translations.cities.map((city) => {
-                            const isSelected = selectedCities.includes(city);
-                            return (
-                              <label
-                                key={city}
-                                className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() => handleCityToggle(city)}
-                                  className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                                />
-                                <span className="text-sm text-gray-700 flex-1">
-                                  {getCityDisplayName(city)}
-                                </span>
-                              </label>
-                            );
-                          })}
-                        </div>
+          {/* Filters row */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex-1 min-w-[200px] sm:min-w-[240px] sm:max-w-xs">
+              <ReusableSearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder={
+                  t.projectPage?.searchPlaceholder || "Search projects..."
+                }
+                variant="white"
+                className="w-full"
+              />
+            </div>
+
+            {translations.cities.length > 0 && (
+              <div className="relative flex-shrink-0" ref={cityFilterRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsCityFilterOpen(!isCityFilterOpen)}
+                  className="flex items-center gap-2 bg-white text-primary px-3 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[140px] h-10 justify-between"
+                >
+                  <span className="text-sm font-medium truncate">
+                    {getCityFilterDisplayText()}
+                  </span>
+                  <ChevronDown
+                    size={16}
+                    className={`text-primary transition-transform ${
+                      isCityFilterOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+                {isCityFilterOpen && (
+                  <div className="absolute right-0 z-50 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                    <div className="p-3 border-b border-gray-200 sticky top-0 bg-white">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-sm font-semibold text-gray-700">
+                          {locale === "ar"
+                            ? "تصفية حسب المدينة"
+                            : "Filter by City"}
+                        </h3>
+                        <button
+                          onClick={handleSelectAllCities}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          {selectedCities.length ===
+                          translations.cities.length
+                            ? locale === "ar"
+                              ? "إلغاء الكل"
+                              : "Clear All"
+                            : locale === "ar"
+                              ? "تحديد الكل"
+                              : "Select All"}
+                        </button>
                       </div>
-                    )}
+                    </div>
+                    <div className="p-2">
+                      {translations.cities.map((city) => {
+                        const isSelected = selectedCities.includes(city);
+                        return (
+                          <label
+                            key={city}
+                            className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleCityToggle(city)}
+                              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                            />
+                            <span className="text-sm text-gray-700 flex-1">
+                              {getCityDisplayName(city)}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
-
-                <div className="min-w-[180px]">
-                  <SearchableDropdownSelect
-                    options={developers}
-                    value={selectedDeveloper}
-                    onChange={(e) => setSelectedDeveloper(e.target.value)}
-                    name="developer"
-                    placeholder={
-                      developersLoading
-                        ? locale === "ar"
-                          ? "جاري التحميل..."
-                          : "Loading..."
-                        : locale === "ar"
-                          ? "جميع المطورين"
-                          : "All Developers"
-                    }
-                    showAllOption={true}
-                    allOptionLabel={
-                      locale === "ar" ? "جميع المطورين" : "All Developers"
-                    }
-                    allOptionValue=""
-                    getValue={(option) => option.id}
-                    getLabel={(option, loc) =>
-                      loc === "ar"
-                        ? option.ar_name || option.en_name
-                        : option.en_name || option.ar_name
-                    }
-                    searchFields={["ar_name", "en_name"]}
-                    className="w-full"
-                    buttonClassName="rounded-lg border-0 px-4 py-2 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
-                    disabled={developersLoading}
-                    isLoading={developersLoading}
-                  />
-                </div>
-
-                <div className="min-w-[200px]">
-                  <SearchableProjectSelect
-                    value={addProjectSelectValue}
-                    onChange={(e) => setAddProjectSelectValue(e.target.value)}
-                    onProjectSelectStart={handleProjectSelectStart}
-                    onProjectSelect={handleAppendProject}
-                    name="add_project"
-                    placeholder={
-                      locale === "ar" ? "ابحث بالاسم..." : "Search by name..."
-                    }
-                    className="w-full"
-                    buttonClassName="rounded-lg border-0 px-4 py-2 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
-                    isPublic={false}
-                  />
-                </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {canCreateProject && (
-                  <button
-                    onClick={handleOpenAdd}
-                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-gray-50"
-                  >
-                    <Plus size={20} />
-                    <span>
-                      {t.projectPage?.add || t.addNewProject || "Add"}
-                    </span>
-                  </button>
-                )}
-                {!isDeveloper && canImportProjects && (
-                  <button
-                    onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
-                  >
-                    <Plus size={20} />
-                    <span>
-                      {t.projectPage?.importButton || "Import"}
-                    </span>
-                  </button>
-                )}
-                <VideoInstructionsDialog
-                  variant="projects"
-                  iconSize="lg"
-                  iconClassName="hover:bg-white/20"
-                  svgClassName="text-white"
-                  tooltipText={
-                    t.projectsPage?.instructions || "How to manage projects"
-                  }
-                />
-              </div>
+            <div className="w-[170px] flex-shrink-0">
+              <SearchableDropdownSelect
+                options={developers}
+                value={selectedDeveloper}
+                onChange={(e) => setSelectedDeveloper(e.target.value)}
+                name="developer"
+                placeholder={
+                  developersLoading
+                    ? locale === "ar"
+                      ? "جاري التحميل..."
+                      : "Loading..."
+                    : locale === "ar"
+                      ? "جميع المطورين"
+                      : "All Developers"
+                }
+                showAllOption={true}
+                allOptionLabel={
+                  locale === "ar" ? "جميع المطورين" : "All Developers"
+                }
+                allOptionValue=""
+                getValue={(option) => option.id}
+                getLabel={(option, loc) =>
+                  loc === "ar"
+                    ? option.ar_name || option.en_name
+                    : option.en_name || option.ar_name
+                }
+                searchFields={["ar_name", "en_name"]}
+                className="w-full"
+                buttonClassName="rounded-lg border-0 px-3 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
+                disabled={developersLoading}
+                isLoading={developersLoading}
+              />
+            </div>
+
+            <div className="w-[190px] flex-shrink-0">
+              <SearchableProjectSelect
+                value={addProjectSelectValue}
+                onChange={(e) => setAddProjectSelectValue(e.target.value)}
+                onProjectSelectStart={handleProjectSelectStart}
+                onProjectSelect={handleAppendProject}
+                name="add_project"
+                placeholder={
+                  locale === "ar" ? "ابحث بالاسم..." : "Search by name..."
+                }
+                className="w-full"
+                buttonClassName="rounded-lg border-0 px-3 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
+                isPublic={false}
+              />
             </div>
           </div>
         </div>
@@ -916,21 +911,27 @@ export default function ProjectsList({ clientId }) {
         {/* Projects content */}
         <div className="flex-1 min-h-0 overflow-y-auto">
           {isLoading ? (
-            <LoadingSpinner containerClassName="flex items-center justify-center p-10" />
+            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+              <LoadingSpinner />
+            </div>
           ) : isError ? (
-            <QueryErrorState
-              error={error}
-              refetch={refetch}
-              isFetching={isFetching}
-              title={t.projectsPage?.errorTitle || "Error loading projects"}
-              message={
-                t.projectsPage?.errorMessage ||
-                "Failed to load projects. Please try again."
-              }
-              retryLabel={t.projectsPage?.retryLabel || "Retry"}
-            />
+            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+              <QueryErrorState
+                error={error}
+                refetch={refetch}
+                isFetching={isFetching}
+                title={t.projectsPage?.errorTitle || "Error loading projects"}
+                message={
+                  t.projectsPage?.errorMessage ||
+                  "Failed to load projects. Please try again."
+                }
+                retryLabel={t.projectsPage?.retryLabel || "Retry"}
+              />
+            </div>
           ) : displayList.length === 0 ? (
-            <EmptyStateVideo variant="projects" autoPlay showControls loop />
+            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+              <EmptyStateVideo variant="projects" autoPlay showControls loop />
+            </div>
           ) : (
             <div className="space-y-4">
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
