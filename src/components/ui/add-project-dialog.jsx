@@ -131,6 +131,7 @@ export default function AddCompoundDialog({
   onAdd = () => {},
   defaultCity,
   defaultDistrict,
+  viewMode = false,
 }) {
   const GOOGLE_MAPS_REQUIRED_PREFIX = "https://maps.app.goo.gl";
   const queryClient = useQueryClient();
@@ -990,7 +991,10 @@ export default function AddCompoundDialog({
   const handleSubmit = useCallback(async (e) => {
     // Prevent default form submission if event exists
     e?.preventDefault();
-    
+
+    // View-only mode never submits anything
+    if (viewMode) return;
+
     // Prevent duplicate submissions using ref
     if (isSubmittingRef.current || isSubmitting) {
       console.log("[handleSubmit] Already submitting, ignoring duplicate");
@@ -1489,11 +1493,12 @@ export default function AddCompoundDialog({
     queryClient,
     GOOGLE_MAPS_REQUIRED_PREFIX,
     validateForm,
-    isSubmitting
+    isSubmitting,
+    viewMode
   ]);
 
   const handleClose = useCallback(() => {
-    if (isDirty) {
+    if (isDirty && !viewMode) {
       const message =
         locale === "ar"
           ? "لديك تغييرات غير محفوظة. هل أنت متأكد من الإغلاق؟"
@@ -1501,7 +1506,7 @@ export default function AddCompoundDialog({
       if (!window.confirm(message)) return;
     }
     onClose();
-  }, [isDirty, onClose, locale]);
+  }, [isDirty, onClose, locale, viewMode]);
 
   const handleAddDeveloper = (newDeveloper) => {
     setDevelopers([...developers, newDeveloper]);
@@ -1617,52 +1622,58 @@ export default function AddCompoundDialog({
             className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
             disabled={isSubmitting}
           >
-            {t.buttons?.cancel || "Cancel"}
+            {viewMode
+              ? t.buttons?.close || (locale === "ar" ? "إغلاق" : "Close")
+              : t.buttons?.cancel || "Cancel"}
           </button>
         }
         headerActions={
           <div className="flex items-center gap-2">
-            {isDirty && (
+            {isDirty && !viewMode && (
               <span className="flex items-center gap-1 px-2 py-0.5 bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 text-xs rounded-full">
                 <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse inline-block" />
                 {locale === "ar" ? "تغييرات غير محفوظة" : "Unsaved changes"}
               </span>
             )}
-            <button
-              type="submit"
-              form="add-project-form"
-              disabled={isSubmitting || isUploading || isMasterPlanUploading}
-              className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
-              style={{
-                minWidth: '120px',
-                touchAction: 'manipulation',
-                WebkitTapHighlightColor: 'transparent'
-              }}
-            >
-              {isSubmitting ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 size={16} className="animate-spin" />
-                  {editMode ? t.updating : t.buttons?.saving || "Saving..."}
-                </span>
-              ) : editMode ? (
-                t.updateProject || "Update Project"
-              ) : (
-                t.buttons?.saveProject || "Save Project"
-              )}
-            </button>
+            {!viewMode && (
+              <button
+                type="submit"
+                form="add-project-form"
+                disabled={isSubmitting || isUploading || isMasterPlanUploading}
+                className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:cursor-not-allowed relative"
+                style={{
+                  minWidth: '120px',
+                  touchAction: 'manipulation',
+                  WebkitTapHighlightColor: 'transparent'
+                }}
+              >
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 size={16} className="animate-spin" />
+                    {editMode ? t.updating : t.buttons?.saving || "Saving..."}
+                  </span>
+                ) : editMode ? (
+                  t.updateProject || "Update Project"
+                ) : (
+                  t.buttons?.saveProject || "Save Project"
+                )}
+              </button>
+            )}
           </div>
         }
         title={
-          editMode
-            ? t.updateProject
-            : t.modal?.addNewProject || "Add New Project"
+          viewMode
+            ? t.viewProject || (locale === "ar" ? "عرض المشروع" : "Project Details")
+            : editMode
+              ? t.updateProject
+              : t.modal?.addNewProject || "Add New Project"
         }
         bodyClassName="p-0 overflow-y-auto bg-white flex-1 min-h-0"
       >
         <form
           id="add-project-form"
           onSubmit={handleSubmit}
-          className="block w-full"
+          className={`block w-full ${viewMode ? "view-only-form" : ""}`}
         >
           <nav
             className="sticky top-0 z-20 flex flex-wrap gap-2 border-b border-gray-200 bg-white/95 px-3 py-2.5 backdrop-blur supports-[backdrop-filter]:bg-white/90"
@@ -1680,6 +1691,7 @@ export default function AddCompoundDialog({
             ))}
           </nav>
 
+          <fieldset disabled={viewMode} className="block w-full min-w-0 border-0 p-0 m-0">
           <div className="mx-auto w-full max-w-3xl space-y-6 px-4 pb-8 pt-4">
             {errors.submit && (
               <div className="space-y-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -2003,13 +2015,15 @@ export default function AddCompoundDialog({
                     {t.formLabels?.developer || "Developer"}{" "}
                     <span className="text-red-500">*</span>
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddDeveloperDialogOpen(true)}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700"
-                  >
-                    + {t.buttons?.addNew || "Add New"}
-                  </button>
+                  {!viewMode && (
+                    <button
+                      type="button"
+                      onClick={() => setIsAddDeveloperDialogOpen(true)}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      + {t.buttons?.addNew || "Add New"}
+                    </button>
+                  )}
                 </div>
                 <SearchableDropdownSelect
                   name="developer_id"
@@ -2239,38 +2253,40 @@ export default function AddCompoundDialog({
                   <label className="block text-sm font-medium text-gray-700">
                     {t.formLabels?.facilityManagement || "Facility Management"}
                   </label>
-                  {formData.facility_management ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsDirty(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          facility_management: null,
-                        }));
-                      }}
-                      className="text-sm text-red-500 hover:text-red-600"
-                    >
-                      {t.buttons?.remove || "Remove"}
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setIsDirty(true);
-                        setFormData((prev) => ({
-                          ...prev,
-                          facility_management: {
-                            name: "",
-                            description: "",
-                            rating: "",
-                          },
-                        }));
-                      }}
-                      className="text-sm text-blue-600 hover:text-blue-700"
-                    >
-                      + {t.buttons?.addNew || "Add"}
-                    </button>
+                  {!viewMode && (
+                    formData.facility_management ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDirty(true);
+                          setFormData((prev) => ({
+                            ...prev,
+                            facility_management: null,
+                          }));
+                        }}
+                        className="text-sm text-red-500 hover:text-red-600"
+                      >
+                        {t.buttons?.remove || "Remove"}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsDirty(true);
+                          setFormData((prev) => ({
+                            ...prev,
+                            facility_management: {
+                              name: "",
+                              description: "",
+                              rating: "",
+                            },
+                          }));
+                        }}
+                        className="text-sm text-blue-600 hover:text-blue-700"
+                      >
+                        + {t.buttons?.addNew || "Add"}
+                      </button>
+                    )
                   )}
                 </div>
                 {formData.facility_management && (
@@ -2343,6 +2359,7 @@ export default function AddCompoundDialog({
               </div>
             </FormSection>
           </div>
+          </fieldset>
         </form>
       </Dialog>
 
