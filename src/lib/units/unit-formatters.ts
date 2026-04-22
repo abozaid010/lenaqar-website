@@ -160,17 +160,22 @@ export const buildLocationLabel = (unit: any): string | null => {
  * Route building helpers
  */
 export const buildProjectHref = (unit: any): string | null => {
-  if (!unit.project_id) return null;
-  
-  const projectId = unit.project_id;
-  const projectName = unit.project || unit.project_ar;
-  
-  if (projectName) {
-    const slug = slugify(projectName);
-    return `/projects/${projectId}/${slug}`;
+  // Use project.en_name for the new project details route
+  if (unit.project_en_name) {
+    return `/myProjects/${encodeURIComponent(unit.project_en_name)}`;
   }
   
-  return `/projects/${projectId}`;
+  // Fallback to project name if en_name not available
+  if (unit.project) {
+    return `/myProjects/${encodeURIComponent(unit.project)}`;
+  }
+  
+  // Fallback to project_ar if project not available
+  if (unit.project_ar) {
+    return `/myProjects/${encodeURIComponent(unit.project_ar)}`;
+  }
+  
+  return null;
 };
 
 export const buildDeveloperHref = (unit: any): string | null => {

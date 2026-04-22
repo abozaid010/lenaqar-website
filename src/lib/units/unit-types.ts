@@ -9,6 +9,7 @@ export interface RawUnit {
   is_primary: boolean;
   images: UnitImage[];
   project_ar: string;
+  project_en_name?: string;
   phase: string;
   clientId: string;
   city: string;
