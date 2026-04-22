@@ -23,6 +23,28 @@ export async function getUnitById(unitId: string): Promise<UnitApiResponse> {
   }
 }
 
+export async function getPublicUnitById(unitId: string): Promise<UnitApiResponse> {
+  try {
+    const response = await axiosInstance.get(`/public/unit-details/${unitId}`);
+    // Transform the response to match the expected UnitApiResponse structure
+    const unitData = response.data?.data;
+    if (unitData) {
+      return {
+        status: true,
+        code: 200,
+        message: 'Success',
+        data: {
+          units: [unitData]
+        }
+      };
+    }
+    throw new Error('No unit data found');
+  } catch (error) {
+    console.error('Error fetching public unit by ID:', error);
+    throw error;
+  }
+}
+
 export async function getUnits(): Promise<UnitApiResponse> {
   try {
     const response = await axiosInstance.get('/units');
