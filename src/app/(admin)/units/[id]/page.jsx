@@ -7,6 +7,11 @@ import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { UNITS_SOURCE_PENDING_PARAM } from "@/utils/units-navigation-source";
 //...
 import axiosInstance from "@/utils/axiosInstance";
+import { getUnitById } from "@/lib/units/unit-api";
+import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
+import UnitDetailsPage from "@/components/unit-details/unit-details-page";
+
+const USE_NEW_UNIT_DESIGN = process.env.NEXT_PUBLIC_NEW_UNIT_DESIGN === "true";
 
 async function fetchUnitData(id) {
   try {
@@ -67,6 +72,15 @@ export default async function PrivateUnitDetailsPage({
   const { id } = await params;
   const searchParams =
     rawSearchParams != null ? await rawSearchParams : {};
+
+  if (USE_NEW_UNIT_DESIGN) {
+    const response = await getUnitById(id);
+    if (response?.status && response.data?.units?.length) {
+      const unit = transformUnitToViewModel(response.data.units[0]);
+      return <UnitDetailsPage unit={unit} />;
+    }
+  }
+
   const unit = await fetchUnitData(id);
   const highlightMissing =
     (searchParams && (searchParams[UNITS_SOURCE_PENDING_PARAM] === "1" || searchParams.pending === true)) ?? false;

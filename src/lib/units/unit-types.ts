@@ -1,0 +1,175 @@
+// Raw API response types
+export interface UnitImage {
+  fileId: string;
+  url: string;
+  source: string;
+}
+
+export interface RawUnit {
+  is_primary: boolean;
+  images: UnitImage[];
+  project_ar: string;
+  phase: string;
+  clientId: string;
+  city: string;
+  downPayment: number;
+  dataSource: string;
+  installment_years: number;
+  landArea: number;
+  buildingType: string;
+  bathroomCount: number;
+  unitTitle: string;
+  developer_id: string;
+  project: string;
+  garageArea: number;
+  deliveryDate: string;
+  purpose: string;
+  installment_amount_yearly: number;
+  clientName: string;
+  code: string;
+  project_id: string;
+  updatedAt: string;
+  totalPrice: number;
+  gardenSize: number;
+  district: string;
+  roomsCount: number;
+  unitId: string;
+  country: string;
+  furnishing: string;
+  roof_area: number;
+  finishing: string;
+  developer: string;
+}
+
+export interface UnitApiResponse {
+  status: boolean;
+  code: number;
+  message: string;
+  data: {
+    units: RawUnit[];
+  };
+}
+
+// Normalized view model types
+export interface HeroImage {
+  url: string;
+  alt: string;
+}
+
+export interface QuickFact {
+  label: string;
+  value: string;
+  icon?: string;
+}
+
+export interface SpecItem {
+  label: string;
+  value: string;
+}
+
+export interface TrustItem {
+  label: string;
+  value: string;
+}
+
+export interface UnitViewModel {
+  id: string;
+  title: string | null;
+  projectName: string | null;
+  projectNameAr: string | null;
+  developerName: string | null;
+  projectId: string | null;
+  developerId: string | null;
+  projectHref: string | null;
+  developerHref: string | null;
+  locationLabel: string | null;
+  heroImages: HeroImage[];
+  badges: string[];
+  totalPrice: string | null;
+  downPayment: string | null;
+  yearlyInstallment: string | null;
+  monthlyInstallmentEstimate: string | null;
+  installmentYearsLabel: string | null;
+  deliveryDateLabel: string | null;
+  referenceCode: string | null;
+  quickFacts: QuickFact[];
+  specs: SpecItem[];
+  trustItems: TrustItem[];
+  purpose: string | null;
+  buildingType: string | null;
+  finishing: string | null;
+  furnishing: string | null;
+  phase: string | null;
+  isPrimary: boolean;
+}
+
+// Component prop types
+export interface UnitHeroGalleryProps {
+  images: HeroImage[];
+  isPrimary: boolean;
+}
+
+export interface UnitHeaderSummaryProps {
+  unit: UnitViewModel;
+}
+
+export interface UnitQuickFactsProps {
+  facts: QuickFact[];
+}
+
+export interface UnitPricingCardProps {
+  unit: UnitViewModel;
+}
+
+export interface UnitPaymentPlanProps {
+  unit: UnitViewModel;
+}
+
+export interface UnitSpecificationsProps {
+  specs: SpecItem[];
+}
+
+export interface UnitLocationContextProps {
+  unit: UnitViewModel;
+}
+
+export interface RelatedEntityLinksProps {
+  unit: UnitViewModel;
+}
+
+export interface StickyInquiryCardProps {
+  unit: UnitViewModel;
+}
+
+export interface MobileStickyActionBarProps {
+  unit: UnitViewModel;
+}
+
+export interface SectionBlockProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+export interface InfoRowProps {
+  label: string;
+  value: string | null;
+  className?: string;
+}
+
+export interface UnitDetailsSkeletonProps {
+  // No props needed for skeleton
+}
+
+export interface UnitDetailsErrorStateProps {
+  error: string;
+  onRetry?: () => void;
+}
+
+export interface UnitBreadcrumbsProps {
+  unit: UnitViewModel;
+}
+
+export interface UnitBadgesProps {
+  badges: string[];
+}
