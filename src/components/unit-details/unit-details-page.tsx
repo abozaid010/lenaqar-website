@@ -22,10 +22,7 @@ import type { UnitViewModel } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
-import UnitPricingCard from './unit-pricing-card';
-import UnitSpecifications from './unit-specifications';
 import UnitLocationContext from './unit-location-context';
-import RelatedEntityLinks from './related-entity-links';
 import StickyInquiryCard from './sticky-inquiry-card';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
 import UnitBreadcrumbs from './unit-breadcrumbs';
@@ -58,25 +55,12 @@ export default function UnitDetailsPage({ unit }: UnitDetailsPageProps) {
             <UnitHeaderSummary unit={unit} />
 
             {/* Quick Facts */}
-            {unit.quickFacts.length > 0 && (
-              <UnitQuickFacts facts={unit.quickFacts} />
-            )}
-
-            {/* Pricing and Payment */}
-            <div className="space-y-6">
-              <UnitPricingCard unit={unit} />
-            </div>
-
-            {/* Specifications */}
-            {unit.specs.length > 0 && (
-              <UnitSpecifications specs={unit.specs} />
+            {(unit.quickFacts.length > 0 || unit.specs.length > 0) && (
+              <UnitQuickFacts facts={unit.quickFacts} specs={unit.specs} />
             )}
 
             {/* Location and Context */}
             <UnitLocationContext unit={unit} />
-
-            {/* Related Navigation */}
-            <RelatedEntityLinks unit={unit} />
           </div>
 
           {/* Right Column - Sticky Sidebar */}

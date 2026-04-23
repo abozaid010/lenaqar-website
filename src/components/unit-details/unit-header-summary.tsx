@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { MapPin, Building, User, Tag } from 'lucide-react';
+import { MapPin, Building, User, Tag, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
@@ -57,14 +57,6 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
 
       {/* Key Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Price */}
-        {unit.totalPrice && (
-          <div className="space-y-1">
-            <div className="text-sm text-gray-600">Price</div>
-            <div className="text-2xl font-bold text-gray-900">{unit.totalPrice}</div>
-          </div>
-        )}
-
         {/* Building Type */}
         {unit.buildingType && (
           <div className="space-y-1">
@@ -89,6 +81,66 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
           </div>
         )}
       </div>
+
+      {/* Pricing & Payment Information */}
+      {(unit.totalPrice || unit.downPayment || unit.yearlyInstallment || unit.monthlyInstallmentEstimate || unit.installmentYearsLabel) && (
+        <div className="border-t pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="w-5 h-5 text-gray-600" />
+            <h3 className="text-lg font-semibold text-gray-900">Pricing & Payment</h3>
+          </div>
+          
+          {/* Total Price - Highlight */}
+          {unit.totalPrice && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="text-sm text-blue-600 font-medium mb-1">Total Price</div>
+              <div className="text-2xl lg:text-3xl font-bold text-blue-900">{unit.totalPrice}</div>
+            </div>
+          )}
+
+          {/* Payment Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Down Payment */}
+            {unit.downPayment && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Down Payment</div>
+                <div className="text-xl font-semibold text-gray-900">{unit.downPayment}</div>
+              </div>
+            )}
+
+            {/* Installment Period */}
+            {unit.installmentYearsLabel && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <Calendar className="w-4 h-4" />
+                  Installment Period
+                </div>
+                <div className="text-xl font-semibold text-gray-900">{unit.installmentYearsLabel}</div>
+              </div>
+            )}
+
+            {/* Yearly Installment */}
+            {unit.yearlyInstallment && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm text-gray-600 mb-1">Yearly Installment</div>
+                <div className="text-xl font-semibold text-gray-900">{unit.yearlyInstallment}</div>
+              </div>
+            )}
+
+            {/* Monthly Estimate */}
+            {unit.monthlyInstallmentEstimate && (
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                  <TrendingUp className="w-4 h-4" />
+                  Monthly (Est.)
+                </div>
+                <div className="text-xl font-semibold text-gray-900">{unit.monthlyInstallmentEstimate}</div>
+                <div className="text-xs text-gray-500 mt-1">Estimated monthly amount</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Badges */}
       {unit.badges.length > 0 && (
