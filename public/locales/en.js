@@ -63,7 +63,7 @@ export default {
     title: {
       part1: "Lena is with you",
       part2: "all the time",
-      averageScore: "leads quality",
+      averageScore: "Leads Quality",
     },
     subtitle:
       "Mobile app, and website, you can track your work anytime anywhere",

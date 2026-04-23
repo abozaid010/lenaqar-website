@@ -1,5 +1,5 @@
 # CLAUDE.md — LenaAI CRM (Next.js)
-
+ROLE: Act As Senior Next JS, and Senior UX engineer,
 ## Stack & Theme
 Next.js App Router · TypeScript · Tailwind · React Query · Axios (`src/utils/axiosInstance`)
 Primary color `#030250` — defined once in `globals.css`, never hardcoded elsewhere.
