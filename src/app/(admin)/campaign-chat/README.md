@@ -29,7 +29,7 @@ The chat dashboard is only accessible when:
 
 ### Authentication
 
-All API calls use the `NEXT_PUBLIC_X_API_Key` environment variable as the `X-API-Key` header.
+All API calls use the `NEXT_PUBLIC_X_API_KEY` environment variable as the `X-API-Key` header.
 
 ## File Structure
 
@@ -88,7 +88,7 @@ Uses the existing design system:
 
 Required in `.env`:
 ```
-NEXT_PUBLIC_X_API_Key=your_api_key_here
+NEXT_PUBLIC_X_API_KEY=your_api_key_here
 ```
 
 ## Testing

@@ -1,38 +1,61 @@
 import { Phone, MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
+import { contactInfo } from '@/lib/contact-info';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
-  // Get the best phone number (owner first, then developer)
-  const getPrimaryPhone = () => {
-    return unit.ownerPhone || unit.developerPhone;
+  const [contactData, setContactData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Get current user's client ID from access token (this would come from auth context)
+  const getCurrentClientId = () => {
+    // TODO: Get actual client ID from access token/auth context
+    return 'public'; // Simulated - should match unit.clientId for owner info
   };
 
-  // Get the best WhatsApp number (owner first, then developer)
-  const getPrimaryWhatsapp = () => {
-    return unit.ownerWhatsapp || unit.developerWhatsapp || getPrimaryPhone();
-  };
+  useEffect(() => {
+    const loadContactInfo = async () => {
+      try {
+        setLoading(true);
+        const currentClientId = getCurrentClientId();
+        const contact = await contactInfo.get_contact_info({
+          clientId: unit.clientId,
+          developerId: unit.developerId,
+          isPrimary: unit.isPrimary,
+          ownerName: unit.ownerName,
+          ownerMobile: unit.ownerMobile,
+          developerName: unit.developerName
+        }, currentClientId);
+        
+        setContactData(contact);
+      } catch (error) {
+        console.error('Error loading contact info:', error);
+        setContactData({
+          name: null,
+          phone: null,
+          whatsapp: null,
+          type: null
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Get contact name for display
-  const getContactName = () => {
-    if (unit.ownerName) return unit.ownerName;
-    if (unit.developerName) return unit.developerName;
-    return 'Property Contact';
-  };
+    loadContactInfo();
+  }, [unit]);
 
   const handleCall = () => {
-    const phone = getPrimaryPhone();
-    if (phone) {
-      window.open(`tel:${phone}`, '_blank');
+    if (contactData?.phone) {
+      window.open(`tel:${contactData.phone}`, '_blank');
     } else {
       console.log('No phone number available');
     }
   };
 
   const handleWhatsApp = () => {
-    const whatsapp = getPrimaryWhatsapp();
-    if (whatsapp) {
+    if (contactData?.whatsapp) {
       // Remove any non-digit characters for WhatsApp
-      const cleanNumber = whatsapp.replace(/[^\d]/g, '');
+      const cleanNumber = contactData.whatsapp.replace(/[^\d]/g, '');
       window.open(`https://wa.me/${cleanNumber}`, '_blank');
     } else {
       console.log('No WhatsApp number available');
@@ -60,21 +83,25 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
       </div>
 
       {/* Contact Information */}
-      {(getPrimaryPhone() || getPrimaryWhatsapp()) && (
+      {loading ? (
         <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-600 mb-1">Contact:</div>
-          <div className="text-sm font-medium text-gray-900">{getContactName()}</div>
-          {getPrimaryPhone() && (
-            <div className="text-xs text-gray-500 mt-1">{getPrimaryPhone()}</div>
+          <div className="text-xs text-gray-600">Loading contact information...</div>
+        </div>
+      ) : (contactData?.phone || contactData?.whatsapp) ? (
+        <div className="bg-gray-50 rounded-lg p-3 text-center">
+          <div className="text-xs text-gray-600 mb-1">Contact ({contactData?.type}):</div>
+          <div className="text-sm font-medium text-gray-900">{contactData?.name}</div>
+          {contactData?.phone && (
+            <div className="text-xs text-gray-500 mt-1">{contactData.phone}</div>
           )}
         </div>
-      )}
+      ) : null}
 
       {/* Primary CTAs */}
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={handleCall}
-          disabled={!getPrimaryPhone()}
+          disabled={!contactData?.phone || loading}
           className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <PhoneCall className="w-4 h-4" />
@@ -83,7 +110,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
         
         <button
           onClick={handleWhatsApp}
-          disabled={!getPrimaryWhatsapp()}
+          disabled={!contactData?.whatsapp || loading}
           className="bg-green-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <MessageCircle className="w-4 h-4" />
@@ -113,14 +140,6 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
         </div>
       </div>
 
-      {/* Trust Indicators */}
-      <div className="border-t pt-4">
-        <div className="text-center text-xs text-gray-500 space-y-1">
-          <div>Responsive team</div>
-          <div>Verified listings</div>
-          <div>Secure communication</div>
-        </div>
-      </div>
-    </div>
+          </div>
   );
 }

@@ -86,8 +86,10 @@ export interface UnitViewModel {
   developerPhone: string | null;
   developerWhatsapp: string | null;
   ownerName: string | null;
-  ownerPhone: string | null;
+  ownerMobile: string | null; // Updated from ownerPhone to match JSON
   ownerWhatsapp: string | null;
+  clientId: string | null;
+  isPrimary: boolean;
   locationLabel: string | null;
   heroImages: HeroImage[];
   badges: string[];
@@ -106,7 +108,6 @@ export interface UnitViewModel {
   finishing: string | null;
   furnishing: string | null;
   phase: string | null;
-  isPrimary: boolean;
 }
 
 // Component prop types

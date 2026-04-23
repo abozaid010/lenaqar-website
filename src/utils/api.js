@@ -1104,7 +1104,7 @@ export async function fetchCampaignSessions({
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSIONS}?${params.toString()}`, {
       headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
       }
     });
 
@@ -1139,7 +1139,7 @@ export async function fetchCampaignSession({
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSION}?${params.toString()}`, {
       headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
       }
     });
 
@@ -1170,7 +1170,7 @@ export async function toggleCampaignAIReply({
       ai_reply_enabled
     }, {
       headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
       }
     });
 
@@ -1196,7 +1196,7 @@ export async function updateCampaignSessionName({
       phone_number,
       user_name
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
     });
     return response.data;
   } catch (error) {
@@ -1220,7 +1220,7 @@ export async function toggleCampaignFavorite({
       phone_number,
       is_favorite
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
     });
     return response.data;
   } catch (error) {
@@ -1244,7 +1244,7 @@ export async function updateCampaignNotes({
       phone_number,
       notes
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key }
+      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
     });
     return response.data;
   } catch (error) {
@@ -1287,7 +1287,7 @@ export async function sendCampaignReply({
 
     const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UNIFIED_REPLY, payload, {
       headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_Key
+        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
       }
     });
 

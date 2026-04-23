@@ -51,30 +51,18 @@ const iconMap: Record<string, any> = {
   check: CheckCircle,
 };
 
-// Function to determine appropriate icon based on specification label
+// Simple icon mapping for remaining items after filtering
 function getIconForSpec(label: string): any {
   const lowerLabel = label.toLowerCase();
   
-  if (lowerLabel.includes('bed') || lowerLabel.includes('bedroom')) return Bed;
-  if (lowerLabel.includes('bath') || lowerLabel.includes('bathroom')) return Bath;
-  if (lowerLabel.includes('area') || lowerLabel.includes('size') || lowerLabel.includes('sq')) return Maximize;
-  if (lowerLabel.includes('parking') || lowerLabel.includes('garage')) return Car;
-  if (lowerLabel.includes('delivery') || lowerLabel.includes('date') || lowerLabel.includes('year')) return Calendar;
-  if (lowerLabel.includes('floor') || lowerLabel.includes('level')) return Building;
-  if (lowerLabel.includes('view') || lowerLabel.includes('scenic')) return Camera;
-  if (lowerLabel.includes('security') || lowerLabel.includes('safe')) return Shield;
-  if (lowerLabel.includes('electric') || lowerLabel.includes('power')) return Zap;
-  if (lowerLabel.includes('air') || lowerLabel.includes('conditioning') || lowerLabel.includes('hvac')) return Wind;
-  if (lowerLabel.includes('water') || lowerLabel.includes('plumbing')) return Droplet;
-  if (lowerLabel.includes('heating') || lowerLabel.includes('temperature')) return Thermometer;
-  if (lowerLabel.includes('internet') || lowerLabel.includes('wifi')) return Wifi;
-  if (lowerLabel.includes('cable') || lowerLabel.includes('tv')) return Tv;
-  if (lowerLabel.includes('balcony') || lowerLabel.includes('terrace') || lowerLabel.includes('outdoor')) return Sun;
-  if (lowerLabel.includes('furnished') || lowerLabel.includes('furniture')) return Home;
-  if (lowerLabel.includes('lock') || lowerLabel.includes('access')) return Lock;
-  if (lowerLabel.includes('key') || lowerLabel.includes('entry')) return Key;
-  if (lowerLabel.includes('document') || lowerLabel.includes('paper') || lowerLabel.includes('permit')) return FileText;
-  if (lowerLabel.includes('available') || lowerLabel.includes('ready')) return CheckCircle;
+  // Only handle the core items that remain after filtering
+  if (lowerLabel.includes('bed') || lowerLabel.includes('room')) return Bed;
+  if (lowerLabel.includes('bath')) return Bath;
+  if (lowerLabel.includes('garden')) return Trees;
+  if (lowerLabel.includes('garage') || lowerLabel.includes('parking')) return Car;
+  if (lowerLabel.includes('furnish')) return Home;
+  if (lowerLabel.includes('finish')) return Shield;
+  if (lowerLabel.includes('type') || lowerLabel.includes('building')) return Building;
   
   return Info; // Default icon
 }
@@ -85,10 +73,6 @@ interface CombinedQuickFactsProps {
 }
 
 export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFactsProps) {
-  // Debug: Log incoming data
-  console.log('UnitQuickFacts - facts:', facts);
-  console.log('UnitQuickFacts - specs:', specs);
-  
   // Convert specifications to quick facts format
   const specFacts = specs.map(spec => ({
     label: spec.label,
@@ -98,31 +82,40 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
 
   // Combine quick facts and specifications
   const allFacts = [...facts, ...specFacts];
-  console.log('UnitQuickFacts - allFacts:', allFacts);
 
-  // Filter out unwanted items and remove duplicates
+  // Filter out unwanted items based on exact JSON field mapping
   const filteredFacts = allFacts.filter(fact => {
     const labelLower = fact.label.toLowerCase();
     
-    // Remove Reference Code
+    // Remove items that correspond to these exact JSON fields:
+    // - code (Reference Code)
+    // - deliveryDate (Delivery Date/Delivery)  
+    // - landArea (Area)
+    // - totalPrice (already shown in header pricing)
+    // - downPayment (already shown in header pricing)
+    // - installment_years (already shown in header pricing)
+    // - installment_amount_yearly (already shown in header pricing)
+    
     if (labelLower.includes('reference') || labelLower.includes('code')) {
-      return false;
+      return false; // Remove code field
     }
     
-    // Remove Delivery Date and Delivery
     if (labelLower.includes('delivery') || labelLower.includes('date')) {
-      return false;
+      return false; // Remove deliveryDate field
     }
     
-    // Remove Area
     if (labelLower.includes('area') || labelLower.includes('size') || labelLower.includes('sq')) {
-      return false;
+      return false; // Remove landArea field
+    }
+    
+    if (labelLower.includes('price') || labelLower.includes('payment') || labelLower.includes('installment')) {
+      return false; // Remove pricing fields already shown in header
     }
     
     return true;
   });
 
-  // Remove exact duplicates
+  // Remove exact duplicates based on label and value
   const deduplicatedFacts = filteredFacts.filter((fact, index, self) => {
     return self.findIndex(otherFact => 
       fact.label.toLowerCase() === otherFact.label.toLowerCase() && 
@@ -130,11 +123,7 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
     ) === index;
   });
 
-  console.log('UnitQuickFacts - filteredFacts:', filteredFacts);
-  console.log('UnitQuickFacts - deduplicatedFacts:', deduplicatedFacts);
-
   if (deduplicatedFacts.length === 0) {
-    console.log('UnitQuickFacts - No facts to display, returning null');
     return null;
   }
 
