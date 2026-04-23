@@ -10,7 +10,7 @@ import SaleDetailsStep from "@/components/ui/unit-forms/sale-details-step";
 import StepIndicator from "./step-indicator";
 
 import { useI18n } from "@/context/translate-api";
-import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
+import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -76,7 +76,7 @@ function sanitizeAmountsForApi(data) {
   return out;
 }
 
-export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
+export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
   // Temp: fallback to client ID from access token when unit/cookie is missing clientId
   const clientId =
     LenaCookiesManager.getClientId() || getClientid() || null;
@@ -110,7 +110,25 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
 
-  const sharedData = useAdminSharedData();
+  const developersQuery = useDevelopers(clientId, false);
+  
+  // Optimized shared data object - only load what we need
+  const sharedData = {
+    developers: {
+      data: developersQuery.data || [],
+      isLoading: developersQuery.isLoading,
+      error: developersQuery.error,
+      isError: developersQuery.isError,
+      refetch: developersQuery.refetch,
+      isFetching: developersQuery.isFetching,
+    },
+    // Lazy load other data only when needed
+    compounds: { data: [], isLoading: false, error: null },
+    citiesAndDistricts: { data: [], isLoading: false, error: null },
+    isSharedDataLoading: developersQuery.isLoading,
+    hasSharedDataErrors: developersQuery.isError,
+    sharedDataErrorMessage: developersQuery.error?.message,
+  };
 
   const modalRef = useRef(null);
   const { t, locale } = useI18n();
@@ -663,6 +681,155 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     </div>
   );
 
+  const formContent = (
+    <>
+      {/* Step Indicator — right below header */}
+      <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
+        <StepIndicator
+          currentStep={currentStep}
+          onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
+          steps={[
+            { number: 1, label: t.steps.basicDetails },
+            {
+              number: 2,
+              label:
+                formData.purpose === "sell"
+                  ? t.steps.financialDetails
+                  : t.steps.rentalDetails,
+            },
+            { number: 3, label: t.steps.imagesInfo },
+          ]}
+        />
+      </div>
+
+      {/* Source text reference (when filled from text or editing unit with extra_info) */}
+      {extractedSourceText && (
+        <div className="px-2 pt-2 md:px-3 md:pt-2">
+          <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-2 shadow-sm">
+            <div className="min-h-[120px] max-h-40 overflow-y-auto rounded border border-amber-200/80 bg-white/80 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
+              {cleanExtraInfo(extractedSourceText)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        ref={modalRef}
+        className={isPageMode ? "mt-3 px-3 md:p-5 pb-5" : "mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"}
+      >
+        {currentStep === 1 && (
+          <BasicDetailsStep
+            clientId={clientId}
+            formData={formData}
+            updateFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+            developers={sharedData.developers?.data ?? []}
+            developersLoading={sharedData.developers?.isLoading ?? false}
+          />
+        )}
+
+        {currentStep === 2 && formData.purpose === "sell" && (
+          <SaleDetailsStep
+            formData={SellFormData}
+            commonFormData={formData}
+            clientType={clientType}
+            updateFormData={(newData) =>
+              setSellFormData((prev) => ({ ...prev, ...newData }))
+            }
+            updateCommonFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+          />
+        )}
+
+        {currentStep === 2 && formData.purpose === "rent" && (
+          <RentalDetailsStep
+            formData={rentFormData}
+            commonFormData={formData}
+            clientType={clientType}
+            updateFormData={(newData) =>
+              setRentFormData((prev) => ({ ...prev, ...newData }))
+            }
+            updateCommonFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+          />
+        )}
+
+        {currentStep === 3 && (
+          <ImagesStep
+            formData={formData}
+            updateFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+            isUploading={isUploading}
+            setIsUploading={setIsUploading}
+          />
+        )}
+      </form>
+    </>
+  );
+
+  // Page mode: render directly without modal wrapper
+  if (isPageMode) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center gap-3">
+            {isEdit ? null : (
+              <button
+                type="button"
+                onClick={handleClose}
+                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+            <h2 className="text-lg font-semibold text-gray-900">{modalTitle}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={() => setCurrentStep((prev) => prev - 1)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                {t.buttons?.previous || "Previous"}
+              </button>
+            )}
+            {currentStep < 3 ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  const isValid = await validateStep(currentStep);
+                  if (isValid) setCurrentStep((prev) => prev + 1);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                {t.buttons?.next || "Next"}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isUploading || updateUnitMutation?.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {isUploading || updateUnitMutation?.isPending
+                  ? t.buttons?.saving || "Saving..."
+                  : t.buttons?.saveUnit || "Save Unit"}
+              </button>
+            )}
+          </div>
+        </div>
+        {formContent}
+      </div>
+    );
+  }
+
+  // Modal mode: render with portal and dialog wrapper
   return createPortal(
     <>
       <UnifiedDialog
@@ -677,92 +844,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         closeOnEscape={false}
         bodyClassName="p-0"
       >
-        {/* Step Indicator — right below header */}
-        <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
-          <StepIndicator
-            currentStep={currentStep}
-            onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
-            steps={[
-              { number: 1, label: t.steps.basicDetails },
-              {
-                number: 2,
-                label:
-                  formData.purpose === "sell"
-                    ? t.steps.financialDetails
-                    : t.steps.rentalDetails,
-              },
-              { number: 3, label: t.steps.imagesInfo },
-            ]}
-          />
-        </div>
-
-        {/* Source text reference (when filled from text or editing unit with extra_info) */}
-        {extractedSourceText && (
-          <div className="px-2 pt-2 md:px-3 md:pt-2">
-            <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-2 shadow-sm">
-              <div className="min-h-[120px] max-h-40 overflow-y-auto rounded border border-amber-200/80 bg-white/80 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
-                {cleanExtraInfo(extractedSourceText)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form
-          onSubmit={handleSubmit}
-          ref={modalRef}
-          className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
-        >
-          {currentStep === 1 && (
-            <BasicDetailsStep
-              clientId={clientId}
-              formData={formData}
-              updateFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-              developers={sharedData.developers?.data ?? []}
-              developersLoading={sharedData.developers?.isLoading ?? false}
-            />
-          )}
-
-          {currentStep === 2 && formData.purpose === "sell" && (
-            <SaleDetailsStep
-              formData={SellFormData}
-              commonFormData={formData}
-              clientType={clientType}
-              updateFormData={(newData) =>
-                setSellFormData((prev) => ({ ...prev, ...newData }))
-              }
-              updateCommonFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-            />
-          )}
-
-          {currentStep === 2 && formData.purpose === "rent" && (
-            <RentalDetailsStep
-              formData={rentFormData}
-              commonFormData={formData}
-              clientType={clientType}
-              updateFormData={(newData) =>
-                setRentFormData((prev) => ({ ...prev, ...newData }))
-              }
-              updateCommonFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <ImagesStep
-              formData={formData}
-              updateFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-              isUploading={isUploading}
-              setIsUploading={setIsUploading}
-            />
-          )}
-        </form>
+        {formContent}
       </UnifiedDialog>
 
       <FillFromTextDialog

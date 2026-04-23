@@ -146,6 +146,7 @@ export interface RelatedEntityLinksProps {
 
 export interface StickyInquiryCardProps {
   unit: UnitViewModel;
+  rawUnit?: RawUnit;
 }
 
 export interface MobileStickyActionBarProps {

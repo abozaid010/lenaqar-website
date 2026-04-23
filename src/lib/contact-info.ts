@@ -35,6 +35,7 @@ class ContactInfo {
 
   // Load contacts from localStorage with proper error handling
   private loadFromStorage(): void {
+    if (typeof window === 'undefined') return; // Skip on server-side
     try {
       const cachedData = localStorage.getItem(this.CACHE_KEY);
       if (cachedData) {
@@ -48,12 +49,15 @@ class ContactInfo {
     } catch (error) {
       console.warn('Failed to load contacts from cache:', error);
       // Clear corrupted cache
-      localStorage.removeItem(this.CACHE_KEY);
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(this.CACHE_KEY);
+      }
     }
   }
 
   // Save contacts to localStorage as single cache object
   private saveToStorage(): void {
+    if (typeof window === 'undefined') return; // Skip on server-side
     try {
       const cacheData = {
         developerContacts: Array.from(this.developerContacts.entries()),

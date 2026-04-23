@@ -18,7 +18,7 @@ import {
   Share2,
   Heart
 } from 'lucide-react';
-import type { UnitViewModel } from '@/lib/units/unit-types';
+import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
@@ -28,9 +28,10 @@ import UnitBreadcrumbs from './unit-breadcrumbs';
 
 interface UnitDetailsPageProps {
   unit: UnitViewModel;
+  rawUnit?: RawUnit;
 }
 
-export default function UnitDetailsPage({ unit }: UnitDetailsPageProps) {
+export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
   const [showMobileActionBar, setShowMobileActionBar] = useState(true);
 
   return (
