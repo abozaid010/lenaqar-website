@@ -22,7 +22,6 @@ import type { UnitViewModel } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
-import UnitLocationContext from './unit-location-context';
 import StickyInquiryCard from './sticky-inquiry-card';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
 import UnitBreadcrumbs from './unit-breadcrumbs';
@@ -58,9 +57,6 @@ export default function UnitDetailsPage({ unit }: UnitDetailsPageProps) {
             {(unit.quickFacts.length > 0 || unit.specs.length > 0) && (
               <UnitQuickFacts facts={unit.quickFacts} specs={unit.specs} />
             )}
-
-            {/* Location and Context */}
-            <UnitLocationContext unit={unit} />
           </div>
 
           {/* Right Column - Sticky Sidebar */}
