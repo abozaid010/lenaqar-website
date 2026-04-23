@@ -100,9 +100,38 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
   const allFacts = [...facts, ...specFacts];
   console.log('UnitQuickFacts - allFacts:', allFacts);
 
-  // Temporarily disable deduplication to test
-  const deduplicatedFacts = allFacts;
-  console.log('UnitQuickFacts - deduplicatedFacts (no dedup):', deduplicatedFacts);
+  // Filter out unwanted items and remove duplicates
+  const filteredFacts = allFacts.filter(fact => {
+    const labelLower = fact.label.toLowerCase();
+    
+    // Remove Reference Code
+    if (labelLower.includes('reference') || labelLower.includes('code')) {
+      return false;
+    }
+    
+    // Remove Delivery Date and Delivery
+    if (labelLower.includes('delivery') || labelLower.includes('date')) {
+      return false;
+    }
+    
+    // Remove Area
+    if (labelLower.includes('area') || labelLower.includes('size') || labelLower.includes('sq')) {
+      return false;
+    }
+    
+    return true;
+  });
+
+  // Remove exact duplicates
+  const deduplicatedFacts = filteredFacts.filter((fact, index, self) => {
+    return self.findIndex(otherFact => 
+      fact.label.toLowerCase() === otherFact.label.toLowerCase() && 
+      fact.value === otherFact.value
+    ) === index;
+  });
+
+  console.log('UnitQuickFacts - filteredFacts:', filteredFacts);
+  console.log('UnitQuickFacts - deduplicatedFacts:', deduplicatedFacts);
 
   if (deduplicatedFacts.length === 0) {
     console.log('UnitQuickFacts - No facts to display, returning null');

@@ -83,6 +83,11 @@ export interface UnitViewModel {
   developerId: string | null;
   projectHref: string | null;
   developerHref: string | null;
+  developerPhone: string | null;
+  developerWhatsapp: string | null;
+  ownerName: string | null;
+  ownerPhone: string | null;
+  ownerWhatsapp: string | null;
   locationLabel: string | null;
   heroImages: HeroImage[];
   badges: string[];

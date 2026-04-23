@@ -73,14 +73,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
           </div>
         )}
 
-        {/* Reference Code */}
-        {unit.referenceCode && (
-          <div className="space-y-1">
-            <div className="text-sm text-gray-600">Reference</div>
-            <div className="text-lg font-semibold text-gray-900">{unit.referenceCode}</div>
-          </div>
-        )}
-      </div>
+              </div>
 
       {/* Pricing & Payment Information */}
       {(unit.totalPrice || unit.downPayment || unit.yearlyInstallment || unit.monthlyInstallmentEstimate || unit.installmentYearsLabel) && (
