@@ -24,7 +24,6 @@ import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
 import StickyInquiryCard from './sticky-inquiry-card';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
-import UnitBreadcrumbs from './unit-breadcrumbs';
 
 interface UnitDetailsPageProps {
   unit: UnitViewModel;
@@ -36,10 +35,16 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
 
   return (
     <div className="bg-gray-50 flex-1">
-      {/* Breadcrumbs */}
+      {/* Back Button */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <UnitBreadcrumbs unit={unit} />
+          <Link 
+            href="/admin/units" 
+            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 mr-2 rotate-180" />
+            Back to Properties
+          </Link>
         </div>
       </div>
 

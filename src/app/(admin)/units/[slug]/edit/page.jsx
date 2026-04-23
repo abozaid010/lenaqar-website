@@ -91,18 +91,10 @@ export default async function EditUnitPage({ params }) {
         ]}
       />
       
-      <div className="container mx-auto py-8">
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6">
-            <h1 className="text-2xl font-bold text-gray-900 mb-6">Edit Unit</h1>
-            
-            <EditUnitClient 
-              rawUnit={rawUnit}
-              slug={slug}
-            />
-          </div>
-        </div>
-      </div>
+      <EditUnitClient 
+        rawUnit={rawUnit}
+        slug={slug}
+      />
     </>
   );
 }

@@ -380,6 +380,133 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     return !isBefore(deliveryDate, minDate) && !isAfter(deliveryDate, maxDate);
   };
 
+  const validateStep = async (step) => {
+    // Validate required fields for step 1
+    if (step === 1) {
+      const requiredFields = [
+        "project",
+        "buildingType",
+        "purpose",
+        "landArea", // area
+      ];
+      // Add rooms and bathroom count only if building type is not office
+      if (formData.buildingType !== "office") {
+        requiredFields.push("roomsCount", "bathroomCount");
+      }
+      const zeroFields = [
+        "floor",
+        "landArea",
+        "gardenSize",
+        "outdoor_area",
+        "roomsCount",
+        "bathroomCount",
+      ];
+      const sanitizedData = { ...formData };
+
+      // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+      zeroFields.forEach((field) => {
+        if (!sanitizedData[field] || sanitizedData[field] === "") {
+          sanitizedData[field] = 0;
+        }
+      });
+
+      setFormData(sanitizedData);
+
+      // 0 is valid for numeric fields (landArea, roomsCount, bathroomCount)
+      const missingFields = requiredFields.filter(
+        (field) => formData[field] !== 0 && !formData[field]
+      );
+
+      if (missingFields.length > 0) {
+        setInvalidFields(missingFields);
+        return false;
+      }
+    }
+
+    // Validate required fields for step 2
+    if (step === 2) {
+      if (formData.purpose === "sell") {
+        const requiredFields = ["deliveryDate", "totalPrice"]; // price
+        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
+        const missingFields = requiredFields.filter(
+          (field) => SellFormData[field] !== 0 && !SellFormData[field]
+        );
+
+        // Phone number (owner_mobile) is required
+        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+          missingFields.push("owner_mobile");
+        }
+
+        if (
+          SellFormData.deliveryDate &&
+          !validateDeliveryDate(SellFormData.deliveryDate)
+        ) {
+          missingFields.push("deliveryDate");
+          toast.error(
+            t.saleDetails.deleveryError ||
+            "Delivery date must be between 30 years ago and 10 years from now",
+            {
+              duration: 5000,
+            }
+          );
+        }
+
+        // Validate payment plan fields
+        if (SellFormData.installment_years && SellFormData.installment_years <= 0) {
+          missingFields.push("installment_years");
+        }
+
+        if (missingFields.length > 0) {
+          setInvalidFields(missingFields);
+          return false;
+        }
+
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const zeroFields = ["totalPrice", "downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
+        const sanitizedData = { ...SellFormData };
+        zeroFields.forEach((field) => {
+          if (!sanitizedData[field] || sanitizedData[field] === "") {
+            sanitizedData[field] = 0;
+          }
+        });
+      } else if (formData.purpose === "rent") {
+        // Phone number (owner_mobile) is required
+        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+          setInvalidFields(["owner_mobile"]);
+          return false;
+        }
+
+        // Check if at least one rentDurationType has a price > 0
+        const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
+          (duration) => duration.price > 0
+        );
+
+        if (!hasValidPrice) {
+          toast.error(t.toasts.enterValidPrice);
+          return false;
+        }
+
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
+        Object.keys(sanitizedRentDurationType).forEach((duration) => {
+          Object.keys(sanitizedRentDurationType[duration]).forEach((field) => {
+            if (sanitizedRentDurationType[duration][field] === "") {
+              sanitizedRentDurationType[duration][field] = 0;
+            }
+          });
+        });
+
+        setRentFormData((prev) => ({
+          ...prev,
+          rentDurationType: sanitizedRentDurationType,
+        }));
+      }
+    }
+
+    setInvalidFields([]);
+    return true;
+  };
+
   const handleNext = (e) => {
     e.preventDefault();
     // Validate required fields for step 1
