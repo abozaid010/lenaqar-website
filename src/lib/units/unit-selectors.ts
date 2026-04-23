@@ -19,6 +19,7 @@ import {
   getUnitBadges,
   capitalizeWords
 } from './unit-formatters';
+import { generateUnitSlug } from './unit-url-utils';
 import type { RawUnit, UnitViewModel, QuickFact, SpecItem, TrustItem } from './unit-types';
 
 /**
@@ -92,6 +93,12 @@ export const transformUnitToViewModel = (rawUnit: RawUnit): UnitViewModel => {
     developerId,
     projectHref,
     developerHref,
+    developerPhone: null, // These would come from contact info API
+    developerWhatsapp: null,
+    ownerName: null, // These would come from unit data
+    ownerMobile: null,
+    ownerWhatsapp: null,
+    clientId: rawUnit.clientId || null,
     locationLabel,
     heroImages,
     badges,

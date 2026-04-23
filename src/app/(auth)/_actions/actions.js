@@ -98,7 +98,8 @@ export async function loginAction(prevState, formData) {
 
     return {
       success: true,
-      message: "Login successful"
+      message: "Login successful",
+      clientId: client_id,
     };
 
   } catch (error) {

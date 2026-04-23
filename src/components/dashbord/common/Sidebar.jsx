@@ -29,6 +29,7 @@ const Sidebar = ({
   canAccessMap = false,
   canAccessNews = false,
   initialModuleActions = undefined,
+  clientId = null,
 }) => {
   const { t } = useI18n();
   const router = useRouter();
@@ -40,7 +41,6 @@ const Sidebar = ({
   const [pendingPath, setPendingPath] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  // Use shared access control hook
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
   const conversation = useModuleActions("conversation");
@@ -56,26 +56,35 @@ const Sidebar = ({
   const news = useModuleActions("news");
   const map = useModuleActions("map");
 
+  // Build prefixed nav href
+  const prefix = clientId ? `/${clientId}` : '';
+  const navHref = (path) => `${prefix}${path}`;
+
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
-  
-  // Handle navigation with optimistic UI
+
   const handleNavigation = (href, e) => {
     e.preventDefault();
-    setPendingPath(href); // Immediate visual feedback
-    
+    setPendingPath(href);
     startTransition(() => {
       router.push(href);
-      // Pending state will be cleared by useEffect when pathname changes
     });
   };
 
-  const isLinkActive = (path) => {
-    if (path === "/dashboard" && pathname === "/dashboard") return true;
-    return pathname.startsWith(path) && path !== "/dashboard";
+  // Strip clientId prefix for active-link comparison
+  const normalizePathname = () => {
+    if (clientId && pathname.startsWith(`/${clientId}`)) {
+      return pathname.slice(`/${clientId}`.length) || '/';
+    }
+    return pathname;
   };
 
-  // Modular: unit detail and edit unit (modal) both respect URL source (pending=1 → Resale)
+  const isLinkActive = (path) => {
+    const norm = normalizePathname();
+    if (path === "/dashboard") return norm === "/dashboard";
+    return norm.startsWith(path);
+  };
+
   const isUnitsLinkActive = unitsSection === "units";
   const isPendingApprovalLinkActive = unitsSection === "pending_approval";
 
@@ -84,15 +93,8 @@ const Sidebar = ({
   }
 
   useEffect(() => {
-    if (isOpen) {
-      setIsOpen(false);
-    }
-    // Clear pending state when pathname changes (navigation completed)
-    if (pendingPath && pathname === pendingPath) {
-      setPendingPath(null);
-    }
-
-    // Update campaign chat access based on shared hook
+    if (isOpen) setIsOpen(false);
+    if (pendingPath && pathname === pendingPath) setPendingPath(null);
     setCanAccessCampaignChat(hasAccess);
   }, [pathname, isOpen, pendingPath, hasAccess]);
 
@@ -121,7 +123,6 @@ const Sidebar = ({
                 {t.sidebar.logoutConfirm.message}
               </p>
             </div>
-
             <div className="flex gap-3 mt-6">
               <button
                 onClick={cancelLogout}
@@ -130,10 +131,7 @@ const Sidebar = ({
                 {t.sidebar.logoutConfirm.cancel}
               </button>
               <button
-                onClick={() => {
-                  // Logout functionality should be handled in Header component
-                  setShowLogoutConfirm(false);
-                }}
+                onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
               >
                 {t.sidebar.logoutConfirm.confirm}
@@ -150,7 +148,7 @@ const Sidebar = ({
         }`}
       >
         {/* Logo/Brand */}
-        <div className="p-4 mt-1 ">
+        <div className="p-4 mt-1">
           <Link href="/" className="text-xl font-bold flex items-center">
             <Image
               src="/images/logo.png"
@@ -165,227 +163,227 @@ const Sidebar = ({
         <div className={`flex-1 ${SELECTION_COLORS.BG}`}>
           {conversation.canView && (
             <Link
-              href="/dashboard"
+              href={navHref("/dashboard")}
               prefetch={true}
-              onClick={(e) => handleNavigation("/dashboard", e)}
+              onClick={(e) => handleNavigation(navHref("/dashboard"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/dashboard") || pendingPath === "/dashboard"
+                isLinkActive("/dashboard") || pendingPath === navHref("/dashboard")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === "/dashboard" ? "opacity-70" : ""}`}
+              } ${isPending && pendingPath === navHref("/dashboard") ? "opacity-70" : ""}`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
               <span>{t.sidebar.dashboard}</span>
-              {isPending && pendingPath === "/dashboard" && (
+              {isPending && pendingPath === navHref("/dashboard") && (
                 <Loader2 className="h-4 w-4 ml-auto animate-spin" />
               )}
             </Link>
           )}
 
           {campaign.canView && (
-          <Link
-            href="/campaigns"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/campaigns", e)}
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/campaigns") || pendingPath === "/campaigns"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/campaigns" ? "opacity-70" : ""}`}
-          >
-            <Megaphone className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.campaigns || "Campaigns"}</span>
-            {isPending && pendingPath === "/campaigns" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/campaigns")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/campaigns"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/campaigns") || pendingPath === navHref("/campaigns")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/campaigns") ? "opacity-70" : ""}`}
+            >
+              <Megaphone className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.campaigns || "Campaigns"}</span>
+              {isPending && pendingPath === navHref("/campaigns") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {canAccessCampaignChat && chatCampaign.canView && (
             <Link
-              href="/campaign-chat"
+              href={navHref("/campaign-chat")}
               prefetch={true}
-              onClick={(e) => handleNavigation("/campaign-chat", e)}
+              onClick={(e) => handleNavigation(navHref("/campaign-chat"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/campaign-chat") || pendingPath === "/campaign-chat"
+                isLinkActive("/campaign-chat") || pendingPath === navHref("/campaign-chat")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === "/campaign-chat" ? "opacity-70" : ""}`}
+              } ${isPending && pendingPath === navHref("/campaign-chat") ? "opacity-70" : ""}`}
             >
               <MessageCircle className="h-5 w-5 mr-3" />
               <span>{t.sidebar.campaignChat || "Campaign Chat"}</span>
-              {isPending && pendingPath === "/campaign-chat" && (
+              {isPending && pendingPath === navHref("/campaign-chat") && (
                 <Loader2 className="h-4 w-4 ml-auto animate-spin" />
               )}
             </Link>
           )}
 
           {calendar.canView && (
-          <Link
-            href="/schedule"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/schedule", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/schedule") || pendingPath === "/schedule"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/schedule" ? "opacity-70" : ""}`}
-          >
-            <Calendar className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.schedule || "Schedule"}</span>
-            {isPending && pendingPath === "/schedule" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/schedule")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/schedule"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/schedule") || pendingPath === navHref("/schedule")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/schedule") ? "opacity-70" : ""}`}
+            >
+              <Calendar className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.schedule || "Schedule"}</span>
+              {isPending && pendingPath === navHref("/schedule") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {analytics.canView && (
-          <Link
-            href="/analytics"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/analytics", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/analytics") || pendingPath === "/analytics"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/analytics" ? "opacity-70" : ""}`}
-          >
-            <BarChart2 className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.analytics}</span>
-            {isPending && pendingPath === "/analytics" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/analytics")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/analytics"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/analytics") || pendingPath === navHref("/analytics")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/analytics") ? "opacity-70" : ""}`}
+            >
+              <BarChart2 className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.analytics}</span>
+              {isPending && pendingPath === navHref("/analytics") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {units.canView && (
-          <Link
-            href="/units"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/units", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              (isUnitsLinkActive || pendingPath === "/units")
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/units" ? "opacity-70" : ""}`}
-          >
-            <Home className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.units}</span>
-            {isPending && pendingPath === "/units" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/units")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/units"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                (isUnitsLinkActive || pendingPath === navHref("/units"))
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/units") ? "opacity-70" : ""}`}
+            >
+              <Home className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.units}</span>
+              {isPending && pendingPath === navHref("/units") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {resale.canView && (
-          <Link
-            href="/units/pending-approval"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/units/pending-approval", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isPendingApprovalLinkActive || pendingPath === "/units/pending-approval"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/units/pending-approval" ? "opacity-70" : ""}`}
-          >
-            <Home className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.pendingApproval ?? "Resale"}</span>
-            {isPending && pendingPath === "/units/pending-approval" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/units/pending-approval")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/units/pending-approval"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isPendingApprovalLinkActive || pendingPath === navHref("/units/pending-approval")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/units/pending-approval") ? "opacity-70" : ""}`}
+            >
+              <Home className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.pendingApproval ?? "Resale"}</span>
+              {isPending && pendingPath === navHref("/units/pending-approval") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {teamMembers.canView && (
-          <Link
-            href="/team"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/team", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/team") || pendingPath === "/team"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/team" ? "opacity-70" : ""}`}
-          >
-            <Users2 className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.team}</span>
-            {isPending && pendingPath === "/team" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/team")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/team"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/team") || pendingPath === navHref("/team")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/team") ? "opacity-70" : ""}`}
+            >
+              <Users2 className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.team}</span>
+              {isPending && pendingPath === navHref("/team") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
-          
+
           {projects.canView && (
-          <Link
-            href="/myProjects"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/myProjects", e)}
-            className={`flex items-center px-4 py-2  mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/myProjects") || pendingPath === "/myProjects"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/myProjects" ? "opacity-70" : ""}`}
-          >
-            <FolderKanban className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.myProjects}</span>
-            {isPending && pendingPath === "/myProjects" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/myProjects")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/myProjects"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/myProjects") || pendingPath === navHref("/myProjects")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/myProjects") ? "opacity-70" : ""}`}
+            >
+              <FolderKanban className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.myProjects}</span>
+              {isPending && pendingPath === navHref("/myProjects") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {developers.canView && (
-          <Link
-            href="/developers"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/developers", e)}
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/developers") || pendingPath === "/developers"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/developers" ? "opacity-70" : ""}`}
-          >
-            <LayoutDashboard className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.developers}</span>
-            {isPending && pendingPath === "/developers" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/developers")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/developers"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/developers") || pendingPath === navHref("/developers")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/developers") ? "opacity-70" : ""}`}
+            >
+              <LayoutDashboard className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.developers}</span>
+              {isPending && pendingPath === navHref("/developers") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {canAccessNews && news.canView && (
-          <Link
-            href="/news"
-            prefetch={true}
-            onClick={(e) => handleNavigation("/news", e)}
-            className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-              isLinkActive("/news") || pendingPath === "/news"
-                ? SELECTION_COLORS.SELECTED
-                : "text-gray-700 hover:bg-gray-100"
-            } ${isPending && pendingPath === "/news" ? "opacity-70" : ""}`}
-          >
-            <Newspaper className="h-5 w-5 mr-3" />
-            <span>{t.sidebar.news}</span>
-            {isPending && pendingPath === "/news" && (
-              <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-            )}
-          </Link>
+            <Link
+              href={navHref("/news")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/news"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/news") || pendingPath === navHref("/news")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/news") ? "opacity-70" : ""}`}
+            >
+              <Newspaper className="h-5 w-5 mr-3" />
+              <span>{t.sidebar.news}</span>
+              {isPending && pendingPath === navHref("/news") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
           )}
 
           {canAccessMap && map.canView && (
             <Link
-              href="/map"
+              href={navHref("/map")}
               prefetch={true}
-              onClick={(e) => handleNavigation("/map", e)}
+              onClick={(e) => handleNavigation(navHref("/map"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/map") || pendingPath === "/map"
+                isLinkActive("/map") || pendingPath === navHref("/map")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === "/map" ? "opacity-70" : ""}`}
+              } ${isPending && pendingPath === navHref("/map") ? "opacity-70" : ""}`}
             >
               <MapPin className="h-5 w-5 mr-3" />
               <span>{t.sidebar.map}</span>
-              {isPending && pendingPath === "/map" && (
+              {isPending && pendingPath === navHref("/map") && (
                 <Loader2 className="h-4 w-4 ml-auto animate-spin" />
               )}
             </Link>

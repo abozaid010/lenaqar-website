@@ -2,18 +2,29 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import UnitDetailsPage from '@/components/unit-details/unit-details-page';
 import { getUnitById } from '@/lib/units/unit-api';
+import { findUnitBySlug } from '@/lib/units/unit-url-utils';
 import { transformUnitToViewModel, generateFallbackTitle } from '@/lib/units/unit-selectors';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params;
+  const { slug } = await params;
   
   try {
-    const response = await getUnitById(id);
+    // First try to find unit by slug
+    const unitId = await findUnitBySlug(slug);
+    
+    if (!unitId) {
+      return {
+        title: 'Unit Not Found',
+        description: 'The requested property unit could not be found.',
+      };
+    }
+
+    const response = await getUnitById(unitId);
     
     if (!response.status || !response.data.units.length) {
       return {
@@ -58,10 +69,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function UnitPage({ params }: PageProps) {
-  const { id } = await params;
+  const { slug } = await params;
   
   try {
-    const response = await getUnitById(id);
+    // First try to find unit by slug
+    const unitId = await findUnitBySlug(slug);
+    
+    if (!unitId) {
+      notFound();
+    }
+
+    const response = await getUnitById(unitId);
     
     if (!response.status || !response.data.units.length) {
       notFound();

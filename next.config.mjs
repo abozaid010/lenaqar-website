@@ -84,12 +84,16 @@ const nextConfig = {
       },
     ];
   },
-  // TODO: i18n configuration in next.config.mjs is unsupported in App Router.
-  // i18n: {
-  //   locales: ["en", "ar"],  // Supported locales
-  //   defaultLocale: "ar", // Default locale
-  //   // localeDetection: true, // Enable automatic locale detection
-  // },
+  async rewrites() {
+    const adminPaths = [
+      'dashboard', 'campaigns', 'campaign-chat', 'schedule',
+      'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map',
+    ];
+    return adminPaths.flatMap((path) => [
+      { source: `/:clientId/${path}`, destination: `/${path}` },
+      { source: `/:clientId/${path}/:rest*`, destination: `/${path}/:rest*` },
+    ]);
+  },
 };
 
 export default nextConfig;

@@ -7,6 +7,7 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/utils/api";
+import { generateUnitSlug } from "@/lib/units/unit-url-utils";
 import { useState } from "react";
 import shareButton from "../../../public/share.svg";
 import {
@@ -65,8 +66,18 @@ export default function UnitsGrid({
               href={
                 u.unitId
                   ? (readonly
-                      ? `/allProberties/${u.unitId}`
-                      : `/units/${u.unitId}`) + (linkQueryParams || "")
+                      ? `/allProberties/${generateUnitSlug({
+                          buildingType: u.buildingType,
+                          project: u.project,
+                          code: u.code,
+                          unitId: u.unitId
+                        })}`
+                      : `/unit/${generateUnitSlug({
+                          buildingType: u.buildingType,
+                          project: u.project,
+                          code: u.code,
+                          unitId: u.unitId
+                        })}`) + (linkQueryParams || "")
                   : "#"
               }
               key={u.unitId ?? u.code ?? idx}

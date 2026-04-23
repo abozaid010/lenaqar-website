@@ -47,7 +47,7 @@ export async function getPublicUnitById(unitId: string): Promise<UnitApiResponse
 
 export async function getUnits(): Promise<UnitApiResponse> {
   try {
-    const response = await axiosInstance.get('/units');
+    const response = await axiosInstance.get('/units/all');
     return response.data;
   } catch (error) {
     console.error('Error fetching units:', error);

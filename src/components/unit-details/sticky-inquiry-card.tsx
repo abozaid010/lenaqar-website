@@ -1,9 +1,12 @@
 import { Phone, MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
+import { generateUnitSlug } from '@/lib/units/unit-url-utils';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
+  const router = useRouter();
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -64,8 +67,23 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
 
   
   const handleEdit = () => {
-    // TODO: Implement edit functionality - navigate to edit page
-    console.log('Edit property action triggered');
+    // Navigate to admin edit page for the unit using new slug-based URL
+    try {
+      const slug = generateUnitSlug({
+        buildingType: unit.buildingType,
+        project: unit.projectName,
+        code: unit.referenceCode, // Use referenceCode as fallback for code
+        unitId: unit.id
+      });
+      const editUrl = `/admin/units/${slug}/edit`;
+      router.push(editUrl);
+    } catch (error) {
+      console.error('Error navigating to edit page:', error);
+      // Fallback to old URL format if needed
+      if (unit.id) {
+        router.push(`/admin/units/${unit.id}/edit`);
+      }
+    }
   };
 
   const handleDelete = () => {
