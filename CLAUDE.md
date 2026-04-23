@@ -25,6 +25,10 @@ Detail pages (`properties/[id]`, `projects/[id]/[slug]`) must live **outside** `
 ## Auth & Permissions
 Cookies (`COOKIE_KEYS`) → `getRoleFromToken` + `useModuleActions` + `useBrokerPermission` · Server components read cookies directly; client components use hooks.
 
+## Sidebar & Navigation
+- **Sidebar always visible**: Keep sidebar visible at all times for admin users
+- **Admin routes structure**: All admin routes start with client_id, e.g. `http://localhost:3000/public/units` where `public` is the client_id for the currently logged in user
+
 ## Constraints
 Server components fetch data · Client components handle interactions only · Prefer local state; React Query for server state
 No new patterns, dependencies, or layout changes without a clear need — stability over experimentation
