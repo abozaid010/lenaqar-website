@@ -1,9 +1,12 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import UnitDetailsPage from '@/components/unit-details/unit-details-page';
 import { getUnitById } from '@/lib/units/unit-api';
 import { findUnitBySlug } from '@/lib/units/unit-url-utils';
 import { transformUnitToViewModel, generateFallbackTitle } from '@/lib/units/unit-selectors';
+import { getRoleFromToken } from '@/lib/getRoleFromToken';
+import { cookies } from 'next/headers';
+import { COOKIE_KEYS } from '@/constants/cookieKeys';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -71,6 +74,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function UnitPage({ params }: PageProps) {
   const { slug } = await params;
   
+  // Check if user is admin and redirect to admin route with sidebar
+  const role = await getRoleFromToken();
+  const cookieStore = await cookies();
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
+  
+  // If user is admin and clientId exists, redirect to admin route with sidebar
+  if (role && clientId) {
+    const adminRoles = ['admin', 'owner', 'editor'];
+    if (adminRoles.includes(role.toLowerCase())) {
+      redirect(`/admin/units/${slug}`);
+    }
+  }
+
   try {
     // First try to find unit by slug
     const unitId = await findUnitBySlug(slug);
