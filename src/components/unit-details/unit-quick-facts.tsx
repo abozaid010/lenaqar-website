@@ -85,6 +85,10 @@ interface CombinedQuickFactsProps {
 }
 
 export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFactsProps) {
+  // Debug: Log incoming data
+  console.log('UnitQuickFacts - facts:', facts);
+  console.log('UnitQuickFacts - specs:', specs);
+  
   // Convert specifications to quick facts format
   const specFacts = specs.map(spec => ({
     label: spec.label,
@@ -94,8 +98,14 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
 
   // Combine quick facts and specifications
   const allFacts = [...facts, ...specFacts];
+  console.log('UnitQuickFacts - allFacts:', allFacts);
 
-  if (allFacts.length === 0) {
+  // Temporarily disable deduplication to test
+  const deduplicatedFacts = allFacts;
+  console.log('UnitQuickFacts - deduplicatedFacts (no dedup):', deduplicatedFacts);
+
+  if (deduplicatedFacts.length === 0) {
+    console.log('UnitQuickFacts - No facts to display, returning null');
     return null;
   }
 
@@ -103,7 +113,7 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
     <div className="bg-white rounded-lg border p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Facts</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {allFacts.map((fact, index) => {
+        {deduplicatedFacts.map((fact, index) => {
           // Determine icon: use iconMap for quick facts, getIconForSpec for specifications
           const IconComponent = fact.icon && iconMap[fact.icon] 
             ? iconMap[fact.icon] 
