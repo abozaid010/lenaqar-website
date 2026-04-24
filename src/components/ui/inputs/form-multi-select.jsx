@@ -68,7 +68,7 @@ const FormMultiSelect = ({
     );
 
     return selectedOptions
-      .map((opt) => (locale === "ar" ? opt.ar_label : opt.en_label))
+      .map((opt) => opt[labelKey] ?? (locale === "ar" ? opt.ar_label : opt.en_label))
       .join(", ");
   };
 
@@ -102,8 +102,8 @@ const FormMultiSelect = ({
         </button>
 
         {isOpen && (
-          <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
-            <ul className="py-1 max-h-60 overflow-auto">
+          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+            <ul className="py-1 max-h-96 overflow-auto">
               {options.map((option) => (
                 <li
                   key={option[valueKey]}
@@ -120,7 +120,7 @@ const FormMultiSelect = ({
                       className="mr-2 h-4 w-4"
                     />
                     <span className="text-gray-900">
-                      {locale === "ar" ? option.ar_label : option.en_label}
+                      {option[labelKey] ?? (locale === "ar" ? option.ar_label : option.en_label)}
                     </span>
                   </div>
                 </li>

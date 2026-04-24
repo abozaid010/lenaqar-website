@@ -24,6 +24,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
+import { isCurrentUserKingAdmin } from "@/lib/kingAdmin";
 
 const Sidebar = ({
   canAccessMap = false,
@@ -308,6 +309,25 @@ const Sidebar = ({
               <Users2 className="h-5 w-5 mr-3" />
               <span>{t.sidebar.team}</span>
               {isPending && pendingPath === navHref("/team") && (
+                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
+              )}
+            </Link>
+          )}
+
+          {isCurrentUserKingAdmin() && (
+            <Link
+              href={navHref("/clients/new")}
+              prefetch={true}
+              onClick={(e) => handleNavigation(navHref("/clients/new"), e)}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/clients") || pendingPath === navHref("/clients/new")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              } ${isPending && pendingPath === navHref("/clients/new") ? "opacity-70" : ""}`}
+            >
+              <Users2 className="h-5 w-5 mr-3" />
+              <span>Clients</span>
+              {isPending && pendingPath === navHref("/clients/new") && (
                 <Loader2 className="h-4 w-4 ml-auto animate-spin" />
               )}
             </Link>

@@ -16,18 +16,27 @@ async function performRefresh() {
     throw new Error("No refresh token found");
   }
 
-  const response = await fetch(
-    `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
-    {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-      },
+  let response;
+  try {
+    response = await fetch(
+      `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
+      {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        signal: AbortSignal.timeout(5000), // 5 second timeout
+      }
+    );
+  } catch (fetchError) {
+    if (fetchError.code === 'ECONNREFUSED' || fetchError.name === 'AbortError') {
+      throw new Error(`Backend API unavailable at ${API_BASE_URL}. Please check if the server is running.`);
     }
-  );
+    throw fetchError;
+  }
 
   if (!response.ok) {
-    throw new Error("Failed to refresh token");
+    throw new Error(`Token refresh failed with status ${response.status}`);
   }
 
   const data = await response.json();
