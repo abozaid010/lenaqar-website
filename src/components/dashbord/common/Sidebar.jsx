@@ -41,6 +41,7 @@ const Sidebar = ({
   const [isPending, startTransition] = useTransition();
   const [pendingPath, setPendingPath] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
@@ -94,6 +95,7 @@ const Sidebar = ({
   }
 
   useEffect(() => {
+    setIsMounted(true);
     if (isOpen) setIsOpen(false);
     if (pendingPath && pathname === pendingPath) setPendingPath(null);
     setCanAccessCampaignChat(hasAccess);
@@ -162,7 +164,7 @@ const Sidebar = ({
 
         {/* Navigation Menu */}
         <div className={`flex-1 ${SELECTION_COLORS.BG}`}>
-          {conversation.canView && (
+          {isMounted && conversation.canView && (
             <Link
               href={navHref("/dashboard")}
               prefetch={true}
@@ -181,7 +183,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {campaign.canView && (
+          {isMounted && campaign.canView && (
             <Link
               href={navHref("/campaigns")}
               prefetch={true}
@@ -200,7 +202,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {canAccessCampaignChat && chatCampaign.canView && (
+          {isMounted && canAccessCampaignChat && chatCampaign.canView && (
             <Link
               href={navHref("/campaign-chat")}
               prefetch={true}
@@ -219,7 +221,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {calendar.canView && (
+          {isMounted && calendar.canView && (
             <Link
               href={navHref("/schedule")}
               prefetch={true}
@@ -238,7 +240,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {analytics.canView && (
+          {isMounted && analytics.canView && (
             <Link
               href={navHref("/analytics")}
               prefetch={true}
@@ -257,7 +259,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {units.canView && (
+          {isMounted && units.canView && (
             <Link
               href={navHref("/units")}
               prefetch={true}
@@ -276,7 +278,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {resale.canView && (
+          {isMounted && resale.canView && (
             <Link
               href={navHref("/units/pending-approval")}
               prefetch={true}
@@ -295,7 +297,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {teamMembers.canView && (
+          {isMounted && teamMembers.canView && (
             <Link
               href={navHref("/team")}
               prefetch={true}
@@ -314,26 +316,26 @@ const Sidebar = ({
             </Link>
           )}
 
-          {isCurrentUserKingAdmin() && (
+          {isMounted && isCurrentUserKingAdmin() && (
             <Link
-              href={navHref("/clients/new")}
+              href={navHref("/clients")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/clients/new"), e)}
+              onClick={(e) => handleNavigation(navHref("/clients"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/clients") || pendingPath === navHref("/clients/new")
+                isLinkActive("/clients") || pendingPath === navHref("/clients")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/clients/new") ? "opacity-70" : ""}`}
+              } ${isPending && pendingPath === navHref("/clients") ? "opacity-70" : ""}`}
             >
               <Users2 className="h-5 w-5 mr-3" />
               <span>Clients</span>
-              {isPending && pendingPath === navHref("/clients/new") && (
+              {isPending && pendingPath === navHref("/clients") && (
                 <Loader2 className="h-4 w-4 ml-auto animate-spin" />
               )}
             </Link>
           )}
 
-          {projects.canView && (
+          {isMounted && projects.canView && (
             <Link
               href={navHref("/myProjects")}
               prefetch={true}
@@ -352,7 +354,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {developers.canView && (
+          {isMounted && developers.canView && (
             <Link
               href={navHref("/developers")}
               prefetch={true}
@@ -371,7 +373,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {canAccessNews && news.canView && (
+          {isMounted && canAccessNews && news.canView && (
             <Link
               href={navHref("/news")}
               prefetch={true}
@@ -390,7 +392,7 @@ const Sidebar = ({
             </Link>
           )}
 
-          {canAccessMap && map.canView && (
+          {isMounted && canAccessMap && map.canView && (
             <Link
               href={navHref("/map")}
               prefetch={true}

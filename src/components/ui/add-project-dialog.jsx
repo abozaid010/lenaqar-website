@@ -129,6 +129,7 @@ export default function AddCompoundDialog({
   onClose,
   compoundData: projectData,
   onAdd = () => {},
+  onEdit,
   defaultCity,
   defaultDistrict,
   viewMode = false,
@@ -193,6 +194,21 @@ export default function AddCompoundDialog({
     useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [existingProjectData, setExistingProjectData] = useState(null);
+
+  // Handle edit from preview dialog
+  const handleEditFromPreview = (projectData) => {
+    // Close preview dialog
+    setPreviewDialogOpen(false);
+    setExistingProjectData(null);
+    
+    // Call the onEdit callback if provided
+    if (onEdit && typeof onEdit === 'function') {
+      onEdit(projectData);
+    } else {
+      // Fallback message if no onEdit handler is provided
+      toast.error("Edit functionality not available. Please use the Edit button from the projects list.");
+    }
+  };
 
   // Refs for form fields to enable scrolling to errors
   const fieldRefs = useRef({
@@ -2377,6 +2393,7 @@ export default function AddCompoundDialog({
           setExistingProjectData(null);
         }}
         projectData={existingProjectData}
+        onEdit={handleEditFromPreview}
       />
     </>
   );

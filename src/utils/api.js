@@ -1047,7 +1047,12 @@ export async function createPaymentPlan(paymentPlanData) {
 
 export async function updatePaymentPlan(id, paymentPlanData) {
   try {
-    const response = await axiosInstance.put(`/payment-plans/${id}`, paymentPlanData);
+    // Include ID in the request body as required by the API
+    const requestBody = {
+      ...paymentPlanData,
+      id: id
+    };
+    const response = await axiosInstance.put(`/payment-plans/${id}`, requestBody);
     return response.data;
   } catch (error) {
     console.error("Failed to update payment plan:", error.message);
@@ -1401,6 +1406,33 @@ export async function deleteUser(userId, clientId = "public") {
     return response.data;
   } catch (error) {
     console.error("Failed to delete user:", error.message);
+    throw error;
+  }
+}
+
+// Admin Clients API (king admin only)
+
+export async function fetchAdminClients(page = 1, pageSize = 10) {
+  try {
+    const response = await axiosInstance.get("/api/client/admin/clients", {
+      params: { page, page_size: pageSize },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch admin clients:", error.message);
+    throw error;
+  }
+}
+
+export async function updateAdminClient(clientId, payload) {
+  try {
+    const response = await axiosInstance.patch(
+      `/api/client/admin/clients/${clientId}`,
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update client:", error.message);
     throw error;
   }
 }

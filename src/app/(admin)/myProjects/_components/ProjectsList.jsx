@@ -710,6 +710,7 @@ export default function ProjectsList({ clientId }) {
           compoundData={dialogProject}
           viewMode={projectDialogMode === "view"}
           onAdd={handleProjectSaved}
+          onEdit={handleOpenEdit}
           clientId={clientId}
         />
       )}

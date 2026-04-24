@@ -63,6 +63,13 @@ export const paginatedProjectKeys = {
   list: (filters) => [...paginatedProjectKeys.all, "list", filters],
 };
 
+// Query key factory for admin clients
+export const clientKeys = {
+  all: ["admin-clients"],
+  lists: () => [...clientKeys.all, "list"],
+  list: (page) => [...clientKeys.lists(), { page }],
+};
+
 // Query key factory for cities and projects
 export const cityKeys = {
   all: ["cities"],

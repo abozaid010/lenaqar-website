@@ -4,7 +4,7 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/context/translate-api";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { getBuildingTypes } from "@/data/constants";
-import { CreditCard, Home, Tag } from "lucide-react";
+import { CreditCard, Home, Tag, Edit } from "lucide-react";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useMemo, useEffect } from "react";
@@ -30,6 +30,7 @@ export default function ExistingProjectPreviewDialog({
   isOpen,
   onClose,
   projectData,
+  onEdit,
 }) {
   const { t, locale } = useI18n();
 
@@ -77,14 +78,25 @@ export default function ExistingProjectPreviewDialog({
             <h3 className="text-lg font-medium text-white">
               {t.formLabels?.existingProject || "Existing Project"}
             </h3>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 focus:outline-none"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              {onEdit && (
+                <button
+                  onClick={() => onEdit(projectData)}
+                  className="text-white hover:text-gray-200 focus:outline-none p-1 rounded hover:bg-white/10 transition-colors"
+                  title={t.formLabels?.edit || "Edit"}
+                >
+                  <Edit className="w-5 h-5" />
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="text-white hover:text-gray-200 focus:outline-none"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
           </div>
           <p className="text-white text-sm mt-2">
             {t.formLabels?.duplicateProjectMessage || "We already have this project in our system. Set project name, city correctly. You can't have two projects with same name in same city."}
