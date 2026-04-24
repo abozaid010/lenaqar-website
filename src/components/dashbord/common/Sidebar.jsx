@@ -65,14 +65,7 @@ const Sidebar = ({
   const toggleSidebar = () => setIsOpen(!isOpen);
   const cancelLogout = () => setShowLogoutConfirm(false);
 
-  const handleNavigation = (href, e) => {
-    e.preventDefault();
-    setPendingPath(href);
-    startTransition(() => {
-      router.push(href);
-    });
-  };
-
+  
   // Strip clientId prefix for active-link comparison
   const normalizePathname = () => {
     if (clientId && pathname.startsWith(`/${clientId}`)) {
@@ -168,18 +161,14 @@ const Sidebar = ({
             <Link
               href={navHref("/dashboard")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/dashboard"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/dashboard") || pendingPath === navHref("/dashboard")
+                isLinkActive("/dashboard")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/dashboard") ? "opacity-70" : ""}`}
+              }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
               <span>{t.sidebar.dashboard}</span>
-              {isPending && pendingPath === navHref("/dashboard") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -187,18 +176,14 @@ const Sidebar = ({
             <Link
               href={navHref("/campaigns")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/campaigns"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/campaigns") || pendingPath === navHref("/campaigns")
+                isLinkActive("/campaigns")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/campaigns") ? "opacity-70" : ""}`}
+              }`}
             >
               <Megaphone className="h-5 w-5 mr-3" />
               <span>{t.sidebar.campaigns || "Campaigns"}</span>
-              {isPending && pendingPath === navHref("/campaigns") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -206,18 +191,14 @@ const Sidebar = ({
             <Link
               href={navHref("/campaign-chat")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/campaign-chat"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/campaign-chat") || pendingPath === navHref("/campaign-chat")
+                isLinkActive("/campaign-chat")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/campaign-chat") ? "opacity-70" : ""}`}
+              }`}
             >
               <MessageCircle className="h-5 w-5 mr-3" />
               <span>{t.sidebar.campaignChat || "Campaign Chat"}</span>
-              {isPending && pendingPath === navHref("/campaign-chat") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -225,18 +206,14 @@ const Sidebar = ({
             <Link
               href={navHref("/schedule")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/schedule"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/schedule") || pendingPath === navHref("/schedule")
+                isLinkActive("/schedule")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/schedule") ? "opacity-70" : ""}`}
+              }`}
             >
               <Calendar className="h-5 w-5 mr-3" />
               <span>{t.sidebar.schedule || "Schedule"}</span>
-              {isPending && pendingPath === navHref("/schedule") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -244,18 +221,14 @@ const Sidebar = ({
             <Link
               href={navHref("/analytics")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/analytics"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/analytics") || pendingPath === navHref("/analytics")
+                isLinkActive("/analytics")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/analytics") ? "opacity-70" : ""}`}
+              }`}
             >
               <BarChart2 className="h-5 w-5 mr-3" />
               <span>{t.sidebar.analytics}</span>
-              {isPending && pendingPath === navHref("/analytics") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -263,18 +236,14 @@ const Sidebar = ({
             <Link
               href={navHref("/units")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/units"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                (isUnitsLinkActive || pendingPath === navHref("/units"))
+                isUnitsLinkActive
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/units") ? "opacity-70" : ""}`}
+              }`}
             >
               <Home className="h-5 w-5 mr-3" />
               <span>{t.sidebar.units}</span>
-              {isPending && pendingPath === navHref("/units") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -282,18 +251,14 @@ const Sidebar = ({
             <Link
               href={navHref("/units/pending-approval")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/units/pending-approval"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isPendingApprovalLinkActive || pendingPath === navHref("/units/pending-approval")
+                isPendingApprovalLinkActive
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/units/pending-approval") ? "opacity-70" : ""}`}
+              }`}
             >
               <Home className="h-5 w-5 mr-3" />
               <span>{t.sidebar.pendingApproval ?? "Resale"}</span>
-              {isPending && pendingPath === navHref("/units/pending-approval") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -301,18 +266,14 @@ const Sidebar = ({
             <Link
               href={navHref("/team")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/team"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/team") || pendingPath === navHref("/team")
+                isLinkActive("/team")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/team") ? "opacity-70" : ""}`}
+              }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
               <span>{t.sidebar.team}</span>
-              {isPending && pendingPath === navHref("/team") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -320,18 +281,14 @@ const Sidebar = ({
             <Link
               href={navHref("/clients")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/clients"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/clients") || pendingPath === navHref("/clients")
+                isLinkActive("/clients")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/clients") ? "opacity-70" : ""}`}
+              }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
               <span>Clients</span>
-              {isPending && pendingPath === navHref("/clients") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -339,18 +296,14 @@ const Sidebar = ({
             <Link
               href={navHref("/myProjects")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/myProjects"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/myProjects") || pendingPath === navHref("/myProjects")
+                isLinkActive("/myProjects")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/myProjects") ? "opacity-70" : ""}`}
+              }`}
             >
               <FolderKanban className="h-5 w-5 mr-3" />
               <span>{t.sidebar.myProjects}</span>
-              {isPending && pendingPath === navHref("/myProjects") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -358,18 +311,14 @@ const Sidebar = ({
             <Link
               href={navHref("/developers")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/developers"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/developers") || pendingPath === navHref("/developers")
+                isLinkActive("/developers")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/developers") ? "opacity-70" : ""}`}
+              }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
               <span>{t.sidebar.developers}</span>
-              {isPending && pendingPath === navHref("/developers") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -377,18 +326,14 @@ const Sidebar = ({
             <Link
               href={navHref("/news")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/news"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/news") || pendingPath === navHref("/news")
+                isLinkActive("/news")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/news") ? "opacity-70" : ""}`}
+              }`}
             >
               <Newspaper className="h-5 w-5 mr-3" />
               <span>{t.sidebar.news}</span>
-              {isPending && pendingPath === navHref("/news") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
 
@@ -396,18 +341,14 @@ const Sidebar = ({
             <Link
               href={navHref("/map")}
               prefetch={true}
-              onClick={(e) => handleNavigation(navHref("/map"), e)}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isLinkActive("/map") || pendingPath === navHref("/map")
+                isLinkActive("/map")
                   ? SELECTION_COLORS.SELECTED
                   : "text-gray-700 hover:bg-gray-100"
-              } ${isPending && pendingPath === navHref("/map") ? "opacity-70" : ""}`}
+              }`}
             >
               <MapPin className="h-5 w-5 mr-3" />
               <span>{t.sidebar.map}</span>
-              {isPending && pendingPath === navHref("/map") && (
-                <Loader2 className="h-4 w-4 ml-auto animate-spin" />
-              )}
             </Link>
           )}
         </div>

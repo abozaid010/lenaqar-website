@@ -4,14 +4,14 @@ import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import ImportDevelopersDialog from "@/components/ui/import-developers-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import ReusableSearchInput from "@/components/ui/reusable-search-input";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/context/translate-api";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -37,16 +37,25 @@ export default function DevelopersClientWrapper({ clientId }) {
   const canImportDevelopers = hasDeveloperAction("import");
   const [developers, setDevelopers] = useState([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
+  const [selectedDeveloperSearch, setSelectedDeveloperSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openInEditMode, setOpenInEditMode] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const menuRefs = useRef({});
-  const searchInputRef = useRef(null);
-  const searchBlurTimeoutRef = useRef(null);
+
+  // Convert developers to options format for SearchableDropdownSelect
+  const developerOptions = useMemo(() => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(developer => ({
+      value: developer.id,
+      label: locale === "ar" ? developer.ar_name : developer.en_name,
+      ar_name: developer.ar_name,
+      en_name: developer.en_name
+    }));
+  }, [data, locale]);
 
   useEffect(() => {
     if (!isLoading && !isError && data) {
@@ -56,13 +65,17 @@ export default function DevelopersClientWrapper({ clientId }) {
         return;
       }
 
-      // Filter by search query if provided
-      const filtered = searchQuery
-        ? filterBySearchQuery(data, searchQuery, ["ar_name", "en_name"])
-        : data;
+      // Filter by selected developer search or search query
+      let filtered = data;
+      if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
+        const selected = data.find(d => d.id === selectedDeveloperSearch);
+        filtered = selected ? [selected] : data;
+      } else if (searchQuery) {
+        filtered = filterBySearchQuery(data, searchQuery, ["ar_name", "en_name"]);
+      }
       setDevelopers(filtered);
     }
-  }, [isLoading, isError, data, searchQuery]);
+  }, [isLoading, isError, data, searchQuery, selectedDeveloperSearch]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -80,30 +93,6 @@ export default function DevelopersClientWrapper({ clientId }) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [openMenuId]);
-
-  const handleSearchExpand = () => {
-    setSearchExpanded(true);
-    setTimeout(() => searchInputRef.current?.focus(), 0);
-  };
-
-  const handleSearchBlur = () => {
-    searchBlurTimeoutRef.current = setTimeout(() => {
-      setSearchExpanded(false);
-    }, 150);
-  };
-
-  const handleSearchFocus = () => {
-    if (searchBlurTimeoutRef.current) {
-      clearTimeout(searchBlurTimeoutRef.current);
-      searchBlurTimeoutRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (searchBlurTimeoutRef.current) clearTimeout(searchBlurTimeoutRef.current);
-    };
-  }, []);
 
   const handleEdit = (updatedDeveloper) => {
     setDevelopers((prev) =>
@@ -249,69 +238,73 @@ export default function DevelopersClientWrapper({ clientId }) {
 
   return (
     <>
-      <div className="w-full bg-gray-50 p-3">
-        <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-primary p-4 flex flex-col gap-3">
-            <div className="flex justify-between items-center gap-3 flex-wrap">
-              <h2 className="text-white text-xl font-semibold">
-                {t.sidebar.developers}
-              </h2>
-              <div className="flex items-center gap-2 flex-1 min-w-0 transition-all duration-200">
-                {searchExpanded ? (
-                  <div className="flex-1 min-w-0">
-                    <ReusableSearchInput
-                      value={searchQuery}
-                      onChange={setSearchQuery}
-                      placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
-                      variant="white"
-                      className="w-full"
-                      inputRef={searchInputRef}
-                      onBlur={handleSearchBlur}
-                      onFocus={handleSearchFocus}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleSearchExpand}
-                    className="flex items-center justify-center p-2 rounded-md border border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
-                    aria-label={t.developerPage?.searchPlaceholder || "Search developers"}
-                  >
-                    <Search size={20} />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {canCreateDeveloper && (
-                  <button
-                    onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                  >
-                    <Plus size={20} />
-                    <span>{t.developerPage.addDeveloper}</span>
-                  </button>
-                )}
-                {!isDeveloper && canImportDevelopers && (
-                  <button
-                    onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
-                  >
-                    <Plus size={20} />
-                    <span>{t.developerPage?.importButton || "Import"}</span>
-                  </button>
-                )}
-                <VideoInstructionsDialog
-                  variant="developers"
-                  iconSize="lg"
-                  iconClassName="hover:bg-white/20"
-                  svgClassName="text-white"
-                  tooltipText={
-                    t.developerPage?.instructions || "How to manage developers"
-                  }
-                />
-              </div>
+      {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Search Dropdown */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <SearchableDropdownSelect
+              options={developerOptions}
+              value={selectedDeveloperSearch}
+              onChange={(e) => setSelectedDeveloperSearch(e.target.value)}
+              name="developer_search"
+              placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
+              showAllOption={true}
+              allOptionLabel={locale === "ar" ? "جميع المطورين" : "All Developers"}
+              allOptionValue=""
+              getValue={(option) => option.value}
+              getLabel={(option, loc) => loc === "ar" ? option.ar_name : option.en_name}
+              searchFields={["ar_name", "en_name"]}
+              className="w-full"
+              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              disabled={isLoading}
+              isLoading={isLoading}
+            />
+          </div>
+
+          {/* Action buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            {canCreateDeveloper && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.developerPage.addDeveloper}
+                </span>
+              </button>
+            )}
+            {!isDeveloper && canImportDevelopers && (
+              <button
+                onClick={() => setIsImportOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.developerPage?.importButton || "Import"}
+                </span>
+              </button>
+            )}
+            <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
+              <VideoInstructionsDialog
+                variant="developers"
+                iconSize="sm"
+                tooltipText={
+                  t.developerPage?.instructions || "How to manage developers"
+                }
+              />
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
+
+      {/* Content Container */}
+      <div className="w-full bg-gray-50 p-3">
+        <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
 
           <div className="max-h-[80vh] overflow-y-auto">
             {isLoading ? (
