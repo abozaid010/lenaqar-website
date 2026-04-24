@@ -8,15 +8,15 @@ import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleA
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
-  { value: "all_units", label: "All Units" },
+  { value: "pull_from_other_clients", label: "Pull From Other Clients" },
 ];
 const DEVELOPER_SHARING_OPTIONS = [
   { value: "only_my_developers", label: "Only My Developers" },
-  { value: "all_developers", label: "All Developers" },
+  { value: "pull_from_other_clients", label: "Pull From Other Clients" },
 ];
 const PROJECTS_SHARING_OPTIONS = [
   { value: "only_my_projects", label: "Only My Projects" },
-  { value: "all_projects", label: "All Projects" },
+  { value: "pull_from_other_clients", label: "Pull From Other Clients" },
 ];
 
 const SectionTitle = ({ children }) => (
