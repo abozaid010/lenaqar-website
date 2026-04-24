@@ -22,8 +22,8 @@ export default function RelatedEntityLinks({ project }: RelatedEntityLinksProps)
                 </p>
               </div>
             </div>
-            <Link 
-              href={`/units?project=${project.title}`}
+            <Link
+              href={`/${project.clientId || 'public'}/units?project_name=${encodeURIComponent(project.title)}`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <span>View Units</span>
@@ -45,19 +45,13 @@ export default function RelatedEntityLinks({ project }: RelatedEntityLinksProps)
                   <p className="text-sm text-gray-600">{project.developerName}</p>
                 </div>
               </div>
-              {project.developerHref ? (
-                <Link 
-                  href={project.developerHref}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <span>View Profile</span>
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              ) : (
-                <div className="px-4 py-2 bg-gray-200 text-gray-500 rounded-lg cursor-not-allowed">
-                  No Profile
-                </div>
-              )}
+              <Link
+                href={`/${project.clientId || 'public'}/developers`}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <span>All Developers</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         )}
@@ -74,8 +68,8 @@ export default function RelatedEntityLinks({ project }: RelatedEntityLinksProps)
                 <p className="text-sm text-gray-600">Browse all available projects</p>
               </div>
             </div>
-            <Link 
-              href="/myProjects"
+            <Link
+              href={`/${project.clientId || 'public'}/myProjects`}
               className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
             >
               <span>All Projects</span>

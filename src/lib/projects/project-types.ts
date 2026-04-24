@@ -27,7 +27,6 @@ export interface RawProject {
   created_at?: string;
   updated_at?: string;
   units_count?: number;
-  // Additional project-specific fields from API
   amenities?: string[];
   payment_plans?: PaymentPlan[];
   building_types?: string[];
@@ -45,8 +44,12 @@ export interface RawProject {
   finishing_type?: string[];
   author?: string;
   orientation_url?: string;
-  facility_management?: any;
+  facility_management?: { name: string; description?: string; rating?: number } | null;
   cache_discount?: number;
+  location_landmark?: string;
+  latitude?: number;
+  longitude?: number;
+  is_active?: boolean;
 }
 
 export interface PaymentPlan {
@@ -116,6 +119,7 @@ export interface ProjectViewModel {
   developerHref?: string;
   locationLabel: string;
   heroImages: HeroImage[];
+  galleryImages: HeroImage[];
   badges: string[];
   startingPrice?: string;
   averagePricePerMeter?: string;
@@ -129,12 +133,24 @@ export interface ProjectViewModel {
   phases: string[];
   amenities: string[];
   paymentPlans: string[];
+  paymentPlanDetails: PaymentPlan[];
   buildingTypes: string[];
+  buildingTypeImages: Record<string, string[]>;
+  startPrices: Record<string, number>;
+  startAreas: Record<string, number>;
+  finishingTypes: string[];
   googleMapLink?: string;
   videoUrl?: string;
+  orientationUrl?: string;
+  locationLandmark?: string;
+  latitude?: number;
+  longitude?: number;
+  isActive: boolean;
+  facilityManagement?: { name: string; description?: string; rating?: number } | null;
   units: ProjectUnit[];
   purpose?: string;
   isPrimary: boolean;
+  clientId?: string;
 }
 
 // Component prop types

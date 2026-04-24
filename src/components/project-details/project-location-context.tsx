@@ -1,4 +1,4 @@
-import { MapPin, Navigation, ExternalLink, Video, Car } from 'lucide-react';
+import { MapPin, Navigation, ExternalLink, Video, Car, Crosshair, FileVideo } from 'lucide-react';
 import type { ProjectLocationContextProps } from '@/lib/projects/project-types';
 
 export default function ProjectLocationContext({ project }: ProjectLocationContextProps) {
@@ -44,6 +44,44 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
           </div>
         )}
 
+        {/* Location Landmark */}
+        {project.locationLandmark && (
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="p-2 bg-yellow-100 rounded-lg">
+                <MapPin className="w-5 h-5 text-yellow-600" />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Location Landmark</h3>
+              <p className="text-gray-700 text-sm">{project.locationLandmark}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Coordinates */}
+        {project.latitude != null && project.longitude != null && (
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="p-2 bg-teal-100 rounded-lg">
+                <Crosshair className="w-5 h-5 text-teal-600" />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-1">Coordinates</h3>
+              <a
+                href={`https://maps.google.com/?q=${project.latitude},${project.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-800 text-sm transition-colors"
+              >
+                <span>{project.latitude.toFixed(6)}, {project.longitude.toFixed(6)}</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Video Tour */}
         {project.videoUrl && (
           <div className="flex items-start gap-4">
@@ -61,6 +99,29 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <span>Watch Project Video</span>
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Orientation Video */}
+        {project.orientationUrl && (
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0">
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <FileVideo className="w-5 h-5 text-orange-600" />
+              </div>
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1">Orientation Video</h3>
+              <a
+                href={project.orientationUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <span>Watch Orientation</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>

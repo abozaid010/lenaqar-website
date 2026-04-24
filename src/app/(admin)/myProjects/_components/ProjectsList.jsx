@@ -33,6 +33,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -267,6 +268,7 @@ function ProjectCard({
 
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const { t, locale } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
@@ -588,9 +590,8 @@ export default function ProjectsList({ clientId }) {
   };
 
   const handleOpenView = (project) => {
-    setDialogProject(project);
-    setProjectDialogMode("view");
-    setShowProjectDialog(true);
+    const slug = encodeURIComponent(project.en_name || project.ar_name || project.id);
+    router.push(`/${clientId}/myProjects/${slug}`);
   };
   const handleOpenEdit = (project) => {
     setDialogProject(project);

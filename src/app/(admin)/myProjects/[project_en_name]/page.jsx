@@ -132,7 +132,13 @@ export default async function ProjectDetailsPageWrapper({ params }) {
       );
     }
 
-    const project = transformProjectToViewModel(response.data.project);
+    const cookieStore = await cookies();
+    const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
+
+    const project = {
+      ...transformProjectToViewModel(response.data.project),
+      ...(clientId ? { clientId } : {}),
+    };
 
     return (
       <>
@@ -152,7 +158,7 @@ export default async function ProjectDetailsPageWrapper({ params }) {
             },
           ]}
         />
-        <ProjectDetailsPage project={project} />
+        <ProjectDetailsPage project={project} rawProject={response.data.project} />
       </>
     );
   } catch (error) {

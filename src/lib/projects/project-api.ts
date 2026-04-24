@@ -232,6 +232,24 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
     badges.push(`${rawProject.phases.length} Phases`);
   }
 
+  // Build full gallery: master_plan first, then all images[]
+  const galleryImages: HeroImage[] = [...heroImages];
+  if (rawProject.images && Array.isArray(rawProject.images)) {
+    for (const img of rawProject.images) {
+      if (img.url && !galleryImages.some(h => h.url === img.url)) {
+        galleryImages.push({ url: img.url, alt: rawProject.en_name || 'Project image' });
+      }
+    }
+  }
+
+  // Build building type images map: type → url[]
+  const buildingTypeImages: Record<string, string[]> = {};
+  if (rawProject.building_types_images) {
+    for (const [type, imgs] of Object.entries(rawProject.building_types_images)) {
+      buildingTypeImages[type] = (imgs as any[]).map((img: any) => img.url).filter(Boolean);
+    }
+  }
+
   return {
     id: rawProject.id,
     title: rawProject.en_name || 'Untitled Project',
@@ -241,13 +259,14 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
     developerId: rawProject.developer_id,
     developerHref: rawProject.developer_id ? `/developers/${rawProject.developer_id}` : null,
     locationLabel: `${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`,
-    heroImages,
+    heroImages: galleryImages.length > 0 ? galleryImages : heroImages,
+    galleryImages,
     badges,
     startingPrice: (rawProject.start_price || rawProject.starting_price) ? `EGP ${(rawProject.start_price || rawProject.starting_price).toLocaleString()}` : undefined,
     averagePricePerMeter: rawProject.average_price_per_meter ? `EGP ${rawProject.average_price_per_meter.toLocaleString()}` : undefined,
     totalUnits: (rawProject.units_count || rawProject.total_units)?.toString(),
-    deliveryDateLabel: rawProject.delivery_date ? 
-      (typeof rawProject.delivery_date === 'number' ? `${rawProject.delivery_date} years` : new Date(rawProject.delivery_date).toLocaleDateString()) 
+    deliveryDateLabel: rawProject.delivery_date ?
+      (typeof rawProject.delivery_date === 'number' ? `${rawProject.delivery_date} years` : new Date(rawProject.delivery_date).toLocaleDateString())
       : undefined,
     referenceCode: rawProject.id,
     quickFacts,
@@ -257,12 +276,24 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
     phases: rawProject.phases || [],
     amenities: rawProject.amenities || [],
     paymentPlans: rawProject.payment_plans?.map(plan => plan.name) || [],
+    paymentPlanDetails: rawProject.payment_plans || [],
     buildingTypes: rawProject.properties_types || rawProject.building_types || [],
+    buildingTypeImages,
+    startPrices: rawProject.start_prices || {},
+    startAreas: rawProject.start_areas || {},
+    finishingTypes: rawProject.finishing_type || [],
     googleMapLink: rawProject.google_map_link,
     videoUrl: rawProject.video_url,
-    units: [], // Will be populated separately if needed
+    orientationUrl: rawProject.orientation_url,
+    locationLandmark: rawProject.location_landmark,
+    latitude: rawProject.latitude,
+    longitude: rawProject.longitude,
+    isActive: rawProject.is_active ?? true,
+    facilityManagement: rawProject.facility_management,
+    units: [],
     purpose: rawProject.status,
-    isPrimary: false // Projects are not primary units
+    isPrimary: false,
+    clientId: rawProject.client_id,
   };
 }
 
