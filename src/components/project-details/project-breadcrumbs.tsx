@@ -1,50 +1,48 @@
-import Link from 'next/link';
-import { ChevronRight, Home, FolderOpen } from 'lucide-react';
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Home } from 'lucide-react';
 import type { ProjectBreadcrumbsProps } from '@/lib/projects/project-types';
 
 export default function ProjectBreadcrumbs({ project }: ProjectBreadcrumbsProps) {
-  const breadcrumbs = [
-    {
-      name: 'Dashboard',
-      href: '/dashboard',
-      icon: Home
-    },
-    {
-      name: 'My Projects',
-      href: '/myProjects',
-      icon: FolderOpen
-    },
-    {
-      name: project.title,
-      href: null, // Current page, no link
-      icon: null
+  const router = useRouter();
+
+  const handleBack = () => {
+    // Smart navigation: go back to projects list or use browser history
+    if (window.history.length > 2) {
+      router.back();
+    } else {
+      router.push('/myProjects');
     }
-  ];
+  };
 
   return (
-    <nav className="flex items-center space-x-1 text-sm" aria-label="Breadcrumb">
-      {breadcrumbs.map((breadcrumb, index) => (
-        <div key={index} className="flex items-center">
-          {index > 0 && (
-            <ChevronRight className="w-4 h-4 text-gray-400 mx-2" />
-          )}
-          
-          {breadcrumb.href ? (
-            <Link
-              href={breadcrumb.href}
-              className="flex items-center gap-1 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              {breadcrumb.icon && <breadcrumb.icon className="w-4 h-4" />}
-              <span>{breadcrumb.name}</span>
-            </Link>
-          ) : (
-            <span className="flex items-center gap-1 text-gray-900 font-medium">
-              {breadcrumb.icon && <breadcrumb.icon className="w-4 h-4" />}
-              <span>{breadcrumb.name}</span>
-            </span>
-          )}
+    <div className="flex items-center justify-between h-16">
+      {/* Back Button - Takes left space */}
+      <button
+        onClick={handleBack}
+        className="group flex items-center gap-3 px-4 py-2 h-10 bg-white border border-gray-200 rounded-lg hover:border-primary/40 hover:bg-gray-50 transition-all duration-200 shadow-sm hover:shadow-md"
+      >
+        <ArrowLeft 
+          size={20} 
+          className="text-gray-600 group-hover:text-primary transition-colors duration-200 shrink-0" 
+        />
+        <span className="text-sm font-semibold text-gray-900">Back</span>
+      </button>
+
+      {/* Current Project Info - Takes center space */}
+      <div className="flex-1 mx-8 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-2 h-2 bg-primary rounded-full"></div>
+          <h1 className="text-lg font-semibold text-gray-900 truncate max-w-md">
+            {project.title}
+          </h1>
+          <div className="w-2 h-2 bg-primary rounded-full"></div>
         </div>
-      ))}
-    </nav>
+      </div>
+
+      {/* Empty space on right for balance */}
+      <div className="w-32"></div>
+    </div>
   );
 }
