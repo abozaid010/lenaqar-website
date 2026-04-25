@@ -26,7 +26,7 @@ import {
   Legend,
 } from "recharts";
 import FilterMonth from "./FilterMonth";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 // Custom tooltip for the enhanced bar chart
 const CustomTooltip = ({ active, payload, label }) => {
@@ -356,19 +356,19 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
 };
 
 const Analytics = ({ data, datamonth, appliedFilters }) => {
-  const { t } = useI18n();
+  const { translate } = useI18n();
 
   return (
     <div className="flex flex-wrap w-full">
       <div className="w-full p-2 mb-4">
-        <h2 className="text-2xl font-bold">{t('dashboardTitle')}</h2>
-        <p className="text-gray-600">{t('dashboardDescription')}</p>
+        <h2 className="text-2xl font-bold">{translate('dashboardTitle')}</h2>
+        <p className="text-gray-600">{translate('dashboardDescription')}</p>
       </div>
 
       <div className="w-full  p-2">
         <div className="border rounded p-3 h-full">
-          <h3 className="text-lg font-semibold mb-2">{t('conversationAnalysis')}</h3>
-          <EnhancedBarChart data={data} t={t} />
+          <h3 className="text-lg font-semibold mb-2">{translate('conversationAnalysis')}</h3>
+          <EnhancedBarChart data={data} t={translate} />
         </div>
       </div>
 
@@ -376,15 +376,15 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
         <div className="border rounded p-3 h-full">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-lg font-semibold">{t('monthlyActionFrequency')}</h3>
-              <p className="text-sm text-gray-500">{t('bubbleVisualization')}</p>
+              <h3 className="text-lg font-semibold">{translate('monthlyActionFrequency')}</h3>
+              <p className="text-sm text-gray-500">{translate('bubbleVisualization')}</p>
             </div>
             <div className="w-2/5">
-              <FilterMonth appliedFilters={appliedFilters} t={t} />
+              <FilterMonth appliedFilters={appliedFilters} t={translate} />
             </div>
           </div>
 
-          <EnhancedDailyActionBarChart datamonth={datamonth} t={t} />
+          <EnhancedDailyActionBarChart datamonth={datamonth} t={translate} />
         </div>
       </div>
 
