@@ -6,7 +6,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -27,7 +27,7 @@ function getFirstUnitImage(unit) {
 }
 
 export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const c = t?.campaigns || {};
   const clientId = LenaCookiesManager.getClientId() || "";
 
@@ -110,7 +110,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
     <Dialog
       isOpen={isOpen}
       onClose={onClose}
-      title={t('campaigns.unitSelectorTitle')}
+      title={translate("campaigns.unitSelectorTitle")}
     >
       <div className="space-y-4">
         {/* Filters */}
@@ -123,8 +123,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               }
               name="city"
               showAllOption={true}
-              allOptionLabel={t('unitsFilter.allCities')}
-              placeholder={t('unitsFilter.allCities')}
+              allOptionLabel={translate("unitsFilter.allCities")}
+              placeholder={translate("unitsFilter.allCities")}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
             />
 
@@ -142,8 +142,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               getLabel={(dev, loc) => (loc === "ar" ? dev.ar_name : dev.en_name)}
               searchFields={["en_name", "ar_name", "name"]}
               showAllOption={true}
-              allOptionLabel={t('unitsFilter.allDevelopers')}
-              placeholder={t('unitsFilter.allDevelopers')}
+              allOptionLabel={translate("unitsFilter.allDevelopers")}
+              placeholder={translate("unitsFilter.allDevelopers")}
               isLoading={developersLoading}
               loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
@@ -162,8 +162,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               isPublic={false}
               isLoading={projectsLoading}
               showAllOption={true}
-              allOptionLabel={t('unitsFilter.allCompounds')}
-              placeholder={t('unitsFilter.allCompounds')}
+              allOptionLabel={translate("unitsFilter.allCompounds")}
+              placeholder={translate("unitsFilter.allCompounds")}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
             />
 
@@ -178,8 +178,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               }
               name="purpose"
               showAllOption={true}
-              allOptionLabel={t('unitsFilter.allPurposes')}
-              placeholder={t('unitsFilter.allPurposes')}
+              allOptionLabel={translate("unitsFilter.allPurposes")}
+              placeholder={translate("unitsFilter.allPurposes")}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
             />
 
@@ -197,8 +197,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               getLabel={(type, loc) => (loc === "ar" ? type.ar_label : type.en_label)}
               searchFields={["en_label", "ar_label", "value"]}
               showAllOption={true}
-              allOptionLabel={t('unitsFilter.allPropertyTypes')}
-              placeholder={t('unitsFilter.allPropertyTypes')}
+              allOptionLabel={translate("unitsFilter.allPropertyTypes")}
+              placeholder={translate("unitsFilter.allPropertyTypes")}
               className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
             />
 
@@ -212,7 +212,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                     min_price: e.target.value.replace(/\D/g, ""),
                   }))
                 }
-                placeholder={t('unitsFilter.min')}
+                placeholder={translate("unitsFilter.min")}
                 className="w-full px-2 py-2 h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm"
               />
               <input
@@ -224,7 +224,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                     max_price: e.target.value.replace(/\D/g, ""),
                   }))
                 }
-                placeholder={t('unitsFilter.max')}
+                placeholder={translate("unitsFilter.max")}
                 className="w-full px-2 py-2 h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm"
               />
             </div>
@@ -246,7 +246,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               }}
               className="px-3 py-2 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 text-sm"
             >
-              {t('campaigns.clear')}
+              {translate("campaigns.clear")}
             </button>
             <button
               type="button"
@@ -256,7 +256,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
               {isFetching ? (
                 <span className="inline-flex items-center gap-2">
                   <Loader2 size={16} className="animate-spin" />
-                  {t('common.loading')}
+                  {translate("common.loading")}
                 </span>
               ) : (
                 t?.campaigns?.refresh
@@ -268,14 +268,14 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
         {/* Results */}
         <div className="bg-white border border-gray-200 rounded-lg p-4">
           {isLoading ? (
-            <LoadingSpinner message={t('campaigns.loadingUnits')} />
+            <LoadingSpinner message={translate("campaigns.loadingUnits")} />
           ) : isError ? (
             <div className="text-red-600 text-sm">
               {error?.message || t?.campaigns?.failedToLoadUnits}
             </div>
           ) : units.length === 0 ? (
             <div className="text-gray-600 text-sm">
-              {t('campaigns.noUnitsFound')}
+              {translate("campaigns.noUnitsFound")}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -346,7 +346,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                 }}
                 className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
               >
-                {t('previous')}
+                {translate("common.previous")}
               </button>
               <button
                 type="button"
@@ -357,7 +357,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                 }}
                 className="px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
               >
-                {t('next')}
+                {translate("common.next")}
               </button>
             </div>
           )}

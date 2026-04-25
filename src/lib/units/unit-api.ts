@@ -16,11 +16,36 @@ export async function getUnitById(unitId: string): Promise<UnitApiResponse> {
         }
       };
     }
-    throw new Error('No unit data found');
   } catch (error) {
-    console.error('Error fetching unit by ID:', error);
+    const statusCode = (error as any)?.response?.status;
+    // Treat "not found" as a non-exceptional result so pages can render NotFound UI
+    if (statusCode === 404) {
+      return {
+        status: false,
+        code: 404,
+        message: 'Not Found',
+        data: { units: [] },
+      };
+    }
+    // If the API returned a 2xx but missing payload, also return empty result
+    if ((error as any)?.message === 'No unit data found') {
+      return {
+        status: false,
+        code: 404,
+        message: 'Not Found',
+        data: { units: [] },
+      };
+    }
     throw error;
   }
+
+  // Fallback: response had no data payload
+  return {
+    status: false,
+    code: 404,
+    message: 'Not Found',
+    data: { units: [] },
+  };
 }
 
 export async function getPublicUnitById(unitId: string): Promise<UnitApiResponse> {
@@ -38,11 +63,33 @@ export async function getPublicUnitById(unitId: string): Promise<UnitApiResponse
         }
       };
     }
-    throw new Error('No unit data found');
   } catch (error) {
-    console.error('Error fetching public unit by ID:', error);
+    const statusCode = (error as any)?.response?.status;
+    if (statusCode === 404) {
+      return {
+        status: false,
+        code: 404,
+        message: 'Not Found',
+        data: { units: [] },
+      };
+    }
+    if ((error as any)?.message === 'No unit data found') {
+      return {
+        status: false,
+        code: 404,
+        message: 'Not Found',
+        data: { units: [] },
+      };
+    }
     throw error;
   }
+
+  return {
+    status: false,
+    code: 404,
+    message: 'Not Found',
+    data: { units: [] },
+  };
 }
 
 export async function getUnits(): Promise<UnitApiResponse> {

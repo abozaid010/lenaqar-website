@@ -11,6 +11,16 @@ const MessageBubble = ({ message }) => {
   const isAssistant = message.role === "assistant";
   const isAdmin = message.role === "admin";
 
+  const formatTime = (value) => {
+    if (!value) return "";
+    const dateObj = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateObj.getTime())) return "";
+    return dateObj.toLocaleTimeString(locale === "ar" ? "ar-EG" : "en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   const formatMessageContent = (content) => {
     if (!content) return "";
     

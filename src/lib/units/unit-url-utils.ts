@@ -76,6 +76,18 @@ export function parseUnitSlug(slug: string): UnitSlugParts {
 // Cache for slug-to-unitId mapping
 const slugToUnitIdCache = new Map<string, string>();
 
+function cleanSlugPart(input: string): string {
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+function cleanCodePart(input: string): string {
+  return input.toUpperCase().replace(/[^a-z0-9]/g, "");
+}
+
 // Build slug-to-unitId mapping from units data
 async function buildSlugMapping(): Promise<void> {
   try {
@@ -94,6 +106,17 @@ async function buildSlugMapping(): Promise<void> {
             unitId: unit.unitId
           });
           slugToUnitIdCache.set(slug, unit.unitId);
+
+          // Backwards compatibility: older links used looser slug formats.
+          // Examples seen in the wild: `-ramla-57` (missing type), or `ramla-57`.
+          const project = typeof unit.project === "string" ? unit.project : "";
+          const code = typeof unit.code === "string" ? unit.code : "";
+          const cleanProject = project ? cleanSlugPart(project) : "";
+          const cleanCode = code ? cleanCodePart(code) : "";
+          if (cleanProject && cleanCode) {
+            slugToUnitIdCache.set(`${cleanProject}-${cleanCode}`, unit.unitId);
+            slugToUnitIdCache.set(`-${cleanProject}-${cleanCode}`, unit.unitId);
+          }
         }
       });
       
@@ -107,6 +130,11 @@ async function buildSlugMapping(): Promise<void> {
 // Find unit by slug using cached mapping
 export async function findUnitBySlug(slug: string): Promise<string | null> {
   try {
+    // Support direct unitId usage (older routes sometimes used unitId instead of slug)
+    if (slug && (slug.includes("_") || slug.length >= 20)) {
+      return slug;
+    }
+
     // Check cache first
     if (slugToUnitIdCache.has(slug)) {
       return slugToUnitIdCache.get(slug) || null;
