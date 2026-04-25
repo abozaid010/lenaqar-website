@@ -8,7 +8,6 @@ import { cookies } from "next/headers";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { SELECTION_COLORS } from "@/constants/colors";
 
 export async function generateMetadata() {
   const cookieStore = await cookies();
@@ -61,15 +60,13 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className={`min-h-0 flex flex-col flex-1 ${SELECTION_COLORS.BG}`}>
-        <div className="container bg-white rounded-md shadow-sm py-2 flex flex-col min-h-[calc(100vh-5.5rem)] md:min-h-[calc(100vh-6rem)]">
-          <AverageScoreProvider>
-            <div className="relative z-20 mb-1 flex shrink-0 items-center justify-between gap-2 overflow-visible">
-              <div className="flex min-w-0 flex-1 items-center overflow-visible">
-                <DashbordFilter appliedFilters={searchParams} compact />
-              </div>
-            </div>
+      <div className="h-full flex flex-col">
+        <AverageScoreProvider>
+          <div className="relative z-20 shrink-0 p-4 bg-white rounded-lg shadow-md overflow-visible">
+            <DashbordFilter appliedFilters={searchParams} compact />
+          </div>
 
+          <div className="mt-4 flex-1 min-h-0 flex flex-col">
             <Suspense
               fallback={
                 <LoadingSpinner
@@ -80,8 +77,8 @@ export default async function DashbordPage({ searchParams: rawSearchParams }) {
             >
               <DashboardSplitView />
             </Suspense>
-          </AverageScoreProvider>
-        </div>
+          </div>
+        </AverageScoreProvider>
       </div>
     </>
   );

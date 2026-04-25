@@ -237,7 +237,7 @@ export default function DevelopersClientWrapper({ clientId }) {
   };
 
   return (
-    <>
+    <div className="h-full flex flex-col">
       {/* Header Container */}
       <div className="p-4 bg-white rounded-lg shadow-md">
         <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
@@ -299,11 +299,8 @@ export default function DevelopersClientWrapper({ clientId }) {
         </div>
       </div>
 
-      {/* Margin Separator */}
-      <div className="h-4 bg-gray-100"></div>
-
       {/* Content Container */}
-      <div className="w-full bg-gray-50 p-3">
+      <div className="mt-4">
         <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
 
           <div className="max-h-[80vh] overflow-y-auto">
@@ -519,6 +516,6 @@ export default function DevelopersClientWrapper({ clientId }) {
         onImported={handleImported}
         existingDeveloperIds={developers.map((d) => d.id)}
       />
-    </>
+    </div>
   );
 }

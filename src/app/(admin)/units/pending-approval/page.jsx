@@ -36,7 +36,7 @@ export default async function PendingApprovalUnitsPage({
           },
         ]}
       />
-      <div className="container relative">
+      <div className="h-full flex flex-col">
         <Suspense fallback={<LoadingSpinner />}>
           <ResalePageQuery searchParams={searchParams} />
         </Suspense>

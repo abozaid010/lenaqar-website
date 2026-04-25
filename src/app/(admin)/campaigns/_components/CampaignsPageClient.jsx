@@ -3,7 +3,6 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
-import UnifiedHeader from "@/components/ui/UnifiedHeader";
 import { useI18n } from "@/context/translate-api";
 import { fetchCampaigns } from "@/utils/api";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
@@ -280,7 +279,7 @@ export default function CampaignsPageClient() {
 
   if (isError) {
     return (
-      <div className="container">
+      <div className="h-full flex flex-col">
         <QueryErrorState
           error={error}
           refetch={refetch}
@@ -299,28 +298,28 @@ export default function CampaignsPageClient() {
   const ofLabel = t?.campaigns?.of ?? "of";
 
   return (
-    <div className="container">
-      <UnifiedHeader
-        title={campaignsTitle}
-        leadingSlot={
-          <span className="text-sm text-primary">
-            {t?.campaigns?.total ?? "Total"}: <span className="font-medium">{totalCount}</span>
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          <span className="text-sm text-gray-600">
+            {t?.campaigns?.total ?? "Total"}: <span className="font-medium text-gray-900">{totalCount}</span>
           </span>
-        }
-        trailingSlot={
-          <button
-            type="button"
-            onClick={() => {
-              setEditingCampaign(null);
-              setIsCampaignDialogOpen(true);
-            }}
-            className="inline-flex items-center gap-2 h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
-          >
-            <Plus size={16} />
-            {newCampaignLabel}
-          </button>
-        }
-      />
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCampaign(null);
+                setIsCampaignDialogOpen(true);
+              }}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+            >
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">{newCampaignLabel}</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">

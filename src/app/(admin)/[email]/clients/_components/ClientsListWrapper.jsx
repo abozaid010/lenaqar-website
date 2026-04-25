@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useClients } from "@/hooks/use-clients-data";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -48,21 +49,26 @@ export default function ClientsListWrapper() {
   }
 
   return (
-    <div className="p-6">
+    <div className="h-full flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Clients</h1>
-        <button
-          type="button"
-          onClick={() => router.push(`${prefix}/clients/new`)}
-          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-        >
-          + Create New Client
-        </button>
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          <div className="flex-1" />
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            <button
+              type="button"
+              onClick={() => router.push(`${prefix}/clients/new`)}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+            >
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Create New Client</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="mt-4 bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

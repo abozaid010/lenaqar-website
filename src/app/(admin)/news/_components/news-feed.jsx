@@ -290,29 +290,25 @@ const NewsFeed = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {t.sidebar?.news || "News"}
-          </h1>
-          <p className="text-gray-600">
-            {t.newsSubtitle || "Latest real estate news and updates"}
-          </p>
+    <div className="h-full flex flex-col">
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          <div className="flex-1" />
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            <button
+              type="button"
+              onClick={openAddDialog}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+            >
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">{t.addNews || "Add News"}</span>
+            </button>
+          </div>
         </div>
-
-        <button
-          type="button"
-          onClick={openAddDialog}
-          className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-primary-dark"
-        >
-          <Plus size={18} />
-          <span>{t.addNews || "Add News"}</span>
-        </button>
       </div>
 
       {!sortedNews || sortedNews.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-[calc(100vh-260px)] p-4">
+        <div className="mt-4 flex flex-col items-center justify-center h-[calc(100vh-260px)] p-4">
           <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 max-w-md text-center w-full">
             <p className="text-gray-600 text-lg mb-4">
               {t.noNews || "No news available at the moment"}
@@ -328,7 +324,7 @@ const NewsFeed = () => {
           </div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="mt-4 space-y-4">
           {sortedNews.map((item, index) => {
             const imageUrl = getDisplayImageUrl(resolveImageUrl(getNewsImageUrl(item)));
             const id = getNewsId(item) ?? index;

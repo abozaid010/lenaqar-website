@@ -63,19 +63,21 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className="container relative">
+      <div className="h-full flex flex-col">
         <UnitsFilter
           appliedFilters={searchParams}
           clientId={clientId}
           isPublic={false}
         />
 
-        <Suspense fallback={<LoadingSpinner />}>
-          <UnitsPageQueryOptimized
-            searchParams={searchParams}
-            clientId={clientId}
-          />
-        </Suspense>
+        <div className="mt-4">
+          <Suspense fallback={<LoadingSpinner />}>
+            <UnitsPageQueryOptimized
+              searchParams={searchParams}
+              clientId={clientId}
+            />
+          </Suspense>
+        </div>
       </div>
     </>
   );

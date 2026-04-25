@@ -435,18 +435,18 @@ const CampaignChat = () => {
       {/* Left Panel - Contact List */}
       <div className="w-80 border-r border-gray-200 flex flex-col bg-white">
         {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-lg font-semibold text-gray-800">Campaign Chat</h1>
+        <div className="p-4 border-b border-gray-200 bg-white">
+          <div className="flex justify-between items-center mb-4 gap-2">
+            <h1 className="text-sm font-semibold text-gray-800">Campaign Chat</h1>
             <button
               onClick={() => setIsCreateDialogOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
+              className="flex-shrink-0 px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
-              <Plus size={16} />
-              Create
+              <Plus size={18} className="shrink-0" />
+              <span className="whitespace-nowrap">Create</span>
             </button>
           </div>
-          
+
           {/* Search */}
           <div className="relative mb-3">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -455,7 +455,7 @@ const CampaignChat = () => {
               placeholder="Search by name or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full pl-10 pr-4 h-10 border border-[#E6E6E6] bg-[#F6F7FB] text-[#494A4B] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             />
           </div>
 

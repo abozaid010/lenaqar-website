@@ -386,7 +386,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCities || "All Cities"}
             placeholder={t.unitsFilter.allCities || "All Cities"}
-            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
 
@@ -419,7 +419,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
             noResultsText={locale === "ar" ? "لا توجد نتائج" : "No developers found"}
             searchPlaceholder={locale === "ar" ? "ابحث عن المطور..." : "Search developers..."}
-            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
 
@@ -438,7 +438,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCompounds || "All Projects"}
             placeholder={t.unitsFilter.allCompounds || "All Projects"}
-            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
 
@@ -459,7 +459,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             allOptionLabel={t.unitsFilter.allPurposes || "All Purposes"}
             placeholder={t.unitsFilter.allPurposes || "All Purposes"}
             searchPlaceholder={locale === "ar" ? "ابحث عن الغرض..." : "Search purposes..."}
-            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
 
@@ -480,7 +480,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             allOptionLabel={t.unitsFilter.allPropertyTypes || "All Property Types"}
             placeholder={t.unitsFilter.allPropertyTypes || "All Property Types"}
             searchPlaceholder={locale === "ar" ? "ابحث عن نوع العقار..." : "Search property types..."}
-            className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
           />
         </div>
 
@@ -491,7 +491,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         >
           <button
             type="button"
-            className="w-full px-2 py-[10px] h-[40px] bg-[#F6F7FB] rounded-[5px] border-[1px] border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-primary flex justify-between items-center"
+            className="w-full px-3 h-10 bg-[#F6F7FB] rounded-md border border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/40 transition-colors flex justify-between items-center"
             onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
           >
             <span className="truncate">{getPriceDisplayText()}</span>
@@ -556,19 +556,21 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
               onClick={() => setIsUploadDialogOpen(true)}
-              className="flex-1 md:flex-initial px-[16px] py-[10px] h-[40px] bg-green-600 hover:bg-green-700 text-white rounded-[5px] flex items-center justify-center gap-2 transition-colors text-sm"
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
-              <FileSpreadsheet size={18} />
-              <span className="hidden sm:inline">
+              <FileSpreadsheet size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">
                 {t.uploadExcel?.button || "Upload Excel"}
               </span>
             </button>
-            <AddUnitButton className="flex-1 md:flex-initial text-sm bg-primary text-white rounded-[5px] hover:bg-primary-dark transition-colors" />
-            <VideoInstructionsDialog
-              variant="units"
-              iconSize="lg"
-              tooltipText={t.unitsFilter?.instructions || "How to manage units"}
-            />
+            <AddUnitButton className="flex-1 md:flex-initial px-4 py-2 h-10 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors shadow-sm hover:shadow-md" />
+            <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
+              <VideoInstructionsDialog
+                variant="units"
+                iconSize="sm"
+                tooltipText={t.unitsFilter?.instructions || "How to manage units"}
+              />
+            </div>
           </div>
         )}
       </div>
