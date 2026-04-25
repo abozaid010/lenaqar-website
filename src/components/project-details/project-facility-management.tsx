@@ -1,11 +1,13 @@
 import { Star } from 'lucide-react';
 import type { ProjectViewModel } from '@/lib/projects/project-types';
+import { useI18n } from '@/hooks/useI18n';
 
 interface Props {
   project: ProjectViewModel;
 }
 
 export default function ProjectFacilityManagement({ project }: Props) {
+  const { translate } = useI18n();
   const fm = project.facilityManagement;
   if (!fm?.name?.trim()) return null;
 
@@ -20,7 +22,7 @@ export default function ProjectFacilityManagement({ project }: Props) {
 
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Facility Management</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">{translate('projectDetails.facilityManagement')}</h2>
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="font-semibold text-gray-900">{fm.name}</h3>

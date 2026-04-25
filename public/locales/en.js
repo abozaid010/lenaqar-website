@@ -1839,6 +1839,7 @@ export default {
     browseAllProjects: "Browse all available projects",
     projectPhases: "Project Phases",
     phasesPlanned: "{count} phases planned",
+    facilityManagement: "Facility Management",
   },
 
   unitLocation: {

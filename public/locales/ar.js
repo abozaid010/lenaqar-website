@@ -1901,7 +1901,7 @@ export default {
   projectDetails: {
     relatedInformation: "معلومات ذات صلة",
     unitsInProject: "الوحدات في المشروع",
-    unitsAvailable: "{count} وحدات متاحة",
+    unitsAvailable: "وحدة {count} متاحة",
     viewAllUnits: "عرض جميع الوحدات",
     viewUnits: "عرض الوحدات",
     developer: "المطور",
@@ -1910,6 +1910,7 @@ export default {
     browseAllProjects: "تصفح جميع المشاريع المتاحة",
     projectPhases: "مراحل المشروع",
     phasesPlanned: "{count} مراحل مخطط لها",
+    facilityManagement: "إدارة المرافق",
   },
 
   unitLocation: {
