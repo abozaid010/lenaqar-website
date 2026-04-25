@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { useUpdateClient } from "@/hooks/use-clients-data";
 import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleActionsSelector";
+import { useI18n } from "@/hooks/useI18n";
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
@@ -59,6 +60,7 @@ function buildInitialState(client) {
 }
 
 export default function EditClientDialog({ client, isOpen, onClose }) {
+  const { t } = useI18n();
   const [form, setForm] = useState(() => buildInitialState(client));
   const updateClient = useUpdateClient();
 

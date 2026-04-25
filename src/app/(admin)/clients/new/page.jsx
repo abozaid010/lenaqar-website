@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin";
 import ClientSignupForm from "./_components/ClientSignupForm";
 
-export default function ClientSignupPage() {
+export default async function ClientSignupPage() {
   // Check if current user is king admin
-  if (!isCurrentUserKingAdmin()) {
+  if (!(await isCurrentUserKingAdmin())) {
     redirect("/dashboard");
   }
 

@@ -91,12 +91,13 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
           >
             {t?.buttons?.edit}
           </button>
-          <a
-            href="tel:"
-            className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
+          <button
+            disabled
+            className="flex-1 flex items-center justify-center gap-2 py-2 bg-gray-300 text-gray-500 rounded-lg text-sm font-medium cursor-not-allowed"
+            title="Phone number not available"
           >
             {t?.buttons?.call}
-          </a>
+          </button>
         </div>
       </div>
 

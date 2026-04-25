@@ -8,6 +8,7 @@ import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
 import ModuleActionsSelector from "./ModuleActionsSelector";
 import DynamicSuggestionsList from "./DynamicSuggestionsList";
+import { useI18n } from "@/hooks/useI18n";
 
 const CLIENT_TYPES = [
   { value: "premium", label: "Premium" },
@@ -41,6 +42,7 @@ const ACCURATE_QUERIES_LEVELS = [
 ];
 
 const ClientSignupForm = () => {
+  const { t } = useI18n();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({

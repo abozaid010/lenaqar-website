@@ -24,7 +24,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
-import { isCurrentUserKingAdmin } from "@/lib/kingAdmin";
+import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 
 const Sidebar = ({
   canAccessMap = false,

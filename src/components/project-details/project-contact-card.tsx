@@ -55,22 +55,22 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
 
       {/* Contact CTAs */}
       <div className="grid grid-cols-2 gap-3">
-        <a
-          href={`tel:`}
-          className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+        <button
+          disabled
+          className="bg-gray-300 text-gray-500 rounded-lg py-2 px-3 font-medium cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+          title="Phone number not available"
         >
           <PhoneCall className="w-4 h-4" />
           {t?.buttons?.call}
-        </a>
-        <a
-          href={`https://wa.me/`}
-          target="_blank"
-          rel="noreferrer"
-          className="bg-green-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
+        </button>
+        <button
+          disabled
+          className="bg-gray-300 text-gray-500 rounded-lg py-2 px-3 font-medium cursor-not-allowed flex items-center justify-center gap-2 text-sm"
+          title="WhatsApp not available"
         >
           <MessageCircle className="w-4 h-4" />
           {t?.buttons?.whatsapp}
-        </a>
+        </button>
       </div>
 
       {/* Admin Actions */}

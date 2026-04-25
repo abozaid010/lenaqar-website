@@ -9,8 +9,8 @@ import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
  */
 export async function POST(request) {
   try {
-    // Check if the request is from a king admin
-    if (!isRequestFromKingAdmin(request)) {
+    // Check if the request is from a king admin with proper JWT validation
+    if (!(await isRequestFromKingAdmin(request))) {
       return NextResponse.json(
         { error: "Unauthorized. King admin access required." },
         { status: 403 }

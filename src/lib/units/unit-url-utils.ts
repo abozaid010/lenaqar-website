@@ -113,74 +113,77 @@ export function parseUnitSlug(slug: string): UnitSlugParts {
 
 const slugToUnitIdCache = new Map<string, string>();
 let cacheTimestamp = 0;
-let isBuildingCache = false;
+let cachePromise: Promise<void> | null = null;
 
 function isCacheExpired(): boolean {
   return Date.now() - cacheTimestamp > CACHE_TTL_MS;
 }
 
 async function buildSlugMapping(): Promise<void> {
-  if (isBuildingCache) {
-    while (isBuildingCache) {
-      await new Promise((resolve) => setTimeout(resolve, 75));
-    }
-    return;
+  // If cache is already being built, return the existing promise
+  if (cachePromise) {
+    return cachePromise;
   }
 
-  try {
-    isBuildingCache = true;
-    const { getUnits } = await import("@/lib/units/unit-api");
-    const response = await getUnits();
-    const units = response?.data?.units;
+  // Create and store the cache building promise
+  cachePromise = (async () => {
+    try {
+      const { getUnits } = await import("@/lib/units/unit-api");
+      const response = await getUnits();
+      const units = response?.data?.units;
 
-    if (response?.status && Array.isArray(units) && units.length > 0) {
-      slugToUnitIdCache.clear();
+      if (response?.status && Array.isArray(units) && units.length > 0) {
+        slugToUnitIdCache.clear();
 
-      units.forEach((unit: any) => {
-        const resolvedUnitId = getUnitId(unit);
-        if (!resolvedUnitId) return;
+        units.forEach((unit: any) => {
+          const resolvedUnitId = getUnitId(unit);
+          if (!resolvedUnitId) return;
 
-        const buildingType = unit?.buildingType ?? unit?.building_type ?? null;
-        const project =
-          unit?.project ??
-          unit?.projectName ??
-          unit?.project_name ??
-          unit?.project_en_name ??
-          null;
-        const code = unit?.code ?? unit?.referenceCode ?? unit?.reference_code ?? null;
+          const buildingType = unit?.buildingType ?? unit?.building_type ?? null;
+          const project =
+            unit?.project ??
+            unit?.projectName ??
+            unit?.project_name ??
+            unit?.project_en_name ??
+            null;
+          const code = unit?.code ?? unit?.referenceCode ?? unit?.reference_code ?? null;
 
-        const canonical = generateUnitSlug({
-          buildingType,
-          project,
-          code,
-          unitId: resolvedUnitId,
+          const canonical = generateUnitSlug({
+            buildingType,
+            project,
+            code,
+            unitId: resolvedUnitId,
+          });
+          slugToUnitIdCache.set(canonical, resolvedUnitId);
+
+          // Backward compatibility for legacy slugs:
+          // 1) old "type-project-code" format
+          const oldStyle = `${cleanSlugPart(buildingType || "property")}-${
+            cleanSlugPart(project || "unknown")
+          }-${cleanCodePart(code || unitIdPrefix(resolvedUnitId) || "unknown")}`;
+          slugToUnitIdCache.set(oldStyle, resolvedUnitId);
+
+          // 2) project-code and -project-code aliases used in older URLs
+          const cleanProject = cleanSlugPart(project || "");
+          const cleanCode = cleanCodePart(code || "");
+          if (cleanProject && cleanCode) {
+            slugToUnitIdCache.set(`${cleanProject}-${cleanCode}`, resolvedUnitId);
+            slugToUnitIdCache.set(`-${cleanProject}-${cleanCode}`, resolvedUnitId);
+          }
         });
-        slugToUnitIdCache.set(canonical, resolvedUnitId);
 
-        // Backward compatibility for legacy slugs:
-        // 1) old "type-project-code" format
-        const oldStyle = `${cleanSlugPart(buildingType || "property")}-${
-          cleanSlugPart(project || "unknown")
-        }-${cleanCodePart(code || unitIdPrefix(resolvedUnitId) || "unknown")}`;
-        slugToUnitIdCache.set(oldStyle, resolvedUnitId);
-
-        // 2) project-code and -project-code aliases used in older URLs
-        const cleanProject = cleanSlugPart(project || "");
-        const cleanCode = cleanCodePart(code || "");
-        if (cleanProject && cleanCode) {
-          slugToUnitIdCache.set(`${cleanProject}-${cleanCode}`, resolvedUnitId);
-          slugToUnitIdCache.set(`-${cleanProject}-${cleanCode}`, resolvedUnitId);
-        }
-      });
-
-      cacheTimestamp = Date.now();
+        cacheTimestamp = Date.now();
+      }
+    } catch (error) {
+      // Keep prior cache when refresh fails.
+      console.error("Error building slug mapping:", error);
+    } finally {
+      // Clear the promise when done (whether success or failure)
+      cachePromise = null;
     }
-  } catch (error) {
-    // Keep prior cache when refresh fails.
-    console.error("Error building slug mapping:", error);
-  } finally {
-    isBuildingCache = false;
-  }
+  })();
+
+  return cachePromise;
 }
 
 export async function refreshSlugCache(): Promise<void> {

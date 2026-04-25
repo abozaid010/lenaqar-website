@@ -5,7 +5,7 @@ import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
 
 export async function PATCH(request, { params }) {
   try {
-    if (!isRequestFromKingAdmin(request)) {
+    if (!(await isRequestFromKingAdmin(request))) {
       return NextResponse.json(
         { error: "Unauthorized. King admin access required." },
         { status: 403 }
