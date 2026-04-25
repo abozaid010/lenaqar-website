@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function BackButton({ 
   className = "", 
@@ -9,6 +10,7 @@ export default function BackButton({
   onClick 
 } = {}) {
   const router = useRouter();
+  const { translate } = useI18n();
 
   const handleBack = () => {
     if (onClick) {
@@ -33,7 +35,7 @@ export default function BackButton({
         size={18} 
         className="text-gray-600 group-hover:text-primary transition-colors duration-200 shrink-0" 
       />
-      <span className="text-sm font-semibold text-gray-900">Back</span>
+      <span className="text-sm font-semibold text-gray-900">{translate('common.back')}</span>
     </button>
   );
 }

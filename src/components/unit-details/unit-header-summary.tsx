@@ -4,13 +4,16 @@ import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
+  const buildingTypeLabel = unit.buildingType
+    ? translate(`buildingTypes.${String(unit.buildingType).toLowerCase()}`, unit.buildingType)
+    : null;
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
       {/* Title */}
       <div className="space-y-2">
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
-          {unit.title || `${unit.buildingType || 'Property'} Details`}
+          {unit.title || `${buildingTypeLabel || 'Property'} Details`}
         </h1>
         
         {/* Project and Developer Links */}
@@ -63,7 +66,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
         {unit.buildingType && (
           <div className="space-y-1">
             <div className="text-sm text-gray-600">{t?.unitHeader?.propertyType || "Property Type"}</div>
-            <div className="text-lg font-semibold text-gray-900">{unit.buildingType}</div>
+            <div className="text-lg font-semibold text-gray-900">{buildingTypeLabel}</div>
           </div>
         )}
 

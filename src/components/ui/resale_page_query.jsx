@@ -15,15 +15,22 @@ import { ChevronDown } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 
 const VISIBILITY_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "pending_approval", label: "Pending Approval" },
-  { value: "visible", label: "Visible" },
-  { value: "hidden", label: "Hidden" },
-  { value: "ai_generated", label: "AI Generated" },
+  { value: "all", label: null },
+  { value: "pending_approval", label: null },
+  { value: "visible", label: null },
+  { value: "hidden", label: null },
+  { value: "ai_generated", label: null },
 ];
 
 export default function ResalePageQuery({ searchParams }) {
   const { t, locale } = useI18n();
+  const visibilityOptions = useMemo(() => ([
+    { value: "all", label: t?.common?.all ?? "All" },
+    { value: "pending_approval", label: t?.unitsFilter?.pendingApproval ?? "Pending Approval" },
+    { value: "visible", label: t?.common?.show ?? "Visible" },
+    { value: "hidden", label: t?.common?.hide ?? "Hidden" },
+    { value: "ai_generated", label: t?.common?.aiGenerated ?? "AI Generated" },
+  ]), [t]);
   const [filter, setFilter] = useState("all");
   const [updatedAtDate, setUpdatedAtDate] = useState("");
   const [propertyType, setPropertyType] = useState("");
@@ -135,7 +142,7 @@ export default function ResalePageQuery({ searchParams }) {
             <SearchableDropdownSelect
               name="filter"
               label="Filter"
-              options={VISIBILITY_OPTIONS}
+              options={visibilityOptions}
               value={filter}
               onChange={handleFilterChange}
               showAllOption={false}

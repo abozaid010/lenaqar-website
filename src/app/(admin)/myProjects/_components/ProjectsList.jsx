@@ -43,9 +43,10 @@ import { useModuleActions } from "@/hooks/useModuleActions";
 
 const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
 
-const getPropertyTypeLabel = (value, locale, buildingTypes) => {
-  const type = buildingTypes.find((t) => t.value === value);
-  return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
+const getPropertyTypeLabel = (value, translate) => {
+  const raw = (value ?? "").toString();
+  const key = raw.toLowerCase();
+  return translate ? translate(`buildingTypes.${key}`, raw) : raw;
 };
 
 const formatPaymentPlan = (plan) => {
@@ -185,7 +186,7 @@ function ProjectCard({
             <Home size={14} className="text-blue-600 shrink-0" />
             {types.slice(0, 3).map((type, i) => (
               <Chip key={i} variant="blue">
-                {getPropertyTypeLabel(type, locale, buildingTypes)}
+                {getPropertyTypeLabel(type, translate)}
               </Chip>
             ))}
             {types.length > 3 && (
@@ -269,7 +270,7 @@ function ProjectCard({
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
     useModuleActions("projects");
@@ -425,6 +426,7 @@ export default function ProjectsList({ clientId }) {
   const getCityDisplayName = useMemo(() => {
     return (city) => {
       if (!city) return "";
+      if (city === "all") return t?.common?.all || "All";
       if (translations.cityLabels[city]) {
         return translations.cityLabels[city];
       }
@@ -437,7 +439,7 @@ export default function ProjectsList({ clientId }) {
       }
       return capitalize(city);
     };
-  }, [translations.cityLabels, locale]);
+  }, [translations.cityLabels, locale, t?.common?.all]);
 
   const getDistrictDisplayName = useCallback(
     (district, city) => {
@@ -660,7 +662,7 @@ export default function ProjectsList({ clientId }) {
 
   const getCityFilterDisplayText = () => {
     if (!selectedCity || selectedCity === "all") {
-      return locale === "ar" ? "جميع المدن" : "All Cities";
+      return t?.unitsFilter?.allCities || (locale === "ar" ? "جميع المدن" : "All Cities");
     }
     return getCityDisplayName(selectedCity);
   };

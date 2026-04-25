@@ -30,7 +30,7 @@ export default function UnitsGrid({
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
 
   // Add a formattcer function for prices
   const formatPrice = (price) => {
@@ -178,11 +178,12 @@ export default function UnitsGrid({
                 <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
                   <div className="flex items-center gap-2 line-clamp-1">
                     <span className="text-[14px] font-bold">
-                      {u.buildingType ? 
-                        (locale === "ar" && t.unitTypes?.[u.buildingType] 
-                          ? t.unitTypes[u.buildingType] 
-                          : u.buildingType.charAt(0).toUpperCase() + u.buildingType.slice(1).toLowerCase())
-                        : (allowMissingFields ? "—" : "Unit Type")
+                      {u.buildingType ? (
+                        translate(
+                          `buildingTypes.${String(u.buildingType).toLowerCase()}`,
+                          String(u.buildingType)
+                        )
+                      ) : (allowMissingFields ? "—" : "Unit Type")
                       }
                     </span>
                     <span className="text-[14px]">

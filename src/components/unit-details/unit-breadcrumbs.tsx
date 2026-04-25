@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { ChevronRight, Home, Building } from 'lucide-react';
 import type { UnitBreadcrumbsProps } from '@/lib/units/unit-types';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitBreadcrumbs({ unit }: UnitBreadcrumbsProps) {
+  const { translate } = useI18n();
   const breadcrumbs = [];
 
   // Home
@@ -35,7 +37,10 @@ export default function UnitBreadcrumbs({ unit }: UnitBreadcrumbsProps) {
   }
 
   // Current unit (non-clickable)
-  const currentTitle = unit.title || `${unit.buildingType || 'Property'} Details`;
+  const buildingTypeLabel = unit.buildingType
+    ? translate(`buildingTypes.${String(unit.buildingType).toLowerCase()}`, unit.buildingType)
+    : null;
+  const currentTitle = unit.title || `${buildingTypeLabel || 'Property'} Details`;
   breadcrumbs.push({
     label: currentTitle.length > 30 ? currentTitle.substring(0, 30) + '...' : currentTitle,
     href: null,

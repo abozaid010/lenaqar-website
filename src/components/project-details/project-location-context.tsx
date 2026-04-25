@@ -3,7 +3,7 @@ import type { ProjectLocationContextProps } from '@/lib/projects/project-types';
 import { useI18n } from '@/hooks/useI18n';
 
 export default function ProjectLocationContext({ project }: ProjectLocationContextProps) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   
   return (
     <div className="bg-white rounded-lg border p-6">
@@ -162,7 +162,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
                   key={index}
                   className="px-3 py-1 bg-gray-100 text-gray-800 text-sm font-medium rounded-lg"
                 >
-                  {type}
+                  {translate(`buildingTypes.${String(type).toLowerCase()}`, type)}
                 </span>
               ))}
             </div>

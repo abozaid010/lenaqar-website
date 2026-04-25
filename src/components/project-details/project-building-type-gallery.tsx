@@ -15,10 +15,15 @@ function TypeGallery({ label, urls }: { label: string; urls: string[] }) {
   const [idx, setIdx] = useState(0);
   if (urls.length === 0) return null;
 
+  const buildingTypeLabel = translate(
+    `buildingTypes.${String(label).toLowerCase()}`,
+    label.replace(/_/g, " ")
+  );
+
   return (
     <div>
       <p className="text-sm font-medium text-gray-700 mb-2 capitalize">
-        {translate('projectBuildingTypeGallery.buildingType')?.replace('{type}', label.replace(/_/g, ' ')) || label.replace(/_/g, ' ')}
+        {translate('projectBuildingTypeGallery.buildingType')?.replace('{type}', buildingTypeLabel) || buildingTypeLabel}
       </p>
       <div className="relative w-full h-48 rounded-lg overflow-hidden bg-gray-100 group">
         <Image src={urls[idx]} alt={label} fill className="object-cover" />
