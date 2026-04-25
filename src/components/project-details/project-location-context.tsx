@@ -1,10 +1,13 @@
 import { MapPin, Navigation, ExternalLink, Video, Car, Crosshair, FileVideo } from 'lucide-react';
 import type { ProjectLocationContextProps } from '@/lib/projects/project-types';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function ProjectLocationContext({ project }: ProjectLocationContextProps) {
+  const { t } = useI18n();
+  
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Location & Context</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">{t('projectLocation.locationAndContext')}</h2>
       
       {/* Location Information */}
       <div className="space-y-6">
@@ -16,7 +19,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
             </div>
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Project Location</h3>
+            <h3 className="font-semibold text-gray-900 mb-2">{t('projectLocation.projectLocation')}</h3>
             <p className="text-gray-700">{project.locationLabel}</p>
           </div>
         </div>
@@ -30,14 +33,14 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 mb-2">View on Map</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('projectLocation.viewOnMap')}</h3>
               <a 
                 href={project.googleMapLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
-                <span>Open in Google Maps</span>
+                <span>{t('projectLocation.openInGoogleMaps')}</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
@@ -53,7 +56,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Location Landmark</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('projectLocation.locationLandmark')}</h3>
               <p className="text-gray-700 text-sm">{project.locationLandmark}</p>
             </div>
           </div>
@@ -68,7 +71,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
               </div>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Coordinates</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('projectLocation.coordinates')}</h3>
               <a
                 href={`https://maps.google.com/?q=${project.latitude},${project.longitude}`}
                 target="_blank"
@@ -91,14 +94,14 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 mb-2">Video Tour</h3>
+              <h3 className="font-semibold text-gray-900 mb-2">{t('projectLocation.videoTour')}</h3>
               <a 
                 href={project.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
-                <span>Watch Project Video</span>
+                <span>{t('projectLocation.watchProjectVideo')}</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
@@ -114,14 +117,14 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
               </div>
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-gray-900 mb-1">Orientation Video</h3>
+              <h3 className="font-semibold text-gray-900 mb-1">{t('projectLocation.orientationVideo')}</h3>
               <a
                 href={project.orientationUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors"
               >
-                <span>Watch Orientation</span>
+                <span>{t('projectLocation.watchOrientation')}</span>
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
@@ -133,7 +136,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
           <div>
             <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
               <Car className="w-5 h-5 text-gray-600" />
-              Nearby Amenities
+              {t('projectLocation.nearbyAmenities')}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {project.amenities.map((amenity, index) => (
@@ -152,7 +155,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
         {/* Building Types */}
         {project.buildingTypes && project.buildingTypes.length > 0 && (
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Available Building Types</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t('projectLocation.availableBuildingTypes')}</h3>
             <div className="flex flex-wrap gap-2">
               {project.buildingTypes.map((type, index) => (
                 <span 
@@ -169,7 +172,7 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
         {/* Payment Plans */}
         {project.paymentPlans && project.paymentPlans.length > 0 && (
           <div>
-            <h3 className="font-semibold text-gray-900 mb-4">Available Payment Plans</h3>
+            <h3 className="font-semibold text-gray-900 mb-4">{t('projectLocation.availablePaymentPlans')}</h3>
             <div className="space-y-2">
               {project.paymentPlans.map((plan, index) => (
                 <div 

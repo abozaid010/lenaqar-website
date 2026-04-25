@@ -1816,6 +1816,7 @@ export default {
     noImagesDescription: "لا توجد صور لهذا العقار",
   },
   buttons: {
+    cancel: "إلغاء",
     call: "اتصال",
     whatsapp: "واتساب",
     delete: "حذف",
@@ -1882,5 +1883,52 @@ export default {
       smokingAllowed: "التدخين مسموح", beachfront: "على الشاطئ", smokeAlarm: "إنذار دخان",
       coAlarm: "إنذار أول أكسيد الكربون",
     },
+  },
+
+  projectDetails: {
+    relatedInformation: "معلومات ذات صلة",
+    unitsInProject: "الوحدات في المشروع",
+    unitsAvailable: "{count} وحدات متاحة",
+    viewAllUnits: "عرض جميع الوحدات",
+    viewUnits: "عرض الوحدات",
+    developer: "المطور",
+    allDevelopers: "جميع المطورين",
+    allProjects: "جميع المشاريع",
+    browseAllProjects: "تصفح جميع المشاريع المتاحة",
+    projectPhases: "مراحل المشروع",
+    phasesPlanned: "{count} مراحل مخطط لها",
+  },
+
+  unitLocation: {
+    locationAndContext: "الموقع والسياق",
+    location: "الموقع",
+    project: "المشروع",
+    developer: "المطور",
+    propertyOverview: "نظرة عامة على العقار",
+    locatedIn: "يقع في {location}",
+    partOfProject: "جزء من {projectName}{developerName ? ` بواسطة ${developerName}` : ''}",
+    by: "بواسطة",
+  },
+
+  projectLocation: {
+    locationAndContext: "الموقع والسياق",
+    projectLocation: "موقع المشروع",
+    viewOnMap: "عرض على الخريطة",
+    openInGoogleMaps: "فتح في خرائط جوجل",
+    locationLandmark: "معلم الموقع",
+    coordinates: "الإحداثيات",
+    videoTour: "جولة فيديو",
+    watchProjectVideo: "مشاهدة فيديو المشروع",
+    orientationVideo: "فيديو التعريف",
+    watchOrientation: "مشاهدة التعريف",
+    nearbyAmenities: "المرافق القريبة",
+    availableBuildingTypes: "أنواع المباني المتاحة",
+    availablePaymentPlans: "خطط الدفع المتاحة",
+  },
+
+  projectBuildingTypeGallery: {
+    unitTypeGalleries: "معارض أنواع الوحدات",
+    buildingType: "{type}",
+    imageCounter: "{current}/{total}",
   },
 };

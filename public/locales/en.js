@@ -1752,6 +1752,7 @@ export default {
     noImagesDescription: "This property has no photos yet",
   },
   buttons: {
+    cancel: "Cancel",
     call: "Call",
     whatsapp: "WhatsApp",
     delete: "Delete",
@@ -1818,5 +1819,52 @@ export default {
       smokingAllowed: "Smoking Allowed", beachfront: "Beachfront", smokeAlarm: "Smoke Alarm",
       coAlarm: "CO Alarm",
     },
+  },
+
+  projectDetails: {
+    relatedInformation: "Related Information",
+    unitsInProject: "Units in Project",
+    unitsAvailable: "{count} units available",
+    viewAllUnits: "View all units",
+    viewUnits: "View Units",
+    developer: "Developer",
+    allDevelopers: "All Developers",
+    allProjects: "All Projects",
+    browseAllProjects: "Browse all available projects",
+    projectPhases: "Project Phases",
+    phasesPlanned: "{count} phases planned",
+  },
+
+  unitLocation: {
+    locationAndContext: "Location & Context",
+    location: "Location",
+    project: "Project",
+    developer: "Developer",
+    propertyOverview: "Property Overview",
+    locatedIn: "Located in {location}",
+    partOfProject: "Part of {projectName}{developerName ? ` by ${developerName}` : ''}",
+    by: "by",
+  },
+
+  projectLocation: {
+    locationAndContext: "Location & Context",
+    projectLocation: "Project Location",
+    viewOnMap: "View on Map",
+    openInGoogleMaps: "Open in Google Maps",
+    locationLandmark: "Location Landmark",
+    coordinates: "Coordinates",
+    videoTour: "Video Tour",
+    watchProjectVideo: "Watch Project Video",
+    orientationVideo: "Orientation Video",
+    watchOrientation: "Watch Orientation",
+    nearbyAmenities: "Nearby Amenities",
+    availableBuildingTypes: "Available Building Types",
+    availablePaymentPlans: "Available Payment Plans",
+  },
+
+  projectBuildingTypeGallery: {
+    unitTypeGalleries: "Unit Type Galleries",
+    buildingType: "{type}",
+    imageCounter: "{current}/{total}",
   },
 };

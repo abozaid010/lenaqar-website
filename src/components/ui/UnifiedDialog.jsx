@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import UnifiedHeader from "@/components/ui/UnifiedHeader";
+import { useI18n } from "@/hooks/useI18n";
 
 /**
  * Unified dialog with consistent header layout:
@@ -16,7 +17,7 @@ export default function UnifiedDialog({
   isOpen,
   onClose,
   title,
-  cancelLabel = "Cancel",
+  cancelLabel,
   onCancel,
   submitLabel,
   onSubmit,
@@ -35,8 +36,12 @@ export default function UnifiedDialog({
   /** Optional class for the content body */
   bodyClassName = "",
 }) {
+  const { t } = useI18n();
   const dialogRef = useRef(null);
   const handleCancel = onCancel ?? onClose;
+  
+  // Use translated cancel label if none provided
+  const finalCancelLabel = cancelLabel ?? t('buttons.cancel');
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -77,7 +82,7 @@ export default function UnifiedDialog({
           <UnifiedHeader
             title={title}
             onCancel={handleCancel}
-            cancelLabel={cancelLabel}
+            cancelLabel={finalCancelLabel}
             onSubmit={onSubmit}
             submitLabel={submitLabel}
             submitDisabled={submitDisabled}
@@ -100,7 +105,7 @@ export default function UnifiedDialog({
                   disabled={submitLoading}
                   className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
                 >
-                  {cancelLabel}
+                  {finalCancelLabel}
                 </button>
               )}
             </div>

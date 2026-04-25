@@ -163,7 +163,7 @@ export default function AddDeveloperDialog({
     }
   }, [developer, isOpen]);
 
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [inProgressRaw, setInProgressRaw] = useState('');
@@ -1383,7 +1383,7 @@ export default function AddDeveloperDialog({
         isEdit
           ? isEditing
             ? t.developerPage?.editDeveloper || "Edit Developer"
-            : t.developerPage?.viewDeveloper || "Developer Details"
+            : (locale === "ar" ? formData.ar_name : formData.en_name) || t.developerPage?.viewDeveloper || "Developer Details"
           : t.developerPage.addDeveloper
       }
     >
