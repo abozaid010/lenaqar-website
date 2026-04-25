@@ -2352,7 +2352,7 @@ export default function AddCompoundDialog({
                       name="facility_management_rating"
                       label={
                         t.formLabels?.facilityManagementRating ||
-                        "Rating (0–5)"
+                        "Rating (0–10)"
                       }
                       value={formData.facility_management.rating}
                       onChange={(e) => {
@@ -2367,7 +2367,7 @@ export default function AddCompoundDialog({
                       }}
                       placeholder="4.5"
                       min="0"
-                      max="5"
+                      max="10"
                       step="0.1"
                     />
                   </div>
