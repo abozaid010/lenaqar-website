@@ -24,7 +24,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import type { UnitQuickFactsProps, SpecItem } from '@/lib/units/unit-types';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 const iconMap: Record<string, any> = {
   bed: Bed,

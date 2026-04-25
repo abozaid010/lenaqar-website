@@ -2,7 +2,7 @@
 
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { createPaymentPlan, updatePaymentPlan, fetchPaymentPlans } from "@/utils/api";
 import { Edit2, Plus, Trash2, Check } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";

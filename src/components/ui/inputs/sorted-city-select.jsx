@@ -1,6 +1,6 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 
 /**

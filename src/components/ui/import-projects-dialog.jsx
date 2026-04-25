@@ -1,7 +1,7 @@
 "use client";
 
 import ImportDialog from "@/components/ui/import-dialog";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { importProjects } from "@/utils/api";
 

@@ -1,6 +1,6 @@
 "use client";
 import ChatBot from "@/components/ui/ChatBot";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import {
   Apple,
   Bot,

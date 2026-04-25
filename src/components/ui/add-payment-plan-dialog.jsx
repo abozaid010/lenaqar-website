@@ -3,7 +3,7 @@
 import Dialog from "@/components/ui/Dialog";
 import FormInput from "@/components/ui/inputs/form-input";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";

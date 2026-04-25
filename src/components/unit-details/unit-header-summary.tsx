@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { MapPin, Building, User, Tag, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
   const { t } = useI18n();

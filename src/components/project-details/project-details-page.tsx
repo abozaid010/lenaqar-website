@@ -15,7 +15,7 @@ import ProjectPricingTable from './project-pricing-table';
 import ProjectBuildingTypeGallery from './project-building-type-gallery';
 import ProjectFacilityManagement from './project-facility-management';
 import AddCompoundDialog from '@/components/ui/add-project-dialog';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 interface ProjectDetailsPageProps {
   project: ProjectViewModel;
@@ -66,7 +66,7 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
 
               {project.trustItems.length > 0 && (
                 <div className="bg-white rounded-lg border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t?.projectPage?.projectInfo || 'Project Information'}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t?.projectPage?.projectInfo}</h3>
                   <div className="space-y-3">
                     {project.trustItems.map((item, index) => (
                       <div key={index} className="flex justify-between items-center">
@@ -89,13 +89,13 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
             onClick={handleEdit}
             className="flex-1 py-2 border border-primary/40 text-primary rounded-lg text-sm font-medium"
           >
-            {t?.buttons?.edit || "Edit"}
+            {t?.buttons?.edit}
           </button>
           <a
             href="tel:"
             className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
           >
-            {t?.buttons?.call || "Call"}
+            {t?.buttons?.call}
           </a>
         </div>
       </div>

@@ -119,6 +119,12 @@ export default {
     apply: "Apply",
     reset: "Reset",
   },
+  breadcrumbs: {
+    home: "Home",
+    properties: "Properties",
+    propertyDetails: "Property Details",
+    myProjects: "My Projects",
+  },
   formLabels: {
     description: "Description",
     default: "Default",

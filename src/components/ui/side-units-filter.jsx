@@ -1,7 +1,7 @@
 "use client";
 
 import FilterCheckboxGroup from "@/components/ui/filter-checkbox-group";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";

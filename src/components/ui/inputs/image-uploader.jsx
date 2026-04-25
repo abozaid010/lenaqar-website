@@ -1,7 +1,7 @@
 '"use client";';
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { deleteImage, uploadImages } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 import {

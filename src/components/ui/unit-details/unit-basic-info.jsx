@@ -1,6 +1,5 @@
 "use client";
 import { useI18n } from "@/hooks/useI18n";
-import { useI18n as useRawTranslations } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../public/locales/en";
 import ar from "../../../../public/locales/ar";

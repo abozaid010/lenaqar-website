@@ -6,7 +6,7 @@ import QueryErrorState from "@/components/ui/query-error-state";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import en from "../../../public/locales/en";

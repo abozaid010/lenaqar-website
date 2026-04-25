@@ -19,7 +19,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
@@ -32,7 +32,7 @@ const Sidebar = ({
   initialModuleActions = undefined,
   clientId = null,
 }) => {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const unitsSection = useUnitsSectionSource();
@@ -183,7 +183,7 @@ const Sidebar = ({
               }`}
             >
               <Megaphone className="h-5 w-5 mr-3" />
-              <span>{t?.sidebar?.campaigns}</span>
+              <span>{translate('sidebar.campaigns')}</span>
             </Link>
           )}
 
@@ -198,7 +198,7 @@ const Sidebar = ({
               }`}
             >
               <MessageCircle className="h-5 w-5 mr-3" />
-              <span>{t?.sidebar?.campaignChat}</span>
+              <span>{translate('sidebar.campaignChat')}</span>
             </Link>
           )}
 
@@ -213,7 +213,7 @@ const Sidebar = ({
               }`}
             >
               <Calendar className="h-5 w-5 mr-3" />
-              <span>{t?.sidebar?.schedule}</span>
+              <span>{translate('sidebar.schedule')}</span>
             </Link>
           )}
 
@@ -228,7 +228,7 @@ const Sidebar = ({
               }`}
             >
               <BarChart2 className="h-5 w-5 mr-3" />
-              <span>{t?.sidebar?.analytics}</span>
+              <span>{translate('sidebar.analytics')}</span>
             </Link>
           )}
 
@@ -288,7 +288,7 @@ const Sidebar = ({
               }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
-              <span>{t?.sidebar?.clients}</span>
+              <span>{translate('sidebar.clients')}</span>
             </Link>
           )}
 

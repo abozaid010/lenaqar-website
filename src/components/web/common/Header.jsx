@@ -2,7 +2,7 @@
 
 import CalendarModal from "@/components/ui/calendar-modal";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryProps) {
   const { t } = useI18n();

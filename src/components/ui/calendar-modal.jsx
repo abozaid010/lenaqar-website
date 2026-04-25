@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import CalendarSelector from "./calender-selector";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
   const { t } = useI18n();

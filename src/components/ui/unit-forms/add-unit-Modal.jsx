@@ -9,7 +9,7 @@ import RentalDetailsStep from "@/components/ui/unit-forms/rental-details-step";
 import SaleDetailsStep from "@/components/ui/unit-forms/sale-details-step";
 import StepIndicator from "./step-indicator";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";

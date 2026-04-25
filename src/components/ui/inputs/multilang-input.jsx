@@ -1,5 +1,5 @@
 import { LenaTextField } from "@/components/ui/inputs";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function MultiLangInput({
   label,

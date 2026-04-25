@@ -1,6 +1,6 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { Edit, Plus } from "lucide-react";
 import { useState } from "react";
 import AddUnitModal from "./add-unit-Modal";

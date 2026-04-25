@@ -42,11 +42,11 @@ const CustomTooltip = ({ active, payload, label }) => {
         <p className="font-bold text-gray-900">{`${label}`}</p>
         <p style={{ color: "#030250" }}>
           <span className="inline-block w-3 h-3 mr-2" style={{ backgroundColor: "#030250" }}></span>
-          {`${t?.conversation || "Conversations"}: ${conversationData?.value || 0}`}
+          {`${t('conversation')}: ${conversationData?.value || 0}`}
         </p>
         <p style={{ color: "#5d3dd5" }}>
           <span className="inline-block w-3 h-3 mr-2" style={{ backgroundColor: "#5d3dd5" }}></span>
-          {`${t?.averageMessagesPerUser || "Average Messages per User"}: ${avgMessagesData?.value || 0}`}
+          {`${t('averageMessagesPerUser')}: ${avgMessagesData?.value || 0}`}
         </p>
       </div>
     );
@@ -68,7 +68,7 @@ const EnhancedBarChart = ({ data, t }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
-      <h3 className="text-xl font-bold text-center mb-4 text-gray-800">{t?.dailyConversationAnalysis || "Daily Conversation Analysis"}</h3>
+      <h3 className="text-xl font-bold text-center mb-4 text-gray-800">{t('dailyConversationAnalysis')}</h3>
       <ResponsiveContainer width="100%" height={489}>
         <BarChart
           data={data?.daily_conversation_analysis || []}
@@ -112,7 +112,7 @@ const EnhancedBarChart = ({ data, t }) => {
           />
           <Bar
             dataKey="conversations"
-            name={t?.numberConversation || "Number of Conversations"}
+            name={t('numberConversation')}
             fill="#030250"
             // radius={[4, 4, 0, 0]}
             barSize={25}
@@ -120,7 +120,7 @@ const EnhancedBarChart = ({ data, t }) => {
           />
           <Bar
             dataKey="avg_user_total_messages"
-            name={t?.averageMessagesPerUser || "Average Messages per User"}
+            name={t('averageMessagesPerUser')}
             fill="#5d3dd5"
             // radius={[4, 4, 0, 0]}
             barSize={25}
@@ -256,7 +256,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
             {label}
           </div>
           <div className="text-gray-800 font-bold mb-1">
-            {t?.actionFrequency || "Action Frequency"}: {value}
+            {t('actionFrequency')}: {value}
           </div>
         </div>
       );
@@ -333,7 +333,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
 
           <Bar
             dataKey="frequency"
-            name={t?.dashboardFilter?.actions?.allActions || "All Actions"}
+            name={t('dashboardFilter.actions.allActions')}
             barSize={30}
             shape={<CustomBar />}
             legendType="none"
@@ -349,7 +349,7 @@ const EnhancedDailyActionBarChart = ({ datamonth, t }) => {
       </ResponsiveContainer>
 
       <div className="text-center mt-4 text-gray-500 text-xs">
-        {t?.clickBarInfo || "Click on any bar to see detailed breakdown of actions"}
+        {t('clickBarInfo')}
       </div>
     </div>
   );
@@ -361,13 +361,13 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
   return (
     <div className="flex flex-wrap w-full">
       <div className="w-full p-2 mb-4">
-        <h2 className="text-2xl font-bold">{t?.dashboardTitle || "Analytics Dashboard"}</h2>
-        <p className="text-gray-600">{t?.dashboardDescription || "Showing user activities and daily action breakdowns"}</p>
+        <h2 className="text-2xl font-bold">{t('dashboardTitle')}</h2>
+        <p className="text-gray-600">{t('dashboardDescription')}</p>
       </div>
 
       <div className="w-full  p-2">
         <div className="border rounded p-3 h-full">
-          <h3 className="text-lg font-semibold mb-2">{t?.conversationAnalysis || "Conversation Analysis"}</h3>
+          <h3 className="text-lg font-semibold mb-2">{t('conversationAnalysis')}</h3>
           <EnhancedBarChart data={data} t={t} />
         </div>
       </div>
@@ -376,8 +376,8 @@ const Analytics = ({ data, datamonth, appliedFilters }) => {
         <div className="border rounded p-3 h-full">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-lg font-semibold">{t?.monthlyActionFrequency || "Monthly Action Frequency Analysis"}</h3>
-              <p className="text-sm text-gray-500">{t?.bubbleVisualization || "Bubble visualization of daily action totals"}</p>
+              <h3 className="text-lg font-semibold">{t('monthlyActionFrequency')}</h3>
+              <p className="text-sm text-gray-500">{t('bubbleVisualization')}</p>
             </div>
             <div className="w-2/5">
               <FilterMonth appliedFilters={appliedFilters} t={t} />

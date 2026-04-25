@@ -10,18 +10,18 @@ const FilterMonth = ({appliedFilters,t}) => {
     const [message, setMessage] = useState("");
     
     const months = [
-        { value: "1", label: t?.January },
-        { value: "2", label: t?.February },
-        { value: "3", label: t?.March },
-        { value: "4", label: t?.April },
-        { value: "5", label: t?.May },
-        { value: "6", label: t?.June },
-        { value: "7", label: t?.July },
-        { value: "8", label: t?.August },
-        { value: "9", label: t?.September },
-        { value: "10", label: t?.October },
-        { value: "11", label: t?.November },
-        { value: "12", label: t?.December },
+        { value: "1", label: t('January') },
+        { value: "2", label: t('February') },
+        { value: "3", label: t('March') },
+        { value: "4", label: t('April') },
+        { value: "5", label: t('May') },
+        { value: "6", label: t('June') },
+        { value: "7", label: t('July') },
+        { value: "8", label: t('August') },
+        { value: "9", label: t('September') },
+        { value: "10", label: t('October') },
+        { value: "11", label: t('November') },
+        { value: "12", label: t('December') },
     ];
     
     const handleFilterChange = (key, value) => {
@@ -41,7 +41,7 @@ const FilterMonth = ({appliedFilters,t}) => {
         <div className="w-full">
             <div>
                 <label className="block text-gray-700 text-xs font-medium mb-1" htmlFor="month-select">
-                   {t?.selectNumberOfMonths}
+                   {t('selectNumberOfMonths')}
                 </label>
                 <select
                     id="month-select"
@@ -52,7 +52,7 @@ const FilterMonth = ({appliedFilters,t}) => {
                     {/* <option value="12">Last 12 Months</option> */}
                     {months.map((month) => (
                         <option key={month.value} value={month.value}>
-                            {month.value === "1" ? `${t?.lastMonth}` : t?.lastMonths?.replace("{count}", month.value) || `Last ${month.value} Months`}
+                            {month.value === "1" ? t('lastMonth') : t('lastMonths', { count: month.value })}
                         </option>
                     ))}
                 </select>

@@ -2,7 +2,7 @@
 
 import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { addNewPhase, updatePhase } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";

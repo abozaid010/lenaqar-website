@@ -224,7 +224,7 @@ export default function CampaignDialog({
           className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
           disabled={isSubmitting}
         >
-          {t?.common?.cancel}
+          {t('common.cancel')}
         </button>
       }
       headerActions={
@@ -237,12 +237,12 @@ export default function CampaignDialog({
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
-                {editMode ? t?.common?.updating : t?.common?.creating}
+                {editMode ? t('common.updating') : t('common.creating')}
               </span>
             ) : editMode ? (
-              t?.common?.update
+              t('common.update')
             ) : (
-              t?.common?.create
+              t('common.create')
             )}
         </button>
       }

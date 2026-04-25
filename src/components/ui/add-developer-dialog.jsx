@@ -3,7 +3,7 @@
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useEffect, useRef, useState } from "react";
@@ -1195,7 +1195,7 @@ export default function AddDeveloperDialog({
             </div>
             <div>
               <LenaTextarea
-                label={t.formLabels?.deliveredProjects || "Delivered Projects"}
+                label={t?.formLabels?.deliveredProjects}
                 name="profile_reviews.delivered_projects"
                 value={deliveredRaw}
                 onChange={(e) => {

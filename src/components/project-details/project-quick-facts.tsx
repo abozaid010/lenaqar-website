@@ -10,7 +10,7 @@ import {
   Info
 } from 'lucide-react';
 import type { ProjectQuickFactsProps } from '@/lib/projects/project-types';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 const iconMap = {
   building: Building,

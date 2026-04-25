@@ -17,7 +17,7 @@ import {
   Share2,
   Heart
 } from 'lucide-react';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { ProjectViewModel } from '@/lib/projects/project-types';
 import { deleteProject } from '@/utils/api';
 import toast from 'react-hot-toast';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 interface Props {
   project: ProjectViewModel;
@@ -42,8 +42,8 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
   return (
     <div className="bg-white rounded-lg border shadow-lg p-6 space-y-4">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">{t?.unitInquiry?.projectInterestedTitle || "Interested in this project?"}</h3>
-        <p className="text-sm text-gray-600">{t?.unitInquiry?.projectInterestedSubtitle || "Get in touch with the developer to learn more"}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-1">{t?.unitInquiry?.projectInterestedTitle}</h3>
+        <p className="text-sm text-gray-600">{t?.unitInquiry?.projectInterestedSubtitle}</p>
       </div>
 
       {project.developerName && (
@@ -60,7 +60,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
           className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
         >
           <PhoneCall className="w-4 h-4" />
-          {t?.buttons?.call || "Call"}
+          {t?.buttons?.call}
         </a>
         <a
           href={`https://wa.me/`}
@@ -69,7 +69,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
           className="bg-green-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm"
         >
           <MessageCircle className="w-4 h-4" />
-          {t?.buttons?.whatsapp || "WhatsApp"}
+          {t?.buttons?.whatsapp}
         </a>
       </div>
 
@@ -80,14 +80,14 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
           className="border border-primary/40 text-primary rounded-lg py-2 px-3 font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 text-sm"
         >
           <Edit className="w-4 h-4" />
-          {t?.buttons?.edit || "Edit"}
+          {t?.buttons?.edit}
         </button>
         <button
           onClick={() => setShowDeleteConfirm(true)}
           className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
         >
           <Trash2 className="w-4 h-4" />
-          {t?.buttons?.delete || "Delete"}
+          {t?.buttons?.delete}
         </button>
       </div>
 

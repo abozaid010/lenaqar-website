@@ -5,7 +5,7 @@ import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
 
 export function useI18n() {
-  const { t, locale } = useTranslation();
+  const { t, locale, changeLanguage } = useTranslation();
 
   // Enhanced translation function with fallback and logging
   const translate = useCallback((key, fallback = null) => {
@@ -221,8 +221,10 @@ export function useI18n() {
   }), [translate, getMapped]);
 
   return {
-    t: translate,
+    t,              // raw locale object  →  t?.unitPricing?.totalPrice
+    translate,      // function wrapper   →  translate('unitPricing.totalPrice')
     locale,
+    changeLanguage,
     isRTL: locale === 'ar',
     direction: locale === 'ar' ? 'rtl' : 'ltr',
     common,

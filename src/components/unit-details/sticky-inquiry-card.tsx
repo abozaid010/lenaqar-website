@@ -1,7 +1,7 @@
 import { Phone, MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { generateUnitSlug } from '@/lib/units/unit-url-utils';

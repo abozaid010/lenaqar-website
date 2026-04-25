@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { debounce } from "@/utils/debounce";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function UnitsSearch({ q }) {
   const { t } = useI18n();

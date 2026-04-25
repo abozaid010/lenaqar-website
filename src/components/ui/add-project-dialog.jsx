@@ -12,7 +12,7 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import AmenitiesSelector from "@/components/ui/inputs/amenities-selector";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";

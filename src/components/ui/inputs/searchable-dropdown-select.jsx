@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, forwardRef, useImperativeHandle } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 
 /**

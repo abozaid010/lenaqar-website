@@ -1,7 +1,7 @@
 "use client";
 
 import ExcelJS from "exceljs";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   Upload,

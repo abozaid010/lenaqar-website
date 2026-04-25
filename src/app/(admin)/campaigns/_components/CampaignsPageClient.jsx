@@ -73,12 +73,12 @@ function CampaignCard({ campaign, onEdit }) {
                 type="button"
                 onClick={handleCopyLink}
                 className="hover:underline text-left"
-                title={copied ? t?.common?.copied : t?.common?.clickToCopy}
+                title={copied ? t('common.copied') : t('common.clickToCopy')}
               >
                 {campaignUrlText}
                 {copied ? (
                   <span className="ms-2 inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
-                    {t?.common?.copied}
+                    {t('common.copied')}
                   </span>
                 ) : null}
               </button>
@@ -114,7 +114,7 @@ function CampaignCard({ campaign, onEdit }) {
             className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
           >
             <Pencil size={16} />
-            {t?.campaigns?.edit}
+            {t('campaigns.edit')}
           </button>
         </div>
       </div>
@@ -125,7 +125,7 @@ function CampaignCard({ campaign, onEdit }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <span>
               <span className="text-gray-500">
-                {t?.campaigns?.campaignManager}:
+                {t('campaigns.campaignManager')}:
               </span>{" "}
               <span className="font-mono">{campaign?.client_phone_number || "—"}</span>
             </span>
@@ -133,18 +133,18 @@ function CampaignCard({ campaign, onEdit }) {
 
           {!isUnitMode ? (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.text}:</span>{" "}
+              <span className="text-gray-500">{t('campaigns.text')}:</span>{" "}
               <span className="font-medium">{campaign?.text ? String(campaign.text) : "—"}</span>
             </div>
           ) : (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.unit}:</span>{" "}
+              <span className="text-gray-500">{t('campaigns.unit')}:</span>{" "}
               <span className="font-medium">
                 {campaign?.unit?.unitTitle ||
                   campaign?.unit?.title ||
                   campaign?.unit?.unitId ||
                   campaign?.unit?.id ||
-                  t?.campaigns?.unit}
+                  t('campaigns.unit')}
               </span>
             </div>
           )}
@@ -154,7 +154,7 @@ function CampaignCard({ campaign, onEdit }) {
       {!isUnitMode && (
         <div className="mt-3">
           <div className="text-xs font-medium text-gray-600 mb-2">
-            {t?.campaigns?.images} ({images.length})
+            {t('campaigns.images')} ({images.length})
           </div>
           {images.length ? (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -177,7 +177,7 @@ function CampaignCard({ campaign, onEdit }) {
             </div>
           ) : (
             <div className="text-sm text-gray-500">
-              {t?.campaigns?.noImages}
+              {t('campaigns.noImages')}
             </div>
           )}
         </div>
@@ -186,7 +186,7 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Suggested answers */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.suggestedAnswers} ({suggestedAns.length})
+          {t('campaigns.suggestedAnswers')} ({suggestedAns.length})
         </div>
         {suggestedAns.length ? (
           <div className="flex flex-wrap gap-2">
@@ -201,7 +201,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noSuggestedAnswers}
+            {t('campaigns.noSuggestedAnswers')}
           </div>
         )}
       </div>
@@ -209,11 +209,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Created/Updated */}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-800">
         <span>
-          <span className="text-gray-500">{t?.campaigns?.createdAt}:</span>{" "}
+          <span className="text-gray-500">{t('campaigns.createdAt')}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.created_at) || "—"}
         </span>
         <span>
-          <span className="text-gray-500">{t?.campaigns?.updatedAt}:</span>{" "}
+          <span className="text-gray-500">{t('campaigns.updatedAt')}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.updated_at) || "—"}
         </span>
       </div>
@@ -221,11 +221,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Link clicked */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.linkClicks}: {linkClicked.length}
+          {t('campaigns.linkClicks')}: {linkClicked.length}
         </div>
         {lastClick ? (
           <div className="text-sm text-gray-700">
-            {t?.campaigns?.lastClick}:{" "}
+            {t('campaigns.lastClick')}:{" "}
             <span className="font-mono">
               {formatDateTimeAmPmShort(lastClick?.date) || "—"}
             </span>{" "}
@@ -235,7 +235,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noClicks}
+            {t('campaigns.noClicks')}
           </div>
         )}
       </div>
@@ -275,7 +275,7 @@ export default function CampaignsPageClient() {
   const canNext = offset + limit < totalCount;
 
   if (isLoading) {
-    return <LoadingSpinner message={t?.common?.loadingData} />;
+    return <LoadingSpinner message={t('common.loadingData')} />;
   }
 
   if (isError) {
@@ -285,9 +285,9 @@ export default function CampaignsPageClient() {
           error={error}
           refetch={refetch}
           isFetching={isFetching}
-          title={t?.common?.error}
-          message={t?.common?.operationFailed}
-          retryLabel={t?.common?.retry}
+          title={t('common.error')}
+          message={t('common.operationFailed')}
+          retryLabel={t('common.retry')}
         />
       </div>
     );
@@ -306,7 +306,7 @@ export default function CampaignsPageClient() {
           {/* Campaign Info */}
           <div className="w-full md:w-auto md:flex-1 min-w-0">
             <span className="text-sm text-gray-600">
-              {t?.campaigns?.total ?? "Total"}: <span className="font-medium text-gray-900">{totalCount}</span>
+              {t('campaigns.total')}: <span className="font-medium text-gray-900">{totalCount}</span>
             </span>
           </div>
 
@@ -337,9 +337,8 @@ export default function CampaignsPageClient() {
           disabled={!canPrev}
           onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-        >
-          {t?.common?.previous}
-        </button>
+          label={t('common.previous')}
+        />
         <div className="text-sm text-gray-600">
           {showingLabel}{" "}
           <span className="font-medium">{Math.min(offset + 1, totalCount)}</span>-
@@ -353,16 +352,15 @@ export default function CampaignsPageClient() {
           disabled={!canNext}
           onClick={() => setOffset((prev) => prev + limit)}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-        >
-          {t?.common?.next}
-        </button>
+          label={t('common.next')}
+        />
       </div>
 
       {/* List */}
       <div className="mt-4 space-y-3">
         {campaigns.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-600">
-            {t?.common?.noCampaignsFound}
+            {t('common.noCampaignsFound')}
           </div>
         ) : (
           campaigns.map((c) => (

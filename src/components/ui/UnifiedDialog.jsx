@@ -41,7 +41,7 @@ export default function UnifiedDialog({
   const handleCancel = onCancel ?? onClose;
   
   // Use translated cancel label if none provided
-  const finalCancelLabel = cancelLabel ?? t('buttons.cancel');
+  const finalCancelLabel = cancelLabel ?? t?.buttons?.cancel;
 
   useEffect(() => {
     const handleEscape = (e) => {

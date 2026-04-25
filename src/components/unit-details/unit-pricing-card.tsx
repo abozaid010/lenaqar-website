@@ -1,6 +1,6 @@
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitPricingCardProps } from '@/lib/units/unit-types';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitPricingCard({ unit }: UnitPricingCardProps) {
   const { t } = useI18n();

@@ -501,7 +501,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            {t?.campaignChat?.lastMessage || "Last Message"}
+            {t('campaignChat.lastMessage')}
             {sortBy === "last_user_message_at" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -514,7 +514,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            {t?.campaignChat?.mostMessages || "Most Messages"}
+            {t('campaignChat.mostMessages')}
             {sortBy === "total_messages_received" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -522,7 +522,7 @@ const CampaignChat = () => {
         </div>
 
         {/* Contact List */}
-        <ErrorBoundary errorMessage={t?.campaignChat?.failedToLoadConversations || "Failed to load conversations. Please try again."}>
+        <ErrorBoundary errorMessage={t('campaignChat.failedToLoadConversations')}>
           <ContactList
             sessions={sortedSessions}
             selectedContact={selectedContact}
@@ -544,7 +544,7 @@ const CampaignChat = () => {
 
       {/* Right Panel - Chat */}
         <div className="flex-1 flex flex-col">
-          <ErrorBoundary errorMessage={t?.campaignChat?.failedToLoadConversation || "Failed to load conversation. Please try again."}>
+          <ErrorBoundary errorMessage={t('campaignChat.failedToLoadConversation')}>
             {selectedContact ? (
               <ChatPanel
                 contact={selectedContact}
@@ -561,8 +561,8 @@ const CampaignChat = () => {
               <div className="flex-1 flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                   <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">{t?.campaignChat?.selectConversation || "Select a conversation"}</h3>
-                  <p className="text-gray-500">{t?.campaignChat?.chooseContact || "Choose a contact from the list to start chatting"}</p>
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">{t('campaignChat.selectConversation')}</h3>
+                  <p className="text-gray-500">{t('campaignChat.chooseContact')}</p>
                 </div>
               </div>
             )}

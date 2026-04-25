@@ -2,7 +2,7 @@
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ReusableSearchInput from "@/components/ui/reusable-search-input";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";

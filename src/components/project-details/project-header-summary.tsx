@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { MapPin, Building, User, Tag, Calendar } from 'lucide-react';
-import { useI18n } from '@/context/translate-api';
+import { useI18n } from '@/hooks/useI18n';
 import type { ProjectHeaderSummaryProps } from '@/lib/projects/project-types';
 
 export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryProps) {

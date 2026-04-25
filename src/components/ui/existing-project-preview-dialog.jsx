@@ -1,7 +1,7 @@
 "use client";
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { getBuildingTypes } from "@/data/constants";
 import { CreditCard, Home, Tag, Edit } from "lucide-react";
