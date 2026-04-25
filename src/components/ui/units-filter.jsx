@@ -5,6 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
+import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
@@ -12,9 +13,10 @@ import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { unitKeys } from "@/utils/query-utils";
 import LoadingSpinner from "./loading-spinner";
@@ -53,7 +55,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     min_price: appliedFilters.min_price || "",
     max_price: appliedFilters.max_price || "",
     city: appliedFilters.city || "",
+    my_inventory: appliedFilters.my_inventory === "true",
+    resale: appliedFilters.resale === "true",
+    min_area: appliedFilters.min_area || "",
   }));
+
+  // Debounced min_area state
+  const [debouncedMinArea, setDebouncedMinArea] = useState(filters.min_area);
+  const minAreaTimeoutRef = useRef(null);
+
+  // Get client ID from token for My Inventory filter
+  const clientIdFromToken = getClientIdFromToken();
+  const hasClientId = !!clientIdFromToken;
 
   useEffect(() => {
     if (!projectsLoading) {
@@ -86,11 +99,43 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     loadCityLabels();
   }, [locale]);
 
+  // Debounce min_area input (300ms)
+  useEffect(() => {
+    if (minAreaTimeoutRef.current) {
+      clearTimeout(minAreaTimeoutRef.current);
+    }
+
+    minAreaTimeoutRef.current = setTimeout(() => {
+      setDebouncedMinArea(filters.min_area);
+    }, 300);
+
+    return () => {
+      if (minAreaTimeoutRef.current) {
+        clearTimeout(minAreaTimeoutRef.current);
+      }
+    };
+  }, [filters.min_area]);
+
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [cityLabels, setCityLabels] = useState({});
   const [activeFilters, setActiveFilters] = useState(() => {
     const initialFilters = [];
+    if (filters.my_inventory) {
+      initialFilters.push({ key: "my_inventory", value: t.unitsFilter.myInventory });
+    }
+    if (filters.resale) {
+      initialFilters.push({ key: "resale", value: t.unitsFilter.resale });
+    }
+    if (filters.min_area) {
+      initialFilters.push({ key: "min_area", value: `${t.unitsFilter.minArea}: ${filters.min_area} m²` });
+    }
+    if (filters.min_price) {
+      initialFilters.push({ key: "min_price", value: `${locale === "ar" ? "من" : "From"} ${formatPriceInput(filters.min_price)} EGP` });
+    }
+    if (filters.max_price) {
+      initialFilters.push({ key: "max_price", value: `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(filters.max_price)} EGP` });
+    }
     if (filters.developer_name) {
       initialFilters.push({
         key: "developer_name",
@@ -136,10 +181,35 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     // Update URL parameters
     const newParams = new URLSearchParams(window.location.search);
 
-    if (value && value !== "" && value !== "all") {
-      newParams.set(key, value);
+    // Handle different filter types
+    if (key === "my_inventory" || key === "resale") {
+      // Boolean toggles
+      if (value) {
+        newParams.set(key, "true");
+      } else {
+        newParams.delete(key);
+      }
+    } else if (key === "min_area") {
+      // Min area uses debounced value, update URL only when debounced
+      if (debouncedMinArea && debouncedMinArea !== "") {
+        newParams.set("min_area", debouncedMinArea);
+      } else {
+        newParams.delete("min_area");
+      }
+    } else if (key === "min_price" || key === "max_price") {
+      // Price fields - handle directly
+      if (value && value !== "") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
     } else {
-      newParams.delete(key);
+      // Existing filters
+      if (value && value !== "" && value !== "all") {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
     }
 
     const newUrl = `${window.location.pathname}?${newParams.toString()}`;
@@ -151,7 +221,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     // This ensures the API is called immediately with the new project filter
     if (key === "project_name") {
       // Invalidate all unit list queries - this causes matching queries to refetch immediately
-      // When the component re-renders with new searchParams, the query key changes
+      // When the component re-render with new searchParams, the query key changes
       // and the invalidated queries will be refetched to get fresh data
       // Using refetchType: 'active' ensures only currently mounted queries refetch
       queryClient.invalidateQueries({ 
@@ -160,19 +230,43 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       });
     }
 
+    // Update active filters
     setActiveFilters((prev) => {
       const existingFilterIndex = prev.findIndex((f) => f.key === key);
+      
+      // Determine display value for new filters
+      let displayValue = value;
+      if (key === "my_inventory") {
+        displayValue = t.unitsFilter.myInventory;
+      } else if (key === "resale") {
+        displayValue = t.unitsFilter.resale;
+      } else if (key === "min_area") {
+        displayValue = debouncedMinArea ? `${t.unitsFilter.minArea}: ${debouncedMinArea} m²` : "";
+      } else if (key === "min_price") {
+        displayValue = value ? `${locale === "ar" ? "من" : "From"} ${formatPriceInput(value)} EGP` : "";
+      } else if (key === "max_price") {
+        displayValue = value ? `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(value)} EGP` : "";
+      }
+      
       if (existingFilterIndex > -1) {
         // Update existing filter
-        const updatedFilter = { ...prev[existingFilterIndex], value };
-        return [
-          ...prev.slice(0, existingFilterIndex),
-          updatedFilter,
-          ...prev.slice(existingFilterIndex + 1),
-        ];
+        if (displayValue && displayValue !== "") {
+          const updatedFilter = { ...prev[existingFilterIndex], value: displayValue };
+          return [
+            ...prev.slice(0, existingFilterIndex),
+            updatedFilter,
+            ...prev.slice(existingFilterIndex + 1),
+          ];
+        } else {
+          // Remove filter if value is empty
+          return prev.filter((f) => f.key !== key);
+        }
       } else {
         // Add new filter
-        return [...prev, { key, value }];
+        if (displayValue && displayValue !== "") {
+          return [...prev, { key, value: displayValue }];
+        }
+        return prev;
       }
     });
   };
@@ -256,6 +350,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       min_price: "",
       max_price: "",
       city: "",
+      my_inventory: false,
+      resale: false,
+      min_area: "",
     });
 
     router.push(window.location.pathname);
@@ -267,7 +364,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const handleRemoveFilter = (key) => {
     const newParams = new URLSearchParams(window.location.search);
 
-    // Special handling for price range
+    // Special handling for different filter types
     if (key === "price_range") {
       newParams.delete("min_price");
       newParams.delete("max_price");
@@ -276,7 +373,20 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         min_price: "",
         max_price: "",
       }));
+    } else if (key === "my_inventory" || key === "resale") {
+      // Boolean toggles
+      setFilters((prev) => ({ ...prev, [key]: false }));
+      newParams.delete(key);
+    } else if (key === "min_area") {
+      // Min area input
+      setFilters((prev) => ({ ...prev, min_area: "" }));
+      newParams.delete("min_area");
+    } else if (key === "min_price" || key === "max_price") {
+      // Price fields
+      setFilters((prev) => ({ ...prev, [key]: "" }));
+      newParams.delete(key);
     } else {
+      // Existing filters
       setFilters((prev) => ({ ...prev, [key]: "" }));
       newParams.delete(key);
     }
@@ -354,6 +464,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   function getFilterDisplayText(key, value) {
     switch (key) {
+      case "my_inventory":
+        return t.unitsFilter.myInventory;
+      case "resale":
+        return t.unitsFilter.resale;
+      case "min_area":
+        return value || t.unitsFilter.minArea;
+      case "min_price":
+        return value ? `${locale === "ar" ? "من" : "From"} ${formatPriceInput(value)} EGP` : "";
+      case "max_price":
+        return value ? `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(value)} EGP` : "";
       case "developer_name":
         return getSelectedDeveloper();
       case "project_name":
@@ -373,9 +493,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   return (
     <div className="p-4 space-y-4 bg-white rounded-lg shadow-md">
-      <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+      {/* Line 1: Primary Filters + Actions */}
+      <div className="flex flex-wrap items-center gap-2">
         {/* Cities Dropdown */}
-        <div className="w-full md:w-auto md:flex-1 min-w-0">
+        <div className="flex-1 min-w-[140px] max-w-[200px]">
           <SearchableCitySelect
             value={filters.city === "all" ? "" : filters.city}
             onChange={(e) => {
@@ -386,12 +507,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCities || "All Cities"}
             placeholder={t.unitsFilter.allCities || "All Cities"}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
 
         {/* Developer Dropdown */}
-        <div className="w-full md:w-auto md:flex-1 min-w-0">
+        <div className="flex-1 min-w-[140px] max-w-[200px]">
           <SearchableDropdownSelect
             options={developers}
             value={filters.developer_name === "all" ? "" : filters.developer_name}
@@ -419,12 +540,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
             noResultsText={locale === "ar" ? "لا توجد نتائج" : "No developers found"}
             searchPlaceholder={locale === "ar" ? "ابحث عن المطور..." : "Search developers..."}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
 
         {/* Compounds Dropdown */}
-        <div className="w-full md:w-auto md:flex-1 min-w-0">
+        <div className="flex-1 min-w-[140px] max-w-[200px]">
           <SearchableProjectSelect
             value={filters.project_name === "all" ? "" : filters.project_name}
             onChange={(e) => {
@@ -438,12 +559,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCompounds || "All Projects"}
             placeholder={t.unitsFilter.allCompounds || "All Projects"}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
 
         {/* Purpose Dropdown */}
-        <div className="w-full md:w-auto md:flex-1 min-w-0">
+        <div className="flex-1 min-w-[120px] max-w-[160px]">
           <SearchableDropdownSelect
             options={EnumPropertyIntent.map((purpose) => ({
               value: purpose,
@@ -459,12 +580,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             allOptionLabel={t.unitsFilter.allPurposes || "All Purposes"}
             placeholder={t.unitsFilter.allPurposes || "All Purposes"}
             searchPlaceholder={locale === "ar" ? "ابحث عن الغرض..." : "Search purposes..."}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
 
         {/* Property Type Dropdown */}
-        <div className="w-full md:w-auto md:flex-1 min-w-0">
+        <div className="flex-1 min-w-[140px] max-w-[200px]">
           <SearchableDropdownSelect
             options={BUILDING_TYPES}
             value={filters.property_type === "all" ? "" : filters.property_type}
@@ -480,90 +601,23 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             allOptionLabel={t.unitsFilter.allPropertyTypes || "All Property Types"}
             placeholder={t.unitsFilter.allPropertyTypes || "All Property Types"}
             searchPlaceholder={locale === "ar" ? "ابحث عن نوع العقار..." : "Search property types..."}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
 
-        {/* Price Filter Dropdown */}
-        <div
-          className="relative w-full md:w-auto md:flex-1 min-w-0"
-          ref={priceDropdownRef}
-        >
-          <button
-            type="button"
-            className="w-full px-3 h-10 bg-[#F6F7FB] rounded-md border border-[#E6E6E6] text-[#494A4B] text-sm text-left focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-primary/40 transition-colors flex justify-between items-center"
-            onClick={() => setIsPriceDropdownOpen(!isPriceDropdownOpen)}
-          >
-            <span className="truncate">{getPriceDisplayText()}</span>
-            <ChevronDown size={22} className="inline-block mt-0.5 shrink-0" />
-          </button>
-
-          {isPriceDropdownOpen && (
-            <div className="absolute z-46 mt-1 w-full md:min-w-[200px] bg-white rounded-[5px] shadow-2xl p-3">
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    {t.unitsFilter.min} EGP
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={formatPriceInput(filters.min_price)}
-                    onChange={(e) => {
-                      // Remove commas and non-digits, then update state
-                      const value = e.target.value.replace(/\D/g, "");
-                      setFilters((prev) => ({
-                        ...prev,
-                        min_price: value,
-                      }));
-                    }}
-                    placeholder="0"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">
-                    {t.unitsFilter.max} EGP
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full px-2 py-1.5 text-sm border rounded-md"
-                    value={formatPriceInput(filters.max_price)}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      setFilters((prev) => ({
-                        ...prev,
-                        max_price: value,
-                      }));
-                    }}
-                    placeholder="5,000,000,000"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  className="w-full py-1.5 text-sm bg-primary text-white rounded-md"
-                  onClick={handlePriceApply}
-                >
-                  {t.unitsFilter.applay}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
+        {/* Actions */}
         {!isPublic && (
-          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+          <div className="flex gap-2 items-center ml-auto">
             <button
               onClick={() => setIsUploadDialogOpen(true)}
-              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              className="px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
-              <FileSpreadsheet size={18} className="shrink-0" />
-              <span className="hidden sm:inline whitespace-nowrap">
-                {t.uploadExcel?.button || "Upload Excel"}
+              <FileSpreadsheet size={16} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap text-xs">
+                {t.uploadExcel?.button || "Upload"}
               </span>
             </button>
-            <AddUnitButton className="flex-1 md:flex-initial px-4 py-2 h-10 text-sm font-medium bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors shadow-sm hover:shadow-md" />
+            <AddUnitButton className="px-3 py-2 h-10 text-xs font-medium bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-1 transition-colors shadow-sm hover:shadow-md" />
             <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
               <VideoInstructionsDialog
                 variant="units"
@@ -575,7 +629,96 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         )}
       </div>
 
-      {/* Active Filters Display */}
+      {/* Line 2: Secondary Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        {/* My Inventory Toggle */}
+        <div className="flex-shrink-0">
+          <button
+            type="button"
+            disabled={!hasClientId}
+            className={`px-3 h-10 rounded-md border text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              filters.my_inventory
+                ? "bg-primary text-white border-primary hover:bg-primary/90"
+                : hasClientId
+                ? "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                : "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
+            }`}
+            onClick={() => handleFilterChange("my_inventory", !filters.my_inventory)}
+            title={!hasClientId ? (locale === "ar" ? "يتطلب تسجيل الدخول" : "Requires login") : ""}
+          >
+            <span className="truncate text-xs">
+              {t.unitsFilter.myInventory}
+            </span>
+          </button>
+        </div>
+
+        {/* Resale Toggle */}
+        <div className="flex-shrink-0">
+          <button
+            type="button"
+            className={`px-3 h-10 rounded-md border text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              filters.resale
+                ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
+                : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+            }`}
+            onClick={() => handleFilterChange("resale", !filters.resale)}
+          >
+            <span className="truncate text-xs">
+              {t.unitsFilter.resale}
+            </span>
+          </button>
+        </div>
+
+        {/* Min Price Field */}
+        <div className="flex-shrink-0">
+          <LenaTextField
+            name="min_price"
+            type="money"
+            label={locale === "ar" ? "الحد الأدنى للسعر" : "Min Price"}
+            value={filters.min_price}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              setFilters((prev) => ({ ...prev, min_price: value }));
+            }}
+            className="w-32"
+            adornment="EGP"
+          />
+        </div>
+
+        {/* Max Price Field */}
+        <div className="flex-shrink-0">
+          <LenaTextField
+            name="max_price"
+            type="money"
+            label={locale === "ar" ? "الحد الأقصى للسعر" : "Max Price"}
+            value={filters.max_price}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              setFilters((prev) => ({ ...prev, max_price: value }));
+            }}
+            className="w-32"
+            adornment="EGP"
+          />
+        </div>
+
+        {/* Min Area Field */}
+        <div className="flex-shrink-0">
+          <LenaTextField
+            name="min_area"
+            type="number"
+            label={t.unitsFilter.minArea}
+            value={filters.min_area}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              setFilters((prev) => ({ ...prev, min_area: value }));
+            }}
+            className="w-24"
+            adornment="m²"
+          />
+        </div>
+      </div>
+
+      {/* Line 3: Active Filters - Keep as is */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-600">

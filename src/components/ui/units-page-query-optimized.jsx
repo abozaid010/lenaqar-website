@@ -18,10 +18,40 @@ export default function UnitsPageQueryOptimized({
     const isBroker = (clientInfo?.client_type ?? "").toLowerCase() === "broker";
     const base = { ...searchParams };
     if (publicUnits) return base;
+    
+    // Handle My Inventory filter
+    let clientParam = {};
+    if (searchParams.my_inventory === "true") {
+      // When My Inventory is ON, use client_id from token and override broker behavior
+      const accessToken = LenaCookiesManager.getAccessToken();
+      if (accessToken) {
+        try {
+          const payload = JSON.parse(atob(accessToken.split('.')[1]));
+          const tokenClientId = payload.client_id ?? payload.sub ?? null;
+          if (tokenClientId) {
+            clientParam = { client_id: tokenClientId };
+          }
+        } catch (error) {
+          console.error("Failed to extract client_id from token:", error);
+        }
+      }
+    } else {
+      // Default behavior when My Inventory is OFF
+      clientParam = isBroker ? {} : { client_id: clientId || "" };
+    }
+    
+    // Handle Resale filter
+    let isPrimaryParam = {};
+    if (searchParams.resale === "true") {
+      isPrimaryParam = { is_primary: false };
+    } else {
+      isPrimaryParam = { is_primary: true };
+    }
+    
     return {
       ...base,
-      is_primary: true,
-      ...(isBroker ? {} : { client_id: clientId || "" }),
+      ...isPrimaryParam,
+      ...clientParam,
     };
   }, [searchParams, clientId, publicUnits]);
 

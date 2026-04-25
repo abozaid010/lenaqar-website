@@ -661,6 +661,9 @@ export default {
     allCities: "جميع المدن",
     from: "من",
     upTo: "إلى",
+    myInventory: "مخزوني",
+    resale: "إعادة بيع",
+    minArea: "الحد الأدنى للمساحة",
     purposes: {
       buy: "شراء",
       rent: "إيجار",

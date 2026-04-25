@@ -664,6 +664,9 @@ export default {
     clearall: " Clear All",
     from: "From",
     upTo: "Up to",
+    myInventory: "My Inventory",
+    resale: "Resale",
+    minArea: "Min Area",
     purposes: {
       buy: "Buy",
       rent: "Rent",
