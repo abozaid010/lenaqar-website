@@ -1,8 +1,13 @@
+'use client';
+
 import Link from 'next/link';
 import { MapPin, Building, User, Tag, Calendar } from 'lucide-react';
+import { useI18n } from '@/context/translate-api';
 import type { ProjectHeaderSummaryProps } from '@/lib/projects/project-types';
 
 export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryProps) {
+  const { t } = useI18n();
+
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
       {/* Title */}
@@ -10,12 +15,12 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
           {project.title}
         </h1>
-        
+
         {/* Developer and Location Links */}
         <div className="flex flex-wrap items-center gap-4 text-sm">
           {project.developerName && (
             project.developerHref ? (
-              <Link 
+              <Link
                 href={project.developerHref}
                 className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
               >
@@ -29,7 +34,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
               </span>
             )
           )}
-          
+
           <span className="flex items-center gap-1 text-gray-600">
             <MapPin className="w-4 h-4" />
             {project.locationLabel}
@@ -40,9 +45,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
       {/* Description */}
       {project.description && (
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-700 leading-relaxed">
-            {project.description}
-          </p>
+          <p className="text-gray-700 leading-relaxed">{project.description}</p>
         </div>
       )}
 
@@ -54,7 +57,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
               <Building className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Total Units</p>
+              <p className="text-sm text-gray-600">{t?.projectPage?.totalUnits || 'Total Units'}</p>
               <p className="font-semibold text-gray-900">{project.totalUnits}</p>
             </div>
           </div>
@@ -66,7 +69,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
               <Calendar className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Delivery</p>
+              <p className="text-sm text-gray-600">{t?.projectPage?.delivery || 'Delivery'}</p>
               <p className="font-semibold text-gray-900">{project.deliveryDateLabel}</p>
             </div>
           </div>
@@ -78,7 +81,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
               <Tag className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-gray-600">Status</p>
+              <p className="text-sm text-gray-600">{t?.projectPage?.status || 'Status'}</p>
               <p className="font-semibold text-gray-900 capitalize">{project.status}</p>
             </div>
           </div>
@@ -89,7 +92,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
       {project.badges.length > 0 && (
         <div className="flex flex-wrap gap-2">
           {project.badges.map((badge, index) => (
-            <span 
+            <span
               key={index}
               className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full"
             >
@@ -105,13 +108,13 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {project.startingPrice && (
               <div>
-                <p className="text-sm text-gray-600 mb-1">Starting Price</p>
+                <p className="text-sm text-gray-600 mb-1">{t?.projectPage?.startingPrice || 'Starting Price'}</p>
                 <p className="text-2xl font-bold text-green-600">{project.startingPrice}</p>
               </div>
             )}
             {project.averagePricePerMeter && (
               <div>
-                <p className="text-sm text-gray-600 mb-1">Average Price/m²</p>
+                <p className="text-sm text-gray-600 mb-1">{t?.projectPage?.avgPricePerM2 || 'Avg Price / m²'}</p>
                 <p className="text-2xl font-bold text-green-600">{project.averagePricePerMeter}</p>
               </div>
             )}

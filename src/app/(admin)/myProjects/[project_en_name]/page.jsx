@@ -5,13 +5,14 @@ import { getProjectByEnName } from "@/lib/projects/project-api";
 import { transformProjectToViewModel } from "@/lib/projects/project-api";
 import ProjectDetailsPage from "@/components/project-details/project-details-page";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { getServerTranslations } from "@/utils/getServerTranslations";
 
 export async function generateMetadata({ params }) {
   const { project_en_name } = await params;
   
   try {
     const response = await getProjectByEnName(project_en_name);
-    const project = response?.data?.project 
+    const project = response?.data?.project
       ? transformProjectToViewModel(response.data.project)
       : null;
 
@@ -134,9 +135,11 @@ export default async function ProjectDetailsPageWrapper({ params }) {
 
     const cookieStore = await cookies();
     const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
+    const locale = cookieStore.get('lang')?.value || 'ar';
+    const { t } = getServerTranslations(locale);
 
     const project = {
-      ...transformProjectToViewModel(response.data.project),
+      ...transformProjectToViewModel(response.data.project, t, locale),
       ...(clientId ? { clientId } : {}),
     };
 

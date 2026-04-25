@@ -1,5 +1,6 @@
 "use client";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
+import { useI18n as useRawTranslations } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../public/locales/en";
 import ar from "../../../../public/locales/ar";
@@ -29,8 +30,8 @@ export default function UnitBasicInfo({
   unit,
   missingRequiredFields = [],
 }) {
-  const { t, locale } = useI18n();
-  const { formatDate } = useLocaleConstants();
+  const { locale, common, property, localeUtils } = useI18n();
+  const { t } = useRawTranslations();
   const missing = missingRequiredFields || [];
   const isMissing = (field) => missing.includes(field);
 
@@ -105,7 +106,7 @@ export default function UnitBasicInfo({
           isMissing("unitTitle") ? MISSING_FIELD_CLASS : ""
         } ${isMissing("unitTitle") ? "p-2" : ""}`}
       >
-        {u.unitTitle || t.unitDetails?.title || "Unit Details"}
+        {u.unitTitle || property.getUnitTitle()}
       </h1>
 
       <div
@@ -162,7 +163,7 @@ export default function UnitBasicInfo({
                 {t.unitDetails?.deliveryDate}
               </span>
               <p className="font-medium text-xs whitespace-nowrap">
-                {formatDate(u.deliveryDate) || t.unitDetails?.notAvailable}
+                {localeUtils.formatDate(u.deliveryDate) || t.unitDetails?.notAvailable}
               </p>
             </div>
           </div>
@@ -210,7 +211,7 @@ export default function UnitBasicInfo({
           <Package className="h-5 w-5 text-primary shrink-0" />
           <div>
             <span className="text-xs line-clamp-1 text-gray-500">
-              {t.unitDetails?.finishing}
+              {t.unitDetails?.furnishing}
             </span>
             <p className="font-medium text-xs whitespace-nowrap ">
               {u.furnishing
@@ -261,13 +262,13 @@ export default function UnitBasicInfo({
       {(u.owner_name || u.owner_mobile) && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-3 text-slate-800">
-            {t.steps?.ownerDetails || "Owner Information"}
+            {property.getOwnerDetails()}
           </h3>
 
           {u.owner_name && u.owner_mobile ? (
             <button
               className="w-5 h-5 bg-green-500 hover:bg-green-600 rounded flex items-center justify-center transition-colors"
-              title="Open WhatsApp"
+              title={common.openWhatsApp}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -289,10 +290,10 @@ export default function UnitBasicInfo({
           <div className="flex flex-col items-center py-1.5 bg-white rounded-md border border-gray-200 h-20">
             <Ruler className="h-6 w-6 text-primary" />
             <span className="mt-1 text-sm text-gray-500">
-              {t.unitDetails?.area}
+              {property.getArea()}
             </span>
             <p className="font-medium text-center text-sm">
-              {u.landArea} m²
+              {localeUtils.formatNumber(u.landArea)} m²
             </p>
           </div>
         )}
@@ -307,7 +308,7 @@ export default function UnitBasicInfo({
         >
           <Eye className="h-5 w-5 text-primary flex-shrink-0" />
           <span className="mt-1 text-sm text-gray-500">
-            {t.unitDetails?.view}
+            {property.getView()}
           </span>
           <p className="font-medium text-center break-words text-sm">
             {u.view
@@ -326,7 +327,7 @@ export default function UnitBasicInfo({
         >
           <BedDouble className="h-6 w-6 text-primary" />
           <span className="mt-1 text-sm text-gray-500">
-            {t.unitDetails?.rooms}
+            {property.getRooms()}
           </span>
           <p className="font-medium text-center text-sm">
             {u.roomsCount != null && u.roomsCount !== "" ? u.roomsCount : "—"}
@@ -342,7 +343,9 @@ export default function UnitBasicInfo({
           }`}
         >
           <Bath className="h-6 w-6 text-primary" />
-          <span className="mt-1 text-sm text-gray-500">{t.bathrooms}</span>
+          <span className="text-xs text-gray-500">
+            {property.getBathrooms()}
+          </span>
           <p className="font-medium text-center text-sm">
             {u.bathroomCount != null && u.bathroomCount !== "" ? u.bathroomCount : "—"}
           </p>

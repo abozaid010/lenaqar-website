@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
+import { useI18n } from '@/context/translate-api';
 
 export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryProps) {
+  const { t } = useI18n();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   if (images.length === 0) {
@@ -13,8 +15,8 @@ export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryPr
       <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
           <ImageIcon className="w-16 h-16 mb-4" />
-          <p className="text-lg font-medium">No images available</p>
-          <p className="text-sm mt-2">This property has no photos yet</p>
+          <p className="text-lg font-medium">{t?.unitLabels?.noImages || 'No images available'}</p>
+          <p className="text-sm mt-2">{t?.unitLabels?.noImagesDescription || 'This property has no photos yet'}</p>
         </div>
       </div>
     );
@@ -45,7 +47,7 @@ export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryPr
       {isPrimary && (
         <div className="flex justify-end">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-            Primary Unit
+            {t?.unitLabels?.primaryUnit || 'Primary Unit'}
           </span>
         </div>
       )}

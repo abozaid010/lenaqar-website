@@ -66,7 +66,7 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
 
               {project.trustItems.length > 0 && (
                 <div className="bg-white rounded-lg border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Project Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t?.projectPage?.projectInfo || 'Project Information'}</h3>
                   <div className="space-y-3">
                     {project.trustItems.map((item, index) => (
                       <div key={index} className="flex justify-between items-center">

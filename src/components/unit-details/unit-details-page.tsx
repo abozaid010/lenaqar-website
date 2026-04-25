@@ -1,13 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  Bed, 
-  Bath, 
-  Maximize, 
-  Calendar, 
-  Phone, 
-  MessageCircle, 
+import {
+  Bed,
+  Bath,
+  Maximize,
+  Calendar,
+  Phone,
+  MessageCircle,
   Home,
   MapPin,
   Building,
@@ -17,6 +17,7 @@ import {
   Share2,
   Heart
 } from 'lucide-react';
+import { useI18n } from '@/context/translate-api';
 import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
@@ -31,6 +32,7 @@ interface UnitDetailsPageProps {
 }
 
 export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
+  const { t } = useI18n();
   const [showMobileActionBar, setShowMobileActionBar] = useState(true);
 
   return (
@@ -70,7 +72,7 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
               {/* Trust/Metadata */}
               {unit.trustItems.length > 0 && (
                 <div className="bg-white rounded-lg border p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Property Information</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">{t?.projectPage?.propertyInfo || 'Property Information'}</h3>
                   <div className="space-y-3">
                     {unit.trustItems.map((item, index) => (
                       <div key={index} className="flex justify-between items-center">

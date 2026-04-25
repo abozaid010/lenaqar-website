@@ -52,21 +52,24 @@ const iconMap: Record<string, any> = {
   check: CheckCircle,
 };
 
-// Simple icon mapping for remaining items after filtering
-function getIconForSpec(label: string): any {
-  const lowerLabel = label.toLowerCase();
-  
-  // Only handle the core items that remain after filtering
-  if (lowerLabel.includes('bed') || lowerLabel.includes('room')) return Bed;
-  if (lowerLabel.includes('bath')) return Bath;
-  if (lowerLabel.includes('garden')) return Trees;
-  if (lowerLabel.includes('garage') || lowerLabel.includes('parking')) return Car;
-  if (lowerLabel.includes('furnish')) return Home;
-  if (lowerLabel.includes('finish')) return Shield;
-  if (lowerLabel.includes('type') || lowerLabel.includes('building')) return Building;
-  
-  return Info; // Default icon
+const KEY_ICON_MAP: Record<string, any> = {
+  bedrooms: Bed,
+  bathrooms: Bath,
+  garden: Trees,
+  garage: Car,
+  furnishing: Home,
+  finishing: Shield,
+  propertyType: Building,
+};
+
+// Fallback icon for specs without a key
+function getIconForKey(key?: string): any {
+  if (!key) return Info;
+  return KEY_ICON_MAP[key] ?? Info;
 }
+
+// Keys to exclude — items shown elsewhere (pricing header, specs section)
+const EXCLUDED_KEYS = new Set(['referenceCode', 'area', 'delivery', 'totalPrice', 'downPayment', 'installmentYears', 'installmentAmount']);
 
 interface CombinedQuickFactsProps {
   facts: UnitQuickFactsProps['facts'];
@@ -79,41 +82,16 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
   const specFacts = specs.map(spec => ({
     label: spec.label,
     value: spec.value,
-    icon: 'info' // Will be mapped to appropriate icon
+    icon: 'info',
+    key: spec.key,
   }));
 
   // Combine quick facts and specifications
   const allFacts = [...facts, ...specFacts];
 
-  // Filter out unwanted items based on exact JSON field mapping
+  // Filter out unwanted items using the stable `key` field (locale-independent)
   const filteredFacts = allFacts.filter(fact => {
-    const labelLower = fact.label.toLowerCase();
-    
-    // Remove items that correspond to these exact JSON fields:
-    // - code (Reference Code)
-    // - deliveryDate (Delivery Date/Delivery)  
-    // - landArea (Area)
-    // - totalPrice (already shown in header pricing)
-    // - downPayment (already shown in header pricing)
-    // - installment_years (already shown in header pricing)
-    // - installment_amount_yearly (already shown in header pricing)
-    
-    if (labelLower.includes('reference') || labelLower.includes('code')) {
-      return false; // Remove code field
-    }
-    
-    if (labelLower.includes('delivery') || labelLower.includes('date')) {
-      return false; // Remove deliveryDate field
-    }
-    
-    if (labelLower.includes('area') || labelLower.includes('size') || labelLower.includes('sq')) {
-      return false; // Remove landArea field
-    }
-    
-    if (labelLower.includes('price') || labelLower.includes('payment') || labelLower.includes('installment')) {
-      return false; // Remove pricing fields already shown in header
-    }
-    
+    if (fact.key && EXCLUDED_KEYS.has(fact.key)) return false;
     return true;
   });
 
@@ -134,10 +112,9 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
       <h2 className="text-lg font-semibold text-gray-900 mb-4">{t?.unitQuickFacts?.title || "Quick Facts"}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {deduplicatedFacts.map((fact, index) => {
-          // Determine icon: use iconMap for quick facts, getIconForSpec for specifications
-          const IconComponent = fact.icon && iconMap[fact.icon] 
-            ? iconMap[fact.icon] 
-            : getIconForSpec(fact.label);
+          const IconComponent = (fact.icon && iconMap[fact.icon])
+            ? iconMap[fact.icon]
+            : getIconForKey(fact.key);
           
           return (
             <div

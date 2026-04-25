@@ -1,3 +1,6 @@
+'use client';
+
+import { useI18n } from '@/context/translate-api';
 import type { ProjectViewModel } from '@/lib/projects/project-types';
 
 interface Props {
@@ -5,12 +8,17 @@ interface Props {
 }
 
 export default function ProjectPaymentPlans({ project }: Props) {
+  const { t } = useI18n();
   const plans = project.paymentPlanDetails;
   if (!plans || plans.length === 0) return null;
 
+  const yrsLabel = t?.projectPage?.years || 'yrs';
+
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">Payment Plans</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-4">
+        {t?.projectPage?.paymentPlans || 'Payment Plans'}
+      </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {plans.map((plan, i) => (
           <div
@@ -26,7 +34,7 @@ export default function ProjectPaymentPlans({ project }: Props) {
               <h3 className="font-semibold text-gray-900 text-sm">{plan.name}</h3>
               {plan.is_default && (
                 <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full">
-                  Default
+                  {t?.projectPage?.delivery || 'Default'}
                 </span>
               )}
             </div>
@@ -34,21 +42,21 @@ export default function ProjectPaymentPlans({ project }: Props) {
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 text-center">
               <div className="bg-white rounded-md p-2 border border-gray-100">
-                <p className="text-xs text-gray-500">Down</p>
+                <p className="text-xs text-gray-500">{t?.projectPage?.down || 'Down'}</p>
                 <p className="font-semibold text-gray-900 text-sm">
                   {plan.downpayment_percentage}%
                 </p>
               </div>
               <div className="bg-white rounded-md p-2 border border-gray-100">
-                <p className="text-xs text-gray-500">Install.</p>
+                <p className="text-xs text-gray-500">{t?.projectPage?.installmentAbbr || 'Install.'}</p>
                 <p className="font-semibold text-gray-900 text-sm">
-                  {plan.installment_years} yrs
+                  {plan.installment_years} {yrsLabel}
                 </p>
               </div>
               <div className="bg-white rounded-md p-2 border border-gray-100">
-                <p className="text-xs text-gray-500">Deliver</p>
+                <p className="text-xs text-gray-500">{t?.projectPage?.deliver || 'Deliver'}</p>
                 <p className="font-semibold text-gray-900 text-sm">
-                  {plan.delivery_in_years} yrs
+                  {plan.delivery_in_years} {yrsLabel}
                 </p>
               </div>
             </div>
@@ -56,13 +64,13 @@ export default function ProjectPaymentPlans({ project }: Props) {
             {/* Secondary info */}
             <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
               {plan.cache_discount > 0 && (
-                <span>Cash discount: {plan.cache_discount}%</span>
+                <span>{t?.projectPage?.cashDiscount || 'Cash discount'}: {plan.cache_discount}%</span>
               )}
               {plan.maintenance_fee > 0 && (
-                <span>Maintenance: {plan.maintenance_fee}%</span>
+                <span>{t?.projectPage?.maintenance || 'Maintenance'}: {plan.maintenance_fee}%</span>
               )}
               {plan.installment_increasing_percentage > 0 && (
-                <span>Escalation: {plan.installment_increasing_percentage}%</span>
+                <span>{t?.projectPage?.escalation || 'Escalation'}: {plan.installment_increasing_percentage}%</span>
               )}
             </div>
 

@@ -106,49 +106,72 @@ export async function getProjectByEnName(enName: string): Promise<ProjectApiResp
   }
 }
 
-export function transformProjectToViewModel(rawProject: RawProject): ProjectViewModel {
+type T = Record<string, any> | null | undefined;
+const getT = (t: T, ...path: string[]): string | null => {
+  if (!t) return null;
+  let val: any = t;
+  for (const k of path) {
+    if (val === null || val === undefined || typeof val !== 'object') return null;
+    val = val[k];
+  }
+  return typeof val === 'string' && val.length > 0 ? val : null;
+};
+
+export function transformProjectToViewModel(rawProject: RawProject, t?: T, locale: string = 'en'): ProjectViewModel {
+  const intlLocale = locale === 'ar' ? 'ar-EG' : 'en-US';
+
+  const formatDate = (val: string | Date): string => {
+    try {
+      return new Intl.DateTimeFormat(intlLocale, { year: 'numeric', month: 'long', day: 'numeric' }).format(new Date(val));
+    } catch {
+      return String(val);
+    }
+  };
+
+  const yearsLabel = getT(t, 'projectPage', 'years') || 'yrs';
+  const formatDelivery = (val: number | string): string =>
+    typeof val === 'number' ? `${val} ${yearsLabel}` : formatDate(val);
+
+  const localeName = locale === 'ar'
+    ? (rawProject.ar_name || rawProject.en_name || '')
+    : (rawProject.en_name || rawProject.ar_name || '');
+
   // Transform hero images
   const heroImages: HeroImage[] = [];
   if (rawProject.master_plan?.url) {
-    heroImages.push({
-      url: rawProject.master_plan.url,
-      alt: rawProject.en_name || rawProject.ar_name || 'Project Master Plan'
-    });
+    heroImages.push({ url: rawProject.master_plan.url, alt: localeName || 'Project' });
   }
 
   // Build quick facts
   const quickFacts: QuickFact[] = [];
-  
+
   if (rawProject.units_count || rawProject.total_units) {
     quickFacts.push({
-      label: 'Total Units',
+      label: getT(t, 'projectPage', 'totalUnits') || 'Total Units',
       value: (rawProject.units_count || rawProject.total_units).toString(),
       icon: 'building'
     });
   }
-  
+
   if (rawProject.city) {
     quickFacts.push({
-      label: 'Location',
+      label: getT(t, 'propertyDetails', 'location') || 'Location',
       value: `${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`,
       icon: 'map-pin'
     });
   }
-  
+
   if (rawProject.delivery_date) {
-    const deliveryDate = typeof rawProject.delivery_date === 'number' 
-      ? `${rawProject.delivery_date} years` 
-      : new Date(rawProject.delivery_date).toLocaleDateString();
     quickFacts.push({
-      label: 'Delivery Date',
-      value: deliveryDate,
+      label: getT(t, 'unitDetails', 'deliveryDate') || 'Delivery Date',
+      value: formatDelivery(rawProject.delivery_date),
       icon: 'calendar'
     });
   }
 
   if (rawProject.properties_types && rawProject.properties_types.length > 0) {
     quickFacts.push({
-      label: 'Property Types',
+      label: getT(t, 'projectPage', 'propertyTypes') || 'Property Types',
       value: rawProject.properties_types.join(', '),
       icon: 'home'
     });
@@ -156,80 +179,81 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
 
   if (rawProject.area || rawProject.start_area) {
     quickFacts.push({
-      label: 'Starting Area',
-      value: `From ${rawProject.start_area || rawProject.area} m²`,
+      label: getT(t, 'projectPage', 'startingArea') || 'Starting Area',
+      value: `${rawProject.start_area || rawProject.area} m²`,
       icon: 'maximize'
     });
   }
 
   // Build specifications
   const specs: SpecItem[] = [];
-  
+
   if (rawProject.status) {
     specs.push({
-      label: 'Status',
+      label: getT(t, 'projectPage', 'status') || 'Status',
       value: rawProject.status
     });
   }
-  
+
   if (rawProject.phases && rawProject.phases.length > 0) {
     specs.push({
-      label: 'Phases',
+      label: getT(t, 'projectPage', 'phases') || 'Phases',
       value: rawProject.phases.join(', ')
     });
   }
-  
+
   if (rawProject.start_price || rawProject.starting_price) {
     const price = rawProject.start_price || rawProject.starting_price;
     specs.push({
-      label: 'Starting Price',
-      value: `EGP ${price.toLocaleString()}`
+      label: getT(t, 'projectPage', 'startingPrice') || 'Starting Price',
+      value: `EGP ${price.toLocaleString('en-US')}`
     });
   }
-  
+
   if (rawProject.average_price_per_meter) {
     specs.push({
-      label: 'Average Price/m²',
-      value: `EGP ${rawProject.average_price_per_meter.toLocaleString()}`
+      label: getT(t, 'projectPage', 'avgPricePerM2') || 'Avg Price / m²',
+      value: `EGP ${rawProject.average_price_per_meter.toLocaleString('en-US')}`
     });
   }
 
   if (rawProject.gated !== undefined) {
     specs.push({
-      label: 'Gated Community',
-      value: rawProject.gated ? 'Yes' : 'No'
+      label: getT(t, 'projectPage', 'gatedCommunity') || 'Gated Community',
+      value: rawProject.gated
+        ? (getT(t, 'common', 'yes') || 'Yes')
+        : (getT(t, 'common', 'no') || 'No')
     });
   }
 
   // Build trust items
   const trustItems: TrustItem[] = [];
-  
+
   trustItems.push({
-    label: 'Project ID',
+    label: getT(t, 'projectPage', 'projectId') || 'Project ID',
     value: rawProject.id
   });
-  
+
   if (rawProject.created_at) {
     trustItems.push({
-      label: 'Created',
-      value: new Date(rawProject.created_at).toLocaleDateString()
+      label: getT(t, 'projectPage', 'created') || 'Created',
+      value: formatDate(rawProject.created_at)
     });
   }
 
   if (rawProject.updated_at) {
     trustItems.push({
-      label: 'Last Updated',
-      value: new Date(rawProject.updated_at).toLocaleDateString()
+      label: getT(t, 'unitLabels', 'lastUpdated') || 'Last Updated',
+      value: formatDate(rawProject.updated_at)
     });
   }
 
   // Create badges
   const badges: string[] = [];
-  if (rawProject.status) {
-    badges.push(rawProject.status);
-  }
+  if (rawProject.status) badges.push(rawProject.status);
   if (rawProject.phases && rawProject.phases.length > 0) {
-    badges.push(`${rawProject.phases.length} Phases`);
+    const phasesLabel = getT(t, 'projectPage', 'phases') || 'Phases';
+    badges.push(`${rawProject.phases.length} ${phasesLabel}`);
   }
 
   // Build full gallery: master_plan first, then all images[]
@@ -237,7 +261,7 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
   if (rawProject.images && Array.isArray(rawProject.images)) {
     for (const img of rawProject.images) {
       if (img.url && !galleryImages.some(h => h.url === img.url)) {
-        galleryImages.push({ url: img.url, alt: rawProject.en_name || 'Project image' });
+        galleryImages.push({ url: img.url, alt: localeName || 'Project image' });
       }
     }
   }
@@ -250,9 +274,13 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
     }
   }
 
+  const deliveryDateLabel = rawProject.delivery_date
+    ? formatDelivery(rawProject.delivery_date)
+    : undefined;
+
   return {
     id: rawProject.id,
-    title: rawProject.en_name || 'Untitled Project',
+    title: localeName || 'Untitled Project',
     titleAr: rawProject.ar_name || rawProject.en_name || 'Untitled Project',
     description: rawProject.description,
     developerName: rawProject.developer_name || rawProject.developer,
@@ -262,12 +290,14 @@ export function transformProjectToViewModel(rawProject: RawProject): ProjectView
     heroImages: galleryImages.length > 0 ? galleryImages : heroImages,
     galleryImages,
     badges,
-    startingPrice: (rawProject.start_price || rawProject.starting_price) ? `EGP ${(rawProject.start_price || rawProject.starting_price).toLocaleString()}` : undefined,
-    averagePricePerMeter: rawProject.average_price_per_meter ? `EGP ${rawProject.average_price_per_meter.toLocaleString()}` : undefined,
-    totalUnits: (rawProject.units_count || rawProject.total_units)?.toString(),
-    deliveryDateLabel: rawProject.delivery_date ?
-      (typeof rawProject.delivery_date === 'number' ? `${rawProject.delivery_date} years` : new Date(rawProject.delivery_date).toLocaleDateString())
+    startingPrice: (rawProject.start_price || rawProject.starting_price)
+      ? `EGP ${(rawProject.start_price || rawProject.starting_price).toLocaleString('en-US')}`
       : undefined,
+    averagePricePerMeter: rawProject.average_price_per_meter
+      ? `EGP ${rawProject.average_price_per_meter.toLocaleString('en-US')}`
+      : undefined,
+    totalUnits: (rawProject.units_count || rawProject.total_units)?.toString(),
+    deliveryDateLabel,
     referenceCode: rawProject.id,
     quickFacts,
     specs,

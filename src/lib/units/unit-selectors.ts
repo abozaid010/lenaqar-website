@@ -17,16 +17,27 @@ import {
   formatInstallmentYears,
   calculateMonthlyInstallment,
   getUnitBadges,
-  capitalizeWords
+  capitalizeWords,
 } from './unit-formatters';
 import { generateUnitSlug } from './unit-url-utils';
 import type { RawUnit, UnitViewModel, QuickFact, SpecItem, TrustItem } from './unit-types';
 
+type T = Record<string, any> | null | undefined;
+
+const getT = (t: T, ...path: string[]): string | null => {
+  if (!t) return null;
+  let val: any = t;
+  for (const k of path) {
+    if (val === null || val === undefined || typeof val !== 'object') return null;
+    val = val[k];
+  }
+  return typeof val === 'string' && val.length > 0 ? val : null;
+};
+
 /**
  * Transform raw unit data into normalized view model
  */
-export const transformUnitToViewModel = (rawUnit: RawUnit): UnitViewModel => {
-  // Basic info
+export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string = 'en'): UnitViewModel => {
   const id = rawUnit.unitId;
   const title = isNonEmptyString(rawUnit.unitTitle) ? rawUnit.unitTitle : null;
   const projectName = isNonEmptyString(rawUnit.project) ? rawUnit.project : null;
@@ -38,50 +49,33 @@ export const transformUnitToViewModel = (rawUnit: RawUnit): UnitViewModel => {
   const phase = isNonEmptyString(rawUnit.phase) ? rawUnit.phase : null;
   const isPrimary = Boolean(rawUnit.is_primary);
 
-  // Location
   const locationLabel = buildLocationLabel(rawUnit);
 
-  // Images
-  const heroImages = hasValidImages(rawUnit.images) 
+  const heroImages = hasValidImages(rawUnit.images)
     ? rawUnit.images
         .filter(img => img && isNonEmptyString(img.url))
         .map(img => ({
           url: img.url,
-          alt: title || projectName || 'Property image'
+          alt: title || projectName || 'Property image',
         }))
     : [];
 
-  // Badges
-  const badges = getUnitBadges(rawUnit);
-
-  // Pricing
+  const badges = getUnitBadges(rawUnit, t);
   const totalPrice = formatCurrency(rawUnit.totalPrice);
   const downPayment = formatCurrency(rawUnit.downPayment);
   const yearlyInstallment = formatCurrency(rawUnit.installment_amount_yearly);
   const monthlyInstallmentEstimate = calculateMonthlyInstallment(rawUnit.installment_amount_yearly);
-  const installmentYearsLabel = formatInstallmentYears(rawUnit.installment_years);
-
-  // Dates
-  const deliveryDateLabel = formatDeliveryDate(rawUnit.deliveryDate);
-
-  // Property details
-  const purpose = formatPurpose(rawUnit.purpose);
-  const buildingType = formatBuildingType(rawUnit.buildingType);
-  const finishing = formatFinishing(rawUnit.finishing);
-  const furnishing = formatFurnishing(rawUnit.furnishing);
-
-  // Navigation
+  const installmentYearsLabel = formatInstallmentYears(rawUnit.installment_years, t);
+  const deliveryDateLabel = formatDeliveryDate(rawUnit.deliveryDate, locale);
+  const purpose = formatPurpose(rawUnit.purpose, t);
+  const buildingType = formatBuildingType(rawUnit.buildingType, t);
+  const finishing = formatFinishing(rawUnit.finishing, t);
+  const furnishing = formatFurnishing(rawUnit.furnishing, t);
   const projectHref = buildProjectHref(rawUnit);
   const developerHref = buildDeveloperHref(rawUnit);
-
-  // Quick facts
-  const quickFacts = getQuickFacts(rawUnit);
-
-  // Specifications
-  const specs = getUnitSpecs(rawUnit);
-
-  // Trust items
-  const trustItems = getTrustItems(rawUnit);
+  const quickFacts = getQuickFacts(rawUnit, t, locale);
+  const specs = getUnitSpecs(rawUnit, t, locale);
+  const trustItems = getTrustItems(rawUnit, t, locale);
 
   return {
     id,
@@ -93,9 +87,9 @@ export const transformUnitToViewModel = (rawUnit: RawUnit): UnitViewModel => {
     developerId,
     projectHref,
     developerHref,
-    developerPhone: null, // These would come from contact info API
+    developerPhone: null,
     developerWhatsapp: null,
-    ownerName: null, // These would come from unit data
+    ownerName: null,
     ownerMobile: null,
     ownerWhatsapp: null,
     clientId: rawUnit.clientId || null,
@@ -124,72 +118,39 @@ export const transformUnitToViewModel = (rawUnit: RawUnit): UnitViewModel => {
 /**
  * Get quick facts for the unit
  */
-export const getQuickFacts = (unit: RawUnit): QuickFact[] => {
+export const getQuickFacts = (unit: RawUnit, t?: T, locale: string = 'en'): QuickFact[] => {
   const facts: QuickFact[] = [];
 
-  // Bedrooms
   if (isMeaningfulNumber(unit.roomsCount)) {
-    facts.push({
-      label: 'Bedrooms',
-      value: unit.roomsCount === 1 ? '1 Bedroom' : `${unit.roomsCount} Bedrooms`,
-      icon: 'bed'
-    });
+    const label = getT(t, 'unitLabels', 'bedrooms') || 'Bedrooms';
+    facts.push({ key: 'bedrooms', label, value: `${unit.roomsCount} ${label}`, icon: 'bed' });
   }
 
-  // Bathrooms
   if (isMeaningfulNumber(unit.bathroomCount)) {
-    facts.push({
-      label: 'Bathrooms',
-      value: unit.bathroomCount === 1 ? '1 Bathroom' : `${unit.bathroomCount} Bathrooms`,
-      icon: 'bath'
-    });
+    const label = getT(t, 'unitLabels', 'bathrooms') || 'Bathrooms';
+    facts.push({ key: 'bathrooms', label, value: `${unit.bathroomCount} ${label}`, icon: 'bath' });
   }
 
-  // Area
   const area = formatArea(unit.landArea);
   if (area) {
-    facts.push({
-      label: 'Area',
-      value: area,
-      icon: 'maximize'
-    });
+    facts.push({ key: 'area', label: getT(t, 'unitLabels', 'area') || 'Area', value: area, icon: 'maximize' });
   }
 
-  // Garden size (only if meaningful)
   if (isMeaningfulNumber(unit.gardenSize)) {
-    facts.push({
-      label: 'Garden',
-      value: formatArea(unit.gardenSize),
-      icon: 'trees'
-    });
+    facts.push({ key: 'garden', label: getT(t, 'unitLabels', 'garden') || 'Garden', value: formatArea(unit.gardenSize) as string, icon: 'trees' });
   }
 
-  // Roof area (only if meaningful)
   if (isMeaningfulNumber(unit.roof_area)) {
-    facts.push({
-      label: 'Roof Area',
-      value: formatArea(unit.roof_area),
-      icon: 'home'
-    });
+    facts.push({ key: 'roofArea', label: getT(t, 'unitLabels', 'roofArea') || 'Roof Area', value: formatArea(unit.roof_area) as string, icon: 'home' });
   }
 
-  // Garage area (only if meaningful)
   if (isMeaningfulNumber(unit.garageArea)) {
-    facts.push({
-      label: 'Garage',
-      value: formatArea(unit.garageArea),
-      icon: 'car'
-    });
+    facts.push({ key: 'garage', label: getT(t, 'unitLabels', 'garage') || 'Garage', value: formatArea(unit.garageArea) as string, icon: 'car' });
   }
 
-  // Delivery date
-  const deliveryDate = formatDeliveryDate(unit.deliveryDate);
+  const deliveryDate = formatDeliveryDate(unit.deliveryDate, locale);
   if (deliveryDate) {
-    facts.push({
-      label: 'Delivery',
-      value: deliveryDate,
-      icon: 'calendar'
-    });
+    facts.push({ key: 'delivery', label: getT(t, 'unitDetails', 'deliveryDate') || 'Delivery', value: deliveryDate, icon: 'calendar' });
   }
 
   return facts;
@@ -198,84 +159,67 @@ export const getQuickFacts = (unit: RawUnit): QuickFact[] => {
 /**
  * Get detailed specifications for the unit
  */
-export const getUnitSpecs = (unit: RawUnit): SpecItem[] => {
+export const getUnitSpecs = (unit: RawUnit, t?: T, locale: string = 'en'): SpecItem[] => {
   const specs: SpecItem[] = [];
 
-  // Building type
-  const buildingType = formatBuildingType(unit.buildingType);
+  const buildingType = formatBuildingType(unit.buildingType, t);
   if (buildingType) {
-    specs.push({ label: 'Property Type', value: buildingType });
+    specs.push({ key: 'propertyType', label: getT(t, 'unitHeader', 'propertyType') || 'Property Type', value: buildingType });
   }
 
-  // Purpose
-  const purpose = formatPurpose(unit.purpose);
+  const purpose = formatPurpose(unit.purpose, t);
   if (purpose) {
-    specs.push({ label: 'Purpose', value: purpose });
+    specs.push({ key: 'purpose', label: getT(t, 'unitDetails', 'purpose') || 'Purpose', value: purpose });
   }
 
-  // Bedrooms
   if (isMeaningfulNumber(unit.roomsCount)) {
-    specs.push({ 
-      label: 'Bedrooms', 
-      value: unit.roomsCount === 1 ? '1 Bedroom' : `${unit.roomsCount} Bedrooms` 
-    });
+    const label = getT(t, 'unitLabels', 'bedrooms') || 'Bedrooms';
+    specs.push({ key: 'bedrooms', label, value: unit.roomsCount === 1 ? `1 ${label}` : `${unit.roomsCount} ${label}` });
   }
 
-  // Bathrooms
   if (isMeaningfulNumber(unit.bathroomCount)) {
-    specs.push({ 
-      label: 'Bathrooms', 
-      value: unit.bathroomCount === 1 ? '1 Bathroom' : `${unit.bathroomCount} Bathrooms` 
-    });
+    const label = getT(t, 'unitLabels', 'bathrooms') || 'Bathrooms';
+    specs.push({ key: 'bathrooms', label, value: unit.bathroomCount === 1 ? `1 ${label}` : `${unit.bathroomCount} ${label}` });
   }
 
-  // Land area
   const landArea = formatArea(unit.landArea);
   if (landArea) {
-    specs.push({ label: 'Land Area', value: landArea });
+    specs.push({ key: 'landArea', label: getT(t, 'unitDetails', 'landArea') || 'Land Area', value: landArea });
   }
 
-  // Garden size
   if (isMeaningfulNumber(unit.gardenSize)) {
-    specs.push({ label: 'Garden Size', value: formatArea(unit.gardenSize) });
+    specs.push({ key: 'gardenSize', label: getT(t, 'basicDetails', 'gardenSize') || 'Garden Size', value: formatArea(unit.gardenSize) as string });
   }
 
-  // Roof area
   if (isMeaningfulNumber(unit.roof_area)) {
-    specs.push({ label: 'Roof Area', value: formatArea(unit.roof_area) });
+    specs.push({ key: 'roofArea', label: getT(t, 'unitLabels', 'roofArea') || 'Roof Area', value: formatArea(unit.roof_area) as string });
   }
 
-  // Garage area
   if (isMeaningfulNumber(unit.garageArea)) {
-    specs.push({ label: 'Garage Area', value: formatArea(unit.garageArea) });
+    specs.push({ key: 'garageArea', label: getT(t, 'basicDetails', 'garageArea') || 'Garage Area', value: formatArea(unit.garageArea) as string });
   }
 
-  // Finishing
-  const finishing = formatFinishing(unit.finishing);
+  const finishing = formatFinishing(unit.finishing, t);
   if (finishing) {
-    specs.push({ label: 'Finishing', value: finishing });
+    specs.push({ key: 'finishing', label: getT(t, 'unitDetails', 'finishing') || 'Finishing', value: finishing });
   }
 
-  // Furnishing
-  const furnishing = formatFurnishing(unit.furnishing);
+  const furnishing = formatFurnishing(unit.furnishing, t);
   if (furnishing) {
-    specs.push({ label: 'Furnishing', value: furnishing });
+    specs.push({ key: 'furnishing', label: getT(t, 'unitDetails', 'furnishing') || 'Furnishing', value: furnishing });
   }
 
-  // Delivery date
-  const deliveryDate = formatDeliveryDate(unit.deliveryDate);
+  const deliveryDate = formatDeliveryDate(unit.deliveryDate, locale);
   if (deliveryDate) {
-    specs.push({ label: 'Delivery Date', value: deliveryDate });
+    specs.push({ key: 'deliveryDate', label: getT(t, 'unitDetails', 'deliveryDate') || 'Delivery Date', value: deliveryDate });
   }
 
-  // Phase
   if (isNonEmptyString(unit.phase)) {
-    specs.push({ label: 'Phase', value: capitalizeWords(unit.phase) });
+    specs.push({ key: 'phase', label: getT(t, 'unitLabels', 'phase') || 'Phase', value: capitalizeWords(unit.phase) });
   }
 
-  // Reference code
   if (isNonEmptyString(unit.code)) {
-    specs.push({ label: 'Reference Code', value: unit.code });
+    specs.push({ key: 'referenceCode', label: getT(t, 'unitLabels', 'referenceCode') || 'Reference Code', value: unit.code });
   }
 
   return specs;
@@ -284,27 +228,26 @@ export const getUnitSpecs = (unit: RawUnit): SpecItem[] => {
 /**
  * Get trust/metadata items for the unit
  */
-export const getTrustItems = (unit: RawUnit): TrustItem[] => {
+export const getTrustItems = (unit: RawUnit, t?: T, locale: string = 'en'): TrustItem[] => {
   const items: TrustItem[] = [];
 
-  // Reference code
   if (isNonEmptyString(unit.code)) {
-    items.push({ label: 'Reference Code', value: unit.code });
+    items.push({ key: 'referenceCode', label: getT(t, 'unitLabels', 'referenceCode') || 'Reference Code', value: unit.code });
   }
 
-  // Last updated
   if (isValidDate(unit.updatedAt)) {
-    items.push({ 
-      label: 'Last Updated', 
-      value: formatDate(unit.updatedAt) || 'Unknown' 
+    items.push({
+      key: 'lastUpdated',
+      label: getT(t, 'unitLabels', 'lastUpdated') || 'Last Updated',
+      value: formatDate(unit.updatedAt, locale) || '',
     });
   }
 
-  // Data source (only if meaningful)
   if (isNonEmptyString(unit.dataSource) && unit.dataSource !== 'import_v2') {
-    items.push({ 
-      label: 'Source', 
-      value: capitalizeWords(unit.dataSource.replace('_', ' ')) 
+    items.push({
+      key: 'source',
+      label: getT(t, 'unitLabels', 'source') || 'Source',
+      value: capitalizeWords(unit.dataSource.replace('_', ' ')),
     });
   }
 
@@ -317,85 +260,44 @@ export const getTrustItems = (unit: RawUnit): TrustItem[] => {
 export const getPricingItems = (unit: RawUnit) => {
   const items: any[] = [];
 
-  // Total price
   const totalPrice = formatCurrency(unit.totalPrice);
-  if (totalPrice) {
-    items.push({ label: 'Total Price', value: totalPrice, highlight: true });
-  }
+  if (totalPrice) items.push({ label: 'Total Price', value: totalPrice, highlight: true });
 
-  // Down payment
   const downPayment = formatCurrency(unit.downPayment);
-  if (downPayment) {
-    items.push({ label: 'Down Payment', value: downPayment });
-  }
+  if (downPayment) items.push({ label: 'Down Payment', value: downPayment });
 
-  // Installment years
   const installmentYears = formatInstallmentYears(unit.installment_years);
-  if (installmentYears) {
-    items.push({ label: 'Installment Period', value: installmentYears });
-  }
+  if (installmentYears) items.push({ label: 'Installment Period', value: installmentYears });
 
-  // Yearly installment
   const yearlyInstallment = formatCurrency(unit.installment_amount_yearly);
-  if (yearlyInstallment) {
-    items.push({ label: 'Yearly Installment', value: yearlyInstallment });
-  }
+  if (yearlyInstallment) items.push({ label: 'Yearly Installment', value: yearlyInstallment });
 
-  // Monthly estimate
   const monthlyEstimate = calculateMonthlyInstallment(unit.installment_amount_yearly);
-  if (monthlyEstimate) {
-    items.push({ label: 'Monthly (Est.)', value: monthlyEstimate, note: 'Estimated' });
-  }
+  if (monthlyEstimate) items.push({ label: 'Monthly (Est.)', value: monthlyEstimate, note: 'Estimated' });
 
   return items;
 };
 
-/**
- * Check if unit has meaningful pricing information
- */
 export const hasPricingInfo = (unit: RawUnit): boolean => {
-  return isMeaningfulNumber(unit.totalPrice) || 
-         isMeaningfulNumber(unit.downPayment) || 
-         isMeaningfulNumber(unit.installment_amount_yearly);
+  return isMeaningfulNumber(unit.totalPrice) ||
+    isMeaningfulNumber(unit.downPayment) ||
+    isMeaningfulNumber(unit.installment_amount_yearly);
 };
 
-/**
- * Check if unit has meaningful specifications
- */
-export const hasSpecsInfo = (unit: RawUnit): boolean => {
-  return getUnitSpecs(unit).length > 0;
-};
+export const hasSpecsInfo = (unit: RawUnit): boolean => getUnitSpecs(unit).length > 0;
+export const hasQuickFacts = (unit: RawUnit): boolean => getQuickFacts(unit).length > 0;
 
 /**
- * Check if unit has meaningful quick facts
- */
-export const hasQuickFacts = (unit: RawUnit): boolean => {
-  return getQuickFacts(unit).length > 0;
-};
-
-/**
- * Generate fallback unit title
+ * Generate fallback unit title (locale-unaware, used for SEO only)
  */
 export const generateFallbackTitle = (unit: RawUnit): string => {
   const parts: string[] = [];
-
-  // Building type
   const buildingType = formatBuildingType(unit.buildingType);
-  if (buildingType) {
-    parts.push(buildingType);
-  }
-
-  // Rooms
+  if (buildingType) parts.push(buildingType);
   if (isMeaningfulNumber(unit.roomsCount)) {
     parts.push(unit.roomsCount === 1 ? '1BR' : `${unit.roomsCount}BR`);
   }
-
-  // Project name
-  if (isNonEmptyString(unit.project)) {
-    parts.push(`in ${unit.project}`);
-  } else if (isNonEmptyString(unit.project_ar)) {
-    parts.push(`in ${unit.project_ar}`);
-  }
-
+  if (isNonEmptyString(unit.project)) parts.push(`in ${unit.project}`);
+  else if (isNonEmptyString(unit.project_ar)) parts.push(`in ${unit.project_ar}`);
   return parts.length > 0 ? parts.join(' ') : 'Property Details';
 };

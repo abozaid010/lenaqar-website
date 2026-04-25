@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation';
+import { cookies } from 'next/headers';
 import { Metadata } from 'next';
 import UnitDetailsPage from '@/components/unit-details/unit-details-page';
 import { getUnitById } from '@/lib/units/unit-api';
 import { transformUnitToViewModel, generateFallbackTitle } from '@/lib/units/unit-selectors';
+import { getServerTranslations } from '@/utils/getServerTranslations';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -23,7 +25,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
 
     const rawUnit = response.data.units[0];
-    const unit = transformUnitToViewModel(rawUnit);
+    const cookieStore = await cookies();
+    const locale = cookieStore.get('lang')?.value || 'ar';
+    const { t } = getServerTranslations(locale);
+    const unit = transformUnitToViewModel(rawUnit, t, locale);
     
     const title = unit.title || generateFallbackTitle(rawUnit);
     const description = unit.projectName && unit.locationLabel
@@ -68,7 +73,10 @@ export default async function UnitPage({ params }: PageProps) {
     }
 
     const rawUnit = response.data.units[0];
-    const unit = transformUnitToViewModel(rawUnit);
+    const cookieStore = await cookies();
+    const locale = cookieStore.get('lang')?.value || 'ar';
+    const { t } = getServerTranslations(locale);
+    const unit = transformUnitToViewModel(rawUnit, t, locale);
     
     return <UnitDetailsPage unit={unit} />;
   } catch (error) {

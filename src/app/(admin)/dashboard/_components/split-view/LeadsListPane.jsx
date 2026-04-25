@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LeadRow from "./LeadRow";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 function ListSkeleton({ rows = 8 }) {
   return (
@@ -30,7 +30,7 @@ export default function LeadsListPane({
   onSelectLead,
   data,
 }) {
-  const { t } = useI18n();
+  const { t, common, property, localeUtils } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get("query") || "");
@@ -82,13 +82,13 @@ export default function LeadsListPane({
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-red-600">
-        <p>{error?.message || "Failed to load leads"}</p>
+        <p>{error?.message || common.failedToLoadLeads}</p>
         <button
           type="button"
           onClick={() => refetch()}
           className="mt-2 px-3 py-1 bg-primary text-white rounded text-xs"
         >
-          Retry
+          {common.retry}
         </button>
       </div>
     );
@@ -115,7 +115,7 @@ export default function LeadsListPane({
       <div
         className="flex-1 min-h-0 overflow-y-auto"
         role="listbox"
-        aria-label="Leads"
+        aria-label={common.leads}
       >
         {showInitialLoading ? (
           <ListSkeleton />
@@ -136,7 +136,7 @@ export default function LeadsListPane({
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
             {isFetchingNextPage && (
               <div className="py-2 text-center text-xs text-gray-500">
-                Loading more…
+                {common.loadingMore}
               </div>
             )}
             {hasNextPage && !isFetchingNextPage && (
@@ -146,7 +146,7 @@ export default function LeadsListPane({
                   onClick={() => fetchNextPage()}
                   className="w-full py-1 text-xs text-primary border border-gray-200 rounded hover:bg-gray-50"
                 >
-                  Load more
+                  {common.loadMore}
                 </button>
               </div>
             )}

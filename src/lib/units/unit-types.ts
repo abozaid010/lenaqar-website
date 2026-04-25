@@ -58,17 +58,20 @@ export interface HeroImage {
 }
 
 export interface QuickFact {
+  key?: string;
   label: string;
   value: string;
   icon?: string;
 }
 
 export interface SpecItem {
+  key?: string;
   label: string;
   value: string;
 }
 
 export interface TrustItem {
+  key?: string;
   label: string;
   value: string;
 }

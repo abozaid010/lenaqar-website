@@ -6,6 +6,7 @@ import { getUnitById } from "@/lib/units/unit-api";
 import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
 import { findUnitBySlug } from "@/lib/units/unit-url-utils";
 import UnitDetailsPage from "@/components/unit-details/unit-details-page";
+import { getServerTranslations } from "@/utils/getServerTranslations";
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }) {
     }
 
     const response = await getUnitById(unitId);
-    const unit = response?.status && response.data?.units?.length 
+    const unit = response?.status && response.data?.units?.length
       ? transformUnitToViewModel(response.data.units[0])
       : null;
 
@@ -104,9 +105,12 @@ export default async function PrivateUnitDetailsPage({
       );
     }
 
+    const cookieStore = await cookies();
+    const locale = cookieStore.get('lang')?.value || 'ar';
+    const { t } = getServerTranslations(locale);
     const response = await getUnitById(unitId);
     if (response?.status && response.data.units.length) {
-      const unit = transformUnitToViewModel(response.data.units[0]);
+      const unit = transformUnitToViewModel(response.data.units[0], t, locale);
       return (
         <>
           <BreadcrumbSchema

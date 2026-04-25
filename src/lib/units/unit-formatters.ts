@@ -1,4 +1,14 @@
-import { format } from 'date-fns';
+type TranslationBundle = Record<string, any> | null | undefined;
+
+const getT = (t: TranslationBundle, ...path: string[]): string | null => {
+  if (!t) return null;
+  let val: any = t;
+  for (const k of path) {
+    if (val === null || val === undefined || typeof val !== 'object') return null;
+    val = val[k];
+  }
+  return typeof val === 'string' && val.length > 0 ? val : null;
+};
 
 /**
  * Validation helpers
@@ -22,7 +32,7 @@ export const isValidDate = (value: any): boolean => {
 };
 
 export const hasValidImages = (images: any[]): boolean => {
-  return Array.isArray(images) && images.some(img => 
+  return Array.isArray(images) && images.some(img =>
     img && typeof img.url === 'string' && img.url.trim().length > 0
   );
 };
@@ -47,73 +57,78 @@ export const formatArea = (value: any): string | null => {
   return `${num.toLocaleString()} m²`;
 };
 
-export const formatDate = (value: any): string | null => {
+export const formatDate = (value: any, locale: string = 'en'): string | null => {
   if (!isValidDate(value)) return null;
   try {
-    return format(new Date(value), 'dd MMM yyyy');
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(value));
   } catch {
     return null;
   }
 };
 
-export const formatDeliveryDate = (value: any): string | null => {
+export const formatDeliveryDate = (value: any, locale: string = 'en'): string | null => {
   if (!isValidDate(value)) return null;
   try {
-    return format(new Date(value), 'MMMM yyyy');
+    return new Intl.DateTimeFormat(locale === 'ar' ? 'ar-EG' : 'en-US', {
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date(value));
   } catch {
     return null;
   }
 };
 
-export const formatPurpose = (value: any): string | null => {
+export const formatPurpose = (value: any, t?: TranslationBundle): string | null => {
   if (!isNonEmptyString(value)) return null;
   const purpose = value.toLowerCase().trim();
+  const translated = getT(t, 'property', 'purpose', purpose);
+  if (translated) return translated;
   const purposeMap: Record<string, string> = {
-    'sell': 'For Sale',
-    'rent': 'For Rent',
-    'sale': 'For Sale',
+    sell: 'For Sale', rent: 'For Rent', sale: 'For Sale', buy: 'Buy', lease: 'Lease',
   };
   return purposeMap[purpose] || purpose.charAt(0).toUpperCase() + purpose.slice(1);
 };
 
-export const formatFinishing = (value: any): string | null => {
+export const formatFinishing = (value: any, t?: TranslationBundle): string | null => {
   if (!isNonEmptyString(value)) return null;
   const finishing = value.toLowerCase().trim();
+  const translated = getT(t, 'unitDetails', 'finishingTypes', finishing);
+  if (translated) return translated;
   const finishingMap: Record<string, string> = {
-    'semi finished': 'Semi Finished',
-    'fully finished': 'Fully Finished',
-    'unfinished': 'Unfinished',
-    'semi-finished': 'Semi Finished',
-    'fully-finished': 'Fully Finished',
+    'semi finished': 'Semi Finished', 'fully finished': 'Fully Finished',
+    unfinished: 'Unfinished', 'semi-finished': 'Semi Finished',
+    'fully-finished': 'Fully Finished', 'core & shell': 'Core & Shell',
+    'white box': 'White Box', finished: 'Finished',
   };
   return finishingMap[finishing] || finishing.charAt(0).toUpperCase() + finishing.slice(1);
 };
 
-export const formatFurnishing = (value: any): string | null => {
+export const formatFurnishing = (value: any, t?: TranslationBundle): string | null => {
   if (!isNonEmptyString(value)) return null;
   const furnishing = value.toLowerCase().trim();
+  const translated = getT(t, 'unitDetails', 'furnishingTypes', furnishing);
+  if (translated) return translated;
   const furnishingMap: Record<string, string> = {
-    'furnished': 'Furnished',
-    'unfurnished': 'Unfurnished',
-    'semi furnished': 'Semi Furnished',
-    'semi-furnished': 'Semi Furnished',
+    furnished: 'Furnished', unfurnished: 'Unfurnished',
+    'semi furnished': 'Semi Furnished', 'semi-furnished': 'Semi Furnished',
+    'partially furnished': 'Partially Furnished', hotel_furnished: 'Hotel Furnished',
   };
   return furnishingMap[furnishing] || furnishing.charAt(0).toUpperCase() + furnishing.slice(1);
 };
 
-export const formatBuildingType = (value: any): string | null => {
+export const formatBuildingType = (value: any, t?: TranslationBundle): string | null => {
   if (!isNonEmptyString(value)) return null;
   const type = value.toLowerCase().trim();
+  const translated = getT(t, 'buildingTypes', type);
+  if (translated) return translated;
   const typeMap: Record<string, string> = {
-    'apartment': 'Apartment',
-    'villa': 'Villa',
-    'townhouse': 'Townhouse',
-    'penthouse': 'Penthouse',
-    'studio': 'Studio',
-    'duplex': 'Duplex',
-    'twin house': 'Twin House',
-    'chalet': 'Chalet',
-    'bungalow': 'Bungalow',
+    apartment: 'Apartment', villa: 'Villa', townhouse: 'Townhouse',
+    penthouse: 'Penthouse', studio: 'Studio', duplex: 'Duplex',
+    'twin house': 'Twin House', twinhouse: 'Twin House', chalet: 'Chalet', bungalow: 'Bungalow',
   };
   return typeMap[type] || type.charAt(0).toUpperCase() + type.slice(1);
 };
@@ -142,17 +157,9 @@ export const capitalizeWords = (text: string): string => {
  */
 export const buildLocationLabel = (unit: any): string | null => {
   const parts: string[] = [];
-  
-  if (isNonEmptyString(unit.district)) {
-    parts.push(capitalizeWords(unit.district));
-  }
-  if (isNonEmptyString(unit.city)) {
-    parts.push(capitalizeWords(unit.city));
-  }
-  if (isNonEmptyString(unit.country)) {
-    parts.push(capitalizeWords(unit.country));
-  }
-  
+  if (isNonEmptyString(unit.district)) parts.push(capitalizeWords(unit.district));
+  if (isNonEmptyString(unit.city)) parts.push(capitalizeWords(unit.city));
+  if (isNonEmptyString(unit.country)) parts.push(capitalizeWords(unit.country));
   return parts.length > 0 ? parts.join(', ') : null;
 };
 
@@ -160,59 +167,35 @@ export const buildLocationLabel = (unit: any): string | null => {
  * Route building helpers
  */
 export const buildProjectHref = (unit: any): string | null => {
-  // Use project.en_name for the new project details route
-  if (unit.project_en_name) {
-    return `/myProjects/${encodeURIComponent(unit.project_en_name)}`;
-  }
-  
-  // Fallback to project name if en_name not available
-  if (unit.project) {
-    return `/myProjects/${encodeURIComponent(unit.project)}`;
-  }
-  
-  // Fallback to project_ar if project not available
-  if (unit.project_ar) {
-    return `/myProjects/${encodeURIComponent(unit.project_ar)}`;
-  }
-  
+  if (unit.project_en_name) return `/myProjects/${encodeURIComponent(unit.project_en_name)}`;
+  if (unit.project) return `/myProjects/${encodeURIComponent(unit.project)}`;
+  if (unit.project_ar) return `/myProjects/${encodeURIComponent(unit.project_ar)}`;
   return null;
 };
 
 export const buildDeveloperHref = (unit: any): string | null => {
   if (!unit.developer_id) return null;
-  
   const developerId = unit.developer_id;
   const developerName = unit.developer;
-  
-  if (developerName) {
-    const slug = slugify(developerName);
-    return `/developers/${developerId}/${slug}`;
-  }
-  
+  if (developerName) return `/developers/${developerId}/${slugify(developerName)}`;
   return `/developers/${developerId}`;
 };
 
 export const buildUnitHref = (unit: any): string | null => {
   if (!unit.unitId) return null;
-  
-  const unitId = unit.unitId;
-  const unitTitle = unit.unitTitle;
-  
-  if (unitTitle) {
-    const slug = slugify(unitTitle);
-    return `/properties/${unitId}/${slug}`;
-  }
-  
-  return `/properties/${unitId}`;
+  if (unit.unitTitle) return `/properties/${unit.unitId}/${slugify(unit.unitTitle)}`;
+  return `/properties/${unit.unitId}`;
 };
 
 /**
  * Installment helpers
  */
-export const formatInstallmentYears = (years: any): string | null => {
+export const formatInstallmentYears = (years: any, t?: TranslationBundle): string | null => {
   if (!isMeaningfulNumber(years)) return null;
   const num = Number(years);
-  return num === 1 ? '1 year' : `${num} years`;
+  const yearLabel = getT(t, 'saleDetails', 'yearLabel') || getT(t, 'projectPage', 'year') || 'yr';
+  const yearsLabel = getT(t, 'saleDetails', 'yearsLabel') || getT(t, 'projectPage', 'years') || 'yrs';
+  return num === 1 ? `1 ${yearLabel}` : `${num} ${yearsLabel}`;
 };
 
 export const calculateMonthlyInstallment = (yearlyAmount: any): string | null => {
@@ -225,27 +208,16 @@ export const calculateMonthlyInstallment = (yearlyAmount: any): string | null =>
 /**
  * Badge helpers
  */
-export const getUnitBadges = (unit: any): string[] => {
+export const getUnitBadges = (unit: any, t?: TranslationBundle): string[] => {
   const badges: string[] = [];
-  
   if (unit.is_primary) {
-    badges.push('Primary Unit');
+    badges.push(getT(t, 'unitLabels', 'primaryUnit') || 'Primary Unit');
   }
-  
-  const purpose = formatPurpose(unit.purpose);
-  if (purpose) {
-    badges.push(purpose);
-  }
-  
-  const finishing = formatFinishing(unit.finishing);
-  if (finishing) {
-    badges.push(finishing);
-  }
-  
-  const furnishing = formatFurnishing(unit.furnishing);
-  if (furnishing) {
-    badges.push(furnishing);
-  }
-  
+  const purpose = formatPurpose(unit.purpose, t);
+  if (purpose) badges.push(purpose);
+  const finishing = formatFinishing(unit.finishing, t);
+  if (finishing) badges.push(finishing);
+  const furnishing = formatFurnishing(unit.furnishing, t);
+  if (furnishing) badges.push(furnishing);
   return badges;
 };
