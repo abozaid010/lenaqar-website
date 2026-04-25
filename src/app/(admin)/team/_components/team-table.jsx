@@ -31,7 +31,7 @@ export default function TeamTable({ data, canManageTeam = true }) {
       console.log("[TeamTable] Attempting to delete employee with ID:", id);
       await deleteEmployee(id);
       console.log("[TeamTable] Employee deleted successfully");
-      toast.success("Team member deleted successfully");
+      toast.success(t?.common?.teamMemberDeleted);
       router.refresh();
     } catch (error) {
       console.error("[TeamTable] Failed to delete employee:", {

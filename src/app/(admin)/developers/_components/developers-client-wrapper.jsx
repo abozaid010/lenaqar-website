@@ -114,21 +114,19 @@ export default function DevelopersClientWrapper({ clientId }) {
     try {
       const res = await deleteDeveloper(developerId);
       if (!res.status) {
-        toast.error(
-          res.error_message || "Something went wrong. Please try again later."
-        );
+        toast.error(t?.common?.failedToDelete);
         return;
       }
 
       setDevelopers((prev) =>
         prev.filter((developer) => developer.id !== developerId)
       );
-      toast.success("Developer deleted successfully.");
+      toast.success(t?.common?.developerDeleted);
       setSelectedDeveloper(null);
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting developer:", error);
-      toast.error(error.message);
+      toast.error(t?.common?.failedToDelete);
     }
   };
 

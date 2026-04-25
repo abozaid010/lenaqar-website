@@ -68,27 +68,11 @@ export async function getModuleActionsFromToken() {
   const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
   const payload = decodeJwtPayload(token);
   if (!payload || payload.module_actions == null) {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[getModuleActionsFromToken] module_actions: (missing)", {
-        hasToken: !!token,
-        hasPayload: !!payload,
-      });
-    }
     return null;
   }
   const ma = payload.module_actions;
   const normalized = typeof ma === "object" && !Array.isArray(ma) ? ma : null;
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("[getModuleActionsFromToken] module_actions extracted", {
-      hasToken: !!token,
-      keys:
-        normalized && typeof normalized === "object"
-          ? Object.keys(normalized)
-          : null,
-      sample: normalized,
-    });
-  }
 
   return normalized;
 }

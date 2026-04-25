@@ -90,8 +90,8 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
     handleCopyFullPhoneNumber(
       e,
       phoneNumber,
-      () => toast.success("Phone number copied"),
-      () => toast.error("Failed to copy phone number")
+      () => toast.success(t?.common?.phoneCopied),
+      () => toast.error(t?.common?.failedToCopyPhone)
     );
   };
 

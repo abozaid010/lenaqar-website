@@ -90,7 +90,7 @@ export default function LeadDetailPane({
     setIsDeleting(true);
     try {
       await deleteUser(userId, clientId);
-      toast.success("User deleted");
+      toast.success(t?.common?.userDeleted);
       clearSelection();
       queryClient.invalidateQueries({ queryKey: userKeys.all });
       queryClient.removeQueries({ queryKey: ["chatHistory", userId] });
@@ -196,8 +196,8 @@ export default function LeadDetailPane({
                   handleCopyPhoneNumber(
                     e,
                     phoneNumber,
-                    () => toast.success("Copied"),
-                    () => toast.error("Copy failed")
+                    () => toast.success(t?.common?.copied),
+                    () => toast.error(t?.common?.failedToCopyPhone)
                   )
                 }
                 className="p-0.5"

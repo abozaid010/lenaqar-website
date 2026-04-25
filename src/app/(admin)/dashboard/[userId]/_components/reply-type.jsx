@@ -22,9 +22,9 @@ export default function ToggleReplyType({ userId, clientID, source }) {
     );
 
     if (result.success) {
-      toast.success("Auto-reply toggled successfully");
+      toast.success(t?.common?.autoReplyToggled);
     } else {
-      toast.error("Failed to toggle auto-reply");
+      toast.error(t?.common?.failedToToggleAutoReply);
     }
     setIsLoading(false);
   };

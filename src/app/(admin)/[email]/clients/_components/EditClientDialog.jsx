@@ -78,10 +78,10 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
 
     try {
       await updateClient.mutateAsync({ clientId: client.client_id, payload });
-      toast.success("Client updated successfully");
+      toast.success(t?.common?.clientUpdated);
       onClose();
     } catch {
-      toast.error("Failed to update client. Please try again.");
+      toast.error(t?.common?.failedToUpdateClient);
     }
   };
 

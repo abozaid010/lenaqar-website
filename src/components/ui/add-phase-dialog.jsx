@@ -179,7 +179,7 @@ export default function AddPhseDilog({
           className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
           disabled={isSubmitting || isUploading || isMasterPlanUploading}
         >
-          {t.buttons?.cancel || "Cancel"}
+          {t?.buttons?.cancel}
         </button>
       }
       headerActions={
@@ -232,7 +232,7 @@ export default function AddPhseDilog({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.description || "Description"}
+              {t?.formLabels?.description}
             </label>
             <textarea
               name="description"

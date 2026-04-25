@@ -146,10 +146,10 @@ const ClientSignupForm = () => {
       const data = await response.json();
 
       if (response.ok) {
-        toast.success("Client created successfully!");
+        toast.success(t?.common?.clientCreated);
         router.push("/dashboard");
       } else {
-        toast.error(data.error || "Failed to create client");
+        toast.error(data.error || t?.common?.failedToCreateClient);
       }
     } catch (error) {
       console.error("Error creating client:", error);

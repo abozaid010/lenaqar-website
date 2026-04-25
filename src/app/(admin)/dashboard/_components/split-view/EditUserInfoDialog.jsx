@@ -41,13 +41,14 @@ export default function EditUserInfoDialog({
         company_name: company.trim(),
       });
       if (res?.status === false && res?.message) {
-        toast.error(res.message);
+        toast.error(t?.common?.requirementsSaved);
         return;
       }
-      toast.success("Contact updated");
+      toast.success(t?.common?.contactUpdated);
       onSuccess?.();
       onClose();
     } catch (err) {
+      toast.error(t?.common?.updateFailed);
       toast.error(err?.message || "Update failed");
     } finally {
       setPending(false);

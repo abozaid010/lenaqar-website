@@ -149,7 +149,7 @@ export default function SingleImageUploader({
             <div className="relative w-full h-[240px]">
               <ImageWithLoader
                 src={getDisplayImageUrl(value) || "/images/property_placeholder.jpg"}
-                alt={`Image ${selectedImage?.name || "uploaded"}`}
+                alt={`Image ${selectedImage?.name || t?.common?.uploaded || "uploaded"}`}
                 className="w-full h-full object-cover rounded-md"
                 priority={true}
               />

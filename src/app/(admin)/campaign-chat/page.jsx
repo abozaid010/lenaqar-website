@@ -10,6 +10,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import { useI18n } from "@/context/translate-api";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -17,6 +18,7 @@ import ChatPanel from "./_components/ChatPanel";
 import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
 
 const CampaignChat = () => {
+  const { t, locale } = useI18n();
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -303,36 +305,60 @@ const CampaignChat = () => {
   const handleRename = async (phoneNumber, userName) => {
     try {
       await updateCampaignSessionName({ phone_number: phoneNumber, user_name: userName });
-      if (selectedContact?.phone_number === phoneNumber) {
-        setSelectedContact(prev => ({ ...prev, user_name: userName }));
-      }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
-      await refetchSession();
-      toast.success("Contact renamed");
+      
+      // Update session details if it's the currently selected contact
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSessionDetails(prev => ({
+          ...prev,
+          [phoneNumber]: {
+            ...prev[phoneNumber],
+            user_name: userName
+          }
+        }));
+      }
+      
+      // Update the session in allSessions
+      setAllSessions(prev => prev.map(session => 
+        session.phone_number === phoneNumber 
+          ? { ...session, user_name: userName }
+          : session
+      ));
     } catch (error) {
       console.error("Failed to rename session:", error);
-      toast.error(getErrorMessage(error, "Failed to rename contact"));
-      throw error;
+      toast.error("Failed to rename conversation");
     }
   };
 
-  // Handle favorite toggle
+  // Handle toggle favorite
   const handleToggleFavorite = async (phoneNumber, isFavorite) => {
     try {
       await toggleCampaignFavorite({ phone_number: phoneNumber, is_favorite: isFavorite });
-      if (selectedContact?.phone_number === phoneNumber) {
-        setSelectedContact(prev => ({ ...prev, is_favorite: isFavorite }));
-      }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
-      await refetchSession();
+      
+      // Update session details if it's the currently selected contact
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSessionDetails(prev => ({
+          ...prev,
+          [phoneNumber]: {
+            ...prev[phoneNumber],
+            is_favorite: isFavorite
+          }
+        }));
+      }
+      
+      // Update the session in allSessions
+      setAllSessions(prev => prev.map(session => 
+        session.phone_number === phoneNumber 
+          ? { ...session, is_favorite: isFavorite }
+          : session
+      ));
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
-      toast.error(getErrorMessage(error, "Failed to update favorite"));
-      throw error;
+      toast.error("Failed to update favorite status");
     }
   };
 
-  // Handle notes update
   const handleUpdateNotes = async (phoneNumber, notes) => {
     try {
       await updateCampaignNotes({ phone_number: phoneNumber, notes });
@@ -475,7 +501,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            Last Message
+            {t?.campaignChat?.lastMessage || "Last Message"}
             {sortBy === "last_user_message_at" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -488,7 +514,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            Most Messages
+            {t?.campaignChat?.mostMessages || "Most Messages"}
             {sortBy === "total_messages_received" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -496,7 +522,7 @@ const CampaignChat = () => {
         </div>
 
         {/* Contact List */}
-        <ErrorBoundary errorMessage="Failed to load conversations. Please try again.">
+        <ErrorBoundary errorMessage={t?.campaignChat?.failedToLoadConversations || "Failed to load conversations. Please try again."}>
           <ContactList
             sessions={sortedSessions}
             selectedContact={selectedContact}
@@ -517,31 +543,31 @@ const CampaignChat = () => {
       </div>
 
       {/* Right Panel - Chat */}
-      <div className="flex-1 flex flex-col">
-        <ErrorBoundary errorMessage="Failed to load conversation. Please try again.">
-          {selectedContact ? (
-            <ChatPanel
-              contact={selectedContact}
-              sessionData={sessionData}
-              loading={sessionLoading}
-              onToggleAI={handleToggleAI}
-              onSendReply={handleSendReply}
-              refetchSession={refetchSession}
-              onRename={handleRename}
-              onToggleFavorite={handleToggleFavorite}
-              onUpdateNotes={handleUpdateNotes}
-            />
-          ) : (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">Select a conversation</h3>
-                <p className="text-gray-500">Choose a contact from the list to start chatting</p>
+        <div className="flex-1 flex flex-col">
+          <ErrorBoundary errorMessage={t?.campaignChat?.failedToLoadConversation || "Failed to load conversation. Please try again."}>
+            {selectedContact ? (
+              <ChatPanel
+                contact={selectedContact}
+                sessionData={sessionData}
+                loading={sessionLoading}
+                onToggleAI={handleToggleAI}
+                onSendReply={handleSendReply}
+                refetchSession={refetchSession}
+                onRename={handleRename}
+                onToggleFavorite={handleToggleFavorite}
+                onUpdateNotes={handleUpdateNotes}
+              />
+            ) : (
+              <div className="flex-1 flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">{t?.campaignChat?.selectConversation || "Select a conversation"}</h3>
+                  <p className="text-gray-500">{t?.campaignChat?.chooseContact || "Choose a contact from the list to start chatting"}</p>
+                </div>
               </div>
-            </div>
-          )}
-        </ErrorBoundary>
-      </div>
+            )}
+          </ErrorBoundary>
+        </div>
 
       {/* WhatsApp Campaign Dialog */}
       <AddNewWhatsappCampaignDialog

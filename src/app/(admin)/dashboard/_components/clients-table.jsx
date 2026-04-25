@@ -103,8 +103,8 @@ export default function ClientsTable({ users, pagination }) {
     await handleCopyPhoneNumber(
       e,
       phoneNumber,
-      () => toast.success(t.clientsTable?.phoneCopied || "Phone number copied"),
-      () => toast.error(t.clientsTable?.phoneCopyFailed || "Failed to copy phone number")
+      () => toast.success(t?.clientsTable?.phoneCopied),
+      () => toast.error(t?.clientsTable?.phoneCopyFailed)
     );
 
   };
@@ -189,7 +189,7 @@ export default function ClientsTable({ users, pagination }) {
                       </td>
 
                       <td className="px-2 py-2 font-medium text-gray-900 whitespace-nowrap max-w-[150px] truncate">
-                        {user.name || t.clientsTable.newLead}
+                        {user.name || t?.clientsTable?.newLead}
                       </td>
 
                       <td className="px-2 py-2 text-gray-600 whitespace-nowrap max-w-[120px]">
@@ -198,7 +198,7 @@ export default function ClientsTable({ users, pagination }) {
                             <span
                               onClick={(e) => handleCopyPhoneNumberWithToast(e, user.phone_number)}
                               className="cursor-pointer hover:text-primary transition-colors flex-1 text-left truncate"
-                              title={t.clientsTable?.clickToCopy || "Click to copy phone number"}
+                              title={t?.clientsTable?.clickToCopy}
                             >
                               {user.phone_number}
                             </span>
@@ -206,7 +206,7 @@ export default function ClientsTable({ users, pagination }) {
                               onClick={(e) => handleOpenWhatsApp(e, user.phone_number)}
                               className="p-1 h-6 w-6 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center flex-shrink-0 aspect-square"
                               style={{ height: '24px', width: '24px', minHeight: '24px', maxHeight: '24px' }}
-                              title={t.clientsTable?.openWhatsApp || "Open WhatsApp"}
+                              title={t?.clientsTable?.openWhatsApp}
                             >
                               <svg
                                 xmlns="http://www.w3.org/2000/svg"

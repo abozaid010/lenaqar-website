@@ -183,7 +183,7 @@ const Sidebar = ({
               }`}
             >
               <Megaphone className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.campaigns || "Campaigns"}</span>
+              <span>{t?.sidebar?.campaigns}</span>
             </Link>
           )}
 
@@ -198,7 +198,7 @@ const Sidebar = ({
               }`}
             >
               <MessageCircle className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.campaignChat || "Campaign Chat"}</span>
+              <span>{t?.sidebar?.campaignChat}</span>
             </Link>
           )}
 
@@ -213,7 +213,7 @@ const Sidebar = ({
               }`}
             >
               <Calendar className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.schedule || "Schedule"}</span>
+              <span>{t?.sidebar?.schedule}</span>
             </Link>
           )}
 
@@ -228,7 +228,7 @@ const Sidebar = ({
               }`}
             >
               <BarChart2 className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.analytics}</span>
+              <span>{t?.sidebar?.analytics}</span>
             </Link>
           )}
 
@@ -288,7 +288,7 @@ const Sidebar = ({
               }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
-              <span>Clients</span>
+              <span>{t?.sidebar?.clients}</span>
             </Link>
           )}
 

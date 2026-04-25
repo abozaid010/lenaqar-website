@@ -38,12 +38,12 @@ export default function ChatClientWrapper({ userId }) {
     setIsDeleting(true);
     try {
       await deleteUser(userId, data.data.client_id);
-      toast.success("User deleted successfully");
+      toast.success(t?.common?.userDeleted);
       // Redirect to dashboard after successful deletion
       window.location.href = "/dashboard";
     } catch (error) {
       console.error("Failed to delete user:", error);
-      toast.error(error?.message || "Failed to delete user");
+      toast.error(error?.message || t?.common?.failedToDeleteUser);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -136,8 +136,8 @@ export default function ChatClientWrapper({ userId }) {
                   handleCopyPhoneNumber(
                     e,
                     phoneNumber,
-                    () => toast.success("Phone number copied"),
-                    () => toast.error("Failed to copy phone number")
+                    () => toast.success(t?.common?.phoneCopied),
+                    () => toast.error(t?.common?.failedToCopyPhone)
                   )
                 }
                 className="p-1 hover:bg-gray-200 rounded transition-colors"

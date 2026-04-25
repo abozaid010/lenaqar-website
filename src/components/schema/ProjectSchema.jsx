@@ -9,10 +9,10 @@ export default function ProjectSchema({ project }) {
     name: project.name || "Real Estate Project",
     url: `${SITE_URL}/projects/${project.id}`,
     image: project.mainImage || project.image || `${SITE_URL}/images/property_placeholder.jpg`,
-    description: project.description || "Real estate project",
+    description: project.description || t?.schema?.realEstateProject || "Real estate project",
     address: {
       "@type": "PostalAddress",
-      addressLocality: project.location || project.city || "Cairo",
+      addressLocality: project.location || project.city || t?.schema?.cairo || "Cairo",
       addressCountry: "EG",
     },
     offers: {
@@ -24,7 +24,7 @@ export default function ProjectSchema({ project }) {
     ...(project.developer && {
       seller: {
         "@type": "Organization",
-        name: project.developer.name || "Developer",
+        name: project.developer.name || t?.schema?.developer || "Developer",
       },
     }),
   };

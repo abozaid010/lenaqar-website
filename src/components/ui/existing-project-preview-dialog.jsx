@@ -83,7 +83,7 @@ export default function ExistingProjectPreviewDialog({
                 <button
                   onClick={() => onEdit(projectData)}
                   className="text-white hover:text-gray-200 focus:outline-none p-1 rounded hover:bg-white/10 transition-colors"
-                  title={t.formLabels?.edit || "Edit"}
+                  title={t?.formLabels?.edit}
                 >
                   <Edit className="w-5 h-5" />
                 </button>
@@ -126,7 +126,7 @@ export default function ExistingProjectPreviewDialog({
                 {projectData.ar_name && (
                   <div>
                     <span className="text-sm font-medium text-gray-600">
-                      {t.formLabels?.arabic || "Arabic"}:
+                      {t?.formLabels?.arabic}:
                     </span>
                     <p className="text-lg font-semibold text-gray-900">
                       {projectData.ar_name}
@@ -136,7 +136,7 @@ export default function ExistingProjectPreviewDialog({
                 {projectData.en_name && (
                   <div>
                     <span className="text-sm font-medium text-gray-600">
-                      {t.formLabels?.english || "English"}:
+                      {t?.formLabels?.english}:
                     </span>
                     <p className="text-lg font-semibold text-gray-900">
                       {projectData.en_name}
@@ -151,7 +151,7 @@ export default function ExistingProjectPreviewDialog({
               {projectData.city && (
                 <div>
                   <span className="text-sm font-medium text-gray-600 block mb-1">
-                    {t.formLabels?.city || "City"}
+                    {t?.formLabels?.city}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
                     {capitalize(projectData.city)}
@@ -161,7 +161,7 @@ export default function ExistingProjectPreviewDialog({
               {projectData.district && (
                 <div>
                   <span className="text-sm font-medium text-gray-600 block mb-1">
-                    {t.formLabels?.district || "District"}
+                    {t?.formLabels?.district}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
                     {capitalize(projectData.district)}
@@ -175,7 +175,7 @@ export default function ExistingProjectPreviewDialog({
               {projectData.area && (
                 <div className="flex flex-col">
                   <span className="text-xs text-gray-500 mb-1">
-                    {t.formLabels?.area || "Area"}
+                    {t?.formLabels?.area}
                   </span>
                   <span className="text-lg font-bold text-primary">
                     {projectData.area}
@@ -200,8 +200,8 @@ export default function ExistingProjectPreviewDialog({
                   </span>
                   <span className="text-lg font-bold text-primary">
                     {projectData.gated
-                      ? t.formLabels?.yes || "Yes"
-                      : t.formLabels?.no || "No"}
+                      ? t?.formLabels?.yes
+                      : t?.formLabels?.no}
                   </span>
                 </div>
               )}

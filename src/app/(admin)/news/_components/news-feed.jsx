@@ -239,7 +239,7 @@ const NewsFeed = () => {
 
       if (mode === "add") {
         await createNews();
-        toast.success("News added successfully.");
+        toast.success(t?.common?.newsAdded);
       } else {
         const newsId = getNewsId(selectedNews);
         if (!newsId) {
@@ -247,7 +247,7 @@ const NewsFeed = () => {
           return;
         }
         await updateNews(newsId);
-        toast.success("News updated successfully.");
+        toast.success(t?.common?.newsUpdated);
       }
 
       setFormOpen(false);
@@ -430,7 +430,7 @@ const NewsFeed = () => {
                 return;
               }
               await deleteNews(newsId);
-              toast.success("News deleted successfully.");
+              toast.success(t?.common?.newsDeleted);
               setShowDeleteDialog(false);
               setNewsToDelete(null);
               await refetch();

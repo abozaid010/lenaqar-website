@@ -172,7 +172,7 @@ export default function EditRequirementDialog({
         score: {},
       };
       await updateUserRequirements(userId, payload);
-      toast.success("Requirements saved");
+      toast.success(t?.common?.requirementsSaved);
       onSuccess?.();
       onClose();
     } catch (err) {

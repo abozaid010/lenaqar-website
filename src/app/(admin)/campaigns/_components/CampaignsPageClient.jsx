@@ -72,12 +72,12 @@ function CampaignCard({ campaign, onEdit }) {
                 type="button"
                 onClick={handleCopyLink}
                 className="hover:underline text-left"
-                title={copied ? (locale === "ar" ? "تم النسخ" : "Copied") : (locale === "ar" ? "اضغط لنسخ الرابط" : "Click to copy link")}
+                title={copied ? t?.common?.copied : t?.common?.clickToCopy}
               >
                 {campaignUrlText}
                 {copied ? (
                   <span className="ms-2 inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
-                    {locale === "ar" ? "تم النسخ" : "Copied"}
+                    {t?.common?.copied}
                   </span>
                 ) : null}
               </button>
@@ -113,7 +113,7 @@ function CampaignCard({ campaign, onEdit }) {
             className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
           >
             <Pencil size={16} />
-            {t?.campaigns?.edit || "Edit"}
+            {t?.campaigns?.edit}
           </button>
         </div>
       </div>
@@ -124,7 +124,7 @@ function CampaignCard({ campaign, onEdit }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <span>
               <span className="text-gray-500">
-                {t?.campaigns?.campaignManager || "Campaign manager"}:
+                {t?.campaigns?.campaignManager}:
               </span>{" "}
               <span className="font-mono">{campaign?.client_phone_number || "—"}</span>
             </span>
@@ -132,18 +132,18 @@ function CampaignCard({ campaign, onEdit }) {
 
           {!isUnitMode ? (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.text || "Text"}:</span>{" "}
+              <span className="text-gray-500">{t?.campaigns?.text}:</span>{" "}
               <span className="font-medium">{campaign?.text ? String(campaign.text) : "—"}</span>
             </div>
           ) : (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.unit || "Unit"}:</span>{" "}
+              <span className="text-gray-500">{t?.campaigns?.unit}:</span>{" "}
               <span className="font-medium">
                 {campaign?.unit?.unitTitle ||
                   campaign?.unit?.title ||
                   campaign?.unit?.unitId ||
                   campaign?.unit?.id ||
-                  "Selected unit"}
+                  t?.campaigns?.unit}
               </span>
             </div>
           )}
@@ -153,7 +153,7 @@ function CampaignCard({ campaign, onEdit }) {
       {!isUnitMode && (
         <div className="mt-3">
           <div className="text-xs font-medium text-gray-600 mb-2">
-            {t?.campaigns?.images || "Images"} ({images.length})
+            {t?.campaigns?.images} ({images.length})
           </div>
           {images.length ? (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -176,7 +176,7 @@ function CampaignCard({ campaign, onEdit }) {
             </div>
           ) : (
             <div className="text-sm text-gray-500">
-              {t?.campaigns?.noImages || "No images"}
+              {t?.campaigns?.noImages}
             </div>
           )}
         </div>
@@ -185,7 +185,7 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Suggested answers */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.suggestedAnswers || "Suggested answers"} ({suggestedAns.length})
+          {t?.campaigns?.suggestedAnswers} ({suggestedAns.length})
         </div>
         {suggestedAns.length ? (
           <div className="flex flex-wrap gap-2">
@@ -200,7 +200,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noSuggestedAnswers || "No suggested answers"}
+            {t?.campaigns?.noSuggestedAnswers}
           </div>
         )}
       </div>
@@ -208,11 +208,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Created/Updated */}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-800">
         <span>
-          <span className="text-gray-500">{t?.campaigns?.createdAt || "Created"}:</span>{" "}
+          <span className="text-gray-500">{t?.campaigns?.createdAt}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.created_at) || "—"}
         </span>
         <span>
-          <span className="text-gray-500">{t?.campaigns?.updatedAt || "Updated"}:</span>{" "}
+          <span className="text-gray-500">{t?.campaigns?.updatedAt}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.updated_at) || "—"}
         </span>
       </div>
@@ -220,11 +220,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Link clicked */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.linkClicks || "Link clicks"}: {linkClicked.length}
+          {t?.campaigns?.linkClicks}: {linkClicked.length}
         </div>
         {lastClick ? (
           <div className="text-sm text-gray-700">
-            {t?.campaigns?.lastClick || "Latest interaction"}:{" "}
+            {t?.campaigns?.lastClick}:{" "}
             <span className="font-mono">
               {formatDateTimeAmPmShort(lastClick?.date) || "—"}
             </span>{" "}
@@ -234,7 +234,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noClicks || "No clicks"}
+            {t?.campaigns?.noClicks}
           </div>
         )}
       </div>
@@ -274,7 +274,7 @@ export default function CampaignsPageClient() {
   const canNext = offset + limit < totalCount;
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading campaigns..." />;
+    return <LoadingSpinner message={t?.common?.loadingData} />;
   }
 
   if (isError) {
@@ -284,9 +284,9 @@ export default function CampaignsPageClient() {
           error={error}
           refetch={refetch}
           isFetching={isFetching}
-          title="Error loading campaigns"
-          message="Failed to load campaigns data. Please try again."
-          retryLabel="Retry Campaigns"
+          title={t?.common?.error}
+          message={t?.common?.operationFailed}
+          retryLabel={t?.common?.retry}
         />
       </div>
     );
@@ -337,7 +337,7 @@ export default function CampaignsPageClient() {
           onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
-          {t?.previous || "Previous"}
+          {t?.common?.previous}
         </button>
         <div className="text-sm text-gray-600">
           {showingLabel}{" "}
@@ -353,7 +353,7 @@ export default function CampaignsPageClient() {
           onClick={() => setOffset((prev) => prev + limit)}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
         >
-          {t?.next || "Next"}
+          {t?.common?.next}
         </button>
       </div>
 
@@ -361,7 +361,7 @@ export default function CampaignsPageClient() {
       <div className="mt-4 space-y-3">
         {campaigns.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-600">
-            No campaigns found.
+            {t?.common?.noCampaignsFound}
           </div>
         ) : (
           campaigns.map((c) => (

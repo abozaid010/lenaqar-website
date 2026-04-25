@@ -150,9 +150,8 @@ export default function EmptyStateVideo({
         {hasVideo && (
           <div className="pt-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t.videoInstructions?.dialog?.readyToStart ||
-                "Ready to get started? Add your first"}{" "}
-              {variant || "item"} {t.videoInstructions?.dialog?.now || "now."}.
+              {t?.videoInstructions?.dialog?.readyToStart}{" "}
+              {variant || t?.common?.item || "item"} {t?.videoInstructions?.dialog?.now}.
             </p>
           </div>
         )}
