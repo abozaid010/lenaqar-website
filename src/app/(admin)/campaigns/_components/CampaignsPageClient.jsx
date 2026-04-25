@@ -299,12 +299,17 @@ export default function CampaignsPageClient() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header */}
+      {/* Header Container */}
       <div className="p-4 bg-white rounded-lg shadow-md">
         <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
-          <span className="text-sm text-gray-600">
-            {t?.campaigns?.total ?? "Total"}: <span className="font-medium text-gray-900">{totalCount}</span>
-          </span>
+          {/* Campaign Info */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <span className="text-sm text-gray-600">
+              {t?.campaigns?.total ?? "Total"}: <span className="font-medium text-gray-900">{totalCount}</span>
+            </span>
+          </div>
+
+          {/* Action Buttons */}
           <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
               type="button"
@@ -320,6 +325,9 @@ export default function CampaignsPageClient() {
           </div>
         </div>
       </div>
+
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">

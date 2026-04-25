@@ -434,97 +434,65 @@ const CampaignChat = () => {
     <div className="h-full flex">
       {/* Left Panel - Contact List */}
       <div className="w-80 border-r border-gray-200 flex flex-col bg-white">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <div className="flex justify-between items-center mb-4 gap-2">
-            <h1 className="text-sm font-semibold text-gray-800">Campaign Chat</h1>
-            <button
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="flex-shrink-0 px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-            >
-              <Plus size={18} className="shrink-0" />
-              <span className="whitespace-nowrap">Create</span>
-            </button>
-          </div>
-
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Search Input */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
             <input
               type="text"
               placeholder="Search by name or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 h-10 border border-[#E6E6E6] bg-[#F6F7FB] text-[#494A4B] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              className="w-full px-3 py-2 h-10 bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] rounded-md text-sm hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             />
           </div>
 
-          {/* AI Filter */}
-          <div className="flex gap-2 mb-3">
+          {/* Action Buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
-              onClick={() => setAiFilter(null)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                aiFilter === null
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
-              All
-            </button>
-            <button
-              onClick={() => setAiFilter(true)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === true
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <ToggleRight className="h-3 w-3" />
-              AI On
-            </button>
-            <button
-              onClick={() => setAiFilter(false)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === false
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <ToggleLeft className="h-3 w-3" />
-              AI Off
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Create</span>
             </button>
           </div>
+        </div>
+      </div>
 
-          {/* Sort Controls */}
-          <div className="flex items-center gap-1">
-            <ArrowDownUp className="h-3 w-3 text-gray-400 flex-shrink-0" />
-            <button
-              onClick={() => handleSortChange("last_user_message_at")}
-              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
-                sortBy === "last_user_message_at"
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Last Message
-              {sortBy === "last_user_message_at" && (
-                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
-              )}
-            </button>
-            <button
-              onClick={() => handleSortChange("total_messages_received")}
-              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
-                sortBy === "total_messages_received"
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Most Messages
-              {sortBy === "total_messages_received" && (
-                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
-              )}
-            </button>
-          </div>
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
+
+        {/* Sort Controls */}
+        <div className="flex items-center gap-1">
+          <ArrowDownUp className="h-3 w-3 text-gray-400 flex-shrink-0" />
+          <button
+            onClick={() => handleSortChange("last_user_message_at")}
+            className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+              sortBy === "last_user_message_at"
+                ? SELECTION_COLORS.SELECTED
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Last Message
+            {sortBy === "last_user_message_at" && (
+              <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+            )}
+          </button>
+          <button
+            onClick={() => handleSortChange("total_messages_received")}
+            className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+              sortBy === "total_messages_received"
+                ? SELECTION_COLORS.SELECTED
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            Most Messages
+            {sortBy === "total_messages_received" && (
+              <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+            )}
+          </button>
         </div>
 
         {/* Contact List */}

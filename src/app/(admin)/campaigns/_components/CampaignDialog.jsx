@@ -148,7 +148,7 @@ export default function CampaignDialog({
     }
 
     if (!payload.client_phone_number) {
-      toast.error(c.errors?.clientPhoneRequired || "Client phone number is required.");
+      toast.error(c.errors?.clientPhoneRequired || "phone number is required.");
       return false;
     }
 
@@ -264,7 +264,7 @@ export default function CampaignDialog({
           )}
 
           <LenaTextField
-            label={c.clientPhoneNumber || "Client phone number"}
+            label={c.clientPhoneNumber || "phone number"}
             name="client_phone_number"
             value={clientPhoneNumber}
             onChange={(e) => setClientPhoneNumber(e.target.value)}
@@ -274,7 +274,7 @@ export default function CampaignDialog({
 
           <div>
             <div className="text-sm font-medium text-gray-800 mb-2">
-              {c.signupForumLabel || "Signup form"}
+              {t.campaigns?.signupForumLabel || "Signup Forum"}
             </div>
             <SearchableDropdownSelect
               options={SIGNUP_FORUM_OPTIONS}
@@ -302,7 +302,7 @@ export default function CampaignDialog({
                   checked={mode === "text"}
                   onChange={() => setMode("text")}
                 />
-                <span className="text-sm text-gray-800">{c.typeText || "Text"}</span>
+                <span className="text-sm text-gray-800 ml-2">{c.typeText || "Text"}</span>
               </label>
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
