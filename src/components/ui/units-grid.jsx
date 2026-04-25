@@ -183,8 +183,7 @@ export default function UnitsGrid({
                           `buildingTypes.${String(u.buildingType).toLowerCase()}`,
                           String(u.buildingType)
                         )
-                      ) : (allowMissingFields ? "—" : "Unit Type")
-                      }
+                      ) : (allowMissingFields ? "—" : "Unit Type")}
                     </span>
                     <span className="text-[14px]">
                       {u.project ? 

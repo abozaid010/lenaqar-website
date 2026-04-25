@@ -141,7 +141,6 @@ export default function ResalePageQuery({ searchParams }) {
           <div className="w-full md:w-auto md:flex-1 min-w-0">
             <SearchableDropdownSelect
               name="filter"
-              label="Filter"
               options={visibilityOptions}
               value={filter}
               onChange={handleFilterChange}
@@ -151,9 +150,6 @@ export default function ResalePageQuery({ searchParams }) {
             />
           </div>
           <div className="w-full md:w-auto md:flex-1 min-w-0">
-            <label htmlFor="resale-updated-at" className="block text-xs font-medium text-gray-700 mb-1">
-              {t.resalePage?.filterByUpdatedAt ?? "Updated date"}
-            </label>
             <input
               id="resale-updated-at"
               type="date"
@@ -171,7 +167,6 @@ export default function ResalePageQuery({ searchParams }) {
               value={propertyType === "all" ? "" : propertyType}
               onChange={(e) => setPropertyType(e.target.value || "")}
               name="property_type"
-              label={t.resalePage?.propertyTypeLabel ?? "Property type"}
               getValue={(type) => type.value}
               getLabel={(type) => (locale === "ar" ? type.ar_label : type.en_label)}
               searchFields={["en_label", "ar_label", "value"]}
