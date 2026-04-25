@@ -5,7 +5,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useI18n } from "@/context/translate-api";
 import { fetchCampaigns } from "@/utils/api";
-import { formatDateTimeAmPmShort } from "@/utils/formateDate";
+import { useLocaleConstants } from "@/utils/localeConstants";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus } from "lucide-react";
@@ -15,6 +15,7 @@ import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 function CampaignCard({ campaign, onEdit }) {
   const { t, locale } = useI18n();
+  const { formatDateTimeAmPmShort } = useLocaleConstants();
   const isUnitMode = !!campaign?.unit;
   const images = Array.isArray(campaign?.images) ? campaign.images : [];
   const suggestedAns = Array.isArray(campaign?.suggested_ans)

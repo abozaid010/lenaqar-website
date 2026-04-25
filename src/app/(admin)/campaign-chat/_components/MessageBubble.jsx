@@ -1,20 +1,15 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
 import { Bot, User } from "lucide-react";
+import { useI18n } from "@/context/translate-api";
+import { useLocaleConstants } from "@/utils/localeConstants";
 
 const MessageBubble = ({ message }) => {
+  const { locale } = useI18n();
+  const { formatRelativeTime } = useLocaleConstants();
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
   const isAdmin = message.role === "admin";
-
-  const formatTime = (timestamp) => {
-    try {
-      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    } catch {
-      return "Unknown time";
-    }
-  };
 
   const formatMessageContent = (content) => {
     if (!content) return "";

@@ -5,6 +5,7 @@ import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import LeadRow from "./LeadRow";
+import { useI18n } from "@/context/translate-api";
 
 function ListSkeleton({ rows = 8 }) {
   return (
@@ -29,6 +30,7 @@ export default function LeadsListPane({
   onSelectLead,
   data,
 }) {
+  const { t } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get("query") || "");
@@ -103,7 +105,7 @@ export default function LeadsListPane({
             type="search"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search name or phone..."
+            placeholder={t?.searchPlaceholder || "Search name or phone..."}
             className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             autoComplete="off"
           />

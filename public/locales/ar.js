@@ -494,6 +494,7 @@ export default {
     premuim: "ميزة مدفوعة",
     ADD: "اضافة عميل  جديد",
   },
+  searchPlaceholder: "ابحث بالاسم أو الرقم...",
   search: {
     placeholder: "ابحث عن العميل بالاسم أو الرقم...",
   },

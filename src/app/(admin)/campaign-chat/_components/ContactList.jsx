@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { formatDistanceToNow } from "date-fns";
 import { Bot, User, MessageCircle, Star, Pencil, Check, X, Copy } from "lucide-react";
 import toast from "react-hot-toast";
 import { SELECTION_COLORS } from "@/constants/colors";
@@ -9,8 +8,12 @@ import { ContactListSkeleton } from "@/components/ui/loading-states";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
+import { useI18n } from "@/context/translate-api";
+import { useLocaleConstants } from "@/utils/localeConstants";
 
 const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails, hasMore, isFetchingMore, onLoadMore, loadMoreRef, sessionsError, onRetry }) => {
+  const { t, locale } = useI18n();
+  const { formatRelativeTime } = useLocaleConstants();
   const [editingPhone, setEditingPhone] = useState(null);
   const [editValue, setEditValue] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState("all");
@@ -40,15 +43,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
     return phone;
   };
 
-  const getRelativeTime = (timestamp) => {
-    if (!timestamp) return "No messages";
-    try {
-      return formatDistanceToNow(new Date(timestamp), { addSuffix: true });
-    } catch {
-      return "Unknown time";
-    }
-  };
-
+  
   const startEdit = (e, session) => {
     e.stopPropagation();
     setEditingPhone(session.phone_number);

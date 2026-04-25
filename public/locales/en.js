@@ -517,6 +517,7 @@ export default {
     premuim: " Premium Feature",
     ADD: "Add New Lead",
   },
+  searchPlaceholder: "Search name or phone...",
   search: {
     placeholder: "Search client by name or number...",
   },
