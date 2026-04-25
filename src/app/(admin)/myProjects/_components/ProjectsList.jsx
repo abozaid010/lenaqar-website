@@ -245,7 +245,7 @@ function ProjectCard({
                 e.stopPropagation();
                 onManagePhases(project);
               }}
-              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition hover:border-primary hover:text-primary"
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
             >
               <Layers size={14} />
               <span>{t.phases || (locale === "ar" ? "المراحل" : "Phases")}</span>
@@ -253,14 +253,6 @@ function ProjectCard({
                 {phasesCount}
               </span>
             </button>
-            
-            <a
-              href={`/myProjects/${project.en_name}`}
-              onClick={(e) => e.stopPropagation()}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1 text-xs font-medium text-white transition hover:bg-primary/90"
-            >
-              <span>{locale === "ar" ? "التفاصيل" : "View Details"}</span>
-            </a>
           </div>
         </footer>
       </div>
