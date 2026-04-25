@@ -77,6 +77,7 @@ function ProjectCard({
   project,
   locale,
   t,
+  translate,
   buildingTypes,
   getCityLabel,
   getDistrictLabel,
@@ -880,6 +881,7 @@ export default function ProjectsList({ clientId }) {
                     project={project}
                     locale={locale}
                     t={t}
+                    translate={translate}
                     buildingTypes={BUILDING_TYPES}
                     getCityLabel={getCityDisplayName}
                     getDistrictLabel={getDistrictDisplayName}
