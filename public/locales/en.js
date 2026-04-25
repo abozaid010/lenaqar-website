@@ -128,7 +128,7 @@ export default {
     home: "Home",
     properties: "Properties",
     propertyDetails: "Property Details",
-    myProjects: "My Projects",
+    myProjects: "Projects",
   },
   formLabels: {
     description: "Description",
@@ -409,7 +409,7 @@ export default {
   },
   sidebar: {
     schedule: "Calendar",
-    myProjects: "My Projects",
+    myProjects: "Projects",
     dashboard: "Conversations",
     campaigns: "Campaigns",
     campaignChat: "Campaign Chat",

@@ -138,7 +138,7 @@ export default {
     home: "الرئيسية",
     properties: "العقارات",
     propertyDetails: "تفاصيل العقار",
-    myProjects: "مشاريعي",
+    myProjects: "المشاريع",
   },
   formLabels: {
     description: "الوصف",
@@ -417,7 +417,7 @@ export default {
   },
   sidebar: {
     schedule: "مهام الاسبوع",
-    myProjects: "مشاريعي",
+    myProjects: "المشاريع",
     dashboard: " المحادثات",
     campaigns: "الحملات",
     campaignChat: "دردشة الحملات",
