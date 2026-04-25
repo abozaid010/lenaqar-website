@@ -62,13 +62,14 @@ export default {
     openWhatsApp: "فتح WhatsApp",
     whatsapp: "واتساب",
     na: "غير متوفر",
+    ProcessingImages: "جارٍ معالجة الصور...",
+    addImage: "إضافة صورة",
+    fileSizeExceedsMb: "حجم الملف تجاوز {mb}MB. برجاء رفع صورة أصغر.",
     searchPlaceholder: "بحث",
     upload: "رفع",
     browse: "استعراض",
     dragAndDrop: "اسحب وأفلت الملفات هنا",
     or: "أو",
-    required: "مطلوب",
-    optional: "اختياري",
     invalidEmail: "تنسيق البريد الإلكتروني غير صالح",
     passwordTooShort: "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
     fieldRequired: "هذا الحقل مطلوب",
@@ -1254,11 +1255,6 @@ export default {
       na: "غير متوفر",
     },
   },
-  common: {
-    ProcessingImages: "جارٍ معالجة الصور...",
-    addImage: "إضافة صورة",
-    fileSizeExceedsMb: "حجم الملف تجاوز {mb}MB. برجاء رفع صورة أصغر.",
-  },
   formValidation: {
     compoundNameRequired: "اسم المشروع مطلوب",
     cityRequired: "المدينة مطلوبة",
@@ -1574,10 +1570,6 @@ export default {
     from: "من",
     currently_unavailable: "غير متاح حالياً",
   },
-  common: {
-    na: "غير متوفر",
-  },
-
   phasee: {
     updatePhasesuccess: "تم نعديل المارحله بنجاح",
     updatePhaseFaile: "فشل في تعديل المرحله",

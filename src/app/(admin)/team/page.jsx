@@ -51,33 +51,16 @@ export default async function TeamPage() {
   let hasAccess = true;
 
   try {
-    console.log("[Team Page] Starting to fetch sales data...");
     data = await getSalesData();
     
-    console.log("[Team Page] API Response received:", {
-      hasData: !!data,
-      hasStatus: 'status' in (data || {}),
-      hasDataProperty: !!data?.data,
-      dataType: typeof data,
-      dataKeys: data ? Object.keys(data) : [],
-      isDataArray: Array.isArray(data?.data),
-      dataLength: Array.isArray(data?.data) ? data.data.length : 'N/A',
-    });
+    
     
     if (!data?.status) {
       hasAccess = false;
-      console.log("[Team Page] Access denied - status is false or missing");
     } else {
       console.log("[Team Page] Access granted - status is true");
     }
   } catch (error) {
-    console.error("[Team Page] Error fetching sales data:", {
-      message: error.message,
-      name: error.name,
-      stack: error.stack,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
     hasAccess = false;
     data = { data: [], status: false };
   }

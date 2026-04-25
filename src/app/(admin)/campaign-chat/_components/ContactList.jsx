@@ -8,7 +8,7 @@ import { ContactListSkeleton } from "@/components/ui/loading-states";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useLocaleConstants } from "@/utils/localeConstants";
 
 const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRename, onToggleFavorite, sessionDetails, hasMore, isFetchingMore, onLoadMore, loadMoreRef, sessionsError, onRetry }) => {
@@ -292,7 +292,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                       size="sm"
                       className="hover:text-green-600"
                     />
-                    <span className="text-xs text-gray-400 ml-1">{getRelativeTime(session.last_user_message_at)}</span>
+                    <span className="text-xs text-gray-400 ml-1">{formatRelativeTime(session.last_user_message_at)}</span>
                   </div>
                 </div>
               </div>

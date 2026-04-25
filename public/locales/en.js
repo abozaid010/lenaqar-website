@@ -4,6 +4,8 @@ export default {
     loading: "Loading...",
     error: "Error",
     success: "Success",
+    warning: "Warning",
+    info: "Info",
     cancel: "Cancel",
     save: "Save",
     delete: "Delete",
@@ -96,6 +98,9 @@ export default {
     openWhatsApp: "Open WhatsApp",
     whatsapp: "WhatsApp",
     operationFailed: "Operation failed",
+    ProcessingImages: "Processing images...",
+    addImage: "Add Image",
+    fileSizeExceedsMb: "File size exceeds {mb}MB. Please upload a smaller image.",
   },
 
   buttons: {
@@ -1266,11 +1271,6 @@ export default {
     common: {
       na: "N/A",
     },
-  },
-  common: {
-    ProcessingImages: "Processing images...",
-    addImage: "Add Image",
-    fileSizeExceedsMb: "File size exceeds {mb}MB. Please upload a smaller image.",
   },
   formValidation: {
     compoundNameRequired: "Compound name is required",

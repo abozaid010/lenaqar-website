@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import ImageWithLoader from "./image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
+import { useI18n } from "@/hooks/useI18n";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -30,6 +31,7 @@ const InfoItem = ({ icon, label, value }) => (
 );
 
 export default function PropertyCard({ data }) {
+  const { t } = useI18n();
   const [hoveredImage, setHoveredImage] = useState(null);
   const handleImageHover = () => {
     if (data.images?.length > 1) {

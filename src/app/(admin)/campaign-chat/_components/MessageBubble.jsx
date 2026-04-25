@@ -1,7 +1,7 @@
 "use client";
 
 import { Bot, User } from "lucide-react";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useLocaleConstants } from "@/utils/localeConstants";
 
 const MessageBubble = ({ message }) => {

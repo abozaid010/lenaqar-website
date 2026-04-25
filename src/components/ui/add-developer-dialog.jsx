@@ -413,7 +413,6 @@ export default function AddDeveloperDialog({
   };
 
   const ViewMode = () => {
-    const { locale } = useI18n();
     return (
       <div className="space-y-6">
         {formData.logo && (
@@ -1387,7 +1386,7 @@ export default function AddDeveloperDialog({
           : t.developerPage.addDeveloper
       }
     >
-      {isEdit && !isEditing ? ViewMode() : EditMode()}
+      {isEdit && !isEditing ? <ViewMode /> : <EditMode />}
     </UnifiedDialog>
   );
 }

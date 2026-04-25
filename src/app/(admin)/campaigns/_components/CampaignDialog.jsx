@@ -4,7 +4,7 @@ import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { createCampaign, updateCampaign } from "@/utils/api";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,7 +26,7 @@ export default function CampaignDialog({
   campaign, // null for create, object for update
   onSuccess,
 }) {
-  const { t, locale } = useI18n();
+  const { t, translate, locale } = useI18n();
   const queryClient = useQueryClient();
   const c = t?.campaigns || {};
 
@@ -224,7 +224,7 @@ export default function CampaignDialog({
           className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
           disabled={isSubmitting}
         >
-          {t('common.cancel')}
+          {translate("common.cancel")}
         </button>
       }
       headerActions={
@@ -237,12 +237,12 @@ export default function CampaignDialog({
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
-                {editMode ? t('common.updating') : t('common.creating')}
+                {editMode ? translate("common.updating") : translate("common.creating")}
               </span>
             ) : editMode ? (
-              t('common.update')
+              translate("common.update")
             ) : (
-              t('common.create')
+              translate("common.create")
             )}
         </button>
       }

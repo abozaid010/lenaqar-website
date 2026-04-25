@@ -10,7 +10,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -18,7 +18,7 @@ import ChatPanel from "./_components/ChatPanel";
 import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
 
 const CampaignChat = () => {
-  const { t, locale } = useI18n();
+  const { t, translate, locale } = useI18n();
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -501,7 +501,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            {t('campaignChat.lastMessage')}
+            {translate('campaignChat.lastMessage')}
             {sortBy === "last_user_message_at" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -514,7 +514,7 @@ const CampaignChat = () => {
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
-            {t('campaignChat.mostMessages')}
+            {translate('campaignChat.mostMessages')}
             {sortBy === "total_messages_received" && (
               <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
             )}
@@ -522,7 +522,7 @@ const CampaignChat = () => {
         </div>
 
         {/* Contact List */}
-        <ErrorBoundary errorMessage={t('campaignChat.failedToLoadConversations')}>
+        <ErrorBoundary errorMessage={translate('campaignChat.failedToLoadConversations')}>
           <ContactList
             sessions={sortedSessions}
             selectedContact={selectedContact}
@@ -544,7 +544,7 @@ const CampaignChat = () => {
 
       {/* Right Panel - Chat */}
         <div className="flex-1 flex flex-col">
-          <ErrorBoundary errorMessage={t('campaignChat.failedToLoadConversation')}>
+          <ErrorBoundary errorMessage={translate('campaignChat.failedToLoadConversation')}>
             {selectedContact ? (
               <ChatPanel
                 contact={selectedContact}
@@ -561,8 +561,8 @@ const CampaignChat = () => {
               <div className="flex-1 flex items-center justify-center bg-gray-50">
                 <div className="text-center">
                   <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">{t('campaignChat.selectConversation')}</h3>
-                  <p className="text-gray-500">{t('campaignChat.chooseContact')}</p>
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">{translate('campaignChat.selectConversation')}</h3>
+                  <p className="text-gray-500">{translate('campaignChat.chooseContact')}</p>
                 </div>
               </div>
             )}
