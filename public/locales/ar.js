@@ -1944,4 +1944,13 @@ export default {
     buildingType: "{type}",
     imageCounter: "{current}/{total}",
   },
+
+  campaignChat: {
+    lastMessage: "آخر رسالة",
+    mostMessages: "أكثر الرسائل",
+    failedToLoadConversations: "فشل في تحميل المحادثات",
+    failedToLoadConversation: "فشل في تحميل المحادثة",
+    selectConversation: "اختر محادثة",
+    chooseContact: "اختر جهة اتصال لبدء المراسلة",
+  },
 };

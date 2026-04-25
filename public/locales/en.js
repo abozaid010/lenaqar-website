@@ -1873,4 +1873,13 @@ export default {
     buildingType: "{type}",
     imageCounter: "{current}/{total}",
   },
+
+  campaignChat: {
+    lastMessage: "Last Message",
+    mostMessages: "Most Messages",
+    failedToLoadConversations: "Failed to load conversations",
+    failedToLoadConversation: "Failed to load conversation",
+    selectConversation: "Select a conversation",
+    chooseContact: "Choose a contact to start messaging",
+  },
 };

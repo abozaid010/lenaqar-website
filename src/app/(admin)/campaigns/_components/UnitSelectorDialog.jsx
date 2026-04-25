@@ -170,7 +170,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
             <SearchableDropdownSelect
               options={EnumPropertyIntent.map((purpose) => ({
                 value: purpose,
-                label: t.unitsFilter?.purposes?.[purpose] || purpose,
+                label: translate(`unitsFilter.purposes.${purpose}`) || purpose,
               }))}
               value={filters.purpose}
               onChange={(e) =>
@@ -259,7 +259,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                   {translate("common.loading")}
                 </span>
               ) : (
-                t?.campaigns?.refresh
+                translate("campaigns.refresh")
               )}
             </button>
           </div>
@@ -271,7 +271,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
             <LoadingSpinner message={translate("campaigns.loadingUnits")} />
           ) : isError ? (
             <div className="text-red-600 text-sm">
-              {error?.message || t?.campaigns?.failedToLoadUnits}
+              {error?.message || translate("campaigns.failedToLoadUnits")}
             </div>
           ) : units.length === 0 ? (
             <div className="text-gray-600 text-sm">
@@ -287,7 +287,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                   <div className="relative w-full h-44 bg-gray-100">
                     <ImageWithLoader
                       src={getFirstUnitImage(u)}
-                      alt={u?.unitTitle || t?.campaigns?.unit}
+                      alt={u?.unitTitle || translate("campaigns.unit")}
                       className="w-full h-full object-cover"
                       priority={false}
                       loadingVariant="minimal"
@@ -296,11 +296,11 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                   </div>
                   <div className="p-3">
                     <div className="font-semibold text-gray-900 line-clamp-1">
-                      {u?.unitTitle || t?.campaigns?.unnamedUnit}
+                      {u?.unitTitle || translate("campaigns.unnamedUnit")}
                     </div>
                     <div className="text-xs text-gray-600 mt-1 line-clamp-2">
-                      {u?.project ? `${t?.campaigns?.project}: ${u.project}` : null}
-                      {u?.city ? ` • ${t?.campaigns?.city}: ${u.city}` : null}
+                      {u?.project ? `${translate("campaigns.project")}: ${u.project}` : null}
+                      {u?.city ? ` • ${translate("campaigns.city")}: ${u.city}` : null}
                     </div>
 
                     <div className="mt-2 text-xs text-gray-700 flex flex-wrap gap-2">
@@ -325,7 +325,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                         }}
                         className="px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
                       >
-                        {c.select || "Select"}
+                        {translate("campaigns.select")}
                       </button>
                     </div>
                   </div>
