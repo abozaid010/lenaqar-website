@@ -6,9 +6,11 @@ import {
   Users, 
   DollarSign,
   CheckCircle,
-  Clock
+  Clock,
+  Info
 } from 'lucide-react';
 import type { ProjectQuickFactsProps } from '@/lib/projects/project-types';
+import { useI18n } from '@/context/translate-api';
 
 const iconMap = {
   building: Building,
@@ -22,11 +24,12 @@ const iconMap = {
 };
 
 export default function ProjectQuickFacts({ facts }: ProjectQuickFactsProps) {
+  const { t } = useI18n();
   if (facts.length === 0) return null;
 
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-xl font-semibold text-gray-900 mb-6">Quick Facts</h2>
+      <h2 className="text-xl font-semibold text-gray-900 mb-6">{t?.unitQuickFacts?.title || "Quick Facts"}</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {facts.map((fact, index) => {

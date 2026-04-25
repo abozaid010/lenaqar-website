@@ -91,12 +91,12 @@ export default function PropertyCard({ data }) {
           />
           <InfoItem
             icon={<Bed size={18} />}
-            label="Rooms"
+            label={t?.unitLabels?.bedrooms || "Rooms"}
             value={roomsCount ? roomsCount : "N/A"}
           />
           <InfoItem
             icon={<Bath size={18} />}
-            label="Bathrooms"
+            label={t?.unitLabels?.bathrooms || "Bathrooms"}
             value={bathroomCount ? bathroomCount : "N/A"}
           />
           <InfoItem

@@ -4,10 +4,11 @@ import { useI18n } from "@/context/translate-api";
 import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
 
-const MISSING_FIELD_CLASS =
-  "ring-2 ring-red-500 rounded-md bg-red-50/70 border border-red-200";
+import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import { useLocaleConstants } from '@/utils/localeConstants';
 
 export default function UnitPricing({ unit, missingRequiredFields = [] }) {
+  const { formatDate } = useLocaleConstants();
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t } = useI18n();
   const u = unit || {};
@@ -285,13 +286,3 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   );
 }
 
-// Helper functions
-function formatDate(dateString) {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}

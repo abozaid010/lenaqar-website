@@ -4,6 +4,7 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../public/locales/en";
 import ar from "../../../../public/locales/ar";
 import { useMemo } from "react";
+import { useLocaleConstants } from "@/utils/localeConstants";
 import {
   Bath,
   BedDouble,
@@ -29,6 +30,7 @@ export default function UnitBasicInfo({
   missingRequiredFields = [],
 }) {
   const { t, locale } = useI18n();
+  const { formatDate } = useLocaleConstants();
   const missing = missingRequiredFields || [];
   const isMissing = (field) => missing.includes(field);
 
@@ -354,16 +356,6 @@ export default function UnitBasicInfo({
   );
 }
 
-// Helper functions
-function formatDate(dateString) {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}
 
 function getFloorLabel(floor, t) {
   if (!floor) return t.unitDetails?.ground;

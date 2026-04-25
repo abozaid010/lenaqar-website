@@ -1,7 +1,9 @@
 import { Info } from 'lucide-react';
 import type { UnitSpecificationsProps } from '@/lib/units/unit-types';
+import { useI18n } from '@/context/translate-api';
 
 export default function UnitSpecifications({ specs }: UnitSpecificationsProps) {
+  const { t } = useI18n();
   if (specs.length === 0) {
     return null;
   }
@@ -15,7 +17,7 @@ export default function UnitSpecifications({ specs }: UnitSpecificationsProps) {
     <div className="bg-white rounded-lg border p-6">
       <div className="flex items-center gap-2 mb-6">
         <Info className="w-5 h-5 text-gray-600" />
-        <h2 className="text-lg font-semibold text-gray-900">Specifications</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t?.unitSpecifications?.title || "Specifications"}</h2>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

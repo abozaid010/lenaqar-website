@@ -1,8 +1,10 @@
 import Link from 'next/link';
 import { MapPin, Building, User, Tag, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
+import { useI18n } from '@/context/translate-api';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
+  const { t } = useI18n();
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
       {/* Title */}
@@ -60,7 +62,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
         {/* Building Type */}
         {unit.buildingType && (
           <div className="space-y-1">
-            <div className="text-sm text-gray-600">Property Type</div>
+            <div className="text-sm text-gray-600">{t?.unitHeader?.propertyType || "Property Type"}</div>
             <div className="text-lg font-semibold text-gray-900">{unit.buildingType}</div>
           </div>
         )}
@@ -68,7 +70,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
         {/* Delivery Date */}
         {unit.deliveryDateLabel && (
           <div className="space-y-1">
-            <div className="text-sm text-gray-600">Delivery</div>
+            <div className="text-sm text-gray-600">{t?.unitPricing?.expectedDelivery || "Delivery"}</div>
             <div className="text-lg font-semibold text-gray-900">{unit.deliveryDateLabel}</div>
           </div>
         )}
@@ -80,13 +82,13 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
         <div className="border-t pt-6">
           <div className="flex items-center gap-2 mb-4">
             <DollarSign className="w-5 h-5 text-gray-600" />
-            <h3 className="text-lg font-semibold text-gray-900">Pricing & Payment</h3>
+            <h3 className="text-lg font-semibold text-gray-900">{t?.unitPricing?.title || "Pricing & Payment"}</h3>
           </div>
           
           {/* Total Price - Highlight */}
           {unit.totalPrice && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-              <div className="text-sm text-blue-600 font-medium mb-1">Total Price</div>
+              <div className="text-sm text-blue-600 font-medium mb-1">{t?.unitPricing?.totalPrice || "Total Price"}</div>
               <div className="text-2xl lg:text-3xl font-bold text-blue-900">{unit.totalPrice}</div>
             </div>
           )}
@@ -96,7 +98,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
             {/* Down Payment */}
             {unit.downPayment && (
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Down Payment</div>
+                <div className="text-sm text-gray-600 mb-1">{t?.unitPricing?.downPayment || "Down Payment"}</div>
                 <div className="text-xl font-semibold text-gray-900">{unit.downPayment}</div>
               </div>
             )}
@@ -106,7 +108,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                   <Calendar className="w-4 h-4" />
-                  Installment Period
+                  {t?.unitPricing?.installmentPeriod || "Installment Period"}
                 </div>
                 <div className="text-xl font-semibold text-gray-900">{unit.installmentYearsLabel}</div>
               </div>
@@ -115,7 +117,7 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
             {/* Yearly Installment */}
             {unit.yearlyInstallment && (
               <div className="bg-gray-50 rounded-lg p-4">
-                <div className="text-sm text-gray-600 mb-1">Yearly Installment</div>
+                <div className="text-sm text-gray-600 mb-1">{t?.unitPricing?.yearlyInstallment || "Yearly Installment"}</div>
                 <div className="text-xl font-semibold text-gray-900">{unit.yearlyInstallment}</div>
               </div>
             )}
@@ -125,10 +127,10 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
                   <TrendingUp className="w-4 h-4" />
-                  Monthly (Est.)
+                  {t?.unitPricing?.monthlyEstimate || "Monthly (Est.)"}
                 </div>
                 <div className="text-xl font-semibold text-gray-900">{unit.monthlyInstallmentEstimate}</div>
-                <div className="text-xs text-gray-500 mt-1">Estimated monthly amount</div>
+                <div className="text-xs text-gray-500 mt-1">{t?.unitPricing?.estimatedMonthlyAmount || "Estimated monthly amount"}</div>
               </div>
             )}
           </div>

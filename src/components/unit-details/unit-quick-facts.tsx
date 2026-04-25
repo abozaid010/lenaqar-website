@@ -24,6 +24,7 @@ import {
   CheckCircle
 } from 'lucide-react';
 import type { UnitQuickFactsProps, SpecItem } from '@/lib/units/unit-types';
+import { useI18n } from '@/context/translate-api';
 
 const iconMap: Record<string, any> = {
   bed: Bed,
@@ -73,6 +74,7 @@ interface CombinedQuickFactsProps {
 }
 
 export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFactsProps) {
+  const { t } = useI18n();
   // Convert specifications to quick facts format
   const specFacts = specs.map(spec => ({
     label: spec.label,
@@ -129,7 +131,7 @@ export default function UnitQuickFacts({ facts, specs = [] }: CombinedQuickFacts
 
   return (
     <div className="bg-white rounded-lg border p-6">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Facts</h2>
+      <h2 className="text-lg font-semibold text-gray-900 mb-4">{t?.unitQuickFacts?.title || "Quick Facts"}</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {deduplicatedFacts.map((fact, index) => {
           // Determine icon: use iconMap for quick facts, getIconForSpec for specifications

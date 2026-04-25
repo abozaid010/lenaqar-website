@@ -1,11 +1,13 @@
 import { Phone, MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useI18n } from '@/context/translate-api';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { generateUnitSlug } from '@/lib/units/unit-url-utils';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
+  const { t } = useI18n();
   const router = useRouter();
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -96,8 +98,8 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   return (
     <div className="bg-white rounded-lg border shadow-lg p-6 space-y-4">
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">Interested in this property?</h3>
-        <p className="text-sm text-gray-600">Get in touch to learn more or schedule a viewing</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.unitInquiry?.interestedTitle || "Interested in this property?"}</h3>
+        <p className="text-sm text-gray-600">{t?.unitInquiry?.interestedSubtitle || "Get in touch to learn more or schedule a viewing"}</p>
       </div>
 
       {/* Contact Information */}

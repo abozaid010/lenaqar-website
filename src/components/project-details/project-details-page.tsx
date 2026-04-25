@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import BackButton from '@/components/ui/back-button';
-import type { ProjectViewModel } from '@/lib/projects/project-types';
+import type { ProjectViewModel, RawProject } from '@/lib/projects/project-types';
 import ProjectHeroGallery from './project-hero-gallery';
 import ProjectHeaderSummary from './project-header-summary';
 import ProjectLocationContext from './project-location-context';
@@ -15,6 +15,7 @@ import ProjectPricingTable from './project-pricing-table';
 import ProjectBuildingTypeGallery from './project-building-type-gallery';
 import ProjectFacilityManagement from './project-facility-management';
 import AddCompoundDialog from '@/components/ui/add-project-dialog';
+import { useI18n } from '@/context/translate-api';
 
 interface ProjectDetailsPageProps {
   project: ProjectViewModel;
@@ -22,6 +23,7 @@ interface ProjectDetailsPageProps {
 }
 
 export default function ProjectDetailsPage({ project, rawProject }: ProjectDetailsPageProps) {
+  const { t } = useI18n();
   const [showEditDialog, setShowEditDialog] = useState(false);
   const router = useRouter();
 
@@ -87,13 +89,13 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
             onClick={handleEdit}
             className="flex-1 py-2 border border-primary/40 text-primary rounded-lg text-sm font-medium"
           >
-            Edit
+            {t?.buttons?.edit || "Edit"}
           </button>
           <a
             href="tel:"
             className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium"
           >
-            Call
+            {t?.buttons?.call || "Call"}
           </a>
         </div>
       </div>
