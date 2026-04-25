@@ -1,80 +1,14 @@
-// Utility functions for unit URL handling
+// Utility functions for robust unit URL handling
 
 interface UnitSlugParts {
   type: string;
   project: string;
   code: string;
-}
-
-// Generate URL-friendly slug from unit type, project, and code
-export function generateUnitSlug(unit: {
-  buildingType?: string | null;
-  project?: string | null;
-  code?: string | null;
   unitId?: string | null;
-}): string {
-  const type = unit.buildingType || 'property';
-  const project = unit.project || 'unknown';
-  
-  // Handle empty code by using first 4 chars of unit.id
-  let code = unit.code;
-  if (!code && unit.unitId) {
-    // Take first 4 alphanumeric characters from unitId
-    code = unit.unitId.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase();
-  }
-  code = code || 'unknown';
-  
-  // Clean and normalize each part
-  const cleanType = type.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  const cleanProject = project.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
-  const cleanCode = code.toUpperCase().replace(/[^a-z0-9]/g, '');
-  
-  return `${cleanType}-${cleanProject}-${cleanCode}`;
 }
 
-// Parse slug back to components
-export function parseUnitSlug(slug: string): UnitSlugParts {
-  const parts = slug.split('-');
-  
-  // Find the split points - code is typically the last part and is uppercase
-  let codeStartIndex = -1;
-  for (let i = parts.length - 1; i >= 0; i--) {
-    if (parts[i] === parts[i].toUpperCase() && parts[i].length >= 3) {
-      codeStartIndex = i;
-      break;
-    }
-  }
-  
-  if (codeStartIndex === -1) {
-    // Fallback: assume last part is code
-    codeStartIndex = parts.length - 1;
-  }
-  
-  const code = parts.slice(codeStartIndex).join('-');
-  const typeAndProject = parts.slice(0, codeStartIndex);
-  
-  // Try to split type and project - this is a best effort approach
-  let type = 'property';
-  let project = 'unknown';
-  
-  if (typeAndProject.length >= 2) {
-    // Assume first part is type, rest is project
-    type = typeAndProject[0];
-    project = typeAndProject.slice(1).join('-');
-  } else if (typeAndProject.length === 1) {
-    type = typeAndProject[0];
-    project = 'unknown';
-  }
-  
-  return {
-    type,
-    project,
-    code
-  };
-}
-
-// Cache for slug-to-unitId mapping
-const slugToUnitIdCache = new Map<string, string>();
+const SLUG_ID_MARKER = "--u-";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 function cleanSlugPart(input: string): string {
   return input
@@ -85,82 +19,210 @@ function cleanSlugPart(input: string): string {
 }
 
 function cleanCodePart(input: string): string {
-  return input.toUpperCase().replace(/[^a-z0-9]/g, "");
+  return input.toLowerCase().replace(/[^a-z0-9]/g, "");
 }
 
-// Build slug-to-unitId mapping from units data
-async function buildSlugMapping(): Promise<void> {
-  try {
-    const { getUnits } = await import('@/lib/units/unit-api');
-    const response = await getUnits();
-    
-    if (response.status && response.data.units.length > 0) {
-      slugToUnitIdCache.clear();
-      
-      response.data.units.forEach(unit => {
-        if (unit.unitId) {
-          const slug = generateUnitSlug({
-            buildingType: unit.buildingType,
-            project: unit.project,
-            code: unit.code,
-            unitId: unit.unitId
-          });
-          slugToUnitIdCache.set(slug, unit.unitId);
+function sanitizeUnitId(input: string): string {
+  return input.replace(/[^a-zA-Z0-9_-]/g, "");
+}
 
-          // Backwards compatibility: older links used looser slug formats.
-          // Examples seen in the wild: `-ramla-57` (missing type), or `ramla-57`.
-          const project = typeof unit.project === "string" ? unit.project : "";
-          const code = typeof unit.code === "string" ? unit.code : "";
-          const cleanProject = project ? cleanSlugPart(project) : "";
-          const cleanCode = code ? cleanCodePart(code) : "";
-          if (cleanProject && cleanCode) {
-            slugToUnitIdCache.set(`${cleanProject}-${cleanCode}`, unit.unitId);
-            slugToUnitIdCache.set(`-${cleanProject}-${cleanCode}`, unit.unitId);
-          }
+function normalizeSlugInput(slug: string): string {
+  return (slug || "").trim().replace(/\/+$/g, "").replace(/-+$/g, "");
+}
+
+function isDirectUnitId(value: string): boolean {
+  if (!value) return false;
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      value
+    );
+  const isHex24 = /^[0-9a-f]{24}$/i.test(value);
+  const isNumericId = /^[0-9]+$/.test(value);
+  const isLegacyUnderscoreId = value.includes("_") && !value.includes("-");
+  return isUuid || isHex24 || isNumericId || isLegacyUnderscoreId;
+}
+
+function extractUnitIdFromSlug(slug: string): string | null {
+  const markerIndex = slug.lastIndexOf(SLUG_ID_MARKER);
+  if (markerIndex === -1) return null;
+  const encoded = slug.slice(markerIndex + SLUG_ID_MARKER.length);
+  if (!encoded) return null;
+  const unitId = sanitizeUnitId(encoded);
+  return unitId || null;
+}
+
+function unitIdPrefix(unitId: string): string {
+  return sanitizeUnitId(unitId).replace(/[-_]/g, "").slice(0, 8).toLowerCase();
+}
+
+function getUnitId(unit: any): string | null {
+  const raw = unit?.unitId ?? unit?.id ?? null;
+  if (!raw) return null;
+  const cleaned = sanitizeUnitId(String(raw));
+  return cleaned || null;
+}
+
+// Slug format (v2, deterministic + reversible):
+//   <type>-<project>-<code>--u-<unitId>
+// This makes slug resolution independent from fragile cache matching.
+export function generateUnitSlug(unit: {
+  buildingType?: string | null;
+  project?: string | null;
+  code?: string | null;
+  unitId?: string | null;
+}): string {
+  const type = cleanSlugPart(unit.buildingType || "property") || "property";
+  const project = cleanSlugPart(unit.project || "unknown") || "unknown";
+
+  let code = cleanCodePart(unit.code || "");
+  if (!code && unit.unitId) {
+    code = unitIdPrefix(String(unit.unitId)) || "unknown";
+  }
+  if (!code) code = "unknown";
+
+  const safeUnitId = unit.unitId ? sanitizeUnitId(String(unit.unitId)) : "";
+  const base = `${type}-${project}-${code}`;
+
+  return safeUnitId ? `${base}${SLUG_ID_MARKER}${safeUnitId}` : base;
+}
+
+export function parseUnitSlug(slug: string): UnitSlugParts {
+  const normalized = normalizeSlugInput(slug);
+  const extractedUnitId = extractUnitIdFromSlug(normalized);
+  const base = extractedUnitId
+    ? normalized.slice(0, normalized.lastIndexOf(SLUG_ID_MARKER))
+    : normalized;
+  const parts = base.split("-").filter(Boolean);
+
+  const code = parts.length > 0 ? parts[parts.length - 1] : "unknown";
+  const type = parts.length > 1 ? parts[0] : "property";
+  const project =
+    parts.length > 2
+      ? parts.slice(1, parts.length - 1).join("-")
+      : parts.length === 2
+      ? parts[1]
+      : "unknown";
+
+  return {
+    type,
+    project,
+    code,
+    unitId: extractedUnitId,
+  };
+}
+
+const slugToUnitIdCache = new Map<string, string>();
+let cacheTimestamp = 0;
+let isBuildingCache = false;
+
+function isCacheExpired(): boolean {
+  return Date.now() - cacheTimestamp > CACHE_TTL_MS;
+}
+
+async function buildSlugMapping(): Promise<void> {
+  if (isBuildingCache) {
+    while (isBuildingCache) {
+      await new Promise((resolve) => setTimeout(resolve, 75));
+    }
+    return;
+  }
+
+  try {
+    isBuildingCache = true;
+    const { getUnits } = await import("@/lib/units/unit-api");
+    const response = await getUnits();
+    const units = response?.data?.units;
+
+    if (response?.status && Array.isArray(units) && units.length > 0) {
+      slugToUnitIdCache.clear();
+
+      units.forEach((unit: any) => {
+        const resolvedUnitId = getUnitId(unit);
+        if (!resolvedUnitId) return;
+
+        const buildingType = unit?.buildingType ?? unit?.building_type ?? null;
+        const project =
+          unit?.project ??
+          unit?.projectName ??
+          unit?.project_name ??
+          unit?.project_en_name ??
+          null;
+        const code = unit?.code ?? unit?.referenceCode ?? unit?.reference_code ?? null;
+
+        const canonical = generateUnitSlug({
+          buildingType,
+          project,
+          code,
+          unitId: resolvedUnitId,
+        });
+        slugToUnitIdCache.set(canonical, resolvedUnitId);
+
+        // Backward compatibility for legacy slugs:
+        // 1) old "type-project-code" format
+        const oldStyle = `${cleanSlugPart(buildingType || "property")}-${
+          cleanSlugPart(project || "unknown")
+        }-${cleanCodePart(code || unitIdPrefix(resolvedUnitId) || "unknown")}`;
+        slugToUnitIdCache.set(oldStyle, resolvedUnitId);
+
+        // 2) project-code and -project-code aliases used in older URLs
+        const cleanProject = cleanSlugPart(project || "");
+        const cleanCode = cleanCodePart(code || "");
+        if (cleanProject && cleanCode) {
+          slugToUnitIdCache.set(`${cleanProject}-${cleanCode}`, resolvedUnitId);
+          slugToUnitIdCache.set(`-${cleanProject}-${cleanCode}`, resolvedUnitId);
         }
       });
-      
-      console.log('Built slug mapping with', slugToUnitIdCache.size, 'entries');
+
+      cacheTimestamp = Date.now();
     }
   } catch (error) {
-    console.error('Error building slug mapping:', error);
+    // Keep prior cache when refresh fails.
+    console.error("Error building slug mapping:", error);
+  } finally {
+    isBuildingCache = false;
   }
 }
 
-// Find unit by slug using cached mapping
+export async function refreshSlugCache(): Promise<void> {
+  cacheTimestamp = 0;
+  await buildSlugMapping();
+}
+
 export async function findUnitBySlug(slug: string): Promise<string | null> {
   try {
-    // Support direct unitId usage (older routes sometimes used unitId instead of slug)
-    if (slug && (slug.includes("_") || slug.length >= 20)) {
-      return slug;
-    }
+    const normalizedSlug = normalizeSlugInput(slug);
+    if (!normalizedSlug) return null;
 
-    // Check cache first
-    if (slugToUnitIdCache.has(slug)) {
-      return slugToUnitIdCache.get(slug) || null;
-    }
-    
-    // Build mapping if cache is empty
-    if (slugToUnitIdCache.size === 0) {
+    const embeddedUnitId = extractUnitIdFromSlug(normalizedSlug);
+    if (embeddedUnitId) return embeddedUnitId;
+
+    if (isDirectUnitId(normalizedSlug)) return normalizedSlug;
+
+    if (slugToUnitIdCache.size === 0 || isCacheExpired()) {
       await buildSlugMapping();
     }
-    
-    // Try cache again
-    if (slugToUnitIdCache.has(slug)) {
-      return slugToUnitIdCache.get(slug) || null;
+
+    if (slugToUnitIdCache.has(normalizedSlug)) {
+      return slugToUnitIdCache.get(normalizedSlug) || null;
     }
-    
-    // If still not found, rebuild mapping (in case of stale cache)
-    await buildSlugMapping();
-    
-    return slugToUnitIdCache.get(slug) || null;
+
+    // Try unique prefix fallback for partially copied legacy slugs.
+    const matches: string[] = [];
+    for (const key of slugToUnitIdCache.keys()) {
+      if (key.startsWith(normalizedSlug)) matches.push(key);
+      if (matches.length > 1) break;
+    }
+    if (matches.length === 1) {
+      return slugToUnitIdCache.get(matches[0]) || null;
+    }
+
+    return null;
   } catch (error) {
-    console.error('Error finding unit by slug:', error);
+    console.error("Error finding unit by slug:", error);
     return null;
   }
 }
 
-// Get unit URL with new slug format
 export function getUnitUrl(unit: {
   unitId?: string | null;
   buildingType?: string | null;
@@ -168,9 +230,7 @@ export function getUnitUrl(unit: {
   code?: string | null;
 }): string {
   if (!unit.unitId) {
-    return '/units/not-found';
+    return "/units/not-found";
   }
-  
-  const slug = generateUnitSlug(unit);
-  return `/units/${slug}`;
+  return `/units/${generateUnitSlug(unit)}`;
 }
