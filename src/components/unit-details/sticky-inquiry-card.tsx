@@ -5,6 +5,7 @@ import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { generateUnitSlug } from '@/lib/units/unit-url-utils';
+import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   const { t } = useI18n();
@@ -14,8 +15,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
 
   // Get current user's client ID from access token (this would come from auth context)
   const getCurrentClientId = () => {
-    // TODO: Get actual client ID from access token/auth context
-    return 'public'; // Simulated - should match unit.clientId for owner info
+    return LenaCookiesManager.getClientId() || null;
   };
 
   useEffect(() => {

@@ -133,7 +133,7 @@ class ContactInfo {
   }
 
   // Get developer contact by ID - no default values
-  get_developer_contact(developerId: string): ContactInfoResult {
+  get_developer_contact(developerId: string, developerName?: string | null): ContactInfoResult {
     const contact = this.developerContacts.get(developerId);
     
     if (!contact) {
@@ -146,7 +146,7 @@ class ContactInfo {
     }
 
     return {
-      name: contact.sales_phone ? 'Developer Sales Team' : null,
+      name: contact.sales_phone ? (developerName || 'Developer Sales Team') : null,
       phone: contact.sales_phone,
       whatsapp: contact.whatsapp,
       type: 'Developer'
@@ -186,7 +186,7 @@ class ContactInfo {
     // Refresh contacts if needed
     await this.refreshContactsIfNeeded();
 
-    // Rule 1: Owner contact - strict validation
+    // Rule 1: Owner contact - client id == curretn client id && isPrimary == false
     if (unit.clientId && currentClientId && unit.clientId === currentClientId && !unit.isPrimary && unit.ownerMobile) {
       return {
         name: unit.ownerName,
@@ -196,13 +196,13 @@ class ContactInfo {
       };
     }
 
-    // Rule 2: Developer contact - require valid developerId
+    // Rule 2: Developer contact - isPrimary == true && developerId is valid
     if (unit.isPrimary && unit.developerId) {
-      return this.get_developer_contact(unit.developerId);
+      return this.get_developer_contact(unit.developerId, unit.developerName);
     }
 
     // Rule 3: Client contact - require valid clientId
-    if (unit.clientId) {
+    if (unit.clientId && !unit.isPrimary) {
       return this.get_client_contact(unit.clientId);
     }
 

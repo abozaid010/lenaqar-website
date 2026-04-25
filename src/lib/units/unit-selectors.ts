@@ -44,7 +44,8 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   const projectNameAr = isNonEmptyString(rawUnit.project_ar) ? rawUnit.project_ar : null;
   const developerName = isNonEmptyString(rawUnit.developer) ? rawUnit.developer : null;
   const projectId = isNonEmptyString(rawUnit.project_id) ? rawUnit.project_id : null;
-  const developerId = isNonEmptyString(rawUnit.developer_id) ? rawUnit.developer_id : null;
+  const developerId = isNonEmptyString((rawUnit as any).developer_id) ? (rawUnit as any).developer_id : null;
+
   const referenceCode = isNonEmptyString(rawUnit.code) ? rawUnit.code : null;
   const phase = isNonEmptyString(rawUnit.phase) ? rawUnit.phase : null;
   const isPrimary = Boolean(rawUnit.is_primary);
@@ -89,10 +90,16 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     developerHref,
     developerPhone: null,
     developerWhatsapp: null,
-    ownerName: null,
-    ownerMobile: null,
+    ownerName:
+      (isNonEmptyString((rawUnit as any).owner_name) && (rawUnit as any).owner_name) ||
+      (isNonEmptyString((rawUnit as any).ownerName) && (rawUnit as any).ownerName) ||
+      null,
+    ownerMobile:
+      (isNonEmptyString((rawUnit as any).owner_mobile) && (rawUnit as any).owner_mobile) ||
+      (isNonEmptyString((rawUnit as any).ownerMobile) && (rawUnit as any).ownerMobile) ||
+      null,
     ownerWhatsapp: null,
-    clientId: rawUnit.clientId || null,
+    clientId: (rawUnit as any).clientId || (rawUnit as any).client_id || null,
     locationLabel,
     heroImages,
     badges,
