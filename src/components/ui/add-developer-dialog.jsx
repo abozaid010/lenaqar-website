@@ -1368,11 +1368,21 @@ export default function AddDeveloperDialog({
       closeOnOutsideClick={false}
       closeOnEscape={false}
       cancelLabel={
-        isEdit && isEditing ? t.cancel : isEdit ? undefined : t.cancel
+        isEdit && isEditing
+          ? (t.cancel || (locale === "ar" ? "إلغاء" : "Cancel"))
+          : isEdit
+            ? undefined
+            : (t.cancel || (locale === "ar" ? "إلغاء" : "Cancel"))
       }
       onCancel={handleCancel}
       submitLabel={
-        isEditing ? (isEdit ? t.saveChangesButton : t.saveDeveloper) : undefined
+        isEditing
+          ? (
+              isEdit
+                ? (t.saveChangesButton || (locale === "ar" ? "حفظ التغييرات" : "Save Changes"))
+                : (t.saveDeveloper || (locale === "ar" ? "حفظ" : "Save"))
+            )
+          : undefined
       }
       onSubmit={isEditing ? handleSubmit : undefined}
       submitDisabled={isSubmitting}

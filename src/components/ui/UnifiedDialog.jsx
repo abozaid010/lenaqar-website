@@ -36,12 +36,19 @@ export default function UnifiedDialog({
   /** Optional class for the content body */
   bodyClassName = "",
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const dialogRef = useRef(null);
   const handleCancel = onCancel ?? onClose;
   
-  // Use translated cancel label if none provided
-  const finalCancelLabel = cancelLabel ?? t?.buttons?.cancel;
+  // Use translated labels and guard against blank strings.
+  const finalCancelLabel =
+    typeof cancelLabel === "string"
+      ? cancelLabel.trim() || t?.buttons?.cancel || (locale === "ar" ? "إلغاء" : "Cancel")
+      : cancelLabel ?? t?.buttons?.cancel ?? (locale === "ar" ? "إلغاء" : "Cancel");
+  const finalSubmitLabel =
+    typeof submitLabel === "string"
+      ? submitLabel.trim() || t?.buttons?.submit || (locale === "ar" ? "حفظ" : "Save")
+      : submitLabel ?? t?.buttons?.submit ?? (locale === "ar" ? "حفظ" : "Save");
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -84,7 +91,7 @@ export default function UnifiedDialog({
             onCancel={handleCancel}
             cancelLabel={finalCancelLabel}
             onSubmit={onSubmit}
-            submitLabel={submitLabel}
+            submitLabel={finalSubmitLabel}
             submitDisabled={submitDisabled}
             submitLoading={submitLoading}
             leadingSlot={headerLeading}
@@ -115,7 +122,7 @@ export default function UnifiedDialog({
             <div className="flex justify-end items-center gap-2 shrink-0 order-last min-w-[80px]">
               {headerTrailing !== undefined ? (
                 headerTrailing
-              ) : submitLabel != null && onSubmit != null ? (
+              ) : finalSubmitLabel != null && onSubmit != null ? (
                 <button
                   type="button"
                   onClick={onSubmit}
@@ -125,10 +132,10 @@ export default function UnifiedDialog({
                   {submitLoading ? (
                     <>
                       <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      {submitLabel}
+                      {finalSubmitLabel}
                     </>
                   ) : (
-                    submitLabel
+                    finalSubmitLabel
                   )}
                 </button>
               ) : null}

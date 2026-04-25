@@ -131,7 +131,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   };
 
   const modalRef = useRef(null);
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
+  const backLabel = translate("buttons.back", locale === "ar" ? "رجوع" : "Back");
+  const nextLabel = translate("buttons.next", locale === "ar" ? "التالي" : "Next");
+  const saveUnitLabel = translate(
+    "buttons.saveUnit",
+    locale === "ar" ? "حفظ الوحدة" : "Save Unit"
+  );
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload statecl
@@ -775,7 +781,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         ) : (
           <ArrowLeft size={17} />
         )}
-        {t.buttons.back}
+        {backLabel}
       </button>
     ) : undefined;
 
@@ -797,12 +803,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         {currentStep === 3 && (loading || isUploading) ? (
           <>
             <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            {currentStep < 3 ? t.buttons.next : t.buttons.saveUnit}
+            {currentStep < 3 ? nextLabel : saveUnitLabel}
           </>
         ) : currentStep < 3 ? (
-          t.buttons.next
+          nextLabel
         ) : (
-          t.buttons.saveUnit
+          saveUnitLabel
         )}
       </button>
     </div>
