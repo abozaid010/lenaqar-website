@@ -9,7 +9,6 @@ import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/utils/api";
 import { generateUnitSlug } from "@/lib/units/unit-url-utils";
 import { useState } from "react";
-import { Share2 } from "lucide-react";
 import {
   createSafeImageSource,
   handleImageError,
@@ -142,19 +141,9 @@ export default function UnitsGrid({
                   </div>
                 )}
 
-                {/* Share Button */}
+                {/* Share Button (temporarily hidden) */}
                 {!readonly ? (
-                  <div className="  ">
-                    {u.unitId ? (
-                      <button
-                        type="button"
-                        onClick={(e) => handleShareClick(u.unitId, e)}
-                        aria-label={t?.buttons?.share || "Share"}
-                        className="absolute top-2 right-5 cursor-pointer group rounded-full bg-black/40 hover:bg-black/55 backdrop-blur-sm p-2 transition-colors"
-                      >
-                        <Share2 className="w-5 h-5 text-white" />
-                      </button>
-                    ) : null}
+                  <div>
                     <p
                       style={{
                         fontWeight: "500",
