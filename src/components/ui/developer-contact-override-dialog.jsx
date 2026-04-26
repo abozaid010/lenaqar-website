@@ -66,9 +66,7 @@ export default function DeveloperContactOverrideDialog({
       }
     } catch (e) {
       console.error(e);
-      toast.error(
-        translate("common.error", locale === "ar" ? "حدث خطأ" : "Something went wrong")
-      );
+      toast.error(translate("common.error"));
     } finally {
       setLoading(false);
     }
@@ -102,14 +100,13 @@ export default function DeveloperContactOverrideDialog({
       }
       const c = extractContact(res) ?? form;
       toast.success(
-        translate("developerPage.contactOverrideSaved", "Contact settings saved")
+        translate("developerPage.contactOverrideSaved")
       );
       onSaved?.(c);
       onClose();
     } catch (err) {
       toast.error(
-        err?.message ||
-          translate("common.error", "Failed to save")
+        err?.message || translate("developerPage.contactOverrideSaveFailed")
       );
     } finally {
       setSaving(false);
@@ -120,10 +117,7 @@ export default function DeveloperContactOverrideDialog({
     if (!clientId || !developerId) return;
     if (
       !window.confirm(
-        translate(
-          "developerPage.contactOverrideRevertConfirm",
-          "Remove your contact override? Global developer contact will be used again."
-        )
+        translate("developerPage.contactOverrideRevertConfirm")
       )
     ) {
       return;
@@ -136,7 +130,7 @@ export default function DeveloperContactOverrideDialog({
         return;
       }
       toast.success(
-        translate("developerPage.contactOverrideRemoved", "Override removed")
+        translate("developerPage.contactOverrideRemoved")
       );
       await load();
       onSaved?.(null);
@@ -149,7 +143,7 @@ export default function DeveloperContactOverrideDialog({
   };
 
   const titleBase =
-    translate("developerPage.updateContactTitle", "Update contact") +
+    translate("developerPage.updateContactTitle") +
     (developerName ? ` — ${developerName}` : "");
 
   return (
@@ -157,12 +151,12 @@ export default function DeveloperContactOverrideDialog({
       isOpen={isOpen}
       onClose={onClose}
       title={titleBase}
-      cancelLabel={t?.cancel || (locale === "ar" ? "إلغاء" : "Cancel")}
+      cancelLabel={translate("buttons.cancel")}
       onCancel={onClose}
       submitLabel={
         saving
-          ? translate("common.saving", "Saving…")
-          : translate("common.save", "Save")
+          ? translate("common.saving")
+          : translate("common.save")
       }
       onSubmit={handleSave}
       submitDisabled={loading || saving}
@@ -171,20 +165,17 @@ export default function DeveloperContactOverrideDialog({
       bodyClassName="max-h-[70vh] overflow-y-auto"
     >
       <p className="text-sm text-gray-600 mb-4">
-        {translate(
-          "developerPage.updateContactBlurb",
-          "These values apply only to your client and override the global developer contact for your team."
-        )}
+        {translate("developerPage.updateContactBlurb")}
       </p>
       {loading ? (
         <p className="text-sm text-gray-500">
-          {translate("common.loading", "Loading…")}
+          {translate("common.loading")}
         </p>
       ) : (
         <div className="space-y-3">
           <LenaTextField
             name="sales_name"
-            label={translate("formLabels.salesName", "Sales name")}
+            label={translate("formLabels.salesName")}
             value={form.sales_name}
             onChange={handleChange}
             autoComplete="name"
@@ -192,21 +183,21 @@ export default function DeveloperContactOverrideDialog({
           <LenaTextField
             name="sales_email"
             type="email"
-            label={translate("formLabels.salesEmail", "Sales email")}
+            label={translate("formLabels.salesEmail")}
             value={form.sales_email}
             onChange={handleChange}
             autoComplete="email"
           />
           <LenaTextField
             name="sales_phone"
-            label={translate("formLabels.salesPhone", "Sales phone")}
+            label={translate("formLabels.salesPhone")}
             value={form.sales_phone}
             onChange={handleChange}
             autoComplete="tel"
           />
           <LenaTextField
             name="whatsapp"
-            label="WhatsApp"
+            label={translate("formLabels.whatsapp")}
             value={form.whatsapp}
             onChange={handleChange}
             autoComplete="tel"

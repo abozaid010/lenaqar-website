@@ -139,6 +139,10 @@ export default {
     city: "City",
     district: "District",
     area: "Area",
+    salesName: "Sales name",
+    salesEmail: "Sales email",
+    salesPhone: "Sales phone",
+    whatsapp: "WhatsApp",
     yes: "Yes",
     no: "No",
     edit: "Edit",
@@ -1343,6 +1347,10 @@ export default {
     selectDistrict: "select district",
     ownerName: "Owner Name",
     ownerPhone: "Owner Phone",
+    salesName: "Sales name",
+    salesEmail: "Sales email",
+    salesPhone: "Sales phone",
+    whatsapp: "WhatsApp",
     compoundName: "Project Name",
     description: "Description",
     city: "City",
@@ -1525,6 +1533,7 @@ export default {
     updateContactBlurb:
       "These values apply only to your client and override the global developer contact for your team.",
     contactOverrideSaved: "Contact settings saved",
+    contactOverrideSaveFailed: "Failed to save contact settings",
     contactOverrideRevertConfirm:
       "Remove your contact override? Global developer contact will be used again.",
     contactOverrideRemoved: "Override removed",
@@ -1548,6 +1557,15 @@ export default {
     available: "available",
     NoDevelopers: "No developers found.",
     instructions: "How to manage developers",
+  },
+  projectContact: {
+    developerLabel: "Developer",
+    contactLabel: "Contact",
+    contactType: {
+      owner: "Owner",
+      developer: "Developer",
+      client: "Client",
+    },
   },
   currency: {
     egp: "EGP",

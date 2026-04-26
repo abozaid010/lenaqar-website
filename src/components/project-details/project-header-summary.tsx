@@ -4,9 +4,52 @@ import Link from 'next/link';
 import { MapPin, Building, User, Tag, Calendar } from 'lucide-react';
 import { useI18n } from '@/hooks/useI18n';
 import type { ProjectHeaderSummaryProps } from '@/lib/projects/project-types';
+import { useEffect, useMemo, useState } from 'react';
+import { formatCityLabel, formatDistrictLabel } from '@/utils/formatters';
 
 export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryProps) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+
+  const [locationText, setLocationText] = useState<string>(project.locationLabel);
+
+  const { cityRaw, districtRaw } = useMemo(() => {
+    const parts = String(project.locationLabel || '')
+      .split(',')
+      .map((p) => p.trim())
+      .filter(Boolean);
+    return { cityRaw: parts[0] || '', districtRaw: parts[1] || '' };
+  }, [project.locationLabel]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        if (!cityRaw) {
+          if (!cancelled) setLocationText(project.locationLabel);
+          return;
+        }
+        const city = await formatCityLabel(cityRaw, locale);
+        const district = districtRaw
+          ? await formatDistrictLabel(districtRaw, cityRaw, locale)
+          : '';
+        const merged = district ? `${city}, ${district}` : city;
+        if (!cancelled) setLocationText(merged || project.locationLabel);
+      } catch {
+        if (!cancelled) setLocationText(project.locationLabel);
+      }
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [cityRaw, districtRaw, locale, project.locationLabel]);
+
+  const developerName =
+    locale === 'ar'
+      ? ((project as any).developer_ar ||
+          (project as any).developerAr ||
+          project.developerName)
+      : project.developerName;
 
   return (
     <div className="bg-white rounded-lg border p-6 space-y-6">
@@ -18,26 +61,26 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
 
         {/* Developer and Location Links */}
         <div className="flex flex-wrap items-center gap-4 text-sm">
-          {project.developerName && (
+          {developerName && (
             project.developerHref ? (
               <Link
                 href={project.developerHref}
                 className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <User className="w-4 h-4" />
-                {project.developerName}
+                {developerName}
               </Link>
             ) : (
               <span className="flex items-center gap-1 text-gray-600">
                 <User className="w-4 h-4" />
-                {project.developerName}
+                {developerName}
               </span>
             )
           )}
 
           <span className="flex items-center gap-1 text-gray-600">
             <MapPin className="w-4 h-4" />
-            {project.locationLabel}
+            {locationText}
           </span>
         </div>
       </div>

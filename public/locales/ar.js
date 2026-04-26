@@ -149,6 +149,10 @@ export default {
     city: "المدينة",
     district: "الحي",
     area: "المساحة",
+    salesName: "اسم مسؤول المبيعات",
+    salesEmail: "بريد مسؤول المبيعات",
+    salesPhone: "هاتف مسؤول المبيعات",
+    whatsapp: "واتساب",
     yes: "نعم",
     no: "لا",
     edit: "تعديل",
@@ -1333,6 +1337,10 @@ export default {
     cityFirst: "اختر المدينه اولا",
     selectDistrict: "اختر الحي ",
     ownerName: "اسم المالك",
+    salesName: "اسم مسؤول المبيعات",
+    salesEmail: "بريد مسؤول المبيعات",
+    salesPhone: "هاتف مسؤول المبيعات",
+    whatsapp: "واتساب",
     ownerPhone: "رقم الهاتف",
     compoundName: "اسم المشروع",
     description: "الوصف",
@@ -1529,6 +1537,15 @@ export default {
   currency: {
     egp: "جنيه",
   },
+  projectContact: {
+    developerLabel: "المطور",
+    contactLabel: "التواصل",
+    contactType: {
+      owner: "المالك",
+      developer: "المطور",
+      client: "العميل",
+    },
+  },
   schaduall: {
     assignError: "فشل في تعيين مندوب المبيعات",
     salesAssigned: "تم تعيين مندوب المبيعات بنجاح",
@@ -1603,6 +1620,7 @@ export default {
     updateContactBlurb:
       "هذه القيم تنطبق فقط على عميلك وتستبدل بيانات التواصل العامة للمطور لفريقك.",
     contactOverrideSaved: "تم حفظ بيانات التواصل",
+    contactOverrideSaveFailed: "فشل حفظ بيانات التواصل",
     contactOverrideRevertConfirm:
       "هل تريد إزالة بيانات التواصل المخصصة؟ سيتم استخدام بيانات المطور العامة مرة أخرى.",
     contactOverrideRemoved: "تم إزالة التخصيص",
@@ -1941,7 +1959,7 @@ export default {
     projectLocation: "موقع المشروع",
     viewOnMap: "عرض على الخريطة",
     openInGoogleMaps: "فتح في خرائط جوجل",
-    locationLandmark: "معلم الموقع",
+    locationLandmark: "الموقع",
     coordinates: "الإحداثيات",
     videoTour: "جولة فيديو",
     watchProjectVideo: "مشاهدة فيديو المشروع",

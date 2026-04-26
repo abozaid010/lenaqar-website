@@ -121,7 +121,9 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
 
       {project.developerName && (
         <div className="bg-gray-50 rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Developer</div>
+          <div className="text-xs text-gray-500 mb-1">
+            {translate("projectContact.developerLabel")}
+          </div>
           <div className="text-sm font-medium text-gray-900">{project.developerName}</div>
         </div>
       )}
@@ -136,8 +138,10 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
         <div className="bg-gray-50 rounded-lg p-3 text-center">
           <div className="text-xs text-gray-600 mb-1">
             {contactData?.type
-              ? `${translate('unitInquiry.contactType', 'Contact')} (${contactData.type})`
-              : translate('unitInquiry.contactType', 'Contact')}
+              ? `${translate("projectContact.contactLabel")} (${translate(
+                  `projectContact.contactType.${String(contactData.type).toLowerCase()}`
+                )})`
+              : translate("projectContact.contactLabel")}
           </div>
           {contactData?.name && (
             <div className="text-sm font-medium text-gray-900">{contactData.name}</div>
