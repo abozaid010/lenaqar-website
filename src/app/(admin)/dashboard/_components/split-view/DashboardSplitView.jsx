@@ -4,8 +4,10 @@ import { useAverageScore } from "@/context/average-score";
 import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
 import { userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -20,7 +22,7 @@ function flattenUsers(data) {
   return Array.from(map.values());
 }
 
-export default function DashboardSplitView() {
+function DashboardSplitViewComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -103,5 +105,13 @@ export default function DashboardSplitView() {
         />
       </div>
     </div>
+  );
+}
+
+export default function DashboardSplitView() {
+  return (
+    <SearchParamsWrapper>
+      <DashboardSplitViewComponent />
+    </SearchParamsWrapper>
   );
 }

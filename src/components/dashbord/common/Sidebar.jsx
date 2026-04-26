@@ -25,8 +25,9 @@ import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
+import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 
-const Sidebar = ({
+const SidebarComponent = ({
   canAccessMap = false,
   canAccessNews = false,
   initialModuleActions = undefined,
@@ -354,6 +355,14 @@ const Sidebar = ({
         </div>
       </div>
     </>
+  );
+};
+
+const Sidebar = (props) => {
+  return (
+    <SearchParamsWrapper>
+      <SidebarComponent {...props} />
+    </SearchParamsWrapper>
   );
 };
 
