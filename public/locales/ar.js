@@ -1598,6 +1598,15 @@ export default {
     DeleteTitle: "حذف المطور",
     deleteMessage: "هل أنت متأكد أنك تريد حذف هذا المطور؟",
     editDeveloper: "تعديل بيانات المطور",
+    updateContact: "تحديث بيانات التواصل",
+    updateContactTitle: "تحديث بيانات التواصل",
+    updateContactBlurb:
+      "هذه القيم تنطبق فقط على عميلك وتستبدل بيانات التواصل العامة للمطور لفريقك.",
+    contactOverrideSaved: "تم حفظ بيانات التواصل",
+    contactOverrideRevertConfirm:
+      "هل تريد إزالة بيانات التواصل المخصصة؟ سيتم استخدام بيانات المطور العامة مرة أخرى.",
+    contactOverrideRemoved: "تم إزالة التخصيص",
+    revertContactOverride: "إزالة التخصيص واستخدام جهة الاتصال الافتراضية",
     addDeveloper: "إضافة",
     importButton: "استيراد",
     importDevelopers: "استيراد المطورين",

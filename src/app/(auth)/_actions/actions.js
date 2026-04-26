@@ -8,7 +8,7 @@ import { getServerCookieOptions } from "@/lib/CookieConfig";
 export async function loginAction(prevState, formData) {
   // Input validation and sanitization
   const email = String(formData.get("email") || "").trim();
-  const password = String(formData.get("password") || "");
+  const password = String(formData.get("password") || "").trim();
 
   // Basic validation
   if (!email || !password) {

@@ -24,6 +24,7 @@ const ACTIONS = [
   { value: "import", label: "Import" },
   { value: "update_own", label: "Update Own" },
   { value: "update_any", label: "Update Any" },
+  { value: "update_developer_contacts", label: "Update Developer Contacts" },
   { value: "delete_own", label: "Delete Own" },
   { value: "delete_any", label: "Delete Any" }
 ];

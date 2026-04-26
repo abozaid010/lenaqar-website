@@ -1520,6 +1520,15 @@ export default {
     DeleteTitle: "Delete Developer",
     deleteMessage: "Are you sure you want to delete this developer?",
     editDeveloper: "Edit Developer",
+    updateContact: "Update contact",
+    updateContactTitle: "Update contact",
+    updateContactBlurb:
+      "These values apply only to your client and override the global developer contact for your team.",
+    contactOverrideSaved: "Contact settings saved",
+    contactOverrideRevertConfirm:
+      "Remove your contact override? Global developer contact will be used again.",
+    contactOverrideRemoved: "Override removed",
+    revertContactOverride: "Remove, use default point of contact",
     addDeveloper: "Add",
     importButton: "Import",
     importDevelopers: "Import developers",

@@ -783,6 +783,65 @@ export async function deleteDeveloper(id) {
   }
 }
 
+/**
+ * Per-client contact overrides for a developer (auth required; not for public client).
+ * GET/POST/DELETE `/clients/{clientId}/developers/{developerId}/contact`
+ */
+export async function getDeveloperContactOverride(clientId, developerId) {
+  try {
+    const response = await axiosInstance.get(
+      `/clients/${clientId}/developers/${developerId}/contact`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to load developer contact override:", error.message);
+    return {
+      error:
+        error.response?.data?.message ||
+        error.response?.data?.error_message ||
+        error.message,
+      code: error.response?.status,
+    };
+  }
+}
+
+export async function setDeveloperContactOverride(clientId, developerId, body) {
+  try {
+    const response = await axiosInstance.post(
+      `/clients/${clientId}/developers/${developerId}/contact`,
+      body
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to save developer contact override:", error.message);
+    return {
+      error:
+        error.response?.data?.message ||
+        error.response?.data?.error_message ||
+        error.message,
+      code: error.response?.status,
+    };
+  }
+}
+
+export async function deleteDeveloperContactOverride(clientId, developerId) {
+  try {
+    const response = await axiosInstance.delete(
+      `/clients/${clientId}/developers/${developerId}/contact`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete developer contact override:", error.message);
+    return {
+      error:
+        error.response?.data?.message ||
+        error.response?.data?.error_message ||
+        error.message,
+      code: error.response?.status,
+    };
+  }
+}
+
 export async function importDevelopers(developers) {
   try {
     const response = await axiosInstance.post(
