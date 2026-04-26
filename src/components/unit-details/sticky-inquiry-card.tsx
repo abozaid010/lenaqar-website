@@ -18,6 +18,11 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
     return LenaCookiesManager.getClientId() || null;
   };
 
+  const currentClientId = getCurrentClientId();
+  // Hide edit/delete for primary inventory when the viewer is not the unit's client.
+  const showUnitAdminActions =
+    !unit.isPrimary || (unit.clientId ?? null) === (currentClientId ?? null);
+
   useEffect(() => {
     const loadContactInfo = async () => {
       try {
@@ -138,28 +143,28 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
         </button>
       </div>
 
-      
-      {/* Admin Actions */}
-      <div className="border-t pt-4">
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={handleEdit}
-            className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
-          >
-            <Edit className="w-4 h-4" />
-            Edit
-          </button>
-          
-          <button
-            onClick={handleDelete}
-            className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete
-          </button>
-        </div>
-      </div>
+      {/* Admin Actions — not shown for primary units when the viewer is another client */}
+      {showUnitAdminActions ? (
+        <div className="border-t pt-4">
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleEdit}
+              className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
+            >
+              <Edit className="w-4 h-4" />
+              Edit
+            </button>
 
+            <button
+              onClick={handleDelete}
+              className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
+            >
+              <Trash2 className="w-4 h-4" />
+              Delete
+            </button>
           </div>
+        </div>
+      ) : null}
+    </div>
   );
 }
