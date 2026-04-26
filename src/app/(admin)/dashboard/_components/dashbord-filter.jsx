@@ -338,48 +338,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         </div>
 
         {/* Actions row (small screens) */}
-        <div className="flex items-center justify-between gap-2 w-full flex-wrap lg:hidden">
-          <div className="flex items-center gap-2 flex-wrap">
-            <button
-              onClick={handlePrint}
-              className={`${DASHBOARD_BUTTON} ${compact ? "h-9" : "h-10"}`}
-              title={t.dashboardFilter.actions.print}
-            >
-              <Printer size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
-              <span className="hidden sm:inline">
-                {t.dashboardFilter.actions.print}
-              </span>
-            </button>
-
-            <ExcelExportButton searchParams={appliedFilters} compact={compact} />
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <AverageScore />
-            <VideoInstructionsDialog
-              variant="dashboard"
-              iconSize="md"
-              tooltipText="How to use the Dashboard"
-              className="p-0"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Actions row (large screens) */}
-      <div className="hidden lg:flex items-center gap-2 shrink-0">
-        <button
-          onClick={handlePrint}
-          className={`${DASHBOARD_BUTTON} ${compact ? "h-9" : "h-10"}`}
-          title={t.dashboardFilter.actions.print}
-        >
-          <Printer size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
-          <span className="hidden sm:inline">{t.dashboardFilter.actions.print}</span>
-        </button>
-
-        <ExcelExportButton searchParams={appliedFilters} compact={compact} />
-
-        <div className="ml-2 flex items-center gap-2">
+        <div className="flex items-center justify-end gap-2 w-full flex-wrap lg:hidden">
           <AverageScore />
           <VideoInstructionsDialog
             variant="dashboard"
@@ -388,6 +347,17 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             className="p-0"
           />
         </div>
+      </div>
+
+      {/* Actions row (large screens) */}
+      <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <AverageScore />
+        <VideoInstructionsDialog
+          variant="dashboard"
+          iconSize="md"
+          tooltipText="How to use the Dashboard"
+          className="p-0"
+        />
       </div>
     </div>
   );

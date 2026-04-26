@@ -32,6 +32,8 @@ export default function CampaignDialog({
 
   const editMode = !!campaign?.id;
   const didInitRef = useRef(false);
+  const lastCampaignIdToastAtRef = useRef(0);
+  const lastClientPhoneToastAtRef = useRef(0);
 
   const [mode, setMode] = useState("text"); // 'text' | 'unit'
   const [campaignIdInput, setCampaignIdInput] = useState(""); // create only: user-defined campaign_id (4–16 chars, no spaces)
@@ -151,6 +153,13 @@ export default function CampaignDialog({
       toast.error(t?.campaigns?.errors?.clientPhoneRequired);
       return false;
     }
+    {
+      const digits = String(payload.client_phone_number || "").replace(/[^\d]/g, "");
+      if (!digits.startsWith("20")) {
+        toast.error(translate("campaigns.errors.clientPhoneMustStartWith20"));
+        return false;
+      }
+    }
 
     if (mode === "unit") {
       if (!selectedUnit) {
@@ -254,7 +263,22 @@ export default function CampaignDialog({
               label={t.campaigns.campaignIdLabel}
               name="campaign_id"
               value={campaignIdInput}
-              onChange={(e) => setCampaignIdInput((e.target.value || "").replace(/\s/g, ""))}
+              onChange={(e) => {
+                const raw = String(e.target.value || "");
+                // campaign_id must be English-only (no Arabic/Unicode letters)
+                const sanitized = raw
+                  .normalize("NFKD")
+                  .replace(/[^\x00-\x7F]/g, "") // strip non-ASCII (e.g. Arabic)
+                  .replace(/\s/g, ""); // no spaces
+                if (sanitized !== raw) {
+                  const now = Date.now();
+                  if (now - lastCampaignIdToastAtRef.current >= 3000) {
+                    lastCampaignIdToastAtRef.current = now;
+                    toast.error(translate("campaigns.errors.campaignIdEnglishOnly"));
+                  }
+                }
+                setCampaignIdInput(sanitized);
+              }}
               dir="ltr"
               placeholder={t.campaigns.signupForumPlaceholder}
               required
@@ -267,8 +291,22 @@ export default function CampaignDialog({
             label={t.campaigns.clientPhoneNumber}
             name="client_phone_number"
             value={clientPhoneNumber}
-            onChange={(e) => setClientPhoneNumber(e.target.value)}
-            dir={locale === "ar" ? "rtl" : "ltr"}
+            onChange={(e) => {
+              const raw = String(e.target.value || "");
+              const digitsOnly = raw.replace(/[^\d]/g, "");
+              if (digitsOnly !== raw) {
+                const now = Date.now();
+                if (now - lastClientPhoneToastAtRef.current >= 3000) {
+                  lastClientPhoneToastAtRef.current = now;
+                  toast.error(translate("campaigns.errors.clientPhoneNumbersOnly"));
+                }
+              }
+              setClientPhoneNumber(digitsOnly);
+            }}
+            dir="ltr"
+            placeholder={translate("campaigns.clientPhonePlaceholder")}
+            inputMode="numeric"
+            pattern="[0-9]*"
             required
           />
 
