@@ -46,8 +46,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, []);
 
 
-  const [myInventory, setMyInventory] = useState(() => appliedFilters.my_inventory === "true");
-  const [resale, setResale] = useState(() => appliedFilters.resale === "true");
+  const [myInventory, setMyInventory] = useState(false);
+  const [resale, setResale] = useState(false);
 
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer_name || "",
@@ -57,18 +57,20 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     min_price: appliedFilters.min_price || "",
     max_price: appliedFilters.max_price || "",
     city: appliedFilters.city || "",
-    my_inventory: appliedFilters.my_inventory === "true",
-    resale: appliedFilters.resale === "true",
+    my_inventory: false,
+    resale: false,
     min_area: appliedFilters.min_area || "",
   }));
 
-  // Debounced min_area state
-  const [debouncedMinArea, setDebouncedMinArea] = useState(filters.min_area);
-  const minAreaTimeoutRef = useRef(null);
+  // Debounced numeric search (price/area) to avoid spamming backend
+  const numericDebounceRef = useRef(null);
 
-  // Get client ID from token for My Inventory filter
-  const clientIdFromToken = getClientIdFromToken();
-  const hasClientId = !!clientIdFromToken;
+  // Get client ID from token for My Inventory filter.
+  // IMPORTANT: compute on mount only to avoid SSR hydration mismatch.
+  const [hasClientId, setHasClientId] = useState(false);
+  useEffect(() => {
+    setHasClientId(!!getClientIdFromToken());
+  }, []);
 
   useEffect(() => {
     if (!projectsLoading) {
@@ -101,22 +103,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     loadCityLabels();
   }, [locale]);
 
-  // Debounce min_area input (300ms)
   useEffect(() => {
-    if (minAreaTimeoutRef.current) {
-      clearTimeout(minAreaTimeoutRef.current);
-    }
-
-    minAreaTimeoutRef.current = setTimeout(() => {
-      setDebouncedMinArea(filters.min_area);
-    }, 300);
-
     return () => {
-      if (minAreaTimeoutRef.current) {
-        clearTimeout(minAreaTimeoutRef.current);
-      }
+      if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
     };
-  }, [filters.min_area]);
+  }, []);
 
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
@@ -176,6 +167,81 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   // Close dropdown when clicking outside
   useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
 
+  const buildActiveFilters = useCallback((nextFilters) => {
+    const list = [];
+    if (nextFilters.my_inventory) {
+      list.push({ key: "my_inventory", value: t.unitsFilter.myInventory });
+    }
+    if (nextFilters.resale) {
+      list.push({ key: "resale", value: t.unitsFilter.resale });
+    }
+    if (nextFilters.min_area) {
+      list.push({
+        key: "min_area",
+        value: `${t.unitsFilter.minArea}: ${nextFilters.min_area} m²`,
+      });
+    }
+    if (nextFilters.min_price) {
+      list.push({
+        key: "min_price",
+        value: `${locale === "ar" ? "من" : "From"} ${formatPriceInput(nextFilters.min_price)} EGP`,
+      });
+    }
+    if (nextFilters.max_price) {
+      list.push({
+        key: "max_price",
+        value: `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(nextFilters.max_price)} EGP`,
+      });
+    }
+    if (nextFilters.developer_name) {
+      list.push({ key: "developer_name", value: getSelectedDeveloper() });
+    }
+    if (nextFilters.project_name) {
+      list.push({ key: "project_name", value: getSelectedProjectName() });
+    }
+    if (nextFilters.purpose) {
+      list.push({ key: "purpose", value: nextFilters.purpose });
+    }
+    if (nextFilters.property_type) {
+      list.push({ key: "property_type", value: nextFilters.property_type });
+    }
+    if (nextFilters.min_price || nextFilters.max_price) {
+      list.push({ key: "price_range", value: getPriceDisplayText() });
+    }
+    if (nextFilters.city) {
+      list.push({ key: "city", value: getSelectedCity() });
+    }
+    return list;
+  }, [locale, t, compounds, developers, cityLabels]);
+
+  const applyNumericFiltersToUrl = useCallback((nextFilters) => {
+    const newParams = new URLSearchParams(window.location.search);
+
+    const setOrDelete = (key, v) => {
+      if (v && String(v).trim() !== "") newParams.set(key, String(v));
+      else newParams.delete(key);
+    };
+
+    setOrDelete("min_price", nextFilters.min_price);
+    setOrDelete("max_price", nextFilters.max_price);
+    setOrDelete("min_area", nextFilters.min_area);
+
+    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    setActiveFilters(buildActiveFilters(nextFilters));
+  }, [router, buildActiveFilters]);
+
+  const scheduleNumericSearch = useCallback((nextFilters) => {
+    if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
+    numericDebounceRef.current = setTimeout(() => {
+      applyNumericFiltersToUrl(nextFilters);
+    }, 1000);
+  }, [applyNumericFiltersToUrl]);
+
+  const flushNumericSearch = useCallback((nextFilters) => {
+    if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
+    applyNumericFiltersToUrl(nextFilters);
+  }, [applyNumericFiltersToUrl]);
+
   const handleFilterChange = (key, value) => {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
@@ -191,20 +257,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       } else {
         newParams.delete(key);
       }
-    } else if (key === "min_area") {
-      // Min area uses debounced value, update URL only when debounced
-      if (debouncedMinArea && debouncedMinArea !== "") {
-        newParams.set("min_area", debouncedMinArea);
-      } else {
-        newParams.delete("min_area");
-      }
-    } else if (key === "min_price" || key === "max_price") {
-      // Price fields - handle directly
-      if (value && value !== "") {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
+    } else if (key === "min_area" || key === "min_price" || key === "max_price") {
+      // Numeric filters are applied via debounce/onBlur, not here.
+      // Keep URL changes centralized in applyNumericFiltersToUrl().
+      scheduleNumericSearch(updatedFilters);
+      return;
     } else {
       // Existing filters
       if (value && value !== "" && value !== "all") {
@@ -242,8 +299,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         displayValue = t.unitsFilter.myInventory;
       } else if (key === "resale") {
         displayValue = t.unitsFilter.resale;
-      } else if (key === "min_area") {
-        displayValue = debouncedMinArea ? `${t.unitsFilter.minArea}: ${debouncedMinArea} m²` : "";
       } else if (key === "min_price") {
         displayValue = value ? `${locale === "ar" ? "من" : "From"} ${formatPriceInput(value)} EGP` : "";
       } else if (key === "max_price") {
@@ -685,8 +740,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             value={filters.min_price}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              setFilters((prev) => ({ ...prev, min_price: value }));
+              const next = { ...filters, min_price: value };
+              setFilters(next);
+              scheduleNumericSearch(next);
             }}
+            onBlur={() => flushNumericSearch(filters)}
             className="w-32"
             adornment="EGP"
           />
@@ -701,8 +759,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             value={filters.max_price}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              setFilters((prev) => ({ ...prev, max_price: value }));
+              const next = { ...filters, max_price: value };
+              setFilters(next);
+              scheduleNumericSearch(next);
             }}
+            onBlur={() => flushNumericSearch(filters)}
             className="w-32"
             adornment="EGP"
           />
@@ -717,8 +778,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             value={filters.min_area}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              setFilters((prev) => ({ ...prev, min_area: value }));
+              const next = { ...filters, min_area: value };
+              setFilters(next);
+              scheduleNumericSearch(next);
             }}
+            onBlur={() => flushNumericSearch(filters)}
             className="w-24"
             adornment="m²"
           />
