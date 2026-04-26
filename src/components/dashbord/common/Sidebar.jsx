@@ -33,7 +33,7 @@ const SidebarComponent = ({
   initialModuleActions = undefined,
   clientId = null,
 }) => {
-  const { t, translate } = useI18n();
+  const { t, translate, locale } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const unitsSection = useUnitsSectionSource();
@@ -84,22 +84,35 @@ const SidebarComponent = ({
   const isUnitsLinkActive = unitsSection === "units";
   const isPendingApprovalLinkActive = unitsSection === "pending_approval";
 
+  const isRTL = String(locale || "").toLowerCase().startsWith("ar");
+  const drawerSideClass = isRTL ? "right-0" : "left-0";
+  const drawerTransformClass = isOpen
+    ? "translate-x-0"
+    : isRTL
+      ? "translate-x-full lg:translate-x-0"
+      : "-translate-x-full lg:translate-x-0";
+
   if (typeof window !== "undefined") {
     window.toggleSidebar = toggleSidebar;
   }
 
   useEffect(() => {
     setIsMounted(true);
-    if (isOpen) setIsOpen(false);
     if (pendingPath && pathname === pendingPath) setPendingPath(null);
     setCanAccessCampaignChat(hasAccess);
-  }, [pathname, isOpen, pendingPath, hasAccess]);
+  }, [pathname, pendingPath, hasAccess]);
+
+  // Close the mobile drawer on route change
+  useEffect(() => {
+    if (isOpen) setIsOpen(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   return (
     <>
       {/* Overlay for mobile */}
       <div
-        className={`lg:hidden fixed inset-0 bg-black/60 z-10 transition-opacity duration-300 ${
+        className={`lg:hidden fixed inset-0 bg-black/60 z-40 transition-opacity duration-300 ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={toggleSidebar}
@@ -140,9 +153,7 @@ const SidebarComponent = ({
 
       {/* Sidebar content */}
       <div
-        className={`w-[12.0rem] h-full bg-white text-gray-700 flex flex-col fixed lg:static z-10 transition-all duration-300 shadow-md ${
-          isOpen ? "left-0" : "-left-[12.0rem] lg:left-0"
-        }`}
+        className={`w-[12.0rem] h-full bg-white text-gray-700 flex flex-col fixed lg:static z-50 transition-transform duration-300 shadow-md transform ${drawerSideClass} ${drawerTransformClass}`}
       >
         {/* Logo/Brand */}
         <div className="p-4 mt-1">

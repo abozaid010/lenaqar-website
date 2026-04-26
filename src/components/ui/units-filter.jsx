@@ -47,6 +47,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, []);
 
 
+  const [myInventory, setMyInventory] = useState(() => appliedFilters.my_inventory === "true");
+  const [resale, setResale] = useState(() => appliedFilters.resale === "true");
+
   const [filters, setFilters] = useState(() => ({
     developer_name: appliedFilters.developer_name || "",
     project_name: appliedFilters.project_name || "",
@@ -633,40 +636,52 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       <div className="flex flex-wrap items-center gap-2">
         {/* My Inventory Toggle */}
         <div className="flex-shrink-0">
-          <button
-            type="button"
-            disabled={!hasClientId}
-            className={`px-3 h-10 rounded-md border text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-              filters.my_inventory
-                ? "bg-primary text-white border-primary hover:bg-primary/90"
-                : hasClientId
-                ? "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-                : "bg-gray-100 border-gray-300 text-gray-400 cursor-not-allowed"
-            }`}
-            onClick={() => handleFilterChange("my_inventory", !filters.my_inventory)}
+          <label
+            className={`flex items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium select-none ${
+              myInventory
+                ? "bg-primary/10 border-primary/40 text-primary"
+                : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+            } ${!hasClientId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
             title={!hasClientId ? (locale === "ar" ? "يتطلب تسجيل الدخول" : "Requires login") : ""}
           >
-            <span className="truncate text-xs">
-              {t.unitsFilter.myInventory}
-            </span>
-          </button>
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-primary"
+              checked={myInventory}
+              disabled={!hasClientId}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setMyInventory(checked);
+                setFilters((prev) => ({ ...prev, my_inventory: checked }));
+                handleFilterChange("my_inventory", checked);
+              }}
+            />
+            <span className="truncate text-xs">{t.unitsFilter.myInventory}</span>
+          </label>
         </div>
 
         {/* Resale Toggle */}
         <div className="flex-shrink-0">
-          <button
-            type="button"
-            className={`px-3 h-10 rounded-md border text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-              filters.resale
-                ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700"
+          <label
+            className={`flex items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
+              resale
+                ? "bg-orange-50 border-orange-300 text-orange-700"
                 : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
             }`}
-            onClick={() => handleFilterChange("resale", !filters.resale)}
           >
-            <span className="truncate text-xs">
-              {t.unitsFilter.resale}
-            </span>
-          </button>
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-orange-600"
+              checked={resale}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setResale(checked);
+                setFilters((prev) => ({ ...prev, resale: checked }));
+                handleFilterChange("resale", checked);
+              }}
+            />
+            <span className="truncate text-xs">{t.unitsFilter.resale}</span>
+          </label>
         </div>
 
         {/* Min Price Field */}

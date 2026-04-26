@@ -72,11 +72,10 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
 export async function fetchUnitsFilter(searchParams, publicOnly = false) {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
+    const url = `${!publicOnly ? "/units/all" : "/public/units"}`;
+    const qs = new URLSearchParams(params).toString();
 
-    const response = await axiosInstance.get(
-      `${!publicOnly ? "/units/all" : "/public/units"}`,
-      { params }
-    );
+    const response = await axiosInstance.get(qs ? `${url}?${qs}` : url);
 
     // Validate response data structure
     if (!response.data || !response.data.data) {
