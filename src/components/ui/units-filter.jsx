@@ -14,7 +14,6 @@ import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select"
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -621,13 +620,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               </span>
             </button>
             <AddUnitButton className="px-3 py-2 h-10 text-xs font-medium bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-1 transition-colors shadow-sm hover:shadow-md" />
-            <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
-              <VideoInstructionsDialog
-                variant="units"
-                iconSize="sm"
-                tooltipText={t.unitsFilter?.instructions || "How to manage units"}
-              />
-            </div>
           </div>
         )}
       </div>
