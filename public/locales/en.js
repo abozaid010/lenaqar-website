@@ -1549,6 +1549,9 @@ export default {
     NoDevelopers: "No developers found.",
     instructions: "How to manage developers",
   },
+  currency: {
+    egp: "EGP",
+  },
   projectPage: {
     add: "Add",
     searchPlaceholder: "Search projects...",

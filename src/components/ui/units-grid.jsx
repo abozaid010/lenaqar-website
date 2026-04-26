@@ -9,7 +9,7 @@ import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/utils/api";
 import { generateUnitSlug } from "@/lib/units/unit-url-utils";
 import { useState } from "react";
-import shareButton from "../../../public/share.svg";
+import { Share2 } from "lucide-react";
 import {
   createSafeImageSource,
   handleImageError,
@@ -30,12 +30,16 @@ export default function UnitsGrid({
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
-  const { t, locale, translate } = useI18n();
+  const { t, locale, translate, localeUtils } = useI18n();
 
-  // Add a formattcer function for prices
+  const egpLabel = translate("currency.egp") || "EGP";
+
+  // Locale-aware formatter for prices
   const formatPrice = (price) => {
-    if (!price) return "Price not specified";
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (price === null || price === undefined || price === "") return null;
+    const n = typeof price === "number" ? price : Number(String(price).replace(/,/g, ""));
+    if (!Number.isFinite(n)) return null;
+    return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
   const handleShareClick = async (unitId, e) => {
@@ -145,9 +149,10 @@ export default function UnitsGrid({
                       <button
                         type="button"
                         onClick={(e) => handleShareClick(u.unitId, e)}
-                        className="absolute top-2 right-5 cursor-pointer group"
+                        aria-label={t?.buttons?.share || "Share"}
+                        className="absolute top-2 right-5 cursor-pointer group rounded-full bg-black/40 hover:bg-black/55 backdrop-blur-sm p-2 transition-colors"
                       >
-                        <img src={shareButton.src} alt="share" />
+                        <Share2 className="w-5 h-5 text-white" />
                       </button>
                     ) : null}
                     <p
@@ -186,12 +191,14 @@ export default function UnitsGrid({
                       ) : (allowMissingFields ? "—" : "Unit Type")}
                     </span>
                     <span className="text-[14px]">
-                      {u.project ? 
-                        (locale === "ar" && u.ar_name 
-                          ? u.ar_name 
-                          : u.project.charAt(0).toUpperCase() + u.project.slice(1).toLowerCase())
-                        : (allowMissingFields ? "—" : "")
-                      }
+                      {u.project
+                        ? locale === "ar"
+                          ? (u.project_ar || u.projectAr || u.ar_name || u.project)
+                          : u.project.charAt(0).toUpperCase() +
+                            u.project.slice(1).toLowerCase()
+                        : allowMissingFields
+                          ? "—"
+                          : ""}
                     </span>
                   </div>
                 </div>
@@ -201,27 +208,27 @@ export default function UnitsGrid({
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <div className="flex items-center justify-between w-full">
                       <div className="font-semibold text-[21px]">
-                        {u.rentDurationType?.daily?.price
-                          ? `${formatPrice(u.rentDurationType.daily.price)} EGP/day`
-                          : u.rentDurationType?.weekly?.price
-                            ? `${formatPrice(u.rentDurationType.weekly.price)} EGP/week`
-                            : u.rentDurationType?.monthly?.price
-                              ? `${formatPrice(u.rentDurationType.monthly.price)} EGP/month`
-                              : u.rentPrice
-                                ? `${formatPrice(u.rentPrice)} EGP`
+                        {u.rentDurationType?.daily?.price && formatPrice(u.rentDurationType.daily.price)
+                          ? `${formatPrice(u.rentDurationType.daily.price)} ${egpLabel}/day`
+                          : u.rentDurationType?.weekly?.price && formatPrice(u.rentDurationType.weekly.price)
+                            ? `${formatPrice(u.rentDurationType.weekly.price)} ${egpLabel}/week`
+                            : u.rentDurationType?.monthly?.price && formatPrice(u.rentDurationType.monthly.price)
+                              ? `${formatPrice(u.rentDurationType.monthly.price)} ${egpLabel}/month`
+                              : u.rentPrice && formatPrice(u.rentPrice)
+                                ? `${formatPrice(u.rentPrice)} ${egpLabel}`
                                 : allowMissingFields
                                   ? "—"
-                                  : "Price not specified"}
+                                  : t?.common?.na || "N/A"}
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
                       <span className="font-semibold text-[21px]">
-                        {u.totalPrice != null && u.totalPrice !== ""
-                          ? `${formatPrice(u.totalPrice)} EGP`
+                        {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
+                          ? `${formatPrice(u.totalPrice)} ${egpLabel}`
                           : allowMissingFields
                             ? "—"
-                            : "Price not specified"}
+                            : t?.common?.na || "N/A"}
                       </span>
                     </div>
                   )}

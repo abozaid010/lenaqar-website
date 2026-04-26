@@ -8,7 +8,7 @@ import { generateUnitSlug } from '@/lib/units/unit-url-utils';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
-  const { t } = useI18n();
+  const { t, locale, translate } = useI18n();
   const router = useRouter();
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +22,14 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   // Hide edit/delete for primary inventory when the viewer is not the unit's client.
   const showUnitAdminActions =
     !unit.isPrimary || (unit.clientId ?? null) === (currentClientId ?? null);
+
+  // Prefer actual translated strings; fall back only if the locale file is missing keys.
+  const callLabel =
+    t?.buttons?.call || translate("buttons.call") || (locale === "ar" ? "اتصال" : "Call");
+  const whatsappLabel =
+    t?.buttons?.whatsapp ||
+    translate("buttons.whatsapp") ||
+    (locale === "ar" ? "واتساب" : "WhatsApp");
 
   useEffect(() => {
     const loadContactInfo = async () => {
@@ -130,7 +138,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
           className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <PhoneCall className="w-4 h-4" />
-          Call
+          {callLabel}
         </button>
         
         <button
@@ -139,7 +147,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
           className="bg-green-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
         >
           <MessageCircle className="w-4 h-4" />
-          WhatsApp
+          {whatsappLabel}
         </button>
       </div>
 

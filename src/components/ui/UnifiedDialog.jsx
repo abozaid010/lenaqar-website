@@ -37,6 +37,7 @@ export default function UnifiedDialog({
   bodyClassName = "",
 }) {
   const { t, locale } = useI18n();
+  const isRTL = locale === "ar";
   const dialogRef = useRef(null);
   const handleCancel = onCancel ?? onClose;
   
@@ -96,13 +97,16 @@ export default function UnifiedDialog({
             submitLoading={submitLoading}
             leadingSlot={headerLeading}
             trailingSlot={headerTrailing}
+            dir={isRTL ? "rtl" : "ltr"}
           />
         ) : (
           <div
-            className="flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative"
-            dir="ltr"
+            className={`flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
+            dir={isRTL ? "rtl" : "ltr"}
           >
-            <div className="flex justify-start items-center shrink-0 order-first min-w-[80px]">
+            <div className="flex justify-start items-center shrink-0 min-w-[80px]">
               {headerLeading !== undefined ? (
                 headerLeading
               ) : (
@@ -119,7 +123,7 @@ export default function UnifiedDialog({
             <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold text-white px-2 pointer-events-none truncate max-w-[60%]">
               {title}
             </h2>
-            <div className="flex justify-end items-center gap-2 shrink-0 order-last min-w-[80px]">
+            <div className="flex justify-end items-center gap-2 shrink-0 min-w-[80px]">
               {headerTrailing !== undefined ? (
                 headerTrailing
               ) : finalSubmitLabel != null && onSubmit != null ? (

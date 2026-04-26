@@ -20,13 +20,19 @@ export default function UnifiedHeader({
   trailingSlot = null,
   /** Optional: extra class for the root header */
   className = "",
+  /** Optional: direction (rtl/ltr). Defaults to ltr. */
+  dir = "ltr",
 }) {
   const showCancel = !leadingSlot && onCancel != null;
   const showSubmit = !trailingSlot && onSubmit != null;
+  const isRTL = dir === "rtl";
 
   return (
     <header
-      className={`flex items-center justify-between gap-3 px-4 py-3 bg-[#E2dbff] text-primary flex-shrink-0 ${className}`}
+      dir={dir}
+      className={`flex items-center justify-between gap-3 px-4 py-3 bg-[#E2dbff] text-primary flex-shrink-0 ${
+        isRTL ? "flex-row-reverse" : ""
+      } ${className}`}
     >
       {/* Leading: Cancel or custom slot (equal flex so title stays centered) */}
       <div className="flex min-w-0 flex-1 basis-0 justify-start">

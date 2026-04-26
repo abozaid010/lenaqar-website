@@ -194,13 +194,30 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
           )}
 
           {/* Price Display */}
+          {(() => {
+            const raw = activeRent?.price;
+            const n =
+              typeof raw === "number" ? raw : raw != null && raw !== "" ? Number(raw) : NaN;
+            const hasPrice = Number.isFinite(n) && n > 0;
+            const na = getTranslation("unitDetails.common.na", "N/A");
+            const currencyLabel =
+              activeRent?.currency ||
+              t?.currency?.egp ||
+              t?.unitDetails?.unit_pricing?.currency ||
+              "EGP";
+            return (
           <div className="text-3xl font-bold text-primary">
-            {formatCurrency(activeRent?.price ?? 0)}{" "}
-            <span className="text-sm font-normal">
-              {activeRent?.currency ||
-                getTranslation("unitDetails.common.na", "N/A")}
-            </span>
+            {hasPrice ? (
+              <>
+                {formatCurrency(n)}{" "}
+                <span className="text-sm font-normal">{currencyLabel}</span>
+              </>
+            ) : (
+              na
+            )}
           </div>
+            );
+          })()}
 
           <div className="mt-1 text-sm text-gray-600">
             {getDurationText(activeDuration)}
