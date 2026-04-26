@@ -160,6 +160,7 @@ export default {
   },
   header: {
     home: "Home",
+    login: "Login",
     schema: {
       realEstateProject: "Real estate project",
       cairo: "Cairo",
@@ -202,7 +203,6 @@ export default {
     retail: "Retail",
     administrative: "Administrative",
   },
-  login: "Login",
     },
     logoutConfirm: {
       title: "Confirm Logout",

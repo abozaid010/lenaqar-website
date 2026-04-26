@@ -73,9 +73,13 @@ const Header = ({ ci }) => {
               <LanguageSwitcher />
               <Link
                 href={ci ? "/dashboard" : "/login"}
-                className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
+                className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300 inline-flex items-center justify-center min-w-[96px]"
               >
-                {ci ? t.header.clientDashboard : t.header.login}
+                <span className="whitespace-nowrap">
+                  {ci
+                    ? (t?.header?.clientDashboard || t?.header?.dashboard || "Dashboard")
+                    : (t?.header?.login || t?.login || "Login")}
+                </span>
               </Link>
             </div>
 
@@ -121,9 +125,13 @@ const Header = ({ ci }) => {
                   </button>
                   <Link
                     href={ci ? "/dashboard" : "/login"}
-                    className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300"
+                    className="bg-gradient-to-r from-[#3926A7] to-[#21EAF4] text-white px-5 py-1.5 rounded-full hover:shadow-lg hover:opacity-90 transition-all duration-300 inline-flex items-center justify-center min-w-[96px]"
                   >
-                    {ci ? t.header.clientDashboard : t.header.login}
+                    <span className="whitespace-nowrap">
+                      {ci
+                        ? (t?.header?.clientDashboard || t?.header?.dashboard || "Dashboard")
+                        : (t?.header?.login || t?.login || "Login")}
+                    </span>
                   </Link>
                 </div>
               </nav>
