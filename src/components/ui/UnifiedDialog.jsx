@@ -106,7 +106,11 @@ export default function UnifiedDialog({
             }`}
             dir={isRTL ? "rtl" : "ltr"}
           >
-            <div className="flex justify-start items-center shrink-0 min-w-[80px]">
+            <div
+              className={`flex items-center shrink-0 min-w-[80px] ${
+                isRTL ? "justify-end" : "justify-start"
+              }`}
+            >
               {headerLeading !== undefined ? (
                 headerLeading
               ) : (
@@ -123,7 +127,11 @@ export default function UnifiedDialog({
             <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold text-white px-2 pointer-events-none truncate max-w-[60%]">
               {title}
             </h2>
-            <div className="flex justify-end items-center gap-2 shrink-0 min-w-[80px]">
+            <div
+              className={`flex items-center gap-2 shrink-0 min-w-[80px] ${
+                isRTL ? "justify-start" : "justify-end"
+              }`}
+            >
               {headerTrailing !== undefined ? (
                 headerTrailing
               ) : finalSubmitLabel != null && onSubmit != null ? (

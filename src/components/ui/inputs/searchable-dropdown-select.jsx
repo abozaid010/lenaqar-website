@@ -233,7 +233,12 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
 
   // Get selected option label
   const selectedLabel = useMemo(() => {
-    if (!value || value === allOptionValue) {
+    // Some callers store the "all" sentinel explicitly instead of using allOptionValue (default "").
+    // Treat it as the All option for display purposes.
+    const isAllSentinel =
+      showAllOption && typeof value === "string" && value.toLowerCase() === "all";
+
+    if (!value || value === allOptionValue || isAllSentinel) {
       if (showAllOption && allOptionLabel) {
         return allOptionLabel;
       }
