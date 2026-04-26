@@ -805,6 +805,7 @@ export default {
     cabinet: "محل تجاري",
     commercial: "تجاري",
     "service apartment": "شقة سكنية",
+    "serviced apartment": "شقة فندقية",
     loft: "لوفت",
     "office villa": "فيلا مكتبية",
     condo: "كوندو",

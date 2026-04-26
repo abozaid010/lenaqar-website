@@ -33,7 +33,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [compounds, setCompounds] = useState(projectsData || []);
   const [developers, setDevelopers] = useState(developersData || []);
 
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const router = useRouter();
   const queryClient = useQueryClient();
 
@@ -62,6 +62,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     min_area: appliedFilters.min_area || "",
   }));
 
+  const [priceRangeError, setPriceRangeError] = useState("");
+
   // Debounced numeric search (price/area) to avoid spamming backend
   const numericDebounceRef = useRef(null);
 
@@ -70,6 +72,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [hasClientId, setHasClientId] = useState(false);
   useEffect(() => {
     setHasClientId(!!getClientIdFromToken());
+  }, []);
+
+  const parseNumeric = useCallback((v) => {
+    if (v === undefined || v === null) return null;
+    const cleaned = String(v).replace(/[^0-9.]/g, "");
+    if (!cleaned) return null;
+    const n = Number(cleaned);
+    return Number.isFinite(n) ? n : null;
   }, []);
 
   useEffect(() => {
@@ -123,12 +133,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (filters.min_area) {
       initialFilters.push({ key: "min_area", value: `${t.unitsFilter.minArea}: ${filters.min_area} m²` });
     }
-    if (filters.min_price) {
-      initialFilters.push({ key: "min_price", value: `${locale === "ar" ? "من" : "From"} ${formatPriceInput(filters.min_price)} EGP` });
-    }
-    if (filters.max_price) {
-      initialFilters.push({ key: "max_price", value: `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(filters.max_price)} EGP` });
-    }
     if (filters.developer_name) {
       initialFilters.push({
         key: "developer_name",
@@ -181,18 +185,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         value: `${t.unitsFilter.minArea}: ${nextFilters.min_area} m²`,
       });
     }
-    if (nextFilters.min_price) {
-      list.push({
-        key: "min_price",
-        value: `${locale === "ar" ? "من" : "From"} ${formatPriceInput(nextFilters.min_price)} EGP`,
-      });
-    }
-    if (nextFilters.max_price) {
-      list.push({
-        key: "max_price",
-        value: `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(nextFilters.max_price)} EGP`,
-      });
-    }
     if (nextFilters.developer_name) {
       list.push({ key: "developer_name", value: getSelectedDeveloper() });
     }
@@ -206,7 +198,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       list.push({ key: "property_type", value: nextFilters.property_type });
     }
     if (nextFilters.min_price || nextFilters.max_price) {
-      list.push({ key: "price_range", value: getPriceDisplayText() });
+      const min = nextFilters.min_price ? formatPriceInput(nextFilters.min_price) : "";
+      const max = nextFilters.max_price ? formatPriceInput(nextFilters.max_price) : "";
+      let value = t.unitsFilter.price;
+      if (min && max) value = `${min} - ${max} EGP`;
+      else if (min) value = `${t.unitsFilter.from || "From"} ${min} EGP`;
+      else if (max) value = `${t.unitsFilter.upTo || "Up to"} ${max} EGP`;
+      list.push({ key: "price_range", value });
     }
     if (nextFilters.city) {
       list.push({ key: "city", value: getSelectedCity() });
@@ -215,6 +213,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [locale, t, compounds, developers, cityLabels]);
 
   const applyNumericFiltersToUrl = useCallback((nextFilters) => {
+    const minN = parseNumeric(nextFilters.min_price);
+    const maxN = parseNumeric(nextFilters.max_price);
+    if (minN != null && maxN != null && maxN < minN) {
+      setPriceRangeError(
+        locale === "ar"
+          ? "يجب أن يكون الحد الأقصى للسعر أكبر من أو يساوي الحد الأدنى"
+          : "Max price must be greater than or equal to min price"
+      );
+      return;
+    }
+    setPriceRangeError("");
+
     const newParams = new URLSearchParams(window.location.search);
 
     const setOrDelete = (key, v) => {
@@ -228,7 +238,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
     router.push(`${window.location.pathname}?${newParams.toString()}`);
     setActiveFilters(buildActiveFilters(nextFilters));
-  }, [router, buildActiveFilters]);
+  }, [router, buildActiveFilters, parseNumeric, locale]);
 
   const scheduleNumericSearch = useCallback((nextFilters) => {
     if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
@@ -652,7 +662,15 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             }}
             name="property_type"
             getValue={(type) => type.value}
-            getLabel={(type, locale) => locale === "ar" ? type.ar_label : type.en_label}
+            getLabel={(type, currentLocale) => {
+              const key = String(type?.value || "").toLowerCase();
+              // UI label is localized; API value remains `type.value` (English enum).
+              return (
+                translate(`buildingTypes.${key}`) ||
+                (currentLocale === "ar" ? type.ar_label : type.en_label) ||
+                type.value
+              );
+            }}
             searchFields={["en_label", "ar_label", "value"]}
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allPropertyTypes || "All Property Types"}
@@ -738,6 +756,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             type="money"
             label={locale === "ar" ? "الحد الأدنى للسعر" : "Min Price"}
             value={filters.min_price}
+            error={priceRangeError}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
               const next = { ...filters, min_price: value };
@@ -757,6 +776,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             type="money"
             label={locale === "ar" ? "الحد الأقصى للسعر" : "Max Price"}
             value={filters.max_price}
+            error={priceRangeError}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
               const next = { ...filters, max_price: value };

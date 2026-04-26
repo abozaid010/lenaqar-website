@@ -849,6 +849,7 @@ export default {
     cabinet: "Cabinet",
     commercial: "Commercial",
     "service apartment": "Service Apartment",
+    "serviced apartment": "Serviced Apartment",
     loft: "Loft",
     "office villa": "Office Villa",
     condo: "Condo",
