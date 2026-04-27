@@ -15,7 +15,7 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 // Hook for fetching developers (full data for developers tab) with infinite scroll
 export function useDevelopers(client_id, isPublic = false) {
   console.log(`🔧 useDevelopers (infinite) called with: client_id=${client_id}, isPublic=${isPublic}`);
-  
+
   const query = useInfiniteQuery({
     queryKey: developerKeys.infiniteList(client_id, isPublic),
     queryFn: ({ pageParam }) => {
@@ -27,7 +27,8 @@ export function useDevelopers(client_id, isPublic = false) {
       console.log(`📄 Getting next page param, hasNext: ${lastPage.hasNext}, nextCursor: ${lastPage.nextCursor}`);
       return lastPage.hasNext ? lastPage.nextCursor : undefined;
     },
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
+    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
     refetchOnWindowFocus: false,
     enabled: true, // Ensure the query is always enabled
   });
@@ -106,7 +107,8 @@ export function useCompounds(client_id, isPublic = false) {
   return useQuery({
     queryKey: compoundKeys.lists(client_id, isPublic),
     queryFn: () => fetchProjects(isPublic),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
+    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
     refetchOnWindowFocus: false,
   });
 }
@@ -130,7 +132,8 @@ export function useProjectsPaginated({ cityEnName, developerId } = {}) {
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,
-    staleTime: 1000 * 60 * 1, // 1 minute - cached for the session
+    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
+    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
     refetchOnWindowFocus: false,
   });
 }

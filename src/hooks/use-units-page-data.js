@@ -11,7 +11,8 @@ export function useUnitsPageData(searchParams, publicOnly = false) {
   const unitsQuery = useQuery({
     queryKey: unitKeys.list(safeSearchParams),
     queryFn: () => fetchUnitsFilter(safeSearchParams, publicOnly),
-    staleTime: 1000 * 60 * 10, // 10 minutes
+    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
+    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
     refetchOnWindowFocus: false,
   });
 
