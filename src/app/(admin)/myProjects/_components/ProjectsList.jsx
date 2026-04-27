@@ -36,7 +36,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -266,13 +266,17 @@ function ProjectCard({
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t, locale, translate } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
     useModuleActions("projects");
   const canImportProjects = hasProjectAction("import");
 
-  
+  // Read params from URL on load
+  const cityFromUrl = searchParams.get("city") || "";
+  const developerFromUrl = searchParams.get("developer") || "";
+
   const [translations, setTranslations] = useState({
     cities: [],
     cityLabels: {},
@@ -280,7 +284,8 @@ export default function ProjectsList({ clientId }) {
     isLoading: true,
   });
 
-  const [selectedCity, setSelectedCity] = useState("");
+  // Initialize state from URL
+  const [selectedCity, setSelectedCity] = useState(cityFromUrl);
 
   const cityEnName = useMemo(() => {
     if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
@@ -293,7 +298,32 @@ export default function ProjectsList({ clientId }) {
     useDeveloperNames();
 
   const developers = developersData || [];
-  const [selectedDeveloper, setSelectedDeveloper] = useState("");
+
+  // Validate developer ID exists in developers list
+  const validatedDeveloperFromUrl = useMemo(() => {
+    if (!developerFromUrl) return "";
+    const developerExists = developers.some((d) => d.id === developerFromUrl);
+    return developerExists ? developerFromUrl : "";
+  }, [developerFromUrl, developers]);
+
+  const [selectedDeveloper, setSelectedDeveloper] = useState(validatedDeveloperFromUrl);
+
+  // Helper to update URL params
+  const updateUrlParams = useCallback((params) => {
+    const url = new URL(window.location.href);
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value) {
+        url.searchParams.set(key, value);
+      } else {
+        url.searchParams.delete(key);
+      }
+    });
+
+    router.replace(url.pathname + "?" + url.searchParams.toString(), {
+      scroll: false,
+    });
+  }, [router]);
 
   const {
     data: paginatedData,
@@ -412,10 +442,26 @@ export default function ProjectsList({ clientId }) {
   }, [locale, projectsList]);
 
   useEffect(() => {
-    if (translations.cities.length > 0 && !selectedCity) {
+    // Only set default to "all" if no city is selected from URL
+    if (translations.cities.length > 0 && !selectedCity && !cityFromUrl) {
       setSelectedCity("all");
     }
-  }, [translations.cities, selectedCity]);
+  }, [translations.cities, selectedCity, cityFromUrl]);
+
+  // Sync URL changes back to state on navigation/back with validation
+  useEffect(() => {
+    const city = searchParams.get("city") || "";
+    const developer = searchParams.get("developer") || "";
+
+    // Validate city exists in cities list
+    const validCity = translations.cities.includes(city) ? city : "";
+
+    // Validate developer exists in developers list
+    const validDeveloper = developers.some((d) => d.id === developer) ? developer : "";
+
+    setSelectedCity(validCity);
+    setSelectedDeveloper(validDeveloper);
+  }, [searchParams, translations.cities, developers]);
 
   const getCityDisplayName = useMemo(() => {
     return (city) => {
@@ -715,7 +761,11 @@ export default function ProjectsList({ clientId }) {
               <SearchableDropdownSelect
                 options={cityOptions}
                 value={selectedCity}
-                onChange={(e) => setSelectedCity(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSelectedCity(value);
+                  updateUrlParams({ city: value, developer: selectedDeveloper });
+                }}
                 name="city"
                 placeholder={locale === "ar" ? "جميع المدن" : "All Cities"}
                 showAllOption={true}
@@ -736,7 +786,11 @@ export default function ProjectsList({ clientId }) {
             <SearchableDropdownSelect
               options={developers}
               value={selectedDeveloper}
-              onChange={(e) => setSelectedDeveloper(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSelectedDeveloper(value);
+                updateUrlParams({ city: selectedCity, developer: value });
+              }}
               name="developer"
               placeholder={
                 developersLoading
