@@ -1,14 +1,14 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import Link from "next/link";
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import UnitsGridPagination from "@/components/ui/units-grid-pagination";
 import ShareModal from "@/components/ui/units-share-modal";
 import { getShareUnitData } from "@/utils/api";
+import { generateUnitSlug } from "@/lib/units/unit-url-utils";
 import { useState } from "react";
-import shareButton from "../../../public/share.svg";
 import {
   createSafeImageSource,
   handleImageError,
@@ -29,12 +29,16 @@ export default function UnitsGrid({
   const [showModal, setShowModal] = useState(false);
   const [shareData, setShareData] = useState(null);
   const [loadingShare, setLoadingShare] = useState(false);
-  const { t, locale } = useI18n();
+  const { t, locale, translate, localeUtils } = useI18n();
 
-  // Add a formattcer function for prices
+  const egpLabel = translate("currency.egp") || "EGP";
+
+  // Locale-aware formatter for prices
   const formatPrice = (price) => {
-    if (!price) return "Price not specified";
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (price === null || price === undefined || price === "") return null;
+    const n = typeof price === "number" ? price : Number(String(price).replace(/,/g, ""));
+    if (!Number.isFinite(n)) return null;
+    return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
   const handleShareClick = async (unitId, e) => {
@@ -65,8 +69,18 @@ export default function UnitsGrid({
               href={
                 u.unitId
                   ? (readonly
-                      ? `/allProberties/${u.unitId}`
-                      : `/units/${u.unitId}`) + (linkQueryParams || "")
+                      ? `/allProberties/${generateUnitSlug({
+                          buildingType: u.buildingType,
+                          project: u.project,
+                          code: u.code,
+                          unitId: u.unitId
+                        })}`
+                      : `/unit/${generateUnitSlug({
+                          buildingType: u.buildingType,
+                          project: u.project,
+                          code: u.code,
+                          unitId: u.unitId
+                        })}`) + (linkQueryParams || "")
                   : "#"
               }
               key={u.unitId ?? u.code ?? idx}
@@ -80,7 +94,7 @@ export default function UnitsGrid({
                       u.images.map((img) => img?.url),
                       "property"
                     ))}
-                    alt={u.name || u.compound || "Property"}
+                    alt={u.name || u.compound || t?.common?.property || "Property"}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       const originalSrc = u.images[0]?.url;
@@ -127,18 +141,9 @@ export default function UnitsGrid({
                   </div>
                 )}
 
-                {/* Share Button */}
+                {/* Share Button (temporarily hidden) */}
                 {!readonly ? (
-                  <div className="  ">
-                    {u.unitId ? (
-                      <button
-                        type="button"
-                        onClick={(e) => handleShareClick(u.unitId, e)}
-                        className="absolute top-2 right-5 cursor-pointer group"
-                      >
-                        <img src={shareButton.src} alt="share" />
-                      </button>
-                    ) : null}
+                  <div>
                     <p
                       style={{
                         fontWeight: "500",
@@ -163,62 +168,56 @@ export default function UnitsGrid({
 
               {/* Text Overlay Section */}
               <div className="absolute bottom-0 left-0 w-full bg-black/40 py-2 px-3 rounded-b-lg">
-                <h3 className="text-[20px] font-bold text-white line-clamp-1">
-                  {u?.unitTitle || "Unnamed Property"}
-                </h3>
+                {/* Unit Type and Project on same line */}
                 <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
-                  {/* <MapPin className="w-4 h-4 mr-2 flex-shrink-0" /> */}
-                  <p className=" text-white font-normal text-[16px]">
-                    {" "}
-                    {t.city}{" "}
-                  </p>
-                  <span className="line-clamp-1 text-[14px] font-bold">
-                    {u.city ?? (allowMissingFields ? "—" : "Location not specified")}
-                  </span>
-                </div>
-
-                {/* Compound and Purpose Display */}
-                <div className="flex flex-wrap justify-between gap-2 mb-2">
-                  <p className=" text-white text-[16px] font-normal">
-                    {t.project}
-                  </p>
-                  <div>
-                    <span className=" py-1 text-white text-[14px]  rounded-full text-xs font-bold">
-                      {u.project ?? (allowMissingFields ? "—" : "")}
+                  <div className="flex items-center gap-2 line-clamp-1">
+                    <span className="text-[14px] font-bold">
+                      {u.buildingType ? (
+                        translate(
+                          `buildingTypes.${String(u.buildingType).toLowerCase()}`,
+                          String(u.buildingType)
+                        )
+                      ) : (allowMissingFields ? "—" : "Unit Type")}
+                    </span>
+                    <span className="text-[14px]">
+                      {u.project
+                        ? locale === "ar"
+                          ? (u.project_ar || u.projectAr || u.ar_name || u.project)
+                          : u.project.charAt(0).toUpperCase() +
+                            u.project.slice(1).toLowerCase()
+                        : allowMissingFields
+                          ? "—"
+                          : ""}
                     </span>
                   </div>
                 </div>
 
-                {/* Pricing Information */}
+                {/* Pricing Information on second line with 50% larger font */}
                 <div className="text-sm flex items-center justify-between text-white">
                   {u.purpose === "Rent" || u.purpose === "rent" ? (
                     <div className="flex items-center justify-between w-full">
-                      <div className="font-normal text-[16px]">
-                        {t.rentPrice}
-                      </div>
-                      <div className=" font-semibold text-[14px]">
-                        {u.rentDurationType?.daily?.price
-                          ? `${formatPrice(u.rentDurationType.daily.price)} EGP/day`
-                          : u.rentDurationType?.weekly?.price
-                            ? `${formatPrice(u.rentDurationType.weekly.price)} EGP/week`
-                            : u.rentDurationType?.monthly?.price
-                              ? `${formatPrice(u.rentDurationType.monthly.price)} EGP/month`
-                              : u.rentPrice
-                                ? `${formatPrice(u.rentPrice)} EGP`
-                                : "Price not specified"}
+                      <div className="font-semibold text-[21px]">
+                        {u.rentDurationType?.daily?.price && formatPrice(u.rentDurationType.daily.price)
+                          ? `${formatPrice(u.rentDurationType.daily.price)} ${egpLabel}/day`
+                          : u.rentDurationType?.weekly?.price && formatPrice(u.rentDurationType.weekly.price)
+                            ? `${formatPrice(u.rentDurationType.weekly.price)} ${egpLabel}/week`
+                            : u.rentDurationType?.monthly?.price && formatPrice(u.rentDurationType.monthly.price)
+                              ? `${formatPrice(u.rentDurationType.monthly.price)} ${egpLabel}/month`
+                              : u.rentPrice && formatPrice(u.rentPrice)
+                                ? `${formatPrice(u.rentPrice)} ${egpLabel}`
+                                : allowMissingFields
+                                  ? "—"
+                                  : t?.common?.na || "N/A"}
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-normal text-[16px]">
-                        {t.totalPrice}
-                      </span>
-                      <span className=" font-semibold text-[14px]">
-                        {u.totalPrice != null && u.totalPrice !== ""
-                          ? `${formatPrice(u.totalPrice)} EGP`
+                      <span className="font-semibold text-[21px]">
+                        {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
+                          ? `${formatPrice(u.totalPrice)} ${egpLabel}`
                           : allowMissingFields
                             ? "—"
-                            : "Price not specified"}
+                            : t?.common?.na || "N/A"}
                       </span>
                     </div>
                   )}

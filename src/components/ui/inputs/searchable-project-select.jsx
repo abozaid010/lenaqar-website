@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useCallback, useState } from "react";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { fetchProjectById } from "@/utils/api";
 import SearchableDropdownSelect from "./searchable-dropdown-select";

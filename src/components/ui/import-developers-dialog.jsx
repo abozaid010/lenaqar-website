@@ -1,7 +1,7 @@
 "use client";
 
 import ImportDialog from "@/components/ui/import-dialog";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { useDevelopers } from "@/hooks/use-admin-shared-data";
 import { importDevelopers } from "@/utils/api";
 import toast from "react-hot-toast";

@@ -17,13 +17,14 @@ import { useTokenRefresh } from "@/hooks/useTokenRefresh";
  */
 export function TokenRefreshProvider({
   children,
-  checkInterval = 60000, // Check every minute
+  checkInterval = 5 * 60000, // Check every 5 minutes instead of every minute
   refreshThreshold = 5 * 60 * 1000, // 5 minutes
 }) {
   const { refreshToken } = useTokenRefresh();
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
   const isRefreshingRef = useRef(false);
+  const refreshPendingRef = useRef(false);
 
   /**
    * Performs proactive token refresh if needed
@@ -31,6 +32,9 @@ export function TokenRefreshProvider({
   const checkAndRefreshToken = useCallback(async () => {
     // Don't refresh if already refreshing
     if (isRefreshingRef.current) {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[TokenRefreshProvider] Refresh already in progress, skipping...");
+      }
       return;
     }
 
@@ -43,14 +47,16 @@ export function TokenRefreshProvider({
     if (TokenExpirationManager.isTokenExpiringSoon(refreshThreshold)) {
       // Only log in development
       if (process.env.NODE_ENV === "development") {
-        console.log("[TokenRefreshProvider] Token expiring soon, refreshing proactively...");
+        const now = new Date().toLocaleTimeString();
+        console.log(`[${now}] [TokenRefreshProvider] Token expiring soon, refreshing proactively...`);
       }
       isRefreshingRef.current = true;
 
       try {
         await refreshToken();
         if (process.env.NODE_ENV === "development") {
-          console.log("[TokenRefreshProvider] Proactive refresh successful");
+          const now = new Date().toLocaleTimeString();
+          console.log(`[${now}] [TokenRefreshProvider] Proactive refresh successful`);
         }
       } catch (error) {
         // Log error only in development
@@ -60,6 +66,11 @@ export function TokenRefreshProvider({
         // Error handling is done in TokenRefreshService
       } finally {
         isRefreshingRef.current = false;
+        refreshPendingRef.current = false;
+      }
+    } else {
+      if (process.env.NODE_ENV === "development") {
+        console.log("[TokenRefreshProvider] Token not expiring soon, skipping refresh");
       }
     }
   }, [refreshToken, refreshThreshold]);

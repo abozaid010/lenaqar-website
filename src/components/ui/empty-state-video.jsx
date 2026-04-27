@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import {
   VIDEO_MAP,
   EMPTY_STATE_MESSAGES,
@@ -49,12 +49,15 @@ export default function EmptyStateVideo({
   const hasVideo = !!videoId;
 
   const content = EMPTY_STATE_MESSAGES[variant] || EMPTY_STATE_MESSAGES.default;
-  const displayTitle =
-    title || t.videoInstructions?.emptyState?.[variant]?.title || content.title;
+  // If this variant has no i18n entry, fall back to the localized default empty state
+  // (instead of the English constants fallback).
+  const i18nEmptyState =
+    t.videoInstructions?.emptyState?.[variant] ||
+    t.videoInstructions?.emptyState?.default ||
+    null;
+  const displayTitle = title || i18nEmptyState?.title || content.title;
   const displayDescription =
-    description ||
-    t.videoInstructions?.emptyState?.[variant]?.description ||
-    content.description;
+    description || i18nEmptyState?.description || content.description;
 
   const getYouTubeEmbedUrl = () => {
     if (!videoId) return null;
@@ -150,9 +153,8 @@ export default function EmptyStateVideo({
         {hasVideo && (
           <div className="pt-4">
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              {t.videoInstructions?.dialog?.readyToStart ||
-                "Ready to get started? Add your first"}{" "}
-              {variant || "item"} {t.videoInstructions?.dialog?.now || "now."}.
+              {t?.videoInstructions?.dialog?.readyToStart}{" "}
+              {variant || t?.common?.item || "item"} {t?.videoInstructions?.dialog?.now}.
             </p>
           </div>
         )}

@@ -1,19 +1,13 @@
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { NextResponse } from "next/server";
 
-// Use public site URL for redirects so production behind a proxy doesn't redirect to localhost
 const SITE_HOME_PAGE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
 
-const protectedRoutes = [
-  "/dashboard",
-  "/campaigns",
-  "/units",
-  "/team",
-  "/analytics",
-  "/schedule",
-  "/myProjects",
-  "/developers",
+// Admin route segments (without leading slash) that require authentication
+const adminPaths = [
+  'dashboard', 'campaigns', 'campaign-chat', 'schedule',
+  'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map',
 ];
 
 export function proxy(request) {
@@ -28,11 +22,7 @@ export function proxy(request) {
   // Handle image requests with proper MIME types
   if (pathname.match(/\.(jpg|jpeg|png|gif|webp|avif|svg)$/i)) {
     const response = NextResponse.next();
-
-    // Set proper cache headers for images
     response.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-
-    // Set proper MIME types for images
     if (pathname.match(/\.(jpg|jpeg)$/i)) {
       response.headers.set('Content-Type', 'image/jpeg');
     } else if (pathname.match(/\.png$/i)) {
@@ -46,31 +36,46 @@ export function proxy(request) {
     } else if (pathname.match(/\.svg$/i)) {
       response.headers.set('Content-Type', 'image/svg+xml');
     }
-
     return response;
   }
 
   // Handle API image requests
   if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
     const response = NextResponse.next();
-
-    // Set CORS headers for image API requests
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
-
     return response;
   }
 
-  // Get cookies from request headers
   const accessToken = request.cookies.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
   const refreshToken = request.cookies.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
+  const cookieClientId = request.cookies.get(COOKIE_KEYS.CLIENT_ID)?.value;
 
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route)
-  );
+  const segments = pathname.split('/').filter(Boolean);
+  // segments[0] = clientId, segments[1] = adminPath
 
-  if (isProtectedRoute) {
+  // Backward compat: /admin/* → /{clientId}/*
+  if (segments[0] === 'admin') {
+    const remainingPath = segments.slice(1).join('/');
+    const dest = cookieClientId
+      ? `/${cookieClientId}/${remainingPath}`
+      : '/login';
+    return NextResponse.redirect(new URL(dest, SITE_HOME_PAGE));
+  }
+
+  // Backward compat: bare /{adminPath} → /{clientId}/{adminPath}
+  if (segments.length >= 1 && adminPaths.includes(segments[0])) {
+    const dest = cookieClientId
+      ? `/${cookieClientId}/${pathname.slice(1)}`
+      : '/login';
+    return NextResponse.redirect(new URL(dest, SITE_HOME_PAGE));
+  }
+
+  // Detect /{clientId}/{adminPath}[/*] as protected
+  const isClientAdminRoute = segments.length >= 2 && adminPaths.includes(segments[1]);
+
+  if (isClientAdminRoute) {
     // No refresh token: must log in again
     if (!refreshToken) {
       const response = NextResponse.redirect(new URL("/login", SITE_HOME_PAGE));
@@ -79,7 +84,7 @@ export function proxy(request) {
       response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
       return response;
     }
-    // Access token missing but refresh token present: refresh then continue (keep user logged in up to 10 days)
+    // Access token missing but refresh token present: refresh then continue
     if (!accessToken) {
       const redirectParam = encodeURIComponent(
         request.nextUrl.pathname + request.nextUrl.search
@@ -90,9 +95,11 @@ export function proxy(request) {
     }
   }
 
-  if (pathname === "/" && accessToken) {
-    console.log("Redirecting to dashboard");
-    return NextResponse.redirect(new URL("/dashboard", SITE_HOME_PAGE));
+  // Home page: redirect logged-in user to their dashboard
+  if (pathname === "/" && accessToken && cookieClientId) {
+    return NextResponse.redirect(
+      new URL(`/${cookieClientId}/dashboard`, SITE_HOME_PAGE)
+    );
   }
 
   return NextResponse.next();
@@ -100,13 +107,6 @@ export function proxy(request) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 };

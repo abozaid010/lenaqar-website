@@ -4,14 +4,15 @@ import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
 import ImportDevelopersDialog from "@/components/ui/import-developers-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import ReusableSearchInput from "@/components/ui/reusable-search-input";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/context/translate-api";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDevelopers, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -21,13 +22,25 @@ import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 
 export default function DevelopersClientWrapper({ clientId }) {
-  // This page should use ONE source of truth.
-  // We use the public endpoint here because it contains the complete directory data
-  // (including social/contact fields) that the UI expects to render.
-  const { data, isLoading, isError, error, refetch, isFetching } = useDevelopers(
-    clientId,
-    true
-  );
+  const router = useRouter();
+  
+  // List: slim API + infinite scroll. Header search dropdown: full names (`get_all_names`).
+  const {
+    data: developersData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useDevelopers(clientId, true);
+
+  const {
+    data: developerNamesData,
+    isLoading: developerNamesLoading,
+  } = useDeveloperNames();
   const { t, locale } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const {
@@ -35,34 +48,99 @@ export default function DevelopersClientWrapper({ clientId }) {
     has: hasDeveloperAction,
   } = useModuleActions("developers");
   const canImportDevelopers = hasDeveloperAction("import");
-  const [developers, setDevelopers] = useState([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
+  const [selectedDeveloperSearch, setSelectedDeveloperSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openInEditMode, setOpenInEditMode] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
   const menuRefs = useRef({});
-  const searchInputRef = useRef(null);
-  const searchBlurTimeoutRef = useRef(null);
+  const scrollContainerRef = useRef(null);
 
-  useEffect(() => {
-    if (!isLoading && !isError && data) {
-      // Validate that data is an array
-      if (!Array.isArray(data)) {
-        console.error("Developers data is not an array:", data);
-        return;
+  // Function to handle viewing developer details
+  const handleViewDeveloperDetails = useCallback((developer) => {
+    const path = clientId
+      ? `/${clientId}/developers/${developer.id}`
+      : `/developers/${developer.id}`;
+    router.push(path);
+  }, [router, clientId]);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback((e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    
+    // Check if user has scrolled to near the bottom (within 100px)
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+      if (hasNextPage && !isFetchingNextPage && !isFetching) {
+        console.log("🔄 Loading next page of developers...");
+        fetchNextPage();
       }
-
-      // Filter by search query if provided
-      const filtered = searchQuery
-        ? filterBySearchQuery(data, searchQuery, ["ar_name", "en_name"])
-        : data;
-      setDevelopers(filtered);
     }
-  }, [isLoading, isError, data, searchQuery]);
+  }, [hasNextPage, isFetchingNextPage, isFetching, fetchNextPage]);
+
+  const developerOptions = useMemo(() => {
+    if (!developerNamesData || !Array.isArray(developerNamesData)) return [];
+    return developerNamesData.map((developer) => ({
+      value: developer.id,
+      label: locale === "ar" ? developer.ar_name : developer.en_name,
+      ar_name: developer.ar_name,
+      en_name: developer.en_name,
+    }));
+  }, [developerNamesData, locale]);
+
+  const resolveDeveloperRow = useCallback(
+    (id) => {
+      if (!id) return null;
+      const fromSlim = developersData?.find((d) => d.id === id);
+      if (fromSlim) return fromSlim;
+      return developerNamesData?.find((d) => d.id === id) ?? null;
+    },
+    [developersData, developerNamesData]
+  );
+
+  const filteredDevelopers = useMemo(() => {
+    const slim =
+      developersData && Array.isArray(developersData) ? developersData : [];
+
+    if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
+      const row = resolveDeveloperRow(selectedDeveloperSearch);
+      return row ? [row] : [];
+    }
+
+    if (searchQuery && searchQuery.trim() !== "") {
+      const names = developerNamesData;
+      if (names && names.length > 0) {
+        const nameMatches = filterBySearchQuery(names, searchQuery, [
+          "ar_name",
+          "en_name",
+        ]);
+        const idSet = new Set(nameMatches.map((d) => d.id).filter(Boolean));
+        const fromSlim = slim.filter((d) => idSet.has(d.id));
+        const slimIds = new Set(slim.map((d) => d.id));
+        const nameOnly = nameMatches.filter((d) => d.id && !slimIds.has(d.id));
+        const combined = [...fromSlim, ...nameOnly];
+        const label = (d) =>
+          (locale === "ar" ? d.ar_name : d.en_name) || d.en_name || d.ar_name || "";
+        return combined.sort((a, b) =>
+          label(a).localeCompare(label(b), locale === "ar" ? "ar" : "en", {
+            sensitivity: "base",
+          })
+        );
+      }
+      return filterBySearchQuery(slim, searchQuery, ["ar_name", "en_name"]);
+    }
+
+    return slim;
+  }, [
+    developersData,
+    developerNamesData,
+    searchQuery,
+    selectedDeveloperSearch,
+    locale,
+    resolveDeveloperRow,
+  ]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -81,65 +159,46 @@ export default function DevelopersClientWrapper({ clientId }) {
     };
   }, [openMenuId]);
 
-  const handleSearchExpand = () => {
-    setSearchExpanded(true);
-    setTimeout(() => searchInputRef.current?.focus(), 0);
-  };
-
-  const handleSearchBlur = () => {
-    searchBlurTimeoutRef.current = setTimeout(() => {
-      setSearchExpanded(false);
-    }, 150);
-  };
-
-  const handleSearchFocus = () => {
-    if (searchBlurTimeoutRef.current) {
-      clearTimeout(searchBlurTimeoutRef.current);
-      searchBlurTimeoutRef.current = null;
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      if (searchBlurTimeoutRef.current) clearTimeout(searchBlurTimeoutRef.current);
-    };
-  }, []);
-
   const handleEdit = (updatedDeveloper) => {
-    setDevelopers((prev) =>
-      prev.map((dev) =>
-        dev.id === updatedDeveloper.id ? updatedDeveloper : dev
-      )
-    );
+    // Close dialog and clear selection
     setIsOpen(false);
     setSelectedDeveloper(null);
+    
+    // Refetch data to get updated list
+    refetch().catch(error => {
+      console.error("Failed to refetch developers after edit:", error);
+      toast.error("Failed to refresh developers list");
+    });
   };
 
   const handleAdd = (newDeveloper) => {
-    setDevelopers((prev) => [...prev, newDeveloper]);
+    // Close dialog and clear selection
     setIsOpen(false);
     setSelectedDeveloper(null);
+    
+    // Refetch data to get updated list
+    refetch().catch(error => {
+      console.error("Failed to refetch developers after add:", error);
+      toast.error("Failed to refresh developers list");
+    });
   };
 
   const handleDelete = async (developerId) => {
     try {
       const res = await deleteDeveloper(developerId);
       if (!res.status) {
-        toast.error(
-          res.error_message || "Something went wrong. Please try again later."
-        );
+        toast.error(t?.common?.failedToDelete);
         return;
       }
 
-      setDevelopers((prev) =>
-        prev.filter((developer) => developer.id !== developerId)
-      );
-      toast.success("Developer deleted successfully.");
+      // Refetch data to get updated list
+      await refetch();
+      toast.success(t?.common?.developerDeleted);
       setSelectedDeveloper(null);
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Error deleting developer:", error);
-      toast.error(error.message);
+      toast.error(t?.common?.failedToDelete);
     }
   };
 
@@ -160,7 +219,7 @@ export default function DevelopersClientWrapper({ clientId }) {
     }
   };
 
-  // Normalize WhatsApp value into a URL:
+  // Normalize WhatsApp value into a URL with enhanced security:
   // - If input is already a URL (whatsapp.com / wa.me / http(s)), open as-is (with https:// if missing)
   // - Otherwise treat it as a phone number and build https://wa.me/<digits>
   //
@@ -172,10 +231,16 @@ export default function DevelopersClientWrapper({ clientId }) {
 
     const lower = raw.toLowerCase();
 
-    // Already has scheme
-    if (lower.startsWith("http://") || lower.startsWith("https://")) return raw;
+    // Already has scheme - validate URL safety
+    if (lower.startsWith("http://") || lower.startsWith("https://")) {
+      // Basic URL validation to prevent XSS
+      if (raw.includes("javascript:") || raw.includes("data:") || raw.includes("vbscript:")) {
+        return "";
+      }
+      return raw;
+    }
 
-    // WhatsApp / wa.me URLs without scheme
+    // WhatsApp / wa.me URLs without scheme - validate safety
     if (lower.startsWith("wa.me/") || lower.startsWith("www.wa.me/")) return `https://${raw}`;
     if (lower.startsWith("whatsapp.com/") || lower.startsWith("www.whatsapp.com/"))
       return `https://${raw}`;
@@ -184,15 +249,24 @@ export default function DevelopersClientWrapper({ clientId }) {
       return `https://${raw.replace(/^\/+/, "")}`;
     }
 
-    // Other URL (best-effort)
-    if (lower.startsWith("www.")) return `https://${raw}`;
+    // Other URL (best-effort) - validate safety
+    if (lower.startsWith("www.")) {
+      if (raw.includes("javascript:") || raw.includes("data:") || raw.includes("vbscript:")) {
+        return "";
+      }
+      return `https://${raw}`;
+    }
 
-    // Phone normalization
+    // Phone normalization with enhanced security
     let cleaned = raw.replace(/[\s\-\(\)\.]/g, "");
     if (cleaned.startsWith("00")) cleaned = cleaned.slice(2); // international prefix
     if (cleaned.startsWith("+")) cleaned = cleaned.slice(1);
     const digitsOnly = cleaned.replace(/\D/g, "");
-    if (digitsOnly === "") return "";
+    
+    // Validate phone number length and format
+    if (digitsOnly === "" || digitsOnly.length < 7 || digitsOnly.length > 15) {
+      return "";
+    }
 
     return `https://wa.me/${digitsOnly}`;
   };
@@ -243,77 +317,81 @@ export default function DevelopersClientWrapper({ clientId }) {
 
   // Handle row click to view developer details
   const handleRowClick = (developer) => {
-    setSelectedDeveloper(developer);
-    setIsOpen(true);
+    handleViewDeveloperDetails(developer);
   };
 
   return (
-    <>
-      <div className="w-full bg-gray-50 p-3">
-        <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="bg-primary p-4 flex flex-col gap-3">
-            <div className="flex justify-between items-center gap-3 flex-wrap">
-              <h2 className="text-white text-xl font-semibold">
-                {t.sidebar.developers}
-              </h2>
-              <div className="flex items-center gap-2 flex-1 min-w-0 transition-all duration-200">
-                {searchExpanded ? (
-                  <div className="flex-1 min-w-0">
-                    <ReusableSearchInput
-                      value={searchQuery}
-                      onChange={setSearchQuery}
-                      placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
-                      variant="white"
-                      className="w-full"
-                      inputRef={searchInputRef}
-                      onBlur={handleSearchBlur}
-                      onFocus={handleSearchFocus}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={handleSearchExpand}
-                    className="flex items-center justify-center p-2 rounded-md border border-white/30 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white transition-colors"
-                    aria-label={t.developerPage?.searchPlaceholder || "Search developers"}
-                  >
-                    <Search size={20} />
-                  </button>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                {canCreateDeveloper && (
-                  <button
-                    onClick={() => setIsOpen(true)}
-                    className="flex items-center gap-2 bg-white text-primary px-4 py-2 rounded-lg transition-colors duration-200"
-                  >
-                    <Plus size={20} />
-                    <span>{t.developerPage.addDeveloper}</span>
-                  </button>
-                )}
-                {!isDeveloper && canImportDevelopers && (
-                  <button
-                    onClick={() => setIsImportOpen(true)}
-                    className="flex items-center gap-2 bg-white/90 text-primary px-4 py-2 rounded-lg transition-colors duration-200 hover:bg-white"
-                  >
-                    <Plus size={20} />
-                    <span>{t.developerPage?.importButton || "Import"}</span>
-                  </button>
-                )}
-                <VideoInstructionsDialog
-                  variant="developers"
-                  iconSize="lg"
-                  iconClassName="hover:bg-white/20"
-                  svgClassName="text-white"
-                  tooltipText={
-                    t.developerPage?.instructions || "How to manage developers"
-                  }
-                />
-              </div>
-            </div>
+    <div className="h-full flex flex-col">
+      {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Search Dropdown */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <SearchableDropdownSelect
+              options={developerOptions}
+              value={selectedDeveloperSearch}
+              onChange={(e) => setSelectedDeveloperSearch(e.target.value)}
+              name="developer_search"
+              placeholder={t.developerPage?.searchPlaceholder || "Search developers..."}
+              showAllOption={true}
+              allOptionLabel={locale === "ar" ? "جميع المطورين" : "All Developers"}
+              allOptionValue=""
+              getValue={(option) => option.value}
+              getLabel={(option, loc) => loc === "ar" ? option.ar_name : option.en_name}
+              searchFields={["ar_name", "en_name"]}
+              className="w-full"
+              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              disabled={developerNamesLoading && developerOptions.length === 0}
+              isLoading={developerNamesLoading}
+            />
           </div>
 
-          <div className="max-h-[80vh] overflow-y-auto">
+          {/* Action buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            {canCreateDeveloper && (
+              <button
+                onClick={() => setIsOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.developerPage.addDeveloper}
+                </span>
+              </button>
+            )}
+            {!isDeveloper && canImportDevelopers && (
+              <button
+                onClick={() => setIsImportOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.developerPage?.importButton || "Import"}
+                </span>
+              </button>
+            )}
+            <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
+              <VideoInstructionsDialog
+                variant="developers"
+                iconSize="sm"
+                tooltipText={
+                  t.developerPage?.instructions || "How to manage developers"
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content Container */}
+      <div className="mt-4">
+        <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+
+          <div 
+            ref={scrollContainerRef}
+            className="max-h-[80vh] overflow-y-auto"
+            onScroll={handleScroll}
+          >
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : isError ? (
@@ -328,7 +406,7 @@ export default function DevelopersClientWrapper({ clientId }) {
                 }
                 retryLabel={t.developerPage?.retryLabel || "Retry"}
               />
-            ) : developers.length === 0 ? (
+            ) : filteredDevelopers.length === 0 ? (
               // <div className="flex flex-col items-center justify-center p-6">
               //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               //     <svg
@@ -357,7 +435,7 @@ export default function DevelopersClientWrapper({ clientId }) {
               />
             ) : (
               <div className="space-y-3 p-4">
-                {developers.map((d) => {
+                {filteredDevelopers.map((d) => {
                   const displayDescription = locale === "ar" && d.ar_description ? d.ar_description : d.description;
 
                   return (
@@ -487,6 +565,20 @@ export default function DevelopersClientWrapper({ clientId }) {
                     </div>
                   );
                 })}
+                
+                {/* Loading indicator for next page */}
+                {isFetchingNextPage && (
+                  <div className="flex justify-center p-4">
+                    <LoadingSpinner />
+                  </div>
+                )}
+                
+                {/* End of list indicator */}
+                {!hasNextPage && filteredDevelopers.length > 0 && (
+                  <div className="text-center p-4 text-gray-500 text-sm">
+                    {t.common?.endOfList || "End of developers list"}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -524,8 +616,8 @@ export default function DevelopersClientWrapper({ clientId }) {
         onClose={() => setIsImportOpen(false)}
         clientId={clientId}
         onImported={handleImported}
-        existingDeveloperIds={developers.map((d) => d.id)}
+        existingDeveloperIds={filteredDevelopers.map((d) => d.id)}
       />
-    </>
+    </div>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import ExcelJS from "exceljs";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   Upload,
@@ -37,7 +37,7 @@ import toast from "react-hot-toast";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import ProjectsNotUpdatedDialog from "@/components/ui/projects-not-updated-dialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
 import { MIN_LAND_AREA } from "@/data/constants";
 
@@ -86,7 +86,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const clientId = LenaCookiesManager.getClientId() || null;
   const clientName = LenaCookiesManager.getClientInfo()?.client_name || null;
 
-  const { data: developersData, isLoading: developersLoading } = useDevelopers(clientId);
+  const { data: developersData, isLoading: developersLoading } = useDeveloperNames(clientId);
   const developers = developersData || [];
 
   const { mutateAsync: addUnitViaExcel, isError } = useAddUnit(true);

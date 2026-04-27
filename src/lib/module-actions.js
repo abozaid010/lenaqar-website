@@ -14,11 +14,15 @@ export function normalizeActions(actions) {
 export function getModulePermissionFlags(actions) {
   const a = normalizeActions(actions);
   const has = (action) => a.includes(action);
+  const hasCi = (name) =>
+    a.some((x) => String(x).toLowerCase() === String(name).toLowerCase());
 
   const canView = has("view");
   const canCreate = has("create");
   const canEdit = has("update_any") || has("update_own");
   const canDelete = has("delete_any") || has("delete_own");
+  // Backend may send update_contacts or UPDATE_CONTACTS
+  const canEditDeveloperContactInfo = hasCi("update_developer_contacts");
 
   return {
     actions: a,
@@ -27,6 +31,7 @@ export function getModulePermissionFlags(actions) {
     canCreate,
     canEdit,
     canDelete,
+    canEditDeveloperContactInfo,
   };
 }
 

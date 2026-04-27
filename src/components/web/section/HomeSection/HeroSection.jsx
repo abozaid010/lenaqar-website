@@ -1,7 +1,7 @@
 "use client";
 
 import CalendarModal from "@/components/ui/calendar-modal";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";

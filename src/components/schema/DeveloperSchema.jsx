@@ -6,13 +6,13 @@ export default function DeveloperSchema({ developer }) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: developer.name || "Developer",
+    name: developer.name || t?.schema?.developer || "Developer",
     url: `${SITE_URL}/developers/${developer.id}`,
     logo: developer.logo || `${SITE_URL}/images/logo.png`,
-    description: developer.description || "Real estate developer",
+    description: developer.description || t?.schema?.realEstateDeveloper || "Real estate developer",
     brand: {
       "@type": "Brand",
-      name: developer.name || "Developer",
+      name: developer.name || t?.schema?.developer || "Developer",
     },
   };
 

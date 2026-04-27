@@ -4,7 +4,7 @@ import Dialog from "@/components/ui/Dialog";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { createCampaign, updateCampaign } from "@/utils/api";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -26,12 +26,14 @@ export default function CampaignDialog({
   campaign, // null for create, object for update
   onSuccess,
 }) {
-  const { t, locale } = useI18n();
+  const { t, translate, locale } = useI18n();
   const queryClient = useQueryClient();
   const c = t?.campaigns || {};
 
   const editMode = !!campaign?.id;
   const didInitRef = useRef(false);
+  const lastCampaignIdToastAtRef = useRef(0);
+  const lastClientPhoneToastAtRef = useRef(0);
 
   const [mode, setMode] = useState("text"); // 'text' | 'unit'
   const [campaignIdInput, setCampaignIdInput] = useState(""); // create only: user-defined campaign_id (4–16 chars, no spaces)
@@ -134,34 +136,41 @@ export default function CampaignDialog({
     if (!editMode) {
       const raw = (campaignIdInput || "").trim();
       if (!raw) {
-        toast.error(c.errors?.campaignIdRequired || "Campaign ID is required.");
+        toast.error(t?.campaigns?.errors?.campaignIdRequired);
         return false;
       }
       if (raw.length < 4 || raw.length > 16) {
-        toast.error(c.errors?.campaignIdLength || "Campaign ID must be 4–16 characters.");
+        toast.error(t?.campaigns?.errors?.campaignIdLength);
         return false;
       }
       if (/\s/.test(raw)) {
-        toast.error(c.errors?.campaignIdNoSpaces || "Campaign ID must be one word (no spaces).");
+        toast.error(t?.campaigns?.errors?.campaignIdNoSpaces);
         return false;
       }
     }
 
     if (!payload.client_phone_number) {
-      toast.error(c.errors?.clientPhoneRequired || "Client phone number is required.");
+      toast.error(t?.campaigns?.errors?.clientPhoneRequired);
       return false;
+    }
+    {
+      const digits = String(payload.client_phone_number || "").replace(/[^\d]/g, "");
+      if (!digits.startsWith("20")) {
+        toast.error(translate("campaigns.errors.clientPhoneMustStartWith20"));
+        return false;
+      }
     }
 
     if (mode === "unit") {
       if (!selectedUnit) {
-        toast.error(c.errors?.unitRequired || "Please select a unit.");
+        toast.error(t?.campaigns?.errors?.unitRequired);
         return false;
       }
       return true;
     }
 
     if (!payload.text) {
-      toast.error(c.errors?.textRequired || "Text is required.");
+      toast.error(t?.campaigns?.errors?.textRequired);
       return false;
     }
 
@@ -171,7 +180,7 @@ export default function CampaignDialog({
   const handleSubmit = async () => {
     if (isSubmitting) return;
     if (mode === "text" && isUploadingImages) {
-      toast.error(c.errors?.waitForImages || "Please wait for images to finish uploading.");
+      toast.error(t?.campaigns?.errors?.waitForImages);
       return;
     }
     if (!validate()) return;
@@ -190,22 +199,22 @@ export default function CampaignDialog({
 
       const isOk = res?.status === true || res?.code === 200;
       if (!isOk) {
-        toast.error(res?.message || c.errors?.requestFailed || "Request failed. Please try again.");
+        toast.error(res?.message || t?.campaigns?.errors?.requestFailed);
         setIsSubmitting(false);
         return;
       }
 
       toast.success(
         editMode
-          ? c.toasts?.updated || "Campaign updated successfully"
-          : c.toasts?.created || "Campaign created successfully"
+          ? t?.campaigns?.toasts?.updated
+          : t?.campaigns?.toasts?.created
       );
 
       queryClient.invalidateQueries({ queryKey: campaignKeys.all });
       onSuccess?.(res?.data || null);
       onClose?.();
     } catch (e) {
-      toast.error(e?.message || c.errors?.somethingWentWrong || "Something went wrong.");
+      toast.error(e?.message || t?.common?.somethingWentWrong);
     } finally {
       setIsSubmitting(false);
     }
@@ -224,7 +233,7 @@ export default function CampaignDialog({
           className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
           disabled={isSubmitting}
         >
-          {t?.buttons?.cancel || "Cancel"}
+          {translate("common.cancel")}
         </button>
       }
       headerActions={
@@ -237,12 +246,12 @@ export default function CampaignDialog({
             {isSubmitting ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 size={16} className="animate-spin" />
-                {editMode ? c.updating || "Updating..." : c.creating || "Creating..."}
+                {editMode ? translate("common.updating") : translate("common.creating")}
               </span>
             ) : editMode ? (
-              c.updateButton || "Update"
+              translate("common.update")
             ) : (
-              c.createButton || "Create"
+              translate("common.create")
             )}
         </button>
       }
@@ -251,48 +260,59 @@ export default function CampaignDialog({
         <div className="space-y-4">
           {!editMode && (
             <LenaTextField
-              label={c.campaignIdLabel || "Campaign ID"}
+              label={t.campaigns.campaignIdLabel}
               name="campaign_id"
               value={campaignIdInput}
-              onChange={(e) => setCampaignIdInput((e.target.value || "").replace(/\s/g, ""))}
+              onChange={(e) => {
+                const raw = String(e.target.value || "");
+                // campaign_id must be English-only (no Arabic/Unicode letters)
+                const sanitized = raw
+                  .normalize("NFKD")
+                  .replace(/[^\x00-\x7F]/g, "") // strip non-ASCII (e.g. Arabic)
+                  .replace(/\s/g, ""); // no spaces
+                if (sanitized !== raw) {
+                  const now = Date.now();
+                  if (now - lastCampaignIdToastAtRef.current >= 3000) {
+                    lastCampaignIdToastAtRef.current = now;
+                    toast.error(translate("campaigns.errors.campaignIdEnglishOnly"));
+                  }
+                }
+                setCampaignIdInput(sanitized);
+              }}
               dir="ltr"
-              placeholder={c.campaignIdPlaceholder || "e.g. my-campaign"}
+              placeholder={t.campaigns.signupForumPlaceholder}
               required
               maxLength={16}
-              helperText={c.campaignIdHelp || "4–16 characters, one word, no spaces. Used in the campaign URL."}
+              helperText={t.campaigns.campaignIdHelp}
             />
           )}
 
           <LenaTextField
-            label={c.clientPhoneNumber || "Client phone number"}
+            label={t.campaigns.clientPhoneNumber}
             name="client_phone_number"
             value={clientPhoneNumber}
-            onChange={(e) => setClientPhoneNumber(e.target.value)}
-            dir={locale === "ar" ? "rtl" : "ltr"}
+            onChange={(e) => {
+              const raw = String(e.target.value || "");
+              const digitsOnly = raw.replace(/[^\d]/g, "");
+              if (digitsOnly !== raw) {
+                const now = Date.now();
+                if (now - lastClientPhoneToastAtRef.current >= 3000) {
+                  lastClientPhoneToastAtRef.current = now;
+                  toast.error(translate("campaigns.errors.clientPhoneNumbersOnly"));
+                }
+              }
+              setClientPhoneNumber(digitsOnly);
+            }}
+            dir="ltr"
+            placeholder={translate("campaigns.clientPhonePlaceholder")}
+            inputMode="numeric"
+            pattern="[0-9]*"
             required
           />
 
           <div>
             <div className="text-sm font-medium text-gray-800 mb-2">
-              {c.signupForumLabel || "Signup form"}
-            </div>
-            <SearchableDropdownSelect
-              options={SIGNUP_FORUM_OPTIONS}
-              value={signupForum}
-              onChange={(e) => setSignupForum((e.target.value || "").toLowerCase())}
-              name="signup_forum"
-              placeholder={c.signupForumPlaceholder || "Select visibility"}
-              className="[&>div>button]:bg-[#F6F7FB] [&>div>button]:border-[#E6E6E6] [&>div>button]:text-[#494A4B] [&>div>button]:text-sm [&>div>button]:h-[40px] [&>div>button]:px-2 [&>div>button]:py-[10px]"
-            />
-            <div className="text-xs text-gray-500 mt-1">
-              {c.signupForumNote || "Only included in the request if you change it."}
-            </div>
-          </div>
-
-          {/* Mode selector */}
-          <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
-            <div className="text-sm font-medium text-gray-800 mb-2">
-              {c.campaignType || "Campaign type"}
+              {t.campaigns.campaignType}
             </div>
             <div className="flex flex-wrap gap-4">
               <label className="inline-flex items-center gap-2 cursor-pointer">
@@ -302,7 +322,7 @@ export default function CampaignDialog({
                   checked={mode === "text"}
                   onChange={() => setMode("text")}
                 />
-                <span className="text-sm text-gray-800">{c.typeText || "Text"}</span>
+                <span className="text-sm text-gray-800 ml-2">{t.campaigns.typeText}</span>
               </label>
               <label className="inline-flex items-center gap-2 cursor-pointer">
                 <input
@@ -311,7 +331,7 @@ export default function CampaignDialog({
                   checked={mode === "unit"}
                   onChange={() => setMode("unit")}
                 />
-                <span className="text-sm text-gray-800">{c.typeUnit || "Unit"}</span>
+                <span className="text-sm text-gray-800">{t.campaigns.typeUnit}</span>
               </label>
             </div>
           </div>
@@ -320,7 +340,7 @@ export default function CampaignDialog({
           {mode === "text" && (
             <div className="space-y-4">
               <LenaTextarea
-                label={c.text || "Text"}
+                label={t.campaigns.text}
                 name="text"
                 value={textValue}
                 onChange={(e) => setTextValue(e.target.value)}
@@ -330,7 +350,7 @@ export default function CampaignDialog({
 
               <div>
                 <div className="text-sm font-medium text-gray-800 mb-2">
-                  {c.imagesLabel || "Images (max 4, up to 10MB each)"}
+                  {t.campaigns.imagesLabel}
                 </div>
                 <ImageUploader
                   maxImages={4}
@@ -349,29 +369,29 @@ export default function CampaignDialog({
             <div className="space-y-3">
               <div className="bg-gray-50 border border-gray-200 rounded-md p-3">
                 <div className="text-sm font-medium text-gray-800 mb-1">
-                  {c.selectedUnit || "Selected unit"}
+                  {t.campaigns.selectedUnit}
                 </div>
                 {selectedUnit ? (
                   <div className="text-sm text-gray-700">
                     <div className="font-medium">
-                      {selectedUnit?.unitTitle ||
-                        selectedUnit?.title ||
-                        selectedUnit?.unitId ||
-                        selectedUnit?.id ||
-                        "Unit"}
+                      {selectedUnit.unitTitle ||
+                        selectedUnit.title ||
+                        selectedUnit.unitId ||
+                        selectedUnit.id ||
+                        t.campaigns.unit}
                     </div>
                     <div className="text-xs text-gray-500">
-                      {selectedUnit?.project
-                        ? `${c.project || "Project"}: ${selectedUnit.project}`
+                      {selectedUnit.project
+                        ? `${t.campaigns.project}: ${selectedUnit.project}`
                         : null}
-                      {selectedUnit?.city
-                        ? ` • ${c.city || "City"}: ${selectedUnit.city}`
+                      {selectedUnit.city
+                        ? ` • ${t.campaigns.city}: ${selectedUnit.city}`
                         : null}
                     </div>
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">
-                    {c.noUnitSelected || "No unit selected."}
+                    {t.campaigns.noUnitSelected}
                   </div>
                 )}
               </div>
@@ -381,11 +401,11 @@ export default function CampaignDialog({
                 onClick={() => setIsUnitSelectorOpen(true)}
                 className="px-4 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
               >
-                {c.chooseUnit || "Choose unit"}
+                {t.campaigns.chooseUnit}
               </button>
 
               <div className="text-xs text-gray-500">
-                {c.unitModeNote || "Note: images are hidden when unit is selected."}
+                {t.campaigns.unitModeNote}
               </div>
             </div>
           )}
@@ -393,13 +413,13 @@ export default function CampaignDialog({
           {/* Suggested answers */}
           <div className="space-y-3">
             <div className="text-sm font-medium text-gray-800">
-              {c.suggestedAnswersLabel || "Suggested answers (up to 3)"}
+              {t.campaigns.suggestedAnswersLabel}
             </div>
             <div className="grid grid-cols-1 gap-3">
               {[0, 1, 2].map((i) => (
                 <LenaTextField
                   key={i}
-                  label={`${c.suggested || "Suggested"} ${i + 1}`}
+                  label={t.campaigns.suggested + ' ' + (i + 1)}
                   name={`suggested_${i}`}
                   value={suggestedAns[i] || ""}
                   onChange={(e) =>

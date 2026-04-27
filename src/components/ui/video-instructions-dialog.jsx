@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { VIDEO_MAP, DEFAULT_MESSAGES } from "@/constants/video-instructions";
 
 /**

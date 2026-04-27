@@ -2,7 +2,7 @@
 
 import AddPaymentPlanDialog from "@/components/ui/add-payment-plan-dialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { createPaymentPlan, updatePaymentPlan, fetchPaymentPlans } from "@/utils/api";
 import { Edit2, Plus, Trash2, Check } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
@@ -359,12 +359,12 @@ export default function PaymentPlansList({
                           </h3>
                           {isDefaultPlan && (
                             <span className="px-1.5 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-medium rounded flex-shrink-0">
-                              {t.formLabels?.default || "Default"}
+                              {t?.formLabels?.default}
                             </span>
                           )}
                           {plan.is_default && (
                             <span className="px-1.5 py-0.5 bg-green-100 text-green-700 text-[10px] font-medium rounded flex-shrink-0">
-                              {t.formLabels?.isDefault || "Primary"}
+                              {t?.formLabels?.isDefault}
                             </span>
                           )}
                         </div>
@@ -407,7 +407,7 @@ export default function PaymentPlansList({
                           type="button"
                           onClick={() => handleOpenEditDialog(plan, index)}
                           className="p-1 text-gray-400 hover:text-blue-500"
-                          title={t.buttons?.edit || "Edit"}
+                          title={t?.buttons?.edit}
                         >
                           <Edit2 size={14} />
                         </button>
@@ -415,7 +415,7 @@ export default function PaymentPlansList({
                           type="button"
                           onClick={() => handleDeletePlan(index)}
                           className="p-1 text-gray-400 hover:text-red-500"
-                          title={t.buttons?.delete || "Delete"}
+                          title={t?.buttons?.delete}
                         >
                           <Trash2 size={14} />
                         </button>

@@ -16,8 +16,14 @@ export const UNITS_SOURCE_PENDING_PARAM = "pending";
  * @returns {'units'|'pending_approval'|null} - Active section, or null if not in units area
  */
 export function getUnitsSectionFromUrl(pathname, searchParams) {
-  if (!pathname?.startsWith?.("/units")) return null;
-  if (pathname.startsWith("/units/pending-approval")) return "pending_approval";
+  if (!pathname) return null;
+  // Support both /units/* and /{clientId}/units/* URL patterns
+  const isUnitsPath = pathname.startsWith("/units") || /^\/[^/]+\/units/.test(pathname);
+  if (!isUnitsPath) return null;
+  const isPendingPath =
+    pathname.startsWith("/units/pending-approval") ||
+    /^\/[^/]+\/units\/pending-approval/.test(pathname);
+  if (isPendingPath) return "pending_approval";
   if (searchParams?.get?.(UNITS_SOURCE_PENDING_PARAM) === "1") return "pending_approval";
   return "units";
 }

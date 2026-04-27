@@ -1,7 +1,7 @@
 "use client";
 
 import ImageUploader from "@/components/ui/inputs/image-uploader";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 
 import FormSelect from "@/components/ui/inputs/form-select";
 

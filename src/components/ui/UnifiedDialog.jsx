@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import UnifiedHeader from "@/components/ui/UnifiedHeader";
+import { useI18n } from "@/hooks/useI18n";
 
 /**
  * Unified dialog with consistent header layout:
@@ -16,7 +17,7 @@ export default function UnifiedDialog({
   isOpen,
   onClose,
   title,
-  cancelLabel = "Cancel",
+  cancelLabel,
   onCancel,
   submitLabel,
   onSubmit,
@@ -35,8 +36,20 @@ export default function UnifiedDialog({
   /** Optional class for the content body */
   bodyClassName = "",
 }) {
+  const { t, locale } = useI18n();
+  const isRTL = locale === "ar";
   const dialogRef = useRef(null);
   const handleCancel = onCancel ?? onClose;
+  
+  // Use translated labels and guard against blank strings.
+  const finalCancelLabel =
+    typeof cancelLabel === "string"
+      ? cancelLabel.trim() || t?.buttons?.cancel || (locale === "ar" ? "إلغاء" : "Cancel")
+      : cancelLabel ?? t?.buttons?.cancel ?? (locale === "ar" ? "إلغاء" : "Cancel");
+  const finalSubmitLabel =
+    typeof submitLabel === "string"
+      ? submitLabel.trim() || t?.buttons?.submit || (locale === "ar" ? "حفظ" : "Save")
+      : submitLabel ?? t?.buttons?.submit ?? (locale === "ar" ? "حفظ" : "Save");
 
   useEffect(() => {
     const handleEscape = (e) => {
@@ -77,20 +90,27 @@ export default function UnifiedDialog({
           <UnifiedHeader
             title={title}
             onCancel={handleCancel}
-            cancelLabel={cancelLabel}
+            cancelLabel={finalCancelLabel}
             onSubmit={onSubmit}
-            submitLabel={submitLabel}
+            submitLabel={finalSubmitLabel}
             submitDisabled={submitDisabled}
             submitLoading={submitLoading}
             leadingSlot={headerLeading}
             trailingSlot={headerTrailing}
+            dir={isRTL ? "rtl" : "ltr"}
           />
         ) : (
           <div
-            className="flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative"
-            dir="ltr"
+            className={`flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
+            dir={isRTL ? "rtl" : "ltr"}
           >
-            <div className="flex justify-start items-center shrink-0 order-first min-w-[80px]">
+            <div
+              className={`flex items-center shrink-0 min-w-[80px] ${
+                isRTL ? "justify-end" : "justify-start"
+              }`}
+            >
               {headerLeading !== undefined ? (
                 headerLeading
               ) : (
@@ -100,17 +120,21 @@ export default function UnifiedDialog({
                   disabled={submitLoading}
                   className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm disabled:opacity-70 disabled:pointer-events-none"
                 >
-                  {cancelLabel}
+                  {finalCancelLabel}
                 </button>
               )}
             </div>
             <h2 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-lg md:text-xl font-semibold text-white px-2 pointer-events-none truncate max-w-[60%]">
               {title}
             </h2>
-            <div className="flex justify-end items-center gap-2 shrink-0 order-last min-w-[80px]">
+            <div
+              className={`flex items-center gap-2 shrink-0 min-w-[80px] ${
+                isRTL ? "justify-start" : "justify-end"
+              }`}
+            >
               {headerTrailing !== undefined ? (
                 headerTrailing
-              ) : submitLabel != null && onSubmit != null ? (
+              ) : finalSubmitLabel != null && onSubmit != null ? (
                 <button
                   type="button"
                   onClick={onSubmit}
@@ -120,10 +144,10 @@ export default function UnifiedDialog({
                   {submitLoading ? (
                     <>
                       <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                      {submitLabel}
+                      {finalSubmitLabel}
                     </>
                   ) : (
-                    submitLabel
+                    finalSubmitLabel
                   )}
                 </button>
               ) : null}

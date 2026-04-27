@@ -24,22 +24,23 @@ export default function LoginForm() {
   useEffect(() => {
     if (state.success) {
       toast.success(t.login.successMessage);
+      const destination = state.clientId ? `/${state.clientId}/dashboard` : '/dashboard';
       // Use multiple redirect methods for Safari compatibility
       setTimeout(() => {
         // Method 1: Direct window.location change
-        window.location.href = "/dashboard";
-        
+        window.location.href = destination;
+
         // Method 2: Fallback with window.location.replace
         setTimeout(() => {
           if (window.location.pathname === "/login") {
-            window.location.replace("/dashboard");
+            window.location.replace(destination);
           }
         }, 100);
-        
+
         // Method 3: Final fallback using router
         setTimeout(() => {
           if (window.location.pathname === "/login") {
-            router.replace("/dashboard");
+            router.replace(destination);
           }
         }, 200);
       }, 500);

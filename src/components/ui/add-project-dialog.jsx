@@ -12,12 +12,12 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
 import AmenitiesSelector from "@/components/ui/inputs/amenities-selector";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import {
   addCompound as addProject,
@@ -129,6 +129,7 @@ export default function AddCompoundDialog({
   onClose,
   compoundData: projectData,
   onAdd = () => {},
+  onEdit,
   defaultCity,
   defaultDistrict,
   viewMode = false,
@@ -137,7 +138,7 @@ export default function AddCompoundDialog({
   const queryClient = useQueryClient();
 
   const { isLoading: delveloperLoading, data: developersData } =
-    useDevelopers(clientId);
+    useDeveloperNames(clientId);
 
   const { getDistrictsWithLabels } = useCitiesDistricts();
 
@@ -193,6 +194,21 @@ export default function AddCompoundDialog({
     useState(false);
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [existingProjectData, setExistingProjectData] = useState(null);
+
+  // Handle edit from preview dialog
+  const handleEditFromPreview = (projectData) => {
+    // Close preview dialog
+    setPreviewDialogOpen(false);
+    setExistingProjectData(null);
+    
+    // Call the onEdit callback if provided
+    if (onEdit && typeof onEdit === 'function') {
+      onEdit(projectData);
+    } else {
+      // Fallback message if no onEdit handler is provided
+      toast.error("Edit functionality not available. Please use the Edit button from the projects list.");
+    }
+  };
 
   // Refs for form fields to enable scrolling to errors
   const fieldRefs = useRef({
@@ -2336,7 +2352,7 @@ export default function AddCompoundDialog({
                       name="facility_management_rating"
                       label={
                         t.formLabels?.facilityManagementRating ||
-                        "Rating (0–5)"
+                        "Rating (0–10)"
                       }
                       value={formData.facility_management.rating}
                       onChange={(e) => {
@@ -2351,7 +2367,7 @@ export default function AddCompoundDialog({
                       }}
                       placeholder="4.5"
                       min="0"
-                      max="5"
+                      max="10"
                       step="0.1"
                     />
                   </div>
@@ -2377,6 +2393,7 @@ export default function AddCompoundDialog({
           setExistingProjectData(null);
         }}
         projectData={existingProjectData}
+        onEdit={handleEditFromPreview}
       />
     </>
   );

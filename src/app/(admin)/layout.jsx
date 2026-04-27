@@ -49,6 +49,7 @@ const Layout = async ({ children }) => {
               canAccessMap={canAccessMap}
               canAccessNews={canAccessNews}
               initialModuleActions={initialModuleActions}
+              clientId={clientID}
             />
 
           <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">

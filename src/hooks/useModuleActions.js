@@ -21,6 +21,7 @@ export function useModuleActions(moduleName) {
         canCreate: false,
         canEdit: false,
         canDelete: false,
+        canEditDeveloperContactInfo: false,
         // non-required extras (helpful for advanced UI)
         isReady,
         actions: [],
@@ -36,6 +37,7 @@ export function useModuleActions(moduleName) {
         canCreate: true,
         canEdit: true,
         canDelete: true,
+        canEditDeveloperContactInfo: true,
         isReady,
         actions: [],
         has: () => true,

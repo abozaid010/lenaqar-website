@@ -51,33 +51,16 @@ export default async function TeamPage() {
   let hasAccess = true;
 
   try {
-    console.log("[Team Page] Starting to fetch sales data...");
     data = await getSalesData();
     
-    console.log("[Team Page] API Response received:", {
-      hasData: !!data,
-      hasStatus: 'status' in (data || {}),
-      hasDataProperty: !!data?.data,
-      dataType: typeof data,
-      dataKeys: data ? Object.keys(data) : [],
-      isDataArray: Array.isArray(data?.data),
-      dataLength: Array.isArray(data?.data) ? data.data.length : 'N/A',
-    });
+    
     
     if (!data?.status) {
       hasAccess = false;
-      console.log("[Team Page] Access denied - status is false or missing");
     } else {
       console.log("[Team Page] Access granted - status is true");
     }
   } catch (error) {
-    console.error("[Team Page] Error fetching sales data:", {
-      message: error.message,
-      name: error.name,
-      stack: error.stack,
-      response: error.response?.data,
-      status: error.response?.status,
-    });
     hasAccess = false;
     data = { data: [], status: false };
   }
@@ -104,26 +87,29 @@ export default async function TeamPage() {
           },
         ]}
       />
-      <div className="container mx-auto h-full">
+      <div className="h-full flex flex-col">
         {hasAccess ? (
-          <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between gap-4">
-              {teamData.length > 0 ? (
-                <VideoInstructionsDialog
-                  variant="team"
-                  iconSize="md"
-                  tooltipText="How to manage team members"
-                />
-              ) : (
-                <div aria-hidden="true" />
-              )}
-              <AddNewMember canManageTeam={canManageTeam} />
+          <>
+            <div className="p-4 bg-white rounded-lg shadow-md">
+              <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+                <div className="flex-1" />
+                <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+                  <AddNewMember canManageTeam={canManageTeam} />
+                  <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
+                    <VideoInstructionsDialog
+                      variant="team"
+                      iconSize="sm"
+                      tooltipText="How to manage team members"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 relative">
+            <div className="flex-1 relative mt-4">
               <TeamTable data={teamData} canManageTeam={canManageTeam} />
             </div>
-          </div>
+          </>
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
             <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>

@@ -10,6 +10,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
+import { useI18n } from "@/hooks/useI18n";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -17,6 +18,7 @@ import ChatPanel from "./_components/ChatPanel";
 import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
 
 const CampaignChat = () => {
+  const { t, translate, locale } = useI18n();
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
@@ -303,36 +305,60 @@ const CampaignChat = () => {
   const handleRename = async (phoneNumber, userName) => {
     try {
       await updateCampaignSessionName({ phone_number: phoneNumber, user_name: userName });
-      if (selectedContact?.phone_number === phoneNumber) {
-        setSelectedContact(prev => ({ ...prev, user_name: userName }));
-      }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
-      await refetchSession();
-      toast.success("Contact renamed");
+      
+      // Update session details if it's the currently selected contact
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSessionDetails(prev => ({
+          ...prev,
+          [phoneNumber]: {
+            ...prev[phoneNumber],
+            user_name: userName
+          }
+        }));
+      }
+      
+      // Update the session in allSessions
+      setAllSessions(prev => prev.map(session => 
+        session.phone_number === phoneNumber 
+          ? { ...session, user_name: userName }
+          : session
+      ));
     } catch (error) {
       console.error("Failed to rename session:", error);
-      toast.error(getErrorMessage(error, "Failed to rename contact"));
-      throw error;
+      toast.error("Failed to rename conversation");
     }
   };
 
-  // Handle favorite toggle
+  // Handle toggle favorite
   const handleToggleFavorite = async (phoneNumber, isFavorite) => {
     try {
       await toggleCampaignFavorite({ phone_number: phoneNumber, is_favorite: isFavorite });
-      if (selectedContact?.phone_number === phoneNumber) {
-        setSelectedContact(prev => ({ ...prev, is_favorite: isFavorite }));
-      }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
-      await refetchSession();
+      
+      // Update session details if it's the currently selected contact
+      if (selectedContact?.phone_number === phoneNumber) {
+        setSessionDetails(prev => ({
+          ...prev,
+          [phoneNumber]: {
+            ...prev[phoneNumber],
+            is_favorite: isFavorite
+          }
+        }));
+      }
+      
+      // Update the session in allSessions
+      setAllSessions(prev => prev.map(session => 
+        session.phone_number === phoneNumber 
+          ? { ...session, is_favorite: isFavorite }
+          : session
+      ));
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
-      toast.error(getErrorMessage(error, "Failed to update favorite"));
-      throw error;
+      toast.error("Failed to update favorite status");
     }
   };
 
-  // Handle notes update
   const handleUpdateNotes = async (phoneNumber, notes) => {
     try {
       await updateCampaignNotes({ phone_number: phoneNumber, notes });
@@ -434,101 +460,69 @@ const CampaignChat = () => {
     <div className="h-full flex">
       {/* Left Panel - Contact List */}
       <div className="w-80 border-r border-gray-200 flex flex-col bg-white">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-lg font-semibold text-gray-800">Campaign Chat</h1>
-            <button
-              onClick={() => setIsCreateDialogOpen(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
-            >
-              <Plus size={16} />
-              Create
-            </button>
-          </div>
-          
-          {/* Search */}
-          <div className="relative mb-3">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Search Input */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
             <input
               type="text"
               placeholder="Search by name or phone..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              className="w-full px-3 py-2 h-10 bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] rounded-md text-sm hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
             />
           </div>
 
-          {/* AI Filter */}
-          <div className="flex gap-2 mb-3">
+          {/* Action Buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
-              onClick={() => setAiFilter(null)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                aiFilter === null
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+              onClick={() => setIsCreateDialogOpen(true)}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
-              All
-            </button>
-            <button
-              onClick={() => setAiFilter(true)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === true
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <ToggleRight className="h-3 w-3" />
-              AI On
-            </button>
-            <button
-              onClick={() => setAiFilter(false)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors flex items-center gap-1 ${
-                aiFilter === false
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              <ToggleLeft className="h-3 w-3" />
-              AI Off
-            </button>
-          </div>
-
-          {/* Sort Controls */}
-          <div className="flex items-center gap-1">
-            <ArrowDownUp className="h-3 w-3 text-gray-400 flex-shrink-0" />
-            <button
-              onClick={() => handleSortChange("last_user_message_at")}
-              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
-                sortBy === "last_user_message_at"
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Last Message
-              {sortBy === "last_user_message_at" && (
-                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
-              )}
-            </button>
-            <button
-              onClick={() => handleSortChange("total_messages_received")}
-              className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
-                sortBy === "total_messages_received"
-                  ? SELECTION_COLORS.SELECTED
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
-            >
-              Most Messages
-              {sortBy === "total_messages_received" && (
-                <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
-              )}
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">Create</span>
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
+
+        {/* Sort Controls */}
+        <div className="flex items-center gap-1">
+          <ArrowDownUp className="h-3 w-3 text-gray-400 flex-shrink-0" />
+          <button
+            onClick={() => handleSortChange("last_user_message_at")}
+            className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+              sortBy === "last_user_message_at"
+                ? SELECTION_COLORS.SELECTED
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {translate('campaignChat.lastMessage')}
+            {sortBy === "last_user_message_at" && (
+              <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+            )}
+          </button>
+          <button
+            onClick={() => handleSortChange("total_messages_received")}
+            className={`px-2 py-1 rounded text-xs transition-colors flex items-center gap-1 ${
+              sortBy === "total_messages_received"
+                ? SELECTION_COLORS.SELECTED
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {translate('campaignChat.mostMessages')}
+            {sortBy === "total_messages_received" && (
+              <span>{sortOrder === "desc" ? "↓" : "↑"}</span>
+            )}
+          </button>
+        </div>
 
         {/* Contact List */}
-        <ErrorBoundary errorMessage="Failed to load conversations. Please try again.">
+        <ErrorBoundary errorMessage={translate('campaignChat.failedToLoadConversations')}>
           <ContactList
             sessions={sortedSessions}
             selectedContact={selectedContact}
@@ -549,31 +543,31 @@ const CampaignChat = () => {
       </div>
 
       {/* Right Panel - Chat */}
-      <div className="flex-1 flex flex-col">
-        <ErrorBoundary errorMessage="Failed to load conversation. Please try again.">
-          {selectedContact ? (
-            <ChatPanel
-              contact={selectedContact}
-              sessionData={sessionData}
-              loading={sessionLoading}
-              onToggleAI={handleToggleAI}
-              onSendReply={handleSendReply}
-              refetchSession={refetchSession}
-              onRename={handleRename}
-              onToggleFavorite={handleToggleFavorite}
-              onUpdateNotes={handleUpdateNotes}
-            />
-          ) : (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-600 mb-2">Select a conversation</h3>
-                <p className="text-gray-500">Choose a contact from the list to start chatting</p>
+        <div className="flex-1 flex flex-col">
+          <ErrorBoundary errorMessage={translate('campaignChat.failedToLoadConversation')}>
+            {selectedContact ? (
+              <ChatPanel
+                contact={selectedContact}
+                sessionData={sessionData}
+                loading={sessionLoading}
+                onToggleAI={handleToggleAI}
+                onSendReply={handleSendReply}
+                refetchSession={refetchSession}
+                onRename={handleRename}
+                onToggleFavorite={handleToggleFavorite}
+                onUpdateNotes={handleUpdateNotes}
+              />
+            ) : (
+              <div className="flex-1 flex items-center justify-center bg-gray-50">
+                <div className="text-center">
+                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">{translate('campaignChat.selectConversation')}</h3>
+                  <p className="text-gray-500">{translate('campaignChat.chooseContact')}</p>
+                </div>
               </div>
-            </div>
-          )}
-        </ErrorBoundary>
-      </div>
+            )}
+          </ErrorBoundary>
+        </div>
 
       {/* WhatsApp Campaign Dialog */}
       <AddNewWhatsappCampaignDialog

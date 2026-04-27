@@ -240,68 +240,44 @@ const MapView = () => {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header with Toggle */}
-      <div className="sticky top-0 z-20 -mx-3 px-3 pt-3 pb-4 bg-gray-50/95 backdrop-blur supports-[backdrop-filter]:bg-gray-50/80 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {t.sidebar?.map || "Map"}
-            </h1>
-            <p className="text-gray-600">
-              {t.map?.subtitle || "View projects by location"}
-            </p>
+      {/* Header */}
+      <div className="sticky top-0 z-20 p-4 bg-white rounded-lg shadow-md mb-4">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <SearchableDropdownSelect
+              options={projectionData || []}
+              value={selectedDeveloperId}
+              onChange={(e) => setSelectedDeveloperId(e.target.value)}
+              name="developerFilter"
+              showAllOption
+              allOptionLabel={locale === "ar" ? "كل المطورين" : "All developers"}
+              allOptionValue=""
+              placeholder={locale === "ar" ? "اختر مطور" : "Select developer"}
+              searchPlaceholder={locale === "ar" ? "ابحث بالاسم..." : "Search by name..."}
+              searchFields={["ar_name", "en_name", "developer_name"]}
+              getValue={(developer) => String(developer?.developer_id ?? "")}
+              getLabel={(developer, currentLocale) => {
+                if (currentLocale === "ar") {
+                  return developer?.ar_name || developer?.developer_name || developer?.en_name || "";
+                }
+                return developer?.en_name || developer?.developer_name || developer?.ar_name || "";
+              }}
+              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              disabled={isLoading || isError}
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <div className="w-[260px]">
-              <SearchableDropdownSelect
-                options={projectionData || []}
-                value={selectedDeveloperId}
-                onChange={(e) => setSelectedDeveloperId(e.target.value)}
-                name="developerFilter"
-                showAllOption
-                allOptionLabel={locale === "ar" ? "كل المطورين" : "All developers"}
-                allOptionValue=""
-                placeholder={locale === "ar" ? "اختر مطور" : "Select developer"}
-                searchPlaceholder={locale === "ar" ? "ابحث بالاسم..." : "Search by name..."}
-                searchFields={["ar_name", "en_name", "developer_name"]}
-                getValue={(developer) => String(developer?.developer_id ?? "")}
-                getLabel={(developer, currentLocale) => {
-                  if (currentLocale === "ar") {
-                    return (
-                      developer?.ar_name ||
-                      developer?.developer_name ||
-                      developer?.en_name ||
-                      ""
-                    );
-                  }
-                  return (
-                    developer?.en_name ||
-                    developer?.developer_name ||
-                    developer?.ar_name ||
-                    ""
-                  );
-                }}
-                buttonClassName="h-[40px] text-primary"
-                disabled={isLoading || isError}
-              />
-            </div>
-            <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            <div className="flex gap-1 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md p-1">
               <button
                 onClick={() => setViewMode("map")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "map"
-                  ? "bg-primary text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${viewMode === "map" ? "bg-primary text-white" : "text-[#494A4B] hover:bg-white"}`}
               >
                 <Map className="h-4 w-4" />
                 <span>{t.map?.mapView || "Map"}</span>
               </button>
               <button
                 onClick={() => setViewMode("list")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${viewMode === "list"
-                  ? "bg-primary text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded text-sm font-medium transition-colors ${viewMode === "list" ? "bg-primary text-white" : "text-[#494A4B] hover:bg-white"}`}
               >
                 <List className="h-4 w-4" />
                 <span>{t.map?.listView || "List"}</span>

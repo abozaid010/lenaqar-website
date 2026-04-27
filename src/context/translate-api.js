@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useMemo, useCallback, useState, useEffect } from "react";
 
-import en from "../../public/locales/en";
-import ar from "../../public/locales/ar";
+import en from "../../public/locales/en.js";
+import ar from "../../public/locales/ar.js";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 

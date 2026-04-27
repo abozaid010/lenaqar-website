@@ -1,7 +1,10 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useProjectsPaginated, useDevelopers } from "@/hooks/use-admin-shared-data";
+import {
+  useProjectsPaginated,
+  useDeveloperNames,
+} from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
 import {
   CreditCard,
@@ -33,6 +36,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -42,9 +46,10 @@ import { useModuleActions } from "@/hooks/useModuleActions";
 
 const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
 
-const getPropertyTypeLabel = (value, locale, buildingTypes) => {
-  const type = buildingTypes.find((t) => t.value === value);
-  return type ? (locale === "ar" ? type.ar_label : type.en_label) : value;
+const getPropertyTypeLabel = (value, translate) => {
+  const raw = (value ?? "").toString();
+  const key = raw.toLowerCase();
+  return translate ? translate(`buildingTypes.${key}`, raw) : raw;
 };
 
 const formatPaymentPlan = (plan) => {
@@ -75,6 +80,7 @@ function ProjectCard({
   project,
   locale,
   t,
+  translate,
   buildingTypes,
   getCityLabel,
   getDistrictLabel,
@@ -184,7 +190,7 @@ function ProjectCard({
             <Home size={14} className="text-blue-600 shrink-0" />
             {types.slice(0, 3).map((type, i) => (
               <Chip key={i} variant="blue">
-                {getPropertyTypeLabel(type, locale, buildingTypes)}
+                {getPropertyTypeLabel(type, translate)}
               </Chip>
             ))}
             {types.length > 3 && (
@@ -235,20 +241,22 @@ function ProjectCard({
               )}
           </div>
 
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onManagePhases(project);
-            }}
-            className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition hover:border-primary hover:text-primary"
-          >
-            <Layers size={14} />
-            <span>{t.phases || (locale === "ar" ? "المراحل" : "Phases")}</span>
-            <span className="rounded-full bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
-              {phasesCount}
-            </span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onManagePhases(project);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-md border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+            >
+              <Layers size={14} />
+              <span>{t.phases || (locale === "ar" ? "المراحل" : "Phases")}</span>
+              <span className="rounded-full bg-primary/10 px-1.5 text-[10px] font-semibold text-primary">
+                {phasesCount}
+              </span>
+            </button>
+          </div>
         </footer>
       </div>
     </article>
@@ -257,15 +265,14 @@ function ProjectCard({
 
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
-  const { t, locale } = useI18n();
+  const router = useRouter();
+  const { t, locale, translate } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
     useModuleActions("projects");
   const canImportProjects = hasProjectAction("import");
 
-  const [selectedCities, setSelectedCities] = useState([]);
-  const [isCityFilterOpen, setIsCityFilterOpen] = useState(false);
-
+  
   const [translations, setTranslations] = useState({
     cities: [],
     cityLabels: {},
@@ -273,20 +280,17 @@ export default function ProjectsList({ clientId }) {
     isLoading: true,
   });
 
+  const [selectedCity, setSelectedCity] = useState("");
+
   const cityEnName = useMemo(() => {
-    if (
-      selectedCities.length === 1 &&
-      selectedCities.length < translations.cities.length
-    ) {
-      return selectedCities[0];
+    if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
+      return selectedCity;
     }
     return undefined;
-  }, [selectedCities, translations.cities.length]);
+  }, [selectedCity]);
 
-  const {
-    data: developersData,
-    isLoading: developersLoading,
-  } = useDevelopers(null, true);
+  const { data: developersData, isLoading: developersLoading } =
+    useDeveloperNames();
 
   const developers = developersData || [];
   const [selectedDeveloper, setSelectedDeveloper] = useState("");
@@ -408,14 +412,15 @@ export default function ProjectsList({ clientId }) {
   }, [locale, projectsList]);
 
   useEffect(() => {
-    if (translations.cities.length > 0 && selectedCities.length === 0) {
-      setSelectedCities([...translations.cities]);
+    if (translations.cities.length > 0 && !selectedCity) {
+      setSelectedCity("all");
     }
-  }, [translations.cities, selectedCities.length]);
+  }, [translations.cities, selectedCity]);
 
   const getCityDisplayName = useMemo(() => {
     return (city) => {
       if (!city) return "";
+      if (city === "all") return t?.common?.all || "All";
       if (translations.cityLabels[city]) {
         return translations.cityLabels[city];
       }
@@ -428,7 +433,7 @@ export default function ProjectsList({ clientId }) {
       }
       return capitalize(city);
     };
-  }, [translations.cityLabels, locale]);
+  }, [translations.cityLabels, locale, t?.common?.all]);
 
   const getDistrictDisplayName = useCallback(
     (district, city) => {
@@ -490,13 +495,10 @@ export default function ProjectsList({ clientId }) {
       });
 
       let cityFiltered = sorted;
-      if (
-        selectedCities.length > 1 &&
-        selectedCities.length < translations.cities.length
-      ) {
+      if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
         cityFiltered = sorted.filter((p) => {
           const projectCity = p.city?.toLowerCase() || "";
-          return selectedCities.some((c) => c.toLowerCase() === projectCity);
+          return projectCity === selectedCity.toLowerCase();
         });
       }
 
@@ -512,7 +514,7 @@ export default function ProjectsList({ clientId }) {
     projectsList,
     locale,
     searchQuery,
-    selectedCities,
+    selectedCity,
     translations.cities,
   ]);
 
@@ -578,9 +580,8 @@ export default function ProjectsList({ clientId }) {
   };
 
   const handleOpenView = (project) => {
-    setDialogProject(project);
-    setProjectDialogMode("view");
-    setShowProjectDialog(true);
+    const slug = encodeURIComponent(project.en_name || project.ar_name || project.id);
+    router.push(`/${clientId}/myProjects/${slug}`);
   };
   const handleOpenEdit = (project) => {
     setDialogProject(project);
@@ -645,47 +646,19 @@ export default function ProjectsList({ clientId }) {
   };
 
   // City filter handlers
-  const cityFilterRef = useRef(null);
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (
-        cityFilterRef.current &&
-        !cityFilterRef.current.contains(event.target)
-      ) {
-        setIsCityFilterOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const handleCityToggle = (city) => {
-    setSelectedCities((prev) =>
-      prev.includes(city) ? prev.filter((c) => c !== city) : [...prev, city]
-    );
-  };
-
-  const handleSelectAllCities = () => {
-    if (selectedCities.length === translations.cities.length) {
-      setSelectedCities([]);
-    } else {
-      setSelectedCities([...translations.cities]);
-    }
-  };
+  // Convert cities to options format for SearchableDropdownSelect
+  const cityOptions = useMemo(() => {
+    return translations.cities.map(city => ({
+      value: city,
+      label: getCityDisplayName(city)
+    }));
+  }, [translations.cities, getCityDisplayName]);
 
   const getCityFilterDisplayText = () => {
-    if (
-      selectedCities.length === 0 ||
-      selectedCities.length === translations.cities.length
-    ) {
-      return locale === "ar" ? "جميع المدن" : "All Cities";
+    if (!selectedCity || selectedCity === "all") {
+      return t?.unitsFilter?.allCities || (locale === "ar" ? "جميع المدن" : "All Cities");
     }
-    if (selectedCities.length === 1) {
-      return getCityDisplayName(selectedCities[0]);
-    }
-    return locale === "ar"
-      ? `${selectedCities.length} مدن`
-      : `${selectedCities.length} Cities`;
+    return getCityDisplayName(selectedCity);
   };
 
   return (
@@ -700,6 +673,7 @@ export default function ProjectsList({ clientId }) {
           compoundData={dialogProject}
           viewMode={projectDialogMode === "view"}
           onAdd={handleProjectSaved}
+          onEdit={handleOpenEdit}
           clientId={clientId}
         />
       )}
@@ -732,268 +706,209 @@ export default function ProjectsList({ clientId }) {
         />
       )}
 
-      <div className="bg-gray-50 flex flex-col gap-4 p-3 sm:p-4 relative flex-1 min-h-0 h-full w-full">
-        {/* Header */}
-        <div className="bg-primary rounded-lg shadow-sm px-3 py-3 sm:px-4 sm:py-3 flex flex-col gap-3">
-          {/* Top row: title + primary actions */}
-          <div className="flex items-center justify-between gap-3 flex-wrap">
-            <h2 className="text-white text-lg sm:text-xl font-semibold leading-none whitespace-nowrap">
-              {t.sidebar.myProjects}
-            </h2>
-            <div className="flex items-center gap-2 flex-shrink-0">
-              {canCreateProject && (
-                <button
-                  onClick={handleOpenAdd}
-                  className="inline-flex items-center gap-1.5 bg-white text-primary px-3 h-10 rounded-lg transition-colors duration-200 hover:bg-gray-50 text-sm font-medium"
-                >
-                  <Plus size={18} />
-                  <span className="hidden sm:inline">
-                    {t.projectPage?.add || t.addNewProject || "Add"}
-                  </span>
-                </button>
-              )}
-              {!isDeveloper && canImportProjects && (
-                <button
-                  onClick={() => setIsImportOpen(true)}
-                  className="inline-flex items-center gap-1.5 bg-white/95 text-primary px-3 h-10 rounded-lg transition-colors duration-200 hover:bg-white text-sm font-medium"
-                >
-                  <Plus size={18} />
-                  <span className="hidden sm:inline">
-                    {t.projectPage?.importButton || "Import"}
-                  </span>
-                </button>
-              )}
+      {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Cities Dropdown */}
+          {translations.cities.length > 0 && (
+            <div className="w-full md:w-auto md:flex-1 min-w-0">
+              <SearchableDropdownSelect
+                options={cityOptions}
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                name="city"
+                placeholder={locale === "ar" ? "جميع المدن" : "All Cities"}
+                showAllOption={true}
+                allOptionLabel={locale === "ar" ? "جميع المدن" : "All Cities"}
+                allOptionValue=""
+                getValue={(option) => option.value}
+                getLabel={(option) => option.label}
+                className="w-full"
+                buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+                disabled={translations.isLoading}
+                isLoading={translations.isLoading}
+              />
+            </div>
+          )}
+
+          {/* Developer Dropdown */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <SearchableDropdownSelect
+              options={developers}
+              value={selectedDeveloper}
+              onChange={(e) => setSelectedDeveloper(e.target.value)}
+              name="developer"
+              placeholder={
+                developersLoading
+                  ? locale === "ar"
+                    ? "جاري التحميل..."
+                    : "Loading..."
+                  : locale === "ar"
+                    ? "جميع المطورين"
+                    : "All Developers"
+              }
+              showAllOption={true}
+              allOptionLabel={
+                locale === "ar" ? "جميع المطورين" : "All Developers"
+              }
+              allOptionValue=""
+              getValue={(option) => option.id}
+              getLabel={(option, loc) =>
+                loc === "ar"
+                  ? option.ar_name || option.en_name
+                  : option.en_name || option.ar_name
+              }
+              searchFields={["ar_name", "en_name"]}
+              className="w-full"
+              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              disabled={developersLoading}
+              isLoading={developersLoading}
+            />
+          </div>
+
+          {/* Project Search Dropdown */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <SearchableProjectSelect
+              value={addProjectSelectValue}
+              onChange={(e) => setAddProjectSelectValue(e.target.value)}
+              onProjectSelectStart={handleProjectSelectStart}
+              onProjectSelect={handleAppendProject}
+              name="add_project"
+              placeholder={
+                locale === "ar" ? "ابحث بالاسم..." : "Search by name..."
+              }
+              className="w-full"
+              buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
+              isPublic={false}
+            />
+          </div>
+
+          {/* Action buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            {canCreateProject && (
+              <button
+                onClick={handleOpenAdd}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.projectPage?.add || t.addNewProject || "Add"}
+                </span>
+              </button>
+            )}
+            {!isDeveloper && canImportProjects && (
+              <button
+                onClick={() => setIsImportOpen(true)}
+                className="flex-1 md:flex-initial px-4 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              >
+                <Plus size={18} className="shrink-0" />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {t.projectPage?.importButton || "Import"}
+                </span>
+              </button>
+            )}
+            <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
               <VideoInstructionsDialog
                 variant="projects"
-                iconSize="lg"
-                iconClassName="hover:bg-white/20 flex items-center justify-center h-10 w-10"
-                svgClassName="text-white"
+                iconSize="sm"
                 tooltipText={
                   t.projectsPage?.instructions || "How to manage projects"
                 }
               />
             </div>
           </div>
+        </div>
+      </div>
 
-          {/* Filters row */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="flex-1 min-w-[200px] sm:min-w-[240px] sm:max-w-xs">
-              <ReusableSearchInput
-                value={searchQuery}
-                onChange={setSearchQuery}
-                placeholder={
-                  t.projectPage?.searchPlaceholder || "Search projects..."
-                }
-                variant="white"
-                className="w-full"
-              />
-            </div>
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
 
-            {translations.cities.length > 0 && (
-              <div className="relative flex-shrink-0" ref={cityFilterRef}>
-                <button
-                  type="button"
-                  onClick={() => setIsCityFilterOpen(!isCityFilterOpen)}
-                  className="flex items-center gap-2 bg-white text-primary px-3 rounded-lg transition-colors duration-200 hover:bg-gray-50 min-w-[140px] h-10 justify-between"
-                >
-                  <span className="text-sm font-medium truncate">
-                    {getCityFilterDisplayText()}
-                  </span>
-                  <ChevronDown
-                    size={16}
-                    className={`text-primary transition-transform ${
-                      isCityFilterOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {isCityFilterOpen && (
-                  <div className="absolute right-0 z-50 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                    <div className="p-3 border-b border-gray-200 sticky top-0 bg-white">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-sm font-semibold text-gray-700">
-                          {locale === "ar"
-                            ? "تصفية حسب المدينة"
-                            : "Filter by City"}
-                        </h3>
-                        <button
-                          onClick={handleSelectAllCities}
-                          className="text-xs text-primary hover:underline"
-                        >
-                          {selectedCities.length ===
-                          translations.cities.length
-                            ? locale === "ar"
-                              ? "إلغاء الكل"
-                              : "Clear All"
-                            : locale === "ar"
-                              ? "تحديد الكل"
-                              : "Select All"}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="p-2">
-                      {translations.cities.map((city) => {
-                        const isSelected = selectedCities.includes(city);
-                        return (
-                          <label
-                            key={city}
-                            className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleCityToggle(city)}
-                              className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                            />
-                            <span className="text-sm text-gray-700 flex-1">
-                              {getCityDisplayName(city)}
-                            </span>
-                          </label>
-                        );
-                      })}
+      {/* Projects content */}
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        {isLoading ? (
+          <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+            <LoadingSpinner />
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+            <QueryErrorState
+              error={error}
+              refetch={refetch}
+              isFetching={isFetching}
+              title={t.projectsPage?.errorTitle || "Error loading projects"}
+              message={
+                t.projectsPage?.errorMessage ||
+                "Failed to load projects. Please try again."
+              }
+              retryLabel={t.projectsPage?.retryLabel || "Retry"}
+            />
+          </div>
+        ) : displayList.length === 0 ? (
+          <div className="flex items-center justify-center w-full h-full min-h-[300px]">
+            <EmptyStateVideo variant="projects" autoPlay showControls loop />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+              {displayList.map((project) =>
+                project._pending ? (
+                  <div
+                    key={project.id}
+                    className="flex items-center gap-3 rounded-xl border border-primary/40 bg-[#E2DBFF20] p-4"
+                  >
+                    <LoadingSpinner containerClassName="flex-shrink-0" size={24} />
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-primary">
+                        {(locale === "ar"
+                          ? project?.ar_name ?? project?.en_name
+                          : project?.en_name ?? project?.ar_name) ?? ""}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {locale === "ar" ? "جاري التحميل..." : "Loading..."}
+                      </p>
                     </div>
                   </div>
-                )}
-              </div>
-            )}
-
-            <div className="w-[170px] flex-shrink-0">
-              <SearchableDropdownSelect
-                options={developers}
-                value={selectedDeveloper}
-                onChange={(e) => setSelectedDeveloper(e.target.value)}
-                name="developer"
-                placeholder={
-                  developersLoading
-                    ? locale === "ar"
-                      ? "جاري التحميل..."
-                      : "Loading..."
-                    : locale === "ar"
-                      ? "جميع المطورين"
-                      : "All Developers"
-                }
-                showAllOption={true}
-                allOptionLabel={
-                  locale === "ar" ? "جميع المطورين" : "All Developers"
-                }
-                allOptionValue=""
-                getValue={(option) => option.id}
-                getLabel={(option, loc) =>
-                  loc === "ar"
-                    ? option.ar_name || option.en_name
-                    : option.en_name || option.ar_name
-                }
-                searchFields={["ar_name", "en_name"]}
-                className="w-full"
-                buttonClassName="rounded-lg border-0 px-3 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
-                disabled={developersLoading}
-                isLoading={developersLoading}
-              />
-            </div>
-
-            <div className="w-[190px] flex-shrink-0">
-              <SearchableProjectSelect
-                value={addProjectSelectValue}
-                onChange={(e) => setAddProjectSelectValue(e.target.value)}
-                onProjectSelectStart={handleProjectSelectStart}
-                onProjectSelect={handleAppendProject}
-                name="add_project"
-                placeholder={
-                  locale === "ar" ? "ابحث بالاسم..." : "Search by name..."
-                }
-                className="w-full"
-                buttonClassName="rounded-lg border-0 px-3 h-10 bg-white text-primary hover:bg-gray-50 focus:ring-0 focus:border-0 disabled:bg-gray-50 disabled:text-gray-400 disabled:opacity-60 transition-colors duration-200"
-                isPublic={false}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Projects content */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          {isLoading ? (
-            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
-              <LoadingSpinner />
-            </div>
-          ) : isError ? (
-            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
-              <QueryErrorState
-                error={error}
-                refetch={refetch}
-                isFetching={isFetching}
-                title={t.projectsPage?.errorTitle || "Error loading projects"}
-                message={
-                  t.projectsPage?.errorMessage ||
-                  "Failed to load projects. Please try again."
-                }
-                retryLabel={t.projectsPage?.retryLabel || "Retry"}
-              />
-            </div>
-          ) : displayList.length === 0 ? (
-            <div className="flex items-center justify-center w-full h-full min-h-[300px]">
-              <EmptyStateVideo variant="projects" autoPlay showControls loop />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-                {displayList.map((project) =>
-                  project._pending ? (
-                    <div
-                      key={project.id}
-                      className="flex items-center gap-3 rounded-xl border border-primary/40 bg-[#E2DBFF20] p-4"
-                    >
-                      <LoadingSpinner containerClassName="flex-shrink-0" size={24} />
-                      <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-primary">
-                          {(locale === "ar"
-                            ? project?.ar_name ?? project?.en_name
-                            : project?.en_name ?? project?.ar_name) ?? ""}
-                        </h3>
-                        <p className="text-xs text-gray-500">
-                          {locale === "ar" ? "جاري التحميل..." : "Loading..."}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      locale={locale}
-                      t={t}
-                      buildingTypes={BUILDING_TYPES}
-                      getCityLabel={getCityDisplayName}
-                      getDistrictLabel={getDistrictDisplayName}
-                      onView={handleOpenView}
-                      onEdit={handleOpenEdit}
-                      onDelete={handleDeleteClick}
-                      onManagePhases={handleOpenPhases}
-                    />
-                  )
-                )}
-              </div>
-
-              {hasNextPage && (
-                <button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  className="w-full py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-600 font-medium transition-all duration-200 hover:border-primary hover:text-primary hover:bg-primary/5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isFetchingNextPage ? (
-                    <>
-                      <LoadingSpinner containerClassName="inline-flex" size={20} />
-                      <span>
-                        {locale === "ar" ? "جاري التحميل..." : "Loading..."}
-                      </span>
-                    </>
-                  ) : (
-                    <span>
-                      {locale === "ar" ? "تحميل المزيد" : "Load More"}
-                    </span>
-                  )}
-                </button>
+                ) : (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    locale={locale}
+                    t={t}
+                    translate={translate}
+                    buildingTypes={BUILDING_TYPES}
+                    getCityLabel={getCityDisplayName}
+                    getDistrictLabel={getDistrictDisplayName}
+                    onView={handleOpenView}
+                    onEdit={handleOpenEdit}
+                    onDelete={handleDeleteClick}
+                    onManagePhases={handleOpenPhases}
+                  />
+                )
               )}
             </div>
-          )}
-        </div>
+
+            {hasNextPage && (
+              <button
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="w-full py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-600 font-medium transition-all duration-200 hover:border-primary hover:text-primary hover:bg-primary/5 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isFetchingNextPage ? (
+                  <>
+                    <LoadingSpinner containerClassName="inline-flex" size={20} />
+                    <span>
+                      {locale === "ar" ? "جاري التحميل..." : "Loading..."}
+                    </span>
+                  </>
+                ) : (
+                  <span>
+                    {locale === "ar" ? "تحميل المزيد" : "Load More"}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <ImportProjectsDialog

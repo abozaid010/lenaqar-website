@@ -3,7 +3,7 @@
 import Dialog from "@/components/ui/Dialog";
 import FormInput from "@/components/ui/inputs/form-input";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -37,11 +37,21 @@ export default function AddPaymentPlanDialog({
 
   // Resolve delivery years from model/API (support both delivery_in_years and delivery_years)
   const getDeliveryInYears = (plan) => {
-    const raw =
-      plan?.delivery_in_years 
+    const raw = plan?.delivery_in_years ?? plan?.delivery_years;
     if (raw === undefined || raw === null) return "";
     const num = Number(raw);
     return Number.isFinite(num) ? String(raw) : "";
+  };
+
+  // Escalation percentage: API fields vary (installment_ vs installments_)
+  const getInstallmentsIncreasingPercentage = (plan) => {
+    const raw =
+      plan?.installments_increasing_percentage ??
+      plan?.installment_increasing_percentage ??
+      null;
+    if (raw === undefined || raw === null) return "";
+    const num = Number(raw);
+    return Number.isFinite(num) ? (num * 100).toString() : "";
   };
 
   useEffect(() => {
@@ -72,11 +82,7 @@ export default function AddPaymentPlanDialog({
             existingPlan.cache_discount !== null
               ? (existingPlan.cache_discount * 100).toString()
               : "40",
-          installments_increasing_percentage:
-            existingPlan.installments_increasing_percentage !== undefined &&
-            existingPlan.installments_increasing_percentage !== null
-              ? (existingPlan.installments_increasing_percentage * 100).toString()
-              : "",
+          installments_increasing_percentage: getInstallmentsIncreasingPercentage(existingPlan),
           delivery_payment_percentage:
             existingPlan.delivery_payment_percentage !== undefined &&
             existingPlan.delivery_payment_percentage !== null

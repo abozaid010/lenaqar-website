@@ -4,7 +4,7 @@ import Dialog from "@/components/ui/Dialog";
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { deletePhase } from "@/utils/api";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { Plus, Clock } from "lucide-react";

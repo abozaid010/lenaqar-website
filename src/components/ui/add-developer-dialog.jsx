@@ -3,7 +3,7 @@
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useEffect, useRef, useState } from "react";
@@ -22,6 +22,10 @@ import {
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
+import { useModuleActions } from "@/hooks/useModuleActions";
+import DeveloperContactOverrideDialog from "@/components/ui/developer-contact-override-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { developerKeys } from "@/utils/query-utils";
 
 export default function AddDeveloperDialog({
   isOpen,
@@ -38,6 +42,10 @@ export default function AddDeveloperDialog({
   const effectiveIsAdmin = roleFromToken === "admin" || roleFromToken === "owner";
   const { canModify } = useBrokerPermission();
   const canEditThisDeveloper = canModify(developer);
+  const { canEdit, canEditDeveloperContactInfo, isReady: modulePermReady } =
+    useModuleActions("developers");
+  const [contactOverrideOpen, setContactOverrideOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -54,6 +62,7 @@ export default function AddDeveloperDialog({
     logo: "",
     website: "",
     sales_name: "",
+    sales_email: "",
     sales_phone: "",
     whatsapp: "",
     instagram: "",
@@ -93,6 +102,7 @@ export default function AddDeveloperDialog({
         logo: developer.logo || "",
         website: developer.website || "",
         sales_name: developer.sales_name || "",
+        sales_email: developer.sales_email || "",
         sales_phone: developer.sales_phone || "",
         whatsapp: developer.whatsapp || "",
         instagram: developer.instagram || "",
@@ -133,6 +143,7 @@ export default function AddDeveloperDialog({
         logo: "",
         website: "",
         sales_name: "",
+        sales_email: "",
         sales_phone: "",
         whatsapp: "",
         instagram: "",
@@ -163,12 +174,32 @@ export default function AddDeveloperDialog({
     }
   }, [developer, isOpen]);
 
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
   const [inProgressRaw, setInProgressRaw] = useState('');
   const [deliveredRaw, setDeliveredRaw] = useState('');
   const originalProfileReviewsRef = useRef(null);
+
+  const myClientId = getClientid();
+  const canUseContactOverride =
+    modulePermReady &&
+    canEditDeveloperContactInfo &&
+    myClientId &&
+    myClientId !== "public" &&
+    isEdit &&
+    Boolean(developer?.id);
+  const blockFullFormForContactOnly =
+    isPublicDeveloper && canUseContactOverride && !effectiveIsAdmin;
+  const showFullPencil =
+    isEdit && canEditThisDeveloper && canEdit && !blockFullFormForContactOnly;
+
+  useEffect(() => {
+    if (!developer || !isOpen) return;
+    if (blockFullFormForContactOnly) {
+      setIsEditing(false);
+    }
+  }, [blockFullFormForContactOnly, developer, isOpen]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -348,6 +379,7 @@ export default function AddDeveloperDialog({
           onEdit && onEdit(res.data);
           setIsEditing(false);
         } else {
+          queryClient.invalidateQueries({ queryKey: developerKeys.allNames() });
           onAdd && onAdd(res.data);
           onClose();
         }
@@ -413,7 +445,6 @@ export default function AddDeveloperDialog({
   };
 
   const ViewMode = () => {
-    const { locale } = useI18n();
     return (
       <div className="space-y-6">
         {formData.logo && (
@@ -518,6 +549,20 @@ export default function AddDeveloperDialog({
                   </p>
                   <p className="text-sm text-gray-900 truncate">
                     {formData.sales_name}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {formData.sales_email && (
+              <div className="flex items-center gap-2 p-2 bg-white rounded-lg border text-left">
+                <Mail size={16} className="text-gray-500 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs text-gray-500">
+                    {t.formLabels?.salesEmail || "Sales email"}
+                  </p>
+                  <p className="text-sm text-gray-900 truncate">
+                    {formData.sales_email}
                   </p>
                 </div>
               </div>
@@ -1195,7 +1240,7 @@ export default function AddDeveloperDialog({
             </div>
             <div>
               <LenaTextarea
-                label={t.formLabels?.deliveredProjects || "Delivered Projects"}
+                label={t?.formLabels?.deliveredProjects}
                 name="profile_reviews.delivered_projects"
                 value={deliveredRaw}
                 onChange={(e) => {
@@ -1344,50 +1389,102 @@ export default function AddDeveloperDialog({
     }
   };
 
-  // Edit button for header when in view mode
-  const HeaderEditButton = () => (
-    <button
-      type="button"
-      onClick={canEditThisDeveloper ? () => setIsEditing(true) : undefined}
-      disabled={!canEditThisDeveloper}
-      title={!canEditThisDeveloper ? "You can only edit your own developers" : undefined}
-      className={`px-3 py-1.5 rounded-md bg-white text-primary text-sm font-medium inline-flex items-center justify-center gap-2 ${
-        canEditThisDeveloper
-          ? "hover:bg-white/90"
-          : "opacity-40 cursor-not-allowed"
-      }`}
-    >
-      <Pencil size={14} />
-      {t.developerPage?.editDeveloper || "Edit"}
-    </button>
-  );
+  const headerTrailingViewMode =
+    isEdit && !isEditing && (canUseContactOverride || showFullPencil) ? (
+      <div className="flex items-center gap-2 flex-wrap justify-end">
+        {canUseContactOverride ? (
+          <button
+            type="button"
+            onClick={() => setContactOverrideOpen(true)}
+            className="px-3 py-1.5 rounded-md bg-white text-primary text-sm font-medium inline-flex items-center justify-center gap-2 hover:bg-white/90 border border-white/40"
+          >
+            <Phone size={14} />
+            {t.developerPage?.updateContact || "Update contact"}
+          </button>
+        ) : null}
+        {showFullPencil ? (
+          <button
+            type="button"
+            onClick={() => setIsEditing(true)}
+            title={t.developerPage?.editDeveloper || "Edit"}
+            className="px-3 py-1.5 rounded-md bg-white text-primary text-sm font-medium inline-flex items-center justify-center gap-2 hover:bg-white/90"
+          >
+            <Pencil size={14} />
+            {t.developerPage?.editDeveloper || "Edit"}
+          </button>
+        ) : null}
+      </div>
+    ) : undefined;
 
   return (
+    <>
     <UnifiedDialog
       isOpen={isOpen}
       onClose={onClose}
       closeOnOutsideClick={false}
       closeOnEscape={false}
       cancelLabel={
-        isEdit && isEditing ? t.cancel : isEdit ? undefined : t.cancel
+        isEdit && isEditing
+          ? (t.cancel || (locale === "ar" ? "إلغاء" : "Cancel"))
+          : isEdit
+            ? undefined
+            : (t.cancel || (locale === "ar" ? "إلغاء" : "Cancel"))
       }
       onCancel={handleCancel}
       submitLabel={
-        isEditing ? (isEdit ? t.saveChangesButton : t.saveDeveloper) : undefined
+        isEditing
+          ? (
+              isEdit
+                ? (t.saveChangesButton || (locale === "ar" ? "حفظ التغييرات" : "Save Changes"))
+                : (t.saveDeveloper || (locale === "ar" ? "حفظ" : "Save"))
+            )
+          : undefined
       }
       onSubmit={isEditing ? handleSubmit : undefined}
       submitDisabled={isSubmitting}
       submitLoading={isSubmitting}
-      headerTrailing={isEdit && !isEditing ? <HeaderEditButton /> : undefined}
+      headerTrailing={headerTrailingViewMode}
       title={
         isEdit
           ? isEditing
             ? t.developerPage?.editDeveloper || "Edit Developer"
-            : t.developerPage?.viewDeveloper || "Developer Details"
+            : (locale === "ar" ? formData.ar_name : formData.en_name) || t.developerPage?.viewDeveloper || "Developer Details"
           : t.developerPage.addDeveloper
       }
     >
-      {isEdit && !isEditing ? ViewMode() : EditMode()}
+      {isEdit && !isEditing ? <ViewMode /> : <EditMode />}
     </UnifiedDialog>
+    <DeveloperContactOverrideDialog
+      isOpen={contactOverrideOpen}
+      onClose={() => setContactOverrideOpen(false)}
+      clientId={myClientId || ""}
+      developerId={developer?.id || ""}
+      developerName={
+        locale === "ar" ? formData.ar_name : formData.en_name
+      }
+      onSaved={(patch) => {
+        if (patch) {
+          setFormData((fd) => ({
+            ...fd,
+            ...(patch.sales_name !== undefined && patch.sales_name !== null
+              ? { sales_name: patch.sales_name }
+              : {}),
+            ...(patch.sales_email !== undefined && patch.sales_email !== null
+              ? { sales_email: patch.sales_email }
+              : {}),
+            ...(patch.sales_phone !== undefined && patch.sales_phone !== null
+              ? { sales_phone: patch.sales_phone }
+              : {}),
+            ...(patch.whatsapp !== undefined && patch.whatsapp !== null
+              ? { whatsapp: patch.whatsapp }
+              : {}),
+          }));
+          onEdit?.({ ...developer, ...patch });
+        } else {
+          onEdit?.(developer);
+        }
+      }}
+    />
+    </>
   );
 }

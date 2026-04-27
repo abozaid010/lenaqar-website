@@ -13,6 +13,8 @@ export const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
+  console.log(`🚀 Axios Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+  
   if (!config.headers.Authorization) {
     const token = LenaCookiesManager.getAccessToken();
     if (token) {
@@ -25,6 +27,8 @@ axiosInstance.interceptors.request.use((config) => {
 
 axiosInstance.interceptors.response.use(
   (response) => {
+    console.log(`📥 Axios Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.baseURL}${response.config.url}`);
+    console.log(`📥 Response URL: ${response.request?.responseURL || 'N/A'}`);
     return response;
   },
   async (error) => {

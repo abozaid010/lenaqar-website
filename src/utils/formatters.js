@@ -47,5 +47,5 @@ export const convertArabicToEnglishNumbers = (input) => {
 
 export function formatCurrency(value) {
   if (!value) return "0";
-  return Number.parseInt(value).toLocaleString();
+  return Number.parseInt(value).toLocaleString('en-US');
 }

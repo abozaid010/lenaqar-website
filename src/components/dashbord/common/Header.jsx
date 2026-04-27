@@ -2,7 +2,7 @@
 
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";

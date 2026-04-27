@@ -3,10 +3,9 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import QueryErrorState from "@/components/ui/query-error-state";
-import UnifiedHeader from "@/components/ui/UnifiedHeader";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { fetchCampaigns } from "@/utils/api";
-import { formatDateTimeAmPmShort } from "@/utils/formateDate";
+import { useLocaleConstants } from "@/utils/localeConstants";
 import { campaignKeys } from "@/utils/query-utils";
 import { useQuery } from "@tanstack/react-query";
 import { Pencil, Plus } from "lucide-react";
@@ -15,7 +14,8 @@ import CampaignDialog from "./CampaignDialog";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 function CampaignCard({ campaign, onEdit }) {
-  const { t, locale } = useI18n();
+  const { t, translate, locale } = useI18n();
+  const { formatDateTimeAmPmShort } = useLocaleConstants();
   const isUnitMode = !!campaign?.unit;
   const images = Array.isArray(campaign?.images) ? campaign.images : [];
   const suggestedAns = Array.isArray(campaign?.suggested_ans)
@@ -73,12 +73,19 @@ function CampaignCard({ campaign, onEdit }) {
                 type="button"
                 onClick={handleCopyLink}
                 className="hover:underline text-left"
-                title={copied ? (locale === "ar" ? "تم النسخ" : "Copied") : (locale === "ar" ? "اضغط لنسخ الرابط" : "Click to copy link")}
+                title={
+                  copied
+                    ? translate("common.copied", locale === "ar" ? "تم النسخ" : "Copied")
+                    : translate(
+                        "common.clickToCopy",
+                        locale === "ar" ? "انقر للنسخ" : "Click to copy"
+                      )
+                }
               >
                 {campaignUrlText}
                 {copied ? (
                   <span className="ms-2 inline-flex items-center rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
-                    {locale === "ar" ? "تم النسخ" : "Copied"}
+                    {translate("common.copied", locale === "ar" ? "تم النسخ" : "Copied")}
                   </span>
                 ) : null}
               </button>
@@ -114,7 +121,7 @@ function CampaignCard({ campaign, onEdit }) {
             className="inline-flex items-center gap-2 h-10 px-3 py-2 rounded-md bg-primary text-white hover:opacity-95 transition-opacity text-sm"
           >
             <Pencil size={16} />
-            {t?.campaigns?.edit || "Edit"}
+            {translate("campaigns.edit", locale === "ar" ? "تعديل" : "Edit")}
           </button>
         </div>
       </div>
@@ -125,7 +132,7 @@ function CampaignCard({ campaign, onEdit }) {
           <div className="flex flex-wrap gap-x-4 gap-y-1">
             <span>
               <span className="text-gray-500">
-                {t?.campaigns?.campaignManager || "Campaign manager"}:
+                {translate("campaigns.campaignManager")}:
               </span>{" "}
               <span className="font-mono">{campaign?.client_phone_number || "—"}</span>
             </span>
@@ -133,18 +140,18 @@ function CampaignCard({ campaign, onEdit }) {
 
           {!isUnitMode ? (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.text || "Text"}:</span>{" "}
+              <span className="text-gray-500">{translate("campaigns.text")}:</span>{" "}
               <span className="font-medium">{campaign?.text ? String(campaign.text) : "—"}</span>
             </div>
           ) : (
             <div className="text-gray-800">
-              <span className="text-gray-500">{t?.campaigns?.unit || "Unit"}:</span>{" "}
+              <span className="text-gray-500">{translate("campaigns.unit")}:</span>{" "}
               <span className="font-medium">
                 {campaign?.unit?.unitTitle ||
                   campaign?.unit?.title ||
                   campaign?.unit?.unitId ||
                   campaign?.unit?.id ||
-                  "Selected unit"}
+                  translate("campaigns.unit")}
               </span>
             </div>
           )}
@@ -154,7 +161,7 @@ function CampaignCard({ campaign, onEdit }) {
       {!isUnitMode && (
         <div className="mt-3">
           <div className="text-xs font-medium text-gray-600 mb-2">
-            {t?.campaigns?.images || "Images"} ({images.length})
+            {translate("campaigns.images")} ({images.length})
           </div>
           {images.length ? (
             <div className="flex gap-2 overflow-x-auto pb-1">
@@ -177,7 +184,7 @@ function CampaignCard({ campaign, onEdit }) {
             </div>
           ) : (
             <div className="text-sm text-gray-500">
-              {t?.campaigns?.noImages || "No images"}
+              {translate("campaigns.noImages")}
             </div>
           )}
         </div>
@@ -186,7 +193,7 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Suggested answers */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.suggestedAnswers || "Suggested answers"} ({suggestedAns.length})
+          {translate("campaigns.suggestedAnswers")} ({suggestedAns.length})
         </div>
         {suggestedAns.length ? (
           <div className="flex flex-wrap gap-2">
@@ -201,7 +208,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noSuggestedAnswers || "No suggested answers"}
+            {translate("campaigns.noSuggestedAnswers")}
           </div>
         )}
       </div>
@@ -209,11 +216,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Created/Updated */}
       <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-800">
         <span>
-          <span className="text-gray-500">{t?.campaigns?.createdAt || "Created"}:</span>{" "}
+          <span className="text-gray-500">{translate("campaigns.createdAt")}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.created_at) || "—"}
         </span>
         <span>
-          <span className="text-gray-500">{t?.campaigns?.updatedAt || "Updated"}:</span>{" "}
+          <span className="text-gray-500">{translate("campaigns.updatedAt")}:</span>{" "}
           {formatDateTimeAmPmShort(campaign?.updated_at) || "—"}
         </span>
       </div>
@@ -221,11 +228,11 @@ function CampaignCard({ campaign, onEdit }) {
       {/* Link clicked */}
       <div className="mt-3">
         <div className="text-xs font-medium text-gray-600 mb-2">
-          {t?.campaigns?.linkClicks || "Link clicks"}: {linkClicked.length}
+            {translate("campaigns.linkClicks")}: {linkClicked.length}
         </div>
         {lastClick ? (
           <div className="text-sm text-gray-700">
-            {t?.campaigns?.lastClick || "Latest interaction"}:{" "}
+            {translate("campaigns.lastClick")}:{" "}
             <span className="font-mono">
               {formatDateTimeAmPmShort(lastClick?.date) || "—"}
             </span>{" "}
@@ -235,7 +242,7 @@ function CampaignCard({ campaign, onEdit }) {
           </div>
         ) : (
           <div className="text-sm text-gray-500">
-            {t?.campaigns?.noClicks || "No clicks"}
+            {translate("campaigns.noClicks")}
           </div>
         )}
       </div>
@@ -245,7 +252,7 @@ function CampaignCard({ campaign, onEdit }) {
 }
 
 export default function CampaignsPageClient() {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const [limit] = useState(50);
   const [offset, setOffset] = useState(0);
 
@@ -275,19 +282,19 @@ export default function CampaignsPageClient() {
   const canNext = offset + limit < totalCount;
 
   if (isLoading) {
-    return <LoadingSpinner message="Loading campaigns..." />;
+    return <LoadingSpinner message={translate("common.loadingData")} />;
   }
 
   if (isError) {
     return (
-      <div className="container">
+      <div className="h-full flex flex-col">
         <QueryErrorState
           error={error}
           refetch={refetch}
           isFetching={isFetching}
-          title="Error loading campaigns"
-          message="Failed to load campaigns data. Please try again."
-          retryLabel="Retry Campaigns"
+          title={translate("common.error")}
+          message={translate("common.operationFailed")}
+          retryLabel={translate("common.retry")}
         />
       </div>
     );
@@ -299,28 +306,37 @@ export default function CampaignsPageClient() {
   const ofLabel = t?.campaigns?.of ?? "of";
 
   return (
-    <div className="container">
-      <UnifiedHeader
-        title={campaignsTitle}
-        leadingSlot={
-          <span className="text-sm text-primary">
-            {t?.campaigns?.total ?? "Total"}: <span className="font-medium">{totalCount}</span>
-          </span>
-        }
-        trailingSlot={
-          <button
-            type="button"
-            onClick={() => {
-              setEditingCampaign(null);
-              setIsCampaignDialogOpen(true);
-            }}
-            className="inline-flex items-center gap-2 h-10 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
-          >
-            <Plus size={16} />
-            {newCampaignLabel}
-          </button>
-        }
-      />
+    <div className="h-full flex flex-col">
+      {/* Header Container */}
+      <div className="p-4 bg-white rounded-lg shadow-md">
+        <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
+          {/* Campaign Info */}
+          <div className="w-full md:w-auto md:flex-1 min-w-0">
+            <span className="text-sm text-gray-600">
+              {translate("campaigns.total")}:{" "}
+              <span className="font-medium text-gray-900">{totalCount}</span>
+            </span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
+            <button
+              type="button"
+              onClick={() => {
+                setEditingCampaign(null);
+                setIsCampaignDialogOpen(true);
+              }}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+            >
+              <Plus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">{newCampaignLabel}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Margin Separator */}
+      <div className="h-4 bg-gray-100"></div>
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between gap-2">
@@ -329,9 +345,8 @@ export default function CampaignsPageClient() {
           disabled={!canPrev}
           onClick={() => setOffset((prev) => Math.max(0, prev - limit))}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-        >
-          {t?.previous || "Previous"}
-        </button>
+          label={translate("common.previous")}
+        />
         <div className="text-sm text-gray-600">
           {showingLabel}{" "}
           <span className="font-medium">{Math.min(offset + 1, totalCount)}</span>-
@@ -345,16 +360,15 @@ export default function CampaignsPageClient() {
           disabled={!canNext}
           onClick={() => setOffset((prev) => prev + limit)}
           className="h-10 px-4 py-2 bg-primary text-white hover:opacity-95 rounded-md text-sm font-medium disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-auto"
-        >
-          {t?.next || "Next"}
-        </button>
+          label={translate("common.next")}
+        />
       </div>
 
       {/* List */}
       <div className="mt-4 space-y-3">
         {campaigns.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-600">
-            No campaigns found.
+            {translate("common.noCampaignsFound")}
           </div>
         ) : (
           campaigns.map((c) => (

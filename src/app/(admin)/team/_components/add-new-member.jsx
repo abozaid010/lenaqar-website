@@ -113,11 +113,11 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
           </button>
         ) : (
           <button
-            className="mt-4 w-fit flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-primary rounded-md hover:opacity-90"
+            className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             onClick={() => setIsOpen(true)}
           >
-            <PlusIcon size={20} />
-            <span className="text-base">{t.team.addNew}</span>
+            <PlusIcon size={18} className="shrink-0" />
+            <span className="hidden sm:inline whitespace-nowrap">{t.team.addNew}</span>
           </button>
         ))}
 

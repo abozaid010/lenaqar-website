@@ -13,7 +13,7 @@ export default function UnitSchema({ unit, isPublic = false }) {
   const schema = {
     "@context": "https://schema.org",
     "@type": "Residence",
-    name: `${unit.type || "Property"} - ${unit.area ?? ""} sqm`,
+    name: `${unit.type || t?.schema?.property || "Property"} - ${unit.area ?? ""} sqm`,
     floorSize: {
       "@type": "QuantitativeValue",
       value: unit.area ?? 0,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import BasicDetailsStep from "@/components/ui/unit-forms/basic-details-step";
@@ -9,8 +9,8 @@ import RentalDetailsStep from "@/components/ui/unit-forms/rental-details-step";
 import SaleDetailsStep from "@/components/ui/unit-forms/sale-details-step";
 import StepIndicator from "./step-indicator";
 
-import { useI18n } from "@/context/translate-api";
-import { useAdminSharedData } from "@/hooks/use-admin-shared-data";
+import { useI18n } from "@/hooks/useI18n";
+import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -22,6 +22,7 @@ import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
+import { getValidatedClientId } from "@/utils/clientId-validator";
 
 /** Parse value to number for API (strip commas/formatting). */
 function toAmount(value) {
@@ -76,29 +77,109 @@ function sanitizeAmountsForApi(data) {
   return out;
 }
 
-export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted }) {
-  // Temp: fallback to client ID from access token when unit/cookie is missing clientId
-  const clientId =
-    LenaCookiesManager.getClientId() || getClientid() || null;
+export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
+  // Secure clientId state management with loading and error handling
+  const [clientIdState, setClientIdState] = useState({
+    clientId: null,
+    isLoading: true,
+    error: null,
+    source: 'none'
+  });
 
-  if (!clientId) {
-    return (
-      <>
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-          <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+  // Load and validate clientId on component mount
+  useEffect(() => {
+    let isMounted = true;
 
-            <h2 className="text-lg font-semibold pr-8">Client ID not found</h2>
-            <p className="text-gray-600 mt-2 mb-4">Please ensure you are logged in with a valid client.</p>
+    const loadClientId = async () => {
+      try {
+        const result = await getValidatedClientId();
+        
+        if (isMounted) {
+          setClientIdState({
+            clientId: result.clientId,
+            isLoading: false,
+            error: result.error,
+            source: result.source
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load client ID:', error);
+        if (isMounted) {
+          setClientIdState({
+            clientId: null,
+            isLoading: false,
+            error: 'Failed to validate client session',
+            source: 'error'
+          });
+        }
+      }
+    };
+
+    loadClientId();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Show loading state while validating clientId
+  if (clientIdState.isLoading) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-lg">Validating session...</span>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Show error state if clientId validation fails
+  if (!clientIdState.clientId) {
+    const { t } = useI18n();
+    const errorMessage = clientIdState.error || 'Client ID not found';
+    
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          <h2 className="text-lg font-semibold text-red-600 mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-4">{errorMessage}</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Source attempted: {clientIdState.source}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
               Close
             </button>
           </div>
         </div>
-      </>
+      </div>,
+      document.body
     );
   }
 
@@ -110,10 +191,34 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
 
-  const sharedData = useAdminSharedData();
+  const developersQuery = useDeveloperNames(clientIdState.clientId, false);
+  
+  // Optimized shared data object - only load what we need
+  const sharedData = {
+    developers: {
+      data: developersQuery.data || [],
+      isLoading: developersQuery.isLoading,
+      error: developersQuery.error,
+      isError: developersQuery.isError,
+      refetch: developersQuery.refetch,
+      isFetching: developersQuery.isFetching,
+    },
+    // Lazy load other data only when needed
+    compounds: { data: [], isLoading: false, error: null },
+    citiesAndDistricts: { data: [], isLoading: false, error: null },
+    isSharedDataLoading: developersQuery.isLoading,
+    hasSharedDataErrors: developersQuery.isError,
+    sharedDataErrorMessage: developersQuery.error?.message,
+  };
 
   const modalRef = useRef(null);
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
+  const backLabel = translate("buttons.back", locale === "ar" ? "رجوع" : "Back");
+  const nextLabel = translate("buttons.next", locale === "ar" ? "التالي" : "Next");
+  const saveUnitLabel = translate(
+    "buttons.saveUnit",
+    locale === "ar" ? "حفظ الوحدة" : "Save Unit"
+  );
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload statecl
@@ -127,7 +232,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   );
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
-    clientId: unitData?.clientId || clientId,
+    clientId: unitData?.clientId || clientIdState.clientId,
     clientName: unitData?.clientName || clientName,
     country: unitData?.country || "Egypt",
     dataSource: unitData?.dataSource || "website",
@@ -362,6 +467,133 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     return !isBefore(deliveryDate, minDate) && !isAfter(deliveryDate, maxDate);
   };
 
+  const validateStep = async (step) => {
+    // Validate required fields for step 1
+    if (step === 1) {
+      const requiredFields = [
+        "project",
+        "buildingType",
+        "purpose",
+        "landArea", // area
+      ];
+      // Add rooms and bathroom count only if building type is not office
+      if (formData.buildingType !== "office") {
+        requiredFields.push("roomsCount", "bathroomCount");
+      }
+      const zeroFields = [
+        "floor",
+        "landArea",
+        "gardenSize",
+        "outdoor_area",
+        "roomsCount",
+        "bathroomCount",
+      ];
+      const sanitizedData = { ...formData };
+
+      // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+      zeroFields.forEach((field) => {
+        if (!sanitizedData[field] || sanitizedData[field] === "") {
+          sanitizedData[field] = 0;
+        }
+      });
+
+      setFormData(sanitizedData);
+
+      // 0 is valid for numeric fields (landArea, roomsCount, bathroomCount)
+      const missingFields = requiredFields.filter(
+        (field) => formData[field] !== 0 && !formData[field]
+      );
+
+      if (missingFields.length > 0) {
+        setInvalidFields(missingFields);
+        return false;
+      }
+    }
+
+    // Validate required fields for step 2
+    if (step === 2) {
+      if (formData.purpose === "sell") {
+        const requiredFields = ["deliveryDate", "totalPrice"]; // price
+        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
+        const missingFields = requiredFields.filter(
+          (field) => SellFormData[field] !== 0 && !SellFormData[field]
+        );
+
+        // Phone number (owner_mobile) is now optional
+        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+        //   missingFields.push("owner_mobile");
+        // }
+
+        if (
+          SellFormData.deliveryDate &&
+          !validateDeliveryDate(SellFormData.deliveryDate)
+        ) {
+          missingFields.push("deliveryDate");
+          toast.error(
+            t.saleDetails.deleveryError ||
+            "Delivery date must be between 30 years ago and 10 years from now",
+            {
+              duration: 5000,
+            }
+          );
+        }
+
+        // Validate payment plan fields
+        if (SellFormData.installment_years && SellFormData.installment_years <= 0) {
+          missingFields.push("installment_years");
+        }
+
+        if (missingFields.length > 0) {
+          setInvalidFields(missingFields);
+          return false;
+        }
+
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const zeroFields = ["totalPrice", "downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
+        const sanitizedData = { ...SellFormData };
+        zeroFields.forEach((field) => {
+          if (!sanitizedData[field] || sanitizedData[field] === "") {
+            sanitizedData[field] = 0;
+          }
+        });
+      } else if (formData.purpose === "rent") {
+        // Phone number (owner_mobile) is now optional
+        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+        //   setInvalidFields(["owner_mobile"]);
+        //   return false;
+        // }
+
+        // Check if at least one rentDurationType has a price > 0
+        const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
+          (duration) => duration.price > 0
+        );
+
+        if (!hasValidPrice) {
+          toast.error(t.toasts.enterValidPrice);
+          return false;
+        }
+
+        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
+        const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
+        Object.keys(sanitizedRentDurationType).forEach((duration) => {
+          Object.keys(sanitizedRentDurationType[duration]).forEach((field) => {
+            if (sanitizedRentDurationType[duration][field] === "") {
+              sanitizedRentDurationType[duration][field] = 0;
+            }
+          });
+        });
+
+        setRentFormData((prev) => ({
+          ...prev,
+          rentDurationType: sanitizedRentDurationType,
+        }));
+      }
+    }
+
+    setInvalidFields([]);
+    return true;
+  };
+
   const handleNext = (e) => {
     e.preventDefault();
     // Validate required fields for step 1
@@ -415,10 +647,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        // Phone number (owner_mobile) is required
-        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-          missingFields.push("owner_mobile");
-        }
+        // Phone number (owner_mobile) is now optional
+        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+        //   missingFields.push("owner_mobile");
+        // }
 
         if (
           SellFormData.deliveryDate &&
@@ -453,11 +685,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        // Phone number (owner_mobile) is required
-        if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-          setInvalidFields(["owner_mobile"]);
-          return;
-        }
+        // Phone number (owner_mobile) is now optional
+        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
+        //   setInvalidFields(["owner_mobile"]);
+        //   return;
+        // }
 
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
@@ -630,7 +862,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         ) : (
           <ArrowLeft size={17} />
         )}
-        {t.buttons.back}
+        {backLabel}
       </button>
     ) : undefined;
 
@@ -652,17 +884,166 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         {currentStep === 3 && (loading || isUploading) ? (
           <>
             <span className="inline-block w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-            {currentStep < 3 ? t.buttons.next : t.buttons.saveUnit}
+            {currentStep < 3 ? nextLabel : saveUnitLabel}
           </>
         ) : currentStep < 3 ? (
-          t.buttons.next
+          nextLabel
         ) : (
-          t.buttons.saveUnit
+          saveUnitLabel
         )}
       </button>
     </div>
   );
 
+  const formContent = (
+    <>
+      {/* Step Indicator — right below header */}
+      <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
+        <StepIndicator
+          currentStep={currentStep}
+          onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
+          steps={[
+            { number: 1, label: t.steps.basicDetails },
+            {
+              number: 2,
+              label:
+                formData.purpose === "sell"
+                  ? t.steps.financialDetails
+                  : t.steps.rentalDetails,
+            },
+            { number: 3, label: t.steps.imagesInfo },
+          ]}
+        />
+      </div>
+
+      {/* Source text reference (when filled from text or editing unit with extra_info) */}
+      {extractedSourceText && (
+        <div className="px-2 pt-2 md:px-3 md:pt-2">
+          <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-2 shadow-sm">
+            <div className="min-h-[120px] max-h-40 overflow-y-auto rounded border border-amber-200/80 bg-white/80 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
+              {cleanExtraInfo(extractedSourceText)}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <form
+        onSubmit={handleSubmit}
+        ref={modalRef}
+        className={isPageMode ? "mt-3 px-3 md:p-5 pb-5" : "mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"}
+      >
+        {currentStep === 1 && (
+          <BasicDetailsStep
+            clientId={clientId}
+            formData={formData}
+            updateFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+            developers={sharedData.developers?.data ?? []}
+            developersLoading={sharedData.developers?.isLoading ?? false}
+          />
+        )}
+
+        {currentStep === 2 && formData.purpose === "sell" && (
+          <SaleDetailsStep
+            formData={SellFormData}
+            commonFormData={formData}
+            clientType={clientType}
+            updateFormData={(newData) =>
+              setSellFormData((prev) => ({ ...prev, ...newData }))
+            }
+            updateCommonFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+          />
+        )}
+
+        {currentStep === 2 && formData.purpose === "rent" && (
+          <RentalDetailsStep
+            formData={rentFormData}
+            commonFormData={formData}
+            clientType={clientType}
+            updateFormData={(newData) =>
+              setRentFormData((prev) => ({ ...prev, ...newData }))
+            }
+            updateCommonFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+          />
+        )}
+
+        {currentStep === 3 && (
+          <ImagesStep
+            formData={formData}
+            updateFormData={updateFormData}
+            invalidFields={invalidFields}
+            setInvalidFields={setInvalidFields}
+            isUploading={isUploading}
+            setIsUploading={setIsUploading}
+          />
+        )}
+      </form>
+    </>
+  );
+
+  // Page mode: render directly without modal wrapper
+  if (isPageMode) {
+    return (
+      <div className="bg-white rounded-lg shadow-sm border">
+        <div className="flex items-center justify-between px-4 py-3 border-b">
+          <div className="flex items-center gap-3">
+            {isEdit ? null : (
+              <button
+                type="button"
+                onClick={handleClose}
+                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 text-gray-600" />
+              </button>
+            )}
+            <h2 className="text-lg font-semibold text-gray-900">{modalTitle}</h2>
+          </div>
+          <div className="flex items-center gap-2">
+            {currentStep > 1 && (
+              <button
+                type="button"
+                onClick={() => setCurrentStep((prev) => prev - 1)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                {t.buttons?.previous || "Previous"}
+              </button>
+            )}
+            {currentStep < 3 ? (
+              <button
+                type="button"
+                onClick={async () => {
+                  const isValid = await validateStep(currentStep);
+                  if (isValid) setCurrentStep((prev) => prev + 1);
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                {t.buttons?.next || "Next"}
+              </button>
+            ) : (
+              <button
+                type="submit"
+                onClick={handleSubmit}
+                disabled={isUploading || updateUnitMutation?.isPending}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {isUploading || updateUnitMutation?.isPending
+                  ? t.buttons?.saving || "Saving..."
+                  : t.buttons?.saveUnit || "Save Unit"}
+              </button>
+            )}
+          </div>
+        </div>
+        {formContent}
+      </div>
+    );
+  }
+
+  // Modal mode: render with portal and dialog wrapper
   return createPortal(
     <>
       <UnifiedDialog
@@ -677,92 +1058,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         closeOnEscape={false}
         bodyClassName="p-0"
       >
-        {/* Step Indicator — right below header */}
-        <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
-          <StepIndicator
-            currentStep={currentStep}
-            onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
-            steps={[
-              { number: 1, label: t.steps.basicDetails },
-              {
-                number: 2,
-                label:
-                  formData.purpose === "sell"
-                    ? t.steps.financialDetails
-                    : t.steps.rentalDetails,
-              },
-              { number: 3, label: t.steps.imagesInfo },
-            ]}
-          />
-        </div>
-
-        {/* Source text reference (when filled from text or editing unit with extra_info) */}
-        {extractedSourceText && (
-          <div className="px-2 pt-2 md:px-3 md:pt-2">
-            <div className="rounded-lg border border-amber-200 bg-amber-50/90 p-2 shadow-sm">
-              <div className="min-h-[120px] max-h-40 overflow-y-auto rounded border border-amber-200/80 bg-white/80 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
-                {cleanExtraInfo(extractedSourceText)}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form
-          onSubmit={handleSubmit}
-          ref={modalRef}
-          className="mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"
-        >
-          {currentStep === 1 && (
-            <BasicDetailsStep
-              clientId={clientId}
-              formData={formData}
-              updateFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-              developers={sharedData.developers?.data ?? []}
-              developersLoading={sharedData.developers?.isLoading ?? false}
-            />
-          )}
-
-          {currentStep === 2 && formData.purpose === "sell" && (
-            <SaleDetailsStep
-              formData={SellFormData}
-              commonFormData={formData}
-              clientType={clientType}
-              updateFormData={(newData) =>
-                setSellFormData((prev) => ({ ...prev, ...newData }))
-              }
-              updateCommonFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-            />
-          )}
-
-          {currentStep === 2 && formData.purpose === "rent" && (
-            <RentalDetailsStep
-              formData={rentFormData}
-              commonFormData={formData}
-              clientType={clientType}
-              updateFormData={(newData) =>
-                setRentFormData((prev) => ({ ...prev, ...newData }))
-              }
-              updateCommonFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <ImagesStep
-              formData={formData}
-              updateFormData={updateFormData}
-              invalidFields={invalidFields}
-              setInvalidFields={setInvalidFields}
-              isUploading={isUploading}
-              setIsUploading={setIsUploading}
-            />
-          )}
-        </form>
+        {formContent}
       </UnifiedDialog>
 
       <FillFromTextDialog

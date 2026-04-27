@@ -1,7 +1,7 @@
 "use client";
 
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import { Trash2Icon } from "lucide-react";
 

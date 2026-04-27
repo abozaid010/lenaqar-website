@@ -1,13 +1,14 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { formatCurrency } from "@/utils/formatters";
 import { useState } from "react";
 
-const MISSING_FIELD_CLASS =
-  "ring-2 ring-red-500 rounded-md bg-red-50/70 border border-red-200";
+import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import { useLocaleConstants } from '@/utils/localeConstants';
 
 export default function UnitPricing({ unit, missingRequiredFields = [] }) {
+  const { formatDate } = useLocaleConstants();
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t } = useI18n();
   const u = unit || {};
@@ -193,13 +194,30 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
           )}
 
           {/* Price Display */}
+          {(() => {
+            const raw = activeRent?.price;
+            const n =
+              typeof raw === "number" ? raw : raw != null && raw !== "" ? Number(raw) : NaN;
+            const hasPrice = Number.isFinite(n) && n > 0;
+            const na = getTranslation("unitDetails.common.na", "N/A");
+            const currencyLabel =
+              activeRent?.currency ||
+              t?.currency?.egp ||
+              t?.unitDetails?.unit_pricing?.currency ||
+              "EGP";
+            return (
           <div className="text-3xl font-bold text-primary">
-            {formatCurrency(activeRent?.price ?? 0)}{" "}
-            <span className="text-sm font-normal">
-              {activeRent?.currency ||
-                getTranslation("unitDetails.common.na", "N/A")}
-            </span>
+            {hasPrice ? (
+              <>
+                {formatCurrency(n)}{" "}
+                <span className="text-sm font-normal">{currencyLabel}</span>
+              </>
+            ) : (
+              na
+            )}
           </div>
+            );
+          })()}
 
           <div className="mt-1 text-sm text-gray-600">
             {getDurationText(activeDuration)}
@@ -285,13 +303,3 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   );
 }
 
-// Helper functions
-function formatDate(dateString) {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-}

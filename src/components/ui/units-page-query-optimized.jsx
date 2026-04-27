@@ -12,18 +12,43 @@ export default function UnitsPageQueryOptimized({
   clientId,
   publicUnits = false,
 }) {
-  // Client object is stored locally (cookie); don't send client_id when client_type is broker
-  const searchParamsWithClient = useMemo(() => {
-    const clientInfo = LenaCookiesManager.getClientInfo();
-    const isBroker = (clientInfo?.client_type ?? "").toLowerCase() === "broker";
-    const base = { ...searchParams };
-    if (publicUnits) return base;
-    return {
+  const currentClientId = clientId || "";
+
+  const buildUnitsListParams = (raw) => {
+    const base = { ...(raw || {}) };
+
+    // CRITICAL: never allow accidental leakage from URL/searchParams
+    delete base.client_id;
+
+    // Always include session/identity clientId
+    const params = {
       ...base,
-      is_primary: true,
-      ...(isBroker ? {} : { client_id: clientId || "" }),
+      page_size: Number(base.page_size) || 16,
+      clientId: currentClientId,
+      // Resale uses is_primary=false, otherwise default is_primary=true
+      is_primary: base.resale === "true" ? false : true,
     };
-  }, [searchParams, clientId, publicUnits]);
+
+    // ONLY send client_id when My Inventory is ON
+    if (base.my_inventory === "true" && currentClientId) {
+      params.client_id = currentClientId;
+    }
+
+    // Ensure we never send empty/undefined keys
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v === undefined || v === null || v === "") delete params[k];
+    });
+
+    return params;
+  };
+
+  const searchParamsWithClient = useMemo(() => {
+    if (publicUnits) return { ...(searchParams || {}) };
+    // Client object is stored locally (cookie); clientId is always sent for identity,
+    // while client_id is ONLY sent when My Inventory is ON.
+    return buildUnitsListParams(searchParams);
+  }, [searchParams, publicUnits, currentClientId]);
 
   // Stringify searchParams for query key - this changes when filters change
   const searchParamsKey = useMemo(

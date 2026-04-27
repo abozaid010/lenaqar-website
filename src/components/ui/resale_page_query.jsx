@@ -6,7 +6,7 @@ import QueryErrorState from "@/components/ui/query-error-state";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import en from "../../../public/locales/en";
@@ -15,15 +15,22 @@ import { ChevronDown } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 
 const VISIBILITY_OPTIONS = [
-  { value: "all", label: "All" },
-  { value: "pending_approval", label: "Pending Approval" },
-  { value: "visible", label: "Visible" },
-  { value: "hidden", label: "Hidden" },
-  { value: "ai_generated", label: "AI Generated" },
+  { value: "all", label: null },
+  { value: "pending_approval", label: null },
+  { value: "visible", label: null },
+  { value: "hidden", label: null },
+  { value: "ai_generated", label: null },
 ];
 
 export default function ResalePageQuery({ searchParams }) {
   const { t, locale } = useI18n();
+  const visibilityOptions = useMemo(() => ([
+    { value: "all", label: t?.common?.all ?? "All" },
+    { value: "pending_approval", label: t?.unitsFilter?.pendingApproval ?? "Pending Approval" },
+    { value: "visible", label: t?.common?.show ?? "Visible" },
+    { value: "hidden", label: t?.common?.hide ?? "Hidden" },
+    { value: "ai_generated", label: t?.common?.aiGenerated ?? "AI Generated" },
+  ]), [t]);
   const [filter, setFilter] = useState("all");
   const [updatedAtDate, setUpdatedAtDate] = useState("");
   const [propertyType, setPropertyType] = useState("");
@@ -134,8 +141,7 @@ export default function ResalePageQuery({ searchParams }) {
           <div className="w-full md:w-auto md:flex-1 min-w-0">
             <SearchableDropdownSelect
               name="filter"
-              label="Filter"
-              options={VISIBILITY_OPTIONS}
+              options={visibilityOptions}
               value={filter}
               onChange={handleFilterChange}
               showAllOption={false}
@@ -144,9 +150,6 @@ export default function ResalePageQuery({ searchParams }) {
             />
           </div>
           <div className="w-full md:w-auto md:flex-1 min-w-0">
-            <label htmlFor="resale-updated-at" className="block text-xs font-medium text-gray-700 mb-1">
-              {t.resalePage?.filterByUpdatedAt ?? "Updated date"}
-            </label>
             <input
               id="resale-updated-at"
               type="date"
@@ -164,7 +167,6 @@ export default function ResalePageQuery({ searchParams }) {
               value={propertyType === "all" ? "" : propertyType}
               onChange={(e) => setPropertyType(e.target.value || "")}
               name="property_type"
-              label={t.resalePage?.propertyTypeLabel ?? "Property type"}
               getValue={(type) => type.value}
               getLabel={(type) => (locale === "ar" ? type.ar_label : type.en_label)}
               searchFields={["en_label", "ar_label", "value"]}

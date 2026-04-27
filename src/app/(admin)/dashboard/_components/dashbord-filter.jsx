@@ -183,9 +183,9 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   return (
     <div
-      className={`flex flex-col sm:flex-row items-center justify-between gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
+      className={`flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 lg:gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
     >
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0 w-full">
+      <div className="flex flex-col gap-2 flex-1 min-w-0 w-full">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
           <div className="flex flex-1 w-52 min-w-[10rem] items-center">
             <FormSelect
@@ -337,27 +337,20 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
           </div>
         </div>
 
-        {/* Action buttons - Print and Export */}
-        <div className="flex items-center gap-2 flex-shrink-0 self-center sm:self-auto">
-          <button
-            onClick={handlePrint}
-            className={`${DASHBOARD_BUTTON} ${compact ? "h-9" : "h-10"}`}
-            title={t.dashboardFilter.actions.print}
-          >
-            <Printer size={16} className="sm:w-[18px] sm:h-[18px] shrink-0" />
-            <span className="hidden sm:inline">
-              {t.dashboardFilter.actions.print}
-            </span>
-          </button>
-
-          <ExcelExportButton
-            searchParams={appliedFilters}
-            compact={compact}
+        {/* Actions row (small screens) */}
+        <div className="flex items-center justify-end gap-2 w-full flex-wrap lg:hidden">
+          <AverageScore />
+          <VideoInstructionsDialog
+            variant="dashboard"
+            iconSize="md"
+            tooltipText="How to use the Dashboard"
+            className="p-0"
           />
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Actions row (large screens) */}
+      <div className="hidden lg:flex items-center gap-2 shrink-0">
         <AverageScore />
         <VideoInstructionsDialog
           variant="dashboard"

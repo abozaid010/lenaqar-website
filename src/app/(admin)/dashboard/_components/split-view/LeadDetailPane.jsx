@@ -6,7 +6,7 @@ import ChatWith from "@/app/(admin)/dashboard/[userId]/_components/chat-with";
 import NavigationButtons from "@/app/(admin)/dashboard/[userId]/_components/NavigationButtons";
 import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/send-new-message";
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import {
   deleteUser,
   getChatHistory,
@@ -31,7 +31,7 @@ export default function LeadDetailPane({
   leadSummary,
   onInvalidateList,
 }) {
-  const { locale } = useI18n();
+  const { t, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -90,12 +90,12 @@ export default function LeadDetailPane({
     setIsDeleting(true);
     try {
       await deleteUser(userId, clientId);
-      toast.success("User deleted");
+      toast.success(common.userDeleted);
       clearSelection();
       queryClient.invalidateQueries({ queryKey: userKeys.all });
       queryClient.removeQueries({ queryKey: ["chatHistory", userId] });
     } catch (err) {
-      toast.error(err?.message || "Delete failed");
+      toast.error(err?.message || common.operationFailed);
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -111,7 +111,7 @@ export default function LeadDetailPane({
       setOpenActionsModal(true);
     } catch (e) {
       console.error(e);
-      toast.error("Could not load actions");
+      toast.error(common.operationFailed);
     } finally {
       setLoadingActions(false);
     }
@@ -136,7 +136,7 @@ export default function LeadDetailPane({
   if (!userId) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm p-6">
-        Select a lead to view conversation and details.
+        {common.selectLead}
       </div>
     );
   }
@@ -144,7 +144,7 @@ export default function LeadDetailPane({
   if (isLoading && !data) {
     return (
       <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
-        Loading conversation…
+        {common.loadingConversation}
       </div>
     );
   }
@@ -152,13 +152,13 @@ export default function LeadDetailPane({
   if (error || !data?.data) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-6 text-center text-red-600 text-sm">
-        {error?.message || "Could not load chat"}
+        {error?.message || common.couldNotLoadChat}
         <button
           type="button"
           onClick={() => queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] })}
           className="mt-2 px-3 py-1 bg-primary text-white rounded text-xs"
         >
-          Retry
+          {common.retry}
         </button>
       </div>
     );
@@ -180,7 +180,7 @@ export default function LeadDetailPane({
               onClick={() => setShowDeleteConfirm(true)}
               disabled={isDeleting}
               className="p-1 text-red-500 hover:bg-red-50 rounded"
-              title="Delete user"
+              title={common.deleteUser}
             >
               <Trash2 className="h-4 w-4" />
             </button>
@@ -196,8 +196,8 @@ export default function LeadDetailPane({
                   handleCopyPhoneNumber(
                     e,
                     phoneNumber,
-                    () => toast.success("Copied"),
-                    () => toast.error("Copy failed")
+                    () => toast.success(t?.common?.copied),
+                    () => toast.error(t?.common?.failedToCopyPhone)
                   )
                 }
                 className="p-0.5"
@@ -207,8 +207,8 @@ export default function LeadDetailPane({
               <WhatsAppButton
                 phoneNumber={phoneNumber}
                 className="hover:text-green-600"
-                title="Open WhatsApp"
-                ariaLabel="WhatsApp"
+                title={common.openWhatsApp}
+                ariaLabel={common.whatsapp}
               />
             </div>
           )}
@@ -220,7 +220,7 @@ export default function LeadDetailPane({
               className={`${DASHBOARD_BUTTON} h-10 min-h-[40px]`}
             >
               <Pencil className="w-3 h-3" />
-              Requirement
+              {common.requirement}
             </button>
             <button
               type="button"
@@ -228,7 +228,7 @@ export default function LeadDetailPane({
               className={`${DASHBOARD_BUTTON} h-10 min-h-[40px]`}
             >
               <UserPen className="w-3 h-3" />
-              Contact
+              {common.contact}
             </button>
             <button
               type="button"
@@ -237,7 +237,7 @@ export default function LeadDetailPane({
               className={`${DASHBOARD_BUTTON} h-10 min-h-[40px]`}
             >
               <ListPlus className="w-3 h-3" />
-              Actions · {lastActionLabel}
+              {common.actions} · {lastActionLabel}
             </button>
 
             <ToggleReplyType
@@ -300,15 +300,15 @@ export default function LeadDetailPane({
       {showDeleteConfirm && (
         <div className="fixed inset-0 z-[70] bg-black/30 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-4 max-w-sm w-full shadow-xl text-sm">
-            <p className="font-medium text-gray-900 mb-2">Delete this user?</p>
-            <p className="text-gray-600 mb-4">This cannot be undone.</p>
+            <p className="font-medium text-gray-900 mb-2">{common.deleteUser}</p>
+            <p className="text-gray-600 mb-4">{common.deleteCannotBeUndone}</p>
             <div className="flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(false)}
                 className="px-3 py-1.5 border rounded"
               >
-                Cancel
+                {common.cancel}
               </button>
               <button
                 type="button"
@@ -316,7 +316,7 @@ export default function LeadDetailPane({
                 disabled={isDeleting}
                 className="px-3 py-1.5 bg-red-600 text-white rounded"
               >
-                {isDeleting ? "…" : "Delete"}
+                {isDeleting ? "…" : common.delete}
               </button>
             </div>
           </div>

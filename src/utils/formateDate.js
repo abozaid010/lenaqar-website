@@ -36,11 +36,11 @@ export function formatTimestamp(ts) {
 
 /**
  * Matches the Conversations (dashboard) timestamp format:
- * e.g. "Jan 19, 1:35 PM"
+ * e.g. "Jan 19, 1:35 PM" (EN) or "١٩ يناير، ١:٣٥ م" (AR)
  *
  * Returns "" if the value is missing/invalid.
  */
-export function formatDateTimeAmPmShort(value) {
+export function formatDateTimeAmPmShort(value, locale = "en") {
   if (!value) return "";
 
   let dateObj;
@@ -51,27 +51,23 @@ export function formatDateTimeAmPmShort(value) {
     return "";
   }
 
-  const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const monthNames = {
+    en: [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ],
+    ar: [
+      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+    ]
+  };
 
-  const month = monthNames[dateObj.getMonth()];
+  const month = monthNames[locale]?.[dateObj.getMonth()] || monthNames.en[dateObj.getMonth()];
   const day = dateObj.getDate();
 
   let hours = dateObj.getHours();
   const minutes = String(dateObj.getMinutes()).padStart(2, "0");
-  const ampm = hours >= 12 ? "PM" : "AM";
+  const ampm = hours >= 12 ? (locale === "ar" ? "م" : "PM") : (locale === "ar" ? "ص" : "AM");
   hours = hours % 12;
   hours = hours ? hours : 12;
 
