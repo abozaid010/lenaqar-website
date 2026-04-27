@@ -749,8 +749,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
-        {/* Min Price Field */}
-        <div className="flex-shrink-0">
+        {/* Min Price Field — ~70% of prior ~248px effective width */}
+        <div className="flex-shrink-0 w-[10.85rem] min-w-0">
           <LenaTextField
             name="min_price"
             type="money"
@@ -764,13 +764,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               scheduleNumericSearch(next);
             }}
             onBlur={() => flushNumericSearch(filters)}
-            className="w-32"
+            className="w-full min-w-0"
             adornment="EGP"
           />
         </div>
 
         {/* Max Price Field */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 w-[10.85rem] min-w-0">
           <LenaTextField
             name="max_price"
             type="money"
@@ -784,13 +784,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               scheduleNumericSearch(next);
             }}
             onBlur={() => flushNumericSearch(filters)}
-            className="w-32"
+            className="w-full min-w-0"
             adornment="EGP"
           />
         </div>
 
         {/* Min Area Field */}
-        <div className="flex-shrink-0">
+        <div className="flex-shrink-0 w-[10.85rem] min-w-0">
           <LenaTextField
             name="min_area"
             type="number"
@@ -803,7 +803,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               scheduleNumericSearch(next);
             }}
             onBlur={() => flushNumericSearch(filters)}
-            className="w-24"
+            className="w-full min-w-0"
             adornment="m²"
           />
         </div>

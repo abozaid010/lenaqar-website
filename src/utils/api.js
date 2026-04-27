@@ -1162,6 +1162,36 @@ export async function updateProfileData(formData) {
   }
 }
 
+/** POST multipart client logo (authenticated client). */
+export async function uploadClientLogo(formData) {
+  try {
+    const response = await axiosInstance.post(
+      "client/upload-logo",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to upload client logo:", error.message);
+    throw error;
+  }
+}
+
+/** DELETE current client logo (authenticated client). */
+export async function deleteClientLogo() {
+  try {
+    const response = await axiosInstance.delete("client/delete-logo");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete client logo:", error.message);
+    throw error;
+  }
+}
+
 // Share Unit Data API //
 export async function getShareUnitData(unit_id) {
   const clientId = getValidatedApiClientId();

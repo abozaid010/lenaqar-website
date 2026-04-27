@@ -9,6 +9,9 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import ModuleActionsSelector from "./ModuleActionsSelector";
 import DynamicSuggestionsList from "./DynamicSuggestionsList";
 import { useI18n } from "@/hooks/useI18n";
+import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
+import { uploadImages, updateAdminClient } from "@/utils/api";
+import { compressImage } from "@/utils/imageCompression";
 
 const CLIENT_TYPES = [
   { value: "premium", label: "Premium" },
@@ -41,10 +44,21 @@ const ACCURATE_QUERIES_LEVELS = [
   { value: 4, label: "4 - Least Accurate" },
 ];
 
+function extractCreatedClientId(apiPayload) {
+  if (!apiPayload || typeof apiPayload !== "object") return null;
+  const d = apiPayload.data;
+  if (!d || typeof d !== "object") return null;
+  if (d.client_id) return d.client_id;
+  if (d.data && typeof d.data === "object" && d.data.client_id) return d.data.client_id;
+  return null;
+}
+
 const ClientSignupForm = () => {
   const { t } = useI18n();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [deferredLogoFile, setDeferredLogoFile] = useState(null);
+  const [logoUploading, setLogoUploading] = useState(false);
   const [formData, setFormData] = useState({
     // Basic Information
     client_id: "",
@@ -148,6 +162,24 @@ const ClientSignupForm = () => {
       const data = await response.json();
 
       if (response.ok) {
+        const createdId = extractCreatedClientId(data);
+        if (deferredLogoFile && createdId) {
+          try {
+            setLogoUploading(true);
+            const compressedFile = await compressImage(deferredLogoFile);
+            const formDataToUpload = new FormData();
+            formDataToUpload.append("file", compressedFile);
+            const up = await uploadImages(formDataToUpload, createdId);
+            if (up?.url) {
+              await updateAdminClient(createdId, { logo_url: up.url });
+            }
+          } catch (logoErr) {
+            console.error("Logo upload after signup failed:", logoErr);
+            toast.error("Client created but logo upload failed.");
+          } finally {
+            setLogoUploading(false);
+          }
+        }
         toast.success(t?.common?.clientCreated);
         router.push("/dashboard");
       } else {
@@ -275,6 +307,16 @@ const ClientSignupForm = () => {
             value={formData.crm_link}
             onChange={handleInputChange}
             placeholder="https://crm.example.com/..."
+          />
+        </div>
+
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Client Logo</label>
+          <ClientLogoUploader
+            deferred
+            onDeferredFile={setDeferredLogoFile}
+            isUploading={logoUploading}
+            setIsUploading={setLogoUploading}
           />
         </div>
       </div>
@@ -411,10 +453,10 @@ const ClientSignupForm = () => {
         </button>
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || logoUploading}
           className="px-6 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
         >
-          {isLoading ? (
+          {isLoading || logoUploading ? (
             <>
               <Loader2 className="animate-spin" size={16} />
               <span>Creating...</span>
