@@ -20,7 +20,7 @@ export interface RawProject {
   google_map_link?: string;
   video_url?: string;
   status?: string;
-  phases?: string[];
+  phases?: (string | { id: string; name: string; description?: string; master_plan?: any; images?: any; building_types_images?: any; is_active?: boolean; updated_at?: string })[];
   delivery_date?: string | number;
   total_units?: number;
   client_id?: string;

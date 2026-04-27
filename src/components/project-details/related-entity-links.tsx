@@ -83,31 +83,6 @@ export default function RelatedEntityLinks({ project }: RelatedEntityLinksProps)
             </Link>
           </div>
         </div>
-
-        {/* Project Phases */}
-        {project.phases && project.phases.length > 0 && (
-          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <FolderOpen className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-blue-900">{translate('projectDetails.projectPhases')}</h3>
-                <p className="text-sm text-blue-700">
-                  {project.phases.length} {translate('projectPage.phases')}
-                </p>
-              </div>
-            </div>
-            <div className="space-y-2">
-              {project.phases.map((phase, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                  <span className="text-blue-800">{phase}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

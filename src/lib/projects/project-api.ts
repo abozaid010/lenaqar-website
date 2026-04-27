@@ -316,7 +316,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
     specs,
     trustItems,
     status: rawProject.status,
-    phases: rawProject.phases || [],
+    phases: rawProject.phases?.map(phase => typeof phase === 'string' ? phase : phase.name || String(phase)) || [],
     amenities: rawProject.amenities || [],
     paymentPlans: rawProject.payment_plans?.map(plan => plan.name) || [],
     paymentPlanDetails: rawProject.payment_plans || [],

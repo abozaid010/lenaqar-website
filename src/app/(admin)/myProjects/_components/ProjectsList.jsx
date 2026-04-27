@@ -130,7 +130,7 @@ function ProjectCard({
 
         {project.primary_units_sold_out === true && (
           <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-red-600 px-2 py-1 text-[11px] font-semibold text-white shadow">
-            {locale === "ar" ? "نفذت الكمية" : "Sold Out"}
+            {locale === "ar" ? "مُباع بالكامل" : "Sold Out"}
           </span>
         )}
 
