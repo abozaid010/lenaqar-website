@@ -7,7 +7,7 @@ import {
   isSupportedImageFile,
   SUPPORTED_IMAGE_ACCEPT,
 } from "@/config/imageUpload";
-import { getDisplayImageUrl } from "@/utils/imageUtils";
+import { getClientLogoDisplayUrl } from "@/utils/imageUtils";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -183,8 +183,8 @@ export default function ClientLogoUploader({
   };
 
   const displaySrc = deferred
-    ? deferredPreview || getDisplayImageUrl(logoUrl) || "/placeholder.svg"
-    : getDisplayImageUrl(logoUrl) || "/placeholder.svg";
+    ? deferredPreview || getClientLogoDisplayUrl(logoUrl) || "/placeholder.svg"
+    : getClientLogoDisplayUrl(logoUrl) || "/placeholder.svg";
 
   const hasLogo = deferred ? !!deferredPreview || !!logoUrl : !!logoUrl;
 

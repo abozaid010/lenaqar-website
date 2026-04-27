@@ -22,16 +22,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useI18n } from "@/hooks/useI18n";
 import { getProfileData } from "@/utils/api";
-import { getDisplayImageUrl } from "@/utils/imageUtils";
+import { getClientLogoDisplayUrl } from "@/utils/imageUtils";
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
-
-const SIDEBAR_BRAND_LOG = "[SidebarBrand]";
 
 const SidebarComponent = ({
   canAccessMap = false,
@@ -52,14 +49,7 @@ const SidebarComponent = ({
   const [brandImgFailed, setBrandImgFailed] = useState(false);
 
   const isKingAdminUser = isCurrentUserKingAdmin();
-  const {
-    data: profilePayload,
-    status: profileQueryStatus,
-    fetchStatus: profileFetchStatus,
-    isError: profileIsError,
-    error: profileError,
-    isFetched: profileIsFetched,
-  } = useQuery({
+  const { data: profilePayload } = useQuery({
     queryKey: ["clientProfile", "sidebarBrand"],
     queryFn: getProfileData,
     staleTime: 1000 * 60 * 5,
@@ -67,10 +57,14 @@ const SidebarComponent = ({
     enabled: !isKingAdminUser,
   });
 
+  const pd = profilePayload?.data;
   const clientLogoUrl =
-    profilePayload?.data?.logo_url ??
-    profilePayload?.data?.logo ??
-    profilePayload?.logo_url;
+    pd?.logo_url ??
+    pd?.logo ??
+    pd?.client_logo_url ??
+    pd?.client_logo ??
+    profilePayload?.logo_url ??
+    profilePayload?.logo;
 
   useEffect(() => {
     setBrandImgFailed(false);
@@ -81,55 +75,6 @@ const SidebarComponent = ({
     typeof clientLogoUrl === "string" &&
     clientLogoUrl.trim() !== "" &&
     !brandImgFailed;
-
-  useEffect(() => {
-    const displayUrl =
-      typeof clientLogoUrl === "string" && clientLogoUrl.trim()
-        ? getDisplayImageUrl(clientLogoUrl)
-        : null;
-    console.log(SIDEBAR_BRAND_LOG, {
-      clientIdFromLayout: clientId,
-      clientIdFromCookie: LenaCookiesManager.getClientId(),
-      isKingAdminUser,
-      profileQueryEnabled: !isKingAdminUser,
-      profileQueryStatus,
-      profileFetchStatus,
-      profileIsFetched,
-      profileIsError,
-      profileError: profileIsError
-        ? profileError?.message ?? String(profileError)
-        : undefined,
-      profilePayloadType: profilePayload == null ? typeof profilePayload : "object",
-      profileApiErrorField:
-        profilePayload && typeof profilePayload === "object"
-          ? profilePayload.error
-          : undefined,
-      profileTopKeys:
-        profilePayload && typeof profilePayload === "object"
-          ? Object.keys(profilePayload)
-          : [],
-      profileDataKeys:
-        profilePayload?.data && typeof profilePayload.data === "object"
-          ? Object.keys(profilePayload.data)
-          : [],
-      clientLogoUrlRaw: clientLogoUrl,
-      displayUrlAfterRewrite: displayUrl,
-      showClientLogo,
-      brandImgFailed,
-    });
-  }, [
-    clientId,
-    isKingAdminUser,
-    profilePayload,
-    profileQueryStatus,
-    profileFetchStatus,
-    profileIsFetched,
-    profileIsError,
-    profileError,
-    clientLogoUrl,
-    showClientLogo,
-    brandImgFailed,
-  ]);
 
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
@@ -247,7 +192,7 @@ const SidebarComponent = ({
           <Link href="/" className="text-xl font-bold flex items-center">
             {showClientLogo ? (
               <img
-                src={getDisplayImageUrl(clientLogoUrl)}
+                src={getClientLogoDisplayUrl(clientLogoUrl)}
                 alt=""
                 className="max-h-10 w-auto max-w-[7.5rem] object-contain"
                 onError={() => setBrandImgFailed(true)}
