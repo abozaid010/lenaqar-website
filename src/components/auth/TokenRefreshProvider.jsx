@@ -17,7 +17,7 @@ import { useTokenRefresh } from "@/hooks/useTokenRefresh";
  */
 export function TokenRefreshProvider({
   children,
-  checkInterval = 5 * 60000, // Check every 5 minutes instead of every minute
+  checkInterval = 60000, // Check every 1 minute
   refreshThreshold = 5 * 60 * 1000, // 5 minutes
 }) {
   const { refreshToken } = useTokenRefresh();

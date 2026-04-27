@@ -20,7 +20,7 @@ export interface RawProject {
   google_map_link?: string;
   video_url?: string;
   status?: string;
-  phases?: string[];
+  phases?: (string | { id: string; name: string; description?: string; master_plan?: any; images?: any; building_types_images?: any; is_active?: boolean; updated_at?: string })[];
   delivery_date?: string | number;
   total_units?: number;
   client_id?: string;
@@ -49,7 +49,7 @@ export interface RawProject {
   location_landmark?: string;
   latitude?: number;
   longitude?: number;
-  is_active?: boolean;
+  primary_units_sold_out?: boolean;
 }
 
 export interface PaymentPlan {
@@ -145,7 +145,7 @@ export interface ProjectViewModel {
   locationLandmark?: string;
   latitude?: number;
   longitude?: number;
-  isActive: boolean;
+  primaryUnitsSoldOut: boolean;
   facilityManagement?: { name: string; description?: string; rating?: number } | null;
   units: ProjectUnit[];
   purpose?: string;

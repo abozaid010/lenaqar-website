@@ -149,19 +149,24 @@ export class TokenExpirationManager {
   /**
    * Checks if user has a valid refresh token
    * @returns {boolean} True if refresh token exists
+   * Note: Refresh token is HttpOnly and cannot be read client-side.
+   * This method always returns true if access token exists, assuming refresh token is also valid.
    */
   static hasRefreshToken() {
-    return !!LenaCookiesManager.getRefreshToken();
+    // Refresh token is HttpOnly, cannot be read client-side
+    // Assume refresh token exists if access token exists
+    return !!LenaCookiesManager.getAccessToken();
   }
 
   /**
    * Checks if user is authenticated (has both access and refresh tokens)
    * @returns {boolean} True if authenticated
+   * Note: Refresh token is HttpOnly and cannot be read client-side.
+   * This checks only access token, assuming refresh token is also valid.
    */
   static isAuthenticated() {
-    return (
-      !!LenaCookiesManager.getAccessToken() &&
-      !!LenaCookiesManager.getRefreshToken()
-    );
+    // Refresh token is HttpOnly, cannot be read client-side
+    // Assume authenticated if access token exists
+    return !!LenaCookiesManager.getAccessToken();
   }
 }

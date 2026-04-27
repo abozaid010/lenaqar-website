@@ -14,6 +14,7 @@ import ProjectPaymentPlans from './project-payment-plans';
 import ProjectPricingTable from './project-pricing-table';
 import ProjectBuildingTypeGallery from './project-building-type-gallery';
 import ProjectFacilityManagement from './project-facility-management';
+import ProjectPhases from './project-phases';
 import AddCompoundDialog from '@/components/ui/add-project-dialog';
 import { useI18n } from '@/hooks/useI18n';
 
@@ -54,6 +55,7 @@ export default function ProjectDetailsPage({ project, rawProject }: ProjectDetai
             <ProjectLocationContext project={project} />
             <ProjectBuildingTypeGallery project={project} />
             <ProjectFacilityManagement project={project} />
+            <ProjectPhases project={project} rawProject={rawProject} />
             <RelatedEntityLinks project={project} />
           </div>
 

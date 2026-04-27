@@ -374,7 +374,7 @@ const NewsFeed = () => {
                         type="button"
                         onClick={() => openEditDialog(item)}
                         className="p-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-                        aria-label="Edit news"
+                        aria-label={t?.editNewsAria || "Edit news"}
                       >
                         <Pencil size={18} />
                       </button>
@@ -385,7 +385,7 @@ const NewsFeed = () => {
                           setShowDeleteDialog(true);
                         }}
                         className="p-2 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
-                        aria-label="Delete news"
+                        aria-label={t?.deleteNewsAria || "Delete news"}
                       >
                         <Trash2 size={18} />
                       </button>
@@ -572,7 +572,7 @@ const NewsFeed = () => {
                   ) : mode === "add" ? (
                     t.addNews || "Add"
                   ) : (
-                    t.saveChanges || "Save changes"
+                    t.saveChanges
                   )}
                 </button>
               </div>

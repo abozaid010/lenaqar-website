@@ -169,7 +169,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.city) {
     quickFacts.push({
       label: getT(t, 'propertyDetails', 'location') || 'Location',
-      value: `${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`,
+      value: String(`${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`),
       icon: 'map-pin'
     });
   }
@@ -177,7 +177,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.delivery_date) {
     quickFacts.push({
       label: getT(t, 'unitDetails', 'deliveryDate') || 'Delivery Date',
-      value: formatDelivery(rawProject.delivery_date),
+      value: String(formatDelivery(rawProject.delivery_date)),
       icon: 'calendar'
     });
   }
@@ -185,7 +185,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.properties_types && rawProject.properties_types.length > 0) {
     quickFacts.push({
       label: getT(t, 'projectPage', 'propertyTypes') || 'Property Types',
-      value: rawProject.properties_types.join(', '),
+      value: String(rawProject.properties_types.join(', ')),
       icon: 'home'
     });
   }
@@ -193,7 +193,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.area || rawProject.start_area) {
     quickFacts.push({
       label: getT(t, 'projectPage', 'startingArea') || 'Starting Area',
-      value: `${rawProject.start_area || rawProject.area} m²`,
+      value: String(`${rawProject.start_area || rawProject.area} m²`),
       icon: 'maximize'
     });
   }
@@ -204,14 +204,14 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.status) {
     specs.push({
       label: getT(t, 'projectPage', 'status') || 'Status',
-      value: rawProject.status
+      value: String(rawProject.status || '')
     });
   }
 
   if (rawProject.phases && rawProject.phases.length > 0) {
     specs.push({
       label: getT(t, 'projectPage', 'phases') || 'Phases',
-      value: rawProject.phases.join(', ')
+      value: String(rawProject.phases.join(', '))
     });
   }
 
@@ -233,9 +233,9 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.gated !== undefined) {
     specs.push({
       label: getT(t, 'projectPage', 'gatedCommunity') || 'Gated Community',
-      value: rawProject.gated
+      value: String(rawProject.gated
         ? (getT(t, 'common', 'yes') || 'Yes')
-        : (getT(t, 'common', 'no') || 'No')
+        : (getT(t, 'common', 'no') || 'No'))
     });
   }
 
@@ -244,29 +244,29 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
 
   trustItems.push({
     label: getT(t, 'projectPage', 'projectId') || 'Project ID',
-    value: rawProject.id
+    value: String(rawProject.id || '')
   });
 
   if (rawProject.created_at) {
     trustItems.push({
       label: getT(t, 'projectPage', 'created') || 'Created',
-      value: formatDate(rawProject.created_at)
+      value: String(formatDate(rawProject.created_at) || '')
     });
   }
 
   if (rawProject.updated_at) {
     trustItems.push({
       label: getT(t, 'unitLabels', 'lastUpdated') || 'Last Updated',
-      value: formatDate(rawProject.updated_at)
+      value: String(formatDate(rawProject.updated_at) || '')
     });
   }
 
   // Create badges
   const badges: string[] = [];
-  if (rawProject.status) badges.push(rawProject.status);
+  if (rawProject.status) badges.push(String(rawProject.status));
   if (rawProject.phases && rawProject.phases.length > 0) {
     const phasesLabel = getT(t, 'projectPage', 'phases') || 'Phases';
-    badges.push(`${rawProject.phases.length} ${phasesLabel}`);
+    badges.push(String(`${rawProject.phases.length} ${phasesLabel}`));
   }
 
   // Build full gallery: master_plan first, then all images[]
@@ -316,7 +316,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
     specs,
     trustItems,
     status: rawProject.status,
-    phases: rawProject.phases || [],
+    phases: rawProject.phases?.map(phase => typeof phase === 'string' ? phase : phase.name || String(phase)) || [],
     amenities: rawProject.amenities || [],
     paymentPlans: rawProject.payment_plans?.map(plan => plan.name) || [],
     paymentPlanDetails: rawProject.payment_plans || [],
@@ -331,7 +331,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
     locationLandmark: rawProject.location_landmark,
     latitude: rawProject.latitude,
     longitude: rawProject.longitude,
-    isActive: rawProject.is_active ?? true,
+    primaryUnitsSoldOut: rawProject.primary_units_sold_out ?? true,
     facilityManagement: rawProject.facility_management,
     units: [],
     purpose: rawProject.status,

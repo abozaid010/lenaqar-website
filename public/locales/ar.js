@@ -1068,7 +1068,7 @@ export default {
   updateProject: "تعديل المشروع",
   projectUndfined: "لا توجد مشاريع متاحة لك",
   deleteButton: "حذف",
-  saveChangesButton: "حفظ التغييرات",
+  saveChangesButton: "حفظ",
   cancelButton: "الغاء",
   sureDelet: "هل أنت متأكد أنك تريد الحذف؟",
   actionDelet: "لا يمكن التراجع عن هذا الإجراء.",
@@ -1859,6 +1859,8 @@ export default {
   noNews: "لا توجد أخبار متاحة في الوقت الحالي",
   newsSubtitle: "أحدث أخبار وتحديثات القطاع العقاري",
   readMore: "اقرأ المزيد",
+  editNewsAria: "تعديل الخبر",
+  deleteNewsAria: "حذف الخبر",
   loading: "جاري التحميل...",
   error: "خطأ في تحميل المحتوى",
   map: {
@@ -1887,6 +1889,9 @@ export default {
     interestedSubtitle: "تواصل معنا لمعرفة المزيد أو حجز معاينة",
     projectInterestedTitle: "مهتم بهذا المشروع؟",
     projectInterestedSubtitle: "تواصل مع المطور لمعرفة المزيد",
+    loadingContact: "جاري تحميل بيانات التواصل...",
+    contactPrefix: "جهة التواصل",
+    deletePropertyConfirm: "هل أنت متأكد أنك تريد حذف هذا العقار؟",
   },
   unitLabels: {
     bedrooms: "غرف نوم",

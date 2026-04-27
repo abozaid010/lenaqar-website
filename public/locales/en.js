@@ -1794,6 +1794,8 @@ export default {
   noNews: "No news available at the moment",
   newsSubtitle: "Latest real estate news and updates",
   readMore: "Read more",
+  editNewsAria: "Edit news",
+  deleteNewsAria: "Delete news",
   loading: "Loading...",
   error: "Error loading content",
   map: {
@@ -1822,6 +1824,10 @@ export default {
     interestedSubtitle: "Get in touch to learn more or schedule a viewing",
     projectInterestedTitle: "Interested in this project?",
     projectInterestedSubtitle: "Get in touch with the developer to learn more",
+    loadingContact: "Loading contact information...",
+    contactPrefix: "Contact",
+    deletePropertyConfirm:
+      "Are you sure you want to delete this property?",
   },
   unitLabels: {
     bedrooms: "Bedrooms",

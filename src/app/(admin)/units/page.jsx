@@ -64,11 +64,9 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
         ]}
       />
       <div className="h-full flex flex-col">
-        <UnitsFilter
-          appliedFilters={searchParams}
-          clientId={clientId}
-          isPublic={false}
-        />
+        <Suspense fallback={<div className="h-16 rounded-lg bg-gray-100 animate-pulse" />}>
+          <UnitsFilter clientId={clientId} isPublic={false} />
+        </Suspense>
 
         <div className="mt-4">
           <Suspense fallback={<LoadingSpinner />}>

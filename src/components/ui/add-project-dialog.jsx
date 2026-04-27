@@ -8,6 +8,7 @@ import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
+import PhasesList from "@/components/ui/inputs/phases-list";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
@@ -71,6 +72,7 @@ const FIELD_TO_SECTION_KEY = {
   location_landmark: "location",
   payment_plans: "commercial",
   developer_id: "commercial",
+  phases: "media",
   video_url: "links",
   google_map_link: "links",
   master_plan: "media",
@@ -231,6 +233,7 @@ export default function AddCompoundDialog({
     building_types_images: null,
     finishing_type: null,
     images: null,
+    phases: null,
   });
 
   const [formData, setFormData] = useState({
@@ -257,12 +260,12 @@ export default function AddCompoundDialog({
             projectData?.project?.gated !== null
           ? projectData.project.gated
           : true,
-    is_active:
-      projectData?.is_active !== undefined && projectData?.is_active !== null
-        ? projectData.is_active
-        : projectData?.project?.is_active !== undefined &&
-            projectData?.project?.is_active !== null
-          ? projectData.project.is_active
+    primary_units_sold_out:
+      projectData?.primary_units_sold_out !== undefined && projectData?.primary_units_sold_out !== null
+        ? projectData.primary_units_sold_out
+        : projectData?.project?.primary_units_sold_out !== undefined &&
+            projectData?.project?.primary_units_sold_out !== null
+          ? projectData.project.primary_units_sold_out
           : true,
     video_url: projectData?.video_url || projectData?.project?.video_url || "",
     google_map_link:
@@ -283,6 +286,7 @@ export default function AddCompoundDialog({
       [],
     payment_plans:
       projectData?.payment_plans || projectData?.project?.payment_plans || [],
+    phases: projectData?.phases || projectData?.project?.phases || [],
     building_types_images:
       projectData?.building_types_images ||
       projectData?.project?.building_types_images ||
@@ -348,13 +352,13 @@ export default function AddCompoundDialog({
                   projectData?.project?.gated !== null
                 ? projectData.project.gated
                 : true,
-          is_active:
-            projectData.is_active !== undefined &&
-            projectData.is_active !== null
-              ? projectData.is_active
-              : projectData?.project?.is_active !== undefined &&
-                  projectData?.project?.is_active !== null
-                ? projectData.project.is_active
+          primary_units_sold_out:
+            projectData.primary_units_sold_out !== undefined &&
+            projectData.primary_units_sold_out !== null
+              ? projectData.primary_units_sold_out
+              : projectData?.project?.primary_units_sold_out !== undefined &&
+                  projectData?.project?.primary_units_sold_out !== null
+                ? projectData.project.primary_units_sold_out
                 : true,
           video_url:
             projectData.video_url || projectData?.project?.video_url || "",
@@ -378,6 +382,7 @@ export default function AddCompoundDialog({
             projectData.payment_plans ||
             projectData?.project?.payment_plans ||
             [],
+          phases: projectData.phases || projectData?.project?.phases || [],
           building_types_images:
             projectData?.building_types_images ||
             projectData?.project?.building_types_images ||
@@ -429,7 +434,7 @@ export default function AddCompoundDialog({
           district: defaultDistrict || "",
           area: "",
           gated: true,
-          is_active: true,
+          primary_units_sold_out: true,
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
@@ -437,6 +442,7 @@ export default function AddCompoundDialog({
           images: [],
           properties_types: [],
           payment_plans: [],
+          phases: [],
           building_types_images: {},
           finishing_type: [],
           facility_management: null,
@@ -464,9 +470,10 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
-        is_active: true,
+        primary_units_sold_out: true,
         properties_types: [],
         payment_plans: [],
+        phases: [],
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -547,15 +554,15 @@ export default function AddCompoundDialog({
               : prev.gated !== undefined
                 ? prev.gated
                 : true,
-        is_active:
-          projectData?.is_active !== undefined &&
-          projectData?.is_active !== null
-            ? projectData.is_active
-            : projectData?.project?.is_active !== undefined &&
-                projectData?.project?.is_active !== null
-              ? projectData.project.is_active
-              : prev.is_active !== undefined
-                ? prev.is_active
+        primary_units_sold_out:
+          projectData?.primary_units_sold_out !== undefined &&
+          projectData?.primary_units_sold_out !== null
+            ? projectData.primary_units_sold_out
+            : projectData?.project?.primary_units_sold_out !== undefined &&
+                projectData?.project?.primary_units_sold_out !== null
+              ? projectData.project.primary_units_sold_out
+              : prev.primary_units_sold_out !== undefined
+                ? prev.primary_units_sold_out
                 : true,
         video_url:
           projectData?.video_url ||
@@ -590,6 +597,11 @@ export default function AddCompoundDialog({
           projectData?.payment_plans ||
           projectData?.project?.payment_plans ||
           prev.payment_plans ||
+          [],
+        phases:
+          projectData?.phases ||
+          projectData?.project?.phases ||
+          prev.phases ||
           [],
         building_types_images:
           projectData?.building_types_images ||
@@ -1127,10 +1139,12 @@ export default function AddCompoundDialog({
         longitude: lngValue ? parseFloat(lngValue) : null,
         location_landmark: landmarkValue || null,
         payment_plans: paymentPlansForApi,
+        phases: formData.phases || [],
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
         amenities: normalizedAmenities,
         facilities: normalizedAmenities,
+        primary_units_sold_out: formData.primary_units_sold_out,
       };
 
       console.log("[handleSubmit] Client ID info:", {
@@ -1167,7 +1181,7 @@ export default function AddCompoundDialog({
           area: submissionData.area,
           delivery_date: submissionData.delivery_date,
           gated: submissionData.gated,
-          is_active: submissionData.is_active,
+          primary_units_sold_out: submissionData.primary_units_sold_out,
           client_id: submissionData.client_id,
           imagesCount: submissionData.images?.length || 0,
           paymentPlansCount: submissionData.payment_plans?.length || 0,
@@ -1371,13 +1385,14 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
-        is_active: true,
+        primary_units_sold_out: true,
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
         client_id: resetClientId,
         properties_types: [],
         payment_plans: [],
+        phases: [],
         building_types_images: {},
         finishing_type: [],
         facility_management: null,
@@ -1548,6 +1563,22 @@ export default function AddCompoundDialog({
       setErrors({
         ...errors,
         payment_plans: null,
+      });
+    }
+  };
+
+  const handlePhasesChange = (newPhases) => {
+    setIsDirty(true);
+    setFormData((prev) => ({
+      ...prev,
+      phases: newPhases,
+    }));
+
+    // Clear error if any
+    if (errors.phases) {
+      setErrors({
+        ...errors,
+        phases: null,
       });
     }
   };
@@ -1811,22 +1842,22 @@ export default function AddCompoundDialog({
                 <div className="flex items-center gap-1">
                   <input
                     type="checkbox"
-                    id="is_active"
-                    name="is_active"
-                    checked={!formData.is_active}
+                    id="primary_units_sold_out"
+                    name="primary_units_sold_out"
+                    checked={formData.primary_units_sold_out}
                     onChange={(e) => {
                       handleChange({
                         target: {
-                          name: "is_active",
+                          name: "primary_units_sold_out",
                           type: "checkbox",
-                          checked: !e.target.checked,
+                          checked: e.target.checked,
                         },
                       });
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <label
-                    htmlFor="is_active"
+                    htmlFor="primary_units_sold_out"
                     className="ml-2 block text-sm text-gray-700"
                   >
                     {t.formLabels?.soldOut || "Sold out"}
@@ -2240,6 +2271,16 @@ export default function AddCompoundDialog({
                   }}
                   isUploading={isUploading}
                   setIsUploading={setIsUploading}
+                />
+              </div>
+
+              <div ref={(el) => (fieldRefs.current.phases = el)}>
+                <PhasesList
+                  phases={formData.phases}
+                  onChange={handlePhasesChange}
+                  error={errors.phases}
+                  required={false}
+                  projectId={editMode ? (projectData?.id || projectData?.project?.id) : null}
                 />
               </div>
             </FormSection>

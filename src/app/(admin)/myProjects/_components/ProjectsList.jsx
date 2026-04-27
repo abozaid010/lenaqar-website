@@ -36,13 +36,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
 import OwnerActions from "@/components/ui/owner-actions";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
+import { useUrlFilters } from "@/hooks/useUrlFilters";
 
 const capitalize = (str) => (str ? str.charAt(0).toUpperCase() + str.slice(1) : "");
 
@@ -128,9 +129,9 @@ function ProjectCard({
           loadingVariant="minimal"
         />
 
-        {project.is_active === false && (
+        {project.primary_units_sold_out === true && (
           <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-md bg-red-600 px-2 py-1 text-[11px] font-semibold text-white shadow">
-            {locale === "ar" ? "نفذت الكمية" : "Sold Out"}
+            {locale === "ar" ? "مُباع بالكامل" : "Sold Out"}
           </span>
         )}
 
@@ -266,13 +267,13 @@ function ProjectCard({
 export default function ProjectsList({ clientId }) {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t, locale, translate } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const { canCreate: canCreateProject, has: hasProjectAction } =
     useModuleActions("projects");
   const canImportProjects = hasProjectAction("import");
 
-  
   const [translations, setTranslations] = useState({
     cities: [],
     cityLabels: {},
@@ -280,7 +281,47 @@ export default function ProjectsList({ clientId }) {
     isLoading: true,
   });
 
-  const [selectedCity, setSelectedCity] = useState("");
+  const { data: developersData, isLoading: developersLoading } =
+    useDeveloperNames();
+
+  const developers = developersData || [];
+
+  // Validation functions for URL filters
+  const validateCity = useCallback(
+    (city) => {
+      if (!city) return "";
+      if (city === "all") return city;
+      // Keep URL value while cities are still loading
+      if (translations.cities.length === 0) return city;
+      // Case-insensitive match to avoid format mismatches
+      const lc = city.toLowerCase();
+      return translations.cities.some((c) => c.toLowerCase() === lc) ? city : "";
+    },
+    [translations.cities]
+  );
+
+  const validateDeveloper = useCallback(
+    (developerId) => {
+      if (!developerId) return "";
+      // Only validate if developers are loaded - otherwise keep the URL value
+      if (developers.length === 0) return developerId;
+      // Check if developer exists in available developers
+      return developers.some((d) => d.id === developerId) ? developerId : "";
+    },
+    [developers]
+  );
+
+  // Use URL-driven filters (URL = Single Source of Truth)
+  const {
+    city: selectedCity,
+    developer: selectedDeveloper,
+    setCity: setSelectedCity,
+    setDeveloper: setSelectedDeveloper,
+    getFiltersString,
+  } = useUrlFilters("projects_filters", {
+    validateCity,
+    validateDeveloper,
+  });
 
   const cityEnName = useMemo(() => {
     if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
@@ -288,12 +329,6 @@ export default function ProjectsList({ clientId }) {
     }
     return undefined;
   }, [selectedCity]);
-
-  const { data: developersData, isLoading: developersLoading } =
-    useDeveloperNames();
-
-  const developers = developersData || [];
-  const [selectedDeveloper, setSelectedDeveloper] = useState("");
 
   const {
     data: paginatedData,
@@ -308,6 +343,7 @@ export default function ProjectsList({ clientId }) {
   } = useProjectsPaginated({
     cityEnName,
     developerId: selectedDeveloper || undefined,
+    enabled: !translations.isLoading, // Wait for translations to validate filters
   });
 
   const projectsList = useMemo(() => {
@@ -410,12 +446,6 @@ export default function ProjectsList({ clientId }) {
 
     loadAllTranslations();
   }, [locale, projectsList]);
-
-  useEffect(() => {
-    if (translations.cities.length > 0 && !selectedCity) {
-      setSelectedCity("all");
-    }
-  }, [translations.cities, selectedCity]);
 
   const getCityDisplayName = useMemo(() => {
     return (city) => {
@@ -581,7 +611,11 @@ export default function ProjectsList({ clientId }) {
 
   const handleOpenView = (project) => {
     const slug = encodeURIComponent(project.en_name || project.ar_name || project.id);
-    router.push(`/${clientId}/myProjects/${slug}`);
+    const filters = getFiltersString();
+    const url = filters
+      ? `/${clientId}/myProjects/${slug}?${filters}`
+      : `/${clientId}/myProjects/${slug}`;
+    router.push(url);
   };
   const handleOpenEdit = (project) => {
     setDialogProject(project);
