@@ -124,7 +124,7 @@ export function useProjectsNames(isPublic = false) {
 }
 
 // Hook for fetching paginated projects (full project data, cursor-based)
-export function useProjectsPaginated({ cityEnName, developerId } = {}) {
+export function useProjectsPaginated({ cityEnName, developerId, enabled = true } = {}) {
   return useInfiniteQuery({
     queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
     queryFn: ({ pageParam }) =>
@@ -135,6 +135,7 @@ export function useProjectsPaginated({ cityEnName, developerId } = {}) {
     staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
     gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
     refetchOnWindowFocus: false,
+    enabled,
   });
 }
 
