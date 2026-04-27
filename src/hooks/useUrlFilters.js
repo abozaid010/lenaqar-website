@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 
 /**
  * Hook for URL-driven filter state
@@ -13,6 +13,7 @@ export function useUrlFilters(storageKey = "projects_filters", options = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const { validateCity, validateDeveloper } = options;
+  const isInitialMount = useRef(true);
 
   // Read current values from URL
   const rawCity = searchParams.get("city") || "";
@@ -24,10 +25,13 @@ export function useUrlFilters(storageKey = "projects_filters", options = {}) {
 
   // Restore from LocalStorage on mount if URL is empty
   useEffect(() => {
-    const saved = localStorage.getItem(storageKey);
-    const currentParams = searchParams.toString();
-    if (saved && !currentParams) {
-      router.replace(`${pathname}?${saved}`, { scroll: false });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      const saved = localStorage.getItem(storageKey);
+      const currentParams = searchParams.toString();
+      if (saved && !currentParams) {
+        router.replace(`${pathname}?${saved}`, { scroll: false });
+      }
     }
   }, [storageKey, searchParams, router, pathname]);
 
