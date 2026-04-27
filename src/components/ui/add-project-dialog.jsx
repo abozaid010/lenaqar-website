@@ -257,12 +257,12 @@ export default function AddCompoundDialog({
             projectData?.project?.gated !== null
           ? projectData.project.gated
           : true,
-    is_active:
-      projectData?.is_active !== undefined && projectData?.is_active !== null
-        ? projectData.is_active
-        : projectData?.project?.is_active !== undefined &&
-            projectData?.project?.is_active !== null
-          ? projectData.project.is_active
+    primary_units_sold_out:
+      projectData?.primary_units_sold_out !== undefined && projectData?.primary_units_sold_out !== null
+        ? projectData.primary_units_sold_out
+        : projectData?.project?.primary_units_sold_out !== undefined &&
+            projectData?.project?.primary_units_sold_out !== null
+          ? projectData.project.primary_units_sold_out
           : true,
     video_url: projectData?.video_url || projectData?.project?.video_url || "",
     google_map_link:
@@ -348,13 +348,13 @@ export default function AddCompoundDialog({
                   projectData?.project?.gated !== null
                 ? projectData.project.gated
                 : true,
-          is_active:
-            projectData.is_active !== undefined &&
-            projectData.is_active !== null
-              ? projectData.is_active
-              : projectData?.project?.is_active !== undefined &&
-                  projectData?.project?.is_active !== null
-                ? projectData.project.is_active
+          primary_units_sold_out:
+            projectData.primary_units_sold_out !== undefined &&
+            projectData.primary_units_sold_out !== null
+              ? projectData.primary_units_sold_out
+              : projectData?.project?.primary_units_sold_out !== undefined &&
+                  projectData?.project?.primary_units_sold_out !== null
+                ? projectData.project.primary_units_sold_out
                 : true,
           video_url:
             projectData.video_url || projectData?.project?.video_url || "",
@@ -429,7 +429,7 @@ export default function AddCompoundDialog({
           district: defaultDistrict || "",
           area: "",
           gated: true,
-          is_active: true,
+          primary_units_sold_out: true,
           video_url: "",
           google_map_link: "",
           master_plan: { url: null, fileId: null },
@@ -464,7 +464,7 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
-        is_active: true,
+        primary_units_sold_out: true,
         properties_types: [],
         payment_plans: [],
         video_url: "",
@@ -547,15 +547,15 @@ export default function AddCompoundDialog({
               : prev.gated !== undefined
                 ? prev.gated
                 : true,
-        is_active:
-          projectData?.is_active !== undefined &&
-          projectData?.is_active !== null
-            ? projectData.is_active
-            : projectData?.project?.is_active !== undefined &&
-                projectData?.project?.is_active !== null
-              ? projectData.project.is_active
-              : prev.is_active !== undefined
-                ? prev.is_active
+        primary_units_sold_out:
+          projectData?.primary_units_sold_out !== undefined &&
+          projectData?.primary_units_sold_out !== null
+            ? projectData.primary_units_sold_out
+            : projectData?.project?.primary_units_sold_out !== undefined &&
+                projectData?.project?.primary_units_sold_out !== null
+              ? projectData.project.primary_units_sold_out
+              : prev.primary_units_sold_out !== undefined
+                ? prev.primary_units_sold_out
                 : true,
         video_url:
           projectData?.video_url ||
@@ -1131,6 +1131,7 @@ export default function AddCompoundDialog({
         orientation_url: formData.orientation_url?.trim() || null,
         amenities: normalizedAmenities,
         facilities: normalizedAmenities,
+        primary_units_sold_out: formData.primary_units_sold_out,
       };
 
       console.log("[handleSubmit] Client ID info:", {
@@ -1167,7 +1168,7 @@ export default function AddCompoundDialog({
           area: submissionData.area,
           delivery_date: submissionData.delivery_date,
           gated: submissionData.gated,
-          is_active: submissionData.is_active,
+          primary_units_sold_out: submissionData.primary_units_sold_out,
           client_id: submissionData.client_id,
           imagesCount: submissionData.images?.length || 0,
           paymentPlansCount: submissionData.payment_plans?.length || 0,
@@ -1371,7 +1372,7 @@ export default function AddCompoundDialog({
         district: defaultDistrict || "",
         area: "",
         gated: true,
-        is_active: true,
+        primary_units_sold_out: true,
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -1811,22 +1812,22 @@ export default function AddCompoundDialog({
                 <div className="flex items-center gap-1">
                   <input
                     type="checkbox"
-                    id="is_active"
-                    name="is_active"
-                    checked={!formData.is_active}
+                    id="primary_units_sold_out"
+                    name="primary_units_sold_out"
+                    checked={formData.primary_units_sold_out}
                     onChange={(e) => {
                       handleChange({
                         target: {
-                          name: "is_active",
+                          name: "primary_units_sold_out",
                           type: "checkbox",
-                          checked: !e.target.checked,
+                          checked: e.target.checked,
                         },
                       });
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                   <label
-                    htmlFor="is_active"
+                    htmlFor="primary_units_sold_out"
                     className="ml-2 block text-sm text-gray-700"
                   >
                     {t.formLabels?.soldOut || "Sold out"}

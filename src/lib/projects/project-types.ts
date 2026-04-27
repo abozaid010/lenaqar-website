@@ -49,7 +49,7 @@ export interface RawProject {
   location_landmark?: string;
   latitude?: number;
   longitude?: number;
-  is_active?: boolean;
+  primary_units_sold_out?: boolean;
 }
 
 export interface PaymentPlan {
