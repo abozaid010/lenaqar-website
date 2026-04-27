@@ -52,7 +52,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
     try {
       const res = await deleteDeveloper(developer.id);
       if (!res?.status) {
-        toast.error(t?.common?.failedToDelete || "Failed to delete developer");
+        toast.error(
+          t?.common?.failedToDeleteDeveloper || "Failed to delete developer"
+        );
         return;
       }
       await queryClient.invalidateQueries({ queryKey: developerKeys.all });
@@ -61,7 +63,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
       handleBack();
     } catch (err) {
       console.error("Delete developer failed:", err);
-      toast.error(t?.common?.failedToDelete || "Failed to delete developer");
+      toast.error(
+        t?.common?.failedToDeleteDeveloper || "Failed to delete developer"
+      );
     } finally {
       deleteInFlightRef.current = false;
     }
@@ -69,8 +73,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
 
   const handleDeveloperUpdated = (updatedDeveloper) => {
     setIsEditDialogOpen(false);
-    toast.success("Developer updated successfully");
-    // The useDeveloperDetails hook will automatically refetch the data
+    toast.success(
+      t.developerPage?.developerUpdatedSuccess || "Developer updated successfully"
+    );
   };
 
   const handleContactAction = (type, value) => {
@@ -103,10 +108,11 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         <div className="text-center max-w-md mx-auto px-4">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Invalid Developer ID
+            {t.developerPage?.invalidDeveloperIdTitle || "Invalid Developer ID"}
           </h2>
           <p className="text-gray-600 mb-6">
-            No developer ID was provided. Please go back and select a developer.
+            {t.developerPage?.invalidDeveloperIdMessage ||
+              "No developer ID was provided. Please go back and select a developer."}
           </p>
           <button
             onClick={handleBack}
@@ -134,10 +140,13 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         <div className="text-center max-w-md mx-auto px-4">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            Error Loading Developer
+            {t.developerPage?.errorLoadingDeveloperTitle ||
+              "Error Loading Developer"}
           </h2>
           <p className="text-gray-600 mb-6">
-            {error?.message || "Failed to load developer details. Please try again."}
+            {error?.message ||
+              t.developerPage?.errorLoadingDeveloperFallback ||
+              "Failed to load developer details. Please try again."}
           </p>
           <button
             onClick={handleBack}
@@ -156,10 +165,11 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         <div className="text-center max-w-md mx-auto px-4">
           <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {t.developerPage?.detailsError || "Developer Not Found"}
+            {t.developerPage?.detailsError}
           </h2>
           <p className="text-gray-600 mb-6">
-            The developer you're looking for doesn't exist or has been removed.
+            {t.developerPage?.detailsNotFoundMessage ||
+              "The developer you're looking for doesn't exist or has been removed."}
           </p>
           <button
             onClick={handleBack}
@@ -183,8 +193,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
       : developer.description || developer.ar_description;
 
   const updatedAtMs = developer.updated_at ? Date.parse(developer.updated_at) : NaN;
+  const dateLocale = locale === "ar" ? "ar-EG" : undefined;
   const lastUpdatedLabel = Number.isFinite(updatedAtMs)
-    ? new Date(updatedAtMs).toLocaleDateString()
+    ? new Date(updatedAtMs).toLocaleDateString(dateLocale)
     : "—";
 
   return (
@@ -236,7 +247,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
               </h1>
               {developer.founded_year && (
                 <p className="text-gray-600">
-                  {t.developerPage?.founded || "Founded"} {developer.founded_year}
+                  {t.developerPage?.founded} {developer.founded_year}
                 </p>
               )}
             </div>
@@ -247,7 +258,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <button
                   onClick={() => handleContactAction("email", developer.sales_email)}
                   className="p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  title="Email"
+                  title={t.developerPage?.ariaEmail || "Email"}
                 >
                   <Mail className="w-5 h-5 text-gray-700" />
                 </button>
@@ -256,7 +267,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <button
                   onClick={() => handleContactAction("phone", developer.sales_phone)}
                   className="p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                  title="Phone"
+                  title={t.developerPage?.ariaPhone || "Phone"}
                 >
                   <Phone className="w-5 h-5 text-gray-700" />
                 </button>
@@ -265,7 +276,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <button
                   onClick={() => handleContactAction("whatsapp", developer.whatsapp)}
                   className="p-3 bg-green-500 rounded-lg hover:bg-green-600 transition-colors"
-                  title="WhatsApp"
+                  title={t.developerPage?.ariaWhatsApp || "WhatsApp"}
                 >
                   <MessageCircle className="w-5 h-5 text-white" />
                 </button>
@@ -274,7 +285,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <button
                   onClick={() => handleContactAction("website", developer.website)}
                   className="p-3 bg-[#030250] rounded-lg hover:bg-[#040361] transition-colors"
-                  title="Website"
+                  title={t.developerPage?.ariaWebsite || "Website"}
                 >
                   <Globe className="w-5 h-5 text-white" />
                 </button>
@@ -286,7 +297,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         {/* About Section */}
         <div className="mb-12">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
-            {t.developerPage?.about || "About"}
+            {t.developerPage?.about}
           </h2>
           <div className="prose prose-lg max-w-none">
             <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
@@ -301,14 +312,16 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
           {/* Contact Information */}
           <div>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              {t.developerPage?.contactInfo || "Contact Information"}
+              {t.developerPage?.contactInfo}
             </h2>
             <div className="space-y-4">
               {developer.sales_email && (
                 <div className="flex items-center p-4 bg-gray-50 rounded-lg">
                   <Mail className="w-5 h-5 text-gray-600 mr-4" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Email</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t.developerPage?.fieldEmail}
+                    </p>
                     <button
                       onClick={() => handleContactAction("email", developer.sales_email)}
                       className="text-[#030250] hover:underline"
@@ -323,7 +336,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <div className="flex items-center p-4 bg-gray-50 rounded-lg">
                   <Phone className="w-5 h-5 text-gray-600 mr-4" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Phone</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t.developerPage?.fieldPhone}
+                    </p>
                     <button
                       onClick={() => handleContactAction("phone", developer.sales_phone)}
                       className="text-[#030250] hover:underline"
@@ -338,7 +353,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <div className="flex items-center p-4 bg-gray-50 rounded-lg">
                   <MessageCircle className="w-5 h-5 text-gray-600 mr-4" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">WhatsApp</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t.developerPage?.fieldWhatsApp}
+                    </p>
                     <button
                       onClick={() => handleContactAction("whatsapp", developer.whatsapp)}
                       className="text-green-600 hover:underline"
@@ -353,7 +370,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 <div className="flex items-center p-4 bg-gray-50 rounded-lg">
                   <Globe className="w-5 h-5 text-gray-600 mr-4" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Website</p>
+                    <p className="text-sm font-medium text-gray-900">
+                      {t.developerPage?.fieldWebsite}
+                    </p>
                     <button
                       onClick={() => handleContactAction("website", developer.website)}
                       className="text-[#030250] hover:underline truncate max-w-xs"
@@ -370,7 +389,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
           {(developer.linkedin || developer.facebook || developer.instagram) && (
             <div>
               <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                {t.developerPage?.socialLinks || "Social Links"}
+                {t.developerPage?.socialLinks}
               </h2>
               <div className="space-y-4">
                 {developer.linkedin && (
@@ -379,7 +398,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                     className="w-full flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
                   >
                     <Building className="w-5 h-5 text-blue-600 mr-4" />
-                    <span className="text-gray-900">LinkedIn</span>
+                    <span className="text-gray-900">
+                      {t.developerPage?.socialLinkedIn}
+                    </span>
                   </button>
                 )}
                 {developer.facebook && (
@@ -388,7 +409,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                     className="w-full flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
                   >
                     <Building className="w-5 h-5 text-blue-600 mr-4" />
-                    <span className="text-gray-900">Facebook</span>
+                    <span className="text-gray-900">
+                      {t.developerPage?.socialFacebook}
+                    </span>
                   </button>
                 )}
                 {developer.instagram && (
@@ -397,7 +420,9 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                     className="w-full flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left"
                   >
                     <Building className="w-5 h-5 text-pink-600 mr-4" />
-                    <span className="text-gray-900">Instagram</span>
+                    <span className="text-gray-900">
+                      {t.developerPage?.socialInstagram}
+                    </span>
                   </button>
                 )}
               </div>
@@ -409,7 +434,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         {developer.profile_reviews && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-8">
-              {t.developerPage?.profileReview || "Profile Review"}
+              {t.developerPage?.profileReview}
             </h2>
             
             {/* Ratings Grid */}
@@ -421,7 +446,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                   <div className="flex items-center mb-4">
                     <TrendingUp className="w-6 h-6 text-[#030250] mr-3" />
                     <h3 className="font-semibold text-gray-900">
-                      {t.developerPage?.financialState || "Financial State"}
+                      {t.developerPage?.financialState}
                     </h3>
                   </div>
                   {developer.profile_reviews.financial_state_rate && (
@@ -458,7 +483,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                   <div className="flex items-center mb-4">
                     <Users className="w-6 h-6 text-[#030250] mr-3" />
                     <h3 className="font-semibold text-gray-900">
-                      {t.developerPage?.reputation || "Reputation"}
+                      {t.developerPage?.reputation}
                     </h3>
                   </div>
                   {developer.profile_reviews.developer_reputation_rate && (
@@ -495,7 +520,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                   <div className="flex items-center mb-4">
                     <Shield className="w-6 h-6 text-[#030250] mr-3" />
                     <h3 className="font-semibold text-gray-900">
-                      {t.developerPage?.legalCompliance || "Legal Compliance"}
+                      {t.developerPage?.legalCompliance}
                     </h3>
                   </div>
                   <div className="flex items-center mb-3">
@@ -533,7 +558,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
               {/* In Progress Projects */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t.developerPage?.inProgressProjects || "In Progress Projects"}
+                  {t.developerPage?.inProgressProjects}
                 </h3>
                 {developer.profile_reviews.in_progress_projects?.length > 0 ? (
                   <div className="space-y-3">
@@ -546,7 +571,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                   </div>
                 ) : (
                   <p className="text-gray-600">
-                    {t.developerPage?.noProjects || "No projects listed"}
+                    {t.developerPage?.noProjects}
                   </p>
                 )}
               </div>
@@ -554,7 +579,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
               {/* Delivered Projects */}
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  {t.developerPage?.deliveredProjects || "Delivered Projects"}
+                  {t.developerPage?.deliveredProjects}
                 </h3>
                 {developer.profile_reviews.delivered_projects?.length > 0 ? (
                   <div className="space-y-3">
@@ -567,7 +592,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                   </div>
                 ) : (
                   <p className="text-gray-600">
-                    {t.developerPage?.noDeliveredProjects || "No delivered projects listed"}
+                    {t.developerPage?.noDeliveredProjects}
                   </p>
                 )}
               </div>
@@ -580,19 +605,19 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-gray-600">
             <div>
               <p className="mb-2">
-                <strong>{t.developerPage?.clientId || "Client ID"}:</strong> {developer.client_id}
+                <strong>{t.developerPage?.clientId}:</strong> {developer.client_id}
               </p>
               <p className="mb-2">
-                <strong>{t.developerPage?.author || "Author"}:</strong> {developer.author}
+                <strong>{t.developerPage?.author}:</strong> {developer.author}
               </p>
             </div>
             <div>
               <p className="mb-2">
-                <strong>{t.developerPage?.lastUpdated || "Last Updated"}:</strong> {lastUpdatedLabel}
+                <strong>{t.developerPage?.lastUpdated}:</strong> {lastUpdatedLabel}
               </p>
               {developer.scoring && (
                 <p className="mb-2">
-                  <strong>{t.developerPage?.scoring || "Scoring"}:</strong> {developer.scoring}
+                  <strong>{t.developerPage?.scoring}:</strong> {developer.scoring}
                 </p>
               )}
             </div>
@@ -614,10 +639,10 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
         isOpen={showDeleteDialog}
         onClose={() => setShowDeleteDialog(false)}
         onConfirm={handleConfirmDelete}
-        title={t.developerPage?.DeleteTitle || "Delete developer"}
-        message={t.developerPage?.deleteMessage || "Are you sure you want to delete this developer?"}
-        confirmLabel={t.deleteButton || "Delete"}
-        cancelLabel={t.cancelButton || "Cancel"}
+        title={t.developerPage?.DeleteTitle}
+        message={t.developerPage?.deleteMessage}
+        confirmLabel={t.deleteButton}
+        cancelLabel={t.cancelButton}
       />
     </div>
   );
