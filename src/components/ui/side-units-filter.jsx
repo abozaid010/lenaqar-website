@@ -5,21 +5,22 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useMemo } from "react";
 import PriceRangeSlider from "./price-range-slider";
 
 const EnumPropertyIntent = ["rent", "sell"];
 
 export default function SideUnitFilters({
-  appliedFilters,
   developers,
   projects,
   minPrice = 0,
   maxPrice = 10000000,
 }) {
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -28,57 +29,37 @@ export default function SideUnitFilters({
       ar: { buildingTypes: ar.buildingTypes || {} },
     });
   }, []);
-  const [filters, setFilters] = useState(() => ({
-    developer_name: appliedFilters.developer || "",
-    project_name: appliedFilters.project_name || "",
-    purpose: appliedFilters.purpose || "",
-    property_type: appliedFilters.property_type || "",
-    project_name: appliedFilters.project_name || "",
-    min_price: appliedFilters.min_price || "",
-    max_price: appliedFilters.max_price || "",
-  }));
 
-  useEffect(() => {
-    setFilters((prev) => ({
-      ...prev,
-      developer_name: appliedFilters.developer || "",
-      project_name: appliedFilters.project_name || "",
-      purpose: appliedFilters.purpose || "",
-      property_type: appliedFilters.property_type || "",
-      min_price: appliedFilters.min_price || "",
-      max_price: appliedFilters.max_price || "",
-    }));
-  }, [appliedFilters]);
+  // URL is the single source of truth — derived directly from searchParams
+  const filters = {
+    developer_name: searchParams.get("developer_name") || "",
+    project_name: searchParams.get("project_name") || "",
+    purpose: searchParams.get("purpose") || "",
+    property_type: searchParams.get("property_type") || "",
+    min_price: searchParams.get("min_price") || "",
+    max_price: searchParams.get("max_price") || "",
+  };
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
-
-    const newParams = new URLSearchParams(window.location.search);
-    if (value === "") {
-      newParams.delete(key);
-    } else if (value === "all") {
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (!value || value === "" || value === "all") {
       newParams.delete(key);
     } else {
       newParams.set(key, value);
     }
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    const qs = newParams.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
   const handlePriceChange = (min, max) => {
-    setFilters((prev) => ({
-      ...prev,
-      min_price: min,
-      max_price: max,
-    }));
-
-    const newParams = new URLSearchParams(window.location.search);
+    const newParams = new URLSearchParams(searchParams.toString());
     newParams.set("min_price", min);
     newParams.set("max_price", max);
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    router.replace(`${pathname}?${newParams.toString()}`, { scroll: false });
   };
 
   const handleReset = () => {
-    router.push(`${window.location.pathname}`);
+    router.replace(pathname, { scroll: false });
   };
 
   return (

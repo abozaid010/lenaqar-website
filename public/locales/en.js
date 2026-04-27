@@ -1794,6 +1794,8 @@ export default {
   noNews: "No news available at the moment",
   newsSubtitle: "Latest real estate news and updates",
   readMore: "Read more",
+  editNewsAria: "Edit news",
+  deleteNewsAria: "Delete news",
   loading: "Loading...",
   error: "Error loading content",
   map: {

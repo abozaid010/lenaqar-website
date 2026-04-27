@@ -99,7 +99,7 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       isOpen={isOpen}
       onClose={onClose}
       title={`Edit ${client.client_name || client.client_id}`}
-      submitLabel="Save Changes"
+      submitLabel={t?.saveChangesButton || "Save Changes"}
       onSubmit={handleSubmit}
       submitLoading={updateClient.isPending || logoUploading}
       submitDisabled={updateClient.isPending || logoUploading}

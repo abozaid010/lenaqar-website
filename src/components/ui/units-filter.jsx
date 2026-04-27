@@ -14,7 +14,7 @@ import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select"
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { unitKeys } from "@/utils/query-utils";
@@ -35,6 +35,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const { t, locale, translate } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
 
   // Get building types with translations
@@ -45,22 +47,33 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     });
   }, []);
 
+  // URL is the single source of truth for all filter values.
+  // Derived from searchParams so they always reflect the actual URL.
+  const filters = useMemo(() => ({
+    city: searchParams.get("city") || "",
+    developer_name: searchParams.get("developer_name") || "",
+    project_name: searchParams.get("project_name") || "",
+    purpose: searchParams.get("purpose") || "",
+    property_type: searchParams.get("property_type") || "",
+    min_price: searchParams.get("min_price") || "",
+    max_price: searchParams.get("max_price") || "",
+    min_area: searchParams.get("min_area") || "",
+    my_inventory: searchParams.get("my_inventory") === "true",
+    resale: searchParams.get("resale") === "true",
+  }), [searchParams]);
 
-  const [myInventory, setMyInventory] = useState(false);
-  const [resale, setResale] = useState(false);
+  // Local state only for debounced numeric inputs so the user can type freely
+  // without every keystroke hitting the URL. Synced from URL on external changes.
+  const [localMinPrice, setLocalMinPrice] = useState(filters.min_price);
+  const [localMaxPrice, setLocalMaxPrice] = useState(filters.max_price);
+  const [localMinArea, setLocalMinArea] = useState(filters.min_area);
 
-  const [filters, setFilters] = useState(() => ({
-    developer_name: appliedFilters.developer_name || "",
-    project_name: appliedFilters.project_name || "",
-    purpose: appliedFilters.purpose || "",
-    property_type: appliedFilters.property_type || "",
-    min_price: appliedFilters.min_price || "",
-    max_price: appliedFilters.max_price || "",
-    city: appliedFilters.city || "",
-    my_inventory: false,
-    resale: false,
-    min_area: appliedFilters.min_area || "",
-  }));
+  // Sync local numeric inputs when URL changes externally (browser back/forward)
+  useEffect(() => {
+    setLocalMinPrice(searchParams.get("min_price") || "");
+    setLocalMaxPrice(searchParams.get("max_price") || "");
+    setLocalMinArea(searchParams.get("min_area") || "");
+  }, [searchParams]);
 
   const [priceRangeError, setPriceRangeError] = useState("");
 
@@ -122,49 +135,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [cityLabels, setCityLabels] = useState({});
-  const [activeFilters, setActiveFilters] = useState(() => {
-    const initialFilters = [];
-    if (filters.my_inventory) {
-      initialFilters.push({ key: "my_inventory", value: t.unitsFilter.myInventory });
-    }
-    if (filters.resale) {
-      initialFilters.push({ key: "resale", value: t.unitsFilter.resale });
-    }
-    if (filters.min_area) {
-      initialFilters.push({ key: "min_area", value: `${t.unitsFilter.minArea}: ${filters.min_area} m²` });
-    }
-    if (filters.developer_name) {
-      initialFilters.push({
-        key: "developer_name",
-        value: getSelectedDeveloper(),
-      });
-    }
-    if (filters.project_name) {
-      initialFilters.push({
-        key: "project_name",
-        value: getSelectedProjectName(),
-      });
-    }
-    if (filters.purpose) {
-      initialFilters.push({ key: "purpose", value: filters.purpose });
-    }
-    if (filters.property_type) {
-      initialFilters.push({
-        key: "property_type",
-        value: filters.property_type,
-      });
-    }
-    if (filters.min_price || filters.max_price) {
-      initialFilters.push({
-        key: "price_range",
-        value: getPriceDisplayText(),
-      });
-    }
-    if (filters.city) {
-      initialFilters.push({ key: "city", value: getSelectedCity() });
-    }
-    return initialFilters;
-  });
 
   const priceDropdownRef = useRef(null);
 
@@ -212,6 +182,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return list;
   }, [locale, t, compounds, developers, cityLabels]);
 
+  // Derived from URL — automatically stays in sync with searchParams
+  const activeFilters = useMemo(() => buildActiveFilters(filters), [filters, buildActiveFilters]);
+
   const applyNumericFiltersToUrl = useCallback((nextFilters) => {
     const minN = parseNumeric(nextFilters.min_price);
     const maxN = parseNumeric(nextFilters.max_price);
@@ -225,7 +198,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     setPriceRangeError("");
 
-    const newParams = new URLSearchParams(window.location.search);
+    const newParams = new URLSearchParams(searchParams.toString());
 
     const setOrDelete = (key, v) => {
       if (v && String(v).trim() !== "") newParams.set(key, String(v));
@@ -236,9 +209,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     setOrDelete("max_price", nextFilters.max_price);
     setOrDelete("min_area", nextFilters.min_area);
 
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
-    setActiveFilters(buildActiveFilters(nextFilters));
-  }, [router, buildActiveFilters, parseNumeric, locale]);
+    const qs = newParams.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [router, searchParams, pathname, parseNumeric, locale]);
 
   const scheduleNumericSearch = useCallback((nextFilters) => {
     if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
@@ -253,11 +226,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [applyNumericFiltersToUrl]);
 
   const handleFilterChange = (key, value) => {
-    const updatedFilters = { ...filters, [key]: value };
-    setFilters(updatedFilters);
-
-    // Update URL parameters
-    const newParams = new URLSearchParams(window.location.search);
+    // Update URL parameters — URL is the single source of truth
+    const newParams = new URLSearchParams(searchParams.toString());
 
     // Handle different filter types
     if (key === "my_inventory" || key === "resale") {
@@ -270,7 +240,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     } else if (key === "min_area" || key === "min_price" || key === "max_price") {
       // Numeric filters are applied via debounce/onBlur, not here.
       // Keep URL changes centralized in applyNumericFiltersToUrl().
-      scheduleNumericSearch(updatedFilters);
+      scheduleNumericSearch({ ...filters, [key]: value });
       return;
     } else {
       // Existing filters
@@ -281,105 +251,29 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       }
     }
 
-    const newUrl = `${window.location.pathname}?${newParams.toString()}`;
-    
-    // Update URL - this will trigger Next.js to re-render with new searchParams
-    router.push(newUrl);
+    const qs = newParams.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
 
-    // Force refresh: If project_name changed, invalidate unit queries to force fresh API call
-    // This ensures the API is called immediately with the new project filter
     if (key === "project_name") {
-      // Invalidate all unit list queries - this causes matching queries to refetch immediately
-      // When the component re-render with new searchParams, the query key changes
-      // and the invalidated queries will be refetched to get fresh data
-      // Using refetchType: 'active' ensures only currently mounted queries refetch
-      queryClient.invalidateQueries({ 
+      queryClient.invalidateQueries({
         queryKey: unitKeys.lists(),
-        refetchType: 'active' // Only refetch active queries (currently mounted components)
+        refetchType: "active",
       });
     }
-
-    // Update active filters
-    setActiveFilters((prev) => {
-      const existingFilterIndex = prev.findIndex((f) => f.key === key);
-      
-      // Determine display value for new filters
-      let displayValue = value;
-      if (key === "my_inventory") {
-        displayValue = t.unitsFilter.myInventory;
-      } else if (key === "resale") {
-        displayValue = t.unitsFilter.resale;
-      } else if (key === "min_price") {
-        displayValue = value ? `${locale === "ar" ? "من" : "From"} ${formatPriceInput(value)} EGP` : "";
-      } else if (key === "max_price") {
-        displayValue = value ? `${locale === "ar" ? "إلى" : "To"} ${formatPriceInput(value)} EGP` : "";
-      }
-      
-      if (existingFilterIndex > -1) {
-        // Update existing filter
-        if (displayValue && displayValue !== "") {
-          const updatedFilter = { ...prev[existingFilterIndex], value: displayValue };
-          return [
-            ...prev.slice(0, existingFilterIndex),
-            updatedFilter,
-            ...prev.slice(existingFilterIndex + 1),
-          ];
-        } else {
-          // Remove filter if value is empty
-          return prev.filter((f) => f.key !== key);
-        }
-      } else {
-        // Add new filter
-        if (displayValue && displayValue !== "") {
-          return [...prev, { key, value: displayValue }];
-        }
-        return prev;
-      }
-    });
   };
 
   const handlePriceApply = () => {
-    // Update filters state
-    const newMinPrice = filters.min_price;
-    const newMaxPrice = filters.max_price;
+    const newParams = new URLSearchParams(searchParams.toString());
 
-    // Update URL params
-    const newParams = new URLSearchParams(window.location.search);
+    if (localMinPrice) newParams.set("min_price", localMinPrice);
+    else newParams.delete("min_price");
 
-    if (newMinPrice) {
-      newParams.set("min_price", newMinPrice);
-    } else {
-      newParams.delete("min_price");
-    }
+    if (localMaxPrice) newParams.set("max_price", localMaxPrice);
+    else newParams.delete("max_price");
 
-    if (newMaxPrice) {
-      newParams.set("max_price", newMaxPrice);
-    } else {
-      newParams.delete("max_price");
-    }
-
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
+    const qs = newParams.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     setIsPriceDropdownOpen(false);
-
-    setActiveFilters((prev) => {
-      const existingFilterIndex = prev.findIndex(
-        (f) => f.key === "price_range"
-      );
-      const priceText = getPriceDisplayText();
-
-      if (existingFilterIndex > -1) {
-        // Update existing price filter
-        const updatedFilter = { key: "price_range", value: priceText };
-        return [
-          ...prev.slice(0, existingFilterIndex),
-          updatedFilter,
-          ...prev.slice(existingFilterIndex + 1),
-        ];
-      } else {
-        // Add new price filter
-        return [...prev, { key: "price_range", value: priceText }];
-      }
-    });
   };
 
   // Format price input with commas as user types
@@ -409,60 +303,36 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   // Function to remove all filters
   const handleRemoveAllFilters = () => {
-    setFilters({
-      developer_name: "",
-      project_name: "",
-      purpose: "",
-      property_type: "",
-      min_price: "",
-      max_price: "",
-      city: "",
-      my_inventory: false,
-      resale: false,
-      min_area: "",
-    });
-
-    router.push(window.location.pathname);
-
-    setActiveFilters([]);
+    setLocalMinPrice("");
+    setLocalMaxPrice("");
+    setLocalMinArea("");
+    router.replace(pathname, { scroll: false });
   };
 
   // Function to remove a specific filter
   const handleRemoveFilter = (key) => {
-    const newParams = new URLSearchParams(window.location.search);
+    const newParams = new URLSearchParams(searchParams.toString());
 
-    // Special handling for different filter types
     if (key === "price_range") {
       newParams.delete("min_price");
       newParams.delete("max_price");
-      setFilters((prev) => ({
-        ...prev,
-        min_price: "",
-        max_price: "",
-      }));
-    } else if (key === "my_inventory" || key === "resale") {
-      // Boolean toggles
-      setFilters((prev) => ({ ...prev, [key]: false }));
-      newParams.delete(key);
+      setLocalMinPrice("");
+      setLocalMaxPrice("");
     } else if (key === "min_area") {
-      // Min area input
-      setFilters((prev) => ({ ...prev, min_area: "" }));
       newParams.delete("min_area");
-    } else if (key === "min_price" || key === "max_price") {
-      // Price fields
-      setFilters((prev) => ({ ...prev, [key]: "" }));
-      newParams.delete(key);
+      setLocalMinArea("");
+    } else if (key === "min_price") {
+      newParams.delete("min_price");
+      setLocalMinPrice("");
+    } else if (key === "max_price") {
+      newParams.delete("max_price");
+      setLocalMaxPrice("");
     } else {
-      // Existing filters
-      setFilters((prev) => ({ ...prev, [key]: "" }));
       newParams.delete(key);
     }
 
-    router.push(`${window.location.pathname}?${newParams.toString()}`);
-
-    setActiveFilters((prev) =>
-      prev.filter((f) => f.key !== key && f.removeKeys?.indexOf(key) === -1)
-    );
+    const qs = newParams.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   };
 
   function getSelectedPropertyType() {
@@ -703,7 +573,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         <div className="flex-shrink-0">
           <label
             className={`flex items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium select-none ${
-              myInventory
+              filters.my_inventory
                 ? "bg-primary/10 border-primary/40 text-primary"
                 : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
             } ${!hasClientId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
@@ -712,14 +582,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             <input
               type="checkbox"
               className="h-4 w-4 accent-primary"
-              checked={myInventory}
+              checked={filters.my_inventory}
               disabled={!hasClientId}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setMyInventory(checked);
-                setFilters((prev) => ({ ...prev, my_inventory: checked }));
-                handleFilterChange("my_inventory", checked);
-              }}
+              onChange={(e) => handleFilterChange("my_inventory", e.target.checked)}
             />
             <span className="truncate text-xs">{t.unitsFilter.myInventory}</span>
           </label>
@@ -729,7 +594,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         <div className="flex-shrink-0">
           <label
             className={`flex items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
-              resale
+              filters.resale
                 ? "bg-orange-50 border-orange-300 text-orange-700"
                 : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
             }`}
@@ -737,13 +602,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             <input
               type="checkbox"
               className="h-4 w-4 accent-orange-600"
-              checked={resale}
-              onChange={(e) => {
-                const checked = e.target.checked;
-                setResale(checked);
-                setFilters((prev) => ({ ...prev, resale: checked }));
-                handleFilterChange("resale", checked);
-              }}
+              checked={filters.resale}
+              onChange={(e) => handleFilterChange("resale", e.target.checked)}
             />
             <span className="truncate text-xs">{t.unitsFilter.resale}</span>
           </label>
@@ -755,15 +615,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             name="min_price"
             type="money"
             label={locale === "ar" ? "الحد الأدنى للسعر" : "Min Price"}
-            value={filters.min_price}
+            value={localMinPrice}
             error={priceRangeError}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              const next = { ...filters, min_price: value };
-              setFilters(next);
-              scheduleNumericSearch(next);
+              setLocalMinPrice(value);
+              scheduleNumericSearch({ ...filters, min_price: value });
             }}
-            onBlur={() => flushNumericSearch(filters)}
+            onBlur={() => flushNumericSearch({ ...filters, min_price: localMinPrice })}
             className="w-full min-w-0"
             adornment="EGP"
           />
@@ -775,15 +634,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             name="max_price"
             type="money"
             label={locale === "ar" ? "الحد الأقصى للسعر" : "Max Price"}
-            value={filters.max_price}
+            value={localMaxPrice}
             error={priceRangeError}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              const next = { ...filters, max_price: value };
-              setFilters(next);
-              scheduleNumericSearch(next);
+              setLocalMaxPrice(value);
+              scheduleNumericSearch({ ...filters, max_price: value });
             }}
-            onBlur={() => flushNumericSearch(filters)}
+            onBlur={() => flushNumericSearch({ ...filters, max_price: localMaxPrice })}
             className="w-full min-w-0"
             adornment="EGP"
           />
@@ -795,14 +653,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             name="min_area"
             type="number"
             label={t.unitsFilter.minArea}
-            value={filters.min_area}
+            value={localMinArea}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
-              const next = { ...filters, min_area: value };
-              setFilters(next);
-              scheduleNumericSearch(next);
+              setLocalMinArea(value);
+              scheduleNumericSearch({ ...filters, min_area: value });
             }}
-            onBlur={() => flushNumericSearch(filters)}
+            onBlur={() => flushNumericSearch({ ...filters, min_area: localMinArea })}
             className="w-full min-w-0"
             adornment="m²"
           />

@@ -290,12 +290,12 @@ export default function ProjectsList({ clientId }) {
   const validateCity = useCallback(
     (city) => {
       if (!city) return "";
-      // "all" is a valid special value
       if (city === "all") return city;
-      // Only validate if cities are loaded - otherwise keep the URL value
+      // Keep URL value while cities are still loading
       if (translations.cities.length === 0) return city;
-      // Check if city exists in available cities
-      return translations.cities.includes(city) ? city : "";
+      // Case-insensitive match to avoid format mismatches
+      const lc = city.toLowerCase();
+      return translations.cities.some((c) => c.toLowerCase() === lc) ? city : "";
     },
     [translations.cities]
   );
