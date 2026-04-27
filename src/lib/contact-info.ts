@@ -19,8 +19,7 @@ interface ContactInfoResult {
   type: 'Owner' | 'Developer' | 'Client' | null;
 }
 
-// Base URL configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.lenaai.net';
+import { API_BASE_URL, PUBLIC_X_API_KEY } from '@/lib/apiConfig';
 
 class ContactInfo {
   private developerContacts: Map<string, DeveloperContact> = new Map();
@@ -76,7 +75,7 @@ class ContactInfo {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY || ''
+        'X-API-Key': PUBLIC_X_API_KEY
       },
       cache: 'no-store' // Ensure fresh data
     });
@@ -103,7 +102,7 @@ class ContactInfo {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY || ''
+        'X-API-Key': PUBLIC_X_API_KEY
       },
       cache: 'no-store' // Ensure fresh data
     });

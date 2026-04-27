@@ -24,6 +24,31 @@ export function getDisplayImageUrl(url) {
   }
 }
 
+/**
+ * Resolves client logo for a native img element. Full URLs pass through
+ * {@link getDisplayImageUrl} (e.g. /images/ → /gcs/ on the image base host).
+ * API-relative paths like /gcs/... or /images/... are prefixed with
+ * {@link IMAGE_BASE_URL} so they load from the API host in local dev.
+ */
+export function getClientLogoDisplayUrl(url) {
+  if (!url || typeof url !== "string") return url;
+  const t = url.trim();
+  if (!t) return t;
+  let absolute = t;
+  if (t.startsWith("/gcs/") || t.startsWith("/images/")) {
+    try {
+      const base = new URL(IMAGE_BASE_URL);
+      absolute = `${base.origin}${t}`;
+    } catch {
+      return t;
+    }
+  }
+  if (absolute.startsWith("http://") || absolute.startsWith("https://")) {
+    return getDisplayImageUrl(absolute);
+  }
+  return absolute;
+}
+
 // Cache for known broken images to avoid repeated failed requests
 const brokenImageCache = new Set();
 

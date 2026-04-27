@@ -7,6 +7,9 @@ const api_base_url = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai
 export const API_BASE_URL =
   api_base_url.startsWith("http://") || api_base_url.startsWith("https://") ? api_base_url : `https://${api_base_url}`;
 
+/** Public tier key for `X-API-Key` on unauthenticated routes (set `NEXT_PUBLIC_X_API_KEY` in `.env`). */
+export const PUBLIC_X_API_KEY = (process.env.NEXT_PUBLIC_X_API_KEY ?? "").trim();
+
 let apiHostname = "api.lenaai.net";
 try {
   apiHostname = new URL(API_BASE_URL).hostname;

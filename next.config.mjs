@@ -1,3 +1,9 @@
+import nextEnv from "@next/env";
+
+// Ensure .env* are on process.env before any reads (recommended for next.config)
+const { loadEnvConfig } = nextEnv;
+loadEnvConfig(process.cwd());
+
 // Image hostname from NEXT_PUBLIC_IMAGE_BASE_URL (fallback API) for next/image remotePatterns
 const imageBaseUrlRaw =
   process.env.NEXT_PUBLIC_IMAGE_BASE_URL ||
