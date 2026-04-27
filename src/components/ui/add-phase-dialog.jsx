@@ -92,6 +92,31 @@ export default function AddPhseDilog({
         fileId,
       }));
 
+      // If no projectId (creating new project), just return phase data locally
+      if (!projectId) {
+        console.log("[AddPhaseDialog] No projectId, returning phase data locally");
+        const phaseData = {
+          id: formData.id,
+          name: formData.name,
+          description: formData.description,
+          master_plan: formData.master_plan,
+          updated_at: formData.updated_at,
+          images: imagesForApi,
+        };
+        onAdd(phaseData);
+        setFormData({
+          id: uuidv4(),
+          name: "",
+          description: "",
+          master_plan: { url: null, fileId: null },
+          updated_at: new Date().toISOString(),
+        });
+        onClose();
+        return;
+      }
+
+      console.log("[AddPhaseDialog] Calling API with projectId:", projectId);
+
       if (editMode) {
         const formDataToUpdate = {
           name: formData.name,
@@ -223,10 +248,7 @@ export default function AddPhseDilog({
               name="name"
               value={formData.name}
               onChange={handleChange}
-              disabled={editMode}
-              className={`block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-                editMode ? "bg-gray-100 cursor-not-allowed" : ""
-              }`}
+              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 

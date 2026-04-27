@@ -8,6 +8,7 @@ import FormMultiSelect from "@/components/ui/inputs/form-multi-select";
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import MultiLangInput from "@/components/ui/inputs/multilang-input";
 import PaymentPlansList from "@/components/ui/inputs/payment-plans-list";
+import PhasesList from "@/components/ui/inputs/phases-list";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
@@ -71,6 +72,7 @@ const FIELD_TO_SECTION_KEY = {
   location_landmark: "location",
   payment_plans: "commercial",
   developer_id: "commercial",
+  phases: "media",
   video_url: "links",
   google_map_link: "links",
   master_plan: "media",
@@ -231,6 +233,7 @@ export default function AddCompoundDialog({
     building_types_images: null,
     finishing_type: null,
     images: null,
+    phases: null,
   });
 
   const [formData, setFormData] = useState({
@@ -283,6 +286,7 @@ export default function AddCompoundDialog({
       [],
     payment_plans:
       projectData?.payment_plans || projectData?.project?.payment_plans || [],
+    phases: projectData?.phases || projectData?.project?.phases || [],
     building_types_images:
       projectData?.building_types_images ||
       projectData?.project?.building_types_images ||
@@ -378,6 +382,7 @@ export default function AddCompoundDialog({
             projectData.payment_plans ||
             projectData?.project?.payment_plans ||
             [],
+          phases: projectData.phases || projectData?.project?.phases || [],
           building_types_images:
             projectData?.building_types_images ||
             projectData?.project?.building_types_images ||
@@ -437,6 +442,7 @@ export default function AddCompoundDialog({
           images: [],
           properties_types: [],
           payment_plans: [],
+          phases: [],
           building_types_images: {},
           finishing_type: [],
           facility_management: null,
@@ -467,6 +473,7 @@ export default function AddCompoundDialog({
         primary_units_sold_out: true,
         properties_types: [],
         payment_plans: [],
+        phases: [],
         video_url: "",
         google_map_link: "",
         master_plan: { url: null, fileId: null },
@@ -590,6 +597,11 @@ export default function AddCompoundDialog({
           projectData?.payment_plans ||
           projectData?.project?.payment_plans ||
           prev.payment_plans ||
+          [],
+        phases:
+          projectData?.phases ||
+          projectData?.project?.phases ||
+          prev.phases ||
           [],
         building_types_images:
           projectData?.building_types_images ||
@@ -1127,6 +1139,7 @@ export default function AddCompoundDialog({
         longitude: lngValue ? parseFloat(lngValue) : null,
         location_landmark: landmarkValue || null,
         payment_plans: paymentPlansForApi,
+        phases: formData.phases || [],
         facility_management: facilityManagementForApi,
         orientation_url: formData.orientation_url?.trim() || null,
         amenities: normalizedAmenities,
@@ -1379,6 +1392,7 @@ export default function AddCompoundDialog({
         client_id: resetClientId,
         properties_types: [],
         payment_plans: [],
+        phases: [],
         building_types_images: {},
         finishing_type: [],
         facility_management: null,
@@ -1549,6 +1563,22 @@ export default function AddCompoundDialog({
       setErrors({
         ...errors,
         payment_plans: null,
+      });
+    }
+  };
+
+  const handlePhasesChange = (newPhases) => {
+    setIsDirty(true);
+    setFormData((prev) => ({
+      ...prev,
+      phases: newPhases,
+    }));
+
+    // Clear error if any
+    if (errors.phases) {
+      setErrors({
+        ...errors,
+        phases: null,
       });
     }
   };
@@ -2241,6 +2271,16 @@ export default function AddCompoundDialog({
                   }}
                   isUploading={isUploading}
                   setIsUploading={setIsUploading}
+                />
+              </div>
+
+              <div ref={(el) => (fieldRefs.current.phases = el)}>
+                <PhasesList
+                  phases={formData.phases}
+                  onChange={handlePhasesChange}
+                  error={errors.phases}
+                  required={false}
+                  projectId={editMode ? (projectData?.id || projectData?.project?.id) : null}
                 />
               </div>
             </FormSection>
