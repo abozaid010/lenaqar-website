@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import BasicDetailsStep from "@/components/ui/unit-forms/basic-details-step";
@@ -10,7 +10,7 @@ import SaleDetailsStep from "@/components/ui/unit-forms/sale-details-step";
 import StepIndicator from "./step-indicator";
 
 import { useI18n } from "@/hooks/useI18n";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { addYears, isAfter, isBefore, subYears } from "date-fns";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { ArrowLeft, ArrowRight } from "lucide-react";
@@ -22,6 +22,7 @@ import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
+import { getValidatedClientId } from "@/utils/clientId-validator";
 
 /** Parse value to number for API (strip commas/formatting). */
 function toAmount(value) {
@@ -77,28 +78,108 @@ function sanitizeAmountsForApi(data) {
 }
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
-  // Temp: fallback to client ID from access token when unit/cookie is missing clientId
-  const clientId =
-    LenaCookiesManager.getClientId() || getClientid() || null;
+  // Secure clientId state management with loading and error handling
+  const [clientIdState, setClientIdState] = useState({
+    clientId: null,
+    isLoading: true,
+    error: null,
+    source: 'none'
+  });
 
-  if (!clientId) {
-    return (
-      <>
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-          <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+  // Load and validate clientId on component mount
+  useEffect(() => {
+    let isMounted = true;
 
-            <h2 className="text-lg font-semibold pr-8">Client ID not found</h2>
-            <p className="text-gray-600 mt-2 mb-4">Please ensure you are logged in with a valid client.</p>
+    const loadClientId = async () => {
+      try {
+        const result = await getValidatedClientId();
+        
+        if (isMounted) {
+          setClientIdState({
+            clientId: result.clientId,
+            isLoading: false,
+            error: result.error,
+            source: result.source
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load client ID:', error);
+        if (isMounted) {
+          setClientIdState({
+            clientId: null,
+            isLoading: false,
+            error: 'Failed to validate client session',
+            source: 'error'
+          });
+        }
+      }
+    };
+
+    loadClientId();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Show loading state while validating clientId
+  if (clientIdState.isLoading) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-lg">Validating session...</span>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Show error state if clientId validation fails
+  if (!clientIdState.clientId) {
+    const { t } = useI18n();
+    const errorMessage = clientIdState.error || 'Client ID not found';
+    
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          
+          <h2 className="text-lg font-semibold text-red-600 mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-4">{errorMessage}</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Source attempted: {clientIdState.source}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="w-full px-4 py-2 bg-primary text-white rounded-md hover:opacity-90 transition-opacity"
+              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
               Close
             </button>
           </div>
         </div>
-      </>
+      </div>,
+      document.body
     );
   }
 
@@ -110,7 +191,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
 
-  const developersQuery = useDevelopers(clientId, false);
+  const developersQuery = useDeveloperNames(clientIdState.clientId, false);
   
   // Optimized shared data object - only load what we need
   const sharedData = {
@@ -151,7 +232,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   );
   // common form data for both sell and rent
   const [formData, setFormData] = useState(() => ({
-    clientId: unitData?.clientId || clientId,
+    clientId: unitData?.clientId || clientIdState.clientId,
     clientName: unitData?.clientName || clientName,
     country: unitData?.country || "Egypt",
     dataSource: unitData?.dataSource || "website",

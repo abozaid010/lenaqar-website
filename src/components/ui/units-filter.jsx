@@ -3,7 +3,7 @@
 import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
-import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import en from "../../../public/locales/en";
@@ -26,7 +26,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
     isPublic
   );
-  const { data: developersData, isLoading: developersLoading } = useDevelopers(
+  const { data: developersData, isLoading: developersLoading } = useDeveloperNames(
     null,
     isPublic
   );
@@ -90,7 +90,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (!developersLoading) {
       setDevelopers(developersData || []);
     }
-  }, [developersLoading || projectsLoading]);
+  }, [projectsLoading, projectsData, developersLoading, developersData]);
 
   // Load city labels asynchronously
   useEffect(() => {

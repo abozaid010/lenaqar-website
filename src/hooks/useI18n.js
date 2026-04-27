@@ -3,37 +3,45 @@
 import { useI18n as useTranslation } from "@/context/translate-api";
 import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
+import { safePropertyAccess, sanitizeTranslationValue, validateTranslationKey } from "@/utils/translation-sanitizer";
 
 export function useI18n() {
   const { t, locale, changeLanguage } = useTranslation();
 
-  // Enhanced translation function with fallback and logging
+  // Enhanced translation function with security and fallback
   const translate = useCallback((key, fallback = null) => {
     if (!key) return fallback || "";
     
-    try {
-      // Try to get translation
-      const keys = key.split('.');
-      let value = t;
-      
-      for (const k of keys) {
-        value = value?.[k];
+    // Validate and sanitize the translation key
+    const validation = validateTranslationKey(key, fallback);
+    
+    if (!validation.isValid) {
+      // Log security issue in development
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Unsafe translation key rejected: ${key}`);
       }
+      return validation.fallback;
+    }
+    
+    try {
+      // Use safe property access to prevent prototype pollution
+      const value = safePropertyAccess(t, validation.safeKey);
       
       if (value !== undefined && value !== null && value !== "") {
-        return value;
+        // Sanitize the translation value to prevent XSS
+        return sanitizeTranslationValue(value);
       }
       
       // Log missing key for debugging
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation key: ${key} for locale: ${locale}`);
+        console.warn(`Missing translation key: ${validation.safeKey} for locale: ${locale}`);
       }
       
-      // Return fallback or key itself
-      return fallback || key;
+      // Return fallback or safe key
+      return fallback || validation.safeKey;
     } catch (error) {
-      console.error(`Translation error for key: ${key}`, error);
-      return fallback || key;
+      console.error(`Translation error for key: ${validation.safeKey}`, error);
+      return fallback || validation.safeKey;
     }
   }, [t, locale]);
 

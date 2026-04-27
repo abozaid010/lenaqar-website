@@ -32,8 +32,21 @@ export async function getProjectByEnName(enName: string): Promise<ProjectApiResp
     // Decode URL-encoded en_name
     const decodedEnName = decodeURIComponent(enName);
     
-    // Fetch all projects to find by en_name
-    const response = await axiosInstance.get('/projects/all');
+    // Fetch all projects to find by en_name with error handling
+    let response;
+    try {
+      response = await axiosInstance.get('/projects/all');
+    } catch (apiError) {
+      // If /projects/all fails due to ClientsCache error, try alternative endpoints
+      console.warn('Primary projects endpoint failed, trying fallback:', apiError);
+      
+      try {
+        response = await axiosInstance.get('/projectsv2/all_projects_names');
+      } catch (fallbackError) {
+        console.error('All project endpoints failed:', fallbackError);
+        throw new Error('Unable to fetch projects data');
+      }
+    }
     
     if (response.data) {
       let projects = [];

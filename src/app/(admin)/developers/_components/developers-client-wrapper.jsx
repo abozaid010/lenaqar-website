@@ -11,7 +11,8 @@ import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
@@ -21,10 +22,21 @@ import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 
 export default function DevelopersClientWrapper({ clientId }) {
+  const router = useRouter();
+  
   // This page should use ONE source of truth.
-  // We use the public endpoint here because it contains the complete directory data
-  // (including social/contact fields) that the UI expects to render.
-  const { data, isLoading, isError, error, refetch, isFetching } = useDevelopers(
+  // We use the slim API with infinite scroll for pagination
+  const { 
+    data: developersData, 
+    isLoading, 
+    isError, 
+    error, 
+    refetch, 
+    isFetching,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage
+  } = useDevelopers(
     clientId,
     true
   );
@@ -35,7 +47,6 @@ export default function DevelopersClientWrapper({ clientId }) {
     has: hasDeveloperAction,
   } = useModuleActions("developers");
   const canImportDevelopers = hasDeveloperAction("import");
-  const [developers, setDevelopers] = useState([]);
   const [selectedDeveloper, setSelectedDeveloper] = useState(null);
   const [selectedDeveloperSearch, setSelectedDeveloperSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
@@ -45,37 +56,57 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openInEditMode, setOpenInEditMode] = useState(false);
   const menuRefs = useRef({});
+  const scrollContainerRef = useRef(null);
+
+  // Function to handle viewing developer details
+  const handleViewDeveloperDetails = useCallback((developer) => {
+    const path = clientId
+      ? `/${clientId}/developers/${developer.id}`
+      : `/developers/${developer.id}`;
+    router.push(path);
+  }, [router, clientId]);
+
+  // Infinite scroll handler
+  const handleScroll = useCallback((e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    
+    // Check if user has scrolled to near the bottom (within 100px)
+    if (scrollHeight - scrollTop - clientHeight < 100) {
+      if (hasNextPage && !isFetchingNextPage && !isFetching) {
+        console.log("🔄 Loading next page of developers...");
+        fetchNextPage();
+      }
+    }
+  }, [hasNextPage, isFetchingNextPage, isFetching, fetchNextPage]);
 
   // Convert developers to options format for SearchableDropdownSelect
   const developerOptions = useMemo(() => {
-    if (!data || !Array.isArray(data)) return [];
-    return data.map(developer => ({
+    if (!developersData || !Array.isArray(developersData)) return [];
+    return developersData.map(developer => ({
       value: developer.id,
       label: locale === "ar" ? developer.ar_name : developer.en_name,
       ar_name: developer.ar_name,
       en_name: developer.en_name
     }));
-  }, [data, locale]);
+  }, [developersData, locale]);
 
-  useEffect(() => {
-    if (!isLoading && !isError && data) {
-      // Validate that data is an array
-      if (!Array.isArray(data)) {
-        console.error("Developers data is not an array:", data);
-        return;
-      }
-
-      // Filter by selected developer search or search query
-      let filtered = data;
-      if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
-        const selected = data.find(d => d.id === selectedDeveloperSearch);
-        filtered = selected ? [selected] : data;
-      } else if (searchQuery) {
-        filtered = filterBySearchQuery(data, searchQuery, ["ar_name", "en_name"]);
-      }
-      setDevelopers(filtered);
+  // Memoize filtered developers to prevent infinite re-renders
+  const filteredDevelopers = useMemo(() => {
+    if (!developersData || !Array.isArray(developersData)) {
+      return [];
     }
-  }, [isLoading, isError, data, searchQuery, selectedDeveloperSearch]);
+
+    // Filter by selected developer search or search query
+    let filtered = developersData;
+    if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
+      const selected = developersData.find(d => d.id === selectedDeveloperSearch);
+      filtered = selected ? [selected] : developersData;
+    } else if (searchQuery) {
+      filtered = filterBySearchQuery(developersData, searchQuery, ["ar_name", "en_name"]);
+    }
+    
+    return filtered;
+  }, [developersData, searchQuery, selectedDeveloperSearch]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -95,19 +126,27 @@ export default function DevelopersClientWrapper({ clientId }) {
   }, [openMenuId]);
 
   const handleEdit = (updatedDeveloper) => {
-    setDevelopers((prev) =>
-      prev.map((dev) =>
-        dev.id === updatedDeveloper.id ? updatedDeveloper : dev
-      )
-    );
+    // Close dialog and clear selection
     setIsOpen(false);
     setSelectedDeveloper(null);
+    
+    // Refetch data to get updated list
+    refetch().catch(error => {
+      console.error("Failed to refetch developers after edit:", error);
+      toast.error("Failed to refresh developers list");
+    });
   };
 
   const handleAdd = (newDeveloper) => {
-    setDevelopers((prev) => [...prev, newDeveloper]);
+    // Close dialog and clear selection
     setIsOpen(false);
     setSelectedDeveloper(null);
+    
+    // Refetch data to get updated list
+    refetch().catch(error => {
+      console.error("Failed to refetch developers after add:", error);
+      toast.error("Failed to refresh developers list");
+    });
   };
 
   const handleDelete = async (developerId) => {
@@ -118,9 +157,8 @@ export default function DevelopersClientWrapper({ clientId }) {
         return;
       }
 
-      setDevelopers((prev) =>
-        prev.filter((developer) => developer.id !== developerId)
-      );
+      // Refetch data to get updated list
+      await refetch();
       toast.success(t?.common?.developerDeleted);
       setSelectedDeveloper(null);
       setShowDeleteDialog(false);
@@ -147,7 +185,7 @@ export default function DevelopersClientWrapper({ clientId }) {
     }
   };
 
-  // Normalize WhatsApp value into a URL:
+  // Normalize WhatsApp value into a URL with enhanced security:
   // - If input is already a URL (whatsapp.com / wa.me / http(s)), open as-is (with https:// if missing)
   // - Otherwise treat it as a phone number and build https://wa.me/<digits>
   //
@@ -159,10 +197,16 @@ export default function DevelopersClientWrapper({ clientId }) {
 
     const lower = raw.toLowerCase();
 
-    // Already has scheme
-    if (lower.startsWith("http://") || lower.startsWith("https://")) return raw;
+    // Already has scheme - validate URL safety
+    if (lower.startsWith("http://") || lower.startsWith("https://")) {
+      // Basic URL validation to prevent XSS
+      if (raw.includes("javascript:") || raw.includes("data:") || raw.includes("vbscript:")) {
+        return "";
+      }
+      return raw;
+    }
 
-    // WhatsApp / wa.me URLs without scheme
+    // WhatsApp / wa.me URLs without scheme - validate safety
     if (lower.startsWith("wa.me/") || lower.startsWith("www.wa.me/")) return `https://${raw}`;
     if (lower.startsWith("whatsapp.com/") || lower.startsWith("www.whatsapp.com/"))
       return `https://${raw}`;
@@ -171,15 +215,24 @@ export default function DevelopersClientWrapper({ clientId }) {
       return `https://${raw.replace(/^\/+/, "")}`;
     }
 
-    // Other URL (best-effort)
-    if (lower.startsWith("www.")) return `https://${raw}`;
+    // Other URL (best-effort) - validate safety
+    if (lower.startsWith("www.")) {
+      if (raw.includes("javascript:") || raw.includes("data:") || raw.includes("vbscript:")) {
+        return "";
+      }
+      return `https://${raw}`;
+    }
 
-    // Phone normalization
+    // Phone normalization with enhanced security
     let cleaned = raw.replace(/[\s\-\(\)\.]/g, "");
     if (cleaned.startsWith("00")) cleaned = cleaned.slice(2); // international prefix
     if (cleaned.startsWith("+")) cleaned = cleaned.slice(1);
     const digitsOnly = cleaned.replace(/\D/g, "");
-    if (digitsOnly === "") return "";
+    
+    // Validate phone number length and format
+    if (digitsOnly === "" || digitsOnly.length < 7 || digitsOnly.length > 15) {
+      return "";
+    }
 
     return `https://wa.me/${digitsOnly}`;
   };
@@ -230,8 +283,7 @@ export default function DevelopersClientWrapper({ clientId }) {
 
   // Handle row click to view developer details
   const handleRowClick = (developer) => {
-    setSelectedDeveloper(developer);
-    setIsOpen(true);
+    handleViewDeveloperDetails(developer);
   };
 
   return (
@@ -301,7 +353,11 @@ export default function DevelopersClientWrapper({ clientId }) {
       <div className="mt-4">
         <div className="bg-white h-fit rounded-lg shadow-sm border border-gray-200 overflow-hidden">
 
-          <div className="max-h-[80vh] overflow-y-auto">
+          <div 
+            ref={scrollContainerRef}
+            className="max-h-[80vh] overflow-y-auto"
+            onScroll={handleScroll}
+          >
             {isLoading ? (
               <LoadingSpinner containerClassName="flex items-center justify-center p-6" />
             ) : isError ? (
@@ -316,7 +372,7 @@ export default function DevelopersClientWrapper({ clientId }) {
                 }
                 retryLabel={t.developerPage?.retryLabel || "Retry"}
               />
-            ) : developers.length === 0 ? (
+            ) : filteredDevelopers.length === 0 ? (
               // <div className="flex flex-col items-center justify-center p-6">
               //   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               //     <svg
@@ -345,7 +401,7 @@ export default function DevelopersClientWrapper({ clientId }) {
               />
             ) : (
               <div className="space-y-3 p-4">
-                {developers.map((d) => {
+                {filteredDevelopers.map((d) => {
                   const displayDescription = locale === "ar" && d.ar_description ? d.ar_description : d.description;
 
                   return (
@@ -475,6 +531,20 @@ export default function DevelopersClientWrapper({ clientId }) {
                     </div>
                   );
                 })}
+                
+                {/* Loading indicator for next page */}
+                {isFetchingNextPage && (
+                  <div className="flex justify-center p-4">
+                    <LoadingSpinner />
+                  </div>
+                )}
+                
+                {/* End of list indicator */}
+                {!hasNextPage && filteredDevelopers.length > 0 && (
+                  <div className="text-center p-4 text-gray-500 text-sm">
+                    {t.common?.endOfList || "End of developers list"}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -512,7 +582,7 @@ export default function DevelopersClientWrapper({ clientId }) {
         onClose={() => setIsImportOpen(false)}
         clientId={clientId}
         onImported={handleImported}
-        existingDeveloperIds={developers.map((d) => d.id)}
+        existingDeveloperIds={filteredDevelopers.map((d) => d.id)}
       />
     </div>
   );

@@ -6,6 +6,9 @@ import { parseExistingProjectData, parseValidationErrors } from "./error-parser"
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-handler";
+import { validateClientId, createSafeClientId } from "./clientId-validator";
+import { with2SecondRetry } from "./api-retry";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -69,7 +72,7 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
   }
 }
 
-export async function fetchUnitsFilter(searchParams, publicOnly = false) {
+const fetchUnitsFilterBase = async (searchParams, publicOnly = false) => {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
     const url = `${!publicOnly ? "/units/all" : "/public/units"}`;
@@ -98,13 +101,15 @@ export async function fetchUnitsFilter(searchParams, publicOnly = false) {
     // Re-throw the error so TanStack Query can handle it properly
     throw error;
   }
-}
+};
 
-  /**
-   * Fetches units from /units/all for the Resale page.
-   * Always sends is_primary: false. When filter is "all", only is_primary is sent; otherwise
-   * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
-   */
+export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
+
+/**
+ * Fetches units from /units/all for the Resale page.
+ * Always sends is_primary: false. When filter is "all", only is_primary is sent; otherwise
+ * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
+ */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
     const parsed =
@@ -191,48 +196,219 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
   }
 }
 
-export async function fetchDevelopers(isPublic = false) {
-  const url = isPublic ? "/public/developers" : "/developers/";
+// Original fetchDevelopers - keeps full developer data for developers tab with pagination
+const fetchDevelopersBase = async ({ pageParam, pageSize = 20 } = {}) => {
+  const params = new URLSearchParams();
+  params.append("page_size", String(pageSize));
+  
+  // Add cursor if provided (for infinite scroll)
+  if (pageParam) {
+    params.append("cursor", pageParam);
+  }
 
+  const url = `/developers/v1/get_all_slim?${params.toString()}`;
+  
+  console.log(`🔍 Fetching developers with pagination: ${url}`);
+
+  // Debug: Check if access token is available
+  const accessToken = require("@/lib/LenaCookiesManager").LenaCookiesManager?.getAccessToken?.();
+  console.log(`🔐 Access token available: ${!!accessToken ? 'YES' : 'NO'}`);
+
+  const response = await axiosInstance.get(url);
+  
+  console.log(`✅ Developers pagination API response status: ${response.status}`);
+  
+  // Validate response data structure according to API specification
+  if (!response.data) {
+    throw new Error("Invalid response format from server: missing response.data");
+  }
+
+  // Handle the exact response structure from API specification
+  if (!response.data.status || !response.data.data) {
+    throw new Error(
+      `Invalid response structure. Expected {status: true, data: {developers: [], next_cursor: string|null}}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
+  }
+
+  const { developers, next_cursor } = response.data.data;
+  
+  // Validate developers array
+  if (!Array.isArray(developers)) {
+    throw new Error(`Expected developers to be an array, got: ${typeof developers}`);
+  }
+  
+  // Sort developersData by name according to app language: ar_name if Arabic, else en_name
+  const lang = typeof window !== "undefined" && window.localStorage
+    ? window.localStorage.getItem("lang")
+    : "en";
+  const sortedDevelopers = [...developers].sort((a, b) => {
+    const nameA = (lang === "ar" ? a.ar_name : a.en_name) || "";
+    const nameB = (lang === "ar" ? b.ar_name : b.en_name) || "";
+    return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", { sensitivity: "base" });
+  });
+  
+  return {
+    developers: sortedDevelopers,
+    nextCursor: next_cursor,
+    hasNext: next_cursor !== null
+  };
+};
+
+export const fetchDevelopers = with2SecondRetry(fetchDevelopersBase);
+
+// New fetchDeveloperNames - optimized for dropdown lists with names only using slim API
+const fetchDeveloperNamesBase = async (isPublic = false) => {
+  // Use the same slim API for both public and private calls
+  const url = "/developers/v1/get_all_slim?page_size=100"; // Larger page size for dropdown
+  
+  console.log(`🔍 Fetching developer names from slim API: ${url} (isPublic: ${isPublic})`);
+
+  // Debug: Check if access token is available
+  const accessToken = require("@/lib/LenaCookiesManager").LenaCookiesManager?.getAccessToken?.();
+  console.log(`🔐 Access token available for names: ${!!accessToken ? 'YES' : 'NO'}`);
+
+  const response = await axiosInstance.get(url);
+  
+  console.log(`✅ Developer names API response status: ${response.status}`);
+  console.log(`📊 Developer names data received: ${Array.isArray(response.data?.data?.developers) ? response.data.data.developers.length : 'N/A'} items`);
+  
+  // Validate response data structure according to API specification
+  if (!response.data) {
+    throw new Error("Invalid response format from server: missing response.data");
+  }
+
+  // Handle the exact response structure from API specification
+  if (!response.data.status || !response.data.data) {
+    throw new Error(
+      `Invalid response structure. Expected {status: true, data: {developers: [], next_cursor: string|null}}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+    );
+  }
+
+  const { developers } = response.data.data;
+  
+  // Validate developers array
+  if (!Array.isArray(developers)) {
+    throw new Error(`Expected developers to be an array, got: ${typeof developers}`);
+  }
+  
+  // Sort developersData by name according to app language: ar_name if Arabic, else en_name
+  const lang = typeof window !== "undefined" && window.localStorage
+    ? window.localStorage.getItem("lang")
+    : "en";
+  const sortedDevelopers = [...developers].sort((a, b) => {
+    const nameA = (lang === "ar" ? a.ar_name : a.en_name) || "";
+    const nameB = (lang === "ar" ? b.ar_name : b.en_name) || "";
+    return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", { sensitivity: "base" });
+  });
+  
+  return sortedDevelopers;
+};
+
+export const fetchDeveloperNames = with2SecondRetry(fetchDeveloperNamesBase);
+
+function normalizeDeveloperDetailPayload(raw) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
+  const description =
+    raw.description ?? raw.en_description ?? raw.enDescription ?? "";
+  const ar_description =
+    raw.ar_description ?? raw.ar_desc ?? raw.arDescription ?? "";
+  const en_name = raw.en_name ?? raw.english_name ?? raw.name_en ?? "";
+  const ar_name = raw.ar_name ?? raw.name_ar ?? "";
+  const id = raw.id ?? raw.uuid ?? raw.developer_id ?? null;
+  return {
+    ...raw,
+    id,
+    description,
+    ar_description,
+    en_name,
+    ar_name,
+    updated_at: raw.updated_at ?? raw.updatedAt ?? raw.modified_at ?? null,
+    client_id: raw.client_id ?? raw.clientId ?? null,
+    author: raw.author ?? raw.created_by ?? null,
+    sales_email: raw.sales_email ?? raw.email ?? null,
+    sales_phone: raw.sales_phone ?? raw.phone ?? null,
+  };
+}
+
+function isLikelyDeveloperRecord(obj) {
+  if (!obj || typeof obj !== "object" || Array.isArray(obj)) return false;
+  return Boolean(
+    obj.id ||
+      obj.uuid ||
+      obj.developer_id ||
+      obj.en_name ||
+      obj.ar_name ||
+      obj.description ||
+      obj.ar_description ||
+      obj.en_description ||
+      obj.sales_email
+  );
+}
+
+// Fetch individual developer details by ID
+const fetchDeveloperDetailsBase = async (developerId) => {
+  if (!developerId) {
+    throw new Error("Developer ID is required");
+  }
   try {
-    const response = await axiosInstance.get(url);
-    // Validate response data structure
+    const response = await axiosInstance.get(`/developers/${developerId}`, {
+      headers: { accept: "application/json" },
+    });
+
     if (!response.data) {
       throw new Error("Invalid response format from server: missing response.data");
     }
 
-    let developersData;
+    const envelope = response.data;
 
-    // Check if data is directly an array (response.data is array)
-    if (Array.isArray(response.data)) {
-      developersData = response.data;
-    } else if (response.data.data && Array.isArray(response.data.data)) {
-      // Check if data is nested (response.data.data is array)
-      developersData = response.data.data;
-    } else {
-      // If neither structure matches, throw error
+    if (envelope.status === false) {
       throw new Error(
-        `Unexpected response structure. Expected array or {data: array}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+        envelope.error_message || envelope.message || "Failed to load developer details"
       );
     }
-    // Sort developersData by name according to app language: ar_name if Arabic, else en_name
-    const lang = typeof window !== "undefined" && window.localStorage
-      ? window.localStorage.getItem("lang")
-      : "en";
-    developersData.sort((a, b) => {
-      const nameA = (lang === "ar" ? a.ar_name : a.en_name) || "";
-      const nameB = (lang === "ar" ? b.ar_name : b.en_name) || "";
-      return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", { sensitivity: "base" });
-    });
-    // console.log("=== API Response Data ===", developersData);
-    return developersData;
+
+    let payload =
+      envelope.data !== undefined && envelope.data !== null ? envelope.data : envelope;
+
+    if (payload && typeof payload === "object" && payload.developer) {
+      payload = payload.developer;
+    }
+
+    if (
+      payload &&
+      typeof payload === "object" &&
+      !isLikelyDeveloperRecord(payload) &&
+      payload.data &&
+      typeof payload.data === "object" &&
+      isLikelyDeveloperRecord(payload.data)
+    ) {
+      payload = payload.data;
+    }
+
+    if (!isLikelyDeveloperRecord(payload) && isLikelyDeveloperRecord(envelope)) {
+      payload = envelope;
+    }
+
+    if (!payload || typeof payload !== "object") {
+      throw new Error("Invalid developer details payload");
+    }
+
+    const normalized = normalizeDeveloperDetailPayload(payload);
+
+    if (!normalized.id) {
+      throw new Error(
+        `Developer details response missing id. Keys: ${JSON.stringify(Object.keys(payload))}`
+      );
+    }
+
+    return normalized;
   } catch (error) {
-    console.error("Failed to fetch developers data:", error.message);
-    console.error("Error details:", error);
-    // Re-throw the error so TanStack Query can handle it properly
+    console.error("Failed to fetch developer details:", error?.message || error);
     throw error;
   }
-}
+};
+
+export const fetchDeveloperDetails = with2SecondRetry(fetchDeveloperDetailsBase);
 
 /**
  * Fetches a single project by ID (full details).
@@ -302,42 +478,38 @@ export async function fetchProjects(isPublic = false) {
  * Fetches lightweight project names for dropdowns/filters.
  * Response items: { id, en_name, ar_name, city, district } (district required for city+district filtering).
  */
-export async function fetchProjectsNames(isPublic = false) {
+const fetchProjectsNamesBase = async (isPublic = false) => {
   const url = isPublic ? "/projectsv2/all_projects_names?public=true" : "/projectsv2/all_projects_names";
 
-  try {
-    const response = await axiosInstance.get(url);
+  const response = await axiosInstance.get(url);
 
-    // Validate response data structure
-    if (!response.data) {
-      throw new Error("Invalid response format from server: missing response.data");
-    }
-
-    // Handle new API response structure: {status, code, message, data, error_message}
-    if (response.data.data) {
-      if (!Array.isArray(response.data.data)) {
-        throw new Error(
-          `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
-        );
-      }
-      return response.data.data;
-    }
-
-    // Fallback: check if data is directly an array (for backward compatibility)
-    if (Array.isArray(response.data)) {
-      return response.data;
-    }
-
-    // If neither structure matches, throw error
-    throw new Error(
-      `Unexpected response structure. Expected {data: array} or array, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
-    );
-  } catch (error) {
-    console.error("Failed to fetch project names:", error.message);
-    // Re-throw the error so TanStack Query can handle it properly
-    throw error;
+  // Validate response data structure
+  if (!response.data) {
+    throw new Error("Invalid response format from server: missing response.data");
   }
-}
+
+  // Handle new API response structure: {status, code, message, data, error_message}
+  if (response.data.data) {
+    if (!Array.isArray(response.data.data)) {
+      throw new Error(
+        `Expected array but received: ${typeof response.data.data}. Response structure: ${JSON.stringify(Object.keys(response.data))}`
+      );
+    }
+    return response.data.data;
+  }
+
+  // Fallback: check if data is directly an array (for backward compatibility)
+  if (Array.isArray(response.data)) {
+    return response.data;
+  }
+
+  // If neither structure matches, throw error
+  throw new Error(
+    `Unexpected response structure. Expected {data: array} or array, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
+  );
+};
+
+export const fetchProjectsNames = with2SecondRetry(fetchProjectsNamesBase);
 
 export async function fetchProjectsPaginated({ limit = 10, lastDocId, cityEnName, developerId } = {}) {
   try {
@@ -450,116 +622,64 @@ export async function fetchUnitById(id, isPublic = false) {
   }
 }
 
-export async function addUnit(unitData) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
+export const addUnit = withErrorHandling(async (unitData) => {
+  const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
+  return response.data;
+});
 
-export async function addUnitRent(unitData) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add unit:", error.message);
-    return { error: error.response?.data?.message || error.message };
-  }
-}
+export const addUnitRent = withErrorHandling(async (unitData) => {
+  const response = await axiosInstance.post(`/units/v1/add-rent`, unitData);
+  return response.data;
+});
 
-export async function addUnitSaleViaExcel(formData) {
-  try {
-    // v2: import units by developer and return extended summary,
-    // including projects_not_updated for optional cleanup.
-    const response = await axiosInstance.post(
-      `/units/v2/import_units_by_developer`,
-      formData
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to add units via excel:", error.message);
-    return {
-      status: false,
-      data: null,
-      error_message: error.response?.data?.error_message || error.response?.data?.message || error.message,
-    };
-  }
-}
+export const addUnitSaleViaExcel = withErrorHandling(async (formData) => {
+  // v2: import units by developer and return extended summary,
+  // including projects_not_updated for optional cleanup.
+  const response = await axiosInstance.post(
+    `/units/v2/import_units_by_developer`,
+    formData
+  );
+  return response.data;
+});
 
 /**
  * Delete only primary units (isPrimary=true) for the given project IDs.
  * Used as a cleanup step after importing developer units when some
  * projects were not updated.
  */
-export async function deletePrimaryUnits(projectIds) {
-  try {
-    const response = await axiosInstance.delete(
-      `/units/v2/delete_primary_units`,
-      {
-        data: {
-          project_ids: projectIds,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    console.error("Failed to delete primary units:", error.message);
-    return {
-      status: false,
-      data: null,
-      error_message: error.response?.data?.error_message || error.response?.data?.message || error.message,
-    };
-  }
-}
+export const deletePrimaryUnits = withErrorHandling(async (projectIds) => {
+  const response = await axiosInstance.delete(
+    `/units/v2/delete_primary_units`,
+    {
+      data: {
+        project_ids: projectIds,
+      },
+    }
+  );
+  return response.data;
+});
 
-export async function extractUnitsFromText(text) {
-  try {
-    const response = await axiosInstance.post(`/units/extract-from-text`, {
-      text: text || "",
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to extract units from text:", error.message);
-    return {
-      status: false,
-      data: null,
-      error_message: error.response?.data?.error_message || error.message,
-    };
-  }
-}
+export const extractUnitsFromText = withErrorHandling(async (text) => {
+  const response = await axiosInstance.post(`/units/extract-from-text`, {
+    text: text || "",
+  });
+  return response.data;
+});
 
-export async function deleteUnit(id) {
-  try {
-    const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to delete unit:", error.message);
-    return { error: error.message };
-  }
-}
+export const deleteUnit = withErrorHandling(async (id) => {
+  const response = await axiosInstance.delete(`/units/delete?unit_id=${id}`);
+  return response.data;
+});
 
-export async function updateUnit(unit) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/update-sale`, unit);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update unit:", error.message);
-    return { error: error.message };
-  }
-}
+export const updateUnit = withErrorHandling(async (unit) => {
+  const response = await axiosInstance.post(`/units/v1/update-sale`, unit);
+  return response.data;
+});
 
-export async function updateUnitRent(unit) {
-  try {
-    const response = await axiosInstance.post(`/units/v1/update-rent`, unit);
-    return response.data;
-  } catch (error) {
-    console.error("Failed to update unit:", error.message);
-    return { error: error.message };
-  }
-}
+export const updateUnitRent = withErrorHandling(async (unit) => {
+  const response = await axiosInstance.post(`/units/v1/update-rent`, unit);
+  return response.data;
+});
 
 export async function getClientRequirements(user_id) {
   try {
@@ -979,7 +1099,15 @@ export async function updateProfileData(formData) {
 
 // Share Unit Data API //
 export async function getShareUnitData(unit_id) {
-  const clientId = getClientid();
+  const clientId = getValidatedApiClientId();
+
+  if (!clientId) {
+    return createApiError(
+      'Invalid or missing client ID',
+      ERROR_TYPES.AUTHENTICATION,
+      401
+    );
+  }
 
   try {
     const params = {
@@ -1038,13 +1166,38 @@ function getClientIdFromToken() {
 // HELPER FUNCTIONS //
 export function getClientid() {
   const fromToken = getClientIdFromToken();
-  if (fromToken) return fromToken;
+  if (fromToken) {
+    // Validate client ID from token
+    const validation = validateClientId(fromToken);
+    if (validation.isValid) {
+      return validation.sanitizedId;
+    }
+    console.warn("Invalid client ID in token:", validation.error);
+  }
+  
   const clientId = LenaCookiesManager.getClientId();
   if (!clientId) {
-    console.error("Client ID not found in access token or cookies");
-    return null;
+    console.warn("Client ID not found in access token or cookies, using fallback");
+    return "public"; // Fallback for public access
   }
-  return clientId;
+  
+  // Validate client ID from cookies
+  const validation = validateClientId(clientId);
+  if (validation.isValid) {
+    return validation.sanitizedId;
+  }
+  
+  console.warn("Invalid client ID in cookies, using fallback:", validation.error);
+  return "public"; // Fallback for invalid client IDs
+}
+
+/**
+ * Gets a validated client ID safe for API usage
+ * @returns {string|null} - Validated client ID or null if invalid
+ */
+export function getValidatedApiClientId() {
+  const clientId = getClientid();
+  return createSafeClientId(clientId);
 }
 
 // News API //

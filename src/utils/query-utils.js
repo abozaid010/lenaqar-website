@@ -39,6 +39,11 @@ export const developerKeys = {
     "list",
     { client_id, isPublic },
   ],
+  infiniteList: (client_id, isPublic) => [
+    ...developerKeys.all,
+    "infiniteList",
+    { client_id, isPublic },
+  ],
 };
 
 // Query key factory for compounds
