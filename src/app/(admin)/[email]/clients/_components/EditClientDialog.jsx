@@ -6,6 +6,7 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { useUpdateClient } from "@/hooks/use-clients-data";
 import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleActionsSelector";
 import { useI18n } from "@/hooks/useI18n";
+import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
@@ -48,6 +49,10 @@ function buildInitialState(client) {
     address: client.address || "",
     crm_link: client.crm_link || "",
     google_map_link: client.google_map_link || "",
+    logo_url:
+      (typeof client.logo_url === "string" && client.logo_url.trim()) ||
+      (typeof client.logo === "string" && client.logo.trim()) ||
+      "",
     client_type: client.client_type || "free",
     is_active: client.is_active ?? true,
     price_percentage: client.price_percentage ?? 0,
@@ -62,6 +67,7 @@ function buildInitialState(client) {
 export default function EditClientDialog({ client, isOpen, onClose }) {
   const { t } = useI18n();
   const [form, setForm] = useState(() => buildInitialState(client));
+  const [logoUploading, setLogoUploading] = useState(false);
   const updateClient = useUpdateClient();
 
   useEffect(() => {
@@ -74,6 +80,7 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
   const handleSubmit = async () => {
     const payload = {
       ...form,
+      logo_url: form.logo_url || null,
       price_percentage: parseFloat(form.price_percentage) || 0,
       accurate_queries_level: parseInt(form.accurate_queries_level) || 0,
     };
@@ -94,8 +101,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       title={`Edit ${client.client_name || client.client_id}`}
       submitLabel="Save Changes"
       onSubmit={handleSubmit}
-      submitLoading={updateClient.isPending}
-      submitDisabled={updateClient.isPending}
+      submitLoading={updateClient.isPending || logoUploading}
+      submitDisabled={updateClient.isPending || logoUploading}
       bodyClassName="space-y-4"
     >
       {/* Basic Info */}
@@ -123,6 +130,18 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
           <input className={inputCls} value={form.google_map_link} onChange={set("google_map_link")} />
         </Field>
       </div>
+
+      <SectionTitle>Client Logo</SectionTitle>
+      <Field label="Logo">
+        <ClientLogoUploader
+          key={`${client.client_id}-${form.logo_url || "no-logo"}`}
+          clientId={client.client_id}
+          initialLogoUrl={form.logo_url}
+          onLogoUrlChange={(url) => setForm((prev) => ({ ...prev, logo_url: url }))}
+          isUploading={logoUploading}
+          setIsUploading={setLogoUploading}
+        />
+      </Field>
 
       {/* Settings */}
       <SectionTitle>Settings</SectionTitle>
