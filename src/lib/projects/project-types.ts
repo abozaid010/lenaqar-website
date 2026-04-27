@@ -145,7 +145,7 @@ export interface ProjectViewModel {
   locationLandmark?: string;
   latitude?: number;
   longitude?: number;
-  isActive: boolean;
+  primaryUnitsSoldOut: boolean;
   facilityManagement?: { name: string; description?: string; rating?: number } | null;
   units: ProjectUnit[];
   purpose?: string;
