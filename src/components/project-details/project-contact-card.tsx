@@ -1,7 +1,7 @@
 'use client';
 
 import { PhoneCall, MessageCircle, Edit, Trash2 } from 'lucide-react';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ProjectViewModel } from '@/lib/projects/project-types';
 import { deleteProject } from '@/utils/api';
@@ -10,6 +10,7 @@ import { useI18n } from '@/hooks/useI18n';
 import { useModuleActions } from '@/hooks/useModuleActions';
 import { contactInfo } from '@/lib/contact-info';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
+import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
 
 interface Props {
   project: ProjectViewModel;
@@ -29,6 +30,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const deleteInFlightRef = useRef(false);
   const [contactData, setContactData] = useState<ContactData>(null);
   const [contactLoading, setContactLoading] = useState(true);
 
@@ -95,6 +97,8 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
   }, [contactData?.whatsapp]);
 
   const handleDelete = async () => {
+    if (deleteInFlightRef.current) return;
+    deleteInFlightRef.current = true;
     setDeleting(true);
     try {
       const res = await deleteProject(project.id);
@@ -107,6 +111,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
     } catch {
       toast.error('Failed to delete project');
     } finally {
+      deleteInFlightRef.current = false;
       setDeleting(false);
       setShowDeleteConfirm(false);
     }
@@ -194,6 +199,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
           ) : null}
           {canDeleteProject ? (
             <button
+              type="button"
               onClick={() => setShowDeleteConfirm(true)}
               className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
@@ -204,28 +210,23 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
         </div>
       )}
 
-      {/* Delete confirmation */}
-      {canDeleteProject && showDeleteConfirm && (
-        <div className="border border-red-200 rounded-lg p-4 bg-red-50 space-y-3">
-          <p className="text-sm text-red-800 font-medium">Delete &ldquo;{project.title}&rdquo;?</p>
-          <p className="text-xs text-red-600">This action cannot be undone.</p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowDeleteConfirm(false)}
-              className="flex-1 py-1.5 border border-gray-300 rounded-md text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDelete}
-              disabled={deleting}
-              className="flex-1 py-1.5 bg-red-600 text-white rounded-md text-sm hover:bg-red-700 transition-colors disabled:opacity-50"
-            >
-              {deleting ? 'Deleting…' : 'Confirm'}
-            </button>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmDialog
+        isOpen={canDeleteProject && showDeleteConfirm}
+        onClose={() => {
+          if (!deleting) setShowDeleteConfirm(false);
+        }}
+        onConfirm={() => void handleDelete()}
+        title={t?.deleteProjectTitel ?? 'Delete project'}
+        message={`${t?.sureDelet ?? 'Are you sure you want to delete'} "${project.title}"? ${t?.actionDelet ?? 'This action cannot be undone.'}`}
+        confirmLabel={
+          deleting
+            ? locale === 'ar'
+              ? 'جاري الحذف…'
+              : 'Deleting…'
+            : t?.deleteButton ?? 'Delete'
+        }
+        cancelLabel={t?.cancelButton ?? 'Cancel'}
+      />
     </div>
   );
 }
