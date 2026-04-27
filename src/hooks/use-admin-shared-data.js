@@ -64,29 +64,16 @@ export function useDevelopers(client_id, isPublic = false) {
   };
 }
 
-// Hook for fetching developer names (optimized for dropdown lists)
-export function useDeveloperNames(client_id, isPublic = false) {
-  console.log(`🔧 useDeveloperNames called with: client_id=${client_id}, isPublic=${isPublic}`);
-  
-  const query = useQuery({
-    queryKey: [...developerKeys.lists(client_id, isPublic), "names-only"], // Different key to avoid cache conflicts
-    queryFn: () => {
-      console.log(`🚀 Executing fetchDeveloperNames queryFn (isPublic: ${isPublic})`);
-      return fetchDeveloperNames(isPublic);
-    },
-    staleTime: 1000 * 60 * 15, // 15 minutes - longer cache for dropdown data
+// Hook for developer autocomplete: `GET /developers/v1/get_all_names` (authenticated; not public).
+export function useDeveloperNames(_client_id, _isPublic = false) {
+  return useQuery({
+    queryKey: developerKeys.allNames(),
+    queryFn: () => fetchDeveloperNames(),
+    staleTime: 1000 * 60 * 15, // 15 minutes
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
-    enabled: true, // Ensure the query is always enabled
+    retry: 1,
   });
-  
-  console.log(`📊 useDeveloperNames query state:`, {
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    data: query.data ? `${query.data.length} items` : 'null',
-    error: query.error?.message || 'none'
-  });
-  
-  return query;
 }
 
 // Hook for fetching individual developer details

@@ -8,7 +8,7 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
-import { useProjectsNames, useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { fetchUnitsFilter } from "@/utils/api";
 import { formatPrice } from "@/utils/formatters";
@@ -34,10 +34,8 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
     false
   );
-  const { data: developersData, isLoading: developersLoading } = useDevelopers(
-    null,
-    false
-  );
+  const { data: developersData, isLoading: developersLoading } =
+    useDeveloperNames();
 
   const BUILDING_TYPES = useMemo(() => {
     return getBuildingTypes({

@@ -6,7 +6,7 @@ import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/context/translate-api";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDevelopers, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { deleteDeveloper } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
@@ -24,22 +24,23 @@ import { useModuleActions } from "@/hooks/useModuleActions";
 export default function DevelopersClientWrapper({ clientId }) {
   const router = useRouter();
   
-  // This page should use ONE source of truth.
-  // We use the slim API with infinite scroll for pagination
-  const { 
-    data: developersData, 
-    isLoading, 
-    isError, 
-    error, 
-    refetch, 
+  // List: slim API + infinite scroll. Header search dropdown: full names (`get_all_names`).
+  const {
+    data: developersData,
+    isLoading,
+    isError,
+    error,
+    refetch,
     isFetching,
     hasNextPage,
     fetchNextPage,
-    isFetchingNextPage
-  } = useDevelopers(
-    clientId,
-    true
-  );
+    isFetchingNextPage,
+  } = useDevelopers(clientId, true);
+
+  const {
+    data: developerNamesData,
+    isLoading: developerNamesLoading,
+  } = useDeveloperNames();
   const { t, locale } = useI18n();
   const { isDeveloper } = useBrokerPermission();
   const {
@@ -79,34 +80,67 @@ export default function DevelopersClientWrapper({ clientId }) {
     }
   }, [hasNextPage, isFetchingNextPage, isFetching, fetchNextPage]);
 
-  // Convert developers to options format for SearchableDropdownSelect
   const developerOptions = useMemo(() => {
-    if (!developersData || !Array.isArray(developersData)) return [];
-    return developersData.map(developer => ({
+    if (!developerNamesData || !Array.isArray(developerNamesData)) return [];
+    return developerNamesData.map((developer) => ({
       value: developer.id,
       label: locale === "ar" ? developer.ar_name : developer.en_name,
       ar_name: developer.ar_name,
-      en_name: developer.en_name
+      en_name: developer.en_name,
     }));
-  }, [developersData, locale]);
+  }, [developerNamesData, locale]);
 
-  // Memoize filtered developers to prevent infinite re-renders
+  const resolveDeveloperRow = useCallback(
+    (id) => {
+      if (!id) return null;
+      const fromSlim = developersData?.find((d) => d.id === id);
+      if (fromSlim) return fromSlim;
+      return developerNamesData?.find((d) => d.id === id) ?? null;
+    },
+    [developersData, developerNamesData]
+  );
+
   const filteredDevelopers = useMemo(() => {
-    if (!developersData || !Array.isArray(developersData)) {
-      return [];
+    const slim =
+      developersData && Array.isArray(developersData) ? developersData : [];
+
+    if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
+      const row = resolveDeveloperRow(selectedDeveloperSearch);
+      return row ? [row] : [];
     }
 
-    // Filter by selected developer search or search query
-    let filtered = developersData;
-    if (selectedDeveloperSearch && selectedDeveloperSearch !== "") {
-      const selected = developersData.find(d => d.id === selectedDeveloperSearch);
-      filtered = selected ? [selected] : developersData;
-    } else if (searchQuery) {
-      filtered = filterBySearchQuery(developersData, searchQuery, ["ar_name", "en_name"]);
+    if (searchQuery && searchQuery.trim() !== "") {
+      const names = developerNamesData;
+      if (names && names.length > 0) {
+        const nameMatches = filterBySearchQuery(names, searchQuery, [
+          "ar_name",
+          "en_name",
+        ]);
+        const idSet = new Set(nameMatches.map((d) => d.id).filter(Boolean));
+        const fromSlim = slim.filter((d) => idSet.has(d.id));
+        const slimIds = new Set(slim.map((d) => d.id));
+        const nameOnly = nameMatches.filter((d) => d.id && !slimIds.has(d.id));
+        const combined = [...fromSlim, ...nameOnly];
+        const label = (d) =>
+          (locale === "ar" ? d.ar_name : d.en_name) || d.en_name || d.ar_name || "";
+        return combined.sort((a, b) =>
+          label(a).localeCompare(label(b), locale === "ar" ? "ar" : "en", {
+            sensitivity: "base",
+          })
+        );
+      }
+      return filterBySearchQuery(slim, searchQuery, ["ar_name", "en_name"]);
     }
-    
-    return filtered;
-  }, [developersData, searchQuery, selectedDeveloperSearch]);
+
+    return slim;
+  }, [
+    developersData,
+    developerNamesData,
+    searchQuery,
+    selectedDeveloperSearch,
+    locale,
+    resolveDeveloperRow,
+  ]);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -307,8 +341,8 @@ export default function DevelopersClientWrapper({ clientId }) {
               searchFields={["ar_name", "en_name"]}
               className="w-full"
               buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors"
-              disabled={isLoading}
-              isLoading={isLoading}
+              disabled={developerNamesLoading && developerOptions.length === 0}
+              isLoading={developerNamesLoading}
             />
           </div>
 

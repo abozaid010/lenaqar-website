@@ -24,6 +24,8 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import DeveloperContactOverrideDialog from "@/components/ui/developer-contact-override-dialog";
+import { useQueryClient } from "@tanstack/react-query";
+import { developerKeys } from "@/utils/query-utils";
 
 export default function AddDeveloperDialog({
   isOpen,
@@ -43,6 +45,7 @@ export default function AddDeveloperDialog({
   const { canEdit, canEditDeveloperContactInfo, isReady: modulePermReady } =
     useModuleActions("developers");
   const [contactOverrideOpen, setContactOverrideOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const getClientId = () => {
     return getClientid() || client_id || LenaCookiesManager.getClientId() || "";
@@ -376,6 +379,7 @@ export default function AddDeveloperDialog({
           onEdit && onEdit(res.data);
           setIsEditing(false);
         } else {
+          queryClient.invalidateQueries({ queryKey: developerKeys.allNames() });
           onAdd && onAdd(res.data);
           onClose();
         }

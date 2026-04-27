@@ -34,6 +34,8 @@ export const campaignKeys = {
 // Query key factory for developers
 export const developerKeys = {
   all: ["developers"],
+  /** Lightweight name list for autocomplete (`GET /developers/v1/get_all_names`, auth required). */
+  allNames: () => [...developerKeys.all, "getAllNames"],
   lists: (client_id, isPublic) => [
     ...developerKeys.all,
     "list",

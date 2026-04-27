@@ -256,55 +256,120 @@ const fetchDevelopersBase = async ({ pageParam, pageSize = 20 } = {}) => {
 
 export const fetchDevelopers = with2SecondRetry(fetchDevelopersBase);
 
-// New fetchDeveloperNames - optimized for dropdown lists with names only using slim API
-const fetchDeveloperNamesBase = async (isPublic = false) => {
-  // Use the same slim API for both public and private calls
-  const url = "/developers/v1/get_all_slim?page_size=100"; // Larger page size for dropdown
-  
-  console.log(`🔍 Fetching developer names from slim API: ${url} (isPublic: ${isPublic})`);
+function normalizeDeveloperNameRow(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const id = raw.id ?? raw.uuid ?? raw.developer_id ?? "";
+  const en_name =
+    raw.en_name ?? raw.enName ?? raw.name_en ?? raw.english_name ?? "";
+  const ar_name =
+    raw.ar_name ?? raw.arName ?? raw.name_ar ?? "";
+  const developer_name =
+    raw.developer_name ??
+    raw.developerName ??
+    (en_name || ar_name || "");
+  const name = raw.name ?? developer_name ?? en_name ?? ar_name ?? "";
+  const idStr = id !== undefined && id !== null ? String(id).trim() : "";
+  if (!idStr && !en_name && !ar_name) return null;
+  return {
+    ...raw,
+    id: idStr || raw.id,
+    developer_id: raw.developer_id ?? (idStr || raw.id),
+    en_name,
+    ar_name,
+    developer_name,
+    name,
+  };
+}
 
-  // Debug: Check if access token is available
-  const accessToken = require("@/lib/LenaCookiesManager").LenaCookiesManager?.getAccessToken?.();
-  console.log(`🔐 Access token available for names: ${!!accessToken ? 'YES' : 'NO'}`);
+/**
+ * Parse body from `get_all_names`-style endpoints.
+ * Returns `null` if the shape is unknown (caller may try another URL or fallback).
+ */
+function extractDeveloperNameRowsFromBody(body) {
+  if (body == null) return null;
+  if (Array.isArray(body)) return body;
+  if (typeof body !== "object") return null;
+  if (body.status === false) return null;
 
-  const response = await axiosInstance.get(url);
-  
-  console.log(`✅ Developer names API response status: ${response.status}`);
-  console.log(`📊 Developer names data received: ${Array.isArray(response.data?.data?.developers) ? response.data.data.developers.length : 'N/A'} items`);
-  
-  // Validate response data structure according to API specification
-  if (!response.data) {
-    throw new Error("Invalid response format from server: missing response.data");
+  if (Array.isArray(body.data)) return body.data;
+  if (body.data && typeof body.data === "object") {
+    if (Array.isArray(body.data.developers)) return body.data.developers;
+    if (Array.isArray(body.data.names)) return body.data.names;
+    if (Array.isArray(body.data.items)) return body.data.items;
   }
+  if (Array.isArray(body.developers)) return body.developers;
+  if (Array.isArray(body.names)) return body.names;
+  return null;
+}
 
-  // Handle the exact response structure from API specification
-  if (!response.data.status || !response.data.data) {
-    throw new Error(
-      `Invalid response structure. Expected {status: true, data: {developers: [], next_cursor: string|null}}, but got: ${JSON.stringify(Object.keys(response.data || {}))}`
-    );
+function sortDeveloperNameRows(normalized) {
+  const lang =
+    typeof window !== "undefined" && window.localStorage
+      ? window.localStorage.getItem("lang")
+      : "en";
+  return [...normalized].sort((a, b) => {
+    const nameA = (lang === "ar" ? a.ar_name : a.en_name) || a.name || "";
+    const nameB = (lang === "ar" ? b.ar_name : b.en_name) || b.name || "";
+    return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", {
+      sensitivity: "base",
+    });
+  });
+}
+
+async function fetchDeveloperNamesFromSlimFallback() {
+  const response = await axiosInstance.get(
+    "/developers/v1/get_all_slim?page_size=50",
+    {
+      headers: { accept: "application/json" },
+      timeout: 45000,
+    }
+  );
+
+  if (!response.data?.status || !response.data?.data) {
+    throw new Error("Invalid slim response for developer names");
   }
 
   const { developers } = response.data.data;
-  
-  // Validate developers array
   if (!Array.isArray(developers)) {
-    throw new Error(`Expected developers to be an array, got: ${typeof developers}`);
+    throw new Error("Slim response missing developers array");
   }
-  
-  // Sort developersData by name according to app language: ar_name if Arabic, else en_name
-  const lang = typeof window !== "undefined" && window.localStorage
-    ? window.localStorage.getItem("lang")
-    : "en";
-  const sortedDevelopers = [...developers].sort((a, b) => {
-    const nameA = (lang === "ar" ? a.ar_name : a.en_name) || "";
-    const nameB = (lang === "ar" ? b.ar_name : b.en_name) || "";
-    return nameA.localeCompare(nameB, lang === "ar" ? "ar" : "en", { sensitivity: "base" });
-  });
-  
-  return sortedDevelopers;
-};
 
-export const fetchDeveloperNames = with2SecondRetry(fetchDeveloperNamesBase);
+  const normalized = developers.map(normalizeDeveloperNameRow).filter(Boolean);
+  return sortDeveloperNameRows(normalized);
+}
+
+/** Authenticated-only (Bearer via `axiosInstance`); not a public API. */
+const DEVELOPER_GET_ALL_NAMES_URLS = ["/developers/v1/get_all_names"];
+
+/**
+ * Autocomplete developer list: `GET /developers/v1/get_all_names` (auth required),
+ * then falls back to slim list if the response is missing or unrecognized.
+ */
+export async function fetchDeveloperNames() {
+  for (const url of DEVELOPER_GET_ALL_NAMES_URLS) {
+    try {
+      const response = await axiosInstance.get(url, {
+        headers: { accept: "application/json" },
+        timeout: 25000,
+        validateStatus: () => true,
+      });
+
+      if (response.status !== 200 || !response.data) {
+        continue;
+      }
+
+      const rows = extractDeveloperNameRowsFromBody(response.data);
+      if (rows !== null) {
+        const normalized = rows.map(normalizeDeveloperNameRow).filter(Boolean);
+        return sortDeveloperNameRows(normalized);
+      }
+    } catch {
+      /* try next */
+    }
+  }
+
+  return fetchDeveloperNamesFromSlimFallback();
+}
 
 function normalizeDeveloperDetailPayload(raw) {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;

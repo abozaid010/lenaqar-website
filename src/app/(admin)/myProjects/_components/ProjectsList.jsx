@@ -1,7 +1,10 @@
 "use client";
 
 import { useI18n } from "@/context/translate-api";
-import { useProjectsPaginated, useDevelopers } from "@/hooks/use-admin-shared-data";
+import {
+  useProjectsPaginated,
+  useDeveloperNames,
+} from "@/hooks/use-admin-shared-data";
 import CityManager from "@/utils/city_manager";
 import {
   CreditCard,
@@ -286,10 +289,8 @@ export default function ProjectsList({ clientId }) {
     return undefined;
   }, [selectedCity]);
 
-  const {
-    data: developersData,
-    isLoading: developersLoading,
-  } = useDevelopers(null, true);
+  const { data: developersData, isLoading: developersLoading } =
+    useDeveloperNames();
 
   const developers = developersData || [];
   const [selectedDeveloper, setSelectedDeveloper] = useState("");

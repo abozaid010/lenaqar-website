@@ -17,7 +17,7 @@ import { COUNTRIES } from "@/data/cities";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { useDevelopers } from "@/hooks/use-admin-shared-data";
+import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import {
   addCompound as addProject,
@@ -138,7 +138,7 @@ export default function AddCompoundDialog({
   const queryClient = useQueryClient();
 
   const { isLoading: delveloperLoading, data: developersData } =
-    useDevelopers(clientId);
+    useDeveloperNames(clientId);
 
   const { getDistrictsWithLabels } = useCitiesDistricts();
 
