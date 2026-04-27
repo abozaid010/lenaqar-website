@@ -28,7 +28,7 @@ export default function AddPhseDilog({
   const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
-    id: uuidv4() || phaseData?.id,
+    id: phaseData?.id || uuidv4(),
     name: phaseData?.name || "",
     description: phaseData?.description || "",
     master_plan: phaseData?.master_plan || { url: null, fileId: null },

@@ -16,9 +16,11 @@ export default function ProjectPhases({ project, rawProject }: Props) {
   const [selectedPhase, setSelectedPhase] = useState<number | null>(null);
 
   // Get raw phases data which contains images and descriptions
-  const rawPhases = rawProject?.phases as RawProject['phases'];
+  // Validate that phases is an array to prevent runtime errors
+  const rawPhasesRaw = rawProject?.phases;
+  const rawPhases: RawProject['phases'] = Array.isArray(rawPhasesRaw) ? rawPhasesRaw : [];
 
-  if (!rawPhases || rawPhases.length === 0) {
+  if (rawPhases.length === 0) {
     return null;
   }
 
