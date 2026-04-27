@@ -1889,6 +1889,9 @@ export default {
     interestedSubtitle: "تواصل معنا لمعرفة المزيد أو حجز معاينة",
     projectInterestedTitle: "مهتم بهذا المشروع؟",
     projectInterestedSubtitle: "تواصل مع المطور لمعرفة المزيد",
+    loadingContact: "جاري تحميل بيانات التواصل...",
+    contactPrefix: "جهة التواصل",
+    deletePropertyConfirm: "هل أنت متأكد أنك تريد حذف هذا العقار؟",
   },
   unitLabels: {
     bedrooms: "غرف نوم",

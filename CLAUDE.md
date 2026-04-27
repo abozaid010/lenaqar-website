@@ -32,3 +32,5 @@ Cookies (`COOKIE_KEYS`) → `getRoleFromToken` + `useModuleActions` + `useBroker
 ## Constraints
 Server components fetch data · Client components handle interactions only · Prefer local state; React Query for server state
 No new patterns, dependencies, or layout changes without a clear need — stability over experimentation
+
+yes please use (translate('…')). everywhere.   for lcoalzaiton

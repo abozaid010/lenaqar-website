@@ -1,4 +1,4 @@
-import { Phone, MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
+import { MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
@@ -8,7 +8,7 @@ import { generateUnitSlug } from '@/lib/units/unit-url-utils';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
-  const { t, locale, translate } = useI18n();
+  const { locale, translate } = useI18n();
   const router = useRouter();
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -23,13 +23,14 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   const showUnitAdminActions =
     !unit.isPrimary || (unit.clientId ?? null) === (currentClientId ?? null);
 
-  // Prefer actual translated strings; fall back only if the locale file is missing keys.
-  const callLabel =
-    t?.buttons?.call || translate("buttons.call") || (locale === "ar" ? "اتصال" : "Call");
-  const whatsappLabel =
-    t?.buttons?.whatsapp ||
-    translate("buttons.whatsapp") ||
-    (locale === "ar" ? "واتساب" : "WhatsApp");
+  const callLabel = translate(
+    "buttons.call",
+    locale === "ar" ? "اتصال" : "Call"
+  );
+  const whatsappLabel = translate(
+    "buttons.whatsapp",
+    locale === "ar" ? "واتساب" : "WhatsApp"
+  );
 
   useEffect(() => {
     const loadContactInfo = async () => {
@@ -103,7 +104,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
 
   const handleDelete = () => {
     // TODO: Implement delete functionality with confirmation
-    if (window.confirm('Are you sure you want to delete this property?')) {
+    if (window.confirm(translate("unitInquiry.deletePropertyConfirm"))) {
       console.log('Delete property action triggered');
     }
   };
@@ -111,18 +112,26 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   return (
     <div className="bg-white rounded-lg border shadow-lg p-6 space-y-4">
       <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t?.unitInquiry?.interestedTitle || "Interested in this property?"}</h3>
-        <p className="text-sm text-gray-600">{t?.unitInquiry?.interestedSubtitle || "Get in touch to learn more or schedule a viewing"}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {translate("unitInquiry.interestedTitle")}
+        </h3>
+        <p className="text-sm text-gray-600">
+          {translate("unitInquiry.interestedSubtitle")}
+        </p>
       </div>
 
       {/* Contact Information */}
       {loading ? (
         <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-600">Loading contact information...</div>
+          <div className="text-xs text-gray-600">
+            {translate("unitInquiry.loadingContact")}
+          </div>
         </div>
       ) : (contactData?.phone || contactData?.whatsapp) ? (
         <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-600 mb-1">Contact ({contactData?.type}):</div>
+          <div className="text-xs text-gray-600 mb-1">
+            {translate("unitInquiry.contactPrefix")} ({contactData?.type}):
+          </div>
           <div className="text-sm font-medium text-gray-900">{contactData?.name}</div>
           {contactData?.phone && (
             <div className="text-xs text-gray-500 mt-1">{contactData.phone}</div>
@@ -160,7 +169,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
               className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Edit className="w-4 h-4" />
-              Edit
+              {translate("buttons.edit")}
             </button>
 
             <button
@@ -168,7 +177,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
               className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Trash2 className="w-4 h-4" />
-              Delete
+              {translate("buttons.delete")}
             </button>
           </div>
         </div>
