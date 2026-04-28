@@ -78,6 +78,9 @@ function sanitizeAmountsForApi(data) {
 }
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
+  const modalRef = useRef(null);
+  const { t, locale, translate } = useI18n();
+
   // Secure clientId state management with loading and error handling
   const [clientIdState, setClientIdState] = useState({
     clientId: null,
@@ -122,77 +125,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     };
   }, []);
 
-  // Show loading state while validating clientId
-  if (clientIdState.isLoading) {
-    return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-lg">Validating session...</span>
-          </div>
-        </div>
-      </div>,
-      document.body
-    );
-  }
-
-  // Show error state if clientId validation fails
-  if (!clientIdState.clientId) {
-    const { t } = useI18n();
-    const errorMessage = clientIdState.error || 'Client ID not found';
-    
-    return createPortal(
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
-        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            aria-label="Close"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          
-          <h2 className="text-lg font-semibold text-red-600 mb-2">Authentication Required</h2>
-          <p className="text-gray-600 mb-4">{errorMessage}</p>
-          <p className="text-sm text-gray-500 mb-4">
-            Source attempted: {clientIdState.source}
-          </p>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              Retry
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body
-    );
-  }
-
-  const clientInfo = LenaCookiesManager.getClientInfo();
-  const clientName = clientInfo?.client_name;
-  const clientType = clientInfo?.client_type;
-
-  // Add the mutation hooks
+  // Hooks must be called unconditionally (even if we early-return UI states)
   const addUnitMutation = useAddUnit();
   const updateUnitMutation = useUpdateUnit();
-
   const developersQuery = useDeveloperNames(clientIdState.clientId, false);
-  
+
   // Optimized shared data object - only load what we need
   const sharedData = {
     developers: {
@@ -211,8 +148,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     sharedDataErrorMessage: developersQuery.error?.message,
   };
 
-  const modalRef = useRef(null);
-  const { t, locale, translate } = useI18n();
+  const clientInfo = LenaCookiesManager.getClientInfo();
+  const clientName = clientInfo?.client_name;
+  const clientType = clientInfo?.client_type;
   const backLabel = translate("buttons.back", locale === "ar" ? "رجوع" : "Back");
   const nextLabel = translate("buttons.next", locale === "ar" ? "التالي" : "Next");
   const saveUnitLabel = translate(
@@ -310,6 +248,62 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     },
     amenities: unitData?.amenities || [],
   }));
+
+  // Show loading/error UI AFTER all hooks run (to keep hook order stable)
+  if (clientIdState.isLoading) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <div className="flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-lg">Validating session...</span>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  if (!clientIdState.clientId) {
+    const errorMessage = clientIdState.error || "Client ID not found";
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <h2 className="text-lg font-semibold text-red-600 mb-2">Authentication Required</h2>
+          <p className="text-gray-600 mb-4">{errorMessage}</p>
+          <p className="text-sm text-gray-500 mb-4">Source attempted: {clientIdState.source}</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => window.location.reload()}
+              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Retry
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body
+    );
+  }
 
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
@@ -934,7 +928,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       >
         {currentStep === 1 && (
           <BasicDetailsStep
-            clientId={clientId}
+            clientId={clientIdState.clientId}
             formData={formData}
             updateFormData={updateFormData}
             invalidFields={invalidFields}
