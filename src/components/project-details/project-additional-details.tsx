@@ -14,12 +14,12 @@ export default function ProjectAdditionalDetails({ project }: Props) {
         <h2 className="text-xl font-semibold text-gray-900">Additional Details</h2>
         <span
           className={`px-3 py-1 rounded-full text-sm font-medium ${
-            project.isActive
+            project.primaryUnitsSoldOut
               ? 'bg-green-100 text-green-800'
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {project.isActive ? 'Active' : 'Inactive'}
+          {project.primaryUnitsSoldOut ? 'Sold Out' : 'Available'}
         </span>
       </div>
 
