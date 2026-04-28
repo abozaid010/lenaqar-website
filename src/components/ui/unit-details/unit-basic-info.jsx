@@ -1,10 +1,7 @@
 "use client";
 import { useI18n } from "@/hooks/useI18n";
-import { getBuildingTypes } from "@/data/constants";
-import en from "../../../../public/locales/en";
-import ar from "../../../../public/locales/ar";
 import { useMemo } from "react";
-import { useLocaleConstants } from "@/utils/localeConstants";
+import { getBuildingTypeLabel } from "@/lib/enums/buildingTypes";
 import {
   Bath,
   BedDouble,
@@ -29,7 +26,7 @@ export default function UnitBasicInfo({
   unit,
   missingRequiredFields = [],
 }) {
-  const { locale, common, property, localeUtils } = useI18n();
+  const { locale, common, property, localeUtils, translate } = useI18n();
   const { t } = useRawTranslations();
   const missing = missingRequiredFields || [];
   const isMissing = (field) => missing.includes(field);
@@ -38,14 +35,7 @@ export default function UnitBasicInfo({
   const u = unit || {};
   const safeBuildingType = (u.buildingType || "").toString().toLowerCase();
   const safePurpose = u.purpose || "sell";
-
-  // Get building types with translations
-  const BUILDING_TYPES = useMemo(() => {
-    return getBuildingTypes({
-      en: { buildingTypes: en.buildingTypes || {} },
-      ar: { buildingTypes: ar.buildingTypes || {} },
-    });
-  }, []);
+  const buildingTypeLabel = getBuildingTypeLabel(u.buildingType, translate, u.buildingType || "—");
 
   // Function to copy phone number to clipboard
   const copyToClipboard = async (text) => {
@@ -94,9 +84,7 @@ export default function UnitBasicInfo({
               : "bg-gray-100 text-gray-800"
           }`}
         >
-          {BUILDING_TYPES.find((type) => type.value === safeBuildingType)?.[
-            locale === "ar" ? "ar_label" : "en_label"
-          ] || u.buildingType || "—"}
+          {buildingTypeLabel || u.buildingType || "—"}
         </span>
       </div>
 

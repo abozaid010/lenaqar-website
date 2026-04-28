@@ -48,6 +48,13 @@ export const I18nProvider = ({ initialLocal = "ar", children }) => {
 
     const t = useMemo(() => locale === "ar" ? ar : en, [locale]);
 
+    // Ensure <html dir/lang> always matches current locale (including initial render)
+    useEffect(() => {
+        if (typeof document === "undefined") return;
+        document.documentElement.lang = locale;
+        document.documentElement.dir = locale === "ar" ? "rtl" : "ltr";
+    }, [locale]);
+
     return (
         <I18nContext.Provider value={{ locale, t, changeLanguage }}>
             {children}

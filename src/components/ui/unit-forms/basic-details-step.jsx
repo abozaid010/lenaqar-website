@@ -5,13 +5,14 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import { useI18n } from "@/hooks/useI18n";
+import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 /** Display value for numeric fields – 0 is valid; empty shows "". */
 function numericValue(v) {
@@ -28,8 +29,8 @@ export default function BasicDetailsStep({
   developers = [],
   developersLoading = false,
 }) {
-  const { t, locale } = useI18n();
-  const { getBuildingTypes, getViewTypes } = useLocaleConstants();
+  const { t, locale, translate } = useI18n();
+  const { getViewTypes } = useLocaleConstants();
 
   const [projectId, setProjectId] = useState(null);
   const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
@@ -87,42 +88,74 @@ export default function BasicDetailsStep({
       project: value,
       project_ar: proj?.ar_name ?? "",
       project_id: proj?.id ?? "",
+      // Always derive location + developer from project
       city: proj?.city ?? "",
       district: proj?.district ?? "",
       phase: "",
+      developer_id: "",
+      developer: "",
     });
     if (invalidFields.includes("project") && value) {
       setInvalidFields((prev) => prev.filter((field) => field !== "project"));
     }
   };
 
-  const getDeveloperValue = (dev) => (dev?.id ?? dev?.developer_id ?? "")?.toString() ?? "";
-  const getDeveloperLabel = (dev, loc) => {
-    const l = loc ?? locale;
-    return l === "ar"
-      ? (dev?.ar_name || dev?.developer_name || dev?.en_name || dev?.name || "")
-      : (dev?.en_name || dev?.developer_name || dev?.ar_name || dev?.name || "");
-  };
+  const applyDeveloperFromProject = useCallback(
+    (fullProject) => {
+      if (!fullProject || typeof fullProject !== "object") return;
+      const devId =
+        fullProject.developer_id ??
+        fullProject.developerId ??
+        fullProject?.developer?.id ??
+        fullProject?.developer?.developer_id ??
+        "";
+      const devName =
+        locale === "ar"
+          ? fullProject?.developer_ar_name ??
+            fullProject?.developer?.ar_name ??
+            fullProject?.developer_name_ar ??
+            fullProject?.developer_name ??
+            fullProject?.developer?.en_name ??
+            ""
+          : fullProject?.developer_name ??
+            fullProject?.developer?.en_name ??
+            fullProject?.developer_en_name ??
+            fullProject?.developer?.ar_name ??
+            "";
 
-  const handleDeveloperChange = (e) => {
-    const value = e?.target?.value ?? "";
-    const dev = developers.find((d) => getDeveloperValue(d) === value);
-    updateFormData({
-      developer_id: value,
-      developer: dev ? getDeveloperLabel(dev, locale) : value || "",
-    });
-  };
+      if (devId) {
+        updateFormData({
+          developer_id: String(devId),
+          developer: devName || "",
+        });
+      }
+    },
+    [locale, updateFormData]
+  );
 
   const selectedProjectFromList = useMemo(
     () => allProjects.find((p) => p.en_name === formData.project || p.name === formData.project),
     [allProjects, formData.project]
   );
 
+  // When editing an existing unit, keep city/district synced with the selected project
+  useEffect(() => {
+    if (!selectedProjectFromList) return;
+    const nextCity = selectedProjectFromList.city ?? "";
+    const nextDistrict = selectedProjectFromList.district ?? "";
+    const patch = {};
+    if ((formData.city || "") !== nextCity) patch.city = nextCity;
+    if ((formData.district || "") !== nextDistrict) patch.district = nextDistrict;
+    if (Object.keys(patch).length) updateFormData(patch);
+  }, [selectedProjectFromList, formData.city, formData.district, updateFormData]);
+
   const phases = useMemo(() => {
     if (!selectedProjectFromList) return [];
     const existingPhases = selectedProjectFromList.phases ?? projectPhasesMap[selectedProjectFromList.id] ?? [];
     return [{ ...selectedProjectFromList, phases: existingPhases }];
   }, [selectedProjectFromList, projectPhasesMap]);
+
+  const buildingTypeOptions = useMemo(() => getBuildingTypeOptions(translate), [translate]);
 
   const handleAddPhase = (newPhase) => {
     if (!projectId) return;
@@ -140,12 +173,15 @@ export default function BasicDetailsStep({
         {/* Unit Title */}
         <div className="col-span-1 md:col-span-2">
           <LenaTextField
-            label={t.basicDetails.unitTitle}
+            label={translate("basicDetails.unitTitle", t.basicDetails.unitTitle)}
             name="unitTitle"
             required
             value={formData.unitTitle || ""}
             onChange={handleChange}
-            placeholder={t.basicDetails.placeholders.unitTitle}
+            placeholder={translate(
+              "basicDetails.placeholders.unitTitle",
+              t.basicDetails.placeholders.unitTitle
+            )}
             error={invalidFields.includes("unitTitle")}
           />
         </div>
@@ -156,10 +192,10 @@ export default function BasicDetailsStep({
           value={formData.buildingType || ""}
           onChange={handleChange}
           error={invalidFields.includes("buildingType")}
-          options={getBuildingTypes()}
+          options={buildingTypeOptions}
           getValue={(opt) => opt.value}
-          getLabel={(opt) => (locale === "ar" ? opt.ar_label : opt.en_label)}
-          placeholder={t.basicDetails.buildingType}
+          getLabel={(opt) => opt.label}
+          placeholder={translate("basicDetails.buildingType", t.basicDetails.buildingType)}
         />
 
         {/* Project (all projects; city & district are set from selected project and sent to API) */}
@@ -167,43 +203,12 @@ export default function BasicDetailsStep({
           name="project"
           value={formData.project || ""}
           onChange={handleProjectChange}
+          onProjectSelect={applyDeveloperFromProject}
           projects={allProjects}
           isLoading={isLoadingProjectsFromApi}
           required
           error={invalidFields.includes("project")}
-          placeholder={t.basicDetails.selectCompound}
-        />
-
-        {/* Developer */}
-        <SearchableDropdownSelect
-          name="developer_id"
-          value={formData.developer_id || ""}
-          onChange={handleDeveloperChange}
-          options={developers}
-          getValue={getDeveloperValue}
-          getLabel={getDeveloperLabel}
-          searchFields={["ar_name", "en_name", "developer_name", "name"]}
-          placeholder={t.basicDetails?.selectDeveloper || "Select developer"}
-          isLoading={developersLoading}
-          loadingText={locale === "ar" ? "جاري التحميل..." : "Loading developers..."}
-          noResultsText={locale === "ar" ? "لا توجد نتائج" : "No developers found"}
-          searchPlaceholder={locale === "ar" ? "ابحث عن المطور..." : "Search developers..."}
-        />
-
-        {/* City & District (editable; project selection can auto-fill these) */}
-        <LenaTextField
-          label={t.basicDetails?.city || "City"}
-          name="city"
-          value={formData.city || ""}
-          onChange={handleChange}
-          placeholder={t.basicDetails?.placeholders?.city || "City"}
-        />
-        <LenaTextField
-          label={t.basicDetails?.district || "District"}
-          name="district"
-          value={formData.district || ""}
-          onChange={handleChange}
-          placeholder={t.basicDetails?.placeholders?.district || "District"}
+          placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
         />
 
         {/* Phase */}
@@ -221,12 +226,12 @@ export default function BasicDetailsStep({
           getLabel={(opt) => opt.name}
           placeholder={
             !formData.project
-              ? t?.projectFirst || "Select project first"
+              ? translate("projectFirst", t?.projectFirst || "Select project first")
               : phases[0]?.phases?.length === 0
-                ? t.basicDetails.noPhases
-                : t.basicDetails.selectPhase
+                ? translate("basicDetails.noPhases", t.basicDetails.noPhases)
+                : translate("basicDetails.selectPhase", t.basicDetails.selectPhase)
           }
-          noResultsText={t.basicDetails.noPhases}
+          noResultsText={translate("basicDetails.noPhases", t.basicDetails.noPhases)}
         />
 
         <AddPhaseDialog
@@ -244,12 +249,24 @@ export default function BasicDetailsStep({
           required
           error={invalidFields.includes("purpose")}
           options={[
-            { value: "sell", label: t.basicDetails.purposes.sell },
-            { value: "rent", label: t.basicDetails.purposes.rent },
+            {
+              value: "sell",
+              label: translate(
+                "basicDetails.purposes.sell",
+                t.basicDetails.purposes.sell
+              ),
+            },
+            {
+              value: "rent",
+              label: translate(
+                "basicDetails.purposes.rent",
+                t.basicDetails.purposes.rent
+              ),
+            },
           ]}
           getValue={(opt) => opt.value}
           getLabel={(opt) => opt.label}
-          placeholder={t.basicDetails.selectPurpose}
+          placeholder={translate("basicDetails.selectPurpose", t.basicDetails.selectPurpose)}
         />
 
         {/* View */}
@@ -262,21 +279,24 @@ export default function BasicDetailsStep({
           options={getViewTypes()}
           getValue={(opt) => opt.value}
           getLabel={(opt) => (locale === "ar" ? opt.ar_label : opt.en_label)}
-          placeholder={t.basicDetails.selectView}
+          placeholder={translate("basicDetails.selectView", t.basicDetails.selectView)}
         />
 
         {/* code */}
         <LenaTextField
-          label={t.basicDetails.code}
+          label={translate("basicDetails.code", t.basicDetails.code)}
           name="code"
           value={formData.code}
           onChange={handleChange}
-          placeholder={t.basicDetails.placeholders.code}
+          placeholder={translate(
+            "basicDetails.placeholders.code",
+            t.basicDetails.placeholders.code
+          )}
         />
 
         {/* model */}
         <LenaTextField
-          label={t.basicDetails.model}
+          label={translate("basicDetails.model", t.basicDetails.model)}
           name="model"
           value={formData.model}
           onChange={handleChange}
@@ -284,7 +304,7 @@ export default function BasicDetailsStep({
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-8 text-slate-800">
-        {t.basicDetails.propertySpecs}
+        {translate("basicDetails.propertySpecs", t.basicDetails.propertySpecs)}
       </h3>
 
       <div className="grid grid-cols-2 gap-x-2 md:grid-cols-3 gap-y-3 md:gap-x-4">
@@ -305,7 +325,7 @@ export default function BasicDetailsStep({
             </div>
             {/* Bathrooms */}
             <LenaTextField
-              label={t.basicDetails.bathrooms}
+              label={translate("basicDetails.bathrooms", t.basicDetails.bathrooms)}
               name="bathroomCount"
               required
               value={numericValue(formData.bathroomCount)}
@@ -319,7 +339,7 @@ export default function BasicDetailsStep({
 
         {/* Floor */}
         <LenaTextField
-          label={t.basicDetails.floor}
+          label={translate("basicDetails.floor", t.basicDetails.floor)}
           name="floor"
           value={numericValue(formData.floor)}
           onChange={(e) => handleChange(e, "number")}
@@ -329,7 +349,7 @@ export default function BasicDetailsStep({
 
         {/* Land Area (area) - required */}
         <LenaTextField
-          label={`${t.basicDetails.landArea} (m²)`}
+          label={`${translate("basicDetails.landArea", t.basicDetails.landArea)} (m²)`}
           name="landArea"
           value={numericValue(formData.landArea)}
           onChange={(e) => handleChange(e, "number")}
@@ -342,7 +362,7 @@ export default function BasicDetailsStep({
         {/* Garden Size */}
         {formData.buildingType !== "office" && (
           <LenaTextField
-            label={`${t.basicDetails.gardenSize} (m²)`}
+            label={`${translate("basicDetails.gardenSize", t.basicDetails.gardenSize)} (m²)`}
             name="gardenSize"
             value={numericValue(formData.gardenSize)}
             onChange={(e) => handleChange(e, "number")}
@@ -353,7 +373,10 @@ export default function BasicDetailsStep({
 
         {/* Outdoor Area */}
         <LenaTextField
-          label={`${t.basicDetails.outdoorArea || "Outdoor Area"} (m²)`}
+          label={`${translate(
+            "basicDetails.outdoorArea",
+            t.basicDetails.outdoorArea 
+          )} (m²)`}
           name="outdoor_area"
           value={numericValue(formData.outdoor_area)}
           onChange={(e) => handleChange(e, "number")}

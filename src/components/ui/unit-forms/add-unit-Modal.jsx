@@ -249,6 +249,19 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     amenities: unitData?.amenities || [],
   }));
 
+  // Ensure form always carries token-derived clientId (initializer only runs once).
+  useEffect(() => {
+    if (!clientIdState.clientId) return;
+    setFormData((prev) => {
+      if (prev?.clientId === clientIdState.clientId) return prev;
+      return {
+        ...prev,
+        clientId: clientIdState.clientId,
+        ...(clientName ? { clientName } : null),
+      };
+    });
+  }, [clientIdState.clientId, clientName]);
+
   // Show loading/error UI AFTER all hooks run (to keep hook order stable)
   if (clientIdState.isLoading) {
     return createPortal(
@@ -756,6 +769,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
 
       let payload = sanitizeAmountsForApi(finalFormData);
+      // Always send clientId derived from access token/session (source of truth)
+      if (clientIdState.clientId) {
+        payload = {
+          ...payload,
+          clientId: clientIdState.clientId,
+          ...(clientName ? { clientName } : null),
+        };
+      }
       const cleanedExtra = cleanExtraInfo(extractedSourceText);
       if (cleanedExtra) {
         payload = { ...payload, extra_info: cleanedExtra };
@@ -924,10 +945,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       <form
         onSubmit={handleSubmit}
         ref={modalRef}
+        dir={locale === "ar" ? "rtl" : "ltr"}
         className={isPageMode ? "mt-3 px-3 md:p-5 pb-5" : "mt-3 px-3 md:p-5 pb-5 overflow-y-auto max-h-[70vh]"}
       >
         {currentStep === 1 && (
           <BasicDetailsStep
+            isEdit={!!isEdit}
             clientId={clientIdState.clientId}
             formData={formData}
             updateFormData={updateFormData}

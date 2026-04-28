@@ -33,7 +33,7 @@ export default function RentalDetailsStep({
   setInvalidFields = () => {},
 }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
-  const { t } = useI18n();
+  const { t, translateStrict } = useI18n();
 
   const handleChange = (e) => {
     const { name, value, type, checked, dataset } = e.target;
@@ -278,16 +278,16 @@ export default function RentalDetailsStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
             {/* Owner Name */}
             <LenaTextField
-              label={t.formLabels.ownerName || "Owner Name"}
+              label={translateStrict("saleDetails.ownerName")}
               name="owner_name"
               value={commonFormData.owner_name}
               onChange={handleOwnerChange}
-              placeholder="Enter owner name"
+              placeholder={translateStrict("saleDetails.ownerName")}
             />
 
             {/* Owner Mobile */}
             <LenaTextField
-              label={t.formLabels.ownerMobile || "Owner Mobile"}
+              label={translateStrict("saleDetails.ownerMobile")}
               name="owner_mobile"
               value={commonFormData.owner_mobile}
               onChange={handleOwnerChange}
