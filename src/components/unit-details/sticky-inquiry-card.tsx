@@ -9,11 +9,12 @@ import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
 import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
 import toast from 'react-hot-toast';
+import type { UseMutationResult } from '@tanstack/react-query';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
-  const deleteUnitMutation = useDeleteUnit();
+  const deleteUnitMutation = useDeleteUnit() as unknown as UseMutationResult<string, Error, string, unknown>;
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -111,11 +112,11 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
     if (!unit?.id) return;
     try {
       await deleteUnitMutation.mutateAsync(unit.id);
-      toast.success(translate("toasts.unitDeleted", locale === "ar" ? "تم حذف الوحدة بنجاح" : "Unit deleted successfully"));
+      toast.success(translate("toasts.unitDeleted") || (locale === "ar" ? "تم حذف الوحدة بنجاح" : "Unit deleted successfully"));
       setShowDeleteConfirm(false);
       router.push('/units');
     } catch (error: any) {
-      toast.error(error?.message || translate("toasts.errorProcessing", locale === "ar" ? "حدث خطأ أثناء معالجة الطلب" : "Failed to process request"));
+      toast.error(error?.message || translate("toasts.errorProcessing") || (locale === "ar" ? "حدث خطأ أثناء معالجة الطلب" : "Failed to process request"));
     }
   };
 
