@@ -1054,18 +1054,19 @@ export async function importProjects(projects) {
 
 // Images CRUD operations //
 export async function uploadImages(formData, clientId) {
-  // TODO: Cleint ID should be getted from the authantication token
   try {
-    const response = await axiosInstance.post(
-      `/gcs/upload?client_id=${clientId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
+    formData.append("clientId", clientId);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.error || "Failed to upload images");
+    }
+
+    return data;
   } catch (error) {
     console.error("Failed to upload images:", error.message);
     return { error: error.message };

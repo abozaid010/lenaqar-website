@@ -1,6 +1,5 @@
 "use client";
 
-import AddPhaseDialog from "@/components/ui/add-phase-dialog";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
@@ -12,7 +11,7 @@ import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 /** Display value for numeric fields – 0 is valid; empty shows "". */
 function numericValue(v) {
@@ -32,9 +31,6 @@ export default function BasicDetailsStep({
   const { t, locale, translate } = useI18n();
   const { getViewTypes } = useLocaleConstants();
 
-  const [projectId, setProjectId] = useState(null);
-  const [isAddPhaseDialogOpen, setIsAddPhaseDialogOpen] = useState(false);
-  const [projectPhasesMap, setProjectPhasesMap] = useState({});
 
   const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
 
@@ -51,7 +47,6 @@ export default function BasicDetailsStep({
       (p) => p.en_name === formData.project || p.name === formData.project
     );
     if (selected?.id) {
-      setProjectId(selected.id);
       const idStr = String(selected.id);
       // Sync project_id when project name matches (e.g. editing ai_generated unit)
       if (!formData.project_id || String(formData.project_id) !== idStr) {
@@ -149,23 +144,7 @@ export default function BasicDetailsStep({
     if (Object.keys(patch).length) updateFormData(patch);
   }, [selectedProjectFromList, formData.city, formData.district, updateFormData]);
 
-  const phases = useMemo(() => {
-    if (!selectedProjectFromList) return [];
-    const existingPhases = selectedProjectFromList.phases ?? projectPhasesMap[selectedProjectFromList.id] ?? [];
-    return [{ ...selectedProjectFromList, phases: existingPhases }];
-  }, [selectedProjectFromList, projectPhasesMap]);
-
   const buildingTypeOptions = useMemo(() => getBuildingTypeOptions(translate), [translate]);
-
-  const handleAddPhase = (newPhase) => {
-    if (!projectId) return;
-    const currentPhases = phases[0]?.phases ?? [];
-    setProjectPhasesMap((prev) => ({
-      ...prev,
-      [projectId]: [...currentPhases, newPhase],
-    }));
-    updateFormData({ phase: newPhase.name });
-  };
 
   return (
     <>
@@ -209,36 +188,6 @@ export default function BasicDetailsStep({
           required
           error={invalidFields.includes("project")}
           placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
-        />
-
-        {/* Phase */}
-        <SearchableDropdownSelect
-          name="phase"
-          value={formData.phase || ""}
-          onChange={handleChange}
-          disabled={!formData.project}
-          options={
-            formData.project && phases[0]?.phases?.length
-              ? phases[0].phases
-              : []
-          }
-          getValue={(opt) => opt.name}
-          getLabel={(opt) => opt.name}
-          placeholder={
-            !formData.project
-              ? translate("projectFirst", t?.projectFirst || "Select project first")
-              : phases[0]?.phases?.length === 0
-                ? translate("basicDetails.noPhases", t.basicDetails.noPhases)
-                : translate("basicDetails.selectPhase", t.basicDetails.selectPhase)
-          }
-          noResultsText={translate("basicDetails.noPhases", t.basicDetails.noPhases)}
-        />
-
-        <AddPhaseDialog
-          isOpen={isAddPhaseDialogOpen}
-          onClose={() => setIsAddPhaseDialogOpen(false)}
-          onAdd={handleAddPhase}
-          projectId={phases[0]?.id || projectId}
         />
 
         {/* Purpose */}

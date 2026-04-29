@@ -25,10 +25,20 @@ import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 
 /** Parse value to number for API (strip commas/formatting). */
+function normalizeToEnglishDigits(value) {
+  if (value == null) return value;
+  return String(value)
+    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 1632))
+    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
+    .replace(/٫/g, ".")
+    .replace(/٬/g, ",");
+}
+
 function toAmount(value) {
   if (value === "" || value === null || value === undefined) return 0;
   if (typeof value === "number" && !Number.isNaN(value)) return value;
-  const stripped = String(value).replace(/[^\d.]/g, "");
+  const normalized = normalizeToEnglishDigits(value);
+  const stripped = String(normalized).replace(/[^\d.]/g, "");
   const n = parseFloat(stripped);
   return Number.isNaN(n) ? 0 : n;
 }
@@ -75,6 +85,20 @@ function sanitizeAmountsForApi(data) {
     });
   }
   return out;
+}
+
+function normalizeNumbersInPayload(value) {
+  if (value == null) return value;
+  if (Array.isArray(value)) return value.map(normalizeNumbersInPayload);
+  if (typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nestedValue]) => [key, normalizeNumbersInPayload(nestedValue)])
+    );
+  }
+  if (typeof value === "string") {
+    return normalizeToEnglishDigits(value);
+  }
+  return value;
 }
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
@@ -768,7 +792,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         finalFormData = { ...finalFormData, ...rentFormData };
       }
 
-      let payload = sanitizeAmountsForApi(finalFormData);
+      const normalizedFinalFormData = normalizeNumbersInPayload(finalFormData);
+      let payload = sanitizeAmountsForApi(normalizedFinalFormData);
       // Always send clientId derived from access token/session (source of truth)
       if (clientIdState.clientId) {
         payload = {
