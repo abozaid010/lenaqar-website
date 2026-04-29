@@ -1818,6 +1818,7 @@ export default {
     dialog: {
       gotIt: "فهمت!",
       readyToStart: "هل أنت مستعد للبدء؟ أضف أول",
+      now: "الآن",
     },
   },
   placeholders: {

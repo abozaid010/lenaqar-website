@@ -1746,6 +1746,7 @@ export default {
     dialog: {
       gotIt: "Got it!",
       readyToStart: "Ready to get started? Add your first",
+      now: "now",
     },
   },
   placeholders: {
