@@ -146,6 +146,21 @@ export default function EditRequirementDialog({
 
   const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
   const tr = (key, fallback) => translate(key, fallback);
+  const inputClassName =
+    "w-full border border-gray-200 rounded-md px-2.5 py-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
+  const sectionClassName = "rounded-lg border border-gray-100 p-3.5 space-y-3 bg-gray-50/40";
+
+  const toDisplayLabel = (value) =>
+    String(value)
+      .replace(/[_-]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const getOptionLabel = (groupKey, value) => {
+    const stringValue = String(value);
+    return tr(`property.${groupKey}.${stringValue}`, toDisplayLabel(stringValue));
+  };
 
   if (!open) return null;
 
@@ -220,8 +235,8 @@ export default function EditRequirementDialog({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-2">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[92vh] flex flex-col">
-        <div className="flex items-center justify-between p-3 border-b shrink-0">
+      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[92vh] flex flex-col">
+        <div className="flex items-center justify-between px-4 py-3 border-b shrink-0">
           <h3 className="text-sm font-semibold text-gray-900">
             {tr(
               "dashboard.requirementsDialog.title",
@@ -240,11 +255,9 @@ export default function EditRequirementDialog({
             )}
           </div>
         ) : (
-          <form
-            onSubmit={handleSubmit}
-            className="p-4 overflow-y-auto flex-1 min-h-0 text-sm space-y-4"
-          >
-            <section className="rounded-md border border-gray-100 p-3 space-y-3">
+          <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 min-h-0 text-sm">
+            <div className="px-4 py-4 space-y-4">
+            <section className={sectionClassName}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 {tr(
                   "dashboard.requirementsDialog.sections.location",
@@ -260,9 +273,9 @@ export default function EditRequirementDialog({
                 ["developer", tr("dashboard.requirementsDialog.fields.developer", locale === "ar" ? "المطور" : "Developer")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-gray-600">{label}</label>
+                  <label className="text-xs font-medium text-gray-600">{label}</label>
                   <input
-                    className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                    className={inputClassName}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
@@ -271,7 +284,7 @@ export default function EditRequirementDialog({
             </div>
             </section>
 
-            <section className="rounded-md border border-gray-100 p-3 space-y-3">
+            <section className={sectionClassName}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 {tr(
                   "dashboard.requirementsDialog.sections.property",
@@ -280,150 +293,150 @@ export default function EditRequirementDialog({
               </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.buildingType",
                     locale === "ar" ? "نوع العقار" : "Building Type"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.buildingType}
                   onChange={(e) => set("buildingType", e.target.value)}
                 >
                   {BUILDING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {getOptionLabel("buildingTypes", v)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr("dashboard.requirementsDialog.fields.view", locale === "ar" ? "الإطلالة" : "View")}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.viewType}
                   onChange={(e) => set("viewType", e.target.value)}
                 >
                   {VIEW_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {getOptionLabel("view", v)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.finishing",
                     locale === "ar" ? "التشطيب" : "Finishing"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.finishingType}
                   onChange={(e) => set("finishingType", e.target.value)}
                 >
                   {FINISHING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {getOptionLabel("finishing", v)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.furnishing",
                     locale === "ar" ? "الفرش" : "Furnishing"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.furnishingType}
                   onChange={(e) => set("furnishingType", e.target.value)}
                 >
                   {FURNISHING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {tr(`property.furnishing.${v}`, toDisplayLabel(v))}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.status",
                     locale === "ar" ? "الحالة" : "Status"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.propertyStatus}
                   onChange={(e) => set("propertyStatus", e.target.value)}
                 >
                   {PROPERTY_STATUS_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {getOptionLabel("status", v)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.usage",
                     locale === "ar" ? "الاستخدام" : "Usage"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.propertyUsage}
                   onChange={(e) => set("propertyUsage", e.target.value)}
                 >
                   {PROPERTY_USAGE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {getOptionLabel("usage", v)}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.purpose",
                     locale === "ar" ? "الغرض" : "Purpose"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.propertyPurpose}
                   onChange={(e) => set("propertyPurpose", e.target.value)}
                 >
                   {PROPERTY_PURPOSE_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {tr(`propertyPurpose.${v}`, toDisplayLabel(v))}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="text-gray-600">
+                <label className="text-xs font-medium text-gray-600">
                   {tr(
                     "dashboard.requirementsDialog.fields.intent",
                     locale === "ar" ? "النية" : "Intent"
                   )}
                 </label>
                 <select
-                  className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                  className={inputClassName}
                   value={form.propertyIntent}
                   onChange={(e) => set("propertyIntent", e.target.value)}
                 >
                   {PROPERTY_INTENT_VALUES.map((v) => (
                     <option key={v} value={v}>
-                      {v}
+                      {tr(`propertyIntent.${v}`, toDisplayLabel(v))}
                     </option>
                   ))}
                 </select>
@@ -431,7 +444,7 @@ export default function EditRequirementDialog({
             </div>
             </section>
 
-            <section className="rounded-md border border-gray-100 p-3 space-y-3">
+            <section className={sectionClassName}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 {tr(
                   "dashboard.requirementsDialog.sections.measurements",
@@ -448,10 +461,10 @@ export default function EditRequirementDialog({
                 ["garageSize", tr("dashboard.requirementsDialog.fields.garage", locale === "ar" ? "الجراج" : "Garage")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-gray-600">{label}</label>
+                  <label className="text-xs font-medium text-gray-600">{label}</label>
                   <input
                     type="number"
-                    className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                    className={inputClassName}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
@@ -460,7 +473,7 @@ export default function EditRequirementDialog({
             </div>
             </section>
 
-            <section className="rounded-md border border-gray-100 p-3 space-y-3">
+            <section className={sectionClassName}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 {tr(
                   "dashboard.requirementsDialog.sections.pricing",
@@ -468,14 +481,14 @@ export default function EditRequirementDialog({
                 )}
               </h4>
             <div>
-              <label className="text-gray-600">
+              <label className="text-xs font-medium text-gray-600">
                 {tr(
                   "dashboard.requirementsDialog.fields.deliveryDate",
                   locale === "ar" ? "تاريخ التسليم" : "Delivery Date"
                 )}
               </label>
               <input
-                className="w-full md:w-48 border border-gray-200 rounded px-2 py-1 mt-0.5"
+                className={`${inputClassName} md:w-56`}
                 value={form.deliveryDate}
                 onChange={(e) => set("deliveryDate", e.target.value)}
               />
@@ -488,10 +501,10 @@ export default function EditRequirementDialog({
                 ["serviceCharges", tr("dashboard.requirementsDialog.fields.service", locale === "ar" ? "الخدمات" : "Service")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-gray-600">{label}</label>
+                  <label className="text-xs font-medium text-gray-600">{label}</label>
                   <input
                     type="number"
-                    className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5"
+                    className={inputClassName}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
@@ -500,7 +513,7 @@ export default function EditRequirementDialog({
             </div>
             </section>
 
-            <section className="rounded-md border border-gray-100 p-3 space-y-3">
+            <section className={sectionClassName}>
               <h4 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 {tr(
                   "dashboard.requirementsDialog.sections.notes",
@@ -508,7 +521,7 @@ export default function EditRequirementDialog({
                 )}
               </h4>
             <div>
-              <label className="text-gray-600">
+              <label className="text-xs font-medium text-gray-600">
                 {tr(
                   "dashboard.requirementsDialog.fields.dealBreakers",
                   locale === "ar"
@@ -517,13 +530,13 @@ export default function EditRequirementDialog({
                 )}
               </label>
               <textarea
-                className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5 min-h-[48px]"
+                className={`${inputClassName} min-h-[72px]`}
                 value={form.dealBreakers}
                 onChange={(e) => set("dealBreakers", e.target.value)}
               />
             </div>
             <div>
-              <label className="text-gray-600">
+              <label className="text-xs font-medium text-gray-600">
                 {tr(
                   "dashboard.requirementsDialog.fields.additionalFeatures",
                   locale === "ar"
@@ -532,24 +545,25 @@ export default function EditRequirementDialog({
                 )}
               </label>
               <textarea
-                className="w-full border border-gray-200 rounded px-2 py-1 mt-0.5 min-h-[48px]"
+                className={`${inputClassName} min-h-[72px]`}
                 value={form.additionalFeatures}
                 onChange={(e) => set("additionalFeatures", e.target.value)}
               />
             </div>
             </section>
-            <div className="flex gap-2 justify-end pt-2 border-t sticky bottom-0 bg-white pb-1">
+            </div>
+            <div className="flex gap-2 justify-end px-4 py-3 border-t sticky bottom-0 bg-white/95 backdrop-blur-sm">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-3 py-1.5 border border-gray-200 rounded"
+                className="px-3 py-1.5 border border-gray-200 rounded-md text-sm"
               >
                 {tr("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
               </button>
               <button
                 type="submit"
                 disabled={saving}
-                className="px-3 py-1.5 bg-primary text-white rounded disabled:opacity-60"
+                className="px-4 py-1.5 bg-primary text-white rounded-md text-sm font-medium disabled:opacity-60"
               >
                 {saving
                   ? tr("common.saving", locale === "ar" ? "جارٍ الحفظ..." : "Saving...")
