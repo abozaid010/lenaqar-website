@@ -959,7 +959,8 @@ export default {
       rent: "إيجار",
     },
     views: {
-      park: "حديقة",
+      park: "موقف",
+      watercourse: "مجرى مائي",
       street: "شارع",
       lagoon: "بحيرة",
       sea: "بحر",
@@ -1206,7 +1207,7 @@ export default {
       mountain: "جبل",
       street: "شارع",
       city: "مدينة",
-      park: "حديقة",
+      park: "موقف",
       lake: "بحيرة",
       golf: "جولف",
       landmark: "معلم",
@@ -1968,7 +1969,7 @@ export default {
     },
     view: {
       garden: "حديقة", pool: "مسبح", sea: "بحر", landmark: "معلم", street: "شارع",
-      other: "أخرى", mountain: "جبل", city: "مدينة", park: "حديقة", lake: "بحيرة",
+      other: "أخرى", mountain: "جبل", city: "مدينة", park: "منتزه", lake: "بحيرة",
       golf: "ملعب جولف", partial: "جزئي", open: "مفتوح", desert: "صحراء", river: "نهر",
       courtyard: "فناء", forest: "غابة", beach: "شاطئ", lagoon: "بحيرة ساحلية", openArea: "منطقة مفتوحة",
     },

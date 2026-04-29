@@ -5,8 +5,41 @@ import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
 import { safePropertyAccess, sanitizeTranslationValue, validateTranslationKey } from "@/utils/translation-sanitizer";
 
+const warnedDirectTAccess = new Set();
+
+function createStrictTProxy(node, path = []) {
+  if (!node || typeof node !== "object") return node;
+
+  return new Proxy(node, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof prop !== "string") return value;
+
+      const nextPath = [...path, prop];
+      const pathLabel = nextPath.join(".");
+
+      if (
+        process.env.NODE_ENV === "development" &&
+        pathLabel &&
+        !warnedDirectTAccess.has(pathLabel)
+      ) {
+        warnedDirectTAccess.add(pathLabel);
+        console.warn(
+          `[i18n] Direct t access detected: t.${pathLabel}. Prefer translate("${pathLabel}", t.${pathLabel}).`
+        );
+      }
+
+      if (value && typeof value === "object") {
+        return createStrictTProxy(value, nextPath);
+      }
+      return value;
+    },
+  });
+}
+
 export function useI18n() {
-  const { t, locale, changeLanguage } = useTranslation();
+  const { t: rawT, locale, changeLanguage } = useTranslation();
+  const t = useMemo(() => createStrictTProxy(rawT || {}), [rawT]);
 
   // Enhanced translation function with security and fallback
   const translate = useCallback((key, fallback = null) => {
@@ -25,7 +58,7 @@ export function useI18n() {
     
     try {
       // Use safe property access to prevent prototype pollution
-      const value = safePropertyAccess(t, validation.safeKey);
+      const value = safePropertyAccess(rawT, validation.safeKey);
       
       if (value !== undefined && value !== null && value !== "") {
         // Sanitize the translation value to prevent XSS
@@ -38,7 +71,7 @@ export function useI18n() {
       if (fallback !== null && fallback !== undefined) return fallback;
       if (process.env.NODE_ENV === "development") {
         const topKeys =
-          t && typeof t === "object" ? Object.keys(t).slice(0, 25) : [];
+          rawT && typeof rawT === "object" ? Object.keys(rawT).slice(0, 25) : [];
         throw new Error(
           `Missing translation: ${validation.safeKey} (locale: ${locale}). Top-level keys: ${topKeys.join(
             ", "
@@ -50,7 +83,7 @@ export function useI18n() {
       console.error(`Translation error for key: ${validation.safeKey}`, error);
       return fallback || validation.safeKey;
     }
-  }, [t, locale]);
+  }, [rawT, locale]);
 
   // Assert translations are present in development (no silent key display)
   const translateStrict = useCallback((key) => {
