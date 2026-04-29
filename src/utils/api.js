@@ -1786,3 +1786,34 @@ export async function updateAdminClient(clientId, payload) {
     throw error;
   }
 }
+
+/**
+ * Delete all client data via the client/delete_all_client_data endpoint
+ * @param {string} clientId - The client ID to delete
+ * @returns {Promise<Object>} The API response
+ */
+export async function deleteClient(clientId) {
+  if (!clientId) {
+    throw new Error("clientId is required");
+  }
+
+  try {
+    const response = await axiosInstance.delete(
+      `/client/delete_all_client_data?client_id=${clientId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Failed to delete client:", error.message);
+    
+    // Handle 403 Forbidden - user doesn't have permission
+    if (error.response?.status === 403) {
+      const permissionError = new Error("You don't have permission to delete clients. King admin access required.");
+      permissionError.code = 'PERMISSION_DENIED';
+      permissionError.status = 403;
+      throw permissionError;
+    }
+    
+    // Handle other errors
+    throw error;
+  }
+}

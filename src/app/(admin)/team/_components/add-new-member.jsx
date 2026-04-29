@@ -127,30 +127,58 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
         title={t.team?.addNewSales ?? "Add New Sales"}
         showCloseButton={false}
         headerLeading={
-          <CancelButton onClick={() => setIsOpen(false)}>
-            {t.buttons?.cancel || "Cancel"}
-          </CancelButton>
+          locale === "ar" ? (
+            <button
+              type="submit"
+              form="add-member-form"
+              disabled={pending}
+              className={`px-3 py-1.5 text-sm font-medium rounded focus:outline-none focus:ring-1 focus:ring-white ${
+                pending
+                  ? "pointer-events-none opacity-80 bg-white/80 text-primary"
+                  : "bg-white text-primary hover:bg-white/90"
+              }`}
+            >
+              {pending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {t.team.loading}
+                </span>
+              ) : (
+                t.team.save
+              )}
+            </button>
+          ) : (
+            <CancelButton onClick={() => setIsOpen(false)}>
+              {t.buttons?.cancel || "Cancel"}
+            </CancelButton>
+          )
         }
         headerActions={
-          <button
-            type="submit"
-            form="add-member-form"
-            disabled={pending}
-            className={`px-3 py-1.5 text-sm font-medium rounded focus:outline-none focus:ring-1 focus:ring-white ${
-              pending
-                ? "pointer-events-none opacity-80 bg-white/80 text-primary"
-                : "bg-white text-primary hover:bg-white/90"
-            }`}
-          >
-            {pending ? (
-              <span className="flex items-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
-                {t.team.loading}
-              </span>
-            ) : (
-              t.team.save
-            )}
-          </button>
+          locale === "ar" ? (
+            <CancelButton onClick={() => setIsOpen(false)}>
+              {t.buttons?.cancel || "Cancel"}
+            </CancelButton>
+          ) : (
+            <button
+              type="submit"
+              form="add-member-form"
+              disabled={pending}
+              className={`px-3 py-1.5 text-sm font-medium rounded focus:outline-none focus:ring-1 focus:ring-white ${
+                pending
+                  ? "pointer-events-none opacity-80 bg-white/80 text-primary"
+                  : "bg-white text-primary hover:bg-white/90"
+              }`}
+            >
+              {pending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={16} className="animate-spin" />
+                  {t.team.loading}
+                </span>
+              ) : (
+                t.team.save
+              )}
+            </button>
+          )
         }
       >
         <form

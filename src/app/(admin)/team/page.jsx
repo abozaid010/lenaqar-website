@@ -1,12 +1,8 @@
-import { getSalesData } from "@/components/services/serviceFetching";
-import AddNewMember from "./_components/add-new-member";
-import TeamTable from "./_components/team-table";
-import Link from "next/link";
+import TeamContent from "./_components/team-content";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { cookies } from "next/headers";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
-import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import { canManageTeamFromToken } from "@/lib/getRoleFromToken";
 import { safeCookieParse } from "@/utils/safeJsonParser";
 
@@ -47,28 +43,7 @@ export async function generateMetadata() {
 }
 
 export default async function TeamPage() {
-  let data;
-  let hasAccess = true;
-
-  try {
-    data = await getSalesData();
-    
-    
-    
-    if (!data?.status) {
-      hasAccess = false;
-    } else {
-      console.log("[Team Page] Access granted - status is true");
-    }
-  } catch (error) {
-    hasAccess = false;
-    data = { data: [], status: false };
-  }
-
-  // Safely extract team data with proper fallback
-  const teamData = Array.isArray(data?.data) ? data.data : [];
-
-  // Prefer JWT for role (tamper-proof). Fallback to cookie for UI only when JWT has no role (backend must enforce).
+  // Fast permission check only - no blocking data fetching
   let canManageTeam = await canManageTeamFromToken();
   if (!canManageTeam) {
     const cookieStore = await cookies();
@@ -88,42 +63,7 @@ export default async function TeamPage() {
         ]}
       />
       <div className="h-full flex flex-col">
-        {hasAccess ? (
-          <>
-            <div className="p-4 bg-white rounded-lg shadow-md">
-              <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
-                <div className="flex-1" />
-                <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
-                  <AddNewMember canManageTeam={canManageTeam} />
-                  <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
-                    <VideoInstructionsDialog
-                      variant="team"
-                      iconSize="sm"
-                      tooltipText="How to manage team members"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 relative mt-4">
-              <TeamTable data={teamData} canManageTeam={canManageTeam} />
-            </div>
-          </>
-        ) : (
-          <div className="flex flex-col items-center justify-center h-full">
-            <h1 className="text-2xl font-bold text-gray-800">Access Denied</h1>
-            <p className="text-gray-600 mt-2">
-              You do not have permission to view this page.
-            </p>
-            <Link
-              href="/dashboard"
-              className="underline text-sm text-blue-700 mt-4"
-            >
-              Go Back to Dashboard
-            </Link>
-          </div>
-        )}
+        <TeamContent canManageTeam={canManageTeam} />
       </div>
     </>
   );

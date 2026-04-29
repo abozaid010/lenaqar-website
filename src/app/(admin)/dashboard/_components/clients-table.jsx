@@ -6,10 +6,10 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
-import { getClientActions, getClientRequirements } from "@/utils/api";
+import { getClientActions, getClientRequirements, deleteClient } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
-import { BellDot, Loader2 } from "lucide-react";
+import { BellDot, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
 import toast from "react-hot-toast";
@@ -37,6 +37,7 @@ export default function ClientsTable({ users, pagination }) {
   const [rowRequirements, setRowRequirements] = useState(null);
   const [openRequirementsModal, setOpenRequirementsModal] = useState(false);
   const [localUsers, setLocalUsers] = useState(users);
+  const [loadingDelete, setLoadingDelete] = useState(null);
 
   useEffect(() => {
     if (users) {
@@ -109,6 +110,29 @@ export default function ClientsTable({ users, pagination }) {
 
   };
 
+  const handleDelete = async (e, user_id) => {
+    e.stopPropagation();
+    
+    // Confirm before delete
+    const confirmed = window.confirm(
+      t?.clientsTable?.deleteConfirm || "Are you sure you want to delete this client? This action cannot be undone."
+    );
+    if (!confirmed) return;
+
+    setLoadingDelete(user_id);
+    try {
+      await deleteClient(user_id);
+      toast.success(t?.clientsTable?.deleteSuccess || "Client deleted successfully");
+      // Remove the deleted user from local state
+      setLocalUsers((prev) => prev.filter((user) => user.user_id !== user_id));
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      toast.error(t?.clientsTable?.deleteError || "Failed to delete client");
+    } finally {
+      setLoadingDelete(null);
+    }
+  };
+
   return (
     <>
       {localUsers?.length === 0 ? (
@@ -150,6 +174,9 @@ export default function ClientsTable({ users, pagination }) {
                   </th>
                   <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[120px]">
                     {t.clientsTable.headers.action}
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 text-center whitespace-nowrap max-w-[60px]">
+                    {t.buttons?.delete || "Delete"}
                   </th>
                 </tr>
               </thead>
@@ -347,6 +374,21 @@ export default function ClientsTable({ users, pagination }) {
                             )}
                           </span>
                         )}
+                      </td>
+
+                      <td className="px-2 py-2 text-center whitespace-nowrap max-w-[60px]">
+                        <button
+                          onClick={(e) => handleDelete(e, user.user_id)}
+                          disabled={loadingDelete === user.user_id}
+                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                          title={t.buttons?.delete || "Delete"}
+                        >
+                          {loadingDelete === user.user_id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   );

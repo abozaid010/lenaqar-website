@@ -314,7 +314,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full relative">
           <div className="flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-lg">Validating session...</span>
+            <span className="ml-3 text-lg">{t.common?.loadingData || "Validating session..."}</span>
           </div>
         </div>
       </div>,
@@ -331,30 +331,30 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             type="button"
             onClick={onClose}
             className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            aria-label="Close"
+            aria-label={t.buttons?.close || "Close"}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
 
-          <h2 className="text-lg font-semibold text-red-600 mb-2">Authentication Required</h2>
+          <h2 className="text-lg font-semibold text-red-600 mb-2">{t.login?.title || "Authentication Required"}</h2>
           <p className="text-gray-600 mb-4">{errorMessage}</p>
-          <p className="text-sm text-gray-500 mb-4">Source attempted: {clientIdState.source}</p>
+          <p className="text-sm text-gray-500 mb-4">{t.common?.source || "Source"}: {clientIdState.source}</p>
           <div className="flex gap-2">
             <button
               type="button"
               onClick={() => window.location.reload()}
               className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
             >
-              Retry
+              {t.buttons?.retry || "Retry"}
             </button>
             <button
               type="button"
               onClick={onClose}
               className="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
             >
-              Close
+              {t.buttons?.close || "Close"}
             </button>
           </div>
         </div>
@@ -866,7 +866,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             type="button"
             onClick={onClose}
             className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            aria-label="Close"
+            aria-label={t.buttons?.close || "Close"}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -874,14 +874,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           </button>
           <div className="flex items-center justify-center pr-8">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-lg">Loading form data...</span>
+            <span className="ml-3 text-lg">{t.common?.loadingData || "Loading form data..."}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="mt-4 w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
           >
-            Cancel
+            {t.buttons?.cancel || "Cancel"}
           </button>
         </div>
       </div>,
@@ -893,20 +893,20 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
         <div className="bg-white rounded-md shadow-xl p-6 max-w-md w-full">
-          <h2 className="text-lg font-semibold text-red-600 mb-2">Error Loading Data</h2>
+          <h2 className="text-lg font-semibold text-red-600 mb-2">{t.common?.error || "Error Loading Data"}</h2>
           <p className="text-gray-600 mb-4">{sharedData.sharedDataErrorMessage}</p>
           <div className="flex gap-2">
             <button
               onClick={() => window.location.reload()}
               className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             >
-              Retry
+              {t.buttons?.retry || "Retry"}
             </button>
             <button
               onClick={onClose}
               className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
             >
-              Close
+              {t.buttons?.close || "Close"}
             </button>
           </div>
         </div>
@@ -938,7 +938,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         onClick={() => setShowFillFromTextDialog(true)}
         className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm font-medium disabled:opacity-70 disabled:pointer-events-none"
       >
-        {t.modal?.fillFromText?.buttonLabel || "Fill from text"}
+        {t.modal?.fillFromText?.buttonLabel || t.unit?.fillFromText || "Fill from text"}
       </button>
       <button
         type="button"
@@ -1077,7 +1077,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
                 onClick={() => setCurrentStep((prev) => prev - 1)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
-                {t.buttons?.previous || "Previous"}
+                {t.buttons?.back || t.buttons?.previous || "Previous"}
               </button>
             )}
             {currentStep < 3 ? (
