@@ -90,8 +90,11 @@ export default function ClientsListWrapper() {
                   </td>
                 </tr>
               ) : (
-                items.map((client) => (
-                  <tr key={client.client_id} className="hover:bg-gray-50 transition-colors">
+                items.map((client, index) => (
+                  <tr
+                    key={`${client.client_id}-${client.email || "no-email"}-${index}`}
+                    className="hover:bg-gray-50 transition-colors"
+                  >
                     <td className="px-4 py-3 font-mono text-xs text-gray-700">
                       {client.client_id}
                     </td>

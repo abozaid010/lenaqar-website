@@ -16,6 +16,7 @@ const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 
 export async function POST(req) {
   try {
+    console.log("[/api/upload] POST received", { at: new Date().toISOString() });
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
     const formData = await req.formData();
@@ -23,6 +24,13 @@ export async function POST(req) {
     const file = formData.get("file");
     const clientId = formData.get("clientId");
     const shouldGenerateAvif = formData.get("generateAvif") === "true";
+    console.log("[/api/upload] parsed formData", {
+      clientId,
+      hasFile: Boolean(file),
+      fileType: file?.type,
+      fileSize: file?.size,
+      generateAvif: shouldGenerateAvif,
+    });
 
     if (!file || typeof file.arrayBuffer !== "function") {
       return Response.json({ error: "No image file provided." }, { status: 400 });
@@ -41,9 +49,11 @@ export async function POST(req) {
     }
 
     const originalBuffer = Buffer.from(await file.arrayBuffer());
+    console.log("[/api/upload] file buffer ready", { bytes: originalBuffer.length });
     const variants = await processImage(originalBuffer, {
       includeAvif: shouldGenerateAvif,
     });
+    console.log("[/api/upload] image processed", { variantsCount: variants.length });
 
     // Keep current app contract intact by uploading one optimized source image.
     const primaryUpload = variants.find(
@@ -73,6 +83,7 @@ export async function POST(req) {
         body: storageFormData,
       }
     );
+    console.log("[/api/upload] storage response", { status: uploadResponse.status });
 
     const uploadData = await uploadResponse.json().catch(() => ({}));
 
@@ -98,7 +109,7 @@ export async function POST(req) {
       })),
     });
   } catch (error) {
-    console.error("Upload pipeline failed:", error);
+    console.error("[/api/upload] Upload pipeline failed:", error);
     return Response.json({ error: "Unexpected upload error." }, { status: 500 });
   }
 }

@@ -1,5 +1,5 @@
 "use client"
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const FilterMonth = ({appliedFilters,t}) => {
@@ -7,31 +7,24 @@ const FilterMonth = ({appliedFilters,t}) => {
     const[filter,setFilter]=useState({
         months: appliedFilters?.months || "1"
     })
-    const [message, setMessage] = useState("");
-    
     const months = [
-        { value: "1", label: t('January') },
-        { value: "2", label: t('February') },
-        { value: "3", label: t('March') },
-        { value: "4", label: t('April') },
-        { value: "5", label: t('May') },
-        { value: "6", label: t('June') },
-        { value: "7", label: t('July') },
-        { value: "8", label: t('August') },
-        { value: "9", label: t('September') },
-        { value: "10", label: t('October') },
-        { value: "11", label: t('November') },
-        { value: "12", label: t('December') },
+        { value: "1" },
+        { value: "2" },
+        { value: "3" },
+        { value: "4" },
+        { value: "5" },
+        { value: "6" },
+        { value: "7" },
+        { value: "8" },
+        { value: "9" },
+        { value: "10" },
+        { value: "11" },
+        { value: "12" },
     ];
     
     const handleFilterChange = (key, value) => {
         setFilter((prev) => ({ ...prev, [key]: value }));
         
-        // Generate message based on the number of months selected
-        const numMonths = parseInt(value);
-        const monthLabel = numMonths === 1 ? "month" : "months";
-        setMessage(`Now showing statistics for the last ${numMonths} ${monthLabel}`);
-
         const newParams = new URLSearchParams(window.location.search);
         newParams.set(key, value);
         router.push(`${window.location.pathname}?${newParams.toString()}`);

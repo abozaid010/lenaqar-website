@@ -195,6 +195,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const clientInfo = LenaCookiesManager.getClientInfo();
   const clientName = clientInfo?.client_name;
   const clientType = clientInfo?.client_type;
+  const authorEmail = typeof clientInfo?.email === "string" ? clientInfo.email.trim() : "";
   const backLabel = translate("buttons.back", locale === "ar" ? "رجوع" : "Back");
   const nextLabel = translate("buttons.next", locale === "ar" ? "التالي" : "Next");
   const saveUnitLabel = translate(
@@ -826,6 +827,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       if (cleanedExtra) {
         payload = { ...payload, extra_info: cleanedExtra };
       }
+      payload = {
+        ...payload,
+        author: authorEmail,
+      };
 
       if (!isEdit) {
         await addUnitMutation.mutateAsync(payload);
