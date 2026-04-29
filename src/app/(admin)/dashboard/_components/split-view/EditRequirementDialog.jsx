@@ -144,8 +144,8 @@ export default function EditRequirementDialog({
     };
   }, [open, userId]);
 
-  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
   const tr = (key, fallback) => translate(key, fallback);
+  const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
   const inputClassName =
     "w-full border border-gray-200 rounded-md px-2.5 py-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
   const sectionClassName = "rounded-lg border border-gray-100 p-3.5 space-y-3 bg-gray-50/40";
