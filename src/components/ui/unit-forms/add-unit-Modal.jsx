@@ -43,6 +43,10 @@ function toAmount(value) {
   return Number.isNaN(n) ? 0 : n;
 }
 
+function toIntAmount(value) {
+  return Math.floor(toAmount(value));
+}
+
 /** Clean source text for extra_info: normalize newlines, trim lines, drop empty. */
 function cleanExtraInfo(text) {
   if (text == null || typeof text !== "string") return "";
@@ -57,6 +61,8 @@ function cleanExtraInfo(text) {
 /** Ensure all price/amount fields in form data are sent as numbers to the API. */
 function sanitizeAmountsForApi(data) {
   const out = { ...data };
+  const numericIntFields = ["floor", "roomsCount", "bathroomCount", "installment_years"];
+  const numericFloatFields = ["landArea", "gardenSize", "outdoor_area", "roof_area", "garageArea"];
   const sellAmountFields = [
     "totalPrice",
     "downPayment",
@@ -64,22 +70,32 @@ function sanitizeAmountsForApi(data) {
     "remaining_amount",
     "over_price",
   ];
-  sellAmountFields.forEach((field) => {
-    if (field in out && (out[field] !== "" || out[field] != null)) {
+  numericIntFields.forEach((field) => {
+    if (field in out) {
+      out[field] = toIntAmount(out[field]);
+    }
+  });
+  numericFloatFields.forEach((field) => {
+    if (field in out) {
       out[field] = toAmount(out[field]);
     }
   });
-  if (out.installment_years !== "" && out.installment_years != null) {
-    out.installment_years = Math.floor(toAmount(out.installment_years)) || 0;
-  }
+  sellAmountFields.forEach((field) => {
+    if (field in out) {
+      out[field] = toAmount(out[field]);
+    }
+  });
   if (out.purpose === "rent" && out.rentDurationType && typeof out.rentDurationType === "object") {
     out.rentDurationType = { ...out.rentDurationType };
     Object.keys(out.rentDurationType).forEach((duration) => {
       const block = out.rentDurationType[duration];
-      if (block && typeof block === "object" && "price" in block) {
+      if (block && typeof block === "object") {
         out.rentDurationType[duration] = {
           ...block,
           price: toAmount(block.price),
+          securityDeposit: toAmount(block.securityDeposit),
+          cleaningFee: toAmount(block.cleaningFee),
+          serviceFee: toAmount(block.serviceFee),
         };
       }
     });
