@@ -1647,6 +1647,48 @@ export async function updateUserName(userId, name) {
   return updateUserInfo({ user_id: userId, name: name.trim() });
 }
 
+export async function fetchManagerAnalytics(params = {}) {
+  try {
+    const response = await axiosInstance.get("/analysis/manager/stats", { params });
+    return response.data?.data ?? {};
+  } catch (error) {
+    console.error("Failed to fetch manager analytics:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchLegacyUserAnalytics(days = 10) {
+  const clientId = getClientid();
+  try {
+    const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}`, {
+      params: { days },
+    });
+    return response.data?.data ?? {};
+  } catch (error) {
+    console.error("Failed to fetch legacy user analytics:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchLegacyMonthData(searchParams = {}) {
+  const clientId = getClientid();
+  try {
+    const params =
+      typeof searchParams === "string"
+        ? safeMergeParams(searchParams, {})
+        : { ...(searchParams || {}) };
+
+    const response = await axiosInstance.get(
+      `/analysis/v1/dashboard-action-analysis/${clientId}?days=7`,
+      { params }
+    );
+    return response.data?.data?.monthly ?? [];
+  } catch (error) {
+    console.error("Failed to fetch legacy month analytics:", error.message);
+    throw error;
+  }
+}
+
 /**
  * Update requirements for a user (PUT /requirements/:userId)
  */

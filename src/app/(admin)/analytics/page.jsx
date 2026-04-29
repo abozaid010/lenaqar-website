@@ -1,11 +1,7 @@
 import { cookies } from "next/headers";
-import Analytics from "./_component/Analtics";
-import {
-  fetchMonthData,
-  userAnalytics,
-} from "@/components/services/serviceFetching";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import AnalyticsPageClient from "./_components/AnalyticsPageClient";
 
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
@@ -47,11 +43,7 @@ export async function generateMetadata() {
   };
 }
 const page = async ({ searchParams: rawSearchParams }) => {
-  const searchParams = await rawSearchParams;
-  const [datamonth, data] = await Promise.all([
-    fetchMonthData(JSON.stringify(searchParams)),
-    userAnalytics(10),
-  ]);
+  await rawSearchParams;
 
   return (
     <>
@@ -64,11 +56,7 @@ const page = async ({ searchParams: rawSearchParams }) => {
         ]}
       />
       <div>
-        <Analytics
-          data={data}
-          datamonth={datamonth}
-          appliedFilters={searchParams}
-        />
+        <AnalyticsPageClient />
       </div>
     </>
   );

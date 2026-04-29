@@ -97,3 +97,19 @@ export async function fetchMonthData(searchParams) {
     return { error: error.message };
   }
 }
+
+export async function fetchManagerStats(searchParams) {
+  const clientId = await getClientid();
+  try {
+    const params = safeMergeParams(searchParams, {
+      months: "1",
+      range: "daily",
+      client_id: clientId,
+    });
+    const response = await axiosInstance.get("/analysis/manager/stats", { params });
+    return response.data?.data ?? {};
+  } catch (error) {
+    console.error("Failed to fetch manager stats:", error.message);
+    return {};
+  }
+}
