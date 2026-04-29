@@ -6,7 +6,7 @@ import { toast } from "react-hot-toast";
 import { Loader2 } from "lucide-react";
 import FormInput from "@/components/ui/inputs/form-input";
 import FormSelect from "@/components/ui/inputs/form-select";
-import ModuleActionsSelector from "./ModuleActionsSelector";
+import ModuleActionsSelector, { DEFAULT_BROKER_MODULE_ACTIONS } from "./ModuleActionsSelector";
 import DynamicSuggestionsList from "./DynamicSuggestionsList";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
@@ -123,13 +123,22 @@ const ClientSignupForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : 
-              type === "number" ? (value === "" ? "" : parseFloat(value)) :
-              value
-    }));
+
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [name]: type === "checkbox" ? checked :
+                type === "number" ? (value === "" ? "" : parseFloat(value)) :
+                value
+      };
+
+      // Set default module actions when client_type changes to broker
+      if (name === "client_type" && value === "broker") {
+        newData.module_actions = { ...DEFAULT_BROKER_MODULE_ACTIONS };
+      }
+
+      return newData;
+    });
 
     // Clear error for this field when user starts typing
     if (errors[name]) {

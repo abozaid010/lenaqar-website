@@ -18,6 +18,17 @@ const MODULES = [
   "calendar"
 ];
 
+export const DEFAULT_BROKER_MODULE_ACTIONS = {
+  projects: ["view", "import"],
+  developers: ["view", "import", "update_developer_contacts"],
+  units: ["view", "import", "create", "update_own", "delete_own"],
+  campaign: ["view", "create", "update_own", "delete_own"],
+  conversation: ["view", "create", "update_own", "delete_own"],
+  team_members: ["view", "create", "update_own", "delete_own"],
+  analytics: ["view", "create", "update_own", "delete_own"],
+  calendar: ["view", "create", "update_own", "delete_own"]
+};
+
 const ACTIONS = [
   { value: "view", label: "View" },
   { value: "create", label: "Create" },
