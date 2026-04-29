@@ -23,6 +23,7 @@ import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 import { getValidatedClientId } from "@/utils/clientId-validator";
+import { normalizeViewTypeValue } from "@/data/constants";
 
 /** Parse value to number for API (strip commas/formatting). */
 function normalizeToEnglishDigits(value) {
@@ -99,6 +100,9 @@ function sanitizeAmountsForApi(data) {
         };
       }
     });
+  }
+  if ("view" in out) {
+    out.view = normalizeViewTypeValue(out.view);
   }
   return out;
 }

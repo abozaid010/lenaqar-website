@@ -1233,6 +1233,7 @@ export default {
       forest: "Forest",
       beach: "Beach",
       lagoon: "Lagoon",
+      watercourse: "Watercourse",
       openArea: "Open Area",
     },
     finishingTypes: {

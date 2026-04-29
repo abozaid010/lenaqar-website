@@ -62,8 +62,34 @@ export const VIEW_TYPE_VALUES = [
   "golf",
   "garden",
   "open area",
-  "mountain"
+  "mountain",
+   "watercourse"
+
 ];
+
+export const normalizeViewTypeValue = (rawValue) => {
+  if (rawValue === null || rawValue === undefined) return "";
+
+  const normalized = String(rawValue)
+    .trim()
+    .toLowerCase()
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ");
+
+  if (!normalized) return "";
+
+  const withoutSuffix = normalized.replace(/\s+view$/, "").trim();
+
+  const aliases = {
+    openarea: "open area",
+    "open-area": "open area",
+    open: "open area",
+    "water course": "watercourse",
+  };
+
+  const candidate = aliases[withoutSuffix] || withoutSuffix;
+  return VIEW_TYPE_VALUES.includes(candidate) ? candidate : withoutSuffix;
+};
 
 export const FINISHING_TYPE_VALUES = [
   "fully finished",

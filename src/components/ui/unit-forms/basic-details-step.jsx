@@ -6,6 +6,7 @@ import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-s
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
+import { normalizeViewTypeValue } from "@/data/constants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
 import {
@@ -67,6 +68,10 @@ export default function BasicDetailsStep({
       updatedValue = rawValue === "" ? "" : Number(rawValue);
     } else {
       updatedValue = value;
+    }
+
+    if (name === "view") {
+      updatedValue = normalizeViewTypeValue(updatedValue);
     }
 
     updateFormData({ [name]: updatedValue });
