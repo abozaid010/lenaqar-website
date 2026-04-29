@@ -17,10 +17,24 @@ export default function FiltersBar({ employees = [] }) {
   const selectedRange = searchParams.get("range") || "daily";
 
   const employeeOptions = useMemo(() => {
-    return employees.map((employee) => ({
-      id: String(employee.id ?? employee.employee_id ?? ""),
-      name: employee.name || employee.employee_name || translate("analytics.unknown_employee"),
-    }));
+    return employees.reduce((accumulator, employee, index) => {
+      const rawId = employee.id ?? employee.employee_id;
+      const normalizedId = rawId === undefined || rawId === null ? "" : String(rawId).trim();
+
+      // Skip invalid IDs to prevent duplicate empty keys/values in the select.
+      if (!normalizedId) return accumulator;
+
+      const normalizedName =
+        employee.name || employee.employee_name || translate("analytics.unknown_employee");
+
+      accumulator.push({
+        id: normalizedId,
+        name: normalizedName,
+        key: `${normalizedId}-${index}`,
+      });
+
+      return accumulator;
+    }, []);
   }, [employees, translate]);
 
   const updateParam = (key, value) => {
@@ -69,7 +83,7 @@ export default function FiltersBar({ employees = [] }) {
           >
             <option value="all">{translate("analytics.all_employees")}</option>
             {employeeOptions.map((option) => (
-              <option key={option.id} value={option.id}>
+              <option key={option.key} value={option.id}>
                 {option.name}
               </option>
             ))}

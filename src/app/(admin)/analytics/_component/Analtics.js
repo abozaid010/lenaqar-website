@@ -29,9 +29,7 @@ import FilterMonth from "./FilterMonth";
 import { useI18n } from "@/hooks/useI18n";
 
 // Custom tooltip for the enhanced bar chart
-const CustomTooltip = ({ active, payload, label }) => {
-  const { t } = useI18n();
-
+const CustomTooltip = ({ active, payload, label, t }) => {
   if (active && payload && payload.length) {
     // Find the conversation data and average messages data
     const conversationData = payload.find(p => p.dataKey === 'conversations');
@@ -100,7 +98,7 @@ const EnhancedBarChart = ({ data, t }) => {
             tickLine={{ stroke: '#4B5563' }}
             axisLine={{ stroke: '#4B5563' }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip t={t} />} />
           <Legend
             wrapperStyle={{ paddingTop: '10px' }}
             iconSize={10}
