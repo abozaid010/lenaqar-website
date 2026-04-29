@@ -1664,7 +1664,7 @@ export async function updateUserRequirements(userId, payload) {
 }
 
 /**
- * Create a new action (POST /action/create) — client-side helper
+ * Create a new action (POST /action/v1/create) — client-side helper
  */
 export async function createUserAction(payload) {
   const actionVal =
@@ -1682,9 +1682,10 @@ export async function createUserAction(payload) {
     meeting_time: payload.meeting_time ?? null,
     created_at: payload.created_at ?? new Date().toISOString(),
     action: actionVal,
+    author: payload.author ?? "",
   };
   try {
-    const response = await axiosInstance.post("action/create", body);
+    const response = await axiosInstance.post("action/v1/create", body);
     return response.data;
   } catch (error) {
     console.error("Failed to create action:", error.message);
