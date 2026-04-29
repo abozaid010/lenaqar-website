@@ -31,6 +31,7 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deleteProject } from "@/utils/api";
+import { handleApiResponse, isSuccessResponse, getErrorMessage } from "@/utils/api-response-handler";
 import { paginatedProjectKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
@@ -581,23 +582,24 @@ export default function ProjectsList({ clientId }) {
 
   const handleConfirmDeleteProject = async () => {
     if (!projectToDelete) return;
-    try {
-      const res = await deleteProject(projectToDelete.id);
-      if (res.code === 409) {
-        toast.error(t.associateProject);
-      } else if (res.code === 200) {
-        toast.success(t.projectDelete);
-        setAppendedProjects((prev) =>
-          prev.filter((p) => p.id !== projectToDelete.id)
-        );
-        queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
+
+    const result = await handleApiResponse(
+      await deleteProject(projectToDelete.id),
+      {
+        onSuccess: () => {
+          toast.success(t.projectDelete);
+          setAppendedProjects((prev) =>
+            prev.filter((p) => p.id !== projectToDelete.id)
+          );
+          queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
+        },
+        onError: (errorMsg) => toast.error(errorMsg),
+        fallbackError: t.failedProject,
       }
-    } catch {
-      toast.error(t.failedProject);
-    } finally {
-      setShowDeleteDialog(false);
-      setProjectToDelete(null);
-    }
+    );
+
+    setShowDeleteDialog(false);
+    setProjectToDelete(null);
   };
 
   const handleImported = async () => {
