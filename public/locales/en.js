@@ -187,6 +187,7 @@ export default {
     searchPlaceholder: "Search",
     userMenu: {
       settings: "Settings",
+      logout: "Logout",
       unitTypes: {
     apartment: "Apartment",
     villa: "Villa",

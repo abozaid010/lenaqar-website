@@ -1,11 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useClients } from "@/hooks/use-clients-data";
+import { deleteClient } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import EditClientDialog from "./EditClientDialog";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
+import toast from "react-hot-toast";
 
 const StatusBadge = ({ isActive }) =>
   isActive ? (
@@ -22,8 +26,17 @@ export default function ClientsListWrapper() {
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [editingClient, setEditingClient] = useState(null);
+  const [loadingDelete, setLoadingDelete] = useState(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
+  const [isKingAdmin, setIsKingAdmin] = useState(false);
 
-  const { items, pagination, isLoading, isError } = useClients(page);
+  const { items, pagination, isLoading, isError, mutate } = useClients(page);
+
+  // Check if user is king admin on mount
+  useEffect(() => {
+    setIsKingAdmin(isCurrentUserKingAdmin());
+  }, []);
 
   const clientId = LenaCookiesManager.getClientId();
   const prefix = clientId ? `/${clientId}` : "";
@@ -47,6 +60,41 @@ export default function ClientsListWrapper() {
       </div>
     );
   }
+
+  const openDeleteDialog = (clientId) => {
+    setClientToDelete(clientId);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setClientToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!clientToDelete) return;
+
+    setLoadingDelete(clientToDelete);
+    try {
+      await deleteClient(clientToDelete);
+      toast.success("Client deleted successfully");
+      // Refresh data from server to update list
+      mutate();
+    } catch (error) {
+      console.error("Error deleting client:", error);
+
+      // Handle permission denied error
+      if (error.code === 'PERMISSION_DENIED' || error.status === 403) {
+        toast.error(error.message || "You don't have permission to delete clients. King admin access required.");
+      } else {
+        toast.error(error.response?.data?.message || "Failed to delete client. Please try again.");
+      }
+    } finally {
+      setLoadingDelete(null);
+      setDeleteDialogOpen(false);
+      setClientToDelete(null);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col">
@@ -80,12 +128,15 @@ export default function ClientsListWrapper() {
                 <th className="text-start px-4 py-3 font-medium text-gray-600">Type</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">Status</th>
                 <th className="text-start px-4 py-3 font-medium text-gray-600">Actions</th>
+                {isKingAdmin && (
+                  <th className="text-start px-4 py-3 font-medium text-gray-600">Delete</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {items.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
+                  <td colSpan={isKingAdmin ? 8 : 7} className="px-4 py-12 text-center text-gray-500">
                     No clients found.
                   </td>
                 </tr>
@@ -118,6 +169,23 @@ export default function ClientsListWrapper() {
                         Edit
                       </button>
                     </td>
+                    {isKingAdmin && (
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => openDeleteDialog(client.client_id)}
+                          disabled={loadingDelete === client.client_id}
+                          className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
+                          title="Delete"
+                        >
+                          {loadingDelete === client.client_id ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            <Trash2 size={16} />
+                          )}
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
@@ -159,6 +227,17 @@ export default function ClientsListWrapper() {
           onClose={() => setEditingClient(null)}
         />
       )}
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={confirmDelete}
+        title="Delete Client"
+        message="Are you sure you want to delete this client? This action cannot be undone and will delete all client data."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+      />
     </div>
   );
 }

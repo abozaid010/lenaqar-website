@@ -8,12 +8,15 @@ import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import AddNewMember from "./add-new-member";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
+import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 
 export default function TeamTable({ data, canManageTeam = true }) {
   const router = useRouter();
   const { t } = useI18n();
   const [currentId, setCurrentId] = useState(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
 
   useEffect(() => {
     console.log("[TeamTable] Component mounted/updated with data:", {
@@ -24,18 +27,30 @@ export default function TeamTable({ data, canManageTeam = true }) {
     });
   }, [data]);
 
-  const handleDelete = async (id) => {
+  const openDeleteDialog = (id) => {
+    setMemberToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialogOpen(false);
+    setMemberToDelete(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!memberToDelete) return;
+    
     setLoadingDelete(true);
-    setCurrentId(id);
+    setCurrentId(memberToDelete);
     try {
-      console.log("[TeamTable] Attempting to delete employee with ID:", id);
-      await deleteEmployee(id);
+      console.log("[TeamTable] Attempting to delete employee with ID:", memberToDelete);
+      await deleteEmployee(memberToDelete);
       console.log("[TeamTable] Employee deleted successfully");
-      toast.success(t?.common?.teamMemberDeleted);
+      toast.success(t?.common?.teamMemberDeleted || "Team member deleted successfully");
       router.refresh();
     } catch (error) {
       console.error("[TeamTable] Failed to delete employee:", {
-        id,
+        id: memberToDelete,
         error: error.message,
         response: error.response?.data,
         status: error.response?.status,
@@ -44,6 +59,8 @@ export default function TeamTable({ data, canManageTeam = true }) {
     } finally {
       setLoadingDelete(false);
       setCurrentId(null);
+      setDeleteDialogOpen(false);
+      setMemberToDelete(null);
     }
   };
 
@@ -104,7 +121,7 @@ export default function TeamTable({ data, canManageTeam = true }) {
                         <AddNewMember isEdit={true} data={item} canManageTeam={canManageTeam} />
                       </td>
                       <td className="px-2 py-2 text-center">
-                        <button onClick={() => handleDelete(item.id)}>
+                        <button onClick={() => openDeleteDialog(item.id)}>
                           {loadingDelete && currentId === item.id ? (
                             <div className="animate-spin w-4 h-4 border-2 border-gray-400 rounded-full border-t-transparent"></div>
                           ) : (
@@ -120,6 +137,16 @@ export default function TeamTable({ data, canManageTeam = true }) {
           </table>
         </div>
       )}
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={confirmDelete}
+        title={t.team?.deleteTitle || "Delete Team Member"}
+        message={t.team?.deleteMessage || "Are you sure you want to delete this team member? This action cannot be undone."}
+        confirmLabel={t.buttons?.delete || "Delete"}
+        cancelLabel={t.buttons?.cancel || "Cancel"}
+      />
     </div>
   );
 }

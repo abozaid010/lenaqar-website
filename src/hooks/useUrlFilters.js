@@ -1,19 +1,18 @@
 "use client";
 
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback } from "react";
 
 /**
  * Hook for URL-driven filter state
  * URL = Single Source of Truth for filters
- * Syncs with LocalStorage for backup recovery
+ * Syncs with LocalStorage only when navigating between pages (not on initial load)
  */
 export function useUrlFilters(storageKey = "projects_filters", options = {}) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   const { validateCity, validateDeveloper } = options;
-  const isInitialMount = useRef(true);
 
   // Read current values from URL
   const rawCity = searchParams.get("city") || "";
@@ -23,17 +22,9 @@ export function useUrlFilters(storageKey = "projects_filters", options = {}) {
   const city = validateCity ? validateCity(rawCity) : rawCity;
   const developer = validateDeveloper ? validateDeveloper(rawDeveloper) : rawDeveloper;
 
-  // Restore from LocalStorage on mount if URL is empty
-  useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      const saved = localStorage.getItem(storageKey);
-      const currentParams = searchParams.toString();
-      if (saved && !currentParams) {
-        router.replace(`${pathname}?${saved}`, { scroll: false });
-      }
-    }
-  }, [storageKey, searchParams, router, pathname]);
+  // NOTE: Removed auto-restore from LocalStorage
+  // Filters are only applied when user explicitly sets them via UI
+  // LocalStorage is still used to persist filters when navigating between pages
 
   // Save to LocalStorage whenever URL changes
   useEffect(() => {

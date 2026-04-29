@@ -227,17 +227,8 @@ export default function CampaignDialog({
       title={title}
       showCloseButton={false}
       headerLeading={
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
-          disabled={isSubmitting}
-        >
-          {translate("common.cancel")}
-        </button>
-      }
-      headerActions={
-        <button
+        locale === "ar" ? (
+          <button
             type="button"
             onClick={handleSubmit}
             className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
@@ -253,7 +244,47 @@ export default function CampaignDialog({
             ) : (
               translate("common.create")
             )}
-        </button>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
+            disabled={isSubmitting}
+          >
+            {translate("common.cancel")}
+          </button>
+        )
+      }
+      headerActions={
+        locale === "ar" ? (
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-3 py-1.5 rounded-md border border-white/30 bg-white/10 text-white hover:bg-white/15 text-sm"
+            disabled={isSubmitting}
+          >
+            {translate("common.cancel")}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="px-3 py-1.5 rounded-md bg-white text-primary hover:bg-white/90 text-sm disabled:opacity-70 disabled:pointer-events-none"
+            disabled={isSubmitting || (mode === "text" && isUploadingImages)}
+          >
+            {isSubmitting ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                {editMode ? translate("common.updating") : translate("common.creating")}
+              </span>
+            ) : editMode ? (
+              translate("common.update")
+            ) : (
+              translate("common.create")
+            )}
+          </button>
+        )
       }
     >
       <div className="max-w-3xl mx-auto">

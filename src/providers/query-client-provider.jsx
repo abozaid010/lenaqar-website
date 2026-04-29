@@ -16,8 +16,8 @@ function getQueryClient() {
       browserQueryClient = new QueryClient({
         defaultOptions: {
           queries: {
-            staleTime: 1000 * 60 * 15, // 15 minutes default
-            gcTime: 1000 * 60 * 30, // 30 minutes default
+            staleTime: 1000 * 60 * 5, // 5 minutes default (reduced from 15 for memory stability)
+            gcTime: 1000 * 60 * 5, // 5 minutes default (reduced from 30 for memory stability)
             refetchOnWindowFocus: false,
           },
         },

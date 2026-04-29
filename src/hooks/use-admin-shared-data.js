@@ -102,13 +102,22 @@ export function useDeveloperDetails(developerId) {
   return query;
 }
 
-// Hook for fetching compounds
+/**
+ * @deprecated Use useProjectsPaginated for lists or useProjectsNames for lightweight data.
+ * This hook loads ALL projects which is dangerous with large datasets (800+ projects).
+ * It now includes a safety limit of 100 projects max.
+ */
 export function useCompounds(client_id, isPublic = false) {
   return useQuery({
-    queryKey: compoundKeys.lists(client_id, isPublic),
-    queryFn: () => fetchProjects(isPublic),
-    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
-    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
+    queryKey: [...compoundKeys.lists(client_id, isPublic), "limited"],
+    queryFn: async () => {
+      console.warn("useCompounds() is deprecated - loads all projects which causes memory issues. Use useProjectsPaginated instead.");
+      const all = await fetchProjects(isPublic);
+      // Safety limit: only return first 100 projects to prevent memory crash
+      return Array.isArray(all) ? all.slice(0, 100) : all;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes (reduced for memory stability)
+    gcTime: 1000 * 60 * 5, // 5 minutes (reduced for memory stability)
     refetchOnWindowFocus: false,
   });
 }
@@ -124,6 +133,7 @@ export function useProjectsNames(isPublic = false) {
 }
 
 // Hook for fetching paginated projects (full project data, cursor-based)
+// OPTIMIZED: 5min cache times for memory stability with 800+ projects
 export function useProjectsPaginated({ cityEnName, developerId, enabled = true } = {}) {
   return useInfiniteQuery({
     queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
@@ -132,8 +142,8 @@ export function useProjectsPaginated({ cityEnName, developerId, enabled = true }
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,
-    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
-    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
+    staleTime: 1000 * 60 * 5, // 5 minutes (reduced from 15 for memory stability)
+    gcTime: 1000 * 60 * 5, // 5 minutes (reduced from 30 for memory stability)
     refetchOnWindowFocus: false,
     enabled,
   });

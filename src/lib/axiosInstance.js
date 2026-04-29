@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { LenaCookiesManager } from "./LenaCookiesManager";
+import { getClientIdFromToken } from "./getRoleFromToken.client";
 import { TokenRefreshService } from "./TokenRefreshService";
 import { API_BASE_URL } from "./apiConfig";
 
@@ -14,11 +15,20 @@ export const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use((config) => {
   console.log(`🚀 Axios Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
-  
+
+  // Add Authorization header from access token
   if (!config.headers.Authorization) {
     const token = LenaCookiesManager.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  // Add x-client-id header from JWT token (not cookie) for backend validation
+  if (!config.headers['x-client-id']) {
+    const clientIdFromToken = getClientIdFromToken();
+    if (clientIdFromToken) {
+      config.headers['x-client-id'] = clientIdFromToken;
     }
   }
 

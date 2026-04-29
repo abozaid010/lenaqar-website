@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { isKingAdmin } from "@/lib/kingAdmin";
+import { isCurrentUserKingAdmin } from "@/lib/kingAdmin";
 import ClientsListWrapper from "./_components/ClientsListWrapper";
 import enTranslations from "../../../../../public/locales/en.js";
 import arTranslations from "../../../../../public/locales/ar.js";
@@ -10,16 +10,17 @@ export async function generateMetadata() {
   const locale = "en"; // Default to English for metadata
   const translations = locale === "ar" ? arTranslations : enTranslations;
   const t = translations;
-  
+
   return {
     title: t.clients || "Clients",
   };
 }
 
 export default async function ClientsPage({ params }) {
-  const { email } = await params;
+  // Check if current user is king admin using JWT token (not URL param)
+  const isKingAdminUser = await isCurrentUserKingAdmin();
 
-  if (!isKingAdmin(email)) {
+  if (!isKingAdminUser) {
     redirect("/dashboard");
   }
 

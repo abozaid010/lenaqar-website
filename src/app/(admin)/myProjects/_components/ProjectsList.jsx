@@ -31,6 +31,7 @@ import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { deleteProject } from "@/utils/api";
+import { handleApiResponse, isSuccessResponse, getErrorMessage } from "@/utils/api-response-handler";
 import { paginatedProjectKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { filterBySearchQuery } from "@/utils/search-utils";
@@ -358,9 +359,7 @@ export default function ProjectsList({ clientId }) {
     });
   }, []);
 
-  const [projectList, setProjectList] = useState([]);
-
-  // Dialogs state
+  // Dialogs state - REMOVED: projectList useState (was duplicate of projectsList)
   const [showProjectDialog, setShowProjectDialog] = useState(false);
   const [projectDialogMode, setProjectDialogMode] = useState("add"); // "add" | "edit" | "view"
   const [dialogProject, setDialogProject] = useState(null);
@@ -375,8 +374,10 @@ export default function ProjectsList({ clientId }) {
   const [addProjectSelectValue, setAddProjectSelectValue] = useState("");
   const [pendingProject, setPendingProject] = useState(null);
 
+  // Load translations once per locale change - decoupled from projects data
+  // This prevents circular dependency: projectsList changes -> effect runs -> setState -> re-render
   useEffect(() => {
-    const loadAllTranslations = async () => {
+    const loadTranslations = async () => {
       try {
         const manager = CityManager.getInstance();
         await manager.initializeData();
@@ -389,48 +390,11 @@ export default function ProjectsList({ clientId }) {
           cityLabels[cityObj.value] = await manager.getCityLabel(cityObj.id, locale);
         }
 
-        const districtLabels = {};
-        if (projectsList && Array.isArray(projectsList) && projectsList.length > 0) {
-          const cityDistrictPairs = new Set();
-          projectsList.forEach((project) => {
-            if (project.city && project.district) {
-              const cityKey = String(project.city).toLowerCase().trim();
-              const districtKey = String(project.district).toLowerCase().trim();
-              cityDistrictPairs.add(`${cityKey}|${districtKey}`);
-            }
-          });
-
-          for (const pair of cityDistrictPairs) {
-            const [cityValue, districtValue] = pair.split("|");
-            const cityObj = await manager.getCityByValue(cityValue);
-            if (cityObj) {
-              let label = await manager.getDistrictLabel(
-                districtValue,
-                cityObj.id,
-                locale
-              );
-              if (!label) {
-                const districts = await manager.getDistrictsForCity(cityObj.id);
-                const districtObj = districts.find(
-                  (d) =>
-                    d.value === districtValue ||
-                    d.en_name.toLowerCase() === districtValue ||
-                    d.ar_name === districtValue
-                );
-                if (districtObj) {
-                  label =
-                    locale === "ar" ? districtObj.label_ar : districtObj.label_en;
-                }
-              }
-              if (label) districtLabels[pair] = label;
-            }
-          }
-        }
-
+        // Load districts on-demand via getDistrictDisplayName instead of pre-loading all
         setTranslations({
           cities: citiesData,
           cityLabels,
-          districtLabels,
+          districtLabels: {}, // Loaded on-demand
           isLoading: false,
         });
       } catch (err) {
@@ -444,8 +408,8 @@ export default function ProjectsList({ clientId }) {
       }
     };
 
-    loadAllTranslations();
-  }, [locale, projectsList]);
+    loadTranslations();
+  }, [locale]); // REMOVED: projectsList - prevents circular dependency
 
   const getCityDisplayName = useMemo(() => {
     return (city) => {
@@ -506,52 +470,26 @@ export default function ProjectsList({ clientId }) {
     [translations.districtLabels, locale]
   );
 
-  useEffect(() => {
-    if (!isLoading && !isError && projectsList) {
-      if (!Array.isArray(projectsList)) return;
-
-      const sorted = [...projectsList].sort((a, b) => {
-        const rawA =
-          (locale === "ar" ? a?.ar_name : a?.en_name) ??
-          (locale === "ar" ? a?.en_name : a?.ar_name) ??
-          "";
-        const rawB =
-          (locale === "ar" ? b?.ar_name : b?.en_name) ??
-          (locale === "ar" ? b?.en_name : b?.ar_name) ??
-          "";
-        return String(rawA)
-          .trim()
-          .localeCompare(String(rawB).trim(), locale, { sensitivity: "base" });
-      });
-
-      let cityFiltered = sorted;
-      if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
-        cityFiltered = sorted.filter((p) => {
-          const projectCity = p.city?.toLowerCase() || "";
-          return projectCity === selectedCity.toLowerCase();
-        });
-      }
-
-      const filtered = searchQuery
-        ? filterBySearchQuery(cityFiltered, searchQuery, ["ar_name", "en_name"])
-        : cityFiltered;
-
-      setProjectList(filtered);
-    }
-  }, [
-    isLoading,
-    isError,
-    projectsList,
-    locale,
-    searchQuery,
-    selectedCity,
-    translations.cities,
-  ]);
-
+  // displayList derived directly from projectsList - eliminates duplicate state
   const displayList = useMemo(() => {
-    const appendedIds = new Set(appendedProjects.map((p) => p.id));
-    const rest = projectList.filter((p) => !appendedIds.has(p.id));
-    const restSorted = [...rest].sort((a, b) => {
+    if (!projectsList || !Array.isArray(projectsList)) return [];
+
+    // Apply city filter
+    let filtered = projectsList;
+    if (selectedCity && selectedCity !== "" && selectedCity !== "all") {
+      filtered = projectsList.filter((p) => {
+        const projectCity = p.city?.toLowerCase() || "";
+        return projectCity === selectedCity.toLowerCase();
+      });
+    }
+
+    // Apply search filter
+    if (searchQuery) {
+      filtered = filterBySearchQuery(filtered, searchQuery, ["ar_name", "en_name"]);
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
       const rawA =
         (locale === "ar" ? a?.ar_name : a?.en_name) ??
         (locale === "ar" ? a?.en_name : a?.ar_name) ??
@@ -564,7 +502,13 @@ export default function ProjectsList({ clientId }) {
         .trim()
         .localeCompare(String(rawB).trim(), locale, { sensitivity: "base" });
     });
-    const merged = [...appendedProjects, ...restSorted];
+
+    // Merge appended projects
+    const appendedIds = new Set(appendedProjects.map((p) => p.id));
+    const rest = sorted.filter((p) => !appendedIds.has(p.id));
+    const merged = [...appendedProjects, ...rest];
+
+    // Add pending project at top
     if (pendingProject) {
       return [
         pendingProject,
@@ -572,7 +516,7 @@ export default function ProjectsList({ clientId }) {
       ];
     }
     return merged;
-  }, [projectList, appendedProjects, pendingProject, locale]);
+  }, [projectsList, appendedProjects, pendingProject, locale, selectedCity, searchQuery]);
 
   const handleProjectSelectStart = useCallback((option) => {
     setPendingProject({
@@ -600,12 +544,6 @@ export default function ProjectsList({ clientId }) {
         ? prev.map((p) => (p.id === data.id ? data : p))
         : prev
     );
-    setProjectList((prev) => {
-      const exists = prev.some((p) => p.id === data.id);
-      return exists
-        ? prev.map((p) => (p.id === data.id ? data : p))
-        : [...prev, data];
-    });
     queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
   };
 
@@ -644,24 +582,24 @@ export default function ProjectsList({ clientId }) {
 
   const handleConfirmDeleteProject = async () => {
     if (!projectToDelete) return;
-    try {
-      const res = await deleteProject(projectToDelete.id);
-      if (res.code === 409) {
-        toast.error(t.associateProject);
-      } else if (res.code === 200) {
-        toast.success(t.projectDelete);
-        setAppendedProjects((prev) =>
-          prev.filter((p) => p.id !== projectToDelete.id)
-        );
-        setProjectList((prev) => prev.filter((p) => p.id !== projectToDelete.id));
-        queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
+
+    const result = await handleApiResponse(
+      await deleteProject(projectToDelete.id),
+      {
+        onSuccess: () => {
+          toast.success(t.projectDelete);
+          setAppendedProjects((prev) =>
+            prev.filter((p) => p.id !== projectToDelete.id)
+          );
+          queryClient.invalidateQueries({ queryKey: paginatedProjectKeys.all });
+        },
+        onError: (errorMsg) => toast.error(errorMsg),
+        fallbackError: t.failedProject,
       }
-    } catch {
-      toast.error(t.failedProject);
-    } finally {
-      setShowDeleteDialog(false);
-      setProjectToDelete(null);
-    }
+    );
+
+    setShowDeleteDialog(false);
+    setProjectToDelete(null);
   };
 
   const handleImported = async () => {

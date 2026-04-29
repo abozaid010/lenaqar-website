@@ -182,8 +182,22 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return list;
   }, [locale, t, compounds, developers, cityLabels]);
 
+  // Only show active developer filter if developer exists in loaded list
+  // This prevents showing stale filter chips when data reloads
+  const hasValidDeveloper = useMemo(() => {
+    if (!filters.developer_name || filters.developer_name === "all") return false;
+    return developers.some((d) => getDeveloperValue(d) === filters.developer_name);
+  }, [filters.developer_name, developers]);
+
   // Derived from URL — automatically stays in sync with searchParams
-  const activeFilters = useMemo(() => buildActiveFilters(filters), [filters, buildActiveFilters]);
+  const activeFilters = useMemo(() => {
+    // Temporarily override developer_name validity for buildActiveFilters
+    const safeFilters = {
+      ...filters,
+      developer_name: hasValidDeveloper ? filters.developer_name : "",
+    };
+    return buildActiveFilters(safeFilters);
+  }, [filters, buildActiveFilters, hasValidDeveloper]);
 
   const applyNumericFiltersToUrl = useCallback((nextFilters) => {
     const minN = parseNumeric(nextFilters.min_price);
@@ -387,8 +401,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (!filters.developer_name || filters.developer_name === "all") {
       return t.unitsFilter.allDevelopers || "All Developers";
     }
+    // Only show developer name if it exists in the loaded developers list
+    // This prevents displaying stale/cached values that don't match current data
     const d = developers.find((d) => getDeveloperValue(d) === filters.developer_name);
-    if (!d) return filters.developer_name;
+    if (!d) {
+      // If developer not found in list, return "All Developers" instead of raw value
+      // This handles race conditions where filter loads before data
+      return t.unitsFilter.allDevelopers || "All Developers";
+    }
     return getDeveloperLabel(d, locale) || filters.developer_name;
   }
 
