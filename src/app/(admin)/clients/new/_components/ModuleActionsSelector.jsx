@@ -29,6 +29,18 @@ export const DEFAULT_BROKER_MODULE_ACTIONS = {
   calendar: ["view", "create", "update_own", "delete_own"]
 };
 
+
+export const DEFAULT_DEVELOPER_MODULE_ACTIONS = {
+  projects: ["view","update_own", "create"],
+  developers: ["view", "update_own"],
+  units: ["view", "import", "create", "update_own", "delete_own"],
+  campaign: ["view", "create", "update_own", "delete_own"],
+  conversation: ["view", "create", "update_own", "delete_own"],
+  team_members: ["view", "create", "update_own", "delete_own"],
+  analytics: ["view", "create", "update_own", "delete_own"],
+  calendar: ["view", "create", "update_own", "delete_own"]
+};
+
 const ACTIONS = [
   { value: "view", label: "View" },
   { value: "create", label: "Create" },
