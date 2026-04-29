@@ -14,9 +14,6 @@ import { uploadImages, updateAdminClient } from "@/utils/api";
 import { compressImage } from "@/utils/imageCompression";
 
 const CLIENT_TYPES = [
-  { value: "premium", label: "Premium" },
-  { value: "free", label: "Free" },
-  { value: "dev", label: "Development" },
   { value: "broker", label: "Broker" },
   { value: "developer", label: "Developer" },
 ];
@@ -73,7 +70,7 @@ const ClientSignupForm = () => {
     crm_link: "",
     
     // Settings
-    client_type: "free",
+    client_type: "developer",
     is_active: true,
     accurate_queries_level: 0,
     sharing_policy: "only_my_units",
