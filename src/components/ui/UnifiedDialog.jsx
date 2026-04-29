@@ -101,15 +101,11 @@ export default function UnifiedDialog({
           />
         ) : (
           <div
-            className={`flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative ${
-              isRTL ? "flex-row-reverse" : ""
-            }`}
+            className="flex justify-between items-center gap-3 p-3 md:p-4 bg-primary text-white flex-shrink-0 relative"
             dir={isRTL ? "rtl" : "ltr"}
           >
             <div
-              className={`flex items-center shrink-0 min-w-[80px] ${
-                isRTL ? "justify-end" : "justify-start"
-              }`}
+              className="flex items-center shrink-0 min-w-[80px] justify-start"
             >
               {headerLeading !== undefined ? (
                 headerLeading
@@ -128,9 +124,7 @@ export default function UnifiedDialog({
               {title}
             </h2>
             <div
-              className={`flex items-center gap-2 shrink-0 min-w-[80px] ${
-                isRTL ? "justify-start" : "justify-end"
-              }`}
+              className="flex items-center gap-2 shrink-0 min-w-[80px] justify-end"
             >
               {headerTrailing !== undefined ? (
                 headerTrailing
