@@ -32,13 +32,20 @@ export function useI18n() {
         return sanitizeTranslationValue(value);
       }
       
-      // Log missing key for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation key: ${validation.safeKey} for locale: ${locale}`);
+      // Missing translation key handling:
+      // - If caller provided a fallback, return it (legacy support).
+      // - If no fallback and we're in development, fail fast (strict-by-default).
+      if (fallback !== null && fallback !== undefined) return fallback;
+      if (process.env.NODE_ENV === "development") {
+        const topKeys =
+          t && typeof t === "object" ? Object.keys(t).slice(0, 25) : [];
+        throw new Error(
+          `Missing translation: ${validation.safeKey} (locale: ${locale}). Top-level keys: ${topKeys.join(
+            ", "
+          )}`
+        );
       }
-      
-      // Return fallback or safe key
-      return fallback || validation.safeKey;
+      return validation.safeKey;
     } catch (error) {
       console.error(`Translation error for key: ${validation.safeKey}`, error);
       return fallback || validation.safeKey;
@@ -47,26 +54,9 @@ export function useI18n() {
 
   // Assert translations are present in development (no silent key display)
   const translateStrict = useCallback((key) => {
-    // We intentionally avoid fallbacks here; missing keys should be caught early.
-    const value = translate(key, null);
-    if (process.env.NODE_ENV === "development") {
-      const direct = safePropertyAccess(t, key);
-      if (direct === undefined || direct === null || direct === "") {
-        // Provide extra debugging context while keeping the error actionable.
-        const topKeys =
-          t && typeof t === "object" ? Object.keys(t).slice(0, 25) : [];
-        throw new Error(
-          `Missing translation: ${key} (locale: ${locale}). Top-level keys: ${topKeys.join(
-            ", "
-          )}`
-        );
-      }
-    }
-    if (process.env.NODE_ENV === "development" && value === key) {
-      throw new Error(`Missing translation: ${key} (locale: ${locale})`);
-    }
-    return value;
-  }, [translate, locale, t]);
+    // translate() is strict-by-default in development when fallback is null.
+    return translate(key, null);
+  }, [translate]);
 
   // Helper for mapped translations (enums/backend values)
   const getMapped = useCallback((value, mapping, fallback = null) => {
