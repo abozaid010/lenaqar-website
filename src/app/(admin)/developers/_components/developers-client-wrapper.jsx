@@ -1,13 +1,14 @@
 "use client";
 
 import AddDeveloperDialog from "@/components/ui/add-developer-dialog";
+import DeveloperContactOverrideDialog from "@/components/ui/developer-contact-override-dialog";
 import ImportDevelopersDialog from "@/components/ui/import-developers-dialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/context/translate-api";
 import { useDevelopers, useDeveloperNames } from "@/hooks/use-admin-shared-data";
-import { deleteDeveloper } from "@/utils/api";
+import { deleteDeveloper, getClientid } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { MoreVertical, Pencil, Phone, Mail, Plus, Trash2, Search } from "lucide-react";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
@@ -45,6 +46,9 @@ export default function DevelopersClientWrapper({ clientId }) {
   const { isDeveloper } = useBrokerPermission();
   const {
     canCreate: canCreateDeveloper,
+    canEdit: canEditDeveloper,
+    canDelete: canDeleteDeveloper,
+    canEditDeveloperContactInfo,
     has: hasDeveloperAction,
   } = useModuleActions("developers");
   const canImportDevelopers = hasDeveloperAction("import");
@@ -53,6 +57,7 @@ export default function DevelopersClientWrapper({ clientId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isContactOverrideOpen, setIsContactOverrideOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [openInEditMode, setOpenInEditMode] = useState(false);
@@ -530,33 +535,54 @@ export default function DevelopersClientWrapper({ clientId }) {
                             </button>
                             {openMenuId === d.id && (
                               <OwnerActions item={d}>
-                                <div
-                                  className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-full mt-1 w-40 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden`}
-                                >
-                                  <button
-                                    onClick={() => {
-                                      setSelectedDeveloper(d);
-                                      setOpenInEditMode(true);
-                                      setIsOpen(true);
-                                      setOpenMenuId(null);
-                                    }}
-                                    className="w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                                {(canEditDeveloper || canDeleteDeveloper || canEditDeveloperContactInfo) ? (
+                                  <div
+                                    className={`absolute ${locale === "ar" ? "left-0" : "right-0"} top-full mt-1 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-50 overflow-hidden`}
                                   >
-                                    <Pencil size={14} />
-                                    {t.developerPage?.editDeveloper || "Edit"}
-                                  </button>
-                                  <button
-                                    onClick={() => {
-                                      setSelectedDeveloper(d);
-                                      setShowDeleteDialog(true);
-                                      setOpenMenuId(null);
-                                    }}
-                                    className="w-full text-left py-2 px-4 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 flex items-center gap-2"
-                                  >
-                                    <Trash2 size={14} />
-                                    {t.deleteButton || "Delete"}
-                                  </button>
-                                </div>
+                                    {canEditDeveloperContactInfo ? (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedDeveloper(d);
+                                          setIsContactOverrideOpen(true);
+                                          setOpenMenuId(null);
+                                        }}
+                                        className="w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                                      >
+                                        <Phone size={14} />
+                                        {t.developerPage?.updateContact || "Update contact"}
+                                      </button>
+                                    ) : null}
+
+                                    {canEditDeveloper ? (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedDeveloper(d);
+                                          setOpenInEditMode(true);
+                                          setIsOpen(true);
+                                          setOpenMenuId(null);
+                                        }}
+                                        className="w-full text-left py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150 flex items-center gap-2"
+                                      >
+                                        <Pencil size={14} />
+                                        {t.developerPage?.editDeveloper || "Edit"}
+                                      </button>
+                                    ) : null}
+
+                                    {canDeleteDeveloper ? (
+                                      <button
+                                        onClick={() => {
+                                          setSelectedDeveloper(d);
+                                          setShowDeleteDialog(true);
+                                          setOpenMenuId(null);
+                                        }}
+                                        className="w-full text-left py-2 px-4 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150 flex items-center gap-2"
+                                      >
+                                        <Trash2 size={14} />
+                                        {t.deleteButton || "Delete"}
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                ) : null}
                               </OwnerActions>
                             )}
                           </div>
@@ -617,6 +643,23 @@ export default function DevelopersClientWrapper({ clientId }) {
         clientId={clientId}
         onImported={handleImported}
         existingDeveloperIds={filteredDevelopers.map((d) => d.id)}
+      />
+
+      <DeveloperContactOverrideDialog
+        isOpen={isContactOverrideOpen && Boolean(selectedDeveloper?.id)}
+        onClose={() => setIsContactOverrideOpen(false)}
+        clientId={getClientid() || clientId || ""}
+        developerId={selectedDeveloper?.id || ""}
+        developerName={
+          selectedDeveloper
+            ? (locale === "ar"
+                ? (selectedDeveloper.ar_name || selectedDeveloper.en_name)
+                : (selectedDeveloper.en_name || selectedDeveloper.ar_name))
+            : ""
+        }
+        onSaved={() => {
+          refetch();
+        }}
       />
     </div>
   );
