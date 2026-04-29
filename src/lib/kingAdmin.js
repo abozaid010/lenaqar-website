@@ -28,7 +28,7 @@ export function isKingAdmin(clientId) {
 export async function isCurrentUserKingAdmin() {
   try {
     const cookieStore = await cookies();
-    const clientId = cookieStore.get('client_id')?.value;
+    const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
     
     if (!clientId) {
       return false;
@@ -82,7 +82,7 @@ export async function isRequestFromKingAdmin(request) {
 
     // Get client ID from multiple sources for validation
     const clientIdFromHeader = request.headers.get('x-client-id');
-    const clientIdFromCookie = cookieStore.get('client_id')?.value;
+    const clientIdFromCookie = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
     const clientId = clientIdFromHeader || clientIdFromCookie;
 
     // Verify the client ID is 'public' (king admin)
@@ -101,6 +101,6 @@ export async function isRequestFromKingAdmin(request) {
  */
 export function isRequestFromKingAdminLegacy(request) {
   const clientId = request.headers.get('x-client-id') || 
-                   request.cookies.get('client_id')?.value;
+                   request.cookies.get(COOKIE_KEYS.CLIENT_ID)?.value;
   return isKingAdmin(clientId);
 }

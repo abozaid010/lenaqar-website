@@ -613,9 +613,17 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
       console.log("Upload response:", response);
 
-      // Check if the upload was successful
-      if (response?.status && response?.data) {
-        const apiData = response.data;
+      // Check if the upload was successful.
+      // This endpoint is wrapped by withErrorHandling(), which returns
+      // { success, data, statusCode } instead of { status, data }.
+      const isUploadSuccess =
+        response?.success === true ||
+        response?.status === true ||
+        response?.code === 200 ||
+        response?.statusCode === 200;
+
+      if (isUploadSuccess && response?.data) {
+        const apiData = response?.data?.data || response.data;
 
         const insertedIds =
           apiData.inserted_ids || apiData?.summary?.inserted_ids || [];
@@ -751,7 +759,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           prev.map((item) => ({
             ...item,
             status: "failed",
-            error: response?.error_message || "Upload failed",
+            error: response?.error || response?.error_message || "Upload failed",
           }))
         );
       }

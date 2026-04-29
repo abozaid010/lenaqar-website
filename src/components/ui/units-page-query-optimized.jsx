@@ -19,15 +19,17 @@ export default function UnitsPageQueryOptimized({
 
     // CRITICAL: never allow accidental leakage from URL/searchParams
     delete base.client_id;
+    delete base.clientId;
 
-    // Always include session/identity clientId
     const params = {
       ...base,
       page_size: Number(base.page_size) || 16,
-      clientId: currentClientId,
-      // Resale uses is_primary=false, otherwise default is_primary=true
-      is_primary: base.resale === "true" ? false : true,
     };
+
+    // Send is_primary only when resale filter is explicitly enabled.
+    if (base.resale === "true") {
+      params.is_primary = false;
+    }
 
     // ONLY send client_id when My Inventory is ON
     if (base.my_inventory === "true" && currentClientId) {

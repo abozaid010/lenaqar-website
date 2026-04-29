@@ -1054,18 +1054,19 @@ export async function importProjects(projects) {
 
 // Images CRUD operations //
 export async function uploadImages(formData, clientId) {
-  // TODO: Cleint ID should be getted from the authantication token
   try {
-    const response = await axiosInstance.post(
-      `/gcs/upload?client_id=${clientId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
-    return response.data;
+    formData.append("clientId", clientId);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(data?.error || "Failed to upload images");
+    }
+
+    return data;
   } catch (error) {
     console.error("Failed to upload images:", error.message);
     return { error: error.message };
@@ -1646,6 +1647,48 @@ export async function updateUserName(userId, name) {
   return updateUserInfo({ user_id: userId, name: name.trim() });
 }
 
+export async function fetchManagerAnalytics(params = {}) {
+  try {
+    const response = await axiosInstance.get("/analysis/manager/stats", { params });
+    return response.data?.data ?? {};
+  } catch (error) {
+    console.error("Failed to fetch manager analytics:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchLegacyUserAnalytics(days = 10) {
+  const clientId = getClientid();
+  try {
+    const response = await axiosInstance.get(`/analysis/v1/user-analysis/${clientId}`, {
+      params: { days },
+    });
+    return response.data?.data ?? {};
+  } catch (error) {
+    console.error("Failed to fetch legacy user analytics:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchLegacyMonthData(searchParams = {}) {
+  const clientId = getClientid();
+  try {
+    const params =
+      typeof searchParams === "string"
+        ? safeMergeParams(searchParams, {})
+        : { ...(searchParams || {}) };
+
+    const response = await axiosInstance.get(
+      `/analysis/v1/dashboard-action-analysis/${clientId}?days=7`,
+      { params }
+    );
+    return response.data?.data?.monthly ?? [];
+  } catch (error) {
+    console.error("Failed to fetch legacy month analytics:", error.message);
+    throw error;
+  }
+}
+
 /**
  * Update requirements for a user (PUT /requirements/:userId)
  */
@@ -1663,7 +1706,7 @@ export async function updateUserRequirements(userId, payload) {
 }
 
 /**
- * Create a new action (POST /action/create) — client-side helper
+ * Create a new action (POST /action/v1/create) — client-side helper
  */
 export async function createUserAction(payload) {
   const actionVal =
@@ -1681,9 +1724,10 @@ export async function createUserAction(payload) {
     meeting_time: payload.meeting_time ?? null,
     created_at: payload.created_at ?? new Date().toISOString(),
     action: actionVal,
+    author: payload.author ?? "",
   };
   try {
-    const response = await axiosInstance.post("action/create", body);
+    const response = await axiosInstance.post("action/v1/create", body);
     return response.data;
   } catch (error) {
     console.error("Failed to create action:", error.message);

@@ -29,6 +29,7 @@ import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const SidebarComponent = ({
   canAccessMap = false,
@@ -47,17 +48,31 @@ const SidebarComponent = ({
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [brandImgFailed, setBrandImgFailed] = useState(false);
+  const currentClientId = clientId || LenaCookiesManager.getClientId() || null;
 
   const isKingAdminUser = isCurrentUserKingAdmin();
-  const { data: profilePayload } = useQuery({
-    queryKey: ["clientProfile", "sidebarBrand"],
+  const {
+    data: profilePayload,
+    isError: isProfileError,
+    error: profileError,
+  } = useQuery({
+    queryKey: ["clientProfile", "sidebarBrand", currentClientId || "unknown-client"],
     queryFn: getProfileData,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
-    enabled: !isKingAdminUser,
+    enabled: true,
   });
 
   const pd = profilePayload?.data;
+  const profileClientId =
+    pd?.client_id ??
+    pd?.clientId ??
+    profilePayload?.client_id ??
+    profilePayload?.clientId ??
+    null;
+  const isProfileClientMatch =
+    !currentClientId || !profileClientId || String(currentClientId) === String(profileClientId);
+
   const clientLogoUrl =
     pd?.logo_url ??
     pd?.logo ??
@@ -67,14 +82,122 @@ const SidebarComponent = ({
     profilePayload?.logo;
 
   useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    console.log("[SidebarLogo] profile query snapshot", {
+      isKingAdminUser,
+      hasProfilePayload: Boolean(profilePayload),
+      payloadKeys:
+        profilePayload && typeof profilePayload === "object"
+          ? Object.keys(profilePayload)
+          : [],
+      dataKeys:
+        pd && typeof pd === "object"
+          ? Object.keys(pd)
+          : [],
+      extractedClientLogoUrl: clientLogoUrl || null,
+    });
+  }, [isKingAdminUser, profilePayload, pd, clientLogoUrl]);
+
+  // Persist latest profile logo into client_info cookie so branding is available
+  // immediately across app sections that read client_info on startup.
+  useEffect(() => {
+    if (!profilePayload) return;
+    const logoUrl =
+      pd?.logo_url ??
+      pd?.logo ??
+      pd?.client_logo_url ??
+      pd?.client_logo ??
+      profilePayload?.logo_url ??
+      profilePayload?.logo ??
+      "";
+    if (!isProfileClientMatch) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[SidebarLogo] profile/cookie client mismatch, skip cookie persist", {
+          cookieClientId: currentClientId,
+          profileClientId,
+        });
+      }
+      return;
+    }
+    if (process.env.NODE_ENV === "development") {
+      console.log("[SidebarLogo] persist logo step", {
+        rawLogoUrl: logoUrl || null,
+      });
+    }
+    if (!logoUrl) return;
+
+    const currentInfo = LenaCookiesManager.getClientInfo() || {};
+    if (process.env.NODE_ENV === "development") {
+      console.log("[SidebarLogo] cookie before persist", {
+        currentClientInfoLogo: currentInfo.logo_url || null,
+        currentClientInfoName: currentInfo.client_name || null,
+      });
+    }
+    if (
+      currentInfo.logo_url === logoUrl &&
+      (!pd?.client_name || currentInfo.client_name === pd.client_name)
+    ) {
+      return;
+    }
+    LenaCookiesManager.setClientInfo({
+      ...currentInfo,
+      ...(profileClientId ? { client_id: profileClientId } : null),
+      ...(pd?.client_name ? { client_name: pd.client_name } : null),
+      logo_url: logoUrl,
+    });
+    if (process.env.NODE_ENV === "development") {
+      const updatedInfo = LenaCookiesManager.getClientInfo() || {};
+      console.log("[SidebarLogo] cookie after persist", {
+        updatedClientInfoClientId: updatedInfo.client_id || null,
+        updatedClientInfoName: updatedInfo.client_name || null,
+        updatedClientInfoLogo: updatedInfo.logo_url || null,
+      });
+    }
+  }, [profilePayload, pd, currentClientId, isProfileClientMatch, profileClientId]);
+
+  useEffect(() => {
     setBrandImgFailed(false);
   }, [clientLogoUrl]);
 
   const showClientLogo =
-    !isKingAdminUser &&
     typeof clientLogoUrl === "string" &&
     clientLogoUrl.trim() !== "" &&
     !brandImgFailed;
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    console.log("[SidebarLogo] render decision", {
+      isKingAdminUser,
+      currentClientId,
+      profileClientId,
+      isProfileClientMatch,
+      clientLogoUrl: clientLogoUrl || null,
+      brandImgFailed,
+      showClientLogo,
+      fallbackLogoWillRender: !showClientLogo,
+      resolvedDisplayUrl: clientLogoUrl
+        ? getClientLogoDisplayUrl(clientLogoUrl)
+        : null,
+    });
+  }, [
+    isKingAdminUser,
+    currentClientId,
+    profileClientId,
+    isProfileClientMatch,
+    clientLogoUrl,
+    brandImgFailed,
+    showClientLogo,
+  ]);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    if (!isProfileError) return;
+    console.error("[SidebarLogo] profile query failed", {
+      currentClientId,
+      errorMessage: profileError?.message || String(profileError),
+      error: profileError,
+    });
+  }, [isProfileError, profileError, currentClientId]);
 
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
@@ -159,10 +282,10 @@ const SidebarComponent = ({
                 <AlertTriangle className="h-6 w-6 text-red-500" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800">
-                {t.sidebar.logoutConfirm.title}
+                {translate("sidebar.logoutConfirm.title", t?.sidebar?.logoutConfirm?.title)}
               </h3>
               <p className="text-gray-600 mt-2">
-                {t.sidebar.logoutConfirm.message}
+                {translate("sidebar.logoutConfirm.message", t?.sidebar?.logoutConfirm?.message)}
               </p>
             </div>
             <div className="flex gap-3 mt-6">
@@ -170,13 +293,13 @@ const SidebarComponent = ({
                 onClick={cancelLogout}
                 className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
               >
-                {t.sidebar.logoutConfirm.cancel}
+                {translate("sidebar.logoutConfirm.cancel", t?.sidebar?.logoutConfirm?.cancel)}
               </button>
               <button
                 onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
               >
-                {t.sidebar.logoutConfirm.confirm}
+                {translate("sidebar.logoutConfirm.confirm", t?.sidebar?.logoutConfirm?.confirm)}
               </button>
             </div>
           </div>
@@ -195,7 +318,22 @@ const SidebarComponent = ({
                 src={getClientLogoDisplayUrl(clientLogoUrl)}
                 alt=""
                 className="max-h-10 w-auto max-w-[7.5rem] object-contain"
-                onError={() => setBrandImgFailed(true)}
+                onLoad={(e) => {
+                  if (process.env.NODE_ENV === "development") {
+                    console.log("[SidebarLogo] image loaded", {
+                      renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
+                    });
+                  }
+                }}
+                onError={(e) => {
+                  if (process.env.NODE_ENV === "development") {
+                    console.error("[SidebarLogo] image failed", {
+                      renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
+                      originalClientLogoUrl: clientLogoUrl || null,
+                    });
+                  }
+                  setBrandImgFailed(true);
+                }}
               />
             ) : (
               <Image
@@ -221,7 +359,7 @@ const SidebarComponent = ({
               }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.dashboard}</span>
+              <span>{translate("sidebar.dashboard", t?.sidebar?.dashboard)}</span>
             </Link>
           )}
 
@@ -296,7 +434,7 @@ const SidebarComponent = ({
               }`}
             >
               <Home className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.units}</span>
+              <span>{translate("sidebar.units", t?.sidebar?.units)}</span>
             </Link>
           )}
 
@@ -311,7 +449,7 @@ const SidebarComponent = ({
               }`}
             >
               <Home className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.pendingApproval ?? "Resale"}</span>
+              <span>{translate("sidebar.pendingApproval", t?.sidebar?.pendingApproval ?? "Resale")}</span>
             </Link>
           )}
 
@@ -326,7 +464,7 @@ const SidebarComponent = ({
               }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.team}</span>
+              <span>{translate("sidebar.team", t?.sidebar?.team)}</span>
             </Link>
           )}
 
@@ -356,7 +494,7 @@ const SidebarComponent = ({
               }`}
             >
               <FolderKanban className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.myProjects}</span>
+              <span>{translate("sidebar.myProjects", t?.sidebar?.myProjects)}</span>
             </Link>
           )}
 
@@ -371,7 +509,7 @@ const SidebarComponent = ({
               }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.developers}</span>
+              <span>{translate("sidebar.developers", t?.sidebar?.developers)}</span>
             </Link>
           )}
 
@@ -386,7 +524,7 @@ const SidebarComponent = ({
               }`}
             >
               <Newspaper className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.news}</span>
+              <span>{translate("sidebar.news", t?.sidebar?.news)}</span>
             </Link>
           )}
 
@@ -401,7 +539,7 @@ const SidebarComponent = ({
               }`}
             >
               <MapPin className="h-5 w-5 mr-3" />
-              <span>{t.sidebar.map}</span>
+              <span>{translate("sidebar.map", t?.sidebar?.map)}</span>
             </Link>
           )}
         </div>

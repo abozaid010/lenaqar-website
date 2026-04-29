@@ -3,7 +3,6 @@
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/hooks/useI18n";
 import { deleteImage, uploadImages } from "@/utils/api";
-import { compressImage } from "@/utils/imageCompression";
 import {
   getMaxSizeBytes,
   getMaxSizeMB,
@@ -106,9 +105,8 @@ export default function ImageUploader({
     const failedUploads = [];
     for (const image of newSelectedImages) {
       try {
-        const compressedFile = await compressImage(image.file);
         const formDataToUpload = new FormData();
-        formDataToUpload.append("file", compressedFile);
+        formDataToUpload.append("file", image.file);
         const res = await uploadImages(formDataToUpload, clinetId);
         setUploadStatus((prev) => ({ ...prev, [image.id]: "success" }));
         successfulUploads.push({

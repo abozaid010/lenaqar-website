@@ -20,6 +20,10 @@ const PROJECTS_SHARING_OPTIONS = [
   { value: "only_my_projects", label: "Only My Projects" },
   { value: "pull_from_other_clients", label: "Pull From Other Clients" },
 ];
+const CLIENT_TYPE_OPTIONS = [
+  { value: "developer", label: "Developer" },
+  { value: "broker", label: "Broker" },
+];
 
 const SectionTitle = ({ children }) => (
   <h3 className="text-sm font-semibold text-primary uppercase tracking-wide mb-3 mt-5 first:mt-0 border-b border-gray-100 pb-1">
@@ -53,7 +57,7 @@ function buildInitialState(client) {
       (typeof client.logo_url === "string" && client.logo_url.trim()) ||
       (typeof client.logo === "string" && client.logo.trim()) ||
       "",
-    client_type: client.client_type || "free",
+    client_type: client.client_type || "developer",
     is_active: client.is_active ?? true,
     price_percentage: client.price_percentage ?? 0,
     accurate_queries_level: client.accurate_queries_level ?? 0,
@@ -148,8 +152,12 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <Field label="Client Type">
           <select className={selectCls} value={form.client_type} onChange={set("client_type")}>
-            <option value="free">Free</option>
-            <option value="paid">Paid</option>
+            {CLIENT_TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+            {!CLIENT_TYPE_OPTIONS.some((o) => o.value === form.client_type) && form.client_type ? (
+              <option value={form.client_type}>{form.client_type}</option>
+            ) : null}
           </select>
         </Field>
         <Field label="Price Percentage">

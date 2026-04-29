@@ -47,6 +47,12 @@ const LenaTextarea = forwardRef(({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const resolvedDir =
+    dir ??
+    (typeof document !== "undefined" ? document.documentElement.getAttribute("dir") : undefined) ??
+    undefined;
+  const textAlignClass = resolvedDir === "rtl" ? "text-right" : "text-left";
+
   // Expose refs for parent components
   useImperativeHandle(ref, () => ({
     scrollIntoView: (options) => {
@@ -130,7 +136,7 @@ const LenaTextarea = forwardRef(({
           <label
             htmlFor={name}
             className={`absolute transition-all duration-200 pointer-events-none ${
-              dir === "rtl" ? "right-3" : "left-3"
+              resolvedDir === "rtl" ? "right-3" : "left-3"
             } ${
               shouldFloatLabel
                 ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5 z-10`
@@ -152,7 +158,7 @@ const LenaTextarea = forwardRef(({
         required={required}
         disabled={disabled}
         rows={rows}
-        className={`block w-full rounded-md border py-2.5 px-3 text-gray-900 focus:outline-none focus:ring-2 transition-all duration-200 resize-y ${
+        className={`block w-full rounded-md border py-2.5 px-3 text-gray-900 focus:outline-none focus:ring-2 transition-all duration-200 resize-y ${textAlignClass} ${
           shouldFloatLabel && label ? "pt-4" : "pt-2.5"
         } ${
           getBorderColor()
@@ -167,7 +173,7 @@ const LenaTextarea = forwardRef(({
             ? "bg-gray-50 text-gray-400 cursor-not-allowed"
             : "cursor-text bg-white"
         } ${className}`}
-        dir={dir}
+        dir={resolvedDir}
         {...rest}
       />
       </div>

@@ -6,12 +6,17 @@ import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { generateUnitSlug } from '@/lib/units/unit-url-utils';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
+import { useDeleteUnit } from '@/hooks/use-unit-mutations';
+import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
+import toast from 'react-hot-toast';
 
 export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
+  const deleteUnitMutation = useDeleteUnit();
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Get current user's client ID from access token (this would come from auth context)
   const getCurrentClientId = () => {
@@ -102,10 +107,15 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
     }
   };
 
-  const handleDelete = () => {
-    // TODO: Implement delete functionality with confirmation
-    if (window.confirm(translate("unitInquiry.deletePropertyConfirm"))) {
-      console.log('Delete property action triggered');
+  const handleDelete = async () => {
+    if (!unit?.id) return;
+    try {
+      await deleteUnitMutation.mutateAsync(unit.id);
+      toast.success(translate("toasts.unitDeleted", locale === "ar" ? "تم حذف الوحدة بنجاح" : "Unit deleted successfully"));
+      setShowDeleteConfirm(false);
+      router.push('/units');
+    } catch (error: any) {
+      toast.error(error?.message || translate("toasts.errorProcessing", locale === "ar" ? "حدث خطأ أثناء معالجة الطلب" : "Failed to process request"));
     }
   };
 
@@ -173,7 +183,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
             </button>
 
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteConfirm(true)}
               className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
             >
               <Trash2 className="w-4 h-4" />
@@ -182,6 +192,18 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
           </div>
         </div>
       ) : null}
+
+      <DeleteConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={() => {
+          if (!deleteUnitMutation.isPending) setShowDeleteConfirm(false);
+        }}
+        onConfirm={handleDelete}
+        title={translate("unitPage.deleteUnit", locale === "ar" ? "حذف الوحدة" : "Delete Unit")}
+        message={translate("unitPage.confirmDeleteMsg", locale === "ar" ? "هل أنت متأكد أنك تريد حذف هذه الوحدة؟" : "Are you sure you want to delete this unit?")}
+        confirmLabel={deleteUnitMutation.isPending ? translate("common.loading", locale === "ar" ? "جارٍ الحذف..." : "Deleting...") : translate("buttons.delete", locale === "ar" ? "حذف" : "Delete")}
+        cancelLabel={translate("buttons.cancel", locale === "ar" ? "إلغاء" : "Cancel")}
+      />
     </div>
   );
 }

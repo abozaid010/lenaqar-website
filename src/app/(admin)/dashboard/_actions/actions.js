@@ -14,13 +14,14 @@ export async function addNewAction(prevState, formData) {
       comment: formData.get("comment"),
       created_at: new Date().toISOString(),
       client_id: clientId,
+      author: formData.get("author") || "",
 
       user_id: formData.get("user_id"),
       phone_number: "",
       meeting_time: formData.get("meeting_time") || null,
     };
 
-    await axiosInstance.post("action/create", payload);
+    await axiosInstance.post("action/v1/create", payload);
 
     revalidatePath("/dashboard");
 

@@ -5,8 +5,41 @@ import { useCallback, useMemo } from "react";
 import { getMappedTranslation, formatDate, formatNumber, formatCurrency } from "@/lib/i18n-mappings";
 import { safePropertyAccess, sanitizeTranslationValue, validateTranslationKey } from "@/utils/translation-sanitizer";
 
+const warnedDirectTAccess = new Set();
+
+function createStrictTProxy(node, path = []) {
+  if (!node || typeof node !== "object") return node;
+
+  return new Proxy(node, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      if (typeof prop !== "string") return value;
+
+      const nextPath = [...path, prop];
+      const pathLabel = nextPath.join(".");
+
+      if (
+        process.env.NODE_ENV === "development" &&
+        pathLabel &&
+        !warnedDirectTAccess.has(pathLabel)
+      ) {
+        warnedDirectTAccess.add(pathLabel);
+        console.warn(
+          `[i18n] Direct t access detected: t.${pathLabel}. Prefer translate("${pathLabel}", t.${pathLabel}).`
+        );
+      }
+
+      if (value && typeof value === "object") {
+        return createStrictTProxy(value, nextPath);
+      }
+      return value;
+    },
+  });
+}
+
 export function useI18n() {
-  const { t, locale, changeLanguage } = useTranslation();
+  const { t: rawT, locale, changeLanguage } = useTranslation();
+  const t = useMemo(() => createStrictTProxy(rawT || {}), [rawT]);
 
   // Enhanced translation function with security and fallback
   const translate = useCallback((key, fallback = null) => {
@@ -25,25 +58,38 @@ export function useI18n() {
     
     try {
       // Use safe property access to prevent prototype pollution
-      const value = safePropertyAccess(t, validation.safeKey);
+      const value = safePropertyAccess(rawT, validation.safeKey);
       
       if (value !== undefined && value !== null && value !== "") {
         // Sanitize the translation value to prevent XSS
         return sanitizeTranslationValue(value);
       }
       
-      // Log missing key for debugging
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Missing translation key: ${validation.safeKey} for locale: ${locale}`);
+      // Missing translation key handling:
+      // - If caller provided a fallback, return it (legacy support).
+      // - If no fallback and we're in development, fail fast (strict-by-default).
+      if (fallback !== null && fallback !== undefined) return fallback;
+      if (process.env.NODE_ENV === "development") {
+        const topKeys =
+          rawT && typeof rawT === "object" ? Object.keys(rawT).slice(0, 25) : [];
+        throw new Error(
+          `Missing translation: ${validation.safeKey} (locale: ${locale}). Top-level keys: ${topKeys.join(
+            ", "
+          )}`
+        );
       }
-      
-      // Return fallback or safe key
-      return fallback || validation.safeKey;
+      return validation.safeKey;
     } catch (error) {
       console.error(`Translation error for key: ${validation.safeKey}`, error);
       return fallback || validation.safeKey;
     }
-  }, [t, locale]);
+  }, [rawT, locale]);
+
+  // Assert translations are present in development (no silent key display)
+  const translateStrict = useCallback((key) => {
+    // translate() is strict-by-default in development when fallback is null.
+    return translate(key, null);
+  }, [translate]);
 
   // Helper for mapped translations (enums/backend values)
   const getMapped = useCallback((value, mapping, fallback = null) => {
@@ -231,6 +277,7 @@ export function useI18n() {
   return {
     t,              // raw locale object  →  t?.unitPricing?.totalPrice
     translate,      // function wrapper   →  translate('unitPricing.totalPrice')
+    translateStrict,
     locale,
     changeLanguage,
     isRTL: locale === 'ar',

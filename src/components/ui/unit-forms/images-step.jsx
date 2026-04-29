@@ -14,6 +14,7 @@ export default function ImagesStep({
   setInvalidFields = () => {},
 }) {
   const { t, locale } = useI18n();
+  const MAX_PROPERTY_IMAGES = 5;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,12 +92,12 @@ export default function ImagesStep({
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
         {t.propertyImages}{" "}
         <span className="text-sm font-normal text-gray-500">
-          {formData.images?.length || 0} / 8
+          {formData.images?.length || 0} / {MAX_PROPERTY_IMAGES}
         </span>
       </h3>
 
       <ImageUploader
-        maxImages={8}
+        maxImages={MAX_PROPERTY_IMAGES}
         initialImages={formData.images || []}
         onImagesChange={(images) => updateFormData({ images })}
         isUploading={isUploading}

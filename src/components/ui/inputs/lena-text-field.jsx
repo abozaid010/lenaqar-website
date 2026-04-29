@@ -51,6 +51,11 @@ const LenaTextField = forwardRef(({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const resolvedDir =
+    dir ??
+    (typeof document !== "undefined" ? document.documentElement.getAttribute("dir") : undefined) ??
+    undefined;
+
   // Expose refs for parent components
   useImperativeHandle(ref, () => ({
     scrollIntoView: (options) => {
@@ -141,7 +146,7 @@ const LenaTextField = forwardRef(({
           <label
             htmlFor={name}
             className={`absolute transition-all duration-200 pointer-events-none ${
-              dir === "rtl" ? "right-3" : "left-3"
+              resolvedDir === "rtl" ? "right-3" : "left-3"
             } ${
               shouldFloatLabel
                 ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5`
@@ -178,7 +183,7 @@ const LenaTextField = forwardRef(({
               ? "bg-gray-50 text-gray-400 cursor-not-allowed"
               : "cursor-text"
           } ${adornment ? "ltr:pr-12 rtl:pl-12" : ""} ${className}`}
-          dir={dir}
+          dir={resolvedDir}
           {...rest}
         />
         {adornment && (

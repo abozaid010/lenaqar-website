@@ -19,6 +19,7 @@ const LenaFieldWrapper = forwardRef(({
   error = false,
   errorMessage = "",
   className = "",
+  dir = undefined,
   ...rest
 }, ref) => {
   const containerRef = useRef(null);
@@ -36,6 +37,12 @@ const LenaFieldWrapper = forwardRef(({
   // Determine error state and message
   const hasError = !!error || !!errorMessage;
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
+
+  const resolvedDir =
+    dir ??
+    (typeof document !== "undefined" ? document.documentElement.getAttribute("dir") : undefined) ??
+    undefined;
+  const textAlignClass = resolvedDir === "rtl" ? "text-right" : "text-left";
 
   // Trigger shake animation when error appears
   useEffect(() => {
@@ -60,7 +67,8 @@ const LenaFieldWrapper = forwardRef(({
   return (
     <div 
       ref={containerRef}
-      className={`transition-all duration-200 ${className}`}
+      dir={resolvedDir}
+      className={`transition-all duration-200 ${textAlignClass} ${className}`}
       {...rest}
     >
       {children}

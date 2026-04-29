@@ -25,21 +25,14 @@ export default function UnifiedHeader({
 }) {
   const showCancel = !leadingSlot && onCancel != null;
   const showSubmit = !trailingSlot && onSubmit != null;
-  const isRTL = dir === "rtl";
 
   return (
     <header
       dir={dir}
-      className={`flex items-center justify-between gap-3 px-4 py-3 bg-[#E2dbff] text-primary flex-shrink-0 ${
-        isRTL ? "flex-row-reverse" : ""
-      } ${className}`}
+      className={`flex items-center justify-between gap-3 px-4 py-3 bg-[#E2dbff] text-primary flex-shrink-0 ${className}`}
     >
       {/* Leading: Cancel or custom slot (equal flex so title stays centered) */}
-      <div
-        className={`flex min-w-0 flex-1 basis-0 ${
-          isRTL ? "justify-end" : "justify-start"
-        }`}
-      >
+      <div className="flex min-w-0 flex-1 basis-0 justify-start">
         {leadingSlot != null ? (
           leadingSlot
         ) : showCancel ? (
@@ -62,11 +55,7 @@ export default function UnifiedHeader({
       </h2>
 
       {/* Trailing: Submit or custom slot (equal flex so title stays centered) */}
-      <div
-        className={`flex min-w-0 flex-1 basis-0 ${
-          isRTL ? "justify-start" : "justify-end"
-        }`}
-      >
+      <div className="flex min-w-0 flex-1 basis-0 justify-end">
         {trailingSlot != null ? (
           trailingSlot
         ) : showSubmit ? (

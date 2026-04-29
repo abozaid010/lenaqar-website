@@ -14,7 +14,7 @@ export default function SaleDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  const { t } = useI18n();
+  const { t, translateStrict } = useI18n();
 
   const handleChange = (e, type = "") => {
     const { name, value } = e.target;
@@ -82,21 +82,21 @@ export default function SaleDetailsStep({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
             {/* Owner Name */}
             <LenaTextField
-              label={t.formLabels.ownerName || "Owner Name"}
+              label={translateStrict("saleDetails.ownerName")}
               name="owner_name"
               value={commonFormData.owner_name}
               onChange={handleOwnerChange}
-              placeholder="Enter owner name"
+              placeholder={translateStrict("saleDetails.ownerName")}
               error={invalidFields.includes("owner_name")}
             />
 
             {/* Owner Mobile */}
             <LenaTextField
-              label={t.formLabels.ownerPhone}
+              label={translateStrict("saleDetails.ownerMobile")}
               name="owner_mobile"
               value={commonFormData.owner_mobile}
               onChange={handleOwnerChange}
-              placeholder="01234567890"
+              placeholder="2012 34567890"
               error={invalidFields.includes("owner_mobile")}
               type="tel"
               required
@@ -108,12 +108,12 @@ export default function SaleDetailsStep({
       {/* Payment Details */}
       <div className="mt-6">
         <h3 className="text-xl font-semibold text-slate-800 mb-4">
-          {t.saleDetails.paymentPlans || "Payment Details"}
+          {translateStrict("saleDetails.paymentPlans")}
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-y-3 gap-x-4">
           <LenaTextField
-            label={t.saleDetails.totalPrice || "Total Price"}
+            label={translateStrict("saleDetails.totalPrice")}
             name="totalPrice"
             value={formData.totalPrice}
             onChange={handleChange}
@@ -125,7 +125,7 @@ export default function SaleDetailsStep({
           />
           
           <LenaTextField
-            label={t.saleDetails.downPayment || "Down Payment"}
+            label={translateStrict("saleDetails.downPayment")}
             name="downPayment"
             value={formData.downPayment}
             onChange={handleChange}
@@ -135,7 +135,7 @@ export default function SaleDetailsStep({
           />
           
           <LenaTextField
-            label={t.saleDetails.paid_amount || "Paid Amount"}
+            label={translateStrict("saleDetails.paid_amount")}
             name="paid_amount"
             value={formData.paid_amount}
             onChange={handleChange}
@@ -145,7 +145,7 @@ export default function SaleDetailsStep({
           />
           
           <LenaTextField
-            label={t.saleDetails.remaining_amount || "Remaining Amount"}
+            label={translateStrict("saleDetails.remaining_amount")}
             name="remaining_amount"
             value={formData.remaining_amount}
             onChange={handleChange}
@@ -155,7 +155,7 @@ export default function SaleDetailsStep({
           />
           
           <LenaTextField
-            label={t.saleDetails.installment_years || "Installment Years"}
+            label={translateStrict("saleDetails.installment_years")}
             name="installment_years"
             value={formData.installment_years}
             onChange={handleChange}
@@ -165,7 +165,7 @@ export default function SaleDetailsStep({
           />
           
           <LenaTextField
-            label={t.saleDetails.over_price || "Offer Price"}
+            label={translateStrict("saleDetails.over_price")}
             name="over_price"
             value={formData.over_price}
             onChange={handleChange}

@@ -16,6 +16,10 @@ import {
 } from "@/utils/query-utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+function isSuccessfulApiResponse(res) {
+  return Boolean(res?.success === true || res?.status === true || res?.code === 200);
+}
+
 // Hook for adding a new unit
 export function useAddUnit(fromExcel = false) {
   const queryClient = useQueryClient();
@@ -31,8 +35,8 @@ export function useAddUnit(fromExcel = false) {
         res = await addUnitSaleViaExcel(formData);
       }
 
-      if (!res || !res.status) {
-        throw new Error("Failed to add unit");
+      if (!isSuccessfulApiResponse(res)) {
+        throw new Error(res?.error || res?.error_message || res?.message || "Failed to add unit");
       }
 
       // Return the full response for Excel uploads to access inserted_ids
@@ -90,8 +94,8 @@ export function useUpdateUnit() {
         res = await updateUnitRent(formData);
       }
 
-      if (!res || !res.status) {
-        throw new Error("Failed to update unit");
+      if (!isSuccessfulApiResponse(res)) {
+        throw new Error(res?.error || res?.error_message || res?.message || "Failed to update unit");
       }
 
       return formData;
@@ -152,8 +156,8 @@ export function useDeleteUnit() {
     mutationFn: async (unitId) => {
       const res = await deleteUnit(unitId);
 
-      if (!res || !res.status) {
-        throw new Error("Failed to delete unit");
+      if (!isSuccessfulApiResponse(res)) {
+        throw new Error(res?.error || res?.error_message || res?.message || "Failed to delete unit");
       }
 
       return unitId;

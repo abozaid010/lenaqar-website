@@ -17,6 +17,7 @@ import {
 import ImageWithLoader from "./image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useI18n } from "@/hooks/useI18n";
+import { getBuildingTypeLabel } from "@/lib/enums/buildingTypes";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -31,7 +32,7 @@ const InfoItem = ({ icon, label, value }) => (
 );
 
 export default function PropertyCard({ data }) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const [hoveredImage, setHoveredImage] = useState(null);
   const handleImageHover = () => {
     if (data.images?.length > 1) {
@@ -53,6 +54,9 @@ export default function PropertyCard({ data }) {
     project,
     unitTitle,
   } = data;
+
+  const buildingTypeLabel = getBuildingTypeLabel(buildingType, translate, buildingType);
+
   return (
     <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-72 h-96">
       <Link
@@ -81,7 +85,7 @@ export default function PropertyCard({ data }) {
           href={`/units/${unitId}`}
           className="mb-2 line-clamp-1 text-sm font-medium text-gray-800 hover:text-primary hover:underline"
         >
-          {unitTitle} | {buildingType}{" "}
+          {unitTitle} | {buildingTypeLabel}{" "}
         </Link>
 
         {/* Property details */}
