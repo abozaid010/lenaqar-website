@@ -51,8 +51,9 @@ export async function getRoleFromToken() {
   const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
   const payload = decodeJwtPayload(token);
   if (!payload) return null;
-  // Backend may use client_type (from login) or role in JWT
-  const role = payload.client_type ?? payload.role ?? null;
+  // Prefer explicit authorization role claim over client_type.
+  // Some tokens include client_type="client" alongside role="admin"/"owner".
+  const role = payload.role ?? payload.client_type ?? null;
   return role != null && typeof role === "string" ? role : null;
 }
 
