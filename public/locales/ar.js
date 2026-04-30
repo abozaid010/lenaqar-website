@@ -1599,6 +1599,8 @@ export default {
     },
     save: "حفظ",
     loading: "جاري الحفظ...",
+    deleteTitle: "حذف عضو الفريق",
+    deleteMessage: "هل أنت متأكد أنك تريد حذف هذا العضو؟ لا يمكن التراجع عن هذا الإجراء.",
   },
   currency: {
     egp: "جنيه",

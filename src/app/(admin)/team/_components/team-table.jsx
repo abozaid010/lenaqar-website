@@ -55,7 +55,7 @@ export default function TeamTable({ data, canManageTeam = true, onEditSuccess })
         response: error.response?.data,
         status: error.response?.status,
       });
-      toast.error("Failed to delete team member");
+      toast.error(t?.common?.failedToDeleteTeamMember || "Failed to delete team member");
     } finally {
       setLoadingDelete(false);
       setCurrentId(null);
