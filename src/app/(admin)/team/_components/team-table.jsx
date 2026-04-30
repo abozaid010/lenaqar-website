@@ -10,7 +10,7 @@ import AddNewMember from "./add-new-member";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 
-export default function TeamTable({ data, canManageTeam = true }) {
+export default function TeamTable({ data, canManageTeam = true, onEditSuccess }) {
   const router = useRouter();
   const { t } = useI18n();
   const [currentId, setCurrentId] = useState(null);
@@ -118,7 +118,7 @@ export default function TeamTable({ data, canManageTeam = true }) {
                   {canManageTeam && (
                     <>
                       <td className="px-2 py-2 text-center">
-                        <AddNewMember isEdit={true} data={item} canManageTeam={canManageTeam} />
+                        <AddNewMember isEdit={true} data={item} canManageTeam={canManageTeam} onSuccess={onEditSuccess} />
                       </td>
                       <td className="px-2 py-2 text-center">
                         <button onClick={() => openDeleteDialog(item.id)}>

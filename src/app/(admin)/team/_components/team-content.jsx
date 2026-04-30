@@ -12,6 +12,21 @@ export default function TeamContent({ canManageTeam = true }) {
   const [loading, setLoading] = useState(true);
   const [hasAccess, setHasAccess] = useState(true);
 
+  const refreshData = async () => {
+    try {
+      const result = await getSalesData();
+      if (!result?.status) {
+        setHasAccess(false);
+      } else {
+        setHasAccess(true);
+        setData(Array.isArray(result?.data) ? result.data : []);
+      }
+    } catch (error) {
+      setHasAccess(false);
+      setData([]);
+    }
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -91,7 +106,7 @@ export default function TeamContent({ canManageTeam = true }) {
         <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
           <div className="flex-1" />
           <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
-            <AddNewMember canManageTeam={canManageTeam} />
+            <AddNewMember canManageTeam={canManageTeam} onSuccess={refreshData} />
             <div className="flex items-center justify-center w-10 h-10 bg-[#F6F7FB] border border-[#E6E6E6] rounded-md hover:border-primary/40 transition-colors">
               <VideoInstructionsDialog
                 variant="team"
@@ -104,7 +119,7 @@ export default function TeamContent({ canManageTeam = true }) {
       </div>
 
       <div className="flex-1 relative mt-4">
-        <TeamTable data={data} canManageTeam={canManageTeam} />
+        <TeamTable data={data} canManageTeam={canManageTeam} onEditSuccess={refreshData} />
       </div>
     </>
   );

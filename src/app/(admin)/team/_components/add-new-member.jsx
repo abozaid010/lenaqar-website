@@ -34,7 +34,7 @@ const initialState = {
   error: null,
 };
 
-export default function AddNewMember({ isEdit = false, data, canManageTeam = true }) {
+export default function AddNewMember({ isEdit = false, data, canManageTeam = true, onSuccess }) {
   const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(() => {
@@ -58,14 +58,17 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
   const [passwordError, setPasswordError] = useState(null);
 
   useEffect(() => {
-    if (state.success) {
+    if (state.success && !state._handled) {
+      state._handled = true;
       setFormData(initialFormData);
       setIsOpen(false);
+      onSuccess?.(state.data);
     }
-    if (state.error) {
+    if (state.error && !state._errorHandled) {
+      state._errorHandled = true;
       toast.error(state.error);
     }
-  }, [state]);
+  }, [state, onSuccess]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

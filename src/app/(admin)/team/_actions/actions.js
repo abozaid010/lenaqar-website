@@ -38,9 +38,10 @@ export async function addNewSales(prevState, formData) {
       data: newSales,
     };
   } catch (error) {
+    console.error("[addNewSales] Error:", error);
     return {
       success: false,
-      error: "Failed to add new sales.",
+      error: error.message || "Failed to add new sales.",
     };
   }
 }
@@ -54,8 +55,14 @@ export async function editEmployee(prevState, formData) {
     const clientId = await getClientid();
 
     const payload = Object.fromEntries(formData.entries());
+
     const role = payload.role || "viewer";
     const module_actions = getModuleActionsForTeamRole(role);
+
+    // Skip password if empty (user didn't change it)
+    if (!payload.password || payload.password.trim() === "") {
+      delete payload.password;
+    }
 
     const newSales = {
       ...payload,
@@ -74,9 +81,10 @@ export async function editEmployee(prevState, formData) {
       data: newSales,
     };
   } catch (error) {
+    console.error("[editEmployee] Error:", error);
     return {
       success: false,
-      error: "Failed to add new sales.",
+      error: error.message || "Failed to edit team member.",
     };
   }
 }
