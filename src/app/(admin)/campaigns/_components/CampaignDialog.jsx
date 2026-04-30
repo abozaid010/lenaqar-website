@@ -20,6 +20,27 @@ function normalizeSuggestedAnswers(raw) {
   return [v[0] || "", v[1] || "", v[2] || ""];
 }
 
+/**
+ * Convert Arabic numerals (٠-٩) to English numerals (0-9)
+ * Allows users to type in Arabic numerals and converts for API compatibility
+ */
+function convertArabicToEnglishNumerals(str) {
+  if (!str) return str;
+  const arabicToEnglish = {
+    "٠": "0",
+    "١": "1",
+    "٢": "2",
+    "٣": "3",
+    "٤": "4",
+    "٥": "5",
+    "٦": "6",
+    "٧": "7",
+    "٨": "8",
+    "٩": "9",
+  };
+  return String(str).replace(/[٠-٩]/g, (match) => arabicToEnglish[match] || match);
+}
+
 export default function CampaignDialog({
   isOpen,
   onClose,
@@ -78,7 +99,7 @@ export default function CampaignDialog({
       const isUnitMode = !!campaign?.unit;
       setMode(isUnitMode ? "unit" : "text");
       setCampaignIdInput(""); // not editable in edit mode
-      setClientPhoneNumber(campaign?.client_phone_number || "");
+      setClientPhoneNumber(convertArabicToEnglishNumerals(campaign?.client_phone_number || ""));
       setTextValue(campaign?.text || "");
       // Normalize images to { url, fileId } for ImageUploader (API may return file_id)
       const rawImages = Array.isArray(campaign?.images) ? campaign.images : [];
@@ -107,8 +128,11 @@ export default function CampaignDialog({
       .map((x) => (x || "").trim())
       .filter(Boolean);
 
+    // Convert any Arabic numerals to English before sending to API
+    const normalizedPhone = convertArabicToEnglishNumerals(clientPhoneNumber || "").trim();
+
     const base = {
-      client_phone_number: (clientPhoneNumber || "").trim(),
+      client_phone_number: normalizedPhone,
       suggested_ans: cleanSuggested,
       signup_forum: (signupForum || "optional").toLowerCase(),
     };
@@ -154,6 +178,7 @@ export default function CampaignDialog({
       return false;
     }
     {
+      // Phone number is already normalized (Arabic numerals converted to English)
       const digits = String(payload.client_phone_number || "").replace(/[^\d]/g, "");
       if (!digits.startsWith("20")) {
         toast.error(translate("campaigns.errors.clientPhoneMustStartWith20"));
@@ -324,8 +349,11 @@ export default function CampaignDialog({
             value={clientPhoneNumber}
             onChange={(e) => {
               const raw = String(e.target.value || "");
-              const digitsOnly = raw.replace(/[^\d]/g, "");
-              if (digitsOnly !== raw) {
+              // Convert Arabic numerals to English numerals first
+              const withEnglishNumerals = convertArabicToEnglishNumerals(raw);
+              // Then keep only digits (English numerals now)
+              const digitsOnly = withEnglishNumerals.replace(/[^\d]/g, "");
+              if (digitsOnly !== withEnglishNumerals) {
                 const now = Date.now();
                 if (now - lastClientPhoneToastAtRef.current >= 3000) {
                   lastClientPhoneToastAtRef.current = now;

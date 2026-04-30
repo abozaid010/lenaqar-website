@@ -133,6 +133,8 @@ export default {
     submit: "إرسال",
     apply: "تطبيق",
     reset: "إعادة تعيين",
+    saving: "جاري الحفظ...",
+    saveUnit: "حفظ الوحدة",
   },
   breadcrumbs: {
     home: "الرئيسية",

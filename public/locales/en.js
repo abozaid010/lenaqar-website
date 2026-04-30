@@ -123,6 +123,8 @@ export default {
     submit: "Submit",
     apply: "Apply",
     reset: "Reset",
+    saving: "Saving...",
+    saveUnit: "Save Unit",
   },
   breadcrumbs: {
     home: "Home",
