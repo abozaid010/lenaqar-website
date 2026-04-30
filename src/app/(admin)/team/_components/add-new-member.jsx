@@ -4,7 +4,7 @@ import Dialog from "@/components/ui/Dialog";
 import CancelButton from "@/components/ui/cancel-button";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { PlusIcon, Loader2, Edit2 } from "lucide-react";
-import { useState, useActionState, useEffect, useMemo } from "react";
+import { useState, useActionState, useEffect, useMemo, useRef } from "react";
 import { addNewSales, editEmployee } from "../_actions/actions";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
@@ -34,7 +34,7 @@ const initialState = {
   error: null,
 };
 
-export default function AddNewMember({ isEdit = false, data, canManageTeam = true }) {
+export default function AddNewMember({ isEdit = false, data, canManageTeam = true, onSuccess }) {
   const { t, locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState(() => {
@@ -51,21 +51,34 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
     }
     return initialFormData;
   });
-  const [state, formAction, pending] = useActionState(
+  const [state, formAction, pending, resetActionState] = useActionState(
     isEdit ? editEmployee : addNewSales,
     initialState
   );
   const [passwordError, setPasswordError] = useState(null);
+  const lastHandledStateRef = useRef(null);
+
+  // Reset action state when dialog opens to clear any stale success/error
+  useEffect(() => {
+    if (isOpen) {
+      resetActionState?.();
+      lastHandledStateRef.current = null;
+    }
+  }, [isOpen, resetActionState]);
 
   useEffect(() => {
+    if (state === lastHandledStateRef.current) return;
+
     if (state.success) {
-      setFormData(initialFormData);
+      lastHandledStateRef.current = state;
+      setFormData(isEdit ? formData : initialFormData);
       setIsOpen(false);
-    }
-    if (state.error) {
+      onSuccess?.(state.data);
+    } else if (state.error) {
+      lastHandledStateRef.current = state;
       toast.error(state.error);
     }
-  }, [state]);
+  }, [state, onSuccess, isEdit, formData]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

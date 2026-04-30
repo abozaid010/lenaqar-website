@@ -465,9 +465,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
 
       const res = await extractUnitsFromText(text);
-      if (!res?.status) {
+      if (!res?.success) {
         toast.error(
-          res?.error_message || "Failed to extract"
+          res?.message || res?.error?.message || "Failed to extract"
         );
         return false;
       }

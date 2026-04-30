@@ -123,6 +123,8 @@ export default {
     submit: "Submit",
     apply: "Apply",
     reset: "Reset",
+    saving: "Saving...",
+    saveUnit: "Save Unit",
   },
   breadcrumbs: {
     home: "Home",
@@ -1577,6 +1579,8 @@ export default {
     },
     save: "Save",
     loading: "saving...",
+    deleteTitle: "Delete Team Member",
+    deleteMessage: "Are you sure you want to delete this team member? This action cannot be undone.",
   },
   noPaymentPlans: "No payment plans added yet",
   noPaymentPlansHint:

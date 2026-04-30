@@ -49,21 +49,23 @@ export async function getSalesData() {
 
 export async function createNewEmployee(paylod) {
   try {
-    await axiosInstance.post("sales-employees/create-employee", paylod);
+    const response = await axiosInstance.post("sales-employees/create-employee", paylod);
+    return response.data;
   } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
+    console.error("Failed to create employee:", error.message);
+    throw new Error(error.response?.data?.message || error.message || "Failed to create employee");
   }
 }
 export async function editExistingEmployee(paylod) {
   try {
-    await axiosInstance.put(
+    const response = await axiosInstance.put(
       `sales-employees/update-employee/${paylod.id}`,
       paylod
     );
+    return response.data;
   } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
+    console.error("Failed to update employee:", error.message);
+    throw new Error(error.response?.data?.message || error.message || "Failed to update employee");
   }
 }
 
