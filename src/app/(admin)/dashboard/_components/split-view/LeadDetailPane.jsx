@@ -17,14 +17,13 @@ import { handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel } from "@/utils/actions";
 import { userKeys } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { CircleX, Copy, ListPlus, Pencil, Trash2, UserPen } from "lucide-react";
+import { Copy, ListPlus, Pencil, Trash2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { DASHBOARD_BUTTON, DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
+import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import EditRequirementDialog from "./EditRequirementDialog";
-import EditUserInfoDialog from "./EditUserInfoDialog";
 
 export default function LeadDetailPane({
   userId,
@@ -39,7 +38,6 @@ export default function LeadDetailPane({
   const [openActionsModal, setOpenActionsModal] = useState(false);
   const [rowActions, setRowActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
-  const [editInfoOpen, setEditInfoOpen] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -224,14 +222,6 @@ export default function LeadDetailPane({
             </button>
             <button
               type="button"
-              onClick={() => setEditInfoOpen(true)}
-              className={`${DASHBOARD_BUTTON} h-10 min-h-[40px]`}
-            >
-              <UserPen className="w-3 h-3" />
-              {common.contact}
-            </button>
-            <button
-              type="button"
               onClick={handleOpenActions}
               disabled={loadingActions}
               className={`${DASHBOARD_BUTTON} h-10 min-h-[40px]`}
@@ -279,16 +269,6 @@ export default function LeadDetailPane({
           onActionUpdate={handleActionUpdate}
         />
       )}
-
-      <EditUserInfoDialog
-        open={editInfoOpen}
-        onClose={() => setEditInfoOpen(false)}
-        userId={userId}
-        initialName={displayName}
-        initialPhone={phoneNumber || ""}
-        initialCompany=""
-        onSuccess={afterMutation}
-      />
 
       <EditRequirementDialog
         open={editReqOpen}
