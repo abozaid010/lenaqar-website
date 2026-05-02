@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp } from "lucide-react";
+import { MessageCircle, Search, ToggleLeft, ToggleRight, Plus, ArrowDownUp, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
@@ -16,6 +16,7 @@ import { useI18n } from "@/hooks/useI18n";
 import ContactList from "./_components/ContactList";
 import ChatPanel from "./_components/ChatPanel";
 import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
+import AddLeadDialog from "@/components/ui/add-lead-dialog";
 
 const CampaignChat = () => {
   const { t, translate, locale } = useI18n();
@@ -30,6 +31,7 @@ const CampaignChat = () => {
   const observerRef = useRef();
   const [isTogglingAI, setIsTogglingAI] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [sortBy, setSortBy] = useState("last_user_message_at");
   const [sortOrder, setSortOrder] = useState("desc");
   const [sessionDetails, setSessionDetails] = useState({});
@@ -477,6 +479,16 @@ const CampaignChat = () => {
           {/* Action Buttons */}
           <div className="w-full md:w-auto flex-shrink-0 flex gap-2 items-center">
             <button
+              onClick={() => setIsAddLeadOpen(true)}
+              className="flex-1 md:flex-initial px-4 py-2 h-10 border border-primary text-primary hover:bg-primary/5 rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm"
+              title={translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "Add New Lead")}
+            >
+              <UserPlus size={18} className="shrink-0" />
+              <span className="hidden sm:inline whitespace-nowrap">
+                {translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "Add Lead")}
+              </span>
+            </button>
+            <button
               onClick={() => setIsCreateDialogOpen(true)}
               className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
             >
@@ -570,9 +582,15 @@ const CampaignChat = () => {
         </div>
 
       {/* WhatsApp Campaign Dialog */}
-      <AddNewWhatsappCampaignDialog
-        isOpen={isCreateDialogOpen}
-        onClose={() => setIsCreateDialogOpen(false)}
+      <AddNewWhatsappCampaignDialog 
+        isOpen={isCreateDialogOpen} 
+        onClose={() => setIsCreateDialogOpen(false)} 
+      />
+
+      <AddLeadDialog
+        isOpen={isAddLeadOpen}
+        onClose={() => setIsAddLeadOpen(false)}
+        clientId={clientId}
       />
     </div>
   );

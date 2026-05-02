@@ -256,7 +256,7 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
   };
 
   return (
-    <form className="p-3" action={action}>
+    <form className="p-4 bg-gray-50/30 rounded-b-lg border-t border-gray-100" action={action}>
       <input type="hidden" name="user_id" value={userId} />
       <input type="hidden" name="phone_number" value={""} />
       <input type="hidden" name="client_id" value={clientId} />
@@ -266,122 +266,138 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
         value={getFullMeetingDateTime()}
       />
 
-      <div className="flex items-center gap-1.5 sm:gap-3 mb-2">
+      {/* Date & Time Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
             {t.actionForm.dateLabel}
           </label>
-          <div className="relative">
-            <input
-              type="date"
-              value={formData.meeting_date}
-              onChange={handleDateChange}
-              className="min-w-[180px] border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
+          <input
+            type="date"
+            value={formData.meeting_date}
+            onChange={handleDateChange}
+            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
+          />
         </div>
 
-        <div className="flex-1">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+        <div>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
             {t.actionForm.timeLabel}
           </label>
-          <div className="relative flex justify-around  items-center gap-1 border border-gray-300 rounded-md overflow-hidden">
-            <div className="relative flex items-center justify-center   ">
+          <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+            {/* Hours */}
+            <div className="relative flex-1 group">
               <input
                 type="text"
                 value={timeState.hours}
                 onChange={handleTimeChange("hours")}
                 onKeyDown={handleTimeArrowKeys("hours")}
                 onBlur={handleTimeBlur("hours")}
-                className="w-14 py-2 pl-1 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
+                className="w-full py-2.5 text-center text-sm font-semibold focus:outline-none bg-transparent"
                 placeholder="HH"
                 maxLength={2}
                 inputMode="numeric"
               />
-              <div className="absolute right-1.5 flex flex-col">
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("hours", "up")}
-                  className="h-4 w-4 flex items-center justify-center rounded hover:bg-gray-200"
+                  className="p-0.5 hover:bg-gray-100 rounded text-gray-400 hover:text-primary"
                 >
-                  <ChevronUp className=" text-gray-500" />
+                  <ChevronUp size={12} />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("hours", "down")}
-                  className="h-4 w-4 flex items-center justify-center rounded hover:bg-gray-200"
+                  className="p-0.5 hover:bg-gray-100 rounded text-gray-400 hover:text-primary"
                 >
-                  <ChevronDown className="text-gray-500" />
+                  <ChevronDown size={12} />
                 </button>
               </div>
             </div>
 
-            <div className="relative flex items-center gap-2 space-x-0.5">
+            <span className="text-gray-300 font-bold">:</span>
+
+            {/* Minutes */}
+            <div className="relative flex-1 group">
               <input
                 type="text"
                 value={timeState.minutes}
                 onChange={handleTimeChange("minutes")}
                 onKeyDown={handleTimeArrowKeys("minutes")}
                 onBlur={handleTimeBlur("minutes")}
-                className="w-14 py-2 pl-1 pr-4 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 text-center border-r border-gray-300"
+                className="w-full py-2.5 text-center text-sm font-semibold focus:outline-none bg-transparent"
                 placeholder="MM"
                 maxLength={2}
                 inputMode="numeric"
               />
-              <div className="absolute right-1.5 flex flex-col">
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("minutes", "up")}
-                  className="h-4 w-4  flex items-center justify-center rounded hover:bg-gray-200"
+                  className="p-0.5 hover:bg-gray-100 rounded text-gray-400 hover:text-primary"
                 >
-                  <ChevronUp className="text-gray-500" />
+                  <ChevronUp size={12} />
                 </button>
                 <button
                   type="button"
                   onClick={() => handleTimeAdjustment("minutes", "down")}
-                  className="h-4 w-4 flex items-center justify-center rounded hover:bg-gray-200"
+                  className="p-0.5 hover:bg-gray-100 rounded text-gray-400 hover:text-primary"
                 >
-                  <ChevronDown className="text-gray-500" />
+                  <ChevronDown size={12} />
                 </button>
               </div>
             </div>
 
+            {/* AM/PM */}
             <button
               type="button"
               onClick={handleAmPmToggle}
-              onKeyDown={handleTimeArrowKeys("ampm")}
-              className="p-2 text-sm text-center text-gray-600 hover:text-blue-600 bg-gray-100 flex-grow focus:outline-none relative"
+              className="px-3 py-2.5 text-xs font-bold bg-gray-50 border-l border-gray-100 text-primary hover:bg-primary/5 transition-colors focus:outline-none"
             >
               {timeState.ampm}
             </button>
-
-            <span className="px-2 flex items-center">
-              <Clock className="h-4 w-4 text-gray-500 pointer-events-none" />
-            </span>
+            
+            <div className="px-2 border-l border-gray-100">
+              <Clock size={14} className="text-gray-400" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mb-2">
-        <select
-          name="action"
-          className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-700 hover:bg-gray-100 text-sm mb-3"
-          value={formData.action}
-          onChange={(e) => setFormData({ ...formData, action: e.target.value })}
-          required
-        >
-          {ACTIONS.map((action) => (
-            <option key={action.value} value={action.value}>
-              {action.label}
-            </option>
-          ))}
-        </select>
+      {/* Action Selection */}
+      <div className="mb-4">
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+          Action Type
+        </label>
+        <div className="relative">
+          <select
+            name="action"
+            className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none transition-all shadow-sm"
+            value={formData.action}
+            onChange={(e) => setFormData({ ...formData, action: e.target.value })}
+            required
+          >
+            {ACTIONS.map((action) => (
+              <option key={action.value} value={action.value}>
+                {action.label}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+            <ChevronDown size={16} />
+          </div>
+        </div>
       </div>
 
-      <div className="mb-2">
+      {/* Comment */}
+      <div className="mb-6">
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
+          Notes / Comments
+        </label>
         <textarea
           name="comment"
-          className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 w-full text-gray-700 hover:bg-gray-100 text-sm"
+          className="w-full bg-white border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm resize-none"
           placeholder={t.actionForm.commentPlaceholder}
           rows="3"
           value={formData.comment}
@@ -393,7 +409,7 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
 
       <button
         disabled={pending}
-        className="w-full flex justify-center items-center text-white px-4 py-2 rounded-md bg-primary hover:opacity-90 cursor-pointer disabled:opacity-60 disabled:cursor-auto disabled:hover:bg-blue-500 transition-colors"
+        className="w-full flex justify-center items-center text-white px-4 py-3 rounded-xl bg-primary hover:bg-primary/90 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-semibold text-sm"
       >
         {pending ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
         {pending ? t.actionForm.submittingButton : t.actionForm.submitButton}

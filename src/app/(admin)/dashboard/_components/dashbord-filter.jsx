@@ -6,11 +6,13 @@ import FormSelect from "@/components/ui/inputs/form-select";
 import { DASHBOARD_BUTTON, DASHBOARD_TRIGGER } from "@/constants/ui-classes";
 import { useI18n } from "@/context/translate-api";
 import { getActionLabel, getFilterActions } from "@/utils/actions";
-import { ChevronDown, Printer, X } from "lucide-react";
+import { ChevronDown, Printer, X, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import AverageScore from "./average-score";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
+import AddLeadDialog from "@/components/ui/add-lead-dialog";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const formatDate = (date) => {
   const isoString = date.toISOString();
@@ -54,7 +56,9 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
+  const clientId = LenaCookiesManager.getClientId();
   const campaignDropdownRef = useRef(null);
 
   // Load campaigns from localStorage
@@ -339,6 +343,13 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
         {/* Actions row (small screens) */}
         <div className="flex items-center justify-end gap-2 w-full flex-wrap lg:hidden">
+          <button
+            onClick={() => setIsAddLeadOpen(true)}
+            className="flex items-center gap-2 h-9 px-3 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm"
+          >
+            <UserPlus size={16} />
+            <span>{t.dashboardFilter?.ADD || "Add Lead"}</span>
+          </button>
           <AverageScore />
           <VideoInstructionsDialog
             variant="dashboard"
@@ -351,6 +362,13 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
       {/* Actions row (large screens) */}
       <div className="hidden lg:flex items-center gap-2 shrink-0">
+        <button
+          onClick={() => setIsAddLeadOpen(true)}
+          className="flex items-center gap-2 h-10 px-4 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+        >
+          <UserPlus size={18} />
+          <span>{t.dashboardFilter?.ADD || "Add New Lead"}</span>
+        </button>
         <AverageScore />
         <VideoInstructionsDialog
           variant="dashboard"
@@ -359,6 +377,12 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
           className="p-0"
         />
       </div>
+
+      <AddLeadDialog
+        isOpen={isAddLeadOpen}
+        onClose={() => setIsAddLeadOpen(false)}
+        clientId={clientId}
+      />
     </div>
   );
 }
