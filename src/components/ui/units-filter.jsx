@@ -22,6 +22,43 @@ import LoadingSpinner from "./loading-spinner";
 import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 const EnumPropertyIntent = ["rent", "sell"];
 
+// Helper functions defined outside component to avoid hoisting/initialization issues
+const getDeveloperValue = (dev) => {
+  if (!dev) return "";
+  const v =
+    dev.developer_name ??
+    dev.en_name ??
+    dev.ar_name ??
+    dev.name ??
+    dev.id ??
+    "";
+  return String(v);
+};
+
+const getDeveloperLabel = (dev, locale) => {
+  if (!dev) return "";
+  if (locale === "ar") {
+    return dev.ar_name || dev.developer_name || dev.en_name || dev.name || "";
+  }
+  return dev.en_name || dev.developer_name || dev.ar_name || dev.name || "";
+};
+
+function formatPriceInput(value) {
+  if (!value) return "";
+  // Remove all non-digit characters
+  const numericValue = value.replace(/\D/g, "");
+  // Format with commas
+  return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+const parseNumeric = (v) => {
+  if (v === undefined || v === null) return null;
+  const cleaned = String(v).replace(/[^0-9.]/g, "");
+  if (!cleaned) return null;
+  const n = Number(cleaned);
+  return Number.isFinite(n) ? n : null;
+};
+
 export default function UnitsFilter({ appliedFilters, isPublic }) {
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(
     isPublic
@@ -85,14 +122,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [hasClientId, setHasClientId] = useState(false);
   useEffect(() => {
     setHasClientId(!!getClientIdFromToken());
-  }, []);
-
-  const parseNumeric = useCallback((v) => {
-    if (v === undefined || v === null) return null;
-    const cleaned = String(v).replace(/[^0-9.]/g, "");
-    if (!cleaned) return null;
-    const n = Number(cleaned);
-    return Number.isFinite(n) ? n : null;
   }, []);
 
   useEffect(() => {
@@ -225,7 +254,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
     const qs = newParams.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [router, searchParams, pathname, parseNumeric, locale]);
+  }, [router, searchParams, pathname, locale]);
 
   const scheduleNumericSearch = useCallback((nextFilters) => {
     if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
@@ -289,15 +318,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     setIsPriceDropdownOpen(false);
   };
-
-  // Format price input with commas as user types
-  function formatPriceInput(value) {
-    if (!value) return "";
-    // Remove all non-digit characters
-    const numericValue = value.replace(/\D/g, "");
-    // Format with commas
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
 
   function getPriceDisplayText() {
     if (filters.min_price || filters.max_price) {
@@ -376,26 +396,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     return t.unitsFilter.purposes[filters.purpose] || filters.purpose;
   }
-
-  const getDeveloperValue = (dev) => {
-    if (!dev) return "";
-    const v =
-      dev.developer_name ??
-      dev.en_name ??
-      dev.ar_name ??
-      dev.name ??
-      dev.id ??
-      "";
-    return String(v);
-  };
-
-  const getDeveloperLabel = (dev, locale) => {
-    if (!dev) return "";
-    if (locale === "ar") {
-      return dev.ar_name || dev.developer_name || dev.en_name || dev.name || "";
-    }
-    return dev.en_name || dev.developer_name || dev.ar_name || dev.name || "";
-  };
 
   function getSelectedDeveloper() {
     if (!filters.developer_name || filters.developer_name === "all") {
