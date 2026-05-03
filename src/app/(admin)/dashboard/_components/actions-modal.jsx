@@ -36,45 +36,73 @@ export default function ActionsModal({
         </div>
 
         {actions?.length > 0 && (
-          <ul className="timeline px-3 max-h-[280px] overflow-y-auto">
-            {actions.map((a, idx) => (
-              <li className="timeline-item" key={idx}>
-                <div className="timeline-content">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-sm text-gray-800">
-                        {a.action}
-                      </p>
+          <div className="px-4 py-2 space-y-4 max-h-[320px] overflow-y-auto bg-gray-50/50">
+            {actions.map((a, idx) => {
+              const isAI = !a.author?.trim();
+              const authorLabel = isAI ? "AI" : a.author;
 
-                      <div className="text-[10px] mt-1 bg-blue-600 rounded-xl px-2 text-center text-white font-semibold">
-                        {a.user}
+              return (
+                <div
+                  key={idx}
+                  className={`flex flex-col ${isAI ? "items-start" : "items-end"}`}
+                >
+                  <div
+                    className={`max-w-[85%] rounded-2xl p-3 shadow-sm border ${
+                      isAI
+                        ? "bg-white border-gray-200 rounded-tl-none"
+                        : "bg-blue-50 border-blue-100 rounded-tr-none text-right"
+                    }`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 mb-1 ${
+                        isAI ? "flex-row" : "flex-row-reverse"
+                      }`}
+                    >
+                      <span
+                        className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${
+                          isAI
+                            ? "bg-gray-100 text-gray-500"
+                            : "bg-blue-600 text-white"
+                        }`}
+                      >
+                        {authorLabel}
+                      </span>
+                      <small className="text-gray-400 text-[10px] font-medium">
+                        {formatDateForDisplay(a.created_at, false)}
+                      </small>
+                    </div>
+
+                    <p className="font-bold text-sm text-gray-800 mb-1">
+                      {a.action}
+                    </p>
+
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {a.comment}
+                    </p>
+
+                    {a.partner && (
+                      <div className="mt-2 p-2 bg-white/60 border border-blue-200 rounded-lg flex flex-col gap-0.5">
+                        <span className="text-[11px] font-semibold text-primary">
+                          Partner: {a.partner.partner_name}
+                        </span>
+                        <span className="text-[10px] text-primary/80">
+                          {a.partner.partner_phone}
+                        </span>
                       </div>
-                    </div>
+                    )}
 
-                    <small className="text-gray-500 font-medium ">
-                      {formatDateForDisplay(a.created_at, false)}
-                    </small>
+                    {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
+                      <div className="mt-2 pt-2 border-t border-gray-100">
+                        <small className="text-[10px] text-green-600 font-bold bg-green-50 px-2 py-0.5 rounded">
+                          {formatDateForDisplay(a.meeting_time)}
+                        </small>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">{a.comment}</p>
-                  {a.partner && (
-                    <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-lg flex flex-col gap-1">
-                      <span className="text-xs font-semibold text-primary">
-                        Partner: {a.partner.partner_name}
-                      </span>
-                      <span className="text-xs text-primary">
-                        Phone: {a.partner.partner_phone}
-                      </span>
-                    </div>
-                  )}
-                  {!NOPREFRERED_TIME.includes(a.action) && a.meeting_time && (
-                    <small className="underline text-xs text-green-600 font-medium">
-                      {formatDateForDisplay(a.meeting_time)}
-                    </small>
-                  )}
                 </div>
-              </li>
-            ))}
-          </ul>
+              );
+            })}
+          </div>
         )}
 
         <NewActionForm
