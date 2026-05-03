@@ -4,6 +4,8 @@ import { LenaCookiesManager } from "./LenaCookiesManager";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getClientCookieOptions } from "./CookieConfig";
 
+const LOGIN_PATH = "/login";
+
 /**
  * Service for handling token refresh operations
  * Ensures client-side cookies are synced after server-side refresh
@@ -91,22 +93,41 @@ export class TokenRefreshService {
   }
 
   /**
-   * Handles token refresh failure by clearing cookies and redirecting to login
+   * Clears httpOnly + JS-visible session cookies via Route Handler, then removes
+   * any duplicate client-visible cookies and redirects to login.
+   * @param {{ reason?: string }} [opts]
    */
-  static handleRefreshFailure() {
-    // Only log in development
-    if (process.env.NODE_ENV === "development") {
-      console.log("[TokenRefreshService] Handling refresh failure - clearing cookies");
+  static async clearSessionAndRedirectToLogin(opts = {}) {
+    const { reason } = opts;
+    try {
+      await fetch("/api/auth/clear-session", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      /* best-effort: still clear client-visible cookies */
     }
+
     LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
-    // Note: REFRESH_TOKEN is HttpOnly, can't be removed client-side
-    // Server-side middleware or API route should handle refresh token cleanup
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 
-    // Redirect to login
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      const suffix =
+        reason != null && reason !== ""
+          ? `?reason=${encodeURIComponent(reason)}`
+          : "";
+      window.location.href = `${LOGIN_PATH}${suffix}`;
     }
+  }
+
+  /**
+   * Handles token refresh failure by clearing cookies and redirecting to login
+   */
+  static async handleRefreshFailure() {
+    if (process.env.NODE_ENV === "development") {
+      console.log("[TokenRefreshService] Handling refresh failure - clearing session");
+    }
+    await this.clearSessionAndRedirectToLogin();
   }
 }

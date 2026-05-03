@@ -3,29 +3,23 @@
 import { useI18n } from "@/context/translate-api";
 import { deleteEmployee } from "@/utils/api";
 import { Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import AddNewMember from "./add-new-member";
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 
-export default function TeamTable({ data, canManageTeam = true, onEditSuccess }) {
-  const router = useRouter();
+export default function TeamTable({
+  data,
+  canManageTeam = true,
+  onEditSuccess,
+  onMemberDeleted,
+}) {
   const { t } = useI18n();
   const [currentId, setCurrentId] = useState(null);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
-
-  useEffect(() => {
-    console.log("[TeamTable] Component mounted/updated with data:", {
-      dataType: typeof data,
-      isArray: Array.isArray(data),
-      length: Array.isArray(data) ? data.length : 'N/A',
-      data: data,
-    });
-  }, [data]);
 
   const openDeleteDialog = (id) => {
     setMemberToDelete(id);
@@ -39,23 +33,28 @@ export default function TeamTable({ data, canManageTeam = true, onEditSuccess })
 
   const confirmDelete = async () => {
     if (!memberToDelete) return;
-    
+
+    const idToDelete = memberToDelete;
     setLoadingDelete(true);
-    setCurrentId(memberToDelete);
+    setCurrentId(idToDelete);
     try {
-      console.log("[TeamTable] Attempting to delete employee with ID:", memberToDelete);
-      await deleteEmployee(memberToDelete);
-      console.log("[TeamTable] Employee deleted successfully");
-      toast.success(t?.common?.teamMemberDeleted || "Team member deleted successfully");
-      router.refresh();
+      await deleteEmployee(idToDelete);
+      if (onMemberDeleted) {
+        await Promise.resolve(onMemberDeleted(idToDelete));
+      }
+      toast.success(
+        t?.common?.teamMemberDeleted || "Team member deleted successfully"
+      );
     } catch (error) {
       console.error("[TeamTable] Failed to delete employee:", {
-        id: memberToDelete,
+        id: idToDelete,
         error: error.message,
         response: error.response?.data,
         status: error.response?.status,
       });
-      toast.error(t?.common?.failedToDeleteTeamMember || "Failed to delete team member");
+      toast.error(
+        t?.common?.failedToDeleteTeamMember || "Failed to delete team member"
+      );
     } finally {
       setLoadingDelete(false);
       setCurrentId(null);

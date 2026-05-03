@@ -54,33 +54,19 @@ export function getClientIdFromToken() {
 }
 
 /**
- * `module_actions` from JWT, if present (per-team / per-user granular permissions).
- * Shape: { [moduleKey: string]: string[] }
- * Empty array = no access to that module (sidebar should hide the tab).
- * @returns {Record<string, string[]>|null}
- */
-export function getModuleActionsFromToken() {
-  const token = LenaCookiesManager.getAccessToken();
-  const payload = decodeJwtPayload(token);
-  if (!payload || payload.module_actions == null) return null;
-  const ma = payload.module_actions;
-  return typeof ma === "object" && !Array.isArray(ma) ? ma : null;
-}
-
-/**
- * Whether to show a sidebar item for this module.
- * - No `module_actions` on JWT → show all (legacy tokens without granular ACL).
- * - Key omitted from JSON or `[]` → hide (same as empty access list).
- * - Key present with non-empty actions → show.
+ * Whether to show a sidebar item for this module (UX only; use SSR/context data).
+ * Deny when `moduleActions` is unknown. Key omitted or `[]` → hide.
  *
  * @param {string|null|undefined} moduleKey - e.g. "projects", "team_members"
+ * @param {Record<string, string[]>|null|undefined} moduleActions - from login/profile only (not JWT)
  * @returns {boolean}
  */
-export function shouldShowModuleNavItem(moduleKey) {
+export function shouldShowModuleNavItem(moduleKey, moduleActions) {
   if (!moduleKey) return true;
-  const ma = getModuleActionsFromToken();
-  if (!ma) return true;
-  if (!Object.prototype.hasOwnProperty.call(ma, moduleKey)) return false;
-  const actions = ma[moduleKey];
+  if (!moduleActions || typeof moduleActions !== "object" || Array.isArray(moduleActions)) {
+    return false;
+  }
+  if (!Object.prototype.hasOwnProperty.call(moduleActions, moduleKey)) return false;
+  const actions = moduleActions[moduleKey];
   return Array.isArray(actions) && actions.length > 0;
 }

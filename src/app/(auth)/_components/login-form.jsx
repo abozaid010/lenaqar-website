@@ -4,7 +4,6 @@ import { useState, useActionState, useEffect } from "react";
 import { loginAction } from "../_actions/actions";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
-import { useRouter } from "next/navigation";
 import { useI18n } from "@/context/translate-api";
 
 const initialState = {
@@ -14,7 +13,6 @@ const initialState = {
 
 export default function LoginForm() {
   const { t } = useI18n();
-  const router = useRouter();
   const [state, action, pending] = useActionState(loginAction, initialState);
   const [formData, setFormData] = useState({
     email: "",
@@ -24,26 +22,12 @@ export default function LoginForm() {
   useEffect(() => {
     if (state.success) {
       toast.success(t.login.successMessage);
+
       const destination = state.clientId ? `/${state.clientId}/dashboard` : '/dashboard';
-      // Use multiple redirect methods for Safari compatibility
+      // Single navigation: avoids triple dashboard loads (major perf win).
       setTimeout(() => {
-        // Method 1: Direct window.location change
-        window.location.href = destination;
-
-        // Method 2: Fallback with window.location.replace
-        setTimeout(() => {
-          if (window.location.pathname === "/login") {
-            window.location.replace(destination);
-          }
-        }, 100);
-
-        // Method 3: Final fallback using router
-        setTimeout(() => {
-          if (window.location.pathname === "/login") {
-            router.replace(destination);
-          }
-        }, 200);
-      }, 500);
+        window.location.assign(destination);
+      }, 350);
     } else if (state.success === false) {
       toast.error(t.login.errorMessage);
     }

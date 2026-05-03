@@ -58,27 +58,6 @@ export async function getRoleFromToken() {
 }
 
 /**
- * Server-only: `module_actions` from JWT, if present (per-team / per-user granular permissions).
- * Shape: { [moduleKey: string]: string[] }
- * Empty array = no access to that module (sidebar should hide the tab).
- *
- * @returns {Promise<Record<string, string[]>|null>}
- */
-export async function getModuleActionsFromToken() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-  const payload = decodeJwtPayload(token);
-  if (!payload || payload.module_actions == null) {
-    return null;
-  }
-  const ma = payload.module_actions;
-  const normalized = typeof ma === "object" && !Array.isArray(ma) ? ma : null;
-
-
-  return normalized;
-}
-
-/**
  * Check if the current user is allowed to manage team (admin/owner).
  * Uses JWT only; does not trust CLIENT_INFO cookie.
  *

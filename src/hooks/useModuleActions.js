@@ -29,18 +29,17 @@ export function useModuleActions(moduleName) {
       };
     }
 
-    // Legacy tokens without module_actions: allow all.
-    // (Backend should enforce authorization; UI uses this only for visibility.)
+    // Known session without module_actions object → deny privileged UI (backend still enforces).
     if (!moduleActions) {
       return {
-        canView: true,
-        canCreate: true,
-        canEdit: true,
-        canDelete: true,
-        canEditDeveloperContactInfo: true,
+        canView: false,
+        canCreate: false,
+        canEdit: false,
+        canDelete: false,
+        canEditDeveloperContactInfo: false,
         isReady,
         actions: [],
-        has: () => true,
+        has: () => false,
       };
     }
 

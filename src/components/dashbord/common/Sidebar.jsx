@@ -33,11 +33,11 @@ import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const SidebarComponent = ({
-  canAccessMap = false,
-  canAccessNews = false,
-  canAccessResale = false,
-  initialModuleActions = undefined,
   clientId = null,
+  /** Full profile API envelope from RSC (cached); avoids duplicate first client fetch */
+  serverProfileInitial = null,
+  /** Server-provided display name (fallback until profile loads) */
+  clientName = null,
 }) => {
   const { t, translate, locale } = useI18n();
   const router = useRouter();
@@ -52,9 +52,7 @@ const SidebarComponent = ({
   const [brandImgFailed, setBrandImgFailed] = useState(false);
   const currentClientId = clientId || LenaCookiesManager.getClientId() || null;
 
-  // The profile API is the authoritative source for which modules a client can access.
-  // The JWT expands all modules for "owner" role regardless of the client's actual config,
-  // so we override the context as soon as the profile loads.
+  // Profile API is the source of truth for `module_actions` (not embedded in JWT in v2).
   const { setModuleActions } = useModuleActionsContext();
 
   const isKingAdminUser = isCurrentUserKingAdmin();
@@ -68,6 +66,13 @@ const SidebarComponent = ({
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     enabled: true,
+    ...(serverProfileInitial != null
+      ? {
+          initialData: serverProfileInitial,
+          initialDataUpdatedAt: Date.now(),
+          refetchOnMount: false,
+        }
+      : {}),
   });
 
   const pd = profilePayload?.data;
@@ -97,6 +102,14 @@ const SidebarComponent = ({
     pd?.client_logo ??
     profilePayload?.logo_url ??
     profilePayload?.logo;
+
+  const resolvedClientName =
+    pd?.client_name ??
+    pd?.clientName ??
+    profilePayload?.client_name ??
+    profilePayload?.clientName ??
+    clientName ??
+    null;
 
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
@@ -329,37 +342,48 @@ const SidebarComponent = ({
       >
         {/* Logo/Brand */}
         <div className="p-4 mt-1">
-          <Link href="/" className="text-xl font-bold flex items-center">
-            {showClientLogo ? (
-              <img
-                src={getClientLogoDisplayUrl(clientLogoUrl)}
-                alt=""
-                className="max-h-10 w-auto max-w-[7.5rem] object-contain"
-                onLoad={(e) => {
-                  if (process.env.NODE_ENV === "development") {
-                    console.log("[SidebarLogo] image loaded", {
-                      renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
-                    });
-                  }
-                }}
-                onError={(e) => {
-                  if (process.env.NODE_ENV === "development") {
-                    console.error("[SidebarLogo] image failed", {
-                      renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
-                      originalClientLogoUrl: clientLogoUrl || null,
-                    });
-                  }
-                  setBrandImgFailed(true);
-                }}
-              />
-            ) : (
-              <Image
-                src="/images/logo.png"
-                alt="logo_image"
-                width={120}
-                height={40}
-              />
-            )}
+          <Link href="/" className="block w-full">
+            <div className="w-full flex flex-col items-center">
+              {showClientLogo ? (
+                <img
+                  src={getClientLogoDisplayUrl(clientLogoUrl)}
+                  alt=""
+                  className="w-20 h-20 rounded-full object-cover ring-1 ring-gray-200 bg-white"
+                  onLoad={(e) => {
+                    if (process.env.NODE_ENV === "development") {
+                      console.log("[SidebarLogo] image loaded", {
+                        renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
+                      });
+                    }
+                  }}
+                  onError={(e) => {
+                    if (process.env.NODE_ENV === "development") {
+                      console.error("[SidebarLogo] image failed", {
+                        renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
+                        originalClientLogoUrl: clientLogoUrl || null,
+                      });
+                    }
+                    setBrandImgFailed(true);
+                  }}
+                />
+              ) : (
+                <Image
+                  src="/images/logo.png"
+                  alt="logo_image"
+                  width={160}
+                  height={60}
+                  className="w-20 h-20 rounded-full object-cover ring-1 ring-gray-200 bg-white"
+                />
+              )}
+
+              {resolvedClientName ? (
+                <div className="mt-2 w-full text-center">
+                  <p className="text-xs font-semibold text-gray-700 leading-snug break-words">
+                    {resolvedClientName}
+                  </p>
+                </div>
+              ) : null}
+            </div>
           </Link>
         </div>
 
@@ -455,7 +479,7 @@ const SidebarComponent = ({
             </Link>
           )}
 
-          {isMounted && canAccessResale && resale.canView && (
+          {isMounted && resale.canView && (
             <Link
               href={navHref("/units/pending-approval")}
               prefetch={true}
@@ -530,7 +554,7 @@ const SidebarComponent = ({
             </Link>
           )}
 
-          {isMounted && canAccessNews && news.canView && (
+          {isMounted && news.canView && (
             <Link
               href={navHref("/news")}
               prefetch={true}
@@ -545,7 +569,7 @@ const SidebarComponent = ({
             </Link>
           )}
 
-          {isMounted && canAccessMap && map.canView && (
+          {isMounted && map.canView && (
             <Link
               href={navHref("/map")}
               prefetch={true}

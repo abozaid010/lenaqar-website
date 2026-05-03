@@ -12,10 +12,21 @@ import { with2SecondRetry } from "./api-retry";
 
 // Auth API
 export async function loginUser(credentials) {
+  const isDev = process.env.NODE_ENV === "development";
   const params = new URLSearchParams();
   params.append('grant_type', 'password');
   params.append('username', credentials.email);
   params.append('password', credentials.password);
+
+  const startedAt = Date.now();
+  if (isDev) {
+    console.log("[auth][login][request]", {
+      method: "POST",
+      url: `${axiosInstance.defaults.baseURL || ""}/client/login`,
+      username: credentials?.email ? String(credentials.email) : null,
+      contentType: "application/x-www-form-urlencoded",
+    });
+  }
 
   const response = await axiosInstance.post("client/login", params, {
     headers: {
@@ -27,6 +38,25 @@ export async function loginUser(credentials) {
 
   if (!response.data) {
     throw new Error("No data received from server");
+  }
+
+  if (isDev) {
+    const ms = Date.now() - startedAt;
+    const body = response?.data;
+    const data = body?.data;
+    const dataKeys =
+      data && typeof data === "object" && !Array.isArray(data)
+        ? Object.keys(data).filter((k) => !String(k).includes("token"))
+        : null;
+    console.log("[auth][login][response]", {
+      method: "POST",
+      url: `${axiosInstance.defaults.baseURL || ""}/client/login`,
+      status: response?.status ?? null,
+      durationMs: ms,
+      ok: Boolean(body?.status),
+      message: body?.message ?? null,
+      dataKeys,
+    });
   }
 
   return response.data;
@@ -1110,13 +1140,7 @@ export async function createBooking(bookingData) {
 // Sales Team CURD Operations //
 // TODO: Get other operation functions from the serviceFetching file and move them to this file
 export async function deleteEmployee(id) {
-  try {
-    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
-    return true;
-  } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
-  }
+  await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
 }
 
 export async function toggleAutoReply(user_id, client_id, value, source) {

@@ -459,6 +459,8 @@ export default {
     signInButton: "تسجيل الدخول",
     successMessage: "تم تسجيل الدخول بنجاح",
     errorMessage: "فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك",
+    permissionsUpdatedBanner:
+      "تم تحديث صلاحياتك. يرجى تسجيل الدخول مرة أخرى.",
     footer: {
       copyright: "لينا الذكاء الاصطناعي. جميع الحقوق محفوظة",
       version: "الإصدار",
@@ -1596,8 +1598,8 @@ export default {
     role: "الدور",
     roles: {
       admin: "مدير",
-      editor: "محرر",
-      viewer: "مشاهد",
+      editor: "مبيعات",
+      viewer: "ماركتينج",
     },
     save: "حفظ",
     loading: "جاري الحفظ...",
