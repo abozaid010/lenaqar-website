@@ -1140,13 +1140,7 @@ export async function createBooking(bookingData) {
 // Sales Team CURD Operations //
 // TODO: Get other operation functions from the serviceFetching file and move them to this file
 export async function deleteEmployee(id) {
-  try {
-    await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
-    return true;
-  } catch (error) {
-    console.error("Failed to fetch sales data:", error.message);
-    return { error: error.message };
-  }
+  await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
 }
 
 export async function toggleAutoReply(user_id, client_id, value, source) {

@@ -27,6 +27,14 @@ export default function TeamContent({ canManageTeam = true }) {
     }
   };
 
+  const handleMemberDeleted = async (deletedId) => {
+    const idStr = String(deletedId);
+    setData((prev) =>
+      Array.isArray(prev) ? prev.filter((m) => String(m.id) !== idStr) : []
+    );
+    await refreshData();
+  };
+
   useEffect(() => {
     let mounted = true;
 
@@ -119,7 +127,12 @@ export default function TeamContent({ canManageTeam = true }) {
       </div>
 
       <div className="flex-1 relative mt-4">
-        <TeamTable data={data} canManageTeam={canManageTeam} onEditSuccess={refreshData} />
+        <TeamTable
+          data={data}
+          canManageTeam={canManageTeam}
+          onEditSuccess={refreshData}
+          onMemberDeleted={handleMemberDeleted}
+        />
       </div>
     </>
   );
