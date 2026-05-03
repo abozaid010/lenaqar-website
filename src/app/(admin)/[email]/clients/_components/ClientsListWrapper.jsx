@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Plus, Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useClients } from "@/hooks/use-clients-data";
@@ -10,6 +10,7 @@ import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import EditClientDialog from "./EditClientDialog";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import toast from "react-hot-toast";
+import { useI18n } from "@/hooks/useI18n";
 
 const StatusBadge = ({ isActive }) =>
   isActive ? (
@@ -23,6 +24,7 @@ const StatusBadge = ({ isActive }) =>
   );
 
 export default function ClientsListWrapper() {
+  const { translate } = useI18n();
   const router = useRouter();
   const [page, setPage] = useState(1);
   const [editingClient, setEditingClient] = useState(null);
@@ -30,8 +32,10 @@ export default function ClientsListWrapper() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [clientToDelete, setClientToDelete] = useState(null);
   const [isKingAdmin, setIsKingAdmin] = useState(false);
+  /** Keeps the row id for delete across renders so confirm always has a valid target */
+  const pendingDeleteClientIdRef = useRef(null);
 
-  const { items, pagination, isLoading, isError, mutate } = useClients(page);
+  const { items, pagination, isLoading, isError, refetch } = useClients(page);
 
   // Check if user is king admin on mount
   useEffect(() => {
@@ -61,25 +65,37 @@ export default function ClientsListWrapper() {
     );
   }
 
-  const openDeleteDialog = (clientId) => {
-    setClientToDelete(clientId);
+  const openDeleteDialog = (rowClientId) => {
+    const id = rowClientId ?? null;
+    pendingDeleteClientIdRef.current = id;
+    setClientToDelete(id);
     setDeleteDialogOpen(true);
   };
 
   const closeDeleteDialog = () => {
+    pendingDeleteClientIdRef.current = null;
     setDeleteDialogOpen(false);
     setClientToDelete(null);
   };
 
   const confirmDelete = async () => {
-    if (!clientToDelete) return;
+    const targetId = pendingDeleteClientIdRef.current ?? clientToDelete;
+    if (targetId === null || targetId === undefined || targetId === "") {
+      toast.error(
+        translate(
+          "adminClients.missingClientId",
+          "Missing client id. Please try again."
+        )
+      );
+      closeDeleteDialog();
+      return;
+    }
 
-    setLoadingDelete(clientToDelete);
+    setLoadingDelete(targetId);
     try {
-      await deleteClient(clientToDelete);
+      await deleteClient(targetId);
       toast.success("Client deleted successfully");
-      // Refresh data from server to update list
-      mutate();
+      await refetch();
     } catch (error) {
       console.error("Error deleting client:", error);
 
@@ -91,6 +107,7 @@ export default function ClientsListWrapper() {
       }
     } finally {
       setLoadingDelete(null);
+      pendingDeleteClientIdRef.current = null;
       setDeleteDialogOpen(false);
       setClientToDelete(null);
     }
@@ -173,12 +190,16 @@ export default function ClientsListWrapper() {
                       <td className="px-4 py-3">
                         <button
                           type="button"
-                          onClick={() => openDeleteDialog(client.client_id)}
-                          disabled={loadingDelete === client.client_id}
+                          onClick={() =>
+                            openDeleteDialog(client.client_id ?? client.id)
+                          }
+                          disabled={
+                            loadingDelete === (client.client_id ?? client.id)
+                          }
                           className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-md transition-colors disabled:opacity-50"
                           title="Delete"
                         >
-                          {loadingDelete === client.client_id ? (
+                          {loadingDelete === (client.client_id ?? client.id) ? (
                             <Loader2 size={16} className="animate-spin" />
                           ) : (
                             <Trash2 size={16} />

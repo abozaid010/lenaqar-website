@@ -444,7 +444,8 @@ export default function AddDeveloperDialog({
     window.open(urlToOpen, "_blank", "noopener,noreferrer");
   };
 
-  const ViewMode = () => {
+  /** Not a nested <Component /> — that remounts every parent render and drops input focus */
+  function renderViewMode() {
     return (
       <div className="space-y-6">
         {formData.logo && (
@@ -840,9 +841,9 @@ export default function AddDeveloperDialog({
         )}
       </div>
     );
-  };
+  }
 
-  const EditMode = () => {
+  function renderEditMode() {
     return (
       <div className="space-y-4">
         <div className="space-y-2">
@@ -1379,7 +1380,7 @@ export default function AddDeveloperDialog({
       )}
       </div>
     );
-  };
+  }
 
   const handleCancel = () => {
     if (isEdit && isEditing) {
@@ -1452,7 +1453,7 @@ export default function AddDeveloperDialog({
           : t.developerPage.addDeveloper
       }
     >
-      {isEdit && !isEditing ? <ViewMode /> : <EditMode />}
+      {isEdit && !isEditing ? renderViewMode() : renderEditMode()}
     </UnifiedDialog>
     <DeveloperContactOverrideDialog
       isOpen={contactOverrideOpen}

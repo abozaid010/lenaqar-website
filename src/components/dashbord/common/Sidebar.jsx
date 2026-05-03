@@ -27,6 +27,7 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
+import { useModuleActionsContext } from "@/context/module-actions-context";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -34,6 +35,7 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 const SidebarComponent = ({
   canAccessMap = false,
   canAccessNews = false,
+  canAccessResale = false,
   initialModuleActions = undefined,
   clientId = null,
 }) => {
@@ -50,6 +52,11 @@ const SidebarComponent = ({
   const [brandImgFailed, setBrandImgFailed] = useState(false);
   const currentClientId = clientId || LenaCookiesManager.getClientId() || null;
 
+  // The profile API is the authoritative source for which modules a client can access.
+  // The JWT expands all modules for "owner" role regardless of the client's actual config,
+  // so we override the context as soon as the profile loads.
+  const { setModuleActions } = useModuleActionsContext();
+
   const isKingAdminUser = isCurrentUserKingAdmin();
   const {
     data: profilePayload,
@@ -64,6 +71,16 @@ const SidebarComponent = ({
   });
 
   const pd = profilePayload?.data;
+
+  // Sync profile module_actions into context so all useModuleActions hooks
+  // use the configured access list, not the JWT's owner-expanded list.
+  useEffect(() => {
+    const profileModuleActions = pd?.module_actions;
+    if (profileModuleActions && typeof profileModuleActions === "object" && !Array.isArray(profileModuleActions)) {
+      setModuleActions(profileModuleActions);
+    }
+  }, [pd?.module_actions, setModuleActions]);
+
   const profileClientId =
     pd?.client_id ??
     pd?.clientId ??
@@ -438,7 +455,7 @@ const SidebarComponent = ({
             </Link>
           )}
 
-          {isMounted && resale.canView && (
+          {isMounted && canAccessResale && resale.canView && (
             <Link
               href={navHref("/units/pending-approval")}
               prefetch={true}
