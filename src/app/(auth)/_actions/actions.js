@@ -41,27 +41,21 @@ export async function loginAction(prevState, formData) {
       };
     }
 
-    // Extract response data
-    // The API might return user data directly in response.data or nested in a 'user' object
+    // Extract response data (v2: JWT has no module_actions; permissions come from /client/v1/profile)
     const data = response.data || {};
-
-    // Check if data is directly in the response or nested
     const userData = data.user || data;
 
-    const {
-      access_token,
-      refresh_token,
-      expires_in,
-      token_type = 'Bearer'
-    } = data; // tokens seem to be at top level usually, but checking both levels for user info
+    const access_token = data.access_token ?? userData.access_token;
+    const refresh_token = data.refresh_token ?? userData.refresh_token;
 
-    const {
-      client_id,
-      client_name,
-      email: userEmail,
-      phone_number,
-      client_type,
-    } = userData;
+    const client_id = data.client_id ?? userData.client_id;
+    const client_name = data.client_name ?? userData.client_name;
+    const userEmail = data.email ?? userData.email;
+    const phone_number = data.phone_number ?? userData.phone_number;
+    const client_type = data.client_type ?? userData.client_type;
+    const role = data.role ?? userData.role ?? null;
+    const permissions_version =
+      data.permissions_version ?? userData.permissions_version ?? null;
 
     // Validate required fields
     if (!access_token || !refresh_token) {
@@ -91,7 +85,9 @@ export async function loginAction(prevState, formData) {
         email: userEmail,
         client_name,
         phone_number,
-        client_type
+        client_type,
+        ...(role != null && typeof role === "string" ? { role } : {}),
+        ...(permissions_version != null ? { permissions_version } : {}),
       }),
       clientInfoOptions
     );
@@ -100,6 +96,9 @@ export async function loginAction(prevState, formData) {
       success: true,
       message: "Login successful",
       clientId: client_id,
+      role: role != null && typeof role === "string" ? role : null,
+      permissions_version:
+        typeof permissions_version === "number" ? permissions_version : null,
     };
 
   } catch (error) {

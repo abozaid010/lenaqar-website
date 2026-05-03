@@ -37,8 +37,7 @@ export function useTokenRefresh() {
       setError(new Error(errorMessage));
       setIsLoading(false);
 
-      // If refresh fails, handle the failure (clears cookies and redirects)
-      TokenRefreshService.handleRefreshFailure();
+      await TokenRefreshService.handleRefreshFailure();
       return null;
     }
   }, []);

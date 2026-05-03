@@ -2,6 +2,8 @@
 import axios from "axios";
 import { cookies } from "next/headers";
 import { API_BASE_URL } from "@/lib/apiConfig";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +16,7 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(async (config) => {
   if (!config.headers.Authorization) {
     const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -47,6 +49,13 @@ axiosInstance.interceptors.response.use(
       }
     }
 
+    if (error.response?.status === 401) {
+      const detail = error.response?.data?.detail;
+      if (isPermissionsUpdatedError(detail)) {
+        return Promise.reject(error);
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -55,19 +64,19 @@ axiosInstance.interceptors.response.use(
 
         // Get the refresh token from cookies
         const cookieStore = await cookies();
-        const refreshToken = cookieStore.get("refresh_token")?.value;
+        const refreshToken = cookieStore.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
 
         if (!refreshToken) {
           throw new Error("No refresh token found");
         }
 
-        // Call external API directly to refresh the token
         const refreshResponse = await axios.post(
-          `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
-          {},
+          `${API_BASE_URL.replace(/\/$/, "")}/auth/refresh`,
+          { refresh_token: refreshToken },
           {
             headers: {
-              "Accept": "application/json",
+              Accept: "application/json",
+              "Content-Type": "application/json",
             },
           }
         );

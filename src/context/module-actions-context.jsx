@@ -1,8 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-
-import { getModuleActionsFromToken } from "@/lib/getRoleFromToken.client";
+import { createContext, useContext, useMemo, useState } from "react";
 
 const ModuleActionsContext = createContext({
   moduleActions: null,
@@ -10,26 +8,12 @@ const ModuleActionsContext = createContext({
 });
 
 /**
- * Single source of truth for module-level permissions in the UI.
- *
- * - If `initialModuleActions` is provided (even null), we treat the context as ready immediately.
- * - If it is omitted, we will read from the client token after mount.
+ * Single source of truth for module-level permissions in the UI (from login / profile API).
+ * `initialModuleActions` should be supplied by the admin layout (RSC); `null` means known-empty.
  */
-export function ModuleActionsProvider({
-  initialModuleActions = undefined,
-  children,
-}) {
-  const [moduleActions, setModuleActions] = useState(
-    initialModuleActions !== undefined ? initialModuleActions : null
-  );
-  const [isReady, setIsReady] = useState(initialModuleActions !== undefined);
-
-  useEffect(() => {
-    if (initialModuleActions !== undefined) return;
-    const ma = getModuleActionsFromToken();
-    setModuleActions(ma);
-    setIsReady(true);
-  }, [initialModuleActions]);
+export function ModuleActionsProvider({ initialModuleActions = null, children }) {
+  const [moduleActions, setModuleActions] = useState(initialModuleActions ?? null);
+  const [isReady] = useState(true);
 
   const value = useMemo(
     () => ({ moduleActions, isReady, setModuleActions }),
@@ -46,4 +30,3 @@ export function ModuleActionsProvider({
 export function useModuleActionsContext() {
   return useContext(ModuleActionsContext);
 }
-

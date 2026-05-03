@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getServerCookieOptions } from "@/lib/CookieConfig";
 import { API_BASE_URL } from "@/lib/apiConfig";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 /**
  * Shared refresh logic: read refresh_token from cookies, call backend, return new tokens.
@@ -10,7 +11,7 @@ import { API_BASE_URL } from "@/lib/apiConfig";
  */
 async function performRefresh() {
   const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refresh_token")?.value;
+  const refreshToken = cookieStore.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
 
   if (!refreshToken) {
     throw new Error("No refresh token found");
@@ -18,16 +19,15 @@ async function performRefresh() {
 
   let response;
   try {
-    response = await fetch(
-      `${API_BASE_URL}/client/refresh-token?refresh_token=${refreshToken}`,
-      {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
-        signal: AbortSignal.timeout(5000), // 5 second timeout
-      }
-    );
+    response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/auth/refresh`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+      signal: AbortSignal.timeout(5000), // 5 second timeout
+    });
   } catch (fetchError) {
     if (fetchError.code === 'ECONNREFUSED' || fetchError.name === 'AbortError') {
       throw new Error(`Backend API unavailable at ${API_BASE_URL}. Please check if the server is running.`);
@@ -57,9 +57,9 @@ function setTokenCookies(responseObj, newAccessToken, newRefreshToken) {
   const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
   const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");
 
-  responseObj.cookies.set("access_token", newAccessToken, accessTokenOptions);
+  responseObj.cookies.set(COOKIE_KEYS.ACCESS_TOKEN, newAccessToken, accessTokenOptions);
   if (newRefreshToken) {
-    responseObj.cookies.set("refresh_token", newRefreshToken, refreshTokenOptions);
+    responseObj.cookies.set(COOKIE_KEYS.REFRESH_TOKEN, newRefreshToken, refreshTokenOptions);
   }
 }
 

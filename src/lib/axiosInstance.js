@@ -5,6 +5,7 @@ import { LenaCookiesManager } from "./LenaCookiesManager";
 import { getClientIdFromToken } from "./getRoleFromToken.client";
 import { TokenRefreshService } from "./TokenRefreshService";
 import { API_BASE_URL } from "./apiConfig";
+import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 
 export const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -44,6 +45,16 @@ axiosInstance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (error.response?.status === 401) {
+      const detail = error.response?.data?.detail;
+      if (isPermissionsUpdatedError(detail)) {
+        await TokenRefreshService.clearSessionAndRedirectToLogin({
+          reason: "permissions_updated",
+        });
+        return Promise.reject(error);
+      }
+    }
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -64,8 +75,7 @@ axiosInstance.interceptors.response.use(
         if (process.env.NODE_ENV === "development") {
           console.error("[axiosInstance] Token refresh failed:", refreshError);
         }
-        // TokenRefreshService handles cookie cleanup and redirect
-        TokenRefreshService.handleRefreshFailure();
+        await TokenRefreshService.handleRefreshFailure();
         return Promise.reject(refreshError);
       }
     }

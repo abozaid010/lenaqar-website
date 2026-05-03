@@ -1,9 +1,27 @@
 "use client";
 
 import Link from "next/link";
+import { Suspense, useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
+import toast from "react-hot-toast";
 import LoginForm from "../_components/login-form";
 import { useI18n } from "@/context/translate-api";
 import Image from "next/image";
+
+function LoginPermissionsNotice() {
+  const { t } = useI18n();
+  const searchParams = useSearchParams();
+  const shownRef = useRef(false);
+
+  useEffect(() => {
+    if (shownRef.current) return;
+    if (searchParams.get("reason") !== "permissions_updated") return;
+    shownRef.current = true;
+    toast(t.login.permissionsUpdatedBanner, { duration: 8000 });
+  }, [searchParams, t]);
+
+  return null;
+}
 
 export default function LoginPage() {
   const { t } = useI18n();
@@ -22,6 +40,9 @@ export default function LoginPage() {
         </div>
 
         <div className="p-4">
+          <Suspense fallback={null}>
+            <LoginPermissionsNotice />
+          </Suspense>
           {/* Form */}
           <LoginForm />
 

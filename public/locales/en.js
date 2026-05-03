@@ -452,6 +452,8 @@ export default {
     signInButton: "Sign In",
     successMessage: "Login successful",
     errorMessage: "Login failed. Please check your credentials",
+    permissionsUpdatedBanner:
+      "Your permissions have been updated. Please log in again.",
     footer: {
       copyright: "Lena AI. All rights reserved",
       version: "Version",
@@ -1574,8 +1576,8 @@ export default {
     role: "Position",
     roles: {
       admin: "Admin",
-      editor: "Editor",
-      viewer: "Viewer",
+      editor: "Sales",
+      viewer: "Marketing",
     },
     save: "Save",
     loading: "saving...",

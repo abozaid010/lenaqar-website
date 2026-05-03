@@ -5,9 +5,17 @@ import {
   createNewEmployee,
   editExistingEmployee,
 } from "@/components/services/serviceFetching";
-import { getModuleActionsForTeamRole } from "@/lib/team-module-actions";
+import { fetchClientProfileFromCookies } from "@/lib/fetchClientProfile.server";
+import { deriveTeamMemberModuleActionsFromParent } from "@/lib/team-module-actions";
 import { revalidatePath } from "next/cache";
 import { assertCanManageTeam } from "@/lib/getRoleFromToken";
+
+/** Same parent-derived matrix for create and update team members. */
+async function getTeamMemberModuleActionsForRole(role) {
+  const profile = await fetchClientProfileFromCookies();
+  const parentModuleActions = profile?.data?.module_actions;
+  return deriveTeamMemberModuleActionsFromParent(parentModuleActions, role);
+}
 
 export async function addNewSales(prevState, formData) {
   try {
@@ -19,7 +27,8 @@ export async function addNewSales(prevState, formData) {
 
     const payload = Object.fromEntries(formData.entries());
     const role = payload.role || "viewer";
-    const module_actions = getModuleActionsForTeamRole(role);
+
+    const module_actions = await getTeamMemberModuleActionsForRole(role);
 
     const newSales = {
       ...payload,
@@ -57,12 +66,13 @@ export async function editEmployee(prevState, formData) {
     const payload = Object.fromEntries(formData.entries());
 
     const role = payload.role || "viewer";
-    const module_actions = getModuleActionsForTeamRole(role);
 
     // Skip password if empty (user didn't change it)
     if (!payload.password || payload.password.trim() === "") {
       delete payload.password;
     }
+
+    const module_actions = await getTeamMemberModuleActionsForRole(role);
 
     const newSales = {
       ...payload,

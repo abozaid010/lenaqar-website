@@ -1,46 +1,97 @@
 /**
- * Default module keys for sales team `module_actions` (aligned with backend / UI areas).
+ * Reusable defaults for sales-team `module_actions` derived from the **parent**
+ * (logged-in client) `module_actions` shape: same module keys, role-based actions.
+ *
+ * Rules:
+ * - **Viewer**: `view` only on each parent module (excluding analytics & team_members).
+ * - **Editor** / **Admin**: `view`, `create`, `import`, `update_own`, `delete_own` on
+ *   parent modules; **editor** cannot see `analytics` or `team_members`.
+ * - **Admin** only: always includes `team_members` and `analytics` (with the same
+ *   privileged actions) so admins can manage team and see analytics.
  */
-export const TEAM_MODULE_KEYS = [
+
+/** Modules hidden for editor and viewer (admin may still have them). */
+export const TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER = ["analytics", "team_members"];
+
+/** Fallback module list when parent `module_actions` is missing (same order as CRM areas). */
+export const TEAM_PARENT_MODULE_FALLBACK_KEYS = [
+  "projects",
+  "developers",
+  "units",
+  "campaign",
   "conversation",
   "team_members",
-  "campaign",
-  "units",
-  "news",
-  "chat_campaign",
-  "developers",
-  "projects",
-  "map",
-  "resale",
   "analytics",
   "calendar",
 ];
 
-const ADMIN_ACTIONS = ["create", "import", "view", "update_own", "delete_own"];
+export const TEAM_MEMBER_ACTIONS_VIEWER = ["view"];
 
-const EDITOR_ACTIONS = ["create", "import", "view", "update_own"];
+/** Matches “create / edit / update / delete” for editor & admin on allowed modules. */
+export const TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN = [
+  "view",
+  "create",
+  "import",
+  "update_own",
+  "delete_own",
+  "update_developer_contacts"
+];
 
-const VIEWER_ACTIONS = ["view"];
+function normalizeRole(role) {
+  return String(role || "viewer").toLowerCase().trim();
+}
 
-function actionsForModules(actions) {
-  return Object.fromEntries(
-    TEAM_MODULE_KEYS.map((key) => [key, [...actions]])
+function parentModuleKeys(parentModuleActions) {
+  if (
+    !parentModuleActions ||
+    typeof parentModuleActions !== "object" ||
+    Array.isArray(parentModuleActions)
+  ) {
+    return [...TEAM_PARENT_MODULE_FALLBACK_KEYS];
+  }
+  return Object.keys(parentModuleActions).filter(
+    (key) =>
+      Array.isArray(parentModuleActions[key]) && parentModuleActions[key].length > 0
   );
 }
 
+function isHiddenFromEditorAndViewer(moduleKey) {
+  return TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER.includes(moduleKey);
+}
+
 /**
+ * Build `module_actions` for a new/updated team member from the parent's matrix.
+ *
+ * @param {Record<string, string[]>|null|undefined} parentModuleActions
  * @param {"admin"|"editor"|"viewer"|string} role
  * @returns {Record<string, string[]>}
  */
-export function getModuleActionsForTeamRole(role) {
-  const r = String(role || "viewer").toLowerCase().trim();
+export function deriveTeamMemberModuleActionsFromParent(parentModuleActions, role) {
+  const r = normalizeRole(role);
+  const baseKeys = parentModuleKeys(parentModuleActions);
+  const out = {};
 
   if (r === "admin") {
-    return actionsForModules(ADMIN_ACTIONS);
+    const keySet = new Set(baseKeys);
+    TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER.forEach((m) => keySet.add(m));
+    for (const key of keySet) {
+      out[key] = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
+    }
+    return out;
   }
+
   if (r === "editor") {
-    return actionsForModules(EDITOR_ACTIONS);
+    for (const key of baseKeys) {
+      if (isHiddenFromEditorAndViewer(key)) continue;
+      out[key] = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
+    }
+    return out;
   }
-  // viewer or unknown → view-only on all modules
-  return actionsForModules(VIEWER_ACTIONS);
+
+  // viewer (and unknown → treat as viewer)
+  for (const key of baseKeys) {
+    if (isHiddenFromEditorAndViewer(key)) continue;
+    out[key] = [...TEAM_MEMBER_ACTIONS_VIEWER];
+  }
+  return out;
 }
