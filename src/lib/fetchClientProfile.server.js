@@ -100,7 +100,7 @@ export async function fetchClientProfileFromCookies() {
       if (!res.ok) {
         if (process.env.NODE_ENV === "development") {
           console.warn(
-            `[auth][profile] ${res.status} ${ms}ms clientId=${clientId ?? "none"} path=${PROFILE_PATH} body=non_ok`
+            `[auth][profile] GET ${PROFILE_PATH} → ${res.status} ${ms}ms clientId=${clientId ?? "none"} (non_ok)`
           );
         }
         resolvePromise(null);
@@ -118,7 +118,7 @@ export async function fetchClientProfileFromCookies() {
             ? Object.keys(ma).sort().join(",")
             : "";
         console.log(
-          `[auth][profile] ${res.status} ${ms}ms clientId=${clientId ?? "none"} modules=${moduleKeys || "none"}`
+          `[auth][profile] GET ${PROFILE_PATH} → ${res.status} ${ms}ms clientId=${clientId ?? "none"} modules=${moduleKeys || "none"}`
         );
       }
       resolvePromise(json);
@@ -126,7 +126,7 @@ export async function fetchClientProfileFromCookies() {
       const ms = Date.now() - startedAt;
       if (process.env.NODE_ENV === "development") {
         console.error(
-          `[auth][profile] error ${ms}ms clientId=${clientId ?? "none"} path=${PROFILE_PATH}`
+          `[auth][profile] GET ${PROFILE_PATH} → error ${ms}ms clientId=${clientId ?? "none"}`
         );
       }
       resolvePromise(null);
