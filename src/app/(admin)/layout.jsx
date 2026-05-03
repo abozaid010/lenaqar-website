@@ -11,6 +11,7 @@ import {
   getModuleActionsFromToken,
   getRoleFromToken,
 } from "@/lib/getRoleFromToken";
+import { getProfileData } from "@/utils/api";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -28,9 +29,36 @@ const Layout = async ({ children }) => {
 
   const canManageTeam = await canManageTeamFromToken();
   const role = await getRoleFromToken();
-  const canAccessMap = canManageTeam || role?.toLowerCase() === "editor";
-  const canAccessNews = canManageTeam || role?.toLowerCase() === "editor";
-  const initialModuleActions = await getModuleActionsFromToken();
+  const jwtModuleActions = await getModuleActionsFromToken();
+
+  // The profile API is the authoritative source for which modules a client can access.
+  // The JWT expands all modules for "owner" role regardless of the client's actual
+  // configuration, so we prefer the profile's module_actions over the JWT's.
+  let profileModuleActions = null;
+  try {
+    const profileResponse = await getProfileData();
+    const ma = profileResponse?.data?.module_actions;
+    if (ma && typeof ma === "object" && !Array.isArray(ma)) {
+      profileModuleActions = ma;
+    }
+  } catch {
+    // fall through — layout still works with JWT or role-based fallback
+  }
+
+  const initialModuleActions = profileModuleActions ?? jwtModuleActions;
+
+  const canAccessResale =
+    initialModuleActions != null
+      ? Boolean(initialModuleActions.resale?.includes("view"))
+      : false;
+  const canAccessMap =
+    initialModuleActions != null
+      ? Boolean(initialModuleActions.map?.includes("view"))
+      : canManageTeam || role?.toLowerCase() === "editor";
+  const canAccessNews =
+    initialModuleActions != null
+      ? Boolean(initialModuleActions.news?.includes("view"))
+      : canManageTeam || role?.toLowerCase() === "editor";
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;
@@ -48,6 +76,7 @@ const Layout = async ({ children }) => {
             <Sidebar
               canAccessMap={canAccessMap}
               canAccessNews={canAccessNews}
+              canAccessResale={canAccessResale}
               initialModuleActions={initialModuleActions}
               clientId={clientID}
             />
