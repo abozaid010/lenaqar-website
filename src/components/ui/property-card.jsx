@@ -112,7 +112,7 @@ export default function PropertyCard({ data }) {
           />
           <InfoItem
             icon={<Square size={18} />}
-            label="Land Area"
+            label="Total Area"
             value={landArea ? `${landArea} m²` : "N/A"}
           />
 
