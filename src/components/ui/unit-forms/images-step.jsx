@@ -4,6 +4,7 @@ import ImageUploader from "@/components/ui/inputs/image-uploader";
 import { useI18n } from "@/hooks/useI18n";
 
 import FormSelect from "@/components/ui/inputs/form-select";
+import { MAX_UNIT_IMAGES } from "./unit-form-constants";
 
 export default function ImagesStep({
   formData,
@@ -12,9 +13,9 @@ export default function ImagesStep({
   setIsUploading,
   invalidFields = [],
   setInvalidFields = () => {},
+  maxImages = MAX_UNIT_IMAGES,
 }) {
   const { t, locale } = useI18n();
-  const MAX_PROPERTY_IMAGES = 5;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,12 +93,12 @@ export default function ImagesStep({
       <h3 className="text-xl font-semibold mb-4 text-slate-800">
         {t.propertyImages}{" "}
         <span className="text-sm font-normal text-gray-500">
-          {formData.images?.length || 0} / {MAX_PROPERTY_IMAGES}
+          {formData.images?.length || 0} / {maxImages}
         </span>
       </h3>
 
       <ImageUploader
-        maxImages={MAX_PROPERTY_IMAGES}
+        maxImages={maxImages}
         initialImages={formData.images || []}
         onImagesChange={(images) => updateFormData({ images })}
         isUploading={isUploading}
