@@ -1045,7 +1045,7 @@ export default {
   },
   saleDetails: {
     financialDetails: "Financial Details",
-    totalPrice: "cach Price",
+    totalPrice: "Total Price",
     deliveryDate: "Delivery Date",
     installment: "Yearly Installment",
     downPayment: "Down Payment",
