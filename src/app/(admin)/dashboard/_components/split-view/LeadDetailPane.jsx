@@ -22,6 +22,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import EditRequirementDialog from "./EditRequirementDialog";
 
@@ -132,6 +133,11 @@ export default function LeadDetailPane({
     [leadSummary?.last_action, locale]
   );
 
+  const canDeleteLead = useMemo(() => {
+    const r = getRoleFromToken();
+    return r != null && String(r).toLowerCase() === "owner";
+  }, []);
+
   if (!userId) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm p-6">
@@ -173,7 +179,7 @@ export default function LeadDetailPane({
             userId={userId}
             onNameUpdate={() => afterMutation()}
           />
-          {clientId === "public" && (
+          {canDeleteLead && (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}
