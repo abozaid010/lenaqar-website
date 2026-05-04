@@ -162,7 +162,7 @@ export default {
   sidebar: {
     campaigns: "الحملات",
     schedule: "الجدول",
-    campaignChat: "دردشة الحملات",
+    campaignChat: "واتساب",
   },
   videoInstructions: {
     dialog: {
@@ -471,7 +471,7 @@ export default {
     myProjects: "المشاريع",
     dashboard: " العملاء",
     campaigns: "الحملات",
-    campaignChat: "دردشة الحملات",
+    campaignChat: "واتساب",
     clients: "العملاء",
     analytics: "التحليلات",
     units: "الوحدات",

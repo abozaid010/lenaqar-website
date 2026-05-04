@@ -152,7 +152,7 @@ export default {
   sidebar: {
     campaigns: "Campaigns",
     schedule: "Schedule",
-    campaignChat: "Campaign Chat",
+    campaignChat: "WhatsApp",
   },
   videoInstructions: {
     dialog: {
@@ -464,7 +464,7 @@ export default {
     myProjects: "Projects",
     dashboard: "Leads",
     campaigns: "Campaigns",
-    campaignChat: "Campaign Chat",
+    campaignChat: "WhatsApp",
     clients: "Clients",
     analytics: "Analytics",
     units: "Units",

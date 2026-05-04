@@ -671,6 +671,22 @@ export async function fetchCampaigns({ limit = 50, offset = 0 } = {}) {
   }
 }
 
+/**
+ * Lightweight campaign id list for filters (GET /campaign/names_only).
+ * @returns {Promise<string[]>}
+ */
+export async function fetchCampaignNamesOnly({ limit = 50, offset = 0 } = {}) {
+  const response = await axiosInstance.get("/campaign/names_only", {
+    params: { limit, offset },
+  });
+
+  if (!response.data?.data || !Array.isArray(response.data.data.campaign_ids)) {
+    throw new Error("Invalid response format from campaign names_only");
+  }
+
+  return response.data.data.campaign_ids;
+}
+
 export async function createCampaign(payload) {
   try {
     const response = await axiosInstance.post("/campaign/create", payload);
