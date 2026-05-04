@@ -22,6 +22,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import EditRequirementDialog from "./EditRequirementDialog";
 
@@ -29,6 +30,7 @@ export default function LeadDetailPane({
   userId,
   leadSummary,
   onInvalidateList,
+  onLeadRemoved,
 }) {
   const { t, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
@@ -90,7 +92,7 @@ export default function LeadDetailPane({
       await deleteUser(userId, clientId);
       toast.success(common.userDeleted);
       clearSelection();
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      onLeadRemoved?.(userId);
       queryClient.removeQueries({ queryKey: ["chatHistory", userId] });
     } catch (err) {
       toast.error(err?.message || common.operationFailed);
@@ -130,6 +132,11 @@ export default function LeadDetailPane({
     () => getActionLabel(leadSummary?.last_action || null, locale),
     [leadSummary?.last_action, locale]
   );
+
+  const canDeleteLead = useMemo(() => {
+    const r = getRoleFromToken();
+    return r != null && String(r).toLowerCase() === "owner";
+  }, []);
 
   if (!userId) {
     return (
@@ -172,7 +179,7 @@ export default function LeadDetailPane({
             userId={userId}
             onNameUpdate={() => afterMutation()}
           />
-          {clientId === "public" && (
+          {canDeleteLead && (
             <button
               type="button"
               onClick={() => setShowDeleteConfirm(true)}

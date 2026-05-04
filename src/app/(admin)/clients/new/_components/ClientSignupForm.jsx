@@ -11,7 +11,7 @@ import DynamicSuggestionsList from "./DynamicSuggestionsList";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 import { uploadImages, updateAdminClient } from "@/utils/api";
-import { compressImage } from "@/utils/imageCompression";
+import { processImage } from "@/utils/processImage";
 
 const CLIENT_TYPES = [
   { value: "broker", label: "Broker" },
@@ -176,12 +176,17 @@ const ClientSignupForm = () => {
         if (deferredLogoFile && createdId) {
           try {
             setLogoUploading(true);
-            const compressedFile = await compressImage(deferredLogoFile);
+            const compressedFile = await processImage(deferredLogoFile, { maxSizeMB: 5, maxWidthOrHeight: 1920 });
             const formDataToUpload = new FormData();
             formDataToUpload.append("file", compressedFile);
             const up = await uploadImages(formDataToUpload, createdId);
             if (up?.url) {
               await updateAdminClient(createdId, { logo_url: up.url });
+            } else {
+              toast.error(
+                t?.common?.imageUploadFailed ||
+                  "Failed to upload image. Please try again."
+              );
             }
           } catch (logoErr) {
             console.error("Logo upload after signup failed:", logoErr);

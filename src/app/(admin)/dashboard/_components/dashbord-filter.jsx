@@ -13,6 +13,7 @@ import AverageScore from "./average-score";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import AddLeadDialog from "@/components/ui/add-lead-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
 
 const formatDate = (date) => {
   const isoString = date.toISOString();
@@ -61,25 +62,36 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const clientId = LenaCookiesManager.getClientId();
   const campaignDropdownRef = useRef(null);
 
-  // Load campaigns from localStorage
+  // Campaign list: GET /campaign/names_only once per session; localStorage + poll only as fallback on error
   useEffect(() => {
-    const loadCampaigns = () => {
+    let cancelled = false;
+    let interval;
+
+    const loadFromLocalStorage = () => {
       const campaigns = JSON.parse(localStorage.getItem("campaignIds") || "[]");
-      setAvailableCampaigns(campaigns);
+      if (!cancelled) setAvailableCampaigns(campaigns);
     };
 
-    // Initial load
-    loadCampaigns();
+    const onStorage = (e) => {
+      if (e.key === "campaignIds" || e.key === null) loadFromLocalStorage();
+    };
 
-    // Set up an interval to check for updates
-    const interval = setInterval(loadCampaigns, 500);
-
-    // Listen for storage events (when localStorage changes)
-    window.addEventListener("storage", loadCampaigns);
+    loadDashboardCampaignIdsOnce().then((ids) => {
+      if (cancelled) return;
+      if (ids !== null) {
+        setAvailableCampaigns(ids);
+        return;
+      }
+      if (cancelled) return;
+      loadFromLocalStorage();
+      window.addEventListener("storage", onStorage);
+      interval = setInterval(loadFromLocalStorage, 500);
+    });
 
     return () => {
-      clearInterval(interval);
-      window.removeEventListener("storage", loadCampaigns);
+      cancelled = true;
+      if (interval) clearInterval(interval);
+      window.removeEventListener("storage", onStorage);
     };
   }, []);
 

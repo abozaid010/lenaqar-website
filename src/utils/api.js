@@ -671,6 +671,22 @@ export async function fetchCampaigns({ limit = 50, offset = 0 } = {}) {
   }
 }
 
+/**
+ * Lightweight campaign id list for filters (GET /campaign/names_only).
+ * @returns {Promise<string[]>}
+ */
+export async function fetchCampaignNamesOnly({ limit = 50, offset = 0 } = {}) {
+  const response = await axiosInstance.get("/campaign/names_only", {
+    params: { limit, offset },
+  });
+
+  if (!response.data?.data || !Array.isArray(response.data.data.campaign_ids)) {
+    throw new Error("Invalid response format from campaign names_only");
+  }
+
+  return response.data.data.campaign_ids;
+}
+
 export async function createCampaign(payload) {
   try {
     const response = await axiosInstance.post("/campaign/create", payload);
@@ -1084,23 +1100,18 @@ export async function importProjects(projects) {
 
 // Images CRUD operations //
 export async function uploadImages(formData, clientId) {
-  try {
-    formData.append("clientId", clientId);
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+  formData.append("clientId", clientId);
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data?.error || "Failed to upload images");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Failed to upload images:", error.message);
-    return { error: error.message };
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to upload images");
   }
+
+  return data;
 }
 export async function deleteImage(imageId) {
   try {

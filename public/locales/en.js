@@ -152,7 +152,7 @@ export default {
   sidebar: {
     campaigns: "Campaigns",
     schedule: "Schedule",
-    campaignChat: "Campaign Chat",
+    campaignChat: "WhatsApp",
   },
   videoInstructions: {
     dialog: {
@@ -462,9 +462,9 @@ export default {
   sidebar: {
     schedule: "Calendar",
     myProjects: "Projects",
-    dashboard: "Conversations",
+    dashboard: "Leads",
     campaigns: "Campaigns",
-    campaignChat: "Campaign Chat",
+    campaignChat: "WhatsApp",
     clients: "Clients",
     analytics: "Analytics",
     units: "Units",
@@ -675,7 +675,7 @@ export default {
     additionalFeatures: "Additional Features",
     fields: {
       buildingType: "Building Type",
-      landArea: "Land Area",
+      landArea: "Total Area",
       floor: "Floor",
       roomsCount: "Rooms Count",
       bathroomCount: "Bathroom Count",
@@ -1008,7 +1008,7 @@ export default {
     rooms: "Rooms",
     bathrooms: "Bathrooms",
     floor: "Floor",
-    landArea: "Land Area",
+    landArea: "Total Area",
     gardenSize: "Garden Size",
     outdoorArea: "Outdoor Area",
     garageArea: "Garage Area",
@@ -1045,7 +1045,7 @@ export default {
   },
   saleDetails: {
     financialDetails: "Financial Details",
-    totalPrice: "cach Price",
+    totalPrice: "Total Price",
     deliveryDate: "Delivery Date",
     installment: "Yearly Installment",
     downPayment: "Down Payment",
@@ -1145,7 +1145,7 @@ export default {
   countMessagesConversations: "Count of Messages & Conversations",
   numberOfConversations: "Number of Conversations",
   averageMessagesPerUser: "Average Messages per User",
-  conversations: "Conversations",
+  conversations: "Leads",
   avgMessages: "Avg Messages",
   actionFrequency: "Action Frequency",
   monthlyActionFrequency: "Monthly Action Frequency",
@@ -1241,7 +1241,7 @@ export default {
     purpose: "Purpose",
     buildingType: "Building Type",
     finishing: "Finishing",
-    landArea: "Land Area",
+    landArea: "Total Area",
     gardenSize: "Garden Size",
     deliveryDate: "Delivery Date:",
     deliveryStatus: "Delivery Status:",

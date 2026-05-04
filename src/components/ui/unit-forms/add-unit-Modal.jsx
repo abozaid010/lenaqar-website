@@ -22,6 +22,7 @@ import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
+import { MAX_UNIT_IMAGES } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { normalizeViewTypeValue } from "@/data/constants";
 
@@ -1047,6 +1048,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             setInvalidFields={setInvalidFields}
             isUploading={isUploading}
             setIsUploading={setIsUploading}
+            maxImages={MAX_UNIT_IMAGES}
           />
         )}
       </form>
