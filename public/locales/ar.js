@@ -272,7 +272,7 @@ export default {
       print: "طباعة",
       exportExcel: "تصدير إلى Excel",
       onGoingConversion: "محادثة جارية",
-      qualifiedLead: "موجه للشراء",
+      qualifiedLead: "جاد",
       noAction: "لا يوجد إجراء",
     },
     requirementsDialog: {
@@ -585,7 +585,7 @@ export default {
       print: "طباعه",
       exportExcel: "تصدير إلى Excel",
       onGoingConversion: "محادثه جاريه",
-      qualifiedLead: "موجه للشراء",
+      qualifiedLead: "جاد",
       noAction: "لا يوجد إجراء",
       allActions: "كل الإجراءات",
     },
@@ -1022,7 +1022,7 @@ export default {
   },
   saleDetails: {
     financialDetails: "التفاصيل المالية",
-    totalPrice: "سعر الكـاش",
+    totalPrice: "السعر الإجمالي",
     deliveryDate: "تاريخ التسليم",
     downPayment: "المقدم",
     installment: "قيمة القسط السنوى",

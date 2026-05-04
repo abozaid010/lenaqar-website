@@ -1,8 +1,9 @@
-'"use client";';
+'use client';
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useI18n } from "@/hooks/useI18n";
 import { deleteImage, uploadImages } from "@/utils/api";
+import { processImage } from "@/utils/processImage";
 import {
   getMaxSizeBytes,
   getMaxSizeMB,
@@ -105,9 +106,27 @@ export default function ImageUploader({
     const failedUploads = [];
     for (const image of newSelectedImages) {
       try {
+        // Set status to compressing first
+        setUploadStatus((prev) => ({ ...prev, [image.id]: "compressing" }));
+        
+        // Process image with unified compression
+        const processedFile = await processImage(image.file, { 
+          allowLarger: imageType === "masterPlan" 
+        });
+        
+        // Update status to uploading
+        setUploadStatus((prev) => ({ ...prev, [image.id]: "uploading" }));
+        
         const formDataToUpload = new FormData();
-        formDataToUpload.append("file", image.file);
+        formDataToUpload.append("file", processedFile);
         const res = await uploadImages(formDataToUpload, clinetId);
+        if (!res?.url) {
+          throw new Error(
+            t?.common?.imageUploadFailed ||
+              t?.failedToUploadImage ||
+              "Image upload failed. Please try again."
+          );
+        }
         setUploadStatus((prev) => ({ ...prev, [image.id]: "success" }));
         successfulUploads.push({
           url: res.url,
@@ -175,7 +194,7 @@ export default function ImageUploader({
 
   const renderImageItem = (image, isSelected = false) => {
     const imageId = isSelected ? image.id : image.fileId;
-    const isProcessing = isSelected && uploadStatus[imageId] === "uploading";
+    const isProcessing = isSelected && (uploadStatus[imageId] === "uploading" || uploadStatus[imageId] === "compressing");
     return (
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">

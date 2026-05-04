@@ -1,6 +1,6 @@
 import { useI18n } from "@/hooks/useI18n";
 import { deleteImage, uploadImages } from "@/utils/api";
-import { compressImage } from "@/utils/imageCompression";
+import { processImage } from "@/utils/processImage";
 import {
   getMaxSizeBytes,
   getMaxSizeMB,
@@ -53,7 +53,9 @@ export default function SingleImageUploader({
 
     if (file && file.size > maxSizeBytes) {
       toast.error(
-        `File size exceeds ${maxSizeMB}MB. Please select a smaller file.`
+        t?.common?.fileSizeExceedsMb
+          ? String(t.common.fileSizeExceedsMb).replace("{mb}", String(maxSizeMB))
+          : `File size exceeds ${maxSizeMB}MB. Please select a smaller file.`
       );
       return;
     }
@@ -71,26 +73,26 @@ export default function SingleImageUploader({
       setIsUploadingLocal(true);
       setUploading?.(true);
 
-      const compressedFile = await compressImage(file);
+      const processedFile = await processImage(file, { 
+        allowLarger: imageType === "masterPlan" 
+      });
 
       const formDataToUpload = new FormData();
-      formDataToUpload.append("file", compressedFile);
+      formDataToUpload.append("file", processedFile);
 
       const res = await uploadImages(formDataToUpload, clinetId);
-      console.log(res);
-      console.log(selectedImage);
 
-      if (res && res.url) {
+      if (res?.url) {
         setSelectedImage((prev) => ({ ...(prev || {}), imageId: res.fileId }));
         onChange(res.url, res.fileId);
       } else {
-        toast.error("Image upload failed. Please try again.");
+        toast.error(t?.imageUploadFailed || "Image upload failed. Please try again.");
         setSelectedImage(null);
         onChange("");
       }
     } catch (error) {
       console.error("Error compressing image:", error);
-      toast.error("Failed to upload image. Please try again.");
+      toast.error(t?.failedToUploadImage || "Failed to upload image. Please try again.");
     } finally {
       setIsUploadingLocal(false);
       setUploading?.(false);

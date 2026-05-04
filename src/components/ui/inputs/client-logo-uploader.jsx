@@ -2,7 +2,7 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { deleteClientLogo, deleteImage, uploadImages } from "@/utils/api";
-import { compressImage } from "@/utils/imageCompression";
+import { processImage } from "@/utils/processImage";
 import {
   isSupportedImageFile,
   SUPPORTED_IMAGE_ACCEPT,
@@ -176,7 +176,7 @@ export default function ClientLogoUploader({
       try {
         console.log("[ClientLogoUploader] compression started");
         fileToUpload = await withTimeout(
-          compressImage(file),
+          processImage(file, { maxSizeMB: 5, maxWidthOrHeight: 1920 }),
           UPLOAD_TIMEOUT_MS,
           "Timed out while processing image."
         );

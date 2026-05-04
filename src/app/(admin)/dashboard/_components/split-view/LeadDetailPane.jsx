@@ -29,6 +29,7 @@ export default function LeadDetailPane({
   userId,
   leadSummary,
   onInvalidateList,
+  onLeadRemoved,
 }) {
   const { t, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
@@ -90,7 +91,7 @@ export default function LeadDetailPane({
       await deleteUser(userId, clientId);
       toast.success(common.userDeleted);
       clearSelection();
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
+      onLeadRemoved?.(userId);
       queryClient.removeQueries({ queryKey: ["chatHistory", userId] });
     } catch (err) {
       toast.error(err?.message || common.operationFailed);

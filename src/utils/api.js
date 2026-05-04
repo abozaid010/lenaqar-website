@@ -1084,23 +1084,18 @@ export async function importProjects(projects) {
 
 // Images CRUD operations //
 export async function uploadImages(formData, clientId) {
-  try {
-    formData.append("clientId", clientId);
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+  formData.append("clientId", clientId);
+  const response = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data?.error || "Failed to upload images");
-    }
-
-    return data;
-  } catch (error) {
-    console.error("Failed to upload images:", error.message);
-    return { error: error.message };
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to upload images");
   }
+
+  return data;
 }
 export async function deleteImage(imageId) {
   try {

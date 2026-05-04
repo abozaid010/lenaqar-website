@@ -12,6 +12,26 @@ export const userKeys = {
   detail: (id) => [...userKeys.details(), id],
 };
 
+/**
+ * Removes a user from the dashboard infinite-users cache without refetching.
+ * @param {import("@tanstack/react-query").QueryClient} queryClient
+ * @param {string} filterKey - Same string as `userKeys.infiniteList(filterKey)` (JSON-serialized filters)
+ * @param {string} userId
+ */
+export function removeUserFromInfiniteUsersCache(queryClient, filterKey, userId) {
+  const key = userKeys.infiniteList(filterKey);
+  queryClient.setQueryData(key, (old) => {
+    if (!old?.pages) return old;
+    return {
+      ...old,
+      pages: old.pages.map((page) => ({
+        ...page,
+        users: (page.users || []).filter((u) => u?.user_id !== userId),
+      })),
+    };
+  });
+}
+
 // Query key factory for units
 export const unitKeys = {
   all: ["units"],

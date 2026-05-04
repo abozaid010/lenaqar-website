@@ -2,7 +2,7 @@
 
 import { useAverageScore } from "@/context/average-score";
 import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
-import { userKeys } from "@/utils/query-utils";
+import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useCallback } from "react";
@@ -82,6 +82,13 @@ function DashboardSplitViewComponent() {
     queryClient.invalidateQueries({ queryKey: userKeys.all });
   }, [queryClient]);
 
+  const onLeadRemoved = useCallback(
+    (deletedUserId) => {
+      removeUserFromInfiniteUsersCache(queryClient, filterKey, deletedUserId);
+    },
+    [queryClient, filterKey]
+  );
+
   return (
     <div className="flex flex-col min-h-0 flex-1 gap-1">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,360px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
@@ -102,6 +109,7 @@ function DashboardSplitViewComponent() {
           userId={selectedUserId}
           leadSummary={selectedLead}
           onInvalidateList={onInvalidateList}
+          onLeadRemoved={onLeadRemoved}
         />
       </div>
     </div>
