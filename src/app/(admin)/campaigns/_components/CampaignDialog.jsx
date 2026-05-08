@@ -339,7 +339,7 @@ export default function CampaignDialog({
               name="campaign_id"
               value={campaignIdInput}
               onChange={(e) => {
-                const raw = String(e.target.value || "");
+                const raw = String(e?.target?.value || "");
                 // campaign_id must be English-only (no Arabic/Unicode letters)
                 const sanitized = raw
                   .normalize("NFKD")
@@ -367,7 +367,7 @@ export default function CampaignDialog({
             name="client_phone_number"
             value={clientPhoneNumber}
             onChange={(e) => {
-              const raw = String(e.target.value || "");
+              const raw = String(e?.target?.value || "");
               // Convert Arabic numerals to English numerals first
               const withEnglishNumerals = convertArabicToEnglishNumerals(raw);
               // Then keep only digits (English numerals now)
@@ -405,7 +405,8 @@ export default function CampaignDialog({
             ) : (
               <SearchableDropdownSelect
                 value={selectedProjectId}
-                onChange={(value) => {
+                onChange={(e) => {
+                  const value = e?.target?.value || "";
                   setSelectedProjectId(value);
                   // Find and set the project name
                   const project = projectsData?.find(p => p.id === value);
@@ -421,7 +422,6 @@ export default function CampaignDialog({
                   }))
                 ]}
                 placeholder={translate("campaigns.selectProject", "Select a project")}
-                isClearable
                 dir={locale === "ar" ? "rtl" : "ltr"}
               />
             )}
@@ -460,7 +460,7 @@ export default function CampaignDialog({
                 label={t.campaigns.text}
                 name="text"
                 value={textValue}
-                onChange={(e) => setTextValue(e.target.value)}
+                onChange={(e) => setTextValue(e?.target?.value || "")}
                 rows={5}
                 dir={locale === "ar" ? "rtl" : "ltr"}
               />
@@ -542,7 +542,7 @@ export default function CampaignDialog({
                   onChange={(e) =>
                     setSuggestedAns((prev) => {
                       const next = [...prev];
-                      next[i] = e.target.value;
+                      next[i] = e?.target?.value || "";
                       return next;
                     })
                   }
