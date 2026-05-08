@@ -123,7 +123,7 @@ export default function CampaignDialog({
       setTextImages(normalizedImages);
       setSelectedUnit(campaign?.unit || null);
       setSuggestedAns(normalizeSuggestedAnswers(campaign?.suggested_ans));
-      setSignupForum((campaign?.signup_forum || "optional").toLowerCase());
+      setSignupForum((campaign?.signup_forum || "required").toLowerCase());
       setSelectedProjectId(campaign?.project_id || "");
       setSelectedProjectName(campaign?.project_name || "");
     } else {
@@ -151,7 +151,7 @@ export default function CampaignDialog({
     const base = {
       client_phone_number: normalizedPhone,
       suggested_ans: cleanSuggested,
-      signup_forum: (signupForum || "optional").toLowerCase(),
+      signup_forum: (signupForum || "required").toLowerCase(),
       project_id: selectedProjectId || null,
       project_name: selectedProjectName || null,
     };
