@@ -349,7 +349,7 @@ export default function CampaignDialog({
                   const now = Date.now();
                   if (now - lastCampaignIdToastAtRef.current >= 3000) {
                     lastCampaignIdToastAtRef.current = now;
-                    toast.error(translate("campaigns.errors.campaignIdEnglishOnly"));
+                    toast.error(t.campaigns.errors.campaignIdEnglishOnly);
                   }
                 }
                 setCampaignIdInput(sanitized);
