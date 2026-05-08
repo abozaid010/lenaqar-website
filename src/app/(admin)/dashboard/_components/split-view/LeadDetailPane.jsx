@@ -274,18 +274,7 @@ export default function LeadDetailPane({
           </div>
         )}
 
-        {leadSummary?.campaign_ids?.length > 0 && (
-          <div className="shrink-0 px-2 py-1 flex flex-wrap gap-1 border-b border-gray-50">
-            {leadSummary.campaign_ids.slice(0, 6).map((id) => (
-              <span
-                key={id}
-                className="text-[10px] px-1.5 py-0 rounded bg-blue-50 text-blue-800"
-              >
-                {id}
-              </span>
-            ))}
-          </div>
-        )}
+       
 
         <div className="flex-1 min-h-0 flex flex-col bg-gray-100 rounded-b overflow-hidden">
           <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
