@@ -136,6 +136,14 @@ function CampaignCard({ campaign, onEdit }) {
               </span>{" "}
               <span className="font-mono">{campaign?.client_phone_number || "—"}</span>
             </span>
+            {campaign?.project_id && (
+              <span>
+                <span className="text-gray-500">
+                  {translate("campaigns.project", "Project")}:
+                </span>{" "}
+                <span className="font-medium">{campaign?.project_name || "—"}</span>
+              </span>
+            )}
           </div>
 
           {!isUnitMode ? (

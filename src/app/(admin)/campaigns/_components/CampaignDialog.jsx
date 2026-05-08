@@ -5,9 +5,9 @@ import ImageUploader from "@/components/ui/inputs/image-uploader";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import { useI18n } from "@/hooks/useI18n";
-import { createCampaign, updateCampaign } from "@/utils/api";
+import { createCampaign, updateCampaign, fetchProjectsNames } from "@/utils/api";
 import { campaignKeys } from "@/utils/query-utils";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
@@ -66,6 +66,8 @@ export default function CampaignDialog({
   const [selectedUnit, setSelectedUnit] = useState(null); // full unit object
   const [suggestedAns, setSuggestedAns] = useState(["", "", ""]);
   const [signupForum, setSignupForum] = useState("");
+  const [selectedProjectId, setSelectedProjectId] = useState("");
+  const [selectedProjectName, setSelectedProjectName] = useState("");
   const SIGNUP_FORUM_OPTIONS = useMemo(() => ([
     { value: "hidden", label: c.signupForumOptions?.hidden || "Hidden" },
     { value: "optional", label: c.signupForumOptions?.optional || "Optional" },
@@ -75,6 +77,17 @@ export default function CampaignDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isUnitSelectorOpen, setIsUnitSelectorOpen] = useState(false);
+
+  // Fetch projects for dropdown
+  const {
+    data: projectsData,
+    isLoading: isLoadingProjects,
+    error: projectsError
+  } = useQuery({
+    queryKey: ["projectsNames"],
+    queryFn: () => fetchProjectsNames(false),
+    staleTime: 1000 * 60 * 10, // 10 minutes
+  });
 
   const title = useMemo(() => {
     return editMode
@@ -111,6 +124,8 @@ export default function CampaignDialog({
       setSelectedUnit(campaign?.unit || null);
       setSuggestedAns(normalizeSuggestedAnswers(campaign?.suggested_ans));
       setSignupForum((campaign?.signup_forum || "optional").toLowerCase());
+      setSelectedProjectId(campaign?.project_id || "");
+      setSelectedProjectName(campaign?.project_name || "");
     } else {
       setMode("text");
       setCampaignIdInput("");
@@ -120,6 +135,8 @@ export default function CampaignDialog({
       setSelectedUnit(null);
       setSuggestedAns(["", "", ""]);
       setSignupForum("optional");
+      setSelectedProjectId("");
+      setSelectedProjectName("");
     }
   }, [isOpen, campaign]);
 
@@ -135,6 +152,8 @@ export default function CampaignDialog({
       client_phone_number: normalizedPhone,
       suggested_ans: cleanSuggested,
       signup_forum: (signupForum || "optional").toLowerCase(),
+      project_id: selectedProjectId || null,
+      project_name: selectedProjectName || null,
     };
 
     // Include campaign_id only when creating (cannot be updated)
@@ -154,7 +173,7 @@ export default function CampaignDialog({
       text: (textValue || "").trim(),
       images: Array.isArray(textImages) ? textImages : [],
     };
-  }, [editMode, campaignIdInput, clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue, signupForum]);
+  }, [editMode, campaignIdInput, clientPhoneNumber, mode, selectedUnit, suggestedAns, textImages, textValue, signupForum, selectedProjectId, selectedProjectName]);
 
   const validate = () => {
     if (!editMode) {
@@ -368,6 +387,45 @@ export default function CampaignDialog({
             pattern="[0-9]*"
             required
           />
+
+          {/* Project Dropdown */}
+          <div>
+            <div className="text-sm font-medium text-gray-800 mb-2">
+              {translate("campaigns.projectToPromote", "Project to promote (optional)")}
+            </div>
+            {isLoadingProjects ? (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 size={16} className="animate-spin" />
+                {translate("common.loading", "Loading...")}
+              </div>
+            ) : projectsError ? (
+              <div className="text-sm text-red-600">
+                {translate("common.failedToLoadProjects", "Failed to load projects")}
+              </div>
+            ) : (
+              <SearchableDropdownSelect
+                value={selectedProjectId}
+                onChange={(value) => {
+                  setSelectedProjectId(value);
+                  // Find and set the project name
+                  const project = projectsData?.find(p => p.id === value);
+                  setSelectedProjectName(project?.en_name || "");
+                }}
+                options={[
+                  { value: "", label: translate("campaigns.noProject", "No project (general campaign)") },
+                  ...(projectsData || []).map(project => ({
+                    value: project.id,
+                    label: locale === "ar" 
+                      ? `${project.ar_name || project.en_name} — ${project.city || ""} ${project.district || ""}`
+                      : `${project.en_name} — ${project.city || ""} ${project.district || ""}`
+                  }))
+                ]}
+                placeholder={translate("campaigns.selectProject", "Select a project")}
+                isClearable
+                dir={locale === "ar" ? "rtl" : "ltr"}
+              />
+            )}
+          </div>
 
           <div>
             <div className="text-sm font-medium text-gray-800 mb-2">
