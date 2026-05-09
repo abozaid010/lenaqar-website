@@ -12,6 +12,8 @@ import {
   getChatHistory,
   getClientActions,
   resetUnreadMessagesCount,
+  addLeadTags,
+  removeLeadTags,
 } from "@/utils/api";
 import { handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel } from "@/utils/actions";
@@ -25,6 +27,7 @@ import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
+import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
 
 export default function LeadDetailPane({
@@ -44,6 +47,8 @@ export default function LeadDetailPane({
   const [editReqOpen, setEditReqOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [newTagInput, setNewTagInput] = useState("");
+  const [isAddingTag, setIsAddingTag] = useState(false);
 
   const { data, error, isLoading } = useQuery({
     queryKey: ["chatHistory", userId],
@@ -127,6 +132,116 @@ export default function LeadDetailPane({
     onInvalidateList?.();
     queryClient.invalidateQueries({ queryKey: userKeys.all });
     queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
+  };
+
+  // Tag management functions
+  const handleAddTag = async (e) => {
+    e.preventDefault();
+    const tagValue = newTagInput.trim();
+    
+    if (!tagValue) return;
+    
+    // Check for duplicates (case-insensitive) - use tags from leadSummary
+    const currentTags = leadSummary?.tags || [];
+    const isDuplicate = currentTags.some(tag => 
+      tag.toLowerCase() === tagValue.toLowerCase()
+    );
+    
+    if (isDuplicate) {
+      toast.error("Tag already exists");
+      setNewTagInput("");
+      return;
+    }
+
+    setIsAddingTag(true);
+    try {
+      const result = await addLeadTags(userId, [tagValue]);
+      
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Tag added successfully");
+        setNewTagInput("");
+        // Update local data optimistically - update both leadSummary and chat history
+        queryClient.setQueryData(["chatHistory", userId], (oldData) => {
+          if (!oldData?.data) return oldData;
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              tags: [...(oldData.data.tags || []), tagValue],
+            },
+          };
+        });
+        // Also update the users list to reflect the change
+        queryClient.setQueriesData(
+          { queryKey: userKeys.infiniteList },
+          (oldData) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map(page => ({
+                ...page,
+                users: page.users.map(user => 
+                  user.user_id === userId 
+                    ? { ...user, tags: [...(user.tags || []), tagValue] }
+                    : user
+                )
+              }))
+            };
+          }
+        );
+        afterMutation();
+      }
+    } catch (error) {
+      toast.error(error?.message || "Failed to add tag");
+    } finally {
+      setIsAddingTag(false);
+    }
+  };
+
+  const handleRemoveTag = async (tagToRemove) => {
+    try {
+      const result = await removeLeadTags(userId, [tagToRemove]);
+      
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success("Tag removed successfully");
+        // Update local data optimistically - update both leadSummary and chat history
+        queryClient.setQueryData(["chatHistory", userId], (oldData) => {
+          if (!oldData?.data) return oldData;
+          return {
+            ...oldData,
+            data: {
+              ...oldData.data,
+              tags: (oldData.data.tags || []).filter(tag => tag !== tagToRemove),
+            },
+          };
+        });
+        // Also update the users list to reflect the change
+        queryClient.setQueriesData(
+          { queryKey: userKeys.infiniteList },
+          (oldData) => {
+            if (!oldData?.pages) return oldData;
+            return {
+              ...oldData,
+              pages: oldData.pages.map(page => ({
+                ...page,
+                users: page.users.map(user => 
+                  user.user_id === userId 
+                    ? { ...user, tags: (user.tags || []).filter(tag => tag !== tagToRemove) }
+                    : user
+                )
+              }))
+            };
+          }
+        );
+        afterMutation();
+      }
+    } catch (error) {
+      toast.error(error?.message || "Failed to remove tag");
+    }
   };
 
   const lastActionLabel = useMemo(
@@ -274,7 +389,50 @@ export default function LeadDetailPane({
           </div>
         )}
 
-       
+        {/* Tags Section */}
+        <div className="shrink-0 px-4 py-3 bg-white border-b border-gray-200">
+          <div className="space-y-3">
+            {/* Tags List and Add Controls */}
+            <div className="flex gap-3">
+              {/* Tags List - takes remaining space */}
+              <div className="flex-1 min-w-0">
+                {leadSummary?.tags && leadSummary.tags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                    {leadSummary.tags.map((tag, index) => (
+                      <TagChip
+                        key={`${tag}-${index}`}
+                        label={tag}
+                        removable={true}
+                        onRemove={() => handleRemoveTag(tag)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <span className="text-sm text-gray-500">No tags</span>
+                )}
+              </div>
+
+              {/* Add Tag Controls - fixed size */}
+              <form onSubmit={handleAddTag} className="flex gap-2 shrink-0">
+                <input
+                  type="text"
+                  value={newTagInput}
+                  onChange={(e) => setNewTagInput(e.target.value)}
+                  placeholder="Add a tag..."
+                  className="w-32 px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  disabled={isAddingTag}
+                />
+                <button
+                  type="submit"
+                  disabled={!newTagInput.trim() || isAddingTag}
+                  className="w-16 px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isAddingTag ? "..." : "Add"}
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
 
         <div className="flex-1 min-h-0 flex flex-col bg-gray-100 rounded-b overflow-hidden">
           <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
