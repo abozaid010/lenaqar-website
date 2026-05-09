@@ -15,6 +15,7 @@ import {
 } from "@/utils/api";
 import { handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel } from "@/utils/actions";
+import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { userKeys } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Copy, ListPlus, Pencil, Trash2 } from "lucide-react";
@@ -243,22 +244,37 @@ export default function LeadDetailPane({
               source={data.data.source || null}
             />
           </div>
-
-
         </div>
 
-        {leadSummary?.campaign_ids?.length > 0 && (
-          <div className="shrink-0 px-2 py-1 flex flex-wrap gap-1 border-b border-gray-50">
-            {leadSummary.campaign_ids.slice(0, 6).map((id) => (
-              <span
-                key={id}
-                className="text-[10px] px-1.5 py-0 rounded bg-blue-50 text-blue-800"
-              >
-                {id}
-              </span>
-            ))}
+        {/* Summary Information Header */}
+        {leadSummary && (
+          <div className="shrink-0 px-4 py-3 bg-gray-50 border-b border-gray-200">
+            <div className="flex flex-wrap items-center gap-3 text-sm">
+              {/* Requirement */}
+              {leadSummary.requirement_name && leadSummary.requirement_name !== "Not defined" && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium">
+                  {leadSummary.requirement_name}
+                </span>
+              )}
+              
+              {/* Last Action */}
+              {leadSummary.last_action && (
+                <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-700 text-xs font-medium">
+                  {lastActionLabel}
+                </span>
+              )}
+              
+              {/* Last Activity */}
+              {leadSummary.updated_at && (
+                <span className="text-xs text-gray-500">
+                  {t.clientsTable?.lastActivity?.label || "Last activity"}: {formatDateTimeAmPmShort(leadSummary.updated_at)}
+                </span>
+              )}
+            </div>
           </div>
         )}
+
+       
 
         <div className="flex-1 min-h-0 flex flex-col bg-gray-100 rounded-b overflow-hidden">
           <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
