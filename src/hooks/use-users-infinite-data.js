@@ -13,14 +13,10 @@ export function useUsersInfiniteData(searchParams) {
       ? searchParams
       : JSON.stringify(searchParams ?? {});
 
-  console.log(`🔍 useUsersInfiniteData called with params:`, safeSearchParams);
-
   return useInfiniteQuery({
     queryKey: userKeys.infiniteList(safeSearchParams),
-    queryFn: ({ pageParam }) => {
-      console.log(`🚀 fetchUsersData called with pageParam:`, pageParam);
-      return fetchUsersData(safeSearchParams, pageParam ? { cursor: pageParam } : {});
-    },
+    queryFn: ({ pageParam }) =>
+      fetchUsersData(safeSearchParams, pageParam ? { cursor: pageParam } : {}),
     initialPageParam: null,
     getNextPageParam: (lastPage) => {
       const pagination = lastPage?.pagination;
@@ -32,11 +28,5 @@ export function useUsersInfiniteData(searchParams) {
     staleTime: 1000 * 60 * 15, // 15 minutes to reduce refetches
     refetchOnWindowFocus: false,
     placeholderData: undefined,
-    onSuccess: () => {
-      console.log(`✅ useUsersInfiniteData query succeeded`);
-    },
-    onError: (error) => {
-      console.error(`❌ useUsersInfiniteData query failed:`, error);
-    },
   });
 }

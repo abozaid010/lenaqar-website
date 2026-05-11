@@ -8,6 +8,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
+import {
+  leadMatchesSearchQuery,
+  normalizeSearchQueryForApi,
+} from "@/utils/lead-list-search";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -33,6 +37,14 @@ function DashboardSplitViewComponent() {
     delete o.userId;
     delete o.cursor;
     delete o.direction;
+    if (o.query && typeof o.query === "string") {
+      const trimmed = o.query.trim();
+      if (!trimmed) {
+        delete o.query;
+      } else {
+        o.query = normalizeSearchQueryForApi(trimmed);
+      }
+    }
     return JSON.stringify(o);
   }, [searchParams]);
 
@@ -50,21 +62,27 @@ function DashboardSplitViewComponent() {
     isFetching,
   } = useUsersInfiniteData(filterKey);
 
-  const users = useMemo(() => flattenUsers(data), [data]);
+  const allUsers = useMemo(() => flattenUsers(data), [data]);
+
+  const searchQueryTrimmed = (searchParams.get("query") || "").trim();
+  const filteredUsers = useMemo(() => {
+    if (!searchQueryTrimmed) return allUsers;
+    return allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed));
+  }, [allUsers, searchQueryTrimmed]);
 
   useEffect(() => {
     setLoading(isLoading || isFetching);
-    if (users.length > 0) {
-      const totalScore = users.reduce((sum, user) => sum + (user.score || 0), 0);
-      setAverageScore(totalScore / users.length);
+    if (allUsers.length > 0) {
+      const totalScore = allUsers.reduce((sum, user) => sum + (user.score || 0), 0);
+      setAverageScore(totalScore / allUsers.length);
     } else {
       setAverageScore(null);
     }
-  }, [users, isLoading, isFetching, setAverageScore, setLoading]);
+  }, [allUsers, isLoading, isFetching, setAverageScore, setLoading]);
 
   const selectedLead = useMemo(
-    () => users.find((u) => u.user_id === selectedUserId) || null,
-    [users, selectedUserId]
+    () => allUsers.find((u) => u.user_id === selectedUserId) || null,
+    [allUsers, selectedUserId]
   );
 
   const onSelectLead = useCallback(
@@ -93,7 +111,8 @@ function DashboardSplitViewComponent() {
     <div className="flex flex-col min-h-0 flex-1 gap-1">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,360px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
         <LeadsListPane
-          users={users}
+          users={filteredUsers}
+          totalLoadedLeads={allUsers.length}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}

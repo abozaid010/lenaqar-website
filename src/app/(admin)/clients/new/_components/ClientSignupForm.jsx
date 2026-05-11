@@ -10,6 +10,8 @@ import ModuleActionsSelector, { DEFAULT_BROKER_MODULE_ACTIONS, DEFAULT_DEVELOPER
 import DynamicSuggestionsList from "./DynamicSuggestionsList";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
+import { PhoneField } from "@/components/phone/PhoneField";
+import { getPhoneValidationError } from "@/components/phone/phone-utils";
 import { uploadImages, updateAdminClient } from "@/utils/api";
 import { processImage } from "@/utils/processImage";
 
@@ -110,8 +112,12 @@ const ClientSignupForm = () => {
     if (!formData.full_name.trim()) {
       newErrors.full_name = "Full name is required";
     }
-    if (!formData.phone_number.trim()) {
-      newErrors.phone_number = "Phone number is required";
+    const phoneErr = getPhoneValidationError(formData.phone_number, {
+      defaultCountry: "EG",
+      required: true,
+    });
+    if (phoneErr) {
+      newErrors.phone_number = phoneErr;
     }
     if (formData.price_percentage === "" || isNaN(formData.price_percentage)) {
       newErrors.price_percentage = "Price percentage is required and must be a number";
@@ -271,15 +277,20 @@ const ClientSignupForm = () => {
             placeholder="Enter full name"
           />
           
-          <FormInput
-            label="Phone Number"
+          <PhoneField
+            className="w-full"
             name="phone_number"
-            value={formData.phone_number}
-            onChange={handleInputChange}
+            label="Phone Number"
             required
-            error={!!errors.phone_number}
-            errorMessage={errors.phone_number}
-            placeholder="+1 234 567 8900"
+            defaultCountry="EG"
+            value={formData.phone_number ?? ""}
+            onChange={(next) => {
+              setFormData((prev) => ({ ...prev, phone_number: next ?? "" }));
+              if (errors.phone_number) {
+                setErrors((prev) => ({ ...prev, phone_number: "" }));
+              }
+            }}
+            error={errors.phone_number || undefined}
           />
           
           <FormInput

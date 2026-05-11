@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useI18n } from "@/hooks/useI18n";
-import { normalizeInternationalPhone } from "@/utils/phone-utils";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { userKeys } from "@/utils/query-utils";
@@ -18,33 +17,33 @@ export function useAddLead({ onSuccess, clientId } = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const addNewLead = async (formData) => {
-    const { phone_number, user_name, query } = formData;
+    const { phonePayload, user_name, query, phone_number } = formData;
 
-    // Validation
     if (!user_name?.trim()) {
       toast.error(translate("common.nameRequired", "Name is required"));
       return false;
     }
 
-    if (!phone_number?.trim()) {
-      toast.error(translate("common.phoneRequired", "Phone number is required"));
-      return false;
-    }
-
-    const normalizedPhone = normalizeInternationalPhone(phone_number);
-    // Basic E.164 validation check: must start with + and have at least 8 digits
-    if (!normalizedPhone.startsWith("+") || normalizedPhone.length < 8) {
-      toast.error(translate("common.invalidPhone", "Invalid phone number format. Please include country code (e.g. +20...)"));
+    if (!phonePayload?.combined) {
+      if (!phone_number?.trim()) {
+        toast.error(translate("common.phoneRequired", "Phone number is required"));
+      } else {
+        toast.error(
+          translate(
+            "common.invalidPhone",
+            "Invalid phone number format. Please include country code (e.g. +20...)",
+          ),
+        );
+      }
       return false;
     }
 
     setIsSubmitting(true);
     try {
-      // Payload structure per requirements:
-      // user_id (UUID4), phone_number, user_name, query (notes), client_id, platform: "website", campaign_id: "added_manually"
+      // Single combined international number (E.164) from PhoneField.
       const payload = {
         user_id: crypto.randomUUID(),
-        phone_number: normalizedPhone,
+        phone_number: phonePayload.combined,
         user_name: user_name.trim(),
         query: query?.trim() || "",
         client_id: clientId || "public",

@@ -24,6 +24,8 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import DeveloperContactOverrideDialog from "@/components/ui/developer-contact-override-dialog";
+import { PhoneField } from "@/components/phone/PhoneField";
+import { getPhoneValidationError } from "@/components/phone/phone-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { developerKeys } from "@/utils/query-utils";
 
@@ -258,38 +260,24 @@ export default function AddDeveloperDialog({
       newErrors.sales_name = t.errors?.required || "Required";
     }
 
-    if (!formData.sales_phone?.trim()) {
-      newErrors.sales_phone = t.errors?.required || "Required";
-    }
-
-    if (!formData.whatsapp?.trim()) {
-      newErrors.whatsapp = t.errors?.required || "Required";
-    }
-
     if (!formData.founded_year?.trim()) {
       newErrors.founded_year = t.errors?.required || "Required";
     }
 
-    if (formData.sales_phone && formData.sales_phone.trim() !== "") {
-      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-      if (
-        !phoneRegex.test(formData.sales_phone) ||
-        formData.sales_phone.trim().length < 10
-      ) {
-        newErrors.sales_phone =
-          t.errors?.invalidPhone || "Invalid phone number";
-      }
+    const salesPhoneErr = getPhoneValidationError(formData.sales_phone, {
+      defaultCountry: "EG",
+      required: true,
+    });
+    if (salesPhoneErr) {
+      newErrors.sales_phone = salesPhoneErr;
     }
 
-    if (formData.whatsapp && formData.whatsapp.trim() !== "") {
-      const phoneRegex = /^[\d\s\-\+\(\)]+$/;
-      if (
-        !phoneRegex.test(formData.whatsapp) ||
-        formData.whatsapp.trim().length < 10
-      ) {
-        newErrors.whatsapp =
-          t.errors?.invalidPhone || "Invalid WhatsApp number";
-      }
+    const whatsappErr = getPhoneValidationError(formData.whatsapp, {
+      defaultCountry: "EG",
+      required: true,
+    });
+    if (whatsappErr) {
+      newErrors.whatsapp = whatsappErr;
     }
 
     const urlFields = ["website", "instagram", "linkedin", "facebook"];
@@ -948,43 +936,33 @@ export default function AddDeveloperDialog({
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              {t.formLabels?.salesPhone || "Sales Phone"} *
-            </label>
-            <input
-              type="tel"
-              name="sales_phone"
-              value={formData.sales_phone || ""}
-              onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.sales_phone ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder={t.placeholders?.phone || "Phone number"}
-            />
-            {errors.sales_phone && (
-              <p className="text-xs text-red-500 mt-1">{errors.sales_phone}</p>
-            )}
-          </div>
+          <PhoneField
+            className="w-full"
+            name="sales_phone"
+            label={`${t.formLabels?.salesPhone || "Sales Phone"} *`}
+            required
+            defaultCountry="EG"
+            value={formData.sales_phone ?? ""}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, sales_phone: next ?? "" }))
+            }
+            placeholder={t.placeholders?.phone || "Phone number"}
+            error={errors.sales_phone}
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              WhatsApp *
-            </label>
-            <input
-              type="text"
-              name="whatsapp"
-              value={formData.whatsapp || ""}
-              onChange={handleChange}
-              className={`block w-full rounded-md border py-1 px-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                errors.whatsapp ? "border-red-500" : "border-gray-300"
-              }`}
-              placeholder={t.placeholders?.whatsapp || "WhatsApp number"}
-            />
-            {errors.whatsapp && (
-              <p className="text-xs text-red-500 mt-1">{errors.whatsapp}</p>
-            )}
-          </div>
+          <PhoneField
+            className="w-full"
+            name="whatsapp"
+            label={`${t.formLabels?.whatsapp || "WhatsApp"} *`}
+            required
+            defaultCountry="EG"
+            value={formData.whatsapp ?? ""}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, whatsapp: next ?? "" }))
+            }
+            placeholder={t.placeholders?.whatsapp || "WhatsApp number"}
+            error={errors.whatsapp}
+          />
         </div>
 
         <div className="space-y-2">

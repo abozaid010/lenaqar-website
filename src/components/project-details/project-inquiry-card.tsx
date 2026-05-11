@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { Phone, MessageCircle, Mail, Send, Heart, Share2 } from 'lucide-react';
 import type { ProjectInquiryCardProps } from '@/lib/projects/project-types';
+import { PhoneField } from '@/components/phone/PhoneField';
+import { useI18n } from '@/hooks/useI18n';
 
 export default function ProjectInquiryCard({ project }: ProjectInquiryCardProps) {
+  const { translate } = useI18n();
   const [isFavorite, setIsFavorite] = useState(false);
   const [contactMethod, setContactMethod] = useState<'phone' | 'email' | 'whatsapp'>('phone');
   const [formData, setFormData] = useState({
@@ -138,14 +141,16 @@ export default function ProjectInquiryCard({ project }: ProjectInquiryCardProps)
         </div>
         
         <div>
-          <input
-            type="tel"
+          <PhoneField
+            className="w-full"
             name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            placeholder="Your Phone Number"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            label={translate('phoneField.label', 'Phone number')}
             required
+            defaultCountry="EG"
+            value={formData.phone ?? ''}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, phone: next ?? '' }))
+            }
           />
         </div>
         

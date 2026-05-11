@@ -8,6 +8,7 @@ import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements, deleteClient } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { BellDot, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,6 +33,7 @@ export default function ClientsTable({ users, pagination }) {
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
+  const [actionUser, setActionUser] = useState(null);
   const [openActionModal, setOpenActionModal] = useState(false);
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
@@ -65,9 +67,19 @@ export default function ClientsTable({ users, pagination }) {
     return rowSelection.includes(user_id);
   };
 
-  const handleclientAction = async (e, user_id) => {
+  const handleclientAction = async (e, user) => {
     e.stopPropagation();
+    const user_id = typeof user === "string" ? user : user?.user_id;
     setLoadingClientActions(user_id);
+    setActionUser(
+      typeof user === "string"
+        ? { user_id, name: "", phone_number: "" }
+        : {
+            user_id: user?.user_id,
+            name: user?.name || "",
+            phone_number: user?.phone_number || "",
+          }
+    );
     try {
       const actions = await getClientActions(user_id);
       setRowActions(actions);
@@ -75,6 +87,7 @@ export default function ClientsTable({ users, pagination }) {
     } catch (error) {
       console.error("Error fetching actions:", error);
       setLoadingClientActions(null);
+      setActionUser(null);
     }
   };
 
@@ -223,14 +236,24 @@ export default function ClientsTable({ users, pagination }) {
                         {user.phone_number ? (
                           <div className="flex items-center justify-between gap-2 min-w-[140px]">
                             <span
-                              onClick={(e) => handleCopyPhoneNumberWithToast(e, user.phone_number)}
+                              onClick={(e) =>
+                                handleCopyPhoneNumberWithToast(
+                                  e,
+                                  phoneToE164(user.phone_number, "EG") || user.phone_number,
+                                )
+                              }
                               className="cursor-pointer hover:text-primary transition-colors flex-1 text-left truncate"
                               title={t('clientsTable.clickToCopy')}
                             >
-                              {user.phone_number}
+                              {formatPhoneForDisplay(user.phone_number, "EG") || user.phone_number}
                             </span>
                             <button
-                              onClick={(e) => handleOpenWhatsApp(e, user.phone_number)}
+                              onClick={(e) =>
+                                handleOpenWhatsApp(
+                                  e,
+                                  phoneToE164(user.phone_number, "EG") || user.phone_number,
+                                )
+                              }
                               className="p-1 h-6 w-6 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center flex-shrink-0 aspect-square"
                               style={{ height: '24px', width: '24px', minHeight: '24px', maxHeight: '24px' }}
                               title={t('clientsTable.openWhatsApp')}
@@ -356,7 +379,7 @@ export default function ClientsTable({ users, pagination }) {
                         className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap max-w-[120px] truncate ${
                           ACTIONS_COLORS[user.last_action] || "text-gray-400"
                         }`}
-                        onClick={(e) => handleclientAction(e, user.user_id)}
+                        onClick={(e) => handleclientAction(e, user)}
                       >
                         {loadingClientActions === user.user_id &&
                         !openActionModal ? (
@@ -422,10 +445,13 @@ export default function ClientsTable({ users, pagination }) {
       {openActionModal && (
         <ActionsModal
           actions={rowActions}
-          userId={loadingClientActions}
+          userId={actionUser?.user_id || loadingClientActions}
+          phoneNumber={actionUser?.phone_number || ""}
+          name={actionUser?.name || ""}
           onClose={() => {
             setOpenActionModal(false);
             setLoadingClientActions(null);
+            setActionUser(null);
           }}
           onActionUpdate={handleActionUpdate}
         />

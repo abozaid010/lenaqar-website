@@ -7,6 +7,7 @@ import { useUpdateClient } from "@/hooks/use-clients-data";
 import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleActionsSelector";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
+import { PhoneField } from "@/components/phone/PhoneField";
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
@@ -122,7 +123,15 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
           <input type="email" className={inputCls} value={form.email} onChange={set("email")} />
         </Field>
         <Field label="Phone Number">
-          <input className={inputCls} value={form.phone_number} onChange={set("phone_number")} />
+          <PhoneField
+            className="w-full"
+            name="phone_number"
+            value={form.phone_number ?? ""}
+            onChange={(next) =>
+              setForm((prev) => ({ ...prev, phone_number: next ?? "" }))
+            }
+            defaultCountry="EG"
+          />
         </Field>
         <Field label="Address">
           <input className={inputCls} value={form.address} onChange={set("address")} />

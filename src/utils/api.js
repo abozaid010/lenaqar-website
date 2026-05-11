@@ -93,7 +93,6 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
     if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
       throw new Error("Expected users array but received invalid data format");
     }
-    console.log("=== API Response Data ===", response.data.data);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
@@ -747,17 +746,20 @@ export async function addLeadTags(userId, tags) {
 export async function removeLeadTags(userId, tags) {
   try {
     // Normalize tags before sending
-    const normalizedTags = Array.isArray(tags) 
-      ? tags.map(tag => String(tag).trim()).filter(Boolean)
+    const normalizedTags = Array.isArray(tags)
+      ? tags.map((tag) => String(tag).trim()).filter(Boolean)
       : [String(tags).trim()].filter(Boolean);
-    
+
     if (normalizedTags.length === 0) {
       return { error: "No valid tags provided" };
     }
 
-    const response = await axiosInstance.post(`/messages/dashboard/${userId}/tags/remove`, {
-      tags: normalizedTags,
-    });
+    // DELETE /messages/dashboard/{dashboard_id}/tags
+    // Body: { "tags": ["tag1_to_remove"] }
+    const response = await axiosInstance.delete(
+      `/messages/dashboard/${userId}/tags`,
+      { data: { tags: normalizedTags } },
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to remove tags:", error.message);
@@ -1492,6 +1494,14 @@ export async function fetchDataProjection() {
   }
 }
 
+/** `/campaign/*` expects `x-client-id` to match `client_id` (query/body); JWT-only `sub` can otherwise 403. */
+function campaignChatRequestHeaders(client_id) {
+  return {
+    "X-API-Key": process.env.NEXT_PUBLIC_X_API_KEY,
+    "x-client-id": String(client_id),
+  };
+}
+
 export async function fetchCampaignSessions({ 
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   search = "", 
@@ -1510,9 +1520,7 @@ export async function fetchCampaignSessions({
     if (ai_reply_enabled !== null) params.set("ai_reply_enabled", String(ai_reply_enabled));
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSIONS}?${params.toString()}`, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     if (!response.data || !response.data.data) {
@@ -1521,7 +1529,10 @@ export async function fetchCampaignSessions({
 
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch campaign sessions:", error.message);
+    const status = error?.response?.status;
+    if (status !== 403 && status !== 401) {
+      console.error("Failed to fetch campaign sessions:", error.message);
+    }
     throw error;
   }
 }
@@ -1545,9 +1556,7 @@ export async function fetchCampaignSession({
     });
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSION}?${params.toString()}`, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     if (!response.data || !response.data.data) {
@@ -1556,7 +1565,10 @@ export async function fetchCampaignSession({
 
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch campaign session:", error.message);
+    const status = error?.response?.status;
+    if (status !== 403 && status !== 401) {
+      console.error("Failed to fetch campaign session:", error.message);
+    }
     throw error;
   }
 }
@@ -1576,9 +1588,7 @@ export async function toggleCampaignAIReply({
       phone_number,
       ai_reply_enabled
     }, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     return response.data;
@@ -1603,7 +1613,7 @@ export async function updateCampaignSessionName({
       phone_number,
       user_name
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1627,7 +1637,7 @@ export async function toggleCampaignFavorite({
       phone_number,
       is_favorite
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1651,7 +1661,7 @@ export async function updateCampaignNotes({
       phone_number,
       notes
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1693,9 +1703,7 @@ export async function sendCampaignReply({
     });
 
     const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UNIFIED_REPLY, payload, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     return response.data;
@@ -1785,14 +1793,21 @@ export async function fetchLegacyMonthData(searchParams = {}) {
 }
 
 /**
- * Update requirements for a user (PUT /requirements/:userId)
+ * Update a requirement (PUT /requirements/:requirementId).
+ *
+ * NOTE: This endpoint is keyed by the requirement's own id, NOT by the user's
+ * id. The caller is responsible for extracting the requirement id from the
+ * GET /requirements/:userId response (any of `id`, `_id`, `requirement_id`).
  */
-export async function updateUserRequirements(userId, payload) {
-  if (!userId) {
-    throw new Error("userId is required");
+export async function updateUserRequirements(requirementId, payload) {
+  if (!requirementId) {
+    throw new Error("requirementId is required");
   }
   try {
-    const response = await axiosInstance.put(`requirements/${userId}`, payload);
+    const response = await axiosInstance.put(
+      `requirements/${requirementId}`,
+      payload,
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to update requirements:", error.message);

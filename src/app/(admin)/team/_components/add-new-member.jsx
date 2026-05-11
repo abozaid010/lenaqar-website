@@ -3,6 +3,7 @@
 import Dialog from "@/components/ui/Dialog";
 import CancelButton from "@/components/ui/cancel-button";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import { PhoneField } from "@/components/phone/PhoneField";
 import { PlusIcon, Loader2, Edit2 } from "lucide-react";
 import { useState, useActionState, useEffect, useMemo, useRef } from "react";
 import { addNewSales, editEmployee } from "../_actions/actions";
@@ -269,22 +270,24 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1 text-start">
-              {t.team.phone} <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              required
-              placeholder="+20 123 456 7890"
-              value={formData.phone}
-              onChange={handleChange}
-              dir="ltr"
-              style={{ textAlign: "start" }}
-              className="block w-full rounded-md border border-gray-300 py-1 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
+          {/*
+            NOTE: react-phone-number-input's inner <input> stores only the
+            national portion (no country code), so forwarding `name="phone"`
+            would submit a half-number and the backend would 422. Submit the
+            full E.164 value from state via a hidden field instead.
+          */}
+          <PhoneField
+            className="w-full"
+            label={t.team.phone}
+            required
+            defaultCountry="EG"
+            value={formData.phone ?? ""}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, phone: next ?? "" }))
+            }
+            placeholder="+20 123 456 7890"
+          />
+          <input type="hidden" name="phone" value={formData.phone ?? ""} />
 
           <div>
             <SearchableDropdownSelect

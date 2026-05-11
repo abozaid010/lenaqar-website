@@ -13,10 +13,23 @@ import {
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
-  createUserAction,
   getClientRequirements,
   updateUserRequirements,
 } from "@/utils/api";
+
+// The PUT /requirements/{requirement_id} endpoint is keyed by the
+// requirement's own id (not the user id). The GET response may expose it
+// under any of these keys depending on the backend layer.
+function pickRequirementId(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  return (
+    raw.requirement_id ||
+    raw.requirementId ||
+    raw._id ||
+    raw.id ||
+    null
+  );
+}
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -49,6 +62,7 @@ export default function EditRequirementDialog({
   const { locale, translate } = useI18n();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [requirementId, setRequirementId] = useState(null);
   const [form, setForm] = useState(() => ({
     client_id: "",
     user_id: "",
@@ -81,7 +95,11 @@ export default function EditRequirementDialog({
   }));
 
   useEffect(() => {
-    if (!open || !userId) return;
+    if (!open) {
+      setRequirementId(null);
+      return undefined;
+    }
+    if (!userId) return undefined;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -95,6 +113,7 @@ export default function EditRequirementDialog({
         const last = (arr) =>
           Array.isArray(arr) && arr.length ? arr[arr.length - 1] : arr;
 
+        setRequirementId(pickRequirementId(raw));
         setForm({
           client_id: raw.client_id ?? clientId,
           user_id: userId,
@@ -167,12 +186,20 @@ export default function EditRequirementDialog({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!userId) return;
+    if (!requirementId) {
+      toast.error(
+        tr(
+          "dashboard.requirementsDialog.messages.missingRequirementId",
+          locale === "ar"
+            ? "لا يمكن العثور على معرّف المتطلب لهذا العميل"
+            : "Could not find a requirement id for this lead",
+        ),
+      );
+      return;
+    }
     setSaving(true);
     try {
       const clientId = form.client_id || LenaCookiesManager.getClientId() || "";
-      const clientInfo = LenaCookiesManager.getClientInfo();
-      const authorEmail =
-        typeof clientInfo?.email === "string" ? clientInfo.email.trim() : "";
       const payload = {
         client_id: clientId,
         user_id: userId,
@@ -204,19 +231,12 @@ export default function EditRequirementDialog({
         additionalFeatures: splitList(form.additionalFeatures),
         score: {},
       };
-      await updateUserRequirements(userId, payload);
-      await createUserAction({
-        client_id: clientId,
-        user_id: userId,
-        action: "missingRequirement",
-        comment: "Requirements updated",
-        author: authorEmail,
-      });
+      await updateUserRequirements(requirementId, payload);
       toast.success(
         tr(
           "common.requirementsSaved",
-          locale === "ar" ? "تم حفظ المتطلبات بنجاح" : "Requirements saved"
-        )
+          locale === "ar" ? "تم حفظ المتطلبات بنجاح" : "Requirements saved",
+        ),
       );
       onSuccess?.();
       onClose();
@@ -225,8 +245,8 @@ export default function EditRequirementDialog({
         err?.message ||
           tr(
             "dashboard.requirementsDialog.messages.saveFailed",
-            locale === "ar" ? "فشل الحفظ" : "Save failed"
-          )
+            locale === "ar" ? "فشل الحفظ" : "Save failed",
+          ),
       );
     } finally {
       setSaving(false);

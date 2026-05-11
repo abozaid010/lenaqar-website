@@ -640,10 +640,23 @@ export default {
       na: "لا توجد رسائل غير مقروءة",
       count: "{count} رسالة غير مقروءة",
     },
+    tags: {
+      addPlaceholder: "أضف هاشتاجاً...",
+      addButton: "إضافة",
+      noTags: "لا توجد هاشتاجات",
+    },
+  },
+  chatHistory: {
+    noMessages: "لا توجد رسائل بعد.",
   },
   actionForm: {
+    actionLabel: "نوع الإجراء",
+    commentLabel: "ملاحظات / تعليقات",
     commentPlaceholder: "أدخل تعليقك هنا...",
+    dateLabel: "التاريخ",
+    timeLabel: "الوقت",
     submitButton: "إرسال",
+    submittingButton: "جارٍ الإرسال...",
     successMessage: "تم إضافة الإجراء بنجاح",
     errorMessage: "فشل إضافة الإجراء",
     aiAction: "إجراءات الذكاء الاصطناعي",
@@ -1618,6 +1631,42 @@ export default {
       client: "العميل",
     },
   },
+  leadDetail: {
+    requirementSummary: {
+      title: "متطلب العميل",
+      editTitle: "تعديل المتطلب",
+      addAction: "إضافة",
+      empty: "لا يوجد متطلب مسجل بعد. اضغط إضافة لتسجيل تفضيلات هذا العميل.",
+    },
+    tabs: {
+      ariaLabel: "أقسام تفاصيل العميل",
+      conversations: "المحادثات",
+      requirements: "المتطلبات",
+      actions: "الإجراءات",
+    },
+    header: {
+      lastActivity: "آخر نشاط",
+    },
+    leadSummary: {
+      title: "ملخص العميل",
+      companyLabel: "الشركة",
+      requirementLabel: "المتطلب",
+      empty:
+        "لا توجد شركة أو متطلب مسجل لهذا العميل بعد (من قائمة لوحة التحكم).",
+    },
+    actionsTab: {
+      sections: {
+        tags: "الهاشتاج",
+        actionsLog: "سجل الإجراءات",
+        replyMode: "وضع الرد",
+        dangerZone: "منطقة الحذف",
+      },
+      deleteLead: "حذف العميل",
+      replyModeHint: "اختر طريقة الرد على رسائل هذا العميل.",
+      noTags: "لا توجد وسوم بعد.",
+      dangerZoneHint: "حذف العميل دائم ولا يمكن التراجع عنه.",
+    },
+  },
   schaduall: {
     assignError: "فشل في تعيين مندوب المبيعات",
     salesAssigned: "تم تعيين مندوب المبيعات بنجاح",
@@ -1628,6 +1677,13 @@ export default {
     scheduleweek: "جدولك خالٍ هذا الأسبوع.",
     Schedule: "مهام الاسبوع",
     NoSalesAvailable: "لا يوجد موظفين مبيعات",
+    updateActionTimeTitle: "تحديث التاريخ والوقت",
+    updateActionTimeHint:
+      "عند الحفظ يتم إنشاء إجراء جديد لنفس العميل بالتاريخ والوقت والملاحظات التي تختارها.",
+    clickToEditDateTime: "تعديل التاريخ والوقت",
+    cannotUpdateActionMissingUser:
+      "لا يمكن تحديث هذه المهمة لأنها غير مرتبطة بعميل.",
+    saveAsNewAction: "حفظ كإجراء جديد",
   },
 
   noappointments: "لا توجد مواعيد هذا الأسبوع",
@@ -1872,6 +1928,15 @@ export default {
     projectEnName: "أدخل اسم المشروع بالإنجليزية",
     projectDescription:
       "برجاء اضافة تفاصيل المشروع وخطط السداد ومواعيد الاستلام  وجودة المشروع",
+  },
+  phoneField: {
+    required: "رقم الهاتف مطلوب",
+    tooShort: "رقم الهاتف قصير جدًا",
+    tooLong: "رقم الهاتف طويل جدًا",
+    invalidLength: "طول رقم الهاتف غير صالح",
+    invalid: "رقم هاتف غير صالح",
+    label: "رقم الهاتف",
+    placeholder: "أدخل رقم الهاتف",
   },
   clientInfo: {
     email: "البريد الإلكتروني",

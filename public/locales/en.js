@@ -562,6 +562,42 @@ export default {
       somethingWentWrong: "Something went wrong.",
     },
   },
+  leadDetail: {
+    requirementSummary: {
+      title: "Lead Requirement",
+      editTitle: "Edit requirement",
+      addAction: "Add",
+      empty: "No requirement captured yet. Click Add to fill in this lead's preferences.",
+    },
+    tabs: {
+      ariaLabel: "Lead detail sections",
+      conversations: "Conversations",
+      requirements: "Requirements",
+      actions: "Actions",
+    },
+    header: {
+      lastActivity: "Last activity",
+    },
+    leadSummary: {
+      title: "Lead summary",
+      companyLabel: "Company",
+      requirementLabel: "Requirement",
+      empty:
+        "No company or requirement is set for this lead yet (from the dashboard list).",
+    },
+    actionsTab: {
+      sections: {
+        tags: "Tags",
+        actionsLog: "Actions log",
+        replyMode: "Reply mode",
+        dangerZone: "Danger zone",
+      },
+      deleteLead: "Delete lead",
+      replyModeHint: "Choose how new messages from this lead are answered.",
+      noTags: "No tags yet.",
+      dangerZoneHint: "Deleting a lead is permanent and cannot be undone.",
+    },
+  },
   schaduall: {
     assignError: "Failed to assign salesperson",
     salesAssigned: "Salesperson assigned successfully",
@@ -572,6 +608,13 @@ export default {
     noSale: "لا توجد مبيعات متاحة",
     scheduleweek: "جدولك خالٍ هذا الأسبوع.",
     Schedule: "مهام الاسبوع",
+    updateActionTimeTitle: "Update date & time",
+    updateActionTimeHint:
+      "Saving sends a new action for this lead with the date, time, and notes you set.",
+    clickToEditDateTime: "Edit date and time",
+    cannotUpdateActionMissingUser:
+      "This task cannot be updated because the lead is not linked.",
+    saveAsNewAction: "Save as new action",
   },
   Noappointments: "No appointments this week",
   scheduleweek: "Your schedule is clear for this week.",
@@ -653,10 +696,23 @@ export default {
       na: "N/A",
       count: "{count} unread messages",
     },
+    tags: {
+      addPlaceholder: "Add a tag...",
+      addButton: "Add",
+      noTags: "No tags",
+    },
+  },
+  chatHistory: {
+    noMessages: "No messages yet.",
   },
   actionForm: {
+    actionLabel: "Action Type",
+    commentLabel: "Notes / Comments",
     commentPlaceholder: "Enter your comment here...",
+    dateLabel: "Date",
+    timeLabel: "Time",
     submitButton: "Send",
+    submittingButton: "Sending...",
     successMessage: "Action added successfully",
     errorMessage: "Failed to add action",
     aiAction: "AI Actions",
@@ -1804,6 +1860,15 @@ export default {
     projectEnName: "Enter project Name In English",
     projectDescription:
       "Add area, delivery, unit types and pyament plan about this project.",
+  },
+  phoneField: {
+    required: "Phone number is required",
+    tooShort: "Phone number is too short",
+    tooLong: "Phone number is too long",
+    invalidLength: "Phone number length is invalid",
+    invalid: "Invalid phone number",
+    label: "Phone number",
+    placeholder: "Enter phone number",
   },
   clientInfo: {
     email: "Email",

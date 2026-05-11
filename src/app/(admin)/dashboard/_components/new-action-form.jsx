@@ -13,7 +13,19 @@ const initialState = {
   message: "",
 };
 
-export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
+export default function NewActionForm({
+  userId,
+  phoneNumber = "",
+  name = "",
+  onSuccess,
+  onActionUpdate,
+  /** Pre-fill when opening from schedule (or similar); creates a new action on submit. */
+  defaultAction = null,
+  defaultComment = null,
+  defaultMeetingDate = null,
+  defaultMeetingTime = null,
+  submitButtonLabel = null,
+}) {
   const { t, locale } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = LenaCookiesManager.getClientId();
@@ -25,6 +37,31 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
     label: getActionLabel(action.value, locale),
     value: action.value,
   }));
+
+  // Get current date
+  const getDefaultDate = () => {
+    const now = new Date();
+    return now.toISOString().split("T")[0];
+  };
+
+  // Get current time in 24h format
+  const getDefaultTime = () => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+  };
+
+  const initialMeetingDate = defaultMeetingDate || getDefaultDate();
+  const initialMeetingTime = defaultMeetingTime || getDefaultTime();
+
+  const pickInitialAction = () => {
+    const first = ACTIONS[0]?.value || "Make a call";
+    if (defaultAction && ACTIONS.some((a) => a.value === defaultAction)) {
+      return defaultAction;
+    }
+    return first;
+  };
 
   // Convert 24h to 12h format
   const to12HourFormat = (time24) => {
@@ -52,30 +89,16 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
     ).padStart(2, "0")}`;
   };
 
-  // Get current time in 24h format
-  const getDefaultTime = () => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
-  };
-
-  // Get current date
-  const getDefaultDate = () => {
-    const now = new Date();
-    return now.toISOString().split("T")[0];
-  };
-
-  const [formData, setFormData] = useState({
-    action: ACTIONS[0]?.value || "Make a call",
-    comment: "",
-    meeting_date: getDefaultDate(),
-    meeting_time: getDefaultTime(),
+  const [formData, setFormData] = useState(() => ({
+    action: pickInitialAction(),
+    comment: defaultComment ?? "",
+    meeting_date: initialMeetingDate,
+    meeting_time: initialMeetingTime,
     client_id: clientId,
-  });
+  }));
 
   const [timeState, setTimeState] = useState(() => {
-    const converted = to12HourFormat(getDefaultTime());
+    const converted = to12HourFormat(initialMeetingTime);
     return {
       hours: converted.hours,
       minutes: converted.minutes,
@@ -257,9 +280,10 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
 
   return (
     <form className="p-4 bg-gray-50/30 rounded-b-lg border-t border-gray-100" action={action}>
-      <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name="phone_number" value={""} />
-      <input type="hidden" name="client_id" value={clientId} />
+      <input type="hidden" name="user_id" value={userId || ""} />
+      <input type="hidden" name="name" value={name || ""} />
+      <input type="hidden" name="phone_number" value={phoneNumber || ""} />
+      <input type="hidden" name="client_id" value={clientId || ""} />
       <input
         type="hidden"
         name="meeting_time"
@@ -368,7 +392,7 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
       {/* Action Selection */}
       <div className="mb-4">
         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-          Action Type
+          {t.actionForm.actionLabel}
         </label>
         <div className="relative">
           <select
@@ -393,7 +417,7 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
       {/* Comment */}
       <div className="mb-6">
         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-          Notes / Comments
+          {t.actionForm.commentLabel}
         </label>
         <textarea
           name="comment"
@@ -412,7 +436,9 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
         className="w-full flex justify-center items-center text-white px-4 py-3 rounded-xl bg-primary hover:bg-primary/90 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-semibold text-sm"
       >
         {pending ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-        {pending ? t.actionForm.submittingButton : t.actionForm.submitButton}
+        {pending
+          ? t.actionForm.submittingButton
+          : submitButtonLabel || t.actionForm.submitButton}
       </button>
     </form>
   );

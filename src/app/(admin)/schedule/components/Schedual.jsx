@@ -3,11 +3,18 @@ import { assignSalsePerson } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
+  formatPhoneForDisplay,
+  phoneToE164,
+} from "@/components/phone/phone-utils";
+import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
+import { getActionLabel } from "@/utils/actions";
+import {
   Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Copy,
   Loader2,
   Phone,
   User,
@@ -17,15 +24,48 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
+
+/** Lead id for creating a follow-up action from the schedule card. */
+function getScheduledActionUserId(item) {
+  return item?.user_id ?? item?.userId ?? null;
+}
+
+/** Local calendar date + time from meeting_time or created_at. */
+function getAppointmentDateTimeParts(appointment) {
+  const raw = appointment?.meeting_time || appointment?.created_at;
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return { dateStr: `${y}-${m}-${day}`, timeStr: `${hh}:${mm}` };
+}
+
+// Returns the Saturday that starts the week containing `date` (Sat → Fri).
+const getWeekStartSaturday = (date) => {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday ... 6 = Saturday
+  const offset = (day + 1) % 7; // days since last Saturday
+  d.setDate(d.getDate() - offset);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
 const Schedule = ({ data, dataSales }) => {
   const router = useRouter();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() =>
+    getWeekStartSaturday(new Date())
+  );
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { t } = useI18n();
+  const [editAppointment, setEditAppointment] = useState(null);
+  const { t, locale } = useI18n();
   const isRTL = t.direction === "rtl";
 
   const formatDate = (dateString) => {
@@ -88,17 +128,19 @@ const Schedule = ({ data, dataSales }) => {
     return `${formatDate(firstDate)} - ${formatDate(lastDate)}`;
   };
 
-  // Check if we can navigate to previous/next week
+  // Check if we can navigate to previous/next week (only one week each way).
+  // Bounds are anchored to the current week's Saturday so navigation works
+  // consistently regardless of which weekday "today" is.
   const canNavigatePrev = () => {
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() - 7); // Only one week back allowed
-    return currentDate > minDate;
+    const minWeekStart = getWeekStartSaturday(new Date());
+    minWeekStart.setDate(minWeekStart.getDate() - 7);
+    return currentDate > minWeekStart;
   };
 
   const canNavigateNext = () => {
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 7);
-    return currentDate < maxDate;
+    const maxWeekStart = getWeekStartSaturday(new Date());
+    maxWeekStart.setDate(maxWeekStart.getDate() + 7);
+    return currentDate < maxWeekStart;
   };
 
   const toggleDropdown = (index) => {
@@ -141,6 +183,20 @@ const Schedule = ({ data, dataSales }) => {
       setLoading(null);
     }
   };
+
+  const handleOpenEditAppointment = (appointment) => {
+    const uid = getScheduledActionUserId(appointment);
+    if (!uid) {
+      toast.error(
+        t.schaduall?.cannotUpdateActionMissingUser ||
+          "This task is not linked to a lead."
+      );
+      return;
+    }
+    setEditAppointment(appointment);
+  };
+
+  const closeEditAppointment = () => setEditAppointment(null);
 
   return (
     <div className="border border-red-50">
@@ -210,34 +266,119 @@ const Schedule = ({ data, dataSales }) => {
                   >
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                        <div className="flex-1 min-w-0 pe-3">
+                          <div className="flex flex-col gap-1.5">
                             <h3 className="text-xl font-semibold text-gray-800">
-                              {appointment.comment || "user"}
+                              {getActionLabel(appointment.action, locale) ||
+                                appointment.action ||
+                                t.dashboardFilter?.actions?.noAction}
                             </h3>
+                            {appointment.comment?.trim() ? (
+                              <p className="text-sm text-gray-600 leading-relaxed">
+                                {appointment.comment.trim()}
+                              </p>
+                            ) : null}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-2 text-gray-600 mb-1">
-                            <Calendar className="w-4 h-4" />
-                            <span className="font-medium">
-                              {formatDate(appointment.created_at)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Clock className="w-4 h-4" />
-                            <span>{formatTime(appointment.created_at)}</span>
-                          </div>
+                        <div className="text-end shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditAppointment(appointment)}
+                            className="flex flex-col items-end gap-1 rounded-lg p-2 -m-2 text-gray-600 hover:bg-primary/5 hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                            aria-label={
+                              t.schaduall?.clickToEditDateTime ||
+                              "Edit date and time"
+                            }
+                          >
+                            <div className="flex items-center gap-2 justify-end">
+                              <Calendar className="w-4 h-4 flex-shrink-0" />
+                              <span className="font-medium">
+                                {formatDate(
+                                  appointment.meeting_time ||
+                                    appointment.created_at
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 justify-end">
+                              <Clock className="w-4 h-4 flex-shrink-0" />
+                              <span className="font-medium">
+                                {formatTime(
+                                  appointment.meeting_time ||
+                                    appointment.created_at
+                                )}
+                              </span>
+                            </div>
+                          </button>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="space-y-4">
                           <div className="flex items-center gap-3 text-gray-600">
-                            <Phone className="w-5 h-5 text-primary" />
-                            <span className="font-medium">
-                              {appointment.phone_number}
-                            </span>
+                            {appointment.phone_number ? (
+                              <>
+                                <a
+                                  href={`tel:${
+                                    phoneToE164(
+                                      appointment.phone_number,
+                                      "EG"
+                                    ) || appointment.phone_number
+                                  }`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  aria-label={t.buttons?.call || "Call"}
+                                  title={t.buttons?.call || "Call"}
+                                  className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors flex-shrink-0"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={(e) =>
+                                    handleCopyFullPhoneNumber(
+                                      e,
+                                      phoneToE164(
+                                        appointment.phone_number,
+                                        "EG"
+                                      ) || appointment.phone_number,
+                                      () =>
+                                        toast.success(
+                                          t.clientsTable?.phoneCopied ||
+                                            "Phone copied"
+                                        ),
+                                      () =>
+                                        toast.error(
+                                          t.clientsTable?.phoneCopyFailed ||
+                                            "Failed to copy"
+                                        )
+                                    )
+                                  }
+                                  title={
+                                    t.clientsTable?.clickToCopy ||
+                                    "Click to copy"
+                                  }
+                                  aria-label={
+                                    t.clientsTable?.clickToCopy ||
+                                    "Click to copy"
+                                  }
+                                  className="font-medium hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-1.5 group"
+                                >
+                                  <span dir="ltr">
+                                    {formatPhoneForDisplay(
+                                      appointment.phone_number,
+                                      "EG"
+                                    ) || appointment.phone_number}
+                                  </span>
+                                  <Copy className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <Phone className="w-5 h-5 text-gray-300" />
+                                <span className="font-medium text-gray-400">
+                                  —
+                                </span>
+                              </>
+                            )}
                           </div>
                           <div className="flex items-center gap-3 text-gray-600">
                             <Users className="w-5 h-5 text-primary" />
@@ -405,6 +546,54 @@ const Schedule = ({ data, dataSales }) => {
           </div>
         </div>
       </div>
+
+      <UnifiedDialog
+        isOpen={!!editAppointment}
+        onClose={closeEditAppointment}
+        title={
+          t.schaduall?.updateActionTimeTitle ||
+          "Update date and time"
+        }
+        headerVariant="unified"
+        cancelLabel={t.buttons?.cancel}
+        headerTrailing={null}
+        bodyClassName="p-0 sm:p-1"
+      >
+        {editAppointment ? (
+          <>
+            <p className="text-sm text-gray-600 mb-4 px-1 leading-relaxed">
+              {t.schaduall?.updateActionTimeHint ||
+                "Submitting creates a new action with the details below."}
+            </p>
+            <NewActionForm
+              key={`schedule-edit-${editAppointment.id}`}
+              userId={String(getScheduledActionUserId(editAppointment) ?? "")}
+              phoneNumber={
+                phoneToE164(editAppointment.phone_number, "EG") ||
+                editAppointment.phone_number ||
+                ""
+              }
+              name={editAppointment.name || ""}
+              defaultAction={editAppointment.action || null}
+              defaultComment={editAppointment.comment ?? ""}
+              defaultMeetingDate={
+                getAppointmentDateTimeParts(editAppointment)?.dateStr ?? null
+              }
+              defaultMeetingTime={
+                getAppointmentDateTimeParts(editAppointment)?.timeStr ?? null
+              }
+              submitButtonLabel={
+                t.schaduall?.saveAsNewAction ||
+                "Save as new action"
+              }
+              onSuccess={() => {
+                closeEditAppointment();
+                router.refresh();
+              }}
+            />
+          </>
+        ) : null}
+      </UnifiedDialog>
     </div>
   );
 };

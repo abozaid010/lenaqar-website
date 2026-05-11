@@ -17,13 +17,15 @@ export async function addNewAction(prevState, formData) {
       author: formData.get("author") || "",
 
       user_id: formData.get("user_id"),
-      phone_number: "",
+      name: formData.get("name") || "",
+      phone_number: formData.get("phone_number") || "",
       meeting_time: formData.get("meeting_time") || null,
     };
 
     await axiosInstance.post("action/v1/create", payload);
 
     revalidatePath("/dashboard");
+    revalidatePath("/schedule");
 
     return {
       success: true,

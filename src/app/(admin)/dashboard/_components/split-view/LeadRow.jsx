@@ -5,9 +5,14 @@ import { SELECTION_COLORS } from "@/constants/colors";
 import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import { Phone } from "lucide-react";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 
 export default function LeadRow({ user, selected, onSelect }) {
   const { t } = useI18n();
+  const rawPhone = user.phone_number;
+  const phoneE164 = phoneToE164(rawPhone, "EG") || rawPhone;
+  const phoneDisplay =
+    (rawPhone && (formatPhoneForDisplay(rawPhone, "EG") || rawPhone)) || "—";
 
   return (
     <div
@@ -32,14 +37,14 @@ export default function LeadRow({ user, selected, onSelect }) {
 
       {/* Phone */}
       <span className="text-sm leading-snug text-gray-700 font-mono tabular-nums truncate min-w-0 shrink-0">
-        {user.phone_number || "—"}
+        {phoneDisplay}
       </span>
 
       {/* Quick Actions */}
-      {user.phone_number ? (
+      {rawPhone ? (
         <div className="flex items-center gap-0.5 shrink-0">
           <a
-            href={`tel:${user.phone_number}`}
+            href={`tel:${phoneE164 || rawPhone}`}
             onClick={(e) => e.stopPropagation()}
             className={`${DASHBOARD_ICON_BUTTON} hover:text-primary`}
             title="Make a call"
@@ -49,7 +54,7 @@ export default function LeadRow({ user, selected, onSelect }) {
           </a>
 
           <WhatsAppButton
-            phoneNumber={user.phone_number}
+            phoneNumber={phoneE164 || rawPhone}
             className="hover:text-green-600"
             title={t.clientsTable?.openWhatsApp || "Open WhatsApp"}
             ariaLabel="WhatsApp"

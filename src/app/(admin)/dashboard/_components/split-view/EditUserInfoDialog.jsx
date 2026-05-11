@@ -4,6 +4,8 @@ import { updateUserInfo } from "@/utils/api";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { PhoneField } from "@/components/phone/PhoneField";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function EditUserInfoDialog({
   open,
@@ -14,6 +16,7 @@ export default function EditUserInfoDialog({
   initialCompany = "",
   onSuccess,
 }) {
+  const { t, translate } = useI18n();
   const [name, setName] = useState(initialName);
   const [phone, setPhone] = useState(initialPhone);
   const [company, setCompany] = useState(initialCompany);
@@ -73,14 +76,13 @@ export default function EditUserInfoDialog({
               onChange={(e) => setName(e.target.value)}
             />
           </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-0.5">Phone</label>
-            <input
-              className="w-full border border-gray-200 rounded px-2 py-1.5 font-mono"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-            />
-          </div>
+          <PhoneField
+            className="w-full"
+            label={translate("phoneField.label", "Phone number")}
+            value={phone ?? ""}
+            onChange={(next) => setPhone(next ?? "")}
+            defaultCountry="EG"
+          />
           <div>
             <label className="block text-xs text-gray-600 mb-0.5">Company</label>
             <input

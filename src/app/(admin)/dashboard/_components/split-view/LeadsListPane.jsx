@@ -19,6 +19,7 @@ function ListSkeleton({ rows = 8 }) {
 
 export default function LeadsListPane({
   users,
+  totalLoadedLeads = 0,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -37,6 +38,17 @@ export default function LeadsListPane({
   const debounceTimer = useRef(null);
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
+  const scrollRootRef = useRef(null);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const lastAutoFetchAtRef = useRef(0);
+
+  useEffect(() => {
+    fetchNextPageRef.current = fetchNextPage;
+    hasNextPageRef.current = hasNextPage;
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     setSearchInput(searchParams.get("query") || "");
@@ -60,24 +72,41 @@ export default function LeadsListPane({
     };
   }, [searchInput, router, searchParams]);
 
+  const trimmedSearch = searchInput.trim();
+  const clientFilteredEmpty =
+    Boolean(trimmedSearch) && users.length === 0 && totalLoadedLeads > 0;
+  /** When false, list area still shows skeleton — no sentinel in DOM yet. */
+  const initialListPaint = !(isLoading && !data);
+
   useEffect(() => {
     observerRef.current?.disconnect();
-    if (!sentinelRef.current || !hasNextPage) return;
+    observerRef.current = null;
+
+    if (clientFilteredEmpty || !hasNextPage || !initialListPaint) return;
+
+    const root = scrollRootRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel) return;
+
+    const throttleMs = 450;
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0]?.isIntersecting &&
-          hasNextPage &&
-          !isFetchingNextPage
-        ) {
-          fetchNextPage();
-        }
+        if (!entries[0]?.isIntersecting) return;
+        if (!hasNextPageRef.current || isFetchingNextPageRef.current) return;
+        const now = Date.now();
+        if (now - lastAutoFetchAtRef.current < throttleMs) return;
+        lastAutoFetchAtRef.current = now;
+        fetchNextPageRef.current();
       },
-      { threshold: 0.1, rootMargin: "80px" }
+      { root, threshold: 0.1, rootMargin: "80px" }
     );
-    observerRef.current.observe(sentinelRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, users.length]);
+    observerRef.current.observe(sentinel);
+    return () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, [clientFilteredEmpty, hasNextPage, initialListPaint]);
 
   if (isError) {
     return (
@@ -95,6 +124,12 @@ export default function LeadsListPane({
   }
 
   const showInitialLoading = isLoading && !data;
+  const showNoSearchMatches =
+    !showInitialLoading &&
+    !isError &&
+    users.length === 0 &&
+    totalLoadedLeads > 0 &&
+    trimmedSearch;
 
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-gray-200 bg-white">
@@ -113,12 +148,36 @@ export default function LeadsListPane({
       </div>
 
       <div
+        ref={scrollRootRef}
         className="flex-1 min-h-0 overflow-y-auto"
         role="listbox"
         aria-label={common.leads}
       >
         {showInitialLoading ? (
           <ListSkeleton />
+        ) : showNoSearchMatches ? (
+          <>
+            <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-gray-600">
+              {translate("common.noResultsFound", t?.common?.noResultsFound || "No results found")}
+            </div>
+            <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
+            {isFetchingNextPage && (
+              <div className="py-2 text-center text-xs text-gray-500">
+                {common.loadingMore}
+              </div>
+            )}
+            {hasNextPage && !isFetchingNextPage && (
+              <div className="p-2">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className="w-full py-1 text-xs text-primary border border-gray-200 rounded hover:bg-gray-50"
+                >
+                  {common.loadMore}
+                </button>
+              </div>
+            )}
+          </>
         ) : users.length === 0 ? (
           <div className="min-h-[200px] flex items-center justify-center p-2">
             <EmptyStateVideo variant="dashboard" autoPlay showControls loop />
