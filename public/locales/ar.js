@@ -641,17 +641,22 @@ export default {
       count: "{count} رسالة غير مقروءة",
     },
     tags: {
-      addPlaceholder: "أضف وسماً...",
+      addPlaceholder: "أضف هاشتاجاً...",
       addButton: "إضافة",
-      noTags: "لا توجد وسوم",
+      noTags: "لا توجد هاشتاجات",
     },
   },
   chatHistory: {
     noMessages: "لا توجد رسائل بعد.",
   },
   actionForm: {
+    actionLabel: "نوع الإجراء",
+    commentLabel: "ملاحظات / تعليقات",
     commentPlaceholder: "أدخل تعليقك هنا...",
+    dateLabel: "التاريخ",
+    timeLabel: "الوقت",
     submitButton: "إرسال",
+    submittingButton: "جارٍ الإرسال...",
     successMessage: "تم إضافة الإجراء بنجاح",
     errorMessage: "فشل إضافة الإجراء",
     aiAction: "إجراءات الذكاء الاصطناعي",
@@ -1642,9 +1647,16 @@ export default {
     header: {
       lastActivity: "آخر نشاط",
     },
+    leadSummary: {
+      title: "ملخص العميل",
+      companyLabel: "الشركة",
+      requirementLabel: "المتطلب",
+      empty:
+        "لا توجد شركة أو متطلب مسجل لهذا العميل بعد (من قائمة لوحة التحكم).",
+    },
     actionsTab: {
       sections: {
-        tags: "الوسوم",
+        tags: "الهاشتاج",
         actionsLog: "سجل الإجراءات",
         replyMode: "وضع الرد",
         dangerZone: "منطقة الحذف",

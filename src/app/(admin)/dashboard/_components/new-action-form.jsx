@@ -392,7 +392,7 @@ export default function NewActionForm({
       {/* Action Selection */}
       <div className="mb-4">
         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-          Action Type
+          {t.actionForm.actionLabel}
         </label>
         <div className="relative">
           <select
@@ -417,7 +417,7 @@ export default function NewActionForm({
       {/* Comment */}
       <div className="mb-6">
         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 ml-1">
-          Notes / Comments
+          {t.actionForm.commentLabel}
         </label>
         <textarea
           name="comment"

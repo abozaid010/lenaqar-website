@@ -580,6 +580,56 @@ export default function LeadDetailPane({
     return r != null && String(r).toLowerCase() === "owner";
   }, []);
 
+  // Dashboard list summary: same fields as GET /messages/all → users[]:
+  // `company_name`, `requirement_name` (building type slug or free text).
+  // Falls back to legacy summary* fields on conversation payload if present.
+  const leadSummaryText = useMemo(() => {
+    const company =
+      leadSummary?.company_name != null &&
+      String(leadSummary.company_name).trim() !== ""
+        ? String(leadSummary.company_name).trim()
+        : "";
+
+    const reqRaw =
+      leadSummary?.requirement_name != null
+        ? String(leadSummary.requirement_name).trim()
+        : "";
+    const reqInvalid =
+      !reqRaw || reqRaw.toLowerCase() === "not defined";
+    const requirementDisplay = reqInvalid
+      ? ""
+      : translateEnum("buildingTypes", reqRaw) || reqRaw;
+
+    const companyLabel = translate(
+      "leadDetail.leadSummary.companyLabel",
+      t?.leadDetail?.leadSummary?.companyLabel,
+    );
+    const requirementLabel = translate(
+      "leadDetail.leadSummary.requirementLabel",
+      t?.leadDetail?.leadSummary?.requirementLabel,
+    );
+
+    const lines = [];
+    if (company) lines.push(`${companyLabel}: ${company}`);
+    if (requirementDisplay)
+      lines.push(`${requirementLabel}: ${requirementDisplay}`);
+    if (lines.length > 0) return lines.join("\n");
+
+    const candidates = [
+      data?.data?.summary,
+      data?.data?.conversation_summary,
+      data?.data?.lead_summary,
+      data?.data?.summary_text,
+      leadSummary?.summary,
+      leadSummary?.conversation_summary,
+      leadSummary?.summary_text,
+    ];
+    for (const value of candidates) {
+      if (typeof value === "string" && value.trim()) return value.trim();
+    }
+    return "";
+  }, [data, leadSummary, translate, translateEnum]);
+
   if (!userId) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm p-6">
@@ -643,6 +693,116 @@ export default function LeadDetailPane({
     t?.leadDetail?.header?.lastActivity,
   );
 
+  // Read-only AI/lead summary card shown on top of the Actions tab so the
+  // user can scan context (not the requirement chips — those live on the
+  // Requirements tab to avoid duplication).
+  const renderLeadSummaryCard = () => (
+    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+          <UserCircle2 className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
+            {translate(
+              "leadDetail.leadSummary.title",
+              t?.leadDetail?.leadSummary?.title,
+            )}
+          </h4>
+          {leadSummaryText ? (
+            <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
+              {leadSummaryText}
+            </p>
+          ) : (
+            <p className="text-xs text-gray-500">
+              {translate(
+                "leadDetail.leadSummary.empty",
+                t?.leadDetail?.leadSummary?.empty,
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Reusable client/requirement summary card rendered on the Requirements tab
+  // and as a context card on top of the Actions tab so the user always has
+  // their lead's needs in view while taking actions.
+  const renderRequirementSummaryCard = () => (
+    <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+          <UserCircle2 className="w-5 h-5" aria-hidden="true" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+              {translate(
+                "leadDetail.requirementSummary.title",
+                t?.leadDetail?.requirementSummary?.title,
+              )}
+            </h4>
+            <button
+              type="button"
+              onClick={() => setEditReqOpen(true)}
+              className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              title={translate(
+                "leadDetail.requirementSummary.editTitle",
+                t?.leadDetail?.requirementSummary?.editTitle,
+              )}
+              aria-label={translate(
+                "leadDetail.requirementSummary.editTitle",
+                t?.leadDetail?.requirementSummary?.editTitle,
+              )}
+            >
+              {requirementChips.length > 0 ? (
+                <Pencil className="w-3.5 h-3.5" />
+              ) : (
+                <Plus className="w-3.5 h-3.5" />
+              )}
+              <span>
+                {requirementChips.length > 0
+                  ? translate("common.edit", common.edit)
+                  : translate(
+                      "leadDetail.requirementSummary.addAction",
+                      t?.leadDetail?.requirementSummary?.addAction,
+                    )}
+              </span>
+            </button>
+          </div>
+
+          {requirementChips.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {requirementChips.map(({ key, icon: Icon, label, value }) => (
+                <div
+                  key={key}
+                  className="inline-flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 transition-colors px-2 py-1 rounded-md border border-gray-100 text-xs max-w-full"
+                >
+                  <Icon
+                    className="w-3.5 h-3.5 text-gray-400 shrink-0"
+                    aria-hidden="true"
+                  />
+                  <span className="text-gray-500 shrink-0">{label}:</span>
+                  <span className="font-semibold text-gray-900 truncate">
+                    {value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-xs text-gray-500">
+              {translate(
+                "leadDetail.requirementSummary.empty",
+                t?.leadDetail?.requirementSummary?.empty,
+              )}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="flex flex-col min-h-0 flex-1 bg-white border-l border-gray-100">
@@ -694,86 +854,15 @@ export default function LeadDetailPane({
 
           {activeTab === "requirements" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 bg-gray-50/40">
-              <div className="rounded-lg border border-gray-200 bg-white p-3 sm:p-4">
-                <div className="flex items-start gap-3">
-                  <div className="shrink-0 w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <UserCircle2 className="w-5 h-5" aria-hidden="true" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        {translate(
-                          "leadDetail.requirementSummary.title",
-                          t?.leadDetail?.requirementSummary?.title,
-                        )}
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setEditReqOpen(true)}
-                        className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                        title={translate(
-                          "leadDetail.requirementSummary.editTitle",
-                          t?.leadDetail?.requirementSummary?.editTitle,
-                        )}
-                        aria-label={translate(
-                          "leadDetail.requirementSummary.editTitle",
-                          t?.leadDetail?.requirementSummary?.editTitle,
-                        )}
-                      >
-                        {requirementChips.length > 0 ? (
-                          <Pencil className="w-3.5 h-3.5" />
-                        ) : (
-                          <Plus className="w-3.5 h-3.5" />
-                        )}
-                        <span>
-                          {requirementChips.length > 0
-                            ? translate("common.edit", common.edit)
-                            : translate(
-                                "leadDetail.requirementSummary.addAction",
-                                t?.leadDetail?.requirementSummary?.addAction,
-                              )}
-                        </span>
-                      </button>
-                    </div>
-
-                    {requirementChips.length > 0 ? (
-                      <div className="flex flex-wrap gap-1.5">
-                        {requirementChips.map(
-                          ({ key, icon: Icon, label, value }) => (
-                            <div
-                              key={key}
-                              className="inline-flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 transition-colors px-2 py-1 rounded-md border border-gray-100 text-xs max-w-full"
-                            >
-                              <Icon
-                                className="w-3.5 h-3.5 text-gray-400 shrink-0"
-                                aria-hidden="true"
-                              />
-                              <span className="text-gray-500 shrink-0">
-                                {label}:
-                              </span>
-                              <span className="font-semibold text-gray-900 truncate">
-                                {value}
-                              </span>
-                            </div>
-                          ),
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-gray-500">
-                        {translate(
-                          "leadDetail.requirementSummary.empty",
-                          t?.leadDetail?.requirementSummary?.empty,
-                        )}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              {renderRequirementSummaryCard()}
             </div>
           )}
 
           {activeTab === "actions" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 bg-gray-50/40">
+              {/* Lead summary — read-only AI/lead summary text for context */}
+              {renderLeadSummaryCard()}
+
               {/* Tags */}
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
@@ -853,7 +942,8 @@ export default function LeadDetailPane({
                 </button>
               </section>
 
-              {/* Reply mode */}
+              {/* Reply mode — temporarily hidden. Re-enable when product is ready. */}
+              {/*
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
                   {translate(
@@ -875,6 +965,7 @@ export default function LeadDetailPane({
                   )}
                 </p>
               </section>
+              */}
 
               {/* Danger zone */}
               {canDeleteLead && (

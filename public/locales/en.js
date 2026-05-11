@@ -578,6 +578,13 @@ export default {
     header: {
       lastActivity: "Last activity",
     },
+    leadSummary: {
+      title: "Lead summary",
+      companyLabel: "Company",
+      requirementLabel: "Requirement",
+      empty:
+        "No company or requirement is set for this lead yet (from the dashboard list).",
+    },
     actionsTab: {
       sections: {
         tags: "Tags",
@@ -699,8 +706,13 @@ export default {
     noMessages: "No messages yet.",
   },
   actionForm: {
+    actionLabel: "Action Type",
+    commentLabel: "Notes / Comments",
     commentPlaceholder: "Enter your comment here...",
+    dateLabel: "Date",
+    timeLabel: "Time",
     submitButton: "Send",
+    submittingButton: "Sending...",
     successMessage: "Action added successfully",
     errorMessage: "Failed to add action",
     aiAction: "AI Actions",

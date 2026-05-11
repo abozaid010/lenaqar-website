@@ -1793,14 +1793,21 @@ export async function fetchLegacyMonthData(searchParams = {}) {
 }
 
 /**
- * Update requirements for a user (PUT /requirements/:userId)
+ * Update a requirement (PUT /requirements/:requirementId).
+ *
+ * NOTE: This endpoint is keyed by the requirement's own id, NOT by the user's
+ * id. The caller is responsible for extracting the requirement id from the
+ * GET /requirements/:userId response (any of `id`, `_id`, `requirement_id`).
  */
-export async function updateUserRequirements(userId, payload) {
-  if (!userId) {
-    throw new Error("userId is required");
+export async function updateUserRequirements(requirementId, payload) {
+  if (!requirementId) {
+    throw new Error("requirementId is required");
   }
   try {
-    const response = await axiosInstance.put(`requirements/${userId}`, payload);
+    const response = await axiosInstance.put(
+      `requirements/${requirementId}`,
+      payload,
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to update requirements:", error.message);
