@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { LenaTextField } from "@/components/ui/inputs";
+import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
 import {
   getDeveloperContactOverride,
@@ -188,19 +189,27 @@ export default function DeveloperContactOverrideDialog({
             onChange={handleChange}
             autoComplete="email"
           />
-          <LenaTextField
+          <PhoneField
+            className="w-full"
             name="sales_phone"
             label={translate("formLabels.salesPhone")}
-            value={form.sales_phone}
-            onChange={handleChange}
-            autoComplete="tel"
+            value={form.sales_phone ?? ""}
+            onChange={(next) =>
+              setForm((prev) => ({ ...prev, sales_phone: next ?? "" }))
+            }
+            defaultCountry="EG"
+            placeholder={translate("formLabels.salesPhone")}
           />
-          <LenaTextField
+          <PhoneField
+            className="w-full"
             name="whatsapp"
             label={translate("formLabels.whatsapp")}
-            value={form.whatsapp}
-            onChange={handleChange}
-            autoComplete="tel"
+            value={form.whatsapp ?? ""}
+            onChange={(next) =>
+              setForm((prev) => ({ ...prev, whatsapp: next ?? "" }))
+            }
+            defaultCountry="EG"
+            placeholder={translate("formLabels.whatsapp")}
           />
           <div className="pt-2">
             <button

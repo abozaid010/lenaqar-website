@@ -13,6 +13,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import UnitSelectorDialog from "./UnitSelectorDialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import { PhoneField } from "@/components/phone/PhoneField";
+import { digitsOnlyNormalized } from "@/utils/lead-list-search";
 
 function normalizeSuggestedAnswers(raw) {
   const arr = Array.isArray(raw) ? raw : [];
@@ -54,7 +56,6 @@ export default function CampaignDialog({
   const editMode = !!campaign?.id;
   const didInitRef = useRef(false);
   const lastCampaignIdToastAtRef = useRef(0);
-  const lastClientPhoneToastAtRef = useRef(0);
 
   const [mode, setMode] = useState("text"); // 'text' | 'unit'
   const [campaignIdInput, setCampaignIdInput] = useState(""); // create only: user-defined campaign_id (4–16 chars, no spaces)
@@ -197,8 +198,7 @@ export default function CampaignDialog({
       return false;
     }
     {
-      // Phone number is already normalized (Arabic numerals converted to English)
-      const digits = String(payload.client_phone_number || "").replace(/[^\d]/g, "");
+      const digits = digitsOnlyNormalized(payload.client_phone_number || "");
       if (!digits.startsWith("20")) {
         toast.error(translate("campaigns.errors.clientPhoneMustStartWith20"));
         return false;
@@ -362,30 +362,15 @@ export default function CampaignDialog({
             />
           )}
 
-          <LenaTextField
-            label={t.campaigns.clientPhoneNumber}
+          <PhoneField
+            className="w-full"
             name="client_phone_number"
-            value={clientPhoneNumber}
-            onChange={(e) => {
-              const raw = String(e?.target?.value || "");
-              // Convert Arabic numerals to English numerals first
-              const withEnglishNumerals = convertArabicToEnglishNumerals(raw);
-              // Then keep only digits (English numerals now)
-              const digitsOnly = withEnglishNumerals.replace(/[^\d]/g, "");
-              if (digitsOnly !== withEnglishNumerals) {
-                const now = Date.now();
-                if (now - lastClientPhoneToastAtRef.current >= 3000) {
-                  lastClientPhoneToastAtRef.current = now;
-                  toast.error(translate("campaigns.errors.clientPhoneNumbersOnly"));
-                }
-              }
-              setClientPhoneNumber(digitsOnly);
-            }}
-            dir="ltr"
-            placeholder={translate("campaigns.clientPhonePlaceholder")}
-            inputMode="numeric"
-            pattern="[0-9]*"
+            label={t.campaigns.clientPhoneNumber}
             required
+            defaultCountry="EG"
+            value={clientPhoneNumber ?? ""}
+            onChange={(next) => setClientPhoneNumber(next ?? "")}
+            placeholder={translate("campaigns.clientPhonePlaceholder")}
           />
 
           {/* Project Dropdown */}

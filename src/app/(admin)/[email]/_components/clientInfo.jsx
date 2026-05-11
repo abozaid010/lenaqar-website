@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { PhoneField } from "@/components/phone/PhoneField";
 
 export default function ClientInfo({ client_email }) {
   const { t } = useI18n();
@@ -313,18 +314,23 @@ export default function ClientInfo({ client_email }) {
               />
             </div>
           </label>
-          <label className="flex flex-col text-gray-600 mb-1">
-            {t.clientInfo.phoneNumber}:
-            <div className="relative">
-              <input
-                type="text"
-                name="phone_number"
-                value={formData.phone_number || ""}
-                onChange={handleChange}
-                className="mt-2 p-2 pr-8 border border-gray-300 rounded bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
-              />
-            </div>
-          </label>
+          <div className="mb-1">
+            <PhoneField
+              className="w-full"
+              name="phone_number"
+              label={t.clientInfo.phoneNumber}
+              value={formData.phone_number ?? ""}
+              onChange={(next) => {
+                setFormData((prev) => {
+                  const updated = { ...prev, phone_number: next ?? "" };
+                  const normalizedData = normalizeDataForComparison(data?.data);
+                  setIsChanged(JSON.stringify(updated) !== JSON.stringify(normalizedData));
+                  return updated;
+                });
+              }}
+              defaultCountry="EG"
+            />
+          </div>
           <label className="flex flex-col text-gray-600 mb-1">
             {t.clientInfo.clientName}:
             <div className="relative">

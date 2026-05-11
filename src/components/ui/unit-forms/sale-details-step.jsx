@@ -1,6 +1,7 @@
 "use client";
 
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
 import { Trash2Icon } from "lucide-react";
@@ -14,7 +15,7 @@ export default function SaleDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  const { t, translateStrict } = useI18n();
+  const { t, translate, translateStrict } = useI18n();
 
   const handleChange = (e, type = "") => {
     const { name, value } = e.target;
@@ -45,14 +46,6 @@ export default function SaleDetailsStep({
 
     if (invalidFields.includes(name)) {
       setInvalidFields((prev) => prev.filter((field) => field !== name));
-    }
-
-    // For mobile number, ensure it's numeric
-    if (name === "owner_mobile") {
-      const englishValue = String(convertArabicToEnglishNumbers(value));
-      const numericValue = englishValue.replace(/\D/g, "");
-      updateCommonFormData({ [name]: numericValue });
-      return;
     }
 
     updateCommonFormData({ [name]: value });
@@ -90,16 +83,24 @@ export default function SaleDetailsStep({
               error={invalidFields.includes("owner_name")}
             />
 
-            {/* Owner Mobile */}
-            <LenaTextField
-              label={translateStrict("saleDetails.ownerMobile")}
+            <PhoneField
+              className="w-full"
               name="owner_mobile"
-              value={commonFormData.owner_mobile}
-              onChange={handleOwnerChange}
-              placeholder="2012 34567890"
-              error={invalidFields.includes("owner_mobile")}
-              type="tel"
+              label={translateStrict("saleDetails.ownerMobile")}
               required
+              defaultCountry="EG"
+              value={commonFormData.owner_mobile ?? ""}
+              onChange={(next) => {
+                if (invalidFields.includes("owner_mobile")) {
+                  setInvalidFields((prev) => prev.filter((f) => f !== "owner_mobile"));
+                }
+                updateCommonFormData({ owner_mobile: next ?? "" });
+              }}
+              error={
+                invalidFields.includes("owner_mobile")
+                  ? translate("phoneField.invalid", "Invalid phone number")
+                  : undefined
+              }
             />
           </div>
         </div>
