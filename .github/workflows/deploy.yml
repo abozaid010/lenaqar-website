@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+env:
+  GCP_ZONE: ${{ secrets.GCP_ZONE }}
+  VM_NAME: ${{ secrets.GCP_VM_NAME }}
+  VM_SSH_USER: abozaid
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,40 +25,49 @@ jobs:
         id: auth
         uses: google-github-actions/auth@v2
         with:
-            credentials_json: ${{ secrets.GCP_SA_KEY }}
-            project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-          # workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
-          # service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
-
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Provision gcloud SSH keys (fixed deploy key)
         run: |
           set -Eeuo pipefail
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
+
           echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/google_compute_engine
           chmod 600 ~/.ssh/google_compute_engine
+
           ssh-keygen -y -f ~/.ssh/google_compute_engine > ~/.ssh/google_compute_engine.pub
           chmod 644 ~/.ssh/google_compute_engine.pub
-          export CLOUDSDK_COMPUTE_SSH_KEY_FILE="$HOME/.ssh/google_compute_engine"
-          echo "CLOUDSDK_COMPUTE_SSH_KEY_FILE=$CLOUDSDK_COMPUTE_SSH_KEY_FILE" >> "$GITHUB_ENV"
+
+          echo "CLOUDSDK_COMPUTE_SSH_KEY_FILE=$HOME/.ssh/google_compute_engine" >> "$GITHUB_ENV"
+
+          echo "✅ SSH key loaded from VM_SSH_PRIVATE_KEY secret"
+          ls -la ~/.ssh
+
+      - name: SSH warmup — verify IAP access before deploy
+        run: |
+          set -Eeuo pipefail
+          echo "👤 SSH user: ${{ env.VM_SSH_USER }}"
+          echo "🖥️  VM: ${{ env.VM_NAME }}"
+          echo "📍 Zone: ${{ env.GCP_ZONE }}"
+
+          gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
+            --zone="${{ env.GCP_ZONE }}" \
+            --tunnel-through-iap \
+            --command="echo '✅ Connected as:'; whoami; hostname"
 
       - name: Deploy to GCP VM
         run: |
+          set -Eeuo pipefail
           echo "🔐 Deploying lenaAI-website via secure IAP tunnel..."
 
-          # Ensure latest code is present on the VM under the SSH user's home,
-          # then run the deployment script inside the repository.
-          gcloud compute ssh ${{ secrets.VM_SSH_USER }}@${{ secrets.GCP_VM_NAME }} \
-            --zone=${{ secrets.GCP_ZONE }} \
+          gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
+            --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --ssh-key-file="$HOME/.ssh/google_compute_engine" \
             --command='
               set -Eeuo pipefail
               trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
@@ -66,8 +80,7 @@ jobs:
 
               if [ -d "$REPO_PATH/.git" ]; then
                 cd "$REPO_PATH"
-                git config --global --add safe.directory "$REPO_PATH" || true
-                git pull origin main || echo "Git pull failed, continuing with existing code..."
+                git -c safe.directory="$REPO_PATH" pull origin main || echo "Git pull failed, continuing with existing code..."
               else
                 if [ -d "$REPO_PATH" ]; then
                   echo "⚠️ Directory $REPO_PATH exists but is not a git repo, removing..."
@@ -77,9 +90,9 @@ jobs:
                 mkdir -p "$(dirname "$REPO_PATH")"
                 git clone "$REPO_URL" "$REPO_PATH" || {
                   echo "❌ Failed to clone repository"
-                  echo "   Make sure SSH keys are configured for git access"
                   exit 1
                 }
               fi
+
               bash "$REPO_PATH/.deploy/deploy.sh"
             '
