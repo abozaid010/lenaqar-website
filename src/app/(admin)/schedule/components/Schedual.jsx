@@ -15,18 +15,34 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+
+// Returns the Saturday that starts the week containing `date` (Sat → Fri).
+const getWeekStartSaturday = (date) => {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sunday ... 6 = Saturday
+  const offset = (day + 1) % 7; // days since last Saturday
+  d.setDate(d.getDate() - offset);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
 const Schedule = ({ data, dataSales }) => {
   const router = useRouter();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(() =>
+    getWeekStartSaturday(new Date())
+  );
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { t } = useI18n();
   const isRTL = t.direction === "rtl";
+
+  useEffect(() => {
+    console.log("scheduled-actions-by-date response:", data);
+  }, [data]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -88,17 +104,19 @@ const Schedule = ({ data, dataSales }) => {
     return `${formatDate(firstDate)} - ${formatDate(lastDate)}`;
   };
 
-  // Check if we can navigate to previous/next week
+  // Check if we can navigate to previous/next week (only one week each way).
+  // Bounds are anchored to the current week's Saturday so navigation works
+  // consistently regardless of which weekday "today" is.
   const canNavigatePrev = () => {
-    const minDate = new Date();
-    minDate.setDate(minDate.getDate() - 7); // Only one week back allowed
-    return currentDate > minDate;
+    const minWeekStart = getWeekStartSaturday(new Date());
+    minWeekStart.setDate(minWeekStart.getDate() - 7);
+    return currentDate > minWeekStart;
   };
 
   const canNavigateNext = () => {
-    const maxDate = new Date();
-    maxDate.setDate(maxDate.getDate() + 7);
-    return currentDate < maxDate;
+    const maxWeekStart = getWeekStartSaturday(new Date());
+    maxWeekStart.setDate(maxWeekStart.getDate() + 7);
+    return currentDate < maxWeekStart;
   };
 
   const toggleDropdown = (index) => {

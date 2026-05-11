@@ -50,16 +50,22 @@ export async function generateMetadata() {
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-const sevenDaysAgo = new Date(today);
-sevenDaysAgo.setDate(today.getDate() - 7);
+// Week starts on Saturday. Align to the Saturday of the current week, then
+// fetch the previous week, current week, and next week so navigation always
+// has data available (Saturday → Friday).
+const dayOfWeek = today.getDay(); // 0 = Sunday ... 6 = Saturday
+const offsetToSaturday = (dayOfWeek + 1) % 7; // days since last Saturday
+const currentWeekStart = new Date(today);
+currentWeekStart.setDate(today.getDate() - offsetToSaturday);
 
-const formattedBefore = sevenDaysAgo.toISOString().split("T")[0];
-today.setHours(0, 0, 0, 0);
+const rangeStart = new Date(currentWeekStart);
+rangeStart.setDate(currentWeekStart.getDate() - 7); // previous week's Saturday
 
-const sevenDaysLater = new Date(today);
-sevenDaysLater.setDate(today.getDate() + 7);
+const rangeEnd = new Date(currentWeekStart);
+rangeEnd.setDate(currentWeekStart.getDate() + 13); // next week's Friday
 
-const formattedAfter = sevenDaysLater.toISOString().split("T")[0];
+const formattedBefore = rangeStart.toISOString().split("T")[0];
+const formattedAfter = rangeEnd.toISOString().split("T")[0];
 
 const page = async () => {
   try {
