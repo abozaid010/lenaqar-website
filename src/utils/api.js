@@ -1491,6 +1491,14 @@ export async function fetchDataProjection() {
   }
 }
 
+/** `/campaign/*` expects `x-client-id` to match `client_id` (query/body); JWT-only `sub` can otherwise 403. */
+function campaignChatRequestHeaders(client_id) {
+  return {
+    "X-API-Key": process.env.NEXT_PUBLIC_X_API_KEY,
+    "x-client-id": String(client_id),
+  };
+}
+
 export async function fetchCampaignSessions({ 
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   search = "", 
@@ -1509,9 +1517,7 @@ export async function fetchCampaignSessions({
     if (ai_reply_enabled !== null) params.set("ai_reply_enabled", String(ai_reply_enabled));
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSIONS}?${params.toString()}`, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     if (!response.data || !response.data.data) {
@@ -1520,7 +1526,10 @@ export async function fetchCampaignSessions({
 
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch campaign sessions:", error.message);
+    const status = error?.response?.status;
+    if (status !== 403 && status !== 401) {
+      console.error("Failed to fetch campaign sessions:", error.message);
+    }
     throw error;
   }
 }
@@ -1544,9 +1553,7 @@ export async function fetchCampaignSession({
     });
 
     const response = await axiosInstance.get(`${CAMPAIGN_CHAT_ENDPOINTS.SESSION}?${params.toString()}`, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     if (!response.data || !response.data.data) {
@@ -1555,7 +1562,10 @@ export async function fetchCampaignSession({
 
     return response.data.data;
   } catch (error) {
-    console.error("Failed to fetch campaign session:", error.message);
+    const status = error?.response?.status;
+    if (status !== 403 && status !== 401) {
+      console.error("Failed to fetch campaign session:", error.message);
+    }
     throw error;
   }
 }
@@ -1575,9 +1585,7 @@ export async function toggleCampaignAIReply({
       phone_number,
       ai_reply_enabled
     }, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     return response.data;
@@ -1602,7 +1610,7 @@ export async function updateCampaignSessionName({
       phone_number,
       user_name
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1626,7 +1634,7 @@ export async function toggleCampaignFavorite({
       phone_number,
       is_favorite
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1650,7 +1658,7 @@ export async function updateCampaignNotes({
       phone_number,
       notes
     }, {
-      headers: { 'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY }
+      headers: campaignChatRequestHeaders(client_id),
     });
     return response.data;
   } catch (error) {
@@ -1692,9 +1700,7 @@ export async function sendCampaignReply({
     });
 
     const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UNIFIED_REPLY, payload, {
-      headers: {
-        'X-API-Key': process.env.NEXT_PUBLIC_X_API_KEY
-      }
+      headers: campaignChatRequestHeaders(client_id),
     });
 
     return response.data;

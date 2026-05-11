@@ -19,14 +19,13 @@ async function performRefresh() {
 
   let response;
   try {
-    response = await fetch(`${API_BASE_URL.replace(/\/$/, "")}/auth/refresh`, {
+    const url = `${API_BASE_URL.replace(/\/$/, "")}/client/refresh-token?refresh_token=${encodeURIComponent(refreshToken)}`;
+    response = await fetch(url, {
       method: "POST",
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-      signal: AbortSignal.timeout(5000), // 5 second timeout
+      signal: AbortSignal.timeout(5000),
     });
   } catch (fetchError) {
     if (fetchError.code === 'ECONNREFUSED' || fetchError.name === 'AbortError') {

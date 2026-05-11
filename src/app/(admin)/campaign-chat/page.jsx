@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { fetchCampaignSessions, fetchCampaignSession, toggleCampaignAIReply, sendCampaignReply, updateCampaignSessionName, toggleCampaignFavorite, updateCampaignNotes } from "@/utils/api";
 import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { SELECTION_COLORS } from "@/constants/colors";
-import { CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
+import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useI18n } from "@/hooks/useI18n";
@@ -73,31 +73,43 @@ const CampaignChat = () => {
     };
   }, [queryClient]);
 
+  const campaignChatClientId = clientId || CAMPAIGN_CHAT_CLIENT_ID;
+
+  const noRetryOnAuthDenial = (failureCount, error) => {
+    const status = error?.response?.status;
+    if (status === 403 || status === 401) return false;
+    return failureCount < 2;
+  };
+
   // Fetch sessions list
   const { data: sessionsData, isLoading: sessionsLoading, error: sessionsError, refetch: refetchSessions } = useQuery({
-    queryKey: ["campaignSessions", debouncedSearchQuery, aiFilter, page],
+    queryKey: ["campaignSessions", campaignChatClientId, debouncedSearchQuery, aiFilter, page],
     queryFn: () => fetchCampaignSessions({
+      client_id: campaignChatClientId,
       search: debouncedSearchQuery,
       ai_reply_enabled: aiFilter,
       page: page,
       page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE
     }),
-    enabled: canAccessCampaignChat,
+    enabled: canAccessCampaignChat && Boolean(clientId),
     keepPreviousData: true,
     staleTime: 30000, // Cache for 30 seconds to reduce refetches
-    refetchOnWindowFocus: false // Don't refetch on window focus for better UX
+    refetchOnWindowFocus: false, // Don't refetch on window focus for better UX
+    retry: noRetryOnAuthDenial,
   });
 
   // Fetch selected session details
   const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery({
-    queryKey: ["campaignSession", selectedContact?.phone_number],
+    queryKey: ["campaignSession", campaignChatClientId, selectedContact?.phone_number],
     queryFn: () => fetchCampaignSession({
+      client_id: campaignChatClientId,
       phone_number: selectedContact?.phone_number,
       history_page: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE,
       history_page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_HISTORY_PAGE_SIZE
     }),
-    enabled: !!selectedContact?.phone_number,
-    keepPreviousData: true
+    enabled: Boolean(selectedContact?.phone_number) && canAccessCampaignChat && Boolean(clientId),
+    keepPreviousData: true,
+    retry: noRetryOnAuthDenial,
   });
 
   // Update sessionDetails when sessionData is loaded

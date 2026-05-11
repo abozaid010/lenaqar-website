@@ -13,10 +13,11 @@ import {
   type PhoneFieldPublicValue,
 } from "./phone-utils";
 
-const INPUT_VALUE_SETTER = Object.getOwnPropertyDescriptor(
-  HTMLInputElement.prototype,
-  "value",
-)?.set;
+/** Only exists in the browser; avoid touching DOM prototypes during SSR module evaluation. */
+const INPUT_VALUE_SETTER =
+  typeof HTMLInputElement !== "undefined"
+    ? Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set
+    : undefined;
 
 /**
  * Normalizes Unicode digits and strips unsafe characters before the phone formatter runs.
