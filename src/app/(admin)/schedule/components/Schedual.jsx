@@ -3,11 +3,17 @@ import { assignSalsePerson } from "@/components/services/serviceFetching";
 import { useI18n } from "@/context/translate-api";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
+  formatPhoneForDisplay,
+  phoneToE164,
+} from "@/components/phone/phone-utils";
+import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
+import {
   Calendar,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clock,
+  Copy,
   Loader2,
   Phone,
   User,
@@ -252,10 +258,70 @@ const Schedule = ({ data, dataSales }) => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div className="space-y-4">
                           <div className="flex items-center gap-3 text-gray-600">
-                            <Phone className="w-5 h-5 text-primary" />
-                            <span className="font-medium">
-                              {appointment.phone_number}
-                            </span>
+                            {appointment.phone_number ? (
+                              <>
+                                <a
+                                  href={`tel:${
+                                    phoneToE164(
+                                      appointment.phone_number,
+                                      "EG"
+                                    ) || appointment.phone_number
+                                  }`}
+                                  onClick={(e) => e.stopPropagation()}
+                                  aria-label={t.buttons?.call || "Call"}
+                                  title={t.buttons?.call || "Call"}
+                                  className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors flex-shrink-0"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </a>
+                                <button
+                                  type="button"
+                                  onClick={(e) =>
+                                    handleCopyFullPhoneNumber(
+                                      e,
+                                      phoneToE164(
+                                        appointment.phone_number,
+                                        "EG"
+                                      ) || appointment.phone_number,
+                                      () =>
+                                        toast.success(
+                                          t.clientsTable?.phoneCopied ||
+                                            "Phone copied"
+                                        ),
+                                      () =>
+                                        toast.error(
+                                          t.clientsTable?.phoneCopyFailed ||
+                                            "Failed to copy"
+                                        )
+                                    )
+                                  }
+                                  title={
+                                    t.clientsTable?.clickToCopy ||
+                                    "Click to copy"
+                                  }
+                                  aria-label={
+                                    t.clientsTable?.clickToCopy ||
+                                    "Click to copy"
+                                  }
+                                  className="font-medium hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-1.5 group"
+                                >
+                                  <span dir="ltr">
+                                    {formatPhoneForDisplay(
+                                      appointment.phone_number,
+                                      "EG"
+                                    ) || appointment.phone_number}
+                                  </span>
+                                  <Copy className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <Phone className="w-5 h-5 text-gray-300" />
+                                <span className="font-medium text-gray-400">
+                                  —
+                                </span>
+                              </>
+                            )}
                           </div>
                           <div className="flex items-center gap-3 text-gray-600">
                             <Users className="w-5 h-5 text-primary" />

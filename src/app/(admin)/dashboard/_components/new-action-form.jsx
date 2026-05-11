@@ -13,7 +13,13 @@ const initialState = {
   message: "",
 };
 
-export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
+export default function NewActionForm({
+  userId,
+  phoneNumber = "",
+  name = "",
+  onSuccess,
+  onActionUpdate,
+}) {
   const { t, locale } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = LenaCookiesManager.getClientId();
@@ -257,9 +263,10 @@ export default function NewActionForm({ userId, onSuccess, onActionUpdate }) {
 
   return (
     <form className="p-4 bg-gray-50/30 rounded-b-lg border-t border-gray-100" action={action}>
-      <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name="phone_number" value={""} />
-      <input type="hidden" name="client_id" value={clientId} />
+      <input type="hidden" name="user_id" value={userId || ""} />
+      <input type="hidden" name="name" value={name || ""} />
+      <input type="hidden" name="phone_number" value={phoneNumber || ""} />
+      <input type="hidden" name="client_id" value={clientId || ""} />
       <input
         type="hidden"
         name="meeting_time"

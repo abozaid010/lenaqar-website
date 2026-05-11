@@ -33,6 +33,7 @@ export default function ClientsTable({ users, pagination }) {
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);
   const [rowActions, setRowActions] = useState(null);
+  const [actionUser, setActionUser] = useState(null);
   const [openActionModal, setOpenActionModal] = useState(false);
   const [loadingRequirements, setLoadingRequirements] = useState(null);
   const [rowRequirements, setRowRequirements] = useState(null);
@@ -66,9 +67,19 @@ export default function ClientsTable({ users, pagination }) {
     return rowSelection.includes(user_id);
   };
 
-  const handleclientAction = async (e, user_id) => {
+  const handleclientAction = async (e, user) => {
     e.stopPropagation();
+    const user_id = typeof user === "string" ? user : user?.user_id;
     setLoadingClientActions(user_id);
+    setActionUser(
+      typeof user === "string"
+        ? { user_id, name: "", phone_number: "" }
+        : {
+            user_id: user?.user_id,
+            name: user?.name || "",
+            phone_number: user?.phone_number || "",
+          }
+    );
     try {
       const actions = await getClientActions(user_id);
       setRowActions(actions);
@@ -76,6 +87,7 @@ export default function ClientsTable({ users, pagination }) {
     } catch (error) {
       console.error("Error fetching actions:", error);
       setLoadingClientActions(null);
+      setActionUser(null);
     }
   };
 
@@ -367,7 +379,7 @@ export default function ClientsTable({ users, pagination }) {
                         className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap max-w-[120px] truncate ${
                           ACTIONS_COLORS[user.last_action] || "text-gray-400"
                         }`}
-                        onClick={(e) => handleclientAction(e, user.user_id)}
+                        onClick={(e) => handleclientAction(e, user)}
                       >
                         {loadingClientActions === user.user_id &&
                         !openActionModal ? (
@@ -433,10 +445,13 @@ export default function ClientsTable({ users, pagination }) {
       {openActionModal && (
         <ActionsModal
           actions={rowActions}
-          userId={loadingClientActions}
+          userId={actionUser?.user_id || loadingClientActions}
+          phoneNumber={actionUser?.phone_number || ""}
+          name={actionUser?.name || ""}
           onClose={() => {
             setOpenActionModal(false);
             setLoadingClientActions(null);
+            setActionUser(null);
           }}
           onActionUpdate={handleActionUpdate}
         />

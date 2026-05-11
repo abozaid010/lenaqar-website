@@ -15,6 +15,8 @@ export default function ActionsModal({
   actions,
   onClose,
   userId,
+  phoneNumber,
+  name,
   onActionUpdate,
 }) {
   const { t } = useI18n();
@@ -107,6 +109,8 @@ export default function ActionsModal({
 
         <NewActionForm
           userId={userId}
+          phoneNumber={phoneNumber}
+          name={name}
           onSuccess={onClose}
           onActionUpdate={onActionUpdate}
         />

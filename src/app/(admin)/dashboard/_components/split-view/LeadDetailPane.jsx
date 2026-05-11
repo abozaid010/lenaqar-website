@@ -454,6 +454,8 @@ export default function LeadDetailPane({
         <ActionsModal
           actions={rowActions}
           userId={userId}
+          phoneNumber={phoneE164ForLinks || phoneNumber || ""}
+          name={displayName || ""}
           onClose={() => setOpenActionsModal(false)}
           onActionUpdate={handleActionUpdate}
         />
