@@ -38,6 +38,17 @@ export default function LeadsListPane({
   const debounceTimer = useRef(null);
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
+  const scrollRootRef = useRef(null);
+  const fetchNextPageRef = useRef(fetchNextPage);
+  const hasNextPageRef = useRef(hasNextPage);
+  const isFetchingNextPageRef = useRef(isFetchingNextPage);
+  const lastAutoFetchAtRef = useRef(0);
+
+  useEffect(() => {
+    fetchNextPageRef.current = fetchNextPage;
+    hasNextPageRef.current = hasNextPage;
+    isFetchingNextPageRef.current = isFetchingNextPage;
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   useEffect(() => {
     setSearchInput(searchParams.get("query") || "");
@@ -61,24 +72,41 @@ export default function LeadsListPane({
     };
   }, [searchInput, router, searchParams]);
 
+  const trimmedSearch = searchInput.trim();
+  const clientFilteredEmpty =
+    Boolean(trimmedSearch) && users.length === 0 && totalLoadedLeads > 0;
+  /** When false, list area still shows skeleton — no sentinel in DOM yet. */
+  const initialListPaint = !(isLoading && !data);
+
   useEffect(() => {
     observerRef.current?.disconnect();
-    if (!sentinelRef.current || !hasNextPage) return;
+    observerRef.current = null;
+
+    if (clientFilteredEmpty || !hasNextPage || !initialListPaint) return;
+
+    const root = scrollRootRef.current;
+    const sentinel = sentinelRef.current;
+    if (!root || !sentinel) return;
+
+    const throttleMs = 450;
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (
-          entries[0]?.isIntersecting &&
-          hasNextPage &&
-          !isFetchingNextPage
-        ) {
-          fetchNextPage();
-        }
+        if (!entries[0]?.isIntersecting) return;
+        if (!hasNextPageRef.current || isFetchingNextPageRef.current) return;
+        const now = Date.now();
+        if (now - lastAutoFetchAtRef.current < throttleMs) return;
+        lastAutoFetchAtRef.current = now;
+        fetchNextPageRef.current();
       },
-      { threshold: 0.1, rootMargin: "80px" }
+      { root, threshold: 0.1, rootMargin: "80px" }
     );
-    observerRef.current.observe(sentinelRef.current);
-    return () => observerRef.current?.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, totalLoadedLeads]);
+    observerRef.current.observe(sentinel);
+    return () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, [clientFilteredEmpty, hasNextPage, initialListPaint]);
 
   if (isError) {
     return (
@@ -96,7 +124,6 @@ export default function LeadsListPane({
   }
 
   const showInitialLoading = isLoading && !data;
-  const trimmedSearch = searchInput.trim();
   const showNoSearchMatches =
     !showInitialLoading &&
     !isError &&
@@ -121,6 +148,7 @@ export default function LeadsListPane({
       </div>
 
       <div
+        ref={scrollRootRef}
         className="flex-1 min-h-0 overflow-y-auto"
         role="listbox"
         aria-label={common.leads}

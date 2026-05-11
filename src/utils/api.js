@@ -93,7 +93,6 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
     if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
       throw new Error("Expected users array but received invalid data format");
     }
-    console.log("=== API Response Data ===", response.data.data);
     return response.data.data;
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
