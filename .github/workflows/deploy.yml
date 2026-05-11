@@ -32,15 +32,28 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Provision gcloud SSH keys (fixed deploy key)
+        run: |
+          set -Eeuo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > ~/.ssh/google_compute_engine
+          chmod 600 ~/.ssh/google_compute_engine
+          ssh-keygen -y -f ~/.ssh/google_compute_engine > ~/.ssh/google_compute_engine.pub
+          chmod 644 ~/.ssh/google_compute_engine.pub
+          export CLOUDSDK_COMPUTE_SSH_KEY_FILE="$HOME/.ssh/google_compute_engine"
+          echo "CLOUDSDK_COMPUTE_SSH_KEY_FILE=$CLOUDSDK_COMPUTE_SSH_KEY_FILE" >> "$GITHUB_ENV"
+
       - name: Deploy to GCP VM
         run: |
           echo "🔐 Deploying lenaAI-website via secure IAP tunnel..."
-          
+
           # Ensure latest code is present on the VM under the SSH user's home,
           # then run the deployment script inside the repository.
-          gcloud compute ssh ${{ secrets.GCP_VM_NAME }} \
+          gcloud compute ssh ${{ secrets.VM_SSH_USER }}@${{ secrets.GCP_VM_NAME }} \
             --zone=${{ secrets.GCP_ZONE }} \
             --tunnel-through-iap \
+            --ssh-key-file="$HOME/.ssh/google_compute_engine" \
             --command='
               set -Eeuo pipefail
               trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
