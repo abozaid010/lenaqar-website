@@ -24,7 +24,7 @@ export function useAddLead({ onSuccess, clientId } = {}) {
       return false;
     }
 
-    if (!phonePayload?.e164) {
+    if (!phonePayload?.combined) {
       if (!phone_number?.trim()) {
         toast.error(translate("common.phoneRequired", "Phone number is required"));
       } else {
@@ -40,13 +40,10 @@ export function useAddLead({ onSuccess, clientId } = {}) {
 
     setIsSubmitting(true);
     try {
-      // Parsed phone from PhoneField; do not send raw typed text.
+      // Single combined international number (E.164) from PhoneField.
       const payload = {
         user_id: crypto.randomUUID(),
-        phone_country_code: phonePayload.countryCode,
-        phone_number: phonePayload.nationalNumber,
-        phone_e164: phonePayload.e164,
-        phone_country: phonePayload.country,
+        phone_number: phonePayload.combined,
         user_name: user_name.trim(),
         query: query?.trim() || "",
         client_id: clientId || "public",

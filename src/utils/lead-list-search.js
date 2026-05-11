@@ -1,4 +1,4 @@
-import { normalizeDigits } from "@/components/phone/phone-utils";
+import { normalizeDigits, phoneToE164 } from "@/components/phone/phone-utils";
 
 /** Digits only after Arabic/Persian → ASCII normalization (for phone substring match). */
 export function digitsOnlyNormalized(input) {
@@ -35,12 +35,13 @@ export function leadMatchesSearchQuery(user, rawQuery) {
   if (name.includes(q.toLowerCase())) return true;
 
   const phone = String(user?.phone_number ?? "");
+  const phoneCanonical = phoneToE164(phone, "EG") || phone;
   const qDigits = digitsOnlyNormalized(q);
-  const pDigits = digitsOnlyNormalized(phone);
+  const pDigits = digitsOnlyNormalized(phoneCanonical);
   if (qDigits.length > 0 && pDigits.includes(qDigits)) return true;
 
   const qCompact = q.replace(/\s/g, "").toLowerCase();
-  const pCompact = phone.replace(/\s/g, "").toLowerCase();
+  const pCompact = phoneCanonical.replace(/\s/g, "").toLowerCase();
   if (qCompact.length > 0 && pCompact.includes(qCompact)) return true;
 
   return false;

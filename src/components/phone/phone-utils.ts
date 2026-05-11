@@ -37,6 +37,19 @@ export type PhonePayload = {
 };
 
 /**
+ * What {@link PhoneField} exposes via `onValueChange`: one combined international
+ * number (E.164) for APIs and links. Split fields remain internal to this module.
+ */
+export type PhoneFieldPublicValue = {
+  combined: string;
+};
+
+export function toPhoneFieldPublicValue(parsed: PhonePayload | null): PhoneFieldPublicValue | null {
+  if (!parsed?.e164) return null;
+  return { combined: parsed.e164 };
+}
+
+/**
  * Converts Arabic-Indic and Persian (Eastern Arabic) numerals to ASCII 0–9.
  * Other code units are left unchanged.
  */
@@ -94,6 +107,47 @@ export function parsePhonePayload(
   };
 }
 
+function digitsOnlyAscii(input: string): string {
+  return normalizeDigits(input).replace(/\D/g, "");
+}
+
+/**
+ * Best-effort E.164 for API, `tel:`, and WhatsApp. Uses `defaultCountry` when the
+ * stored value is national digits (no country calling code).
+ */
+export function phoneToE164(
+  raw?: string | null,
+  defaultCountry: CountryCode = "EG",
+): string | null {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return null;
+  let parsed = parsePhoneNumberFromString(trimmed, defaultCountry);
+  if (parsed?.isPossible()) return parsed.number;
+  const digits = digitsOnlyAscii(trimmed);
+  if (digits.length >= 8) {
+    parsed = parsePhoneNumberFromString(digits, defaultCountry);
+    if (parsed?.isPossible()) return parsed.number;
+  }
+  return null;
+}
+
+/**
+ * International display with country code, e.g. `+20 10 97097909`.
+ * Falls back to the raw string when parsing fails.
+ */
+export function formatPhoneForDisplay(
+  raw?: string | null,
+  defaultCountry: CountryCode = "EG",
+): string {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed) return "";
+  const e164 = phoneToE164(trimmed, defaultCountry);
+  if (!e164) return trimmed;
+  const parsed = parsePhoneNumberFromString(e164);
+  if (parsed?.isPossible()) return parsed.formatInternational();
+  return trimmed;
+}
+
 /**
  * Validation order: length hints from {@link validatePhoneNumberLength}, then
  * {@link isPossiblePhoneNumber}. Empty value yields an error only when `required` is true.
@@ -129,22 +183,19 @@ export function getPhoneValidationError(
  *
  * import { useState } from 'react';
  * import { PhoneField } from '@/components/phone/PhoneField';
- * import type { PhonePayload } from '@/components/phone/phone-utils';
+ * import type { PhoneFieldPublicValue } from '@/components/phone/phone-utils';
  *
  * export function ExampleLeadForm() {
  *   const [phone, setPhone] = useState("");
- *   const [payload, setPayload] = useState<PhonePayload | null>(null);
+ *   const [phoneResult, setPhoneResult] = useState<PhoneFieldPublicValue | null>(null);
  *
  *   async function handleSubmit(e: React.FormEvent) {
  *     e.preventDefault();
- *     if (!payload) return;
+ *     if (!phoneResult?.combined) return;
  *     await fetch('/api/leads', {
  *       method: 'POST',
  *       body: JSON.stringify({
- *         phone_country_code: payload.countryCode,
- *         phone_number: payload.nationalNumber,
- *         phone_e164: payload.e164,
- *         phone_country: payload.country,
+ *         phone_number: phoneResult.combined,
  *       }),
  *     });
  *   }
@@ -157,7 +208,7 @@ export function getPhoneValidationError(
  *         required
  *         value={phone}
  *         onChange={(v) => setPhone(v ?? "")}
- *         onValueChange={setPayload}
+ *         onValueChange={setPhoneResult}
  *       />
  *       <button type="submit">Submit</button>
  *     </form>

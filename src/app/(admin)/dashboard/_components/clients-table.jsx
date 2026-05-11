@@ -8,6 +8,7 @@ import ar from "../../../../../public/locales/ar";
 import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
 import { getClientActions, getClientRequirements, deleteClient } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { BellDot, Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -223,14 +224,24 @@ export default function ClientsTable({ users, pagination }) {
                         {user.phone_number ? (
                           <div className="flex items-center justify-between gap-2 min-w-[140px]">
                             <span
-                              onClick={(e) => handleCopyPhoneNumberWithToast(e, user.phone_number)}
+                              onClick={(e) =>
+                                handleCopyPhoneNumberWithToast(
+                                  e,
+                                  phoneToE164(user.phone_number, "EG") || user.phone_number,
+                                )
+                              }
                               className="cursor-pointer hover:text-primary transition-colors flex-1 text-left truncate"
                               title={t('clientsTable.clickToCopy')}
                             >
-                              {user.phone_number}
+                              {formatPhoneForDisplay(user.phone_number, "EG") || user.phone_number}
                             </span>
                             <button
-                              onClick={(e) => handleOpenWhatsApp(e, user.phone_number)}
+                              onClick={(e) =>
+                                handleOpenWhatsApp(
+                                  e,
+                                  phoneToE164(user.phone_number, "EG") || user.phone_number,
+                                )
+                              }
                               className="p-1 h-6 w-6 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center flex-shrink-0 aspect-square"
                               style={{ height: '24px', width: '24px', minHeight: '24px', maxHeight: '24px' }}
                               title={t('clientsTable.openWhatsApp')}

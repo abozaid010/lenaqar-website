@@ -16,6 +16,7 @@ import {
   removeLeadTags,
 } from "@/utils/api";
 import { handleCopyPhoneNumber } from "@/utils/phone-utils";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import { getActionLabel } from "@/utils/actions";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { userKeys } from "@/utils/query-utils";
@@ -79,6 +80,13 @@ export default function LeadDetailPane({
     data?.data?.phone_number ||
     leadSummary?.phone_number ||
     null;
+
+  const phoneE164ForLinks = phoneNumber
+    ? phoneToE164(phoneNumber, "EG") || phoneNumber
+    : null;
+  const phoneDisplayFormatted = phoneNumber
+    ? formatPhoneForDisplay(phoneNumber, "EG") || phoneNumber
+    : null;
 
   const clientId = data?.data?.client_id;
   const displayName = data?.data?.name || leadSummary?.name || "";
@@ -308,15 +316,15 @@ export default function LeadDetailPane({
           )}
           {phoneNumber && (
             <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded text-xs">
-              <a href={`tel:${phoneNumber}`} className="font-mono text-gray-800">
-                {phoneNumber}
+              <a href={`tel:${phoneE164ForLinks}`} className="font-mono text-gray-800">
+                {phoneDisplayFormatted}
               </a>
               <button
                 type="button"
                 onClick={(e) =>
                   handleCopyPhoneNumber(
                     e,
-                    phoneNumber,
+                    phoneE164ForLinks || phoneNumber,
                     () => toast.success(t?.common?.copied),
                     () => toast.error(t?.common?.failedToCopyPhone)
                   )
@@ -326,7 +334,7 @@ export default function LeadDetailPane({
                 <Copy className="w-3.5 h-3.5 text-gray-600" />
               </button>
               <WhatsAppButton
-                phoneNumber={phoneNumber}
+                phoneNumber={phoneE164ForLinks || phoneNumber}
                 className="hover:text-green-600"
                 title={common.openWhatsApp}
                 ariaLabel={common.whatsapp}

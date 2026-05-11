@@ -9,7 +9,8 @@ import {
   parsePhonePayload,
   PHONE_VALIDATION_MESSAGES,
   sanitizePhoneInput,
-  type PhonePayload,
+  toPhoneFieldPublicValue,
+  type PhoneFieldPublicValue,
 } from "./phone-utils";
 
 const INPUT_VALUE_SETTER = Object.getOwnPropertyDescriptor(
@@ -65,8 +66,8 @@ export type PhoneFieldProps = {
   value?: string;
   defaultValue?: string;
   onChange?: (value?: string) => void;
-  /** Latest structured payload; `null` when empty or not yet a possible number. */
-  onValueChange?: (payload: PhonePayload | null) => void;
+  /** Valid combined international number (E.164), or `null` while empty/incomplete. */
+  onValueChange?: (value: PhoneFieldPublicValue | null) => void;
   defaultCountry?: Country;
   required?: boolean;
   label?: string;
@@ -124,11 +125,11 @@ export function PhoneField({
         setInternalValue(sanitized);
       }
       onChange?.(sanitized);
-      const payload =
+      const parsed =
         sanitized !== undefined && sanitized !== ""
           ? parsePhonePayload(sanitized, defaultCountry)
           : null;
-      onValueChange?.(payload);
+      onValueChange?.(toPhoneFieldPublicValue(parsed));
     },
     [defaultCountry, isControlled, onChange, onValueChange],
   );
@@ -190,3 +191,5 @@ export function PhoneField({
     </div>
   );
 }
+
+export type { PhoneFieldPublicValue } from "./phone-utils";

@@ -6,8 +6,8 @@ import { revalidatePath } from "next/cache";
 
 /**
  * Server action to add a new lead.
- * Payload: user_id, user_name, query, client_id, platform, campaign_id, and parsed phone fields
- * (phone_country_code, phone_number national digits, phone_e164, phone_country).
+ * Payload: user_id, user_name, query, client_id, platform, campaign_id, and `phone_number`
+ * (combined E.164 international number from PhoneField).
  */
 export async function addNewLeadAction(payload) {
   const clientId = await getClientid();
