@@ -73,7 +73,7 @@ jobs:
               trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
 
               REPO_PATH="$HOME/lenaai-website"
-              REPO_URL="git@github.com:abozaid010/lenaai-website.git"
+              REPO_URL="git@github-website:abozaid010/lenaai-website.git"
 
               echo "🏠 HOME on VM: $HOME"
               echo "📁 Using repository path: $REPO_PATH"
