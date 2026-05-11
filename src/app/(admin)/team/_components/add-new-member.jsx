@@ -270,9 +270,14 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
             )}
           </div>
 
+          {/*
+            NOTE: react-phone-number-input's inner <input> stores only the
+            national portion (no country code), so forwarding `name="phone"`
+            would submit a half-number and the backend would 422. Submit the
+            full E.164 value from state via a hidden field instead.
+          */}
           <PhoneField
             className="w-full"
-            name="phone"
             label={t.team.phone}
             required
             defaultCountry="EG"
@@ -282,6 +287,7 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
             }
             placeholder="+20 123 456 7890"
           />
+          <input type="hidden" name="phone" value={formData.phone ?? ""} />
 
           <div>
             <SearchableDropdownSelect

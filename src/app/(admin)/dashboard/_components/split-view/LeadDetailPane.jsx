@@ -245,16 +245,20 @@ export default function LeadDetailPane({
 
   // Translate an enum-like value (e.g., "fully finished" -> property.finishing.fullyFinished).
   // Falls back to a clean title-cased label if no translation key matches.
+  // We use a sentinel fallback (not null) so the i18n hook does not enter its
+  // strict "missing key" branch — enum probing is expected to miss often
+  // (e.g. free-text `requirement_name` values like "Director").
   const translateEnum = useCallback(
     (groupKey, raw) => {
       const value = pickLast(raw);
       if (!isMeaningfulString(value)) return null;
       const stringValue = String(value).trim();
       const candidates = [stringValue, toCamelKey(stringValue)];
+      const MISSING = "__enum_missing__";
       for (const key of candidates) {
         const path = `property.${groupKey}.${key}`;
-        const result = translate(path, null);
-        if (result && result !== path) return result;
+        const result = translate(path, MISSING);
+        if (result && result !== MISSING && result !== path) return result;
       }
       return toTitleCase(stringValue);
     },
