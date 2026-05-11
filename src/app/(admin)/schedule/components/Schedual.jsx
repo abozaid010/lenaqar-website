@@ -7,6 +7,7 @@ import {
   phoneToE164,
 } from "@/components/phone/phone-utils";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
+import { getActionLabel } from "@/utils/actions";
 import {
   Calendar,
   ChevronDown,
@@ -43,7 +44,7 @@ const Schedule = ({ data, dataSales }) => {
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const isRTL = t.direction === "rtl";
 
   useEffect(() => {
@@ -234,11 +235,18 @@ const Schedule = ({ data, dataSales }) => {
                   >
                     <div className="p-6">
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
+                        <div className="flex-1 min-w-0 pe-3">
+                          <div className="flex flex-col gap-1.5">
                             <h3 className="text-xl font-semibold text-gray-800">
-                              {appointment.comment || "user"}
+                              {getActionLabel(appointment.action, locale) ||
+                                appointment.action ||
+                                t.dashboardFilter?.actions?.noAction}
                             </h3>
+                            {appointment.comment?.trim() ? (
+                              <p className="text-sm text-gray-600 leading-relaxed">
+                                {appointment.comment.trim()}
+                              </p>
+                            ) : null}
                           </div>
                         </div>
                         <div className="text-right">
