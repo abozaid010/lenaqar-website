@@ -22,8 +22,9 @@ export default function TagChip({
   size = "sm",
 }) {
   const sizeClasses = {
+    xs: "text-[10px] px-1.5 py-[1px] leading-tight",
     sm: "text-xs px-2 py-0.5",
-    md: "text-sm px-2.5 py-1", 
+    md: "text-sm px-2.5 py-1",
     lg: "text-base px-3 py-1.5",
   };
 
@@ -33,6 +34,8 @@ export default function TagChip({
     ${compact ? "bg-gray-100 text-gray-700 border border-gray-200" : "bg-blue-50 text-blue-700 border border-blue-200"}
     ${className}
   `;
+
+  const iconSize = size === "xs" ? 10 : 12;
 
   return (
     <span className={baseClasses.trim()}>
@@ -45,7 +48,7 @@ export default function TagChip({
           title="Remove tag"
           aria-label={`Remove ${label} tag`}
         >
-          <X size={12} className="text-blue-600" />
+          <X size={iconSize} className="text-blue-600" />
         </button>
       )}
     </span>

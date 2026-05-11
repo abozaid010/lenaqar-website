@@ -63,13 +63,58 @@ export function formatDateTimeAmPmShort(value, locale = "en") {
   };
 
   const month = monthNames[locale]?.[dateObj.getMonth()] || monthNames.en[dateObj.getMonth()];
-  const day = dateObj.getDate();
+  const day = localizeDigits(dateObj.getDate(), locale);
 
   let hours = dateObj.getHours();
-  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const minutesRaw = String(dateObj.getMinutes()).padStart(2, "0");
   const ampm = hours >= 12 ? (locale === "ar" ? "م" : "PM") : (locale === "ar" ? "ص" : "AM");
   hours = hours % 12;
   hours = hours ? hours : 12;
+  const hoursDisplay = localizeDigits(hours, locale);
+  const minutesDisplay = localizeDigits(minutesRaw, locale);
 
-  return `${month} ${day}, ${hours}:${minutes} ${ampm}`;
+  return `${month} ${day}, ${hoursDisplay}:${minutesDisplay} ${ampm}`;
+}
+
+/**
+ * Convert latin digits to locale-appropriate digits (ar -> Arabic-Indic).
+ * Keeps non-digit characters untouched so colons / separators stay intact.
+ */
+function localizeDigits(value, locale = "en") {
+  const s = String(value);
+  if (locale !== "ar") return s;
+  const arabicIndic = ["٠", "١", "٢", "٣", "٤", "٥", "٦", "٧", "٨", "٩"];
+  return s.replace(/\d/g, (d) => arabicIndic[Number(d)]);
+}
+
+/**
+ * Short "day month" format with no year or time, localized.
+ * EN: "15 May" · AR: "15 مايو"
+ * Returns "" if the value is missing/invalid.
+ */
+export function formatDayMonthShort(value, locale = "en") {
+  if (!value) return "";
+
+  let dateObj;
+  try {
+    dateObj = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateObj.getTime())) return "";
+  } catch {
+    return "";
+  }
+
+  const monthNames = {
+    en: [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ],
+    ar: [
+      "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو",
+      "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر",
+    ],
+  };
+
+  const months = monthNames[locale] ?? monthNames.en;
+  const day = localizeDigits(dateObj.getDate(), locale);
+  return `${day} ${months[dateObj.getMonth()]}`;
 }

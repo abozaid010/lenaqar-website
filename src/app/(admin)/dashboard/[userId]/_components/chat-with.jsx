@@ -77,7 +77,7 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
           onKeyDown={handleKeyDown}
           onBlur={saveName}
           disabled={isSaving}
-          className="text-lg font-bold text-primary border-b-2 border-primary bg-transparent focus:outline-none w-48 px-1"
+          className="text-sm font-bold text-primary border-b-2 border-primary bg-transparent focus:outline-none w-40 px-1"
           placeholder="Enter name..."
         />
         {isSaving ? (
@@ -105,18 +105,18 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
   }
 
   return (
-    <div className="flex items-center gap-2 group/name">
-      <h1 className="text-lg text-primary/90">
+    <div className="flex items-center gap-1.5 group/name min-w-0">
+      <h1 className="text-sm text-primary/90 truncate">
         <span className="text-primary font-bold">
           {displayName || t.clientsTable.newLead}
         </span>
       </h1>
       <button
         onClick={startEditing}
-        className="opacity-0 group-hover/name:opacity-100 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all"
+        className="shrink-0 opacity-0 group-hover/name:opacity-100 p-0.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-all"
         aria-label="Edit name"
       >
-        <Pencil className="h-3.5 w-3.5" />
+        <Pencil className="h-3 w-3" />
       </button>
     </div>
   );

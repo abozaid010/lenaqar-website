@@ -746,17 +746,20 @@ export async function addLeadTags(userId, tags) {
 export async function removeLeadTags(userId, tags) {
   try {
     // Normalize tags before sending
-    const normalizedTags = Array.isArray(tags) 
-      ? tags.map(tag => String(tag).trim()).filter(Boolean)
+    const normalizedTags = Array.isArray(tags)
+      ? tags.map((tag) => String(tag).trim()).filter(Boolean)
       : [String(tags).trim()].filter(Boolean);
-    
+
     if (normalizedTags.length === 0) {
       return { error: "No valid tags provided" };
     }
 
-    const response = await axiosInstance.post(`/messages/dashboard/${userId}/tags/remove`, {
-      tags: normalizedTags,
-    });
+    // DELETE /messages/dashboard/{dashboard_id}/tags
+    // Body: { "tags": ["tag1_to_remove"] }
+    const response = await axiosInstance.delete(
+      `/messages/dashboard/${userId}/tags`,
+      { data: { tags: normalizedTags } },
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to remove tags:", error.message);

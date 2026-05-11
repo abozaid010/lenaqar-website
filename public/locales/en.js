@@ -562,6 +562,35 @@ export default {
       somethingWentWrong: "Something went wrong.",
     },
   },
+  leadDetail: {
+    requirementSummary: {
+      title: "Lead Requirement",
+      editTitle: "Edit requirement",
+      addAction: "Add",
+      empty: "No requirement captured yet. Click Add to fill in this lead's preferences.",
+    },
+    tabs: {
+      ariaLabel: "Lead detail sections",
+      conversations: "Conversations",
+      requirements: "Requirements",
+      actions: "Actions",
+    },
+    header: {
+      lastActivity: "Last activity",
+    },
+    actionsTab: {
+      sections: {
+        tags: "Tags",
+        actionsLog: "Actions log",
+        replyMode: "Reply mode",
+        dangerZone: "Danger zone",
+      },
+      deleteLead: "Delete lead",
+      replyModeHint: "Choose how new messages from this lead are answered.",
+      noTags: "No tags yet.",
+      dangerZoneHint: "Deleting a lead is permanent and cannot be undone.",
+    },
+  },
   schaduall: {
     assignError: "Failed to assign salesperson",
     salesAssigned: "Salesperson assigned successfully",
@@ -660,6 +689,14 @@ export default {
       na: "N/A",
       count: "{count} unread messages",
     },
+    tags: {
+      addPlaceholder: "Add a tag...",
+      addButton: "Add",
+      noTags: "No tags",
+    },
+  },
+  chatHistory: {
+    noMessages: "No messages yet.",
   },
   actionForm: {
     commentPlaceholder: "Enter your comment here...",

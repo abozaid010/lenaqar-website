@@ -640,6 +640,14 @@ export default {
       na: "لا توجد رسائل غير مقروءة",
       count: "{count} رسالة غير مقروءة",
     },
+    tags: {
+      addPlaceholder: "أضف وسماً...",
+      addButton: "إضافة",
+      noTags: "لا توجد وسوم",
+    },
+  },
+  chatHistory: {
+    noMessages: "لا توجد رسائل بعد.",
   },
   actionForm: {
     commentPlaceholder: "أدخل تعليقك هنا...",
@@ -1616,6 +1624,35 @@ export default {
       owner: "المالك",
       developer: "المطور",
       client: "العميل",
+    },
+  },
+  leadDetail: {
+    requirementSummary: {
+      title: "متطلب العميل",
+      editTitle: "تعديل المتطلب",
+      addAction: "إضافة",
+      empty: "لا يوجد متطلب مسجل بعد. اضغط إضافة لتسجيل تفضيلات هذا العميل.",
+    },
+    tabs: {
+      ariaLabel: "أقسام تفاصيل العميل",
+      conversations: "المحادثات",
+      requirements: "المتطلبات",
+      actions: "الإجراءات",
+    },
+    header: {
+      lastActivity: "آخر نشاط",
+    },
+    actionsTab: {
+      sections: {
+        tags: "الوسوم",
+        actionsLog: "سجل الإجراءات",
+        replyMode: "وضع الرد",
+        dangerZone: "منطقة الحذف",
+      },
+      deleteLead: "حذف العميل",
+      replyModeHint: "اختر طريقة الرد على رسائل هذا العميل.",
+      noTags: "لا توجد وسوم بعد.",
+      dangerZoneHint: "حذف العميل دائم ولا يمكن التراجع عنه.",
     },
   },
   schaduall: {

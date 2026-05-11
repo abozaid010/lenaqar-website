@@ -2,13 +2,17 @@
 
 import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
-import FormSelect from "@/components/ui/inputs/form-select";
-import { DASHBOARD_BUTTON, DASHBOARD_TRIGGER } from "@/constants/ui-classes";
+import {
+  DASHBOARD_BUTTON,
+  DASHBOARD_CONTROL_BASE,
+  DASHBOARD_TRIGGER,
+} from "@/constants/ui-classes";
 import { useI18n } from "@/context/translate-api";
 import { getActionLabel, getFilterActions } from "@/utils/actions";
 import { ChevronDown, Printer, X, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { formatDayMonthShort } from "@/utils/formateDate";
 import AverageScore from "./average-score";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import AddLeadDialog from "@/components/ui/add-lead-dialog";
@@ -113,10 +117,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     };
   }, [isCampaignDropdownOpen]);
 
-  const formatDateForDisplay = (date) => {
-    const options = { day: "2-digit", month: "short", year: "2-digit" };
-    return new Date(date).toLocaleDateString("en-GB", options).replace(",", "");
-  };
+  const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
 
   const onApplyDateFilter = () => {
     setIsDatePickerOpen(false);
@@ -203,49 +204,60 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     >
       <div className="flex flex-col gap-2 flex-1 min-w-0 w-full">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-          <div className="flex flex-1 w-52 min-w-[10rem] items-center">
-            <FormSelect
+          <div className="relative w-fit min-w-[7rem] shrink-0">
+            <select
+              id="action_type"
               name="action_type"
-              onChange={(e) => onFilterChange("action", e.target.value)}
               value={filters.action || "all"}
-              className={`text-gray-700 ${compact ? "py-1 h-9 text-sm" : "py-1.5"}`}
+              onChange={(e) => onFilterChange("action", e.target.value)}
+              className={`${DASHBOARD_CONTROL_BASE} w-full appearance-none cursor-pointer text-sm ps-3 pe-9 ${
+                compact ? "h-9 min-h-[36px]" : "h-10"
+              }`}
             >
               {ACTIONS.map((action) => (
                 <option key={action.value} value={action.value}>
                   {action.label}
                 </option>
               ))}
-            </FormSelect>
+            </select>
+            <ChevronDown
+              className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5"
+              aria-hidden="true"
+            />
           </div>
 
           {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
-            className="relative z-[60] flex w-52 min-w-[10rem] flex-1 flex-col items-stretch"
+            className="relative z-[60] w-fit min-w-[7rem] shrink-0"
             ref={campaignDropdownRef}
           >
             <div
               role="button"
               tabIndex={0}
+              aria-haspopup="listbox"
+              aria-expanded={isCampaignDropdownOpen}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ")
                   setIsCampaignDropdownOpen((o) => !o);
               }}
               onClick={() => setIsCampaignDropdownOpen(!isCampaignDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} w-full ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
+              className={`${DASHBOARD_TRIGGER} !w-auto ${
+                compact ? "h-9 min-h-[36px]" : "h-10"
+              }`}
             >
-              <span className="truncate">
+              <span className="whitespace-nowrap">
                 {filters.campaign_ids.length === 0
                   ? t.dashboardFilter.campaigns.allCampaigns
                   : t.dashboardFilter.campaigns.selected.replace(
                       "{count}",
-                      filters.campaign_ids.length
+                      filters.campaign_ids.length,
                     )}
               </span>
               <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
             </div>
 
             {isCampaignDropdownOpen && (
-              <div className="absolute left-0 top-full z-[70] mt-1 w-full rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
+              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
                 {filters.campaign_ids.length > 0 && (
                   <button
                     onClick={clearCampaignFilters}
@@ -280,28 +292,35 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             )}
           </div>
 
-          <div className="relative z-[60] flex min-w-[14rem] max-w-[17rem] flex-1 flex-col items-stretch">
+          <div className="relative z-[60] shrink-0">
             <div
               role="button"
               tabIndex={0}
+              aria-haspopup="dialog"
+              aria-expanded={isDatePickerOpen}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ")
                   setIsDatePickerOpen((o) => !o);
               }}
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className={`relative ${DASHBOARD_TRIGGER} w-full justify-start ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
+              className={`relative ${DASHBOARD_TRIGGER} !w-auto justify-start ps-3 pe-9 ${
+                compact ? "h-9 min-h-[36px]" : "h-10"
+              }`}
             >
-              <span dir="ltr" className="whitespace-nowrap truncate min-w-0 flex-1">
+              <span dir="ltr" className="whitespace-nowrap">
                 {`${formatDateForDisplay(filters.start_date)} - ${formatDateForDisplay(
-                  filters.end_date
+                  filters.end_date,
                 )}`}
               </span>
 
-              <ChevronDown className="absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <ChevronDown
+                className="absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5"
+                aria-hidden="true"
+              />
             </div>
 
             {isDatePickerOpen && (
-              <div className="absolute left-0 top-full z-[70] mt-1 w-full rounded-md border border-gray-200 bg-white p-3 shadow-lg sm:w-66">
+              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
                 <div className="space-y-2">
                   <FormInput
                     type="date"

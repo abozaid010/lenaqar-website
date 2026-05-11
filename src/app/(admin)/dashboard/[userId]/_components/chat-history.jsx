@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useI18n } from "@/hooks/useI18n";
 import UserMessageCard from "./user-message";
 import BotMessageCard from "./bot-message";
 
 export default function ChatHistory({ data }) {
+  const { t, translate } = useI18n();
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +18,9 @@ export default function ChatHistory({ data }) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <p className="text-gray-500 text-2xl font-meduim">No messages yet.</p>
+        <p className="text-gray-500 text-2xl font-meduim">
+          {translate("chatHistory.noMessages", t?.chatHistory?.noMessages)}
+        </p>
       </div>
     );
   }
