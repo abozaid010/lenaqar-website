@@ -1873,6 +1873,15 @@ export default {
     projectDescription:
       "برجاء اضافة تفاصيل المشروع وخطط السداد ومواعيد الاستلام  وجودة المشروع",
   },
+  phoneField: {
+    required: "رقم الهاتف مطلوب",
+    tooShort: "رقم الهاتف قصير جدًا",
+    tooLong: "رقم الهاتف طويل جدًا",
+    invalidLength: "طول رقم الهاتف غير صالح",
+    invalid: "رقم هاتف غير صالح",
+    label: "رقم الهاتف",
+    placeholder: "أدخل رقم الهاتف",
+  },
   clientInfo: {
     email: "البريد الإلكتروني",
     phoneNumber: "رقم الهاتف",

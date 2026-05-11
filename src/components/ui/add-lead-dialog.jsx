@@ -5,6 +5,7 @@ import { X, Loader2, UserPlus } from "lucide-react";
 import { useI18n } from "@/hooks/useI18n";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
+import { PhoneField } from "@/components/phone/PhoneField";
 import { useAddLead } from "@/hooks/use-add-lead";
 
 export default function AddLeadDialog({ isOpen, onClose, clientId }) {
@@ -16,11 +17,13 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
     phone_number: "",
     query: "",
   });
+  const [phonePayload, setPhonePayload] = useState(null);
 
   const { addNewLead, isSubmitting } = useAddLead({
     clientId,
     onSuccess: () => {
       setFormData({ user_name: "", phone_number: "", query: "" });
+      setPhonePayload(null);
       onClose();
     },
   });
@@ -32,7 +35,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await addNewLead(formData);
+    await addNewLead({ ...formData, phonePayload });
   };
 
   if (!isOpen) return null;
@@ -74,15 +77,20 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
             autoFocus
           />
 
-          <LenaTextField
-            label={translate("clientsTable.headers.userNumber", t?.clientsTable?.headers?.userNumber || "Number")}
+          <PhoneField
+            className="w-full"
             name="phone_number"
-            value={formData.phone_number}
-            onChange={handleChange}
+            label={translate(
+              "clientsTable.headers.userNumber",
+              t?.clientsTable?.headers?.userNumber || "Number",
+            )}
             required
-            placeholder="+201012345678"
-            type="tel"
-            hint={isRTL ? "يرجى تضمين رمز الدولة (مثال: +20)" : "Please include country code (e.g. +20)"}
+            defaultCountry="EG"
+            value={formData.phone_number}
+            onChange={(next) =>
+              setFormData((prev) => ({ ...prev, phone_number: next ?? "" }))
+            }
+            onValueChange={setPhonePayload}
           />
 
           <LenaTextarea

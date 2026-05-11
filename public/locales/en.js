@@ -1805,6 +1805,15 @@ export default {
     projectDescription:
       "Add area, delivery, unit types and pyament plan about this project.",
   },
+  phoneField: {
+    required: "Phone number is required",
+    tooShort: "Phone number is too short",
+    tooLong: "Phone number is too long",
+    invalidLength: "Phone number length is invalid",
+    invalid: "Invalid phone number",
+    label: "Phone number",
+    placeholder: "Enter phone number",
+  },
   clientInfo: {
     email: "Email",
     phoneNumber: "Phone Number",

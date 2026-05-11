@@ -19,6 +19,7 @@ function ListSkeleton({ rows = 8 }) {
 
 export default function LeadsListPane({
   users,
+  totalLoadedLeads = 0,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -77,7 +78,7 @@ export default function LeadsListPane({
     );
     observerRef.current.observe(sentinelRef.current);
     return () => observerRef.current?.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage, users.length]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, totalLoadedLeads]);
 
   if (isError) {
     return (
@@ -95,6 +96,13 @@ export default function LeadsListPane({
   }
 
   const showInitialLoading = isLoading && !data;
+  const trimmedSearch = searchInput.trim();
+  const showNoSearchMatches =
+    !showInitialLoading &&
+    !isError &&
+    users.length === 0 &&
+    totalLoadedLeads > 0 &&
+    trimmedSearch;
 
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-gray-200 bg-white">
@@ -119,6 +127,29 @@ export default function LeadsListPane({
       >
         {showInitialLoading ? (
           <ListSkeleton />
+        ) : showNoSearchMatches ? (
+          <>
+            <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-gray-600">
+              {translate("common.noResultsFound", t?.common?.noResultsFound || "No results found")}
+            </div>
+            <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
+            {isFetchingNextPage && (
+              <div className="py-2 text-center text-xs text-gray-500">
+                {common.loadingMore}
+              </div>
+            )}
+            {hasNextPage && !isFetchingNextPage && (
+              <div className="p-2">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  className="w-full py-1 text-xs text-primary border border-gray-200 rounded hover:bg-gray-50"
+                >
+                  {common.loadMore}
+                </button>
+              </div>
+            )}
+          </>
         ) : users.length === 0 ? (
           <div className="min-h-[200px] flex items-center justify-center p-2">
             <EmptyStateVideo variant="dashboard" autoPlay showControls loop />
