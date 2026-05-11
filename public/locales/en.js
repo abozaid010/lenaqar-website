@@ -572,6 +572,13 @@ export default {
     noSale: "لا توجد مبيعات متاحة",
     scheduleweek: "جدولك خالٍ هذا الأسبوع.",
     Schedule: "مهام الاسبوع",
+    updateActionTimeTitle: "Update date & time",
+    updateActionTimeHint:
+      "Saving sends a new action for this lead with the date, time, and notes you set.",
+    clickToEditDateTime: "Edit date and time",
+    cannotUpdateActionMissingUser:
+      "This task cannot be updated because the lead is not linked.",
+    saveAsNewAction: "Save as new action",
   },
   Noappointments: "No appointments this week",
   scheduleweek: "Your schedule is clear for this week.",

@@ -22,8 +22,29 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
+import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
+
+/** Lead id for creating a follow-up action from the schedule card. */
+function getScheduledActionUserId(item) {
+  return item?.user_id ?? item?.userId ?? null;
+}
+
+/** Local calendar date + time from meeting_time or created_at. */
+function getAppointmentDateTimeParts(appointment) {
+  const raw = appointment?.meeting_time || appointment?.created_at;
+  if (!raw) return null;
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return null;
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return { dateStr: `${y}-${m}-${day}`, timeStr: `${hh}:${mm}` };
+}
 
 // Returns the Saturday that starts the week containing `date` (Sat → Fri).
 const getWeekStartSaturday = (date) => {
@@ -43,13 +64,9 @@ const Schedule = ({ data, dataSales }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [editAppointment, setEditAppointment] = useState(null);
   const { t, locale } = useI18n();
   const isRTL = t.direction === "rtl";
-
-  useEffect(() => {
-    console.log("scheduled-actions-by-date response:", data);
-  }, [data]);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -167,6 +184,20 @@ const Schedule = ({ data, dataSales }) => {
     }
   };
 
+  const handleOpenEditAppointment = (appointment) => {
+    const uid = getScheduledActionUserId(appointment);
+    if (!uid) {
+      toast.error(
+        t.schaduall?.cannotUpdateActionMissingUser ||
+          "This task is not linked to a lead."
+      );
+      return;
+    }
+    setEditAppointment(appointment);
+  };
+
+  const closeEditAppointment = () => setEditAppointment(null);
+
   return (
     <div className="border border-red-50">
       <div className={`min-h-screen ${SELECTION_COLORS.BG} p-6`}>
@@ -249,17 +280,35 @@ const Schedule = ({ data, dataSales }) => {
                             ) : null}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="flex items-center gap-2 text-gray-600 mb-1">
-                            <Calendar className="w-4 h-4" />
-                            <span className="font-medium">
-                              {formatDate(appointment.created_at)}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-gray-600">
-                            <Clock className="w-4 h-4" />
-                            <span>{formatTime(appointment.created_at)}</span>
-                          </div>
+                        <div className="text-end shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenEditAppointment(appointment)}
+                            className="flex flex-col items-end gap-1 rounded-lg p-2 -m-2 text-gray-600 hover:bg-primary/5 hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                            aria-label={
+                              t.schaduall?.clickToEditDateTime ||
+                              "Edit date and time"
+                            }
+                          >
+                            <div className="flex items-center gap-2 justify-end">
+                              <Calendar className="w-4 h-4 flex-shrink-0" />
+                              <span className="font-medium">
+                                {formatDate(
+                                  appointment.meeting_time ||
+                                    appointment.created_at
+                                )}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 justify-end">
+                              <Clock className="w-4 h-4 flex-shrink-0" />
+                              <span className="font-medium">
+                                {formatTime(
+                                  appointment.meeting_time ||
+                                    appointment.created_at
+                                )}
+                              </span>
+                            </div>
+                          </button>
                         </div>
                       </div>
 
@@ -497,6 +546,54 @@ const Schedule = ({ data, dataSales }) => {
           </div>
         </div>
       </div>
+
+      <UnifiedDialog
+        isOpen={!!editAppointment}
+        onClose={closeEditAppointment}
+        title={
+          t.schaduall?.updateActionTimeTitle ||
+          "Update date and time"
+        }
+        headerVariant="unified"
+        cancelLabel={t.buttons?.cancel}
+        headerTrailing={null}
+        bodyClassName="p-0 sm:p-1"
+      >
+        {editAppointment ? (
+          <>
+            <p className="text-sm text-gray-600 mb-4 px-1 leading-relaxed">
+              {t.schaduall?.updateActionTimeHint ||
+                "Submitting creates a new action with the details below."}
+            </p>
+            <NewActionForm
+              key={`schedule-edit-${editAppointment.id}`}
+              userId={String(getScheduledActionUserId(editAppointment) ?? "")}
+              phoneNumber={
+                phoneToE164(editAppointment.phone_number, "EG") ||
+                editAppointment.phone_number ||
+                ""
+              }
+              name={editAppointment.name || ""}
+              defaultAction={editAppointment.action || null}
+              defaultComment={editAppointment.comment ?? ""}
+              defaultMeetingDate={
+                getAppointmentDateTimeParts(editAppointment)?.dateStr ?? null
+              }
+              defaultMeetingTime={
+                getAppointmentDateTimeParts(editAppointment)?.timeStr ?? null
+              }
+              submitButtonLabel={
+                t.schaduall?.saveAsNewAction ||
+                "Save as new action"
+              }
+              onSuccess={() => {
+                closeEditAppointment();
+                router.refresh();
+              }}
+            />
+          </>
+        ) : null}
+      </UnifiedDialog>
     </div>
   );
 };

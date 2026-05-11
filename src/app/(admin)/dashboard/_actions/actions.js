@@ -25,6 +25,7 @@ export async function addNewAction(prevState, formData) {
     await axiosInstance.post("action/v1/create", payload);
 
     revalidatePath("/dashboard");
+    revalidatePath("/schedule");
 
     return {
       success: true,

@@ -1628,6 +1628,13 @@ export default {
     scheduleweek: "جدولك خالٍ هذا الأسبوع.",
     Schedule: "مهام الاسبوع",
     NoSalesAvailable: "لا يوجد موظفين مبيعات",
+    updateActionTimeTitle: "تحديث التاريخ والوقت",
+    updateActionTimeHint:
+      "عند الحفظ يتم إنشاء إجراء جديد لنفس العميل بالتاريخ والوقت والملاحظات التي تختارها.",
+    clickToEditDateTime: "تعديل التاريخ والوقت",
+    cannotUpdateActionMissingUser:
+      "لا يمكن تحديث هذه المهمة لأنها غير مرتبطة بعميل.",
+    saveAsNewAction: "حفظ كإجراء جديد",
   },
 
   noappointments: "لا توجد مواعيد هذا الأسبوع",
