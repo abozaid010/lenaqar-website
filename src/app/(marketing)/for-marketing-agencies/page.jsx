@@ -5,9 +5,9 @@ import { SITE_URL } from "@/app/metadata";
 const PATH = "/for-marketing-agencies";
 
 export const metadata = {
-  title: "For Marketing Agencies | Real Estate Operating System",
+  title: "For Marketing Agencies | Where AI Meets Real Estate Growth",
   description:
-    "Offer premium real estate automation to your clients. Help them convert leads faster while creating recurring revenue for your agency.",
+    "Marketing agencies lose revenue after the click. Lena AI is your first sales layer — instant lead response, smart qualification, and higher campaign ROI.",
   openGraph: {
     title: "Lena AI for Marketing Agencies | Real Estate Operating System",
     description:

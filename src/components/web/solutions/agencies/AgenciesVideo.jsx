@@ -12,14 +12,14 @@ export default function AgenciesVideo() {
       <div className="container">
         <FadeIn className="text-center mb-10">
           <h2 className="text-2xl md:text-3xl font-bold text-primary">
-            {translate("solutions.agencies.simple.video.title")}
+            {translate("solutions.agencies.landing.video.title")}
           </h2>
         </FadeIn>
         <FadeIn>
           <div className="mx-auto max-w-sm rounded-2xl overflow-hidden shadow-xl border border-slate-200 bg-black aspect-[9/16]">
             <iframe
               src={AGENCIES_YOUTUBE_EMBED_URL}
-              title={translate("solutions.agencies.simple.video.title")}
+              title={translate("solutions.agencies.landing.video.title")}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               className="h-full w-full"

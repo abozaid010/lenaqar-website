@@ -1,3 +1,5 @@
+import agenciesLanding from "./solutions-agencies-landing-en.js";
+
 export default {
   nav: {
     solutions: "Solutions",
@@ -285,6 +287,7 @@ export default {
     },
     partnerMessage:
       "Hi, I'm interested in becoming a Lena AI marketing partner for my agency.",
+    landing: agenciesLanding,
     simple: {
       whoWeAre: {
         label: "Who we are",

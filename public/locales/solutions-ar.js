@@ -1,3 +1,5 @@
+import agenciesLanding from "./solutions-agencies-landing-ar.js";
+
 export default {
   nav: {
     solutions: "الحلول",
@@ -285,6 +287,7 @@ export default {
     },
     partnerMessage:
       "مرحبًا، أنا مهتم بأن أصبح شريك تسويق لـ Lena AI لوكالتي.",
+    landing: agenciesLanding,
     simple: {
       whoWeAre: {
         label: "من نحن",

@@ -13,7 +13,7 @@ export default function AgenciesClients() {
       <div className="container">
         <FadeIn className="text-center mb-12">
           <h2 className="text-2xl md:text-3xl font-bold text-primary">
-            {translate("solutions.agencies.simple.clients.title")}
+            {translate("solutions.agencies.landing.clients.title")}
           </h2>
         </FadeIn>
         <FadeInStagger className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-8 md:gap-10 max-w-5xl mx-auto">
