@@ -285,6 +285,17 @@ export default function CampaignsPageClient() {
   });
 
   const campaigns = data?.campaigns || [];
+  const sortedCampaigns = useMemo(() => {
+    if (!campaigns.length) return [];
+    return [...campaigns].sort((a, b) => {
+      const dateA = new Date(a?.created_at || 0).getTime();
+      const dateB = new Date(b?.created_at || 0).getTime();
+      if (isNaN(dateA) && isNaN(dateB)) return 0;
+      if (isNaN(dateA)) return 1;
+      if (isNaN(dateB)) return -1;
+      return dateB - dateA;
+    });
+  }, [campaigns]);
   const totalCount = data?.total_count ?? 0;
   const canPrev = offset > 0;
   const canNext = offset + limit < totalCount;
@@ -374,12 +385,12 @@ export default function CampaignsPageClient() {
 
       {/* List */}
       <div className="mt-4 space-y-3">
-        {campaigns.length === 0 ? (
+        {sortedCampaigns.length === 0 ? (
           <div className="bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-600">
             {translate("common.noCampaignsFound")}
           </div>
         ) : (
-          campaigns.map((c) => (
+          sortedCampaigns.map((c) => (
             <CampaignCard
               key={c?.id || JSON.stringify(c)}
               campaign={c}
