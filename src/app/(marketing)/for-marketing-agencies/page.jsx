@@ -1,5 +1,5 @@
 import SolutionsPageSchema from "@/components/schema/SolutionsPageSchema";
-import SolutionsPageContent from "@/components/web/solutions/SolutionsPageContent";
+import AgenciesPageContent from "@/components/web/solutions/agencies/AgenciesPageContent";
 import { SITE_URL } from "@/app/metadata";
 
 const PATH = "/for-marketing-agencies";
@@ -27,7 +27,7 @@ export default function ForMarketingAgenciesPage() {
         title="Lena AI for Marketing Agencies"
         description={metadata.description}
       />
-      <SolutionsPageContent audience="agencies" />
+      <AgenciesPageContent />
     </>
   );
 }

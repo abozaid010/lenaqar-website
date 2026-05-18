@@ -4,10 +4,12 @@ import CalendarModal from "@/components/ui/calendar-modal";
 import { useI18n } from "@/hooks/useI18n";
 import { getWhatsAppUrl } from "@/lib/solutions/links";
 import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function StickyCtaBar() {
   const { translate } = useI18n();
+  const pathname = usePathname();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export default function StickyCtaBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!visible) return null;
+  if (pathname === "/for-marketing-agencies" || !visible) return null;
 
   return (
     <div

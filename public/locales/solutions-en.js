@@ -76,6 +76,10 @@ export default {
       clients: {
         zada: "Zada Property",
         nil: "Nil Property",
+        remax: "Remax Eagle Egypt",
+        orca: "ORCA Group",
+        moujoud: "Moujoud",
+        nileLeaders: "Nile Leaders",
         selective: "Selective Investment",
       },
     },
@@ -281,5 +285,42 @@ export default {
     },
     partnerMessage:
       "Hi, I'm interested in becoming a Lena AI marketing partner for my agency.",
+    simple: {
+      whoWeAre: {
+        label: "Who we are",
+        title: "Lena AI — the real estate operating system",
+        description:
+          "We help real estate businesses run sales, leads, WhatsApp, inventory, and teams from one platform. Marketing partners use Lena AI to deliver more value to clients and grow recurring revenue.",
+      },
+      partnerOffers: {
+        title: "What we offer marketing partners",
+        card1: {
+          title: "Premium service for your clients",
+          description:
+            "Give clients a complete platform for lead handling, follow-up, and operations — beyond ads alone.",
+        },
+        card2: {
+          title: "Recurring revenue for your agency",
+          description:
+            "Partner with Lena AI and build a scalable offering your clients rely on every day.",
+        },
+      },
+      ecosystem: {
+        title: "What we offer",
+        subtitle: "A full real estate ecosystem in one platform",
+      },
+      clients: {
+        title: "Our clients",
+      },
+      video: {
+        title: "See Lena AI in action",
+      },
+      finalCta: {
+        title: "Get started",
+        subtitle: "Download the app or contact us to become a partner.",
+        downloadApp: "Download App",
+        contactUs: "Contact Us",
+      },
+    },
   },
 };
