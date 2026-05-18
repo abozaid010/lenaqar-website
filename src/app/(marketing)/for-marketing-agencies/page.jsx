@@ -1,0 +1,33 @@
+import SolutionsPageSchema from "@/components/schema/SolutionsPageSchema";
+import SolutionsPageContent from "@/components/web/solutions/SolutionsPageContent";
+import { SITE_URL } from "@/app/metadata";
+
+const PATH = "/for-marketing-agencies";
+
+export const metadata = {
+  title: "For Marketing Agencies | Real Estate Operating System",
+  description:
+    "Offer premium real estate automation to your clients. Help them convert leads faster while creating recurring revenue for your agency.",
+  openGraph: {
+    title: "Lena AI for Marketing Agencies | Real Estate Operating System",
+    description:
+      "Offer premium real estate automation to your clients. Help them convert leads faster while creating recurring revenue for your agency.",
+    url: `${SITE_URL}${PATH}`,
+  },
+  alternates: {
+    canonical: `${SITE_URL}${PATH}`,
+  },
+};
+
+export default function ForMarketingAgenciesPage() {
+  return (
+    <>
+      <SolutionsPageSchema
+        path={PATH}
+        title="Lena AI for Marketing Agencies"
+        description={metadata.description}
+      />
+      <SolutionsPageContent audience="agencies" />
+    </>
+  );
+}

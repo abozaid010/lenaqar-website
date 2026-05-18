@@ -1,4 +1,7 @@
+import solutions from "./solutions-en.js";
+
 export default {
+  solutions,
   common: {
     direction: "ltr",
     loading: "Loading...",

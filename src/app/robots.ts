@@ -13,6 +13,9 @@ export default function robots(): MetadataRoute.Robots {
           '/allProberties',
           '/allProberties/*',
           '/privacy',
+          '/for-brokers',
+          '/for-developers',
+          '/for-marketing-agencies',
         ],
         disallow: [
           '/api/',
@@ -41,6 +44,9 @@ export default function robots(): MetadataRoute.Robots {
           '/allProberties',
           '/allProberties/*',
           '/privacy',
+          '/for-brokers',
+          '/for-developers',
+          '/for-marketing-agencies',
         ],
         disallow: [
           '/api/',
