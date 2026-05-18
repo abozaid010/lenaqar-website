@@ -20,13 +20,13 @@ export default function AgenciesClients() {
           {AGENCY_CLIENTS.map((client) => (
             <FadeInItem key={client.nameKey}>
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-full overflow-hidden border-2 border-slate-200 bg-white shadow-md ring-4 ring-slate-50 p-2">
+                <div className="relative h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-full overflow-hidden border-2 border-slate-200 bg-slate-100 shadow-md ring-4 ring-slate-50 aspect-square">
                   <Image
                     src={client.image}
                     alt={translate(client.nameKey)}
                     fill
-                    className="object-contain p-1"
-                    sizes="96px"
+                    className="object-cover object-center scale-110"
+                    sizes="(max-width: 640px) 80px, 96px"
                   />
                 </div>
                 <span className="text-sm font-semibold text-slate-800 leading-snug px-1">
