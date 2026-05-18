@@ -1,4 +1,7 @@
+import solutions from "./solutions-ar.js";
+
 export default {
+  solutions,
   common: {
     direction: "rtl",
     loading: "جاري التحميل...",
