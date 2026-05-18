@@ -14,6 +14,19 @@ export default {
     cta: "Turn Your Campaigns Into Qualified Revenue",
     ctaSub: "Start Partnership",
   },
+  offers: {
+    title: "What we offer marketing partners",
+    card1: {
+      title: "Premium service for your clients",
+      description:
+        "Give clients a complete platform for lead handling, follow-up, and operations — beyond ads alone.",
+    },
+    card2: {
+      title: "Recurring revenue for your agency",
+      description:
+        "Partner with Lena AI and build a scalable offering your clients rely on every day.",
+    },
+  },
   problem: {
     title: "Your Ads Are Working. Your Lead Handling Is Not.",
     optimizeTitle: "Most agencies optimize for:",

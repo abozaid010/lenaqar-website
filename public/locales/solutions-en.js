@@ -1,4 +1,6 @@
 import agenciesLanding from "./solutions-agencies-landing-en.js";
+import brokersLanding from "./solutions-brokers-landing-en.js";
+import developersLanding from "./solutions-developers-landing-en.js";
 
 export default {
   nav: {
@@ -94,6 +96,9 @@ export default {
     },
   },
   brokers: {
+    partnerMessage:
+      "Hi, I'm interested in Lena AI for my brokerage. I'd like to learn more.",
+    landing: brokersLanding,
     meta: {
       title: "Real Estate Brokerage Platform",
       description:
@@ -162,6 +167,9 @@ export default {
     },
   },
   developers: {
+    partnerMessage:
+      "Hi, I'm interested in Lena AI for our development projects. I'd like to book a demo.",
+    landing: developersLanding,
     meta: {
       title: "Developer Sales & Distribution Platform",
       description:

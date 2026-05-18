@@ -1,5 +1,5 @@
 import SolutionsPageSchema from "@/components/schema/SolutionsPageSchema";
-import SolutionsPageContent from "@/components/web/solutions/SolutionsPageContent";
+import DevelopersPageContent from "@/components/web/solutions/developers/DevelopersPageContent";
 import { SITE_URL } from "@/app/metadata";
 
 const PATH = "/for-developers";
@@ -27,7 +27,7 @@ export default function ForDevelopersPage() {
         title="Lena AI for Developers"
         description={metadata.description}
       />
-      <SolutionsPageContent audience="developers" />
+      <DevelopersPageContent />
     </>
   );
 }

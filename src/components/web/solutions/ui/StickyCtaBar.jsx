@@ -19,7 +19,12 @@ export default function StickyCtaBar() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (pathname === "/for-marketing-agencies" || !visible) return null;
+  const hideOnLanding =
+    pathname === "/for-marketing-agencies" ||
+    pathname === "/for-brokers" ||
+    pathname === "/for-developers";
+
+  if (hideOnLanding || !visible) return null;
 
   return (
     <div

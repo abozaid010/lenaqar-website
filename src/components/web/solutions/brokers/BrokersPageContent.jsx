@@ -2,6 +2,6 @@
 
 import AudienceLandingPage from "@/components/web/solutions/landing/AudienceLandingPage";
 
-export default function AgenciesPageContent() {
-  return <AudienceLandingPage audience="agencies" />;
+export default function BrokersPageContent() {
+  return <AudienceLandingPage audience="brokers" />;
 }

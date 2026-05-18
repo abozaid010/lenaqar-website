@@ -1,5 +1,5 @@
 import SolutionsPageSchema from "@/components/schema/SolutionsPageSchema";
-import SolutionsPageContent from "@/components/web/solutions/SolutionsPageContent";
+import BrokersPageContent from "@/components/web/solutions/brokers/BrokersPageContent";
 import { SITE_URL } from "@/app/metadata";
 
 const PATH = "/for-brokers";
@@ -27,7 +27,7 @@ export default function ForBrokersPage() {
         title="Lena AI for Brokers"
         description={metadata.description}
       />
-      <SolutionsPageContent audience="brokers" />
+      <BrokersPageContent />
     </>
   );
 }
