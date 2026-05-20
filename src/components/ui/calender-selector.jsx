@@ -27,6 +27,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { PhoneField } from "@/components/phone/PhoneField";
+import { trackMetaLead } from "@/lib/meta-pixel";
 
 export default function CalendarSelector({
   onSelectDateTime,
@@ -171,6 +172,7 @@ export default function CalendarSelector({
         });
         setSelectedDate(null);
         setSelectedTime(null);
+        trackMetaLead({ content_name: "demo_booking" });
         if (onBookingComplete) {
           onBookingComplete(bookingData);
         }

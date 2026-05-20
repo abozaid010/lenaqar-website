@@ -8,7 +8,9 @@ import { defaultMetadata } from "./metadata";
 import OrganizationSchema from "@/components/schema/OrganizationSchema";
 import LocalBusinessSchema from "@/components/schema/LocalBusinessSchema";
 import WebSiteSchema from "@/components/schema/WebSiteSchema";
-import { ANALYTICS, getGAScriptUrl, getGAConfig } from '@/constants/analytics';
+import { getGAScriptUrl, getGAConfig } from '@/constants/analytics';
+import MetaPixelNoscript from "@/components/analytics/MetaPixelNoscript";
+import MetaPixelProvider from "@/components/analytics/MetaPixelProvider";
 import Script from "next/script";
 
 const montserrat = Montserrat({
@@ -75,12 +77,15 @@ export default async function RootLayout({ children }) {
         </Script>
       </head>
       <body>
+        <MetaPixelNoscript />
         <OrganizationSchema />
         <LocalBusinessSchema />
         <WebSiteSchema />
         <I18nProvider initialLocal={initialLocale}>
           <Toaster position="top-center" reverseOrder={false} />
-          <TanStackQueryProvider>{children}</TanStackQueryProvider>
+          <TanStackQueryProvider>
+            <MetaPixelProvider>{children}</MetaPixelProvider>
+          </TanStackQueryProvider>
         </I18nProvider>
       </body>
     </html>
