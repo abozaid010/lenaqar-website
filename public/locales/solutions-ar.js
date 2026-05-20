@@ -26,6 +26,8 @@ export default {
     company: "الشركة",
     privacy: "سياسة الخصوصية",
     contact: "تواصل",
+    blog: "المدونة",
+    faq: "الأسئلة الشائعة",
     downloadIos: "تحميل من App Store",
     downloadAndroid: "تحميل من Google Play",
     support: "الدعم",

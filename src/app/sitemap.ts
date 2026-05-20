@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from './metadata';
 import { API_BASE_URL } from '@/lib/apiConfig';
+import { SEO_BLOG_POST_KEY_TO_SLUG } from '@/content/seo';
 
 const CHAT_URL = 'https://chat.lenaai.net';
 const MAIN_SITE_URL = SITE_URL;
@@ -70,6 +71,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    {
+      url: `${MAIN_SITE_URL}/blog`,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.75,
+    },
+    {
+      url: `${MAIN_SITE_URL}/faq`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    ...Object.values(SEO_BLOG_POST_KEY_TO_SLUG).map((slug) => ({
+      url: `${MAIN_SITE_URL}/blog/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.65,
+    })),
     {
       url: CHAT_URL,
       lastModified: now,
