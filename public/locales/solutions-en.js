@@ -26,6 +26,8 @@ export default {
     company: "Company",
     privacy: "Privacy Policy",
     contact: "Contact",
+    blog: "Blog",
+    faq: "FAQ",
     downloadIos: "Download on App Store",
     downloadAndroid: "Get it on Google Play",
     support: "Support",

@@ -8,14 +8,21 @@ import SalesManagerSection from "./web/_components/SmartAutmtation";
 import HomePageSchema from "@/components/schema/HomePageSchema";
 import { cookies } from "next/headers";
 import OurResult from "./web/_components/OurResult";
+import SeoGeoLandingSection from "@/components/web/seo/SeoGeoLandingSection";
 
 import { SITE_URL } from "./metadata";
 
 export const metadata = {
   title: "Sell Real Estate by AI - Best AI Agent Tool for Real Estate Chatbot",
   description:
-    "LENAAI (LenaAI / Lina AI) is a Real Estate AI Sales Agent for Egypt—like ChatGPT for real estate: chatbot, lead generation, and marketing automation.",
+    "Lena AI is a real-estate AI agent and AI lead generator for Egypt, UAE, and MENA—AI lead generation, AI lead filtration, AI CRM, and AI ecosystem with Arabic support. 40% more conversions, 80% less manual work.",
   keywords: [
+    "AI lead generator",
+    "AI lead generation",
+    "AI lead filtration",
+    "AI CRM",
+    "AI ecosystem",
+    "AI salesman",
     // Brand / Name Variations
     "LENAAI",
     "LenaAI",
@@ -115,6 +122,8 @@ export default async function HomePage() {
       <HeroSection />
 
       <OurResult />
+
+      <SeoGeoLandingSection />
 
       <div className="overflow-hidden">
         <DashbordImage />

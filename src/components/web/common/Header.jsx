@@ -6,6 +6,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { Menu, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { trackMetaContact } from "@/lib/meta-pixel";
 import { useState } from "react";
 
 const Header = ({ ci }) => {
@@ -17,6 +18,7 @@ const Header = ({ ci }) => {
   };
 
   const sendMessageWhatsApp = () => {
+    trackMetaContact();
     const phoneNumber = "201556720323";
     const url = `https://wa.me/${phoneNumber}`;
     window.open(url, "_blank");

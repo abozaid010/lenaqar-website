@@ -1,6 +1,8 @@
 import solutions from "./solutions-en.js";
+import seo from "./seo-en.js";
 
 export default {
+  seo,
   solutions,
   common: {
     direction: "ltr",
@@ -240,9 +242,10 @@ export default {
   heroSection: {
     title1: "Sell Smarter",
     title2: "You Market, We Sell.",
-    subtitle: "AI Sales team that handle clients requesst 24/7.",
+    subtitle:
+      "Real-estate AI agent and AI salesman—AI lead generation and AI lead filtration in seconds.",
     description:
-      "Lena AI qualify andfilter  leads instantly, engage prospects 24/7, and boost conversions so you focus on closing, not chasing cold leads.",
+      "Unqualified leads waste sales hours and slow follow-up loses deals. Lena AI is your AI lead generator, AI CRM, and AI ecosystem for Egypt, UAE, and MENA—Arabic support, mobile-first iOS & Android, 40% more conversions, 80% less manual work.",
     ctaButton: "Get Started",
     backgroundAlt: "Background",
     aiImageAlt: "AI Assistant",

@@ -65,6 +65,22 @@ export default function SolutionsFooter() {
             <ul className="space-y-2 text-sm">
               <li>
                 <Link
+                  href="/blog"
+                  className="text-blue-100 hover:text-white transition-colors"
+                >
+                  {translate("solutions.footer.blog")}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/faq"
+                  className="text-blue-100 hover:text-white transition-colors"
+                >
+                  {translate("solutions.footer.faq")}
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/privacy"
                   className="text-blue-100 hover:text-white transition-colors"
                 >
