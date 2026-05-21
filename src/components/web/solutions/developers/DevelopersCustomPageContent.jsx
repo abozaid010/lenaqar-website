@@ -15,6 +15,7 @@ import {
   Zap,
 } from "lucide-react";
 import CalendarModal from "@/components/ui/calendar-modal";
+import DevelopersLeadProfilePreview from "@/components/web/solutions/developers/DevelopersLeadProfilePreview";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
 
@@ -221,6 +222,8 @@ export default function DevelopersCustomPageContent() {
           </p>
         </div>
       </OfferBlock>
+
+      <DevelopersLeadProfilePreview />
 
       {/* Offer 2 */}
       <OfferBlock
