@@ -1,6 +1,7 @@
 import agenciesLanding from "./solutions-agencies-landing-ar.js";
 import brokersLanding from "./solutions-brokers-landing-ar.js";
 import developersLanding from "./solutions-developers-landing-ar.js";
+import developersCustomPage from "./solutions-developers-custom-ar.js";
 
 export default {
   nav: {
@@ -170,6 +171,7 @@ export default {
   developers: {
     partnerMessage: "مرحبًا، أنا مهتم بلينا AI لمشاريعنا التطويرية وأود حجز عرض.",
     landing: developersLanding,
+    customPage: developersCustomPage,
     meta: {
       title: "منصة مبيعات وتوزيع المطورين",
       description:

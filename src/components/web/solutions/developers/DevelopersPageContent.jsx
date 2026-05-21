@@ -1,7 +1,7 @@
 "use client";
 
-import AudienceLandingPage from "@/components/web/solutions/landing/AudienceLandingPage";
+import DevelopersCustomPageContent from "@/components/web/solutions/developers/DevelopersCustomPageContent";
 
 export default function DevelopersPageContent() {
-  return <AudienceLandingPage audience="developers" />;
+  return <DevelopersCustomPageContent />;
 }

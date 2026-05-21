@@ -1,6 +1,7 @@
 import agenciesLanding from "./solutions-agencies-landing-en.js";
 import brokersLanding from "./solutions-brokers-landing-en.js";
 import developersLanding from "./solutions-developers-landing-en.js";
+import developersCustomPage from "./solutions-developers-custom-en.js";
 
 export default {
   nav: {
@@ -172,6 +173,7 @@ export default {
     partnerMessage:
       "Hi, I'm interested in Lena AI for our development projects. I'd like to book a demo.",
     landing: developersLanding,
+    customPage: developersCustomPage,
     meta: {
       title: "Developer Sales & Distribution Platform",
       description:
