@@ -1,5 +1,6 @@
 import agenciesLanding from "./solutions-agencies-landing-ar.js";
 import brokersLanding from "./solutions-brokers-landing-ar.js";
+import brokersCustomPage from "./solutions-brokers-custom-ar.js";
 import developersLanding from "./solutions-developers-landing-ar.js";
 import developersCustomPage from "./solutions-developers-custom-ar.js";
 
@@ -101,6 +102,7 @@ export default {
   brokers: {
     partnerMessage: "مرحبًا، أنا مهتم بلينا AI لشركة الوساطة الخاصة بي.",
     landing: brokersLanding,
+    customPage: brokersCustomPage,
     meta: {
       title: "منصة الوساطة العقارية",
       description:
