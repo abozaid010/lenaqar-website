@@ -1,7 +1,7 @@
 "use client";
 
-import AudienceLandingPage from "@/components/web/solutions/landing/AudienceLandingPage";
+import BrokersCustomPageContent from "@/components/web/solutions/brokers/BrokersCustomPageContent";
 
 export default function BrokersPageContent() {
-  return <AudienceLandingPage audience="brokers" />;
+  return <BrokersCustomPageContent />;
 }

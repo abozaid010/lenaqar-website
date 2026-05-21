@@ -5,13 +5,13 @@ import { SITE_URL } from "@/app/metadata";
 const PATH = "/for-developers";
 
 export const metadata = {
-  title: "For Developers | Real Estate Operating System",
+  title: "Lena AI OS For Real Estate Developers",
   description:
-    "Move inventory faster with a connected broker network. Share projects, qualify leads, and track sales performance from one platform.",
+    "AI-powered operating system for Egyptian real estate developers. Automate lead handling, expand broker distribution, and track real buyer interest from one platform.",
   openGraph: {
-    title: "Lena AI for Developers | Real Estate Operating System",
+    title: "Lena AI OS For Real Estate Developers",
     description:
-      "Move inventory faster with a connected broker network. Share projects, qualify leads, and track sales performance from one platform.",
+      "Transform sales operations with AI customer service, broker network distribution, and real buyer analytics built for the Egyptian market.",
     url: `${SITE_URL}${PATH}`,
   },
   alternates: {
@@ -24,7 +24,7 @@ export default function ForDevelopersPage() {
     <>
       <SolutionsPageSchema
         path={PATH}
-        title="Lena AI for Developers"
+        title="Lena AI OS For Real Estate Developers"
         description={metadata.description}
       />
       <DevelopersPageContent />
