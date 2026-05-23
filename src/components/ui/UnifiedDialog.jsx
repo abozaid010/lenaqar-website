@@ -18,6 +18,7 @@ export default function UnifiedDialog({
   onClose,
   title,
   cancelLabel,
+  cancelAriaLabel,
   onCancel,
   submitLabel,
   onSubmit,
@@ -91,6 +92,7 @@ export default function UnifiedDialog({
             title={title}
             onCancel={handleCancel}
             cancelLabel={finalCancelLabel}
+            cancelAriaLabel={cancelAriaLabel ?? finalCancelLabel}
             onSubmit={onSubmit}
             submitLabel={finalSubmitLabel}
             submitDisabled={submitDisabled}

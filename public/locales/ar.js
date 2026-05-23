@@ -1669,6 +1669,9 @@ export default {
       deleteLead: "حذف العميل",
       replyModeHint: "اختر طريقة الرد على رسائل هذا العميل.",
       noTags: "لا توجد وسوم بعد.",
+      tagExists: "الوسم موجود بالفعل",
+      tagAdded: "تمت إضافة الوسم بنجاح",
+      tagRemoved: "تمت إزالة الوسم بنجاح",
       dangerZoneHint: "حذف العميل دائم ولا يمكن التراجع عنه.",
     },
   },
@@ -1689,6 +1692,14 @@ export default {
     cannotUpdateActionMissingUser:
       "لا يمكن تحديث هذه المهمة لأنها غير مرتبطة بعميل.",
     saveAsNewAction: "حفظ كإجراء جديد",
+    viewDetails: "عرض التفاصيل",
+    userDetailsTitle: "تفاصيل العميل",
+    cannotOpenDetailsMissingUser:
+      "لا يمكن فتح التفاصيل لأن هذه المهمة غير مرتبطة بعميل.",
+    scheduledTaskNote: "ملاحظة المهمة المجدولة",
+    loadError: "فشل تحميل الجدول",
+    dialogClose: "إغلاق",
+    dialogCloseAriaLabel: "إغلاق نافذة تفاصيل العميل",
   },
 
   noappointments: "لا توجد مواعيد هذا الأسبوع",
@@ -2043,6 +2054,7 @@ export default {
   },
   buttons: {
     cancel: "إلغاء",
+    close: "إغلاق",
     call: "اتصال",
     whatsapp: "واتساب",
     delete: "حذف",

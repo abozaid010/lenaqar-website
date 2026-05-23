@@ -10,6 +10,8 @@ export default function UnifiedHeader({
   title,
   onCancel,
   cancelLabel = "Cancel",
+  /** Screen-reader label for cancel; defaults to cancelLabel when omitted */
+  cancelAriaLabel,
   onSubmit,
   submitLabel = "Submit",
   submitDisabled = false,
@@ -25,6 +27,7 @@ export default function UnifiedHeader({
 }) {
   const showCancel = !leadingSlot && onCancel != null;
   const showSubmit = !trailingSlot && onSubmit != null;
+  const resolvedCancelAriaLabel = cancelAriaLabel ?? cancelLabel;
 
   return (
     <header
@@ -40,7 +43,7 @@ export default function UnifiedHeader({
             type="button"
             onClick={onCancel}
             className="h-10 rounded-lg border-2 border-primary bg-transparent px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-[#E2dbff]"
-            aria-label={cancelLabel}
+            aria-label={resolvedCancelAriaLabel}
           >
             {cancelLabel}
           </button>

@@ -601,6 +601,9 @@ export default {
       deleteLead: "Delete lead",
       replyModeHint: "Choose how new messages from this lead are answered.",
       noTags: "No tags yet.",
+      tagExists: "Tag already exists",
+      tagAdded: "Tag added successfully",
+      tagRemoved: "Tag removed successfully",
       dangerZoneHint: "Deleting a lead is permanent and cannot be undone.",
     },
   },
@@ -621,6 +624,14 @@ export default {
     cannotUpdateActionMissingUser:
       "This task cannot be updated because the lead is not linked.",
     saveAsNewAction: "Save as new action",
+    viewDetails: "View details",
+    userDetailsTitle: "Lead details",
+    cannotOpenDetailsMissingUser:
+      "This task is not linked to a lead, so details cannot be opened.",
+    scheduledTaskNote: "Scheduled task note",
+    loadError: "Failed to load schedule",
+    dialogClose: "Close",
+    dialogCloseAriaLabel: "Close lead details dialog",
   },
   Noappointments: "No appointments this week",
   scheduleweek: "Your schedule is clear for this week.",
@@ -1977,6 +1988,7 @@ export default {
   },
   buttons: {
     cancel: "Cancel",
+    close: "Close",
     call: "Call",
     whatsapp: "WhatsApp",
     delete: "Delete",

@@ -21,12 +21,14 @@ import {
   User,
   UserPlus,
   Users,
+  Eye,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
+import ScheduleUserDetailsDialog from "./ScheduleUserDetailsDialog";
 
 /** Lead id for creating a follow-up action from the schedule card. */
 function getScheduledActionUserId(item) {
@@ -86,6 +88,7 @@ const Schedule = ({ data, dataSales }) => {
   const [loading, setLoading] = useState(null);
   const [isWeekLoading, setIsWeekLoading] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
+  const [detailsAppointment, setDetailsAppointment] = useState(null);
   const { t, locale } = useI18n();
   const isRTL = t.direction === "rtl";
 
@@ -248,6 +251,20 @@ const Schedule = ({ data, dataSales }) => {
 
   const closeEditAppointment = () => setEditAppointment(null);
 
+  const handleOpenUserDetails = (appointment) => {
+    const uid = getScheduledActionUserId(appointment);
+    if (!uid) {
+      toast.error(
+        t.schaduall?.cannotOpenDetailsMissingUser ||
+          "This task is not linked to a lead."
+      );
+      return;
+    }
+    setDetailsAppointment(appointment);
+  };
+
+  const closeUserDetails = () => setDetailsAppointment(null);
+
   return (
     <div className="border border-red-50">
       <div className={`min-h-screen ${SELECTION_COLORS.BG} p-6`}>
@@ -337,10 +354,24 @@ const Schedule = ({ data, dataSales }) => {
                             ) : null}
                           </div>
                         </div>
-                        <div className="text-end shrink-0">
+                        <div className="text-end shrink-0 flex flex-col items-end gap-2">
                           <button
                             type="button"
-                            onClick={() => handleOpenEditAppointment(appointment)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenUserDetails(appointment);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                          >
+                            <Eye className="w-4 h-4" />
+                            {t.schaduall?.viewDetails || "View details"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditAppointment(appointment);
+                            }}
                             className="flex flex-col items-end gap-1 rounded-lg p-2 -m-2 text-gray-600 hover:bg-primary/5 hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
                             aria-label={
                               t.schaduall?.clickToEditDateTime ||
@@ -652,6 +683,13 @@ const Schedule = ({ data, dataSales }) => {
           </>
         ) : null}
       </UnifiedDialog>
+
+      <ScheduleUserDetailsDialog
+        isOpen={!!detailsAppointment}
+        onClose={closeUserDetails}
+        appointment={detailsAppointment}
+        onDataChanged={() => router.refresh()}
+      />
     </div>
   );
 };
