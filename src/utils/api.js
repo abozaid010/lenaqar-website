@@ -1846,6 +1846,36 @@ export async function createUserAction(payload) {
 }
 
 /**
+ * Update current user action (PUT /action/v1/update/{user_id})
+ * Supports partial updates: action, meeting_time, comment, phone_number, name.
+ */
+export async function updateUserAction(userId, payload = {}) {
+  if (!userId) {
+    throw new Error("userId is required");
+  }
+
+  const body = {
+    ...(payload.action !== undefined && { action: payload.action }),
+    ...(payload.meeting_time !== undefined && {
+      meeting_time: payload.meeting_time || null,
+    }),
+    ...(payload.comment !== undefined && { comment: payload.comment ?? "" }),
+    ...(payload.phone_number !== undefined && {
+      phone_number: payload.phone_number,
+    }),
+    ...(payload.name !== undefined && { name: payload.name }),
+  };
+
+  try {
+    const response = await axiosInstance.put(`action/v1/update/${userId}`, body);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to update action:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Delete user via the user/delete-user endpoint
  * @param {string} userId - The user ID to delete
  * @param {string} clientId - The client ID (should be 'public')
