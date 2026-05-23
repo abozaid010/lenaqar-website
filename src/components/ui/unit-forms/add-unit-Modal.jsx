@@ -243,6 +243,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     furnishing: unitData?.furnishing || "",
     outdoor_area: unitData?.outdoor_area || "",
     images: unitData?.images || [],
+    video: unitData?.video || unitData?.video || "",
+    notes: unitData?.notes || "",
     code: unitData?.code || "",
     model: unitData?.model || "",
     // Owner details (shown only for brokers)

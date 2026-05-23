@@ -180,7 +180,7 @@ function CampaignCard({ campaign, onEdit }) {
                   title={img?.fileId || ""}
                 >
                   <ImageWithLoader
-                    src={getDisplayImageUrl(img?.url) || "/placeholder.svg"}
+                    src={getDisplayImageUrl(img?.url) || "/images/property_placeholder.jpg"}
                     alt={`campaign_image_${idx}`}
                     className="w-full h-full object-cover"
                     priority={false}

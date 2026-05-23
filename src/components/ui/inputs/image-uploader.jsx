@@ -199,7 +199,7 @@ export default function ImageUploader({
       <div key={imageId} className="relative group aspect-square">
         <div className="relative w-full h-full">
           <ImageWithLoader
-            src={getDisplayImageUrl(image.url) || "/placeholder.svg"}
+            src={getDisplayImageUrl(image.url) || "/images/defaultImage.jpg"}
             alt={
               image.name
                 ? `Image ${image.name}`
