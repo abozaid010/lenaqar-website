@@ -73,6 +73,8 @@ const formatToISODate = (date) => {
 
 // Allow browsing schedule history up to ~4 months (17 weeks) back.
 const MAX_PAST_WEEKS = 17;
+// Allow browsing schedule up to 8 weeks ahead.
+const MAX_NEXT_WEEKS = 8;
 
 const Schedule = ({ data, dataSales }) => {
   const router = useRouter();
@@ -187,7 +189,7 @@ const Schedule = ({ data, dataSales }) => {
 
   const canNavigateNext = () => {
     const maxWeekStart = getWeekStartSaturday(new Date());
-    maxWeekStart.setDate(maxWeekStart.getDate() + 7);
+    maxWeekStart.setDate(maxWeekStart.getDate() + MAX_NEXT_WEEKS * 7);
     return currentDate < maxWeekStart;
   };
 
