@@ -32,8 +32,9 @@ interface UnitDetailsPageProps {
 }
 
 export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
-  const { t } = useI18n();
+  const { t, locale, translate } = useI18n();
   const [showMobileActionBar, setShowMobileActionBar] = useState(true);
+  const unitNotes = typeof unit.notes === 'string' ? unit.notes.trim() : '';
 
   return (
     <div className="bg-gray-50 flex-1">
@@ -58,6 +59,16 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
             {/* Quick Facts */}
             {(unit.quickFacts.length > 0 || unit.specs.length > 0) && (
               <UnitQuickFacts facts={unit.quickFacts} specs={unit.specs} />
+            )}
+
+            {/* Notes */}
+            {unitNotes && (
+              <div className="bg-white rounded-lg border p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                  {translate('unit.notes', locale === 'ar' ? 'ملاحظات' : 'Notes')}
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-wrap leading-6">{unitNotes}</p>
+              </div>
             )}
           </div>
 

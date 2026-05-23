@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle } from 'lucide-react';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
 
@@ -24,6 +24,7 @@ export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryPr
 
   const currentImage = images[currentImageIndex];
   const hasMultipleImages = images.length > 1;
+  const isCurrentVideo = currentImage?.type === 'video';
 
   const goToPrevious = () => {
     setCurrentImageIndex((prev) => 
@@ -54,14 +55,34 @@ export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryPr
 
       {/* Main Image */}
       <div className="relative w-full h-96 lg:h-[500px] bg-gray-100 rounded-lg overflow-hidden group">
-        <Image
-          src={currentImage.url}
-          alt={currentImage.alt}
-          fill
-          className="object-cover"
-          priority
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-        />
+        {isCurrentVideo ? (
+          currentImage.provider === 'file' ? (
+            <video
+              src={currentImage.url}
+              className="w-full h-full object-cover"
+              controls
+              preload="metadata"
+            />
+          ) : (
+            <iframe
+              src={currentImage.url}
+              className="w-full h-full"
+              title={currentImage.alt}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+            />
+          )
+        ) : (
+          <Image
+            src={currentImage.url}
+            alt={currentImage.alt}
+            fill
+            className="object-cover"
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+          />
+        )}
 
         {/* Navigation Controls */}
         {hasMultipleImages && (
@@ -105,13 +126,19 @@ export default function UnitHeroGallery({ images, isPrimary }: UnitHeroGalleryPr
               }`}
               aria-label={`View image ${index + 1}`}
             >
-              <Image
-                src={image.url}
-                alt={`${image.alt} - thumbnail ${index + 1}`}
-                fill
-                className="object-cover"
-                sizes="80px"
-              />
+              {image.type === 'video' ? (
+                <div className="w-full h-full bg-gray-900 text-white flex items-center justify-center">
+                  <PlayCircle className="w-8 h-8" />
+                </div>
+              ) : (
+                <Image
+                  src={image.url}
+                  alt={`${image.alt} - thumbnail ${index + 1}`}
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                />
+              )}
             </button>
           ))}
         </div>

@@ -2,6 +2,7 @@
 
 import ImageUploader from "@/components/ui/inputs/image-uploader";
 import { useI18n } from "@/hooks/useI18n";
+import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
 
 import FormSelect from "@/components/ui/inputs/form-select";
 import { MAX_UNIT_IMAGES } from "./unit-form-constants";
@@ -15,7 +16,7 @@ export default function ImagesStep({
   setInvalidFields = () => {},
   maxImages = MAX_UNIT_IMAGES,
 }) {
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,6 +105,29 @@ export default function ImagesStep({
         isUploading={isUploading}
         setIsUploading={setIsUploading}
       />
+
+      <div className="grid grid-cols-1 gap-3 mt-4">
+        <LenaTextField
+          label={translate(
+            "unit.videoLink",
+            locale === "ar" ? "رابط الفيديو (يوتيوب/فيسبوك)" : "Video Link (YouTube/Facebook)"
+          )}
+          name="video"
+          type="url"
+          value={formData.video || ""}
+          onChange={handleChange}
+          required={false}
+        />
+
+        <LenaTextarea
+          label={translate("unit.notes", locale === "ar" ? "ملاحظات" : "Notes")}
+          name="notes"
+          value={formData.notes || ""}
+          onChange={handleChange}
+          required={false}
+          rows={4}
+        />
+      </div>
     </>
   );
 }

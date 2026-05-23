@@ -34,6 +34,49 @@ const getT = (t: T, ...path: string[]): string | null => {
   return typeof val === 'string' && val.length > 0 ? val : null;
 };
 
+const normalizeUrl = (url: string): string => {
+  const trimmed = url.trim();
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+};
+
+const toYoutubeEmbedUrl = (url: string): string | null => {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    const host = parsed.hostname.toLowerCase();
+    let videoId: string | null = null;
+
+    if (host.includes('youtu.be')) {
+      videoId = parsed.pathname.split('/').filter(Boolean)[0] || null;
+    } else if (host.includes('youtube.com')) {
+      if (parsed.pathname === '/watch') {
+        videoId = parsed.searchParams.get('v');
+      } else if (parsed.pathname.startsWith('/shorts/')) {
+        videoId = parsed.pathname.split('/')[2] || null;
+      } else if (parsed.pathname.startsWith('/embed/')) {
+        videoId = parsed.pathname.split('/')[2] || null;
+      }
+    }
+
+    return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+  } catch {
+    return null;
+  }
+};
+
+const toFacebookEmbedUrl = (url: string): string | null => {
+  try {
+    const parsed = new URL(normalizeUrl(url));
+    const host = parsed.hostname.toLowerCase();
+    if (!host.includes('facebook.com') && !host.includes('fb.watch')) return null;
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=false`;
+  } catch {
+    return null;
+  }
+};
+
+const isDirectVideoFile = (url: string): boolean => /\.(mp4|webm|ogg)(\?.*)?$/i.test(url);
+
 /**
  * Transform raw unit data into normalized view model
  */
@@ -52,14 +95,48 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
 
   const locationLabel = buildLocationLabel(rawUnit);
 
-  const heroImages = hasValidImages(rawUnit.images)
+  const baseHeroImages = hasValidImages(rawUnit.images)
     ? rawUnit.images
         .filter(img => img && isNonEmptyString(img.url))
         .map(img => ({
           url: img.url,
           alt: title || projectName || 'Property image',
+          type: 'image' as const,
         }))
     : [];
+
+  const rawVideoUrl = isNonEmptyString(rawUnit.video) ? rawUnit.video : null;
+  const normalizedRawVideoUrl = rawVideoUrl ? normalizeUrl(rawVideoUrl) : null;
+
+  const youtubeEmbed = rawVideoUrl ? toYoutubeEmbedUrl(rawVideoUrl) : null;
+  const facebookEmbed = rawVideoUrl ? toFacebookEmbedUrl(rawVideoUrl) : null;
+  const isDirectVideo = rawVideoUrl ? isDirectVideoFile(rawVideoUrl) : false;
+  const notes = isNonEmptyString(rawUnit.notes) ? rawUnit.notes.trim() : null;
+
+  const videoHeroItem = youtubeEmbed
+    ? {
+        url: youtubeEmbed,
+        alt: title || projectName || 'Property video',
+        type: 'video' as const,
+        provider: 'youtube' as const,
+      }
+    : facebookEmbed
+      ? {
+          url: facebookEmbed,
+          alt: title || projectName || 'Property video',
+          type: 'video' as const,
+          provider: 'facebook' as const,
+        }
+      : isDirectVideo && normalizedRawVideoUrl
+        ? {
+            url: normalizedRawVideoUrl,
+            alt: title || projectName || 'Property video',
+            type: 'video' as const,
+            provider: 'file' as const,
+          }
+        : null;
+
+  const heroImages = videoHeroItem ? [videoHeroItem, ...baseHeroImages] : baseHeroImages;
 
   const badges = getUnitBadges(rawUnit, t);
   const totalPrice = formatCurrency(rawUnit.totalPrice);
@@ -112,6 +189,7 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     finishing,
     furnishing,
     phase,
+    notes,
     isPrimary,
   };
 };

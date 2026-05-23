@@ -40,6 +40,8 @@ export interface RawUnit {
   roof_area: number;
   finishing: string;
   developer: string;
+  notes?: string;
+  video?: string;
 }
 
 export interface UnitApiResponse {
@@ -55,6 +57,8 @@ export interface UnitApiResponse {
 export interface HeroImage {
   url: string;
   alt: string;
+  type?: 'image' | 'video';
+  provider?: 'youtube' | 'facebook' | 'file';
 }
 
 export interface QuickFact {
@@ -111,6 +115,7 @@ export interface UnitViewModel {
   finishing: string | null;
   furnishing: string | null;
   phase: string | null;
+  notes?: string | null;
 }
 
 // Component prop types
