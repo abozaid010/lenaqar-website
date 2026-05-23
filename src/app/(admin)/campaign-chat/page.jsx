@@ -99,7 +99,13 @@ const CampaignChat = () => {
   });
 
   // Fetch selected session details
-  const { data: sessionData, isLoading: sessionLoading, refetch: refetchSession } = useQuery({
+  const {
+    data: sessionData,
+    isLoading: sessionLoading,
+    isFetching: sessionFetching,
+    error: sessionError,
+    refetch: refetchSession,
+  } = useQuery({
     queryKey: ["campaignSession", campaignChatClientId, selectedContact?.phone_number],
     queryFn: () => fetchCampaignSession({
       client_id: campaignChatClientId,
@@ -108,7 +114,6 @@ const CampaignChat = () => {
       history_page_size: CAMPAIGN_CHAT_PAGINATION.DEFAULT_HISTORY_PAGE_SIZE
     }),
     enabled: Boolean(selectedContact?.phone_number) && canAccessCampaignChat && Boolean(clientId),
-    keepPreviousData: true,
     retry: noRetryOnAuthDenial,
   });
 
@@ -255,7 +260,8 @@ const CampaignChat = () => {
   const handleToggleAI = async (phoneNumber, enabled) => {
     setIsTogglingAI(true);
     try {
-      const result = await toggleCampaignAIReply({
+      await toggleCampaignAIReply({
+        client_id: campaignChatClientId,
         phone_number: phoneNumber,
         ai_reply_enabled: enabled
       });
@@ -293,6 +299,7 @@ const CampaignChat = () => {
   const handleSendReply = async (phoneNumber, message) => {
     try {
       await sendCampaignReply({
+        client_id: campaignChatClientId,
         phone_number: phoneNumber,
         admin_reply_text: message
       });
@@ -318,7 +325,11 @@ const CampaignChat = () => {
   // Handle rename
   const handleRename = async (phoneNumber, userName) => {
     try {
-      await updateCampaignSessionName({ phone_number: phoneNumber, user_name: userName });
+      await updateCampaignSessionName({
+        client_id: campaignChatClientId,
+        phone_number: phoneNumber,
+        user_name: userName,
+      });
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
       
       // Update session details if it's the currently selected contact
@@ -347,7 +358,11 @@ const CampaignChat = () => {
   // Handle toggle favorite
   const handleToggleFavorite = async (phoneNumber, isFavorite) => {
     try {
-      await toggleCampaignFavorite({ phone_number: phoneNumber, is_favorite: isFavorite });
+      await toggleCampaignFavorite({
+        client_id: campaignChatClientId,
+        phone_number: phoneNumber,
+        is_favorite: isFavorite,
+      });
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
       
       // Update session details if it's the currently selected contact
@@ -375,7 +390,11 @@ const CampaignChat = () => {
 
   const handleUpdateNotes = async (phoneNumber, notes) => {
     try {
-      await updateCampaignNotes({ phone_number: phoneNumber, notes });
+      await updateCampaignNotes({
+        client_id: campaignChatClientId,
+        phone_number: phoneNumber,
+        notes,
+      });
       if (selectedContact?.phone_number === phoneNumber) {
         setSelectedContact(prev => ({ ...prev, notes }));
       }
@@ -573,7 +592,9 @@ const CampaignChat = () => {
               <ChatPanel
                 contact={selectedContact}
                 sessionData={sessionData}
-                loading={sessionLoading}
+                loading={sessionLoading || sessionFetching}
+                sessionError={sessionError}
+                onRetrySession={refetchSession}
                 onToggleAI={handleToggleAI}
                 onSendReply={handleSendReply}
                 refetchSession={refetchSession}

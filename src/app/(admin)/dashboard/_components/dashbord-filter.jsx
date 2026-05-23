@@ -18,6 +18,7 @@ import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import AddLeadDialog from "@/components/ui/add-lead-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 
 const formatDate = (date) => {
   const isoString = date.toISOString();
@@ -65,6 +66,11 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
   const clientId = LenaCookiesManager.getClientId();
   const campaignDropdownRef = useRef(null);
+
+  const isOwner = useMemo(() => {
+    const role = getRoleFromToken();
+    return role != null && String(role).toLowerCase() === "owner";
+  }, []);
 
   // Campaign list: GET /campaign/names_only once per session; localStorage + poll only as fallback on error
   useEffect(() => {
@@ -381,6 +387,9 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             <UserPlus size={16} />
             <span>{t.dashboardFilter?.ADD || "Add Lead"}</span>
           </button>
+          {isOwner && (
+            <ExcelExportButton searchParams={appliedFilters} compact={compact} />
+          )}
           <AverageScore />
           <VideoInstructionsDialog
             variant="dashboard"
@@ -398,8 +407,11 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
           className="flex items-center gap-2 h-10 px-4 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md"
         >
           <UserPlus size={18} />
-          <span>{t.dashboardFilter?.ADD || "Add New Lead"}</span>
+          <span>{t.dashboardFilter?.ADD || "New Lead"}</span>
         </button>
+        {isOwner && (
+          <ExcelExportButton searchParams={appliedFilters} compact={compact} />
+        )}
         <AverageScore />
         <VideoInstructionsDialog
           variant="dashboard"

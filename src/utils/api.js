@@ -5,6 +5,10 @@ import { safeMergeParams } from "./safeJsonParser";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
+import {
+  normalizeCampaignPhoneParam,
+  normalizeCampaignSessionData,
+} from "@/utils/campaign-chat-session";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-handler";
 import { validateClientId, createSafeClientId } from "./clientId-validator";
@@ -1576,9 +1580,10 @@ export async function fetchCampaignSession({
   }
 
   try {
+    const normalizedPhone = normalizeCampaignPhoneParam(phone_number);
     const params = new URLSearchParams({ 
       client_id, 
-      phone_number, 
+      phone_number: normalizedPhone || String(phone_number), 
       history_page: String(history_page), 
       history_page_size: String(history_page_size) 
     });
@@ -1587,11 +1592,35 @@ export async function fetchCampaignSession({
       headers: campaignChatRequestHeaders(client_id),
     });
 
-    if (!response.data || !response.data.data) {
+    const body = response.data;
+    if (!body) {
       throw new Error("Invalid response format from server");
     }
 
-    return response.data.data;
+    if (body.status === false) {
+      throw new Error(
+        body.error_message || body.message || "Failed to load conversation"
+      );
+    }
+
+    if (!body.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    const normalized = normalizeCampaignSessionData(body.data);
+
+    if (
+      process.env.NODE_ENV === "development" &&
+      normalized.history.length === 0 &&
+      Object.keys(body.data || {}).length > 0
+    ) {
+      console.warn("[campaign-chat] Session loaded but no messages parsed.", {
+        dataKeys: Object.keys(body.data || {}),
+        phone_number: normalized.phone_number,
+      });
+    }
+
+    return normalized;
   } catch (error) {
     const status = error?.response?.status;
     if (status !== 403 && status !== 401) {
