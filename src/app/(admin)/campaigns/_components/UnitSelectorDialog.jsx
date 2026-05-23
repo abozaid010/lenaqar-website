@@ -23,7 +23,7 @@ const EnumPropertyIntent = ["rent", "sell"];
 function getFirstUnitImage(unit) {
   const imgs = Array.isArray(unit?.images) ? unit.images : [];
   const first = imgs.find((x) => x?.url)?.url;
-  return first || "/placeholder.svg";
+  return first || "/images/property_placeholder.jpg";
 }
 
 export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {

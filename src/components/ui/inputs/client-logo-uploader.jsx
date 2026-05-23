@@ -255,8 +255,8 @@ export default function ClientLogoUploader({
   };
 
   const displaySrc = deferred
-    ? deferredPreview || getClientLogoDisplayUrl(logoUrl) || "/placeholder.svg"
-    : getClientLogoDisplayUrl(logoUrl) || "/placeholder.svg";
+    ? deferredPreview || getClientLogoDisplayUrl(logoUrl) || "/images/defaultImage.jpg"
+    : getClientLogoDisplayUrl(logoUrl) || "/images/defaultImage.jpg";
 
   const hasLogo = deferred ? !!deferredPreview || !!logoUrl : !!logoUrl;
 
