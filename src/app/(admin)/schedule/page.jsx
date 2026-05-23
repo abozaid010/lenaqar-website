@@ -7,6 +7,7 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
 import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
@@ -71,7 +72,7 @@ const page = async () => {
   try {
     // Run both API calls in parallel for better performance
     const [data, dataSales] = await Promise.allSettled([
-      getschedual(formattedBefore, formattedAfter),
+      getschedual(formattedBefore, formattedAfter, SCHEDULE_VISIBLE_ACTIONS),
       getSalesData()
     ]);
 

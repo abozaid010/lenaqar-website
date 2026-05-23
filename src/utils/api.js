@@ -721,6 +721,34 @@ export async function getClientActions(phoneNumber) {
   }
 }
 
+/**
+ * Fetch scheduled actions by date range.
+ * Sends allowed actions under the `action` query param as requested by backend.
+ */
+export async function fetchScheduledActionsByDate(
+  startDate,
+  endDate,
+  actions = []
+) {
+  try {
+    const params = new URLSearchParams();
+    params.set("start_date", startDate);
+    params.set("end_date", endDate);
+    actions.forEach((action) => {
+      params.append("action", action);
+    });
+    const response = await axiosInstance.get(
+      `action/scheduled-actions-by-date?${params.toString()}`
+    );
+
+    const list = response?.data?.data?.actions;
+    return Array.isArray(list) ? list : [];
+  } catch (error) {
+    console.error("Failed to fetch scheduled actions by date:", error.message);
+    return [];
+  }
+}
+
 // Tags API helpers
 export async function addLeadTags(userId, tags) {
   try {

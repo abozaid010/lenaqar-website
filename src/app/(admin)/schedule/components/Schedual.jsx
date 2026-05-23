@@ -7,7 +7,8 @@ import {
   phoneToE164,
 } from "@/components/phone/phone-utils";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
-import { getActionLabel } from "@/utils/actions";
+import { getActionLabel, SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
+import { fetchScheduledActionsByDate } from "@/utils/api";
 import {
   Calendar,
   ChevronDown,
@@ -56,6 +57,23 @@ const getWeekStartSaturday = (date) => {
   return d;
 };
 
+const normalizedScheduleActions = new Set(
+  SCHEDULE_VISIBLE_ACTIONS.map((action) => action.toLowerCase())
+);
+
+const isVisibleScheduleAction = (action) =>
+  normalizedScheduleActions.has(String(action || "").trim().toLowerCase());
+
+const formatToISODate = (date) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Allow browsing schedule history up to ~4 months (17 weeks) back.
+const MAX_PAST_WEEKS = 17;
+
 const Schedule = ({ data, dataSales }) => {
   const router = useRouter();
   const [currentDate, setCurrentDate] = useState(() =>
@@ -64,6 +82,7 @@ const Schedule = ({ data, dataSales }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [appointments, setAppointments] = useState(data || []);
   const [loading, setLoading] = useState(null);
+  const [isWeekLoading, setIsWeekLoading] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
   const { t, locale } = useI18n();
   const isRTL = t.direction === "rtl";
@@ -97,12 +116,40 @@ const Schedule = ({ data, dataSales }) => {
     return dates;
   };
 
-  const filteredData = data?.filter((item) => {
-    const itemDate = item.created_at.split("T")[0];
-    return getNext7DaysValues().includes(itemDate);
+  const filteredData = appointments?.filter((item) => {
+    const itemDate = String(item?.meeting_time || item?.created_at || "").split(
+      "T"
+    )[0];
+    if (!itemDate) return false;
+    return (
+      getNext7DaysValues().includes(itemDate) &&
+      isVisibleScheduleAction(item?.action)
+    );
   });
 
-  const navigateWeek = (direction) => {
+  const loadWeekData = async (weekStartDate) => {
+    const weekStart = new Date(weekStartDate);
+    const weekEnd = new Date(weekStartDate);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    setIsWeekLoading(true);
+    try {
+      const nextWeekData = await fetchScheduledActionsByDate(
+        formatToISODate(weekStart),
+        formatToISODate(weekEnd),
+        SCHEDULE_VISIBLE_ACTIONS
+      );
+      setAppointments(nextWeekData);
+    } catch (error) {
+      console.error("Failed to load week schedule:", error);
+      toast.error(t.schaduall?.loadError || "Failed to load schedule");
+      setAppointments([]);
+    } finally {
+      setIsWeekLoading(false);
+    }
+  };
+
+  const navigateWeek = async (direction) => {
     const newDate = new Date(currentDate);
     if (direction === "next") {
       newDate.setDate(newDate.getDate() + 7);
@@ -110,6 +157,7 @@ const Schedule = ({ data, dataSales }) => {
       newDate.setDate(newDate.getDate() - 7);
     }
     setCurrentDate(newDate);
+    await loadWeekData(newDate);
   };
 
   const getWeekRangeDisplay = () => {
@@ -133,7 +181,7 @@ const Schedule = ({ data, dataSales }) => {
   // consistently regardless of which weekday "today" is.
   const canNavigatePrev = () => {
     const minWeekStart = getWeekStartSaturday(new Date());
-    minWeekStart.setDate(minWeekStart.getDate() - 7);
+    minWeekStart.setDate(minWeekStart.getDate() - MAX_PAST_WEEKS * 7);
     return currentDate > minWeekStart;
   };
 
@@ -215,7 +263,7 @@ const Schedule = ({ data, dataSales }) => {
                 <div className="flex gap-2 rtl:flex-row-reverse">
                   <button
                     onClick={() => navigateWeek("prev")}
-                    disabled={!canNavigatePrev()}
+                    disabled={!canNavigatePrev() || isWeekLoading}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
                       canNavigatePrev()
                         ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
@@ -229,7 +277,7 @@ const Schedule = ({ data, dataSales }) => {
                   </button>
                   <button
                     onClick={() => navigateWeek("next")}
-                    disabled={!canNavigateNext()}
+                    disabled={!canNavigateNext() || isWeekLoading}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 border ${
                       canNavigateNext()
                         ? "text-gray-600 hover:text-primary hover:bg-primary/10 border-gray-200 hover:border-violet-200"
@@ -249,7 +297,14 @@ const Schedule = ({ data, dataSales }) => {
           {/* Appointments List */}
           <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2 space-y-4">
-              {filteredData?.length === 0 ? (
+              {isWeekLoading ? (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+                  <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
+                  <p className="text-gray-500">
+                    {t.loading || "Loading..."}
+                  </p>
+                </div>
+              ) : filteredData?.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                   <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-500 mb-2">
@@ -563,7 +618,7 @@ const Schedule = ({ data, dataSales }) => {
           <>
             <p className="text-sm text-gray-600 mb-4 px-1 leading-relaxed">
               {t.schaduall?.updateActionTimeHint ||
-                "Submitting creates a new action with the details below."}
+                "Submitting updates the current action with the details below."}
             </p>
             <NewActionForm
               key={`schedule-edit-${editAppointment.id}`}
@@ -583,9 +638,10 @@ const Schedule = ({ data, dataSales }) => {
                 getAppointmentDateTimeParts(editAppointment)?.timeStr ?? null
               }
               submitButtonLabel={
-                t.schaduall?.saveAsNewAction ||
-                "Save as new action"
+                t.schaduall?.updateAction ||
+                "Update action"
               }
+              useUpdateApi
               onSuccess={() => {
                 closeEditAppointment();
                 router.refresh();

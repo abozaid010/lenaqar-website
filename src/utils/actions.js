@@ -61,6 +61,13 @@ export const USER_ACTIONS = [
   },
 ];
 
+export const SCHEDULE_VISIBLE_ACTIONS = [
+  "Make a call",
+  "Office visit",
+  "Property view",
+  "Follow up later",
+];
+
 // Helper function to get action label by value and language
 export const getActionLabel = (value, language = "en") => {
   const action = USER_ACTIONS.find((action) => action.value === value);

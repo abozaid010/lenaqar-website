@@ -7,6 +7,7 @@ import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
 import { useActionState, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
+import { updateUserAction } from "@/utils/api";
 
 const initialState = {
   success: false,
@@ -25,10 +26,12 @@ export default function NewActionForm({
   defaultMeetingDate = null,
   defaultMeetingTime = null,
   submitButtonLabel = null,
+  useUpdateApi = false,
 }) {
   const { t, locale } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = LenaCookiesManager.getClientId();
+  const [updating, setUpdating] = useState(false);
 
   // Get actions suitable for the action form (excluding "all" and null values)
   const ACTIONS = USER_ACTIONS.filter(
@@ -278,8 +281,51 @@ export default function NewActionForm({
     }
   };
 
+  const handleUpdateSubmit = async (e) => {
+    e.preventDefault();
+    if (!userId) return;
+
+    try {
+      setUpdating(true);
+      await updateUserAction(userId, {
+        action: formData.action,
+        comment: formData.comment,
+        meeting_time: getFullMeetingDateTime(),
+        phone_number: phoneNumber || "",
+        name: name || "",
+      });
+
+      toast.success(
+        t.schaduall?.updateActionSuccess || "Action updated successfully",
+        {
+          duration: 3000,
+          position: "top-right",
+        }
+      );
+
+      if (onActionUpdate) {
+        onActionUpdate(userId, formData.action);
+      }
+      onSuccess?.();
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.detail ||
+          error?.message ||
+          t.schaduall?.updateActionError ||
+          "Failed to update action",
+        { position: "top-right" }
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
-    <form className="p-4 bg-gray-50/30 rounded-b-lg border-t border-gray-100" action={action}>
+    <form
+      className="p-4 bg-gray-50/30 rounded-b-lg border-t border-gray-100"
+      action={useUpdateApi ? undefined : action}
+      onSubmit={useUpdateApi ? handleUpdateSubmit : undefined}
+    >
       <input type="hidden" name="user_id" value={userId || ""} />
       <input type="hidden" name="name" value={name || ""} />
       <input type="hidden" name="phone_number" value={phoneNumber || ""} />
@@ -432,11 +478,13 @@ export default function NewActionForm({
       </div>
 
       <button
-        disabled={pending}
+        disabled={pending || updating}
         className="w-full flex justify-center items-center text-white px-4 py-3 rounded-xl bg-primary hover:bg-primary/90 transition-all shadow-md hover:shadow-lg disabled:opacity-70 disabled:cursor-not-allowed font-semibold text-sm"
       >
-        {pending ? <Loader2 className="animate-spin mr-2" size={18} /> : null}
-        {pending
+        {pending || updating ? (
+          <Loader2 className="animate-spin mr-2" size={18} />
+        ) : null}
+        {pending || updating
           ? t.actionForm.submittingButton
           : submitButtonLabel || t.actionForm.submitButton}
       </button>
