@@ -8,6 +8,7 @@ import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleA
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 import { PhoneField } from "@/components/phone/PhoneField";
+import { phoneToE164 } from "@/components/phone/phone-utils";
 import WhatsappAutomationSection from "./WhatsappAutomationSection";
 
 const SHARING_OPTIONS = [
@@ -46,12 +47,19 @@ const inputCls =
 const selectCls =
   "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary bg-white";
 
+function normalizePhoneForField(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  return phoneToE164(trimmed, "EG") || trimmed;
+}
+
 function buildInitialState(client) {
   return {
     client_name: client.client_name || "",
     full_name: client.full_name || "",
     email: client.email || "",
-    phone_number: client.phone_number || "",
+    phone_number: normalizePhoneForField(client.phone_number),
     address: client.address || "",
     crm_link: client.crm_link || "",
     google_map_link: client.google_map_link || "",
@@ -86,6 +94,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
   const handleSubmit = async () => {
     const payload = {
       ...form,
+      phone_number:
+        phoneToE164(form.phone_number, "EG") || form.phone_number?.trim() || "",
       logo_url: form.logo_url || null,
       price_percentage: parseFloat(form.price_percentage) || 0,
       accurate_queries_level: parseInt(form.accurate_queries_level) || 0,

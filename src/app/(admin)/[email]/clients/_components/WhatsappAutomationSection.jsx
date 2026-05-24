@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
+import { PhoneField } from "@/components/phone/PhoneField";
+import { phoneToE164 } from "@/components/phone/phone-utils";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/hooks/useI18n";
 import {
@@ -26,6 +28,13 @@ function readLinkedWhatsapp(profileResponse) {
   return data.linked_automated_whatsapp ?? null;
 }
 
+function normalizeWhatsappPhone(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  return phoneToE164(trimmed, "EG") || trimmed;
+}
+
 export default function WhatsappAutomationSection({ clientId, enabled = true }) {
   const { translate } = useI18n();
   const [expanded, setExpanded] = useState(true);
@@ -33,6 +42,7 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
   const [isLinked, setIsLinked] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [unlinkOpen, setUnlinkOpen] = useState(false);
+  const profileSyncKeyRef = useRef(null);
 
   const {
     data: profileResponse,
@@ -46,14 +56,14 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     refetchOnWindowFocus: false,
   });
 
-  const applyLinkedState = useCallback((linked) => {
+  const applyLinkedState = useCallback((linked, { clearToken = true } = {}) => {
     if (linked) {
       setIsLinked(true);
-      setForm({
+      setForm((prev) => ({
         whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
-        whatsapp_number: linked.whatsapp_number ?? "",
-        whatsapp_instance_token: "",
-      });
+        whatsapp_number: normalizeWhatsappPhone(linked.whatsapp_number),
+        whatsapp_instance_token: clearToken ? "" : prev.whatsapp_instance_token,
+      }));
     } else {
       setIsLinked(false);
       setForm(EMPTY_WHATSAPP_FORM);
@@ -62,9 +72,30 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
   }, []);
 
   useEffect(() => {
-    if (!enabled) return;
-    applyLinkedState(readLinkedWhatsapp(profileResponse));
-  }, [profileResponse, enabled, applyLinkedState]);
+    if (!enabled) {
+      profileSyncKeyRef.current = null;
+      setForm(EMPTY_WHATSAPP_FORM);
+      setIsLinked(false);
+      setFieldErrors({});
+      return;
+    }
+  }, [enabled, clientId]);
+
+  useEffect(() => {
+    if (!enabled || profileLoading || profileResponse == null) return;
+
+    const linked = readLinkedWhatsapp(profileResponse);
+    const syncKey = `${clientId}:${linked?.whatsapp_instance_id ?? ""}:${linked?.whatsapp_number ?? ""}:${linked ? "1" : "0"}`;
+    if (profileSyncKeyRef.current === syncKey) return;
+    profileSyncKeyRef.current = syncKey;
+    applyLinkedState(linked, { clearToken: true });
+  }, [
+    enabled,
+    clientId,
+    profileLoading,
+    profileResponse,
+    applyLinkedState,
+  ]);
 
   const linkMutation = useMutation({
     mutationFn: (payload) => linkClientWhatsappInstance(clientId, payload),
@@ -75,13 +106,16 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
           "WhatsApp instance linked successfully"
         )
       );
-      const linked = readLinkedWhatsapp(response) ?? response?.data?.linked_automated_whatsapp;
-      applyLinkedState(
+      const linked =
+        readLinkedWhatsapp(response) ?? response?.data?.linked_automated_whatsapp;
+      const nextLinked =
         linked ?? {
           whatsapp_instance_id: form.whatsapp_instance_id,
           whatsapp_number: form.whatsapp_number,
-        }
-      );
+        };
+      const syncKey = `${clientId}:${nextLinked?.whatsapp_instance_id ?? ""}:${nextLinked?.whatsapp_number ?? ""}:1`;
+      profileSyncKeyRef.current = syncKey;
+      applyLinkedState(nextLinked, { clearToken: true });
       void refetchProfile();
     },
     onError: (error) => {
@@ -103,7 +137,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
           "WhatsApp instance unlinked"
         )
       );
-      applyLinkedState(null);
+      profileSyncKeyRef.current = `${clientId}:::0`;
+      applyLinkedState(null, { clearToken: true });
       setUnlinkOpen(false);
       void refetchProfile();
     },
@@ -120,33 +155,40 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     },
   });
 
-  const setField = (key) => (e) => {
-    const value = e?.target?.value ?? "";
-    setForm((prev) => ({ ...prev, [key]: value }));
-    if (fieldErrors[key]) {
-      setFieldErrors((prev) => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      });
-    }
+  const clearFieldError = (key) => {
+    setFieldErrors((prev) => {
+      if (!prev[key]) return prev;
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
   };
 
   const validate = () => {
     const errors = {};
-    if (!form.whatsapp_instance_id.trim()) {
+    const instanceId = form.whatsapp_instance_id.trim();
+    const phoneE164 =
+      phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+    const token = form.whatsapp_instance_token.trim();
+
+    if (!instanceId) {
       errors.whatsapp_instance_id = translate(
         "editClient.whatsapp.instanceIdRequired",
         "UltraMsg Instance ID is required"
       );
     }
-    if (!form.whatsapp_number.trim()) {
+    if (!phoneE164) {
       errors.whatsapp_number = translate(
         "editClient.whatsapp.numberRequired",
         "WhatsApp number is required"
       );
+    } else if (!phoneToE164(form.whatsapp_number, "EG")) {
+      errors.whatsapp_number = translate(
+        "phoneField.invalid",
+        "Invalid phone number"
+      );
     }
-    if (!form.whatsapp_instance_token.trim()) {
+    if (!token) {
       errors.whatsapp_instance_token = translate(
         "editClient.whatsapp.tokenRequired",
         "UltraMsg token is required"
@@ -156,14 +198,17 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     return Object.keys(errors).length === 0;
   };
 
-  const handleLinkSave = (e) => {
-    e.preventDefault();
+  const handleLinkSave = () => {
     if (!validate()) return;
+
+    const phoneE164 =
+      phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+    const token = form.whatsapp_instance_token.trim();
 
     linkMutation.mutate({
       whatsapp_instance_id: form.whatsapp_instance_id.trim(),
-      whatsapp_number: form.whatsapp_number.trim(),
-      whatsapp_instance_token: form.whatsapp_instance_token.trim(),
+      whatsapp_number: phoneE164,
+      whatsapp_instance_token: token,
     });
   };
 
@@ -212,7 +257,7 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                 </span>
               </div>
             ) : (
-              <form onSubmit={handleLinkSave} className="space-y-4">
+              <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <LenaTextField
                     label={translate(
@@ -221,7 +266,13 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                     )}
                     name="whatsapp_instance_id"
                     value={form.whatsapp_instance_id}
-                    onChange={setField("whatsapp_instance_id")}
+                    onChange={(e) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_instance_id: e.target.value,
+                      }));
+                      clearFieldError("whatsapp_instance_id");
+                    }}
                     placeholder={translate(
                       "editClient.whatsapp.instanceIdPlaceholder",
                       "instance177433"
@@ -232,24 +283,25 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                     errorMessage={fieldErrors.whatsapp_instance_id}
                     autoComplete="off"
                   />
-                  <LenaTextField
+                  <PhoneField
+                    className="w-full"
+                    name="whatsapp_number"
                     label={translate(
                       "editClient.whatsapp.numberLabel",
                       "WhatsApp Number"
                     )}
-                    name="whatsapp_number"
-                    type="tel"
-                    value={form.whatsapp_number}
-                    onChange={setField("whatsapp_number")}
-                    placeholder={translate(
-                      "editClient.whatsapp.numberPlaceholder",
-                      "+201055585339"
-                    )}
+                    value={form.whatsapp_number ?? ""}
+                    onChange={(next) => {
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_number: next ?? "",
+                      }));
+                      clearFieldError("whatsapp_number");
+                    }}
+                    defaultCountry="EG"
                     required
                     disabled={isBusy}
-                    error={!!fieldErrors.whatsapp_number}
-                    errorMessage={fieldErrors.whatsapp_number}
-                    autoComplete="tel"
+                    error={fieldErrors.whatsapp_number}
                   />
                 </div>
 
@@ -261,7 +313,13 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                   name="whatsapp_instance_token"
                   type="password"
                   value={form.whatsapp_instance_token}
-                  onChange={setField("whatsapp_instance_token")}
+                  onChange={(e) => {
+                    setForm((prev) => ({
+                      ...prev,
+                      whatsapp_instance_token: e.target.value,
+                    }));
+                    clearFieldError("whatsapp_instance_token");
+                  }}
                   placeholder={tokenPlaceholder}
                   required
                   disabled={isBusy}
@@ -290,7 +348,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                     </button>
                   )}
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={handleLinkSave}
                     disabled={isBusy}
                     className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-60 disabled:pointer-events-none inline-flex items-center gap-2"
                   >
@@ -308,7 +367,7 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                         )}
                   </button>
                 </div>
-              </form>
+              </div>
             )}
           </div>
         )}
