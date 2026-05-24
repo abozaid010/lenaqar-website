@@ -1,6 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -22,6 +30,9 @@ const EMPTY_WHATSAPP_FORM = {
   whatsapp_instance_token: "",
 };
 
+/** Shown when a token exists server-side but is not returned in API responses. */
+const SAVED_TOKEN_MASK = "••••••••••••••••";
+
 function readLinkedWhatsapp(profileResponse) {
   const data = profileResponse?.data;
   if (!data || typeof data !== "object") return null;
@@ -35,14 +46,28 @@ function normalizeWhatsappPhone(raw) {
   return phoneToE164(trimmed, "EG") || trimmed;
 }
 
-export default function WhatsappAutomationSection({ clientId, enabled = true }) {
+function snapshotForm(form) {
+  return {
+    whatsapp_instance_id: form.whatsapp_instance_id?.trim() ?? "",
+    whatsapp_number: form.whatsapp_number?.trim() ?? "",
+    whatsapp_instance_token: form.whatsapp_instance_token?.trim() ?? "",
+  };
+}
+
+const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
+  { clientId, enabled = true },
+  ref
+) {
   const { translate } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const [form, setForm] = useState(EMPTY_WHATSAPP_FORM);
   const [isLinked, setIsLinked] = useState(false);
+  const [hasSavedToken, setHasSavedToken] = useState(false);
+  const [tokenDirty, setTokenDirty] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
   const [unlinkOpen, setUnlinkOpen] = useState(false);
   const profileSyncKeyRef = useRef(null);
+  const baselineRef = useRef(null);
 
   const {
     data: profileResponse,
@@ -75,10 +100,17 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     if (linked) {
       const instanceId = linked.whatsapp_instance_id ?? "";
       const phone = normalizeWhatsappPhone(linked.whatsapp_number);
+      const apiToken =
+        typeof linked.whatsapp_instance_token === "string"
+          ? linked.whatsapp_instance_token.trim()
+          : "";
 
       setIsLinked((prev) => (prev ? prev : true));
+      setHasSavedToken(Boolean(apiToken) || true);
+      setTokenDirty(false);
+
       setForm((prev) => {
-        const token = clearToken ? "" : prev.whatsapp_instance_token;
+        const token = clearToken ? apiToken || "" : prev.whatsapp_instance_token;
         if (
           prev.whatsapp_instance_id === instanceId &&
           prev.whatsapp_number === phone &&
@@ -92,8 +124,18 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
           whatsapp_instance_token: token,
         };
       });
+
+      baselineRef.current = {
+        whatsapp_instance_id: instanceId,
+        whatsapp_number: phone,
+        hasSavedToken: true,
+      };
     } else {
       setIsLinked((prev) => (prev ? false : prev));
+      setHasSavedToken(false);
+      setTokenDirty(false);
+      baselineRef.current = null;
+
       setForm((prev) => {
         if (
           !prev.whatsapp_instance_id &&
@@ -122,6 +164,9 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
         return EMPTY_WHATSAPP_FORM;
       });
       setIsLinked((prev) => (prev ? false : prev));
+      setHasSavedToken(false);
+      setTokenDirty(false);
+      baselineRef.current = null;
       setFieldErrors((prev) => (Object.keys(prev).length === 0 ? prev : {}));
     }
   }, [enabled, clientId]);
@@ -136,12 +181,6 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
   const linkMutation = useMutation({
     mutationFn: (payload) => linkClientWhatsappInstance(clientId, payload),
     onSuccess: (response) => {
-      toast.success(
-        translate(
-          "editClient.whatsapp.linkSuccess",
-          "WhatsApp instance linked successfully"
-        )
-      );
       const linked =
         readLinkedWhatsapp(response) ?? response?.data?.linked_automated_whatsapp;
       const nextLinked =
@@ -152,6 +191,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
       const syncKey = `${clientId}:${nextLinked?.whatsapp_instance_id ?? ""}:${nextLinked?.whatsapp_number ?? ""}:1`;
       profileSyncKeyRef.current = syncKey;
       applyLinkedState(nextLinked, { clearToken: true });
+      setHasSavedToken(true);
+      setTokenDirty(false);
       void refetchProfile();
     },
     onError: (error) => {
@@ -200,12 +241,49 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     });
   };
 
-  const validate = () => {
+  const hasWhatsappDraft = useCallback(() => {
+    const snap = snapshotForm(form);
+    return Boolean(
+      snap.whatsapp_instance_id ||
+        snap.whatsapp_number ||
+        snap.whatsapp_instance_token ||
+        isLinked
+    );
+  }, [form, isLinked]);
+
+  const hasWhatsappChanges = useCallback(() => {
+    if (!hasWhatsappDraft()) return false;
+    const snap = snapshotForm(form);
+    const baseline = baselineRef.current;
+
+    if (!baseline) {
+      return Boolean(
+        snap.whatsapp_instance_id ||
+          snap.whatsapp_number ||
+          snap.whatsapp_instance_token
+      );
+    }
+
+    if (snap.whatsapp_instance_id !== baseline.whatsapp_instance_id) return true;
+    if (snap.whatsapp_number !== baseline.whatsapp_number) return true;
+    if (tokenDirty && snap.whatsapp_instance_token) return true;
+    if (!isLinked && snap.whatsapp_instance_token) return true;
+
+    return false;
+  }, [form, hasWhatsappDraft, isLinked, tokenDirty]);
+
+  const validate = useCallback(() => {
     const errors = {};
     const instanceId = form.whatsapp_instance_id.trim();
     const phoneE164 =
       phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
     const token = form.whatsapp_instance_token.trim();
+    const needsWhatsappSave = hasWhatsappChanges();
+
+    if (!needsWhatsappSave) {
+      setFieldErrors({});
+      return true;
+    }
 
     if (!instanceId) {
       errors.whatsapp_instance_id = translate(
@@ -224,29 +302,69 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
         "Invalid phone number"
       );
     }
-    if (!token) {
+
+    const tokenRequired = !isLinked || tokenDirty;
+    if (tokenRequired && !token) {
       errors.whatsapp_instance_token = translate(
         "editClient.whatsapp.tokenRequired",
         "UltraMsg token is required"
       );
     }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }, [form, hasWhatsappChanges, isLinked, tokenDirty, translate]);
 
-  const handleLinkSave = () => {
-    if (!validate()) return;
+  const submitWhatsapp = useCallback(async () => {
+    if (!hasWhatsappChanges()) return true;
+    if (!validate()) return false;
 
     const phoneE164 =
       phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
     const token = form.whatsapp_instance_token.trim();
 
-    linkMutation.mutate({
+    const payload = {
       whatsapp_instance_id: form.whatsapp_instance_id.trim(),
       whatsapp_number: phoneE164,
-      whatsapp_instance_token: token,
-    });
-  };
+    };
+
+    if (token && token !== SAVED_TOKEN_MASK) {
+      payload.whatsapp_instance_token = token;
+    }
+
+    try {
+      await linkMutation.mutateAsync(payload);
+      return true;
+    } catch {
+      return false;
+    }
+  }, [form, hasWhatsappChanges, validate, linkMutation]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: submitWhatsapp,
+      validate,
+      isBusy: () =>
+        profileLoading || linkMutation.isPending || unlinkMutation.isPending,
+      hasChanges: hasWhatsappChanges,
+    }),
+    [
+      submitWhatsapp,
+      validate,
+      profileLoading,
+      linkMutation.isPending,
+      unlinkMutation.isPending,
+      hasWhatsappChanges,
+    ]
+  );
+
+  const showSavedTokenMask =
+    isLinked && hasSavedToken && !tokenDirty && !form.whatsapp_instance_token.trim();
+
+  const tokenInputValue = showSavedTokenMask
+    ? SAVED_TOKEN_MASK
+    : form.whatsapp_instance_token;
 
   const tokenPlaceholder = isLinked
     ? translate(
@@ -348,22 +466,34 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                   )}
                   name="whatsapp_instance_token"
                   type="password"
-                  value={form.whatsapp_instance_token}
+                  value={tokenInputValue}
                   onChange={(e) => {
+                    const next = e.target.value;
+                    setTokenDirty(true);
                     setForm((prev) => ({
                       ...prev,
-                      whatsapp_instance_token: e.target.value,
+                      whatsapp_instance_token:
+                        next === SAVED_TOKEN_MASK ? "" : next,
                     }));
                     clearFieldError("whatsapp_instance_token");
                   }}
+                  onFocus={() => {
+                    if (showSavedTokenMask) {
+                      setTokenDirty(true);
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_instance_token: "",
+                      }));
+                    }
+                  }}
                   placeholder={tokenPlaceholder}
-                  required
+                  required={!isLinked || tokenDirty}
                   disabled={isBusy}
                   error={!!fieldErrors.whatsapp_instance_token}
                   errorMessage={fieldErrors.whatsapp_instance_token}
                   autoComplete="new-password"
                   helperText={
-                    isLinked
+                    showSavedTokenMask || (isLinked && hasSavedToken)
                       ? translate(
                           "editClient.whatsapp.tokenHelperLinked",
                           "A token is already saved. Enter a new token to replace it."
@@ -372,8 +502,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                   }
                 />
 
-                <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-                  {isLinked && (
+                {isLinked && (
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
                     <button
                       type="button"
                       onClick={() => setUnlinkOpen(true)}
@@ -382,27 +512,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
                     >
                       {translate("editClient.whatsapp.unlinkButton", "Unlink")}
                     </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={handleLinkSave}
-                    disabled={isBusy}
-                    className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 disabled:opacity-60 disabled:pointer-events-none inline-flex items-center gap-2"
-                  >
-                    {linkMutation.isPending && (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    )}
-                    {isLinked
-                      ? translate(
-                          "editClient.whatsapp.updateButton",
-                          "Update WhatsApp"
-                        )
-                      : translate(
-                          "editClient.whatsapp.linkButton",
-                          "Link WhatsApp"
-                        )}
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -426,4 +537,8 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
       />
     </>
   );
-}
+});
+
+WhatsappAutomationSection.displayName = "WhatsappAutomationSection";
+
+export default WhatsappAutomationSection;

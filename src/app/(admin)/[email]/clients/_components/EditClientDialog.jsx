@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { useClientPermissionSchema, useUpdateClient } from "@/hooks/use-clients-data";
@@ -86,6 +86,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
   const { t } = useI18n();
   const [form, setForm] = useState(() => buildInitialState(client));
   const [logoUploading, setLogoUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const whatsappRef = useRef(null);
   const updateClient = useUpdateClient();
   const { rawSchema, isLoading: permissionSchemaLoading } =
     useClientPermissionSchema(isOpen);
@@ -111,21 +113,35 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async () => {
-    const payload = {
-      ...form,
-      phone_number:
-        phoneToE164(form.phone_number, "EG") || form.phone_number?.trim() || "",
-      logo_url: form.logo_url || null,
-      price_percentage: parseFloat(form.price_percentage) || 0,
-      accurate_queries_level: parseInt(form.accurate_queries_level) || 0,
-    };
-
+    setIsSaving(true);
     try {
+      const whatsappApi = whatsappRef.current;
+      if (whatsappApi?.hasChanges?.() && !whatsappApi.validate()) {
+        return;
+      }
+
+      const payload = {
+        ...form,
+        phone_number:
+          phoneToE164(form.phone_number, "EG") || form.phone_number?.trim() || "",
+        logo_url: form.logo_url || null,
+        price_percentage: parseFloat(form.price_percentage) || 0,
+        accurate_queries_level: parseInt(form.accurate_queries_level) || 0,
+      };
+
       await updateClient.mutateAsync({ clientId: client.client_id, payload });
+
+      if (whatsappApi?.hasChanges?.()) {
+        const whatsappOk = await whatsappApi.submit();
+        if (!whatsappOk) return;
+      }
+
       toast.success(t?.common?.clientUpdated);
       onClose();
     } catch {
       toast.error(t?.common?.failedToUpdateClient);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -136,8 +152,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       title={`Edit ${client.client_name || client.client_id}`}
       submitLabel={t?.saveChangesButton || "Save Changes"}
       onSubmit={handleSubmit}
-      submitLoading={updateClient.isPending || logoUploading}
-      submitDisabled={updateClient.isPending || logoUploading}
+      submitLoading={updateClient.isPending || logoUploading || isSaving}
+      submitDisabled={updateClient.isPending || logoUploading || isSaving}
       bodyClassName="space-y-4"
     >
       {/* Basic Info */}
@@ -272,6 +288,7 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       />
 
       <WhatsappAutomationSection
+        ref={whatsappRef}
         clientId={client.client_id}
         enabled={isOpen}
       />
