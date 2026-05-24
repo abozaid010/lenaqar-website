@@ -3,7 +3,11 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
-import { useUpdateClient } from "@/hooks/use-clients-data";
+import { useClientPermissionSchema, useUpdateClient } from "@/hooks/use-clients-data";
+import {
+  getResolvedPermissionSchema,
+  sanitizeModuleActions,
+} from "@/lib/permission-schema";
 import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleActionsSelector";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
@@ -83,10 +87,25 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
   const [form, setForm] = useState(() => buildInitialState(client));
   const [logoUploading, setLogoUploading] = useState(false);
   const updateClient = useUpdateClient();
+  const { rawSchema, isLoading: permissionSchemaLoading } =
+    useClientPermissionSchema(isOpen);
 
   useEffect(() => {
-    if (isOpen) setForm(buildInitialState(client));
-  }, [isOpen, client]);
+    if (!isOpen) return;
+    setForm(buildInitialState(client));
+  }, [isOpen, client?.client_id]);
+
+  useEffect(() => {
+    if (!isOpen || permissionSchemaLoading || !rawSchema) return;
+    const schema = getResolvedPermissionSchema(rawSchema);
+    setForm((prev) => {
+      const sanitized = sanitizeModuleActions(prev.module_actions, schema);
+      const unchanged =
+        JSON.stringify(sanitized) === JSON.stringify(prev.module_actions);
+      if (unchanged) return prev;
+      return { ...prev, module_actions: sanitized };
+    });
+  }, [isOpen, permissionSchemaLoading, rawSchema]);
 
   const set = (key) => (e) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -245,6 +264,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       <SectionTitle>Module Permissions</SectionTitle>
       <ModuleActionsSelector
         moduleActions={form.module_actions}
+        permissionSchema={rawSchema}
+        isSchemaLoading={permissionSchemaLoading}
         onChange={(newActions) =>
           setForm((prev) => ({ ...prev, module_actions: newActions }))
         }

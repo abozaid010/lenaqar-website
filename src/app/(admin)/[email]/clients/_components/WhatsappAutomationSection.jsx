@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { ChevronDown, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -52,50 +52,86 @@ export default function WhatsappAutomationSection({ clientId, enabled = true }) 
     queryKey: ["clientProfile", clientId, "whatsapp"],
     queryFn: () => getClientProfile(clientId),
     enabled: Boolean(enabled && clientId),
-    staleTime: 0,
+    staleTime: 1000 * 60,
     refetchOnWindowFocus: false,
   });
 
+  const linkedFromProfile = useMemo(
+    () => (profileResponse ? readLinkedWhatsapp(profileResponse) : null),
+    [
+      profileResponse,
+      profileResponse?.data?.linked_automated_whatsapp?.whatsapp_instance_id,
+      profileResponse?.data?.linked_automated_whatsapp?.whatsapp_number,
+    ]
+  );
+
+  const linkedSyncKey = useMemo(() => {
+    if (!enabled || profileResponse == null) return null;
+    if (!linkedFromProfile) return `${clientId}:::0`;
+    return `${clientId}:${linkedFromProfile.whatsapp_instance_id ?? ""}:${linkedFromProfile.whatsapp_number ?? ""}:1`;
+  }, [enabled, clientId, profileResponse, linkedFromProfile]);
+
   const applyLinkedState = useCallback((linked, { clearToken = true } = {}) => {
     if (linked) {
-      setIsLinked(true);
-      setForm((prev) => ({
-        whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
-        whatsapp_number: normalizeWhatsappPhone(linked.whatsapp_number),
-        whatsapp_instance_token: clearToken ? "" : prev.whatsapp_instance_token,
-      }));
+      const instanceId = linked.whatsapp_instance_id ?? "";
+      const phone = normalizeWhatsappPhone(linked.whatsapp_number);
+
+      setIsLinked((prev) => (prev ? prev : true));
+      setForm((prev) => {
+        const token = clearToken ? "" : prev.whatsapp_instance_token;
+        if (
+          prev.whatsapp_instance_id === instanceId &&
+          prev.whatsapp_number === phone &&
+          prev.whatsapp_instance_token === token
+        ) {
+          return prev;
+        }
+        return {
+          whatsapp_instance_id: instanceId,
+          whatsapp_number: phone,
+          whatsapp_instance_token: token,
+        };
+      });
     } else {
-      setIsLinked(false);
-      setForm(EMPTY_WHATSAPP_FORM);
+      setIsLinked((prev) => (prev ? false : prev));
+      setForm((prev) => {
+        if (
+          !prev.whatsapp_instance_id &&
+          !prev.whatsapp_number &&
+          !prev.whatsapp_instance_token
+        ) {
+          return prev;
+        }
+        return EMPTY_WHATSAPP_FORM;
+      });
     }
-    setFieldErrors({});
+    setFieldErrors((prev) => (Object.keys(prev).length === 0 ? prev : {}));
   }, []);
 
   useEffect(() => {
+    profileSyncKeyRef.current = null;
     if (!enabled) {
-      profileSyncKeyRef.current = null;
-      setForm(EMPTY_WHATSAPP_FORM);
-      setIsLinked(false);
-      setFieldErrors({});
-      return;
+      setForm((prev) => {
+        if (
+          !prev.whatsapp_instance_id &&
+          !prev.whatsapp_number &&
+          !prev.whatsapp_instance_token
+        ) {
+          return prev;
+        }
+        return EMPTY_WHATSAPP_FORM;
+      });
+      setIsLinked((prev) => (prev ? false : prev));
+      setFieldErrors((prev) => (Object.keys(prev).length === 0 ? prev : {}));
     }
   }, [enabled, clientId]);
 
   useEffect(() => {
-    if (!enabled || profileLoading || profileResponse == null) return;
-
-    const linked = readLinkedWhatsapp(profileResponse);
-    const syncKey = `${clientId}:${linked?.whatsapp_instance_id ?? ""}:${linked?.whatsapp_number ?? ""}:${linked ? "1" : "0"}`;
-    if (profileSyncKeyRef.current === syncKey) return;
-    profileSyncKeyRef.current = syncKey;
-    applyLinkedState(linked, { clearToken: true });
-  }, [
-    enabled,
-    clientId,
-    profileLoading,
-    profileResponse,
-    applyLinkedState,
-  ]);
+    if (!enabled || profileLoading || linkedSyncKey == null) return;
+    if (profileSyncKeyRef.current === linkedSyncKey) return;
+    profileSyncKeyRef.current = linkedSyncKey;
+    applyLinkedState(linkedFromProfile, { clearToken: true });
+  }, [enabled, profileLoading, linkedSyncKey, linkedFromProfile, applyLinkedState]);
 
   const linkMutation = useMutation({
     mutationFn: (payload) => linkClientWhatsappInstance(clientId, payload),

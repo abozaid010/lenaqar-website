@@ -2010,10 +2010,15 @@ export async function deleteUser(userId, clientId = "public") {
 
 // Admin Clients API (king admin only)
 
-export async function fetchAdminClients(page = 1, pageSize = 10) {
+export async function fetchAdminClients(page = 1, pageSize = 20, search = "") {
   try {
+    const params = { page, page_size: pageSize };
+    const trimmedSearch = typeof search === "string" ? search.trim() : "";
+    if (trimmedSearch) {
+      params.search = trimmedSearch;
+    }
     const response = await axiosInstance.get("/api/client/admin/clients", {
-      params: { page, page_size: pageSize },
+      params,
     });
     return response.data;
   } catch (error) {
@@ -2038,6 +2043,16 @@ export async function updateAdminClient(clientId, payload) {
 /** Scope profile / WhatsApp instance APIs to a specific client (king admin editing another tenant). */
 function clientScopedHeaders(clientId) {
   return clientId ? { "x-client-id": String(clientId) } : {};
+}
+
+export async function fetchClientPermissionSchema() {
+  try {
+    const response = await axiosInstance.get("client/permission-schema");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch permission schema:", error.message);
+    throw error;
+  }
 }
 
 export async function getClientProfile(clientId) {

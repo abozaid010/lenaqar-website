@@ -17,10 +17,19 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") || "1";
-    const page_size = searchParams.get("page_size") || "10";
+    const page_size = searchParams.get("page_size") || "20";
+    const search = searchParams.get("search")?.trim() || "";
+
+    const backendParams = new URLSearchParams({
+      page,
+      page_size,
+    });
+    if (search) {
+      backendParams.set("search", search);
+    }
 
     const response = await fetch(
-      `${API_BASE_URL}/client/admin/clients?page=${page}&page_size=${page_size}`,
+      `${API_BASE_URL}/client/admin/clients?${backendParams.toString()}`,
       {
         method: "GET",
         headers: {
