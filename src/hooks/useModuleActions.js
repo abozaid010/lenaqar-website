@@ -45,7 +45,7 @@ export function useModuleActions(moduleName) {
 
     const actions = getActionsForModule(moduleActions, moduleName);
     const flags = getModulePermissionFlags(actions ?? []);
-    return { ...flags, isReady };
+    return { ...flags, isReady, actions: flags.actions ?? [] };
   }, [isReady, moduleActions, moduleName]);
 }
 

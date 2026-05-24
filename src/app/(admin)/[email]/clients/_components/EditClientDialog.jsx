@@ -8,6 +8,7 @@ import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleA
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 import { PhoneField } from "@/components/phone/PhoneField";
+import WhatsappAutomationSection from "./WhatsappAutomationSection";
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
@@ -237,6 +238,11 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
         onChange={(newActions) =>
           setForm((prev) => ({ ...prev, module_actions: newActions }))
         }
+      />
+
+      <WhatsappAutomationSection
+        clientId={client.client_id}
+        enabled={isOpen}
       />
     </UnifiedDialog>
   );

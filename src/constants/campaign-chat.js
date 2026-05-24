@@ -13,7 +13,8 @@ export const CAMPAIGN_CHAT_ENDPOINTS = {
   UNIFIED_REPLY: "/campaign/unified-reply",
   UPDATE_NAME: "/campaign/update-name",
   TOGGLE_FAVORITE: "/campaign/toggle-favorite",
-  UPDATE_NOTES: "/campaign/update-notes"
+  UPDATE_NOTES: "/campaign/update-notes",
+  WHATSAPP_AUTOMATION_MESSAGE: "/whatsapp/automation_message",
 };
 
 // Pagination defaults

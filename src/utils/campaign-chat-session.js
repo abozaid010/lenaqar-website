@@ -95,6 +95,7 @@ function normalizeCampaignMessage(msg) {
     image_url: msg.image_url ?? msg.media_url ?? msg.image ?? null,
     template_name: msg.template_name ?? msg.template ?? null,
     language_code: msg.language_code ?? msg.lang ?? null,
+    source: msg.source ?? null,
   };
 }
 
@@ -129,6 +130,7 @@ export function normalizeCampaignSessionData(raw) {
     notes: raw.notes ?? session?.notes,
     total_messages_received:
       raw.total_messages_received ?? session?.total_messages_received,
+    source: raw.source ?? session?.source ?? null,
     history,
   };
 }

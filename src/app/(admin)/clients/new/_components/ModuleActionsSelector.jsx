@@ -49,7 +49,9 @@ const ACTIONS = [
   { value: "update_any", label: "Update Any" },
   { value: "update_developer_contacts", label: "Update Developer Contacts" },
   { value: "delete_own", label: "Delete Own" },
-  { value: "delete_any", label: "Delete Any" }
+  { value: "delete_any", label: "Delete Any" },
+  { value: "whatsapp", label: "WhatsApp API Template" },
+  { value: "whatsapp_automation", label: "WhatsApp Automation" },
 ];
 
 const ModuleActionsSelector = ({ moduleActions = {}, onChange }) => {

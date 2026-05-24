@@ -31,6 +31,7 @@ import { useModuleActionsContext } from "@/context/module-actions-context";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 
 const SidebarComponent = ({
   clientId = null,
@@ -80,11 +81,11 @@ const SidebarComponent = ({
   // Sync profile module_actions into context so all useModuleActions hooks
   // use the configured access list, not the JWT's owner-expanded list.
   useEffect(() => {
-    const profileModuleActions = pd?.module_actions;
-    if (profileModuleActions && typeof profileModuleActions === "object" && !Array.isArray(profileModuleActions)) {
+    const profileModuleActions = extractModuleActionsFromProfile(profilePayload);
+    if (profileModuleActions) {
       setModuleActions(profileModuleActions);
     }
-  }, [pd?.module_actions, setModuleActions]);
+  }, [profilePayload, setModuleActions]);
 
   const profileClientId =
     pd?.client_id ??

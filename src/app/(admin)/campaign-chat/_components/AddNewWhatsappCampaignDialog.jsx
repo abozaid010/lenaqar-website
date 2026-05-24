@@ -1,14 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Dialog from "@/components/ui/Dialog";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
+import toast from "react-hot-toast";
+import { useI18n } from "@/hooks/useI18n";
+import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { sendWhatsappAutomationMessages } from "@/utils/api";
+import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
+const DEFAULT_CONTACTS_JSON =
+  '[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]';
 
-const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
-  const [contacts, setContacts] = useState('[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]');
+const SEND_MODE = {
+  API: "api",
+  AUTOMATION: "automation",
+};
+
+function recipientsToContacts(recipients) {
+  return recipients.map((r) => ({
+    phone: r.phone_number,
+    name: r.user_name || r.phone_number,
+  }));
+}
+
+function getApiErrorMessage(error, fallback) {
+  return (
+    error?.response?.data?.error_message ||
+    error?.response?.data?.message ||
+    error?.message ||
+    fallback
+  );
+}
+
+const AddNewWhatsappCampaignDialog = ({
+  isOpen,
+  onClose,
+  recipients: recipientsProp = [],
+}) => {
+  const { t, translate } = useI18n();
+  const {
+    canUseApiTemplate: hasApiModule,
+    canUseAutomation: hasAutomationModule,
+    hasBothModules,
+  } = useWhatsappBulkAccess();
+
+  const [sendMode, setSendMode] = useState(
+    hasApiModule ? SEND_MODE.API : SEND_MODE.AUTOMATION
+  );
+  const [contacts, setContacts] = useState(DEFAULT_CONTACTS_JSON);
+  const [automationMessage, setAutomationMessage] = useState("");
   const [languageCode, setLanguageCode] = useState("ar_EG");
   const [templateName, setTemplateName] = useState("download_app_message1");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,192 +60,346 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
   const [jobResult, setJobResult] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const validatePhoneNumber = (phone) => {
-    // Basic phone number validation - should start with + and contain 8-15 digits
-    return phone.trim().length > 0;
-  };
+  const clientId = LenaCookiesManager.getClientId() || "public";
+  const hasPrefilledRecipients = recipientsProp.length > 0;
 
-  const validateLanguageCode = (code) => {
-    // Accept any text with length > 0, no format restrictions
-    const trimmedCode = code.trim();
-    return trimmedCode.length > 0;
-  };
+  useEffect(() => {
+    if (!isOpen) return;
+    if (hasApiModule && !hasAutomationModule) {
+      setSendMode(SEND_MODE.API);
+    } else if (!hasApiModule && hasAutomationModule) {
+      setSendMode(SEND_MODE.AUTOMATION);
+    } else if (hasBothModules) {
+      setSendMode((prev) =>
+        prev === SEND_MODE.API || prev === SEND_MODE.AUTOMATION
+          ? prev
+          : SEND_MODE.API
+      );
+    }
+  }, [isOpen, hasApiModule, hasAutomationModule, hasBothModules]);
+
+  const validatePhoneNumber = (phone) => phone.trim().length > 0;
+
+  const validateLanguageCode = (code) => code.trim().length > 0;
 
   const validateContacts = (contactsStr) => {
+    if (hasPrefilledRecipients) {
+      if (recipientsProp.length === 0) {
+        setError(
+          translate(
+            "dashboardFilter.bulkWhatsapp.noRecipients",
+            "No leads with valid phone numbers to send."
+          )
+        );
+        return false;
+      }
+      return true;
+    }
+
     if (!contactsStr.trim()) {
-      setError("Contacts field is required");
+      setError(
+        translate(
+          "campaignChat.bulkDialog.contactsRequired",
+          "Contacts field is required"
+        )
+      );
       return false;
     }
-    
+
     try {
       const parsedContacts = JSON.parse(contactsStr);
-      
-      // Check if it's an array
+
       if (!Array.isArray(parsedContacts)) {
-        setError("Contacts must be a JSON array");
+        setError(
+          translate(
+            "campaignChat.bulkDialog.contactsMustBeArray",
+            "Contacts must be a JSON array"
+          )
+        );
         return false;
       }
-      
-      // Check if array is not empty
+
       if (parsedContacts.length === 0) {
-        setError("Contacts array cannot be empty");
+        setError(
+          translate(
+            "campaignChat.bulkDialog.contactsEmpty",
+            "Contacts array cannot be empty"
+          )
+        );
         return false;
       }
-      
-      // Validate each contact object
+
       for (let i = 0; i < parsedContacts.length; i++) {
         const contact = parsedContacts[i];
-        
-        // Check if contact is an object
-        if (typeof contact !== 'object' || contact === null) {
-          setError(`Contact at index ${i} must be an object`);
+
+        if (typeof contact !== "object" || contact === null) {
+          setError(
+            translate(
+              "campaignChat.bulkDialog.contactMustBeObject",
+              `Contact at index ${i} must be an object`
+            )
+          );
           return false;
         }
-        
-        // Check required fields
+
         if (!contact.phone || !contact.name) {
-          setError(`Contact at index ${i} must have both 'phone' and 'name' fields`);
+          setError(
+            translate(
+              "campaignChat.bulkDialog.contactPhoneNameRequired",
+              `Contact at index ${i} must have both 'phone' and 'name' fields`
+            )
+          );
           return false;
         }
-        
-        // Validate phone number format
+
         if (!validatePhoneNumber(contact.phone)) {
-          setError(`Invalid phone number format for contact at index ${i}. Phone should start with + followed by 8-15 digits`);
+          setError(
+            translate(
+              "campaignChat.bulkDialog.invalidPhone",
+              `Invalid phone number for contact at index ${i}`
+            )
+          );
           return false;
         }
-        
-        // Check name is not empty
+
         if (!contact.name.trim()) {
-          setError(`Name cannot be empty for contact at index ${i}`);
+          setError(
+            translate(
+              "campaignChat.bulkDialog.emptyName",
+              `Name cannot be empty for contact at index ${i}`
+            )
+          );
           return false;
         }
       }
-      
+
       return true;
-    } catch (e) {
-      setError("Contacts must be valid JSON array");
+    } catch {
+      setError(
+        translate(
+          "campaignChat.bulkDialog.contactsInvalidJson",
+          "Contacts must be valid JSON array"
+        )
+      );
       return false;
     }
   };
 
-  const validateForm = () => {
-    // Clear previous messages
+  const validateApiForm = () => {
     setError("");
-    
-    // Validate contacts
+
     if (!validateContacts(contacts)) {
       return false;
     }
-    
-    // Validate language code - more flexible
+
     if (!languageCode.trim()) {
-      setError("Language code is required");
+      setError(
+        translate(
+          "campaignChat.bulkDialog.languageRequired",
+          "Language code is required"
+        )
+      );
       return false;
     }
-    
-    // Only show validation error on submit if format is clearly wrong
+
     if (!validateLanguageCode(languageCode)) {
-      setError("Invalid language code format. Use format: ll (e.g., ar, en) or ll_CC (e.g., ar_EG, en_US)");
+      setError(
+        translate(
+          "campaignChat.bulkDialog.languageInvalid",
+          "Invalid language code format"
+        )
+      );
       return false;
     }
-    
-    // Validate template name - more flexible
+
     if (!templateName.trim()) {
-      setError("Template name is required");
+      setError(
+        translate(
+          "campaignChat.bulkDialog.templateRequired",
+          "Template name is required"
+        )
+      );
       return false;
     }
-    
-    if (templateName.trim().length < 1) {
-      setError("Template name must be at least 1 character long");
-      return false;
-    }
-    
+
     return true;
   };
 
-  // Real-time form validation
+  const validateAutomationForm = () => {
+    setError("");
+
+    if (recipientsProp.length === 0) {
+      setError(
+        translate(
+          "dashboardFilter.bulkWhatsapp.noRecipients",
+          "No leads with valid phone numbers to send."
+        )
+      );
+      return false;
+    }
+
+    if (!automationMessage.trim()) {
+      setError(
+        translate(
+          "dashboardFilter.bulkWhatsapp.messageRequired",
+          "Message is required"
+        )
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   useEffect(() => {
-    const checkFormValidity = () => {
-      // Check contacts
-      try {
-        const parsedContacts = JSON.parse(contacts);
-        if (!Array.isArray(parsedContacts) || parsedContacts.length === 0) {
+    if (sendMode === SEND_MODE.AUTOMATION) {
+      setIsFormValid(
+        recipientsProp.length > 0 && automationMessage.trim().length > 0
+      );
+      return;
+    }
+
+    if (hasPrefilledRecipients) {
+      setIsFormValid(
+        recipientsProp.length > 0 &&
+          languageCode.trim().length > 0 &&
+          templateName.trim().length > 0
+      );
+      return;
+    }
+
+    try {
+      const parsedContacts = JSON.parse(contacts);
+      if (!Array.isArray(parsedContacts) || parsedContacts.length === 0) {
+        setIsFormValid(false);
+        return;
+      }
+
+      for (const contact of parsedContacts) {
+        if (!contact?.phone || !contact?.name) {
           setIsFormValid(false);
           return;
         }
-        
-        // Validate each contact
-        for (const contact of parsedContacts) {
-          if (!contact?.phone || !contact?.name) {
-            setIsFormValid(false);
-            return;
-          }
-        }
-      } catch {
-        setIsFormValid(false);
-        return;
       }
-      
-      // Check language code - more flexible validation
-      if (!languageCode.trim()) {
-        setIsFormValid(false);
-        return;
-      }
-      
-      // Check template name - more flexible validation
-      if (!templateName.trim() || templateName.trim().length < 1) {
-        setIsFormValid(false);
-        return;
-      }
-      
-      setIsFormValid(true);
+    } catch {
+      setIsFormValid(false);
+      return;
+    }
+
+    setIsFormValid(
+      languageCode.trim().length > 0 && templateName.trim().length > 0
+    );
+  }, [
+    sendMode,
+    contacts,
+    languageCode,
+    templateName,
+    automationMessage,
+    recipientsProp,
+    hasPrefilledRecipients,
+  ]);
+
+  const submitApiCampaign = async () => {
+    if (!validateApiForm()) return;
+
+    const payload = {
+      client_id: clientId,
+      contacts: hasPrefilledRecipients
+        ? recipientsToContacts(recipientsProp)
+        : JSON.parse(contacts),
+      template_name: templateName,
+      language_code: languageCode,
     };
 
-    checkFormValidity();
-  }, [contacts, languageCode, templateName]);
+    const response = await fetch(`${API_BASE_URL}/webhook/bulk/whatsapp/send`, {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
+    }
+
+    return response.json();
+  };
+
+  const submitAutomationMessages = async () => {
+    if (!validateAutomationForm()) return;
+
+    const leads = recipientsProp.map((recipient) => ({
+      phone_number: recipient.phone_number,
+      user_name: recipient.user_name || "",
+    }));
+
+    return sendWhatsappAutomationMessages({
+      client_id: clientId,
+      message: automationMessage.trim(),
+      leads,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     setError("");
-    
+
     try {
-      const payload = {
-        client_id: "public",
-        contacts: JSON.parse(contacts),
-        template_name: templateName,
-        language_code: languageCode
-      };
-
-      const response = await fetch(`${API_BASE_URL}/webhook/bulk/whatsapp/send`, {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      if (sendMode === SEND_MODE.AUTOMATION) {
+        const result = await submitAutomationMessages();
+        const queued =
+          result?.data?.queued ?? result?.queued ?? recipientsProp.length;
+        const saveErrors = result?.data?.errors ?? 0;
+        const successKey =
+          saveErrors > 0
+            ? "dashboardFilter.bulkWhatsapp.automationSuccessWithErrors"
+            : "dashboardFilter.bulkWhatsapp.automationSuccess";
+        const successText = translate(
+          successKey,
+          saveErrors > 0
+            ? `Queued ${queued} message(s) (${saveErrors} session save error(s))`
+            : `Queued ${queued} message(s)`
+        )
+          .replace("{count}", String(queued))
+          .replace("{errors}", String(saveErrors));
+        toast.success(successText);
+        setAutomationMessage("");
+        handleClose();
+        return;
       }
 
-      const result = await response.json();
+      const result = await submitApiCampaign();
 
-      // Reset form
-      setContacts('[\n  {\n    "phone": "+20 102 0914828",\n    "name": "Nada"\n  }\n]');
-      setLanguageCode("ar_EG");
-      setTemplateName("download_app_message1");
+      if (!hasPrefilledRecipients) {
+        setContacts(DEFAULT_CONTACTS_JSON);
+        setLanguageCode("ar_EG");
+        setTemplateName("download_app_message1");
+      }
 
-      // Show job result
       setJobResult(result);
-      
+      toast.success(
+        translate(
+          "campaignChat.bulkDialog.sendSuccess",
+          "Campaign sent successfully"
+        )
+      );
     } catch (err) {
-      setError(err.message || "Failed to send campaign. Please try again.");
+      const message = getApiErrorMessage(
+        err,
+        translate(
+          "dashboardFilter.bulkWhatsapp.sendFailed",
+          "Failed to send. Please try again."
+        )
+      );
+      setError(message);
+      toast.error(message);
     } finally {
       setIsSubmitting(false);
     }
@@ -213,76 +411,276 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setJobResult(null);
     setError("");
     onClose();
+  }, [onClose]);
+
+  const dialogTitle = translate(
+    "dashboardFilter.bulkWhatsapp.dialogTitle",
+    t?.dashboardFilter?.bulkWhatsapp?.dialogTitle || "Send WhatsApp"
+  );
+
+  const recipientSummary = translate(
+    "dashboardFilter.bulkWhatsapp.recipientCount",
+    "{count} recipient(s)"
+  ).replace("{count}", String(recipientsProp.length));
+
+  const renderModeTabs = () => {
+    if (!hasBothModules) return null;
+
+    return (
+      <div className="flex gap-2 mb-4 p-1 bg-gray-100 rounded-lg">
+        <button
+          type="button"
+          onClick={() => setSendMode(SEND_MODE.API)}
+          className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            sendMode === SEND_MODE.API
+              ? "bg-white text-primary shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          {translate(
+            "dashboardFilter.bulkWhatsapp.tabApiTemplate",
+            "API Template"
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setSendMode(SEND_MODE.AUTOMATION)}
+          className={`flex-1 px-3 py-2 text-sm font-medium rounded-md transition-colors ${
+            sendMode === SEND_MODE.AUTOMATION
+              ? "bg-white text-primary shadow-sm"
+              : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          {translate(
+            "dashboardFilter.bulkWhatsapp.tabAutomation",
+            "Automation"
+          )}
+        </button>
+      </div>
+    );
   };
 
-  const handleContactsChange = (e) => {
-    setContacts(e.target.value);
-    clearError("contacts");
-  };
+  const renderAutomationForm = () => (
+    <div className="relative flex flex-col flex-1 min-h-0">
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={translate("common.sending", t?.common?.sending || "Sending...")}
+      />
+      {hasPrefilledRecipients && (
+        <p className="mb-3 text-sm text-gray-600">{recipientSummary}</p>
+      )}
+      <LenaTextarea
+        label={translate(
+          "dashboardFilter.bulkWhatsapp.messageLabel",
+          "Message"
+        )}
+        name="automation_message"
+        value={automationMessage}
+        onChange={(e) => {
+          setAutomationMessage(e.target.value);
+          clearError("message");
+        }}
+        required
+        rows={8}
+        disabled={isSubmitting}
+        placeholder={translate(
+          "dashboardFilter.bulkWhatsapp.messagePlaceholder",
+          "Type your WhatsApp message..."
+        )}
+      />
+    </div>
+  );
 
-  const handleLanguageCodeChange = (e) => {
-    setLanguageCode(e.target.value);
-    clearError("language");
-  };
+  const renderApiForm = () => (
+    <form onSubmit={handleSubmit} className="h-full flex flex-col relative">
+      <LoadingOverlay
+        isVisible={isSubmitting}
+        message={translate("common.sending", t?.common?.sending || "Sending...")}
+      />
 
-  const handleTemplateNameChange = (e) => {
-    setTemplateName(e.target.value);
-    clearError("template");
-  };
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <p className="text-sm text-red-600">{error}</p>
+        </div>
+      )}
+
+      {hasPrefilledRecipients ? (
+        <div className="mb-6 p-3 bg-gray-50 border border-gray-200 rounded-md">
+          <p className="text-sm text-gray-700">{recipientSummary}</p>
+        </div>
+      ) : (
+        <div className="mb-6 flex-1">
+          <LenaTextarea
+            label={translate(
+              "campaignChat.bulkDialog.contactsLabel",
+              "Contacts (JSON Array)"
+            )}
+            name="contacts"
+            value={contacts}
+            onChange={(e) => {
+              setContacts(e.target.value);
+              clearError("contacts");
+            }}
+            required
+            error={error && error.includes("Contacts")}
+            errorMessage={error && error.includes("Contacts") ? error : ""}
+            helperText={translate(
+              "campaignChat.bulkDialog.contactsHelper",
+              "Enter contacts as JSON array with phone and name fields."
+            )}
+            rows={12}
+            className="font-mono text-sm"
+            dir="ltr"
+            disabled={isSubmitting}
+          />
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <LenaTextField
+          label={translate(
+            "campaignChat.bulkDialog.languageLabel",
+            "Language Code"
+          )}
+          name="language_code"
+          value={languageCode}
+          onChange={(e) => {
+            setLanguageCode(e.target.value);
+            clearError("language");
+          }}
+          required
+          placeholder="e.g., ar_EG"
+          disabled={isSubmitting}
+        />
+        <LenaTextField
+          label={translate(
+            "campaignChat.bulkDialog.templateLabel",
+            "Template Name"
+          )}
+          name="template_name"
+          value={templateName}
+          onChange={(e) => {
+            setTemplateName(e.target.value);
+            clearError("template");
+          }}
+          required
+          placeholder="e.g., download_app_message1"
+          disabled={isSubmitting}
+        />
+      </div>
+
+      <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+        <button
+          type="button"
+          onClick={handleClose}
+          disabled={isSubmitting}
+          className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          {translate("common.cancel", t?.common?.cancel || "Cancel")}
+        </button>
+        <LoadingButton
+          type="submit"
+          isLoading={isSubmitting}
+          disabled={!isFormValid}
+          loadingText={translate("common.sending", t?.common?.sending || "Sending...")}
+          className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+        >
+          <Send size={16} />
+          {translate(
+            "campaignChat.bulkDialog.sendCampaign",
+            "Send Campaign"
+          )}
+        </LoadingButton>
+      </div>
+    </form>
+  );
+
+  const showAutomation =
+    sendMode === SEND_MODE.AUTOMATION && hasAutomationModule;
+  const showApi = sendMode === SEND_MODE.API && hasApiModule;
 
   return (
     <Dialog
       isOpen={isOpen}
       onClose={handleClose}
-      title="Add New WhatsApp Campaign"
+      title={dialogTitle}
       showCloseButton={!isSubmitting}
       closeOnOutsideClick={!isSubmitting}
       closeOnEscape={!isSubmitting}
     >
-      {/* Job Result View */}
       {jobResult ? (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-lg">
             <CheckCircle className="h-6 w-6 text-green-600 flex-shrink-0" />
             <div>
-              <p className="font-medium text-green-800">{jobResult.message || "Campaign created successfully"}</p>
+              <p className="font-medium text-green-800">
+                {jobResult.message ||
+                  translate(
+                    "campaignChat.bulkDialog.sendSuccess",
+                    "Campaign created successfully"
+                  )}
+              </p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">Status</p>
+              <p className="text-xs text-gray-500 mb-1">
+                {translate("campaignChat.bulkDialog.status", "Status")}
+              </p>
               <div className="flex items-center gap-1.5">
                 <Clock className="h-4 w-4 text-yellow-500" />
-                <span className="font-medium text-gray-800 capitalize">{jobResult.status}</span>
+                <span className="font-medium text-gray-800 capitalize">
+                  {jobResult.status}
+                </span>
               </div>
             </div>
             <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-              <p className="text-xs text-gray-500 mb-1">Total Contacts</p>
+              <p className="text-xs text-gray-500 mb-1">
+                {translate(
+                  "campaignChat.bulkDialog.totalContacts",
+                  "Total Contacts"
+                )}
+              </p>
               <div className="flex items-center gap-1.5">
                 <Users className="h-4 w-4 text-blue-500" />
-                <span className="font-medium text-gray-800">{jobResult.total}</span>
+                <span className="font-medium text-gray-800">
+                  {jobResult.total}
+                </span>
               </div>
             </div>
             {jobResult.invalid_numbers > 0 && (
               <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-xs text-red-500 mb-1">Invalid Numbers</p>
+                <p className="text-xs text-red-500 mb-1">
+                  {translate(
+                    "campaignChat.bulkDialog.invalidNumbers",
+                    "Invalid Numbers"
+                  )}
+                </p>
                 <div className="flex items-center gap-1.5">
                   <AlertCircle className="h-4 w-4 text-red-500" />
-                  <span className="font-medium text-red-700">{jobResult.invalid_numbers}</span>
+                  <span className="font-medium text-red-700">
+                    {jobResult.invalid_numbers}
+                  </span>
                 </div>
               </div>
             )}
           </div>
 
-          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
-            <p className="text-xs text-gray-500 mb-1">Job ID</p>
-            <p className="font-mono text-sm text-gray-700 break-all">{jobResult.job_id}</p>
-          </div>
+          {jobResult.job_id && (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-xs text-gray-500 mb-1">
+                {translate("campaignChat.bulkDialog.jobId", "Job ID")}
+              </p>
+              <p className="font-mono text-sm text-gray-700 break-all">
+                {jobResult.job_id}
+              </p>
+            </div>
+          )}
 
           <div className="flex justify-end pt-2 border-t border-gray-200">
             <button
@@ -290,97 +688,49 @@ const AddNewWhatsappCampaignDialog = ({ isOpen, onClose }) => {
               onClick={handleClose}
               className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
             >
-              Done
+              {translate("common.done", t?.common?.done || "Done")}
             </button>
           </div>
         </div>
       ) : (
-      <form onSubmit={handleSubmit} className="h-full flex flex-col">
-        {/* Error Message */}
-        {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        {/* Contacts Field - 80% of parent view */}
-        <div className="mb-6 flex-1">
-          <LenaTextarea
-            label="Contacts (JSON Array)"
-            name="contacts"
-            value={contacts}
-            onChange={handleContactsChange}
-            required
-            error={error && error.includes("Contacts")}
-            errorMessage={error && error.includes("Contacts") ? error : ""}
-            helperText="Enter contacts as JSON array with phone and name fields. Phone should start with + followed by digits (e.g., +20 102 0914828)"
-            rows={12}
-            className="font-mono text-sm"
-            dir="ltr"
-            disabled={isSubmitting}
-          />
-        </div>
-
-        {/* Language Code and Template Name */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <LenaTextField
-              label="Language Code"
-              name="language_code"
-              value={languageCode}
-              onChange={handleLanguageCodeChange}
-              required
-              error={error && error.includes("Language")}
-              errorMessage={error && error.includes("Language") ? error : ""}
-              placeholder="e.g., ar_EG"
-              disabled={isSubmitting}
-            />
-          </div>
-          
-          <div>
-            <LenaTextField
-              label="Template Name"
-              name="template_name"
-              value={templateName}
-              onChange={handleTemplateNameChange}
-              required
-              error={error && error.includes("Template")}
-              errorMessage={error && error.includes("Template") ? error : ""}
-              placeholder="e.g., download_app_message1"
-              disabled={isSubmitting}
-            />
-          </div>
-        </div>
-
-        {/* Submit Button */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-          <button
-            type="button"
-            onClick={handleClose}
-            disabled={isSubmitting}
-            className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isSubmitting || !isFormValid}
-            className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Sending...
-              </>
-            ) : (
-              <>
-                <Send size={16} />
-                Send Campaign
-              </>
-            )}
-          </button>
-        </div>
-      </form>
+        <>
+          {renderModeTabs()}
+          {showAutomation ? (
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+              {renderAutomationForm()}
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50"
+                >
+                  {translate("common.cancel", t?.common?.cancel || "Cancel")}
+                </button>
+                <LoadingButton
+                  type="submit"
+                  isLoading={isSubmitting}
+                  disabled={!isFormValid}
+                  loadingText={translate(
+                    "common.sending",
+                    t?.common?.sending || "Sending..."
+                  )}
+                  className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
+                >
+                  <Send size={16} />
+                  {translate("send", t?.send || "Send")}
+                </LoadingButton>
+              </div>
+            </form>
+          ) : showApi ? (
+            renderApiForm()
+          ) : null}
+        </>
       )}
     </Dialog>
   );

@@ -1,6 +1,7 @@
 "use server";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { getApiErrorMessage } from "@/utils/localized-api-error";
 import { getClientid } from "./clientCookies";
 import { safeMergeParams } from "@/utils/safeJsonParser";
 import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
@@ -72,8 +73,9 @@ export async function createNewEmployee(paylod) {
     const response = await axiosInstance.post("sales-employees/create-employee", paylod);
     return response.data;
   } catch (error) {
-    console.error("Failed to create employee:", error.message);
-    throw new Error(error.response?.data?.message || error.message || "Failed to create employee");
+    const message = getApiErrorMessage(error, "Failed to create employee");
+    console.error("Failed to create employee:", message);
+    throw new Error(message);
   }
 }
 export async function editExistingEmployee(paylod) {
@@ -84,8 +86,9 @@ export async function editExistingEmployee(paylod) {
     );
     return response.data;
   } catch (error) {
-    console.error("Failed to update employee:", error.message);
-    throw new Error(error.response?.data?.message || error.message || "Failed to update employee");
+    const message = getApiErrorMessage(error, "Failed to update employee");
+    console.error("Failed to update employee:", message);
+    throw new Error(message);
   }
 }
 

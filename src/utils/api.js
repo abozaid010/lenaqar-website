@@ -1727,6 +1727,57 @@ export async function updateCampaignNotes({
   }
 }
 
+export async function sendWhatsappAutomationMessages({
+  client_id = CAMPAIGN_CHAT_CLIENT_ID,
+  message = "",
+  leads = [],
+  image = null,
+} = {}) {
+  const trimmedMessage = typeof message === "string" ? message.trim() : "";
+  if (!trimmedMessage) {
+    throw new Error("message is required");
+  }
+  if (!Array.isArray(leads) || leads.length === 0) {
+    throw new Error("leads list is required");
+  }
+
+  const payload = {
+    client_id,
+    message: trimmedMessage,
+    leads: leads.map((lead) => ({
+      phone_number: String(lead.phone_number ?? "").replace(/\D/g, ""),
+      user_name:
+        lead.user_name != null && String(lead.user_name).trim()
+          ? String(lead.user_name).trim()
+          : "",
+    })),
+  };
+
+  if (image && String(image).trim()) {
+    payload.image = String(image).trim();
+  }
+
+  try {
+    const response = await axiosInstance.post(
+      CAMPAIGN_CHAT_ENDPOINTS.WHATSAPP_AUTOMATION_MESSAGE,
+      payload,
+      { headers: campaignChatRequestHeaders(client_id) }
+    );
+
+    const body = response.data;
+    if (body?.status === false) {
+      throw new Error(
+        body.error_message || body.message || "Failed to queue automation messages"
+      );
+    }
+
+    return body;
+  } catch (error) {
+    console.error("Failed to send WhatsApp automation messages:", error.message);
+    throw error;
+  }
+}
+
 export async function sendCampaignReply({
   client_id = CAMPAIGN_CHAT_CLIENT_ID, 
   phone_number, 
@@ -1980,6 +2031,47 @@ export async function updateAdminClient(clientId, payload) {
     return response.data;
   } catch (error) {
     console.error("Failed to update client:", error.message);
+    throw error;
+  }
+}
+
+/** Scope profile / WhatsApp instance APIs to a specific client (king admin editing another tenant). */
+function clientScopedHeaders(clientId) {
+  return clientId ? { "x-client-id": String(clientId) } : {};
+}
+
+export async function getClientProfile(clientId) {
+  try {
+    const response = await axiosInstance.get("client/v1/profile", {
+      headers: clientScopedHeaders(clientId),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch client profile:", error.message);
+    throw error;
+  }
+}
+
+export async function linkClientWhatsappInstance(clientId, payload) {
+  try {
+    const response = await axiosInstance.put("client/whatsapp-instance", payload, {
+      headers: clientScopedHeaders(clientId),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to link WhatsApp instance:", error.message);
+    throw error;
+  }
+}
+
+export async function unlinkClientWhatsappInstance(clientId) {
+  try {
+    const response = await axiosInstance.delete("client/whatsapp-instance", {
+      headers: clientScopedHeaders(clientId),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to unlink WhatsApp instance:", error.message);
     throw error;
   }
 }

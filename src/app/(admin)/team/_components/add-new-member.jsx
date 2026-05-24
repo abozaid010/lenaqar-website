@@ -9,6 +9,7 @@ import { useState, useActionState, useEffect, useMemo, useRef } from "react";
 import { addNewSales, editEmployee } from "../_actions/actions";
 import toast from "react-hot-toast";
 import { useI18n } from "@/context/translate-api";
+import { resolveTeamApiError } from "@/utils/localized-api-error";
 
 const ROLE_VALUES = ["admin", "editor", "viewer"];
 
@@ -77,9 +78,9 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
       onSuccess?.(state.data);
     } else if (state.error) {
       lastHandledStateRef.current = state;
-      toast.error(state.error);
+      toast.error(resolveTeamApiError(state.error, t));
     }
-  }, [state, onSuccess, isEdit, formData]);
+  }, [state, onSuccess, isEdit, formData, t]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
