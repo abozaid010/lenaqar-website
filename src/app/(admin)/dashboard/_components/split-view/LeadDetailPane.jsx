@@ -7,6 +7,7 @@ import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/sen
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
 import { useI18n } from "@/hooks/useI18n";
 import {
+  createMatchShareToken,
   deleteUser,
   getChatHistory,
   getClientActions,
@@ -38,6 +39,7 @@ import {
   Pencil,
   Plus,
   Settings2,
+  Sparkles,
   Square,
   Tag,
   Trash2,
@@ -106,6 +108,7 @@ export default function LeadDetailPane({
   const [rowActions, setRowActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
+  const [creatingMatch, setCreatingMatch] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
@@ -241,6 +244,35 @@ export default function LeadDetailPane({
     queryClient.invalidateQueries({ queryKey: userKeys.all });
     queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
     queryClient.invalidateQueries({ queryKey: ["requirements", userId] });
+  };
+
+  const handleOpenMatch = async () => {
+    if (!userId || creatingMatch) return;
+    setCreatingMatch(true);
+    try {
+      const req =
+        requirements && !requirements.error ? requirements : {};
+      const { token } = await createMatchShareToken({
+        client_id: clientId || req.client_id || "",
+        user_id: userId,
+        lead: {
+          name: displayName,
+          phone_number: phoneNumber,
+        },
+        requirements: req,
+      });
+      if (!token) {
+        throw new Error("No share token returned");
+      }
+      window.open(`/match/${encodeURIComponent(token)}`, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error(
+        e?.message ||
+          translate("matchPage.createFailed", "Could not open match page"),
+      );
+    } finally {
+      setCreatingMatch(false);
+    }
   };
 
   // Translate an enum-like value (e.g., "fully finished" -> property.finishing.fullyFinished).
@@ -403,7 +435,7 @@ export default function LeadDetailPane({
       }
     }
 
-    const purposeRaw = pickLast(r.propertyPurpose);
+    const purposeRaw = pickLast(r.purpose ?? r.propertyPurpose);
     if (isMeaningfulString(purposeRaw)) {
       const purposeLabel = translateEnum("purpose", purposeRaw);
       if (purposeLabel) {
@@ -747,33 +779,50 @@ export default function LeadDetailPane({
                 t?.leadDetail?.requirementSummary?.title,
               )}
             </h4>
-            <button
-              type="button"
-              onClick={() => setEditReqOpen(true)}
-              className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-              title={translate(
-                "leadDetail.requirementSummary.editTitle",
-                t?.leadDetail?.requirementSummary?.editTitle,
-              )}
-              aria-label={translate(
-                "leadDetail.requirementSummary.editTitle",
-                t?.leadDetail?.requirementSummary?.editTitle,
-              )}
-            >
-              {requirementChips.length > 0 ? (
-                <Pencil className="w-3.5 h-3.5" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" />
-              )}
-              <span>
-                {requirementChips.length > 0
-                  ? translate("common.edit", common.edit)
-                  : translate(
-                      "leadDetail.requirementSummary.addAction",
-                      t?.leadDetail?.requirementSummary?.addAction,
-                    )}
-              </span>
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleOpenMatch}
+                disabled={creatingMatch}
+                className="inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
+                title={translate("leadDetail.requirementSummary.matchTitle", "Match units")}
+                aria-label={translate("leadDetail.requirementSummary.matchTitle", "Match units")}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>
+                  {creatingMatch
+                    ? "..."
+                    : translate("leadDetail.requirementSummary.match", "Match")}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditReqOpen(true)}
+                className="inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                title={translate(
+                  "leadDetail.requirementSummary.editTitle",
+                  t?.leadDetail?.requirementSummary?.editTitle,
+                )}
+                aria-label={translate(
+                  "leadDetail.requirementSummary.editTitle",
+                  t?.leadDetail?.requirementSummary?.editTitle,
+                )}
+              >
+                {requirementChips.length > 0 ? (
+                  <Pencil className="w-3.5 h-3.5" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {requirementChips.length > 0
+                    ? translate("common.edit", common.edit)
+                    : translate(
+                        "leadDetail.requirementSummary.addAction",
+                        t?.leadDetail?.requirementSummary?.addAction,
+                      )}
+                </span>
+              </button>
+            </div>
           </div>
 
           {requirementChips.length > 0 ? (

@@ -2080,3 +2080,73 @@ export async function deleteClient(clientId) {
     throw error;
   }
 }
+
+// --- Match share (public lead unit matching) ---
+
+/**
+ * Create a share token for public match page (via Next BFF; proxies backend when available).
+ */
+export async function createMatchShareToken(payload) {
+  const response = await fetch("/api/match/share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", accept: "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to create match link");
+  }
+  return json.data;
+}
+
+/**
+ * Resolve share context by token (public; uses same-origin BFF).
+ */
+export async function getMatchShareContext(token) {
+  const response = await fetch(`/api/match/share/${encodeURIComponent(token)}`, {
+    method: "GET",
+    headers: { accept: "application/json" },
+    cache: "no-store",
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Invalid or expired match link");
+  }
+  return json.data;
+}
+
+export async function savePublicUnitReaction(token, unitId, liked) {
+  const response = await fetch(
+    `/api/match/share/${encodeURIComponent(token)}/reactions`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ unit_id: unitId, liked }),
+    },
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to save reaction");
+  }
+  return json.data;
+}
+
+export async function submitMatchViewingRequest(token, { unitIds, meetingTime }) {
+  const response = await fetch(
+    `/api/match/share/${encodeURIComponent(token)}/viewing-request`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        unit_ids: unitIds,
+        meeting_time: meetingTime,
+      }),
+    },
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to submit viewing request");
+  }
+  return json.data;
+}
