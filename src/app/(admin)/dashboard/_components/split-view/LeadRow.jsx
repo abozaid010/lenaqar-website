@@ -7,7 +7,14 @@ import WhatsAppButton from "@/components/ui/whatsapp-button";
 import { Phone } from "lucide-react";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 
-export default function LeadRow({ user, selected, onSelect }) {
+export default function LeadRow({
+  user,
+  selected,
+  onSelect,
+  bulkSelected = false,
+  onToggleBulkSelection,
+  showBulkCheckbox = false,
+}) {
   const { t } = useI18n();
   const rawPhone = user.phone_number;
   const phoneE164 = phoneToE164(rawPhone, "EG") || rawPhone;
@@ -30,6 +37,20 @@ export default function LeadRow({ user, selected, onSelect }) {
         selected ? SELECTION_COLORS.SELECTED : "hover:bg-gray-50 bg-white"
       }`}
     >
+      {showBulkCheckbox && (
+        <input
+          type="checkbox"
+          checked={bulkSelected}
+          onChange={(e) => {
+            e.stopPropagation();
+            onToggleBulkSelection?.(user.user_id);
+          }}
+          onClick={(e) => e.stopPropagation()}
+          className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+          aria-label={t.clientsTable?.headers?.name || "Select lead"}
+        />
+      )}
+
       {/* Name */}
       <span className="font-semibold text-sm leading-snug text-gray-900 truncate min-w-0 flex-1">
         {user.name || t.clientsTable?.newLead || "Lead"}

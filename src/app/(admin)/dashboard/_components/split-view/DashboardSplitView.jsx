@@ -6,6 +6,7 @@ import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils"
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useCallback } from "react";
+import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import {
@@ -31,6 +32,13 @@ function DashboardSplitViewComponent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { setAverageScore, setLoading } = useAverageScore();
+  const {
+    setVisibleLeadsFromList,
+    toggleLeadSelection,
+    toggleSelectAllVisible,
+    isLeadSelected,
+    hasSelection,
+  } = useDashboardLeadsBulk();
 
   const filterKey = useMemo(() => {
     const o = Object.fromEntries(searchParams.entries());
@@ -69,6 +77,10 @@ function DashboardSplitViewComponent() {
     if (!searchQueryTrimmed) return allUsers;
     return allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed));
   }, [allUsers, searchQueryTrimmed]);
+
+  useEffect(() => {
+    setVisibleLeadsFromList(filteredUsers);
+  }, [filteredUsers, setVisibleLeadsFromList]);
 
   useEffect(() => {
     setLoading(isLoading || isFetching);
@@ -123,6 +135,10 @@ function DashboardSplitViewComponent() {
           selectedUserId={selectedUserId}
           onSelectLead={onSelectLead}
           data={data}
+          isLeadSelected={isLeadSelected}
+          onToggleLeadSelection={toggleLeadSelection}
+          onToggleSelectAllVisible={toggleSelectAllVisible}
+          hasBulkSelection={hasSelection}
         />
         <LeadDetailPane
           userId={selectedUserId}

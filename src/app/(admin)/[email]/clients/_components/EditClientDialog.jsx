@@ -1,13 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
-import { useUpdateClient } from "@/hooks/use-clients-data";
+import { useClientPermissionSchema, useUpdateClient } from "@/hooks/use-clients-data";
+import { buildAdminClientPatchPayload } from "@/lib/admin-client-patch";
+import {
+  getResolvedPermissionSchema,
+  sanitizeModuleActions,
+} from "@/lib/permission-schema";
 import ModuleActionsSelector from "@/app/(admin)/clients/new/_components/ModuleActionsSelector";
 import { useI18n } from "@/hooks/useI18n";
 import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 import { PhoneField } from "@/components/phone/PhoneField";
+import { phoneToE164 } from "@/components/phone/phone-utils";
+import WhatsappAutomationSection from "./WhatsappAutomationSection";
 
 const SHARING_OPTIONS = [
   { value: "only_my_units", label: "Only My Units" },
@@ -45,12 +52,19 @@ const inputCls =
 const selectCls =
   "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary bg-white";
 
+function normalizePhoneForField(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  return phoneToE164(trimmed, "EG") || trimmed;
+}
+
 function buildInitialState(client) {
   return {
     client_name: client.client_name || "",
     full_name: client.full_name || "",
     email: client.email || "",
-    phone_number: client.phone_number || "",
+    phone_number: normalizePhoneForField(client.phone_number),
     address: client.address || "",
     crm_link: client.crm_link || "",
     google_map_link: client.google_map_link || "",
@@ -70,32 +84,82 @@ function buildInitialState(client) {
 }
 
 export default function EditClientDialog({ client, isOpen, onClose }) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const [form, setForm] = useState(() => buildInitialState(client));
   const [logoUploading, setLogoUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const whatsappRef = useRef(null);
+  const initialFormRef = useRef(buildInitialState(client));
   const updateClient = useUpdateClient();
+  const { rawSchema, isLoading: permissionSchemaLoading } =
+    useClientPermissionSchema(isOpen);
 
   useEffect(() => {
-    if (isOpen) setForm(buildInitialState(client));
-  }, [isOpen, client]);
+    if (!isOpen) return;
+    const initial = buildInitialState(client);
+    initialFormRef.current = initial;
+    setForm(initial);
+  }, [isOpen, client?.client_id]);
+
+  useEffect(() => {
+    if (!isOpen || permissionSchemaLoading || !rawSchema) return;
+    const schema = getResolvedPermissionSchema(rawSchema);
+    setForm((prev) => {
+      const sanitized = sanitizeModuleActions(prev.module_actions, schema);
+      const unchanged =
+        JSON.stringify(sanitized) === JSON.stringify(prev.module_actions);
+      if (unchanged) return prev;
+      const next = { ...prev, module_actions: sanitized };
+      initialFormRef.current = {
+        ...initialFormRef.current,
+        module_actions: sanitized,
+      };
+      return next;
+    });
+  }, [isOpen, permissionSchemaLoading, rawSchema]);
 
   const set = (key) => (e) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
   const handleSubmit = async () => {
-    const payload = {
-      ...form,
-      logo_url: form.logo_url || null,
-      price_percentage: parseFloat(form.price_percentage) || 0,
-      accurate_queries_level: parseInt(form.accurate_queries_level) || 0,
-    };
+    const whatsappApi = whatsappRef.current;
+    if (whatsappApi?.hasChanges?.() && !whatsappApi.validate()) {
+      return;
+    }
 
+    const whatsappPatch = whatsappApi?.getPatchValue?.();
+    const payload = buildAdminClientPatchPayload(
+      initialFormRef.current,
+      form,
+      whatsappPatch
+    );
+
+    if (Object.keys(payload).length === 0) {
+      toast.success(
+        translate("editClient.noChanges", "No changes to save")
+      );
+      onClose();
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      await updateClient.mutateAsync({ clientId: client.client_id, payload });
+      const result = await updateClient.mutateAsync({
+        clientId: client.client_id,
+        payload,
+      });
+
+      const updated = result?.data;
+      if (updated && whatsappApi?.syncFromServer) {
+        whatsappApi.syncFromServer(updated.linked_automated_whatsapp ?? null);
+      }
+
       toast.success(t?.common?.clientUpdated);
       onClose();
     } catch {
       toast.error(t?.common?.failedToUpdateClient);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -106,8 +170,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       title={`Edit ${client.client_name || client.client_id}`}
       submitLabel={t?.saveChangesButton || "Save Changes"}
       onSubmit={handleSubmit}
-      submitLoading={updateClient.isPending || logoUploading}
-      submitDisabled={updateClient.isPending || logoUploading}
+      submitLoading={updateClient.isPending || logoUploading || isSaving}
+      submitDisabled={updateClient.isPending || logoUploading || isSaving}
       bodyClassName="space-y-4"
     >
       {/* Basic Info */}
@@ -234,9 +298,17 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       <SectionTitle>Module Permissions</SectionTitle>
       <ModuleActionsSelector
         moduleActions={form.module_actions}
+        permissionSchema={rawSchema}
+        isSchemaLoading={permissionSchemaLoading}
         onChange={(newActions) =>
           setForm((prev) => ({ ...prev, module_actions: newActions }))
         }
+      />
+
+      <WhatsappAutomationSection
+        ref={whatsappRef}
+        initialLinkedWhatsapp={client.linked_automated_whatsapp ?? null}
+        enabled={isOpen}
       />
     </UnifiedDialog>
   );

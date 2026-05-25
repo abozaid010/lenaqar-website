@@ -5,10 +5,15 @@ import { safeMergeParams } from "./safeJsonParser";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
+import {
+  normalizeCampaignPhoneParam,
+  normalizeCampaignSessionData,
+} from "@/utils/campaign-chat-session";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-handler";
 import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
+import { cleanRequirementsPayload } from "./cleanRequirements";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -718,6 +723,34 @@ export async function getClientActions(phoneNumber) {
   } catch (error) {
     console.error("Failed to fetch data:", error.message);
     return { error: error.message };
+  }
+}
+
+/**
+ * Fetch scheduled actions by date range.
+ * Sends allowed actions under the `action` query param as requested by backend.
+ */
+export async function fetchScheduledActionsByDate(
+  startDate,
+  endDate,
+  actions = []
+) {
+  try {
+    const params = new URLSearchParams();
+    params.set("start_date", startDate);
+    params.set("end_date", endDate);
+    actions.forEach((action) => {
+      params.append("action", action);
+    });
+    const response = await axiosInstance.get(
+      `action/scheduled-actions-by-date?${params.toString()}`
+    );
+
+    const list = response?.data?.data?.actions;
+    return Array.isArray(list) ? list : [];
+  } catch (error) {
+    console.error("Failed to fetch scheduled actions by date:", error.message);
+    return [];
   }
 }
 
@@ -1548,9 +1581,10 @@ export async function fetchCampaignSession({
   }
 
   try {
+    const normalizedPhone = normalizeCampaignPhoneParam(phone_number);
     const params = new URLSearchParams({ 
       client_id, 
-      phone_number, 
+      phone_number: normalizedPhone || String(phone_number), 
       history_page: String(history_page), 
       history_page_size: String(history_page_size) 
     });
@@ -1559,11 +1593,35 @@ export async function fetchCampaignSession({
       headers: campaignChatRequestHeaders(client_id),
     });
 
-    if (!response.data || !response.data.data) {
+    const body = response.data;
+    if (!body) {
       throw new Error("Invalid response format from server");
     }
 
-    return response.data.data;
+    if (body.status === false) {
+      throw new Error(
+        body.error_message || body.message || "Failed to load conversation"
+      );
+    }
+
+    if (!body.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    const normalized = normalizeCampaignSessionData(body.data);
+
+    if (
+      process.env.NODE_ENV === "development" &&
+      normalized.history.length === 0 &&
+      Object.keys(body.data || {}).length > 0
+    ) {
+      console.warn("[campaign-chat] Session loaded but no messages parsed.", {
+        dataKeys: Object.keys(body.data || {}),
+        phone_number: normalized.phone_number,
+      });
+    }
+
+    return normalized;
   } catch (error) {
     const status = error?.response?.status;
     if (status !== 403 && status !== 401) {
@@ -1666,6 +1724,57 @@ export async function updateCampaignNotes({
     return response.data;
   } catch (error) {
     console.error("Failed to update notes:", error.message);
+    throw error;
+  }
+}
+
+export async function sendWhatsappAutomationMessages({
+  client_id = CAMPAIGN_CHAT_CLIENT_ID,
+  message = "",
+  leads = [],
+  image = null,
+} = {}) {
+  const trimmedMessage = typeof message === "string" ? message.trim() : "";
+  if (!trimmedMessage) {
+    throw new Error("message is required");
+  }
+  if (!Array.isArray(leads) || leads.length === 0) {
+    throw new Error("leads list is required");
+  }
+
+  const payload = {
+    client_id,
+    message: trimmedMessage,
+    leads: leads.map((lead) => ({
+      phone_number: String(lead.phone_number ?? "").replace(/\D/g, ""),
+      user_name:
+        lead.user_name != null && String(lead.user_name).trim()
+          ? String(lead.user_name).trim()
+          : "",
+    })),
+  };
+
+  if (image && String(image).trim()) {
+    payload.image = String(image).trim();
+  }
+
+  try {
+    const response = await axiosInstance.post(
+      CAMPAIGN_CHAT_ENDPOINTS.WHATSAPP_AUTOMATION_MESSAGE,
+      payload,
+      { headers: campaignChatRequestHeaders(client_id) }
+    );
+
+    const body = response.data;
+    if (body?.status === false) {
+      throw new Error(
+        body.error_message || body.message || "Failed to queue automation messages"
+      );
+    }
+
+    return body;
+  } catch (error) {
+    console.error("Failed to send WhatsApp automation messages:", error.message);
     throw error;
   }
 }
@@ -1803,10 +1912,11 @@ export async function updateUserRequirements(requirementId, payload) {
   if (!requirementId) {
     throw new Error("requirementId is required");
   }
+  const cleanedBody = cleanRequirementsPayload(payload);
   try {
     const response = await axiosInstance.put(
       `requirements/${requirementId}`,
-      payload,
+      cleanedBody,
     );
     return response.data;
   } catch (error) {
@@ -1902,10 +2012,15 @@ export async function deleteUser(userId, clientId = "public") {
 
 // Admin Clients API (king admin only)
 
-export async function fetchAdminClients(page = 1, pageSize = 10) {
+export async function fetchAdminClients(page = 1, pageSize = 20, search = "") {
   try {
+    const params = { page, page_size: pageSize };
+    const trimmedSearch = typeof search === "string" ? search.trim() : "";
+    if (trimmedSearch) {
+      params.search = trimmedSearch;
+    }
     const response = await axiosInstance.get("/api/client/admin/clients", {
-      params: { page, page_size: pageSize },
+      params,
     });
     return response.data;
   } catch (error) {
@@ -1923,6 +2038,16 @@ export async function updateAdminClient(clientId, payload) {
     return response.data;
   } catch (error) {
     console.error("Failed to update client:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchClientPermissionSchema() {
+  try {
+    const response = await axiosInstance.get("client/permission-schema");
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch permission schema:", error.message);
     throw error;
   }
 }
@@ -1956,4 +2081,74 @@ export async function deleteClient(clientId) {
     // Handle other errors
     throw error;
   }
+}
+
+// --- Match share (public lead unit matching) ---
+
+/**
+ * Create a share token for public match page (via Next BFF; proxies backend when available).
+ */
+export async function createMatchShareToken(payload) {
+  const response = await fetch("/api/match/share", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", accept: "application/json" },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to create match link");
+  }
+  return json.data;
+}
+
+/**
+ * Resolve share context by token (public; uses same-origin BFF).
+ */
+export async function getMatchShareContext(token) {
+  const response = await fetch(`/api/match/share/${encodeURIComponent(token)}`, {
+    method: "GET",
+    headers: { accept: "application/json" },
+    cache: "no-store",
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Invalid or expired match link");
+  }
+  return json.data;
+}
+
+export async function savePublicUnitReaction(token, unitId, liked) {
+  const response = await fetch(
+    `/api/match/share/${encodeURIComponent(token)}/reactions`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ unit_id: unitId, liked }),
+    },
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to save reaction");
+  }
+  return json.data;
+}
+
+export async function submitMatchViewingRequest(token, { unitIds, meetingTime }) {
+  const response = await fetch(
+    `/api/match/share/${encodeURIComponent(token)}/viewing-request`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        unit_ids: unitIds,
+        meeting_time: meetingTime,
+      }),
+    },
+  );
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || !json?.status) {
+    throw new Error(json?.message || "Failed to submit viewing request");
+  }
+  return json.data;
 }

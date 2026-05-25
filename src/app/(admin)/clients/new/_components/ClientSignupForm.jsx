@@ -13,6 +13,7 @@ import ClientLogoUploader from "@/components/ui/inputs/client-logo-uploader";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { getPhoneValidationError } from "@/components/phone/phone-utils";
 import { uploadImages, updateAdminClient } from "@/utils/api";
+import { useClientPermissionSchema } from "@/hooks/use-clients-data";
 import { processImage } from "@/utils/processImage";
 
 const CLIENT_TYPES = [
@@ -55,6 +56,10 @@ function extractCreatedClientId(apiPayload) {
 const ClientSignupForm = () => {
   const { t } = useI18n();
   const router = useRouter();
+  const {
+    rawSchema: permissionSchema,
+    isLoading: permissionSchemaLoading,
+  } = useClientPermissionSchema(true);
   const [isLoading, setIsLoading] = useState(false);
   const [deferredLogoFile, setDeferredLogoFile] = useState(null);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -462,8 +467,10 @@ const ClientSignupForm = () => {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Module Permissions</h2>
         <ModuleActionsSelector
           moduleActions={formData.module_actions}
-          onChange={(moduleActions) => 
-            setFormData(prev => ({ ...prev, module_actions: moduleActions }))
+          permissionSchema={permissionSchema}
+          isSchemaLoading={permissionSchemaLoading}
+          onChange={(moduleActions) =>
+            setFormData((prev) => ({ ...prev, module_actions: moduleActions }))
           }
         />
       </div>

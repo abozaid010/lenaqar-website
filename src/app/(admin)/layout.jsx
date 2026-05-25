@@ -7,6 +7,7 @@ import ModuleActionsProvider from "@/components/auth/ModuleActionsProvider";
 import { Suspense } from "react";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getCachedClientProfile } from "@/lib/getCachedClientProfile.server";
+import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -23,9 +24,7 @@ const Layout = async ({ children }) => {
   const clientEmail = safeCookieParse(clientInfoCookie, {})?.email;
 
   const profileResponse = await getCachedClientProfile();
-  const ma = profileResponse?.data?.module_actions;
-  const initialModuleActions =
-    ma && typeof ma === "object" && !Array.isArray(ma) ? ma : null;
+  const initialModuleActions = extractModuleActionsFromProfile(profileResponse);
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;

@@ -4,8 +4,15 @@ import EmptyStateVideo from "@/components/ui/empty-state-video";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+
+function useClientMounted() {
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+  return isMounted;
+}
 import LeadRow from "./LeadRow";
 import { useI18n } from "@/hooks/useI18n";
+import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 
 function ListSkeleton({ rows = 8 }) {
   return (
@@ -30,8 +37,16 @@ export default function LeadsListPane({
   selectedUserId,
   onSelectLead,
   data,
+  isLeadSelected,
+  onToggleLeadSelection,
+  onToggleSelectAllVisible,
+  hasBulkSelection = false,
 }) {
   const { t, translate, common, property, localeUtils } = useI18n();
+  const isMounted = useClientMounted();
+  const { canShowBulkButton } = useWhatsappBulkAccess();
+  const showBulkCheckbox = isMounted && canShowBulkButton;
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get("query") || "");
@@ -133,7 +148,41 @@ export default function LeadsListPane({
 
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-gray-200 bg-white">
-      <div className="p-2 border-b border-gray-100 shrink-0">
+      <div className="p-2 border-b border-gray-100 shrink-0 space-y-2">
+        {showBulkCheckbox && users.length > 0 && (
+          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={
+                users.length > 0 &&
+                users.every((u) => isLeadSelected?.(u.user_id))
+              }
+              ref={(el) => {
+                if (!el) return;
+                const someSelected = users.some((u) =>
+                  isLeadSelected?.(u.user_id)
+                );
+                const allSelected =
+                  users.length > 0 &&
+                  users.every((u) => isLeadSelected?.(u.user_id));
+                el.indeterminate = someSelected && !allSelected;
+              }}
+              onChange={() => onToggleSelectAllVisible?.()}
+              className="h-4 w-4 accent-primary cursor-pointer"
+            />
+            <span>
+              {hasBulkSelection
+                ? translate(
+                    "dashboardFilter.bulkWhatsapp.selectedLeads",
+                    "Selected leads"
+                  )
+                : translate(
+                    "dashboardFilter.bulkWhatsapp.selectAllVisible",
+                    "Select all visible"
+                  )}
+            </span>
+          </label>
+        )}
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -190,6 +239,9 @@ export default function LeadsListPane({
                 user={user}
                 selected={selectedUserId === user.user_id}
                 onSelect={onSelectLead}
+                showBulkCheckbox={showBulkCheckbox}
+                bulkSelected={isLeadSelected?.(user.user_id)}
+                onToggleBulkSelection={onToggleLeadSelection}
               />
             ))}
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />

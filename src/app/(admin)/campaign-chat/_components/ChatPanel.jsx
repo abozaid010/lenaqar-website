@@ -11,6 +11,8 @@ import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubble from "./MessageBubble";
+import { useI18n } from "@/hooks/useI18n";
+import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 
 const NOTES_MAX_LENGTH = 500;
 
@@ -30,6 +32,8 @@ const ChatPanel = ({
   contact,
   sessionData,
   loading,
+  sessionError,
+  onRetrySession,
   onToggleAI,
   onSendReply,
   refetchSession,
@@ -37,6 +41,7 @@ const ChatPanel = ({
   onToggleFavorite,
   onUpdateNotes,
 }) => {
+  const { t, translate } = useI18n();
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
@@ -62,6 +67,19 @@ const ChatPanel = ({
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
 
+  const sessionPhone = sessionData?.phone_number
+    ? normalizeCampaignPhoneParam(sessionData.phone_number)
+    : "";
+  const contactPhone = contact?.phone_number
+    ? normalizeCampaignPhoneParam(contact.phone_number)
+    : "";
+  const sessionMatchesContact =
+    !sessionPhone || !contactPhone || sessionPhone === contactPhone;
+  const history =
+    sessionMatchesContact && Array.isArray(sessionData?.history)
+      ? sessionData.history
+      : [];
+
   // Sync favorite from sessionData/contact when contact changes
   useEffect(() => {
     const src = sessionData ?? contact;
@@ -80,7 +98,7 @@ const ChatPanel = ({
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [sessionData?.history]);
+  }, [history]);
 
   // Auto-resize textarea
   useEffect(() => {
@@ -230,7 +248,7 @@ const ChatPanel = ({
     return phone;
   };
 
-  if (loading) {
+  if (loading && !sessionData) {
     return (
       <div className="flex-1 flex flex-col">
         <div className="p-4 border-b border-gray-200 bg-white">
@@ -242,7 +260,40 @@ const ChatPanel = ({
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
-            <p className="text-gray-500">Loading conversation...</p>
+            <p className="text-gray-500">
+              {translate(
+                "campaignChat.loadingConversation",
+                t?.campaignChat?.loadingConversation
+              )}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (sessionError && !sessionData) {
+    const errMsg =
+      sessionError?.response?.data?.error_message ||
+      sessionError?.message ||
+      translate(
+        "campaignChat.failedToLoadConversation",
+        t?.campaignChat?.failedToLoadConversation
+      );
+
+    return (
+      <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex items-center justify-center p-6 bg-gray-50">
+          <div className="text-center max-w-md">
+            <Bot className="h-12 w-12 text-red-400 mx-auto mb-3" />
+            <p className="text-red-600 font-medium mb-2">{errMsg}</p>
+            <button
+              type="button"
+              onClick={() => onRetrySession?.()}
+              className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90"
+            >
+              {translate("common.retry", t?.common?.retry)}
+            </button>
           </div>
         </div>
       </div>
@@ -491,10 +542,10 @@ const ChatPanel = ({
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-        {sessionData?.history?.length > 0 ? (
+        {history.length > 0 ? (
           <>
-            {sessionData.history.map((msg, index) => (
-              <MessageBubble key={index} message={msg} />
+            {history.map((msg, index) => (
+              <MessageBubble key={`${msg.timestamp || "t"}-${index}`} message={msg} />
             ))}
             <div ref={messagesEndRef} />
           </>
@@ -502,11 +553,19 @@ const ChatPanel = ({
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <Bot className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-500">No messages yet</p>
+              <p className="text-gray-500">
+                {translate("campaignChat.noMessages", t?.campaignChat?.noMessages)}
+              </p>
               <p className="text-sm text-gray-400 mt-1">
                 {currentAIStatus
-                  ? "AI replies are enabled. Messages will appear here."
-                  : "Send a message to start the conversation."}
+                  ? translate(
+                      "campaignChat.noMessagesAiOn",
+                      t?.campaignChat?.noMessagesAiOn
+                    )
+                  : translate(
+                      "campaignChat.noMessagesStart",
+                      t?.campaignChat?.noMessagesStart
+                    )}
               </p>
             </div>
           </div>

@@ -95,6 +95,8 @@ export const clientKeys = {
   all: ["admin-clients"],
   lists: () => [...clientKeys.all, "list"],
   list: (page) => [...clientKeys.lists(), { page }],
+  infiniteList: (search = "") => [...clientKeys.all, "infinite", { search: search.trim() }],
+  permissionSchema: () => [...clientKeys.all, "permission-schema"],
 };
 
 // Query key factory for cities and projects

@@ -51,6 +51,10 @@ const LenaTextField = forwardRef(({
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
+  const setHovered = (next) => {
+    setIsHovered((prev) => (prev === next ? prev : next));
+  };
+
   const resolvedDir =
     dir ??
     (typeof document !== "undefined" ? document.documentElement.getAttribute("dir") : undefined) ??
@@ -136,8 +140,8 @@ const LenaTextField = forwardRef(({
     <div 
       ref={containerRef}
       className="relative transition-all duration-200"
-      onMouseEnter={() => !disabled && setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => !disabled && setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       {/* Input Field */}
       <div className="relative">
@@ -163,8 +167,8 @@ const LenaTextField = forwardRef(({
           type={inputType}
           value={inputValue ?? ""}
           onChange={onChange}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => setIsFocused((prev) => (prev ? prev : true))}
+          onBlur={() => setIsFocused((prev) => (prev ? false : prev))}
           placeholder={displayPlaceholder}
           required={required}
           disabled={disabled}

@@ -15,11 +15,13 @@ export default function ImageSwiperModal({
   images = [],
   masterPlan = null,
   showMasterPlanLabel = true,
+  initialSlide = 0,
 }) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, setActiveIndex] = useState(initialSlide);
 
   useEffect(() => {
     if (open) {
+      setActiveIndex(initialSlide);
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "unset";
@@ -29,7 +31,7 @@ export default function ImageSwiperModal({
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [open]);
+  }, [open, initialSlide]);
 
   if (!open) return null;
 
@@ -56,6 +58,7 @@ export default function ImageSwiperModal({
         <div className="flex-1 my-3 relative">
           <Swiper
             modules={[Keyboard, Navigation]}
+            initialSlide={initialSlide}
             slidesPerView={1}
             spaceBetween={10}
             loop={false}

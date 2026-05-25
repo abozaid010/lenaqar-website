@@ -5,7 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useLocaleConstants } from "@/utils/localeConstants";
 
 const MessageBubble = ({ message }) => {
-  const { locale } = useI18n();
+  const { locale, translate } = useI18n();
   const { formatRelativeTime } = useLocaleConstants();
   const isUser = message.role === "user";
   const isAssistant = message.role === "assistant";
@@ -48,6 +48,7 @@ const MessageBubble = ({ message }) => {
 
   // Only show template tag for admin messages that have template_name
   const showTemplateTag = isAdmin && message.template_name;
+  const showAutomationBadge = message.source === "wa_automation";
 
   if (!isUser && !isAssistant && !isAdmin) {
     return null;
@@ -126,13 +127,25 @@ const MessageBubble = ({ message }) => {
             </p>
           </div>
 
-          {/* Timestamp */}
+          {/* Timestamp + automation badge */}
           {message.timestamp && (
-            <span className={`text-xs text-gray-400 mt-1 px-1 ${
-              isRightSide ? "text-right" : "text-left"
-            }`}>
-              {formatTime(message.timestamp)}
-            </span>
+            <div
+              className={`flex items-center gap-1.5 mt-1 px-1 ${
+                isRightSide ? "justify-end" : "justify-start"
+              }`}
+            >
+              {showAutomationBadge && (
+                <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-full text-[10px] font-medium">
+                  {translate(
+                    "campaignChat.automationBadge",
+                    "Automation"
+                  )}
+                </span>
+              )}
+              <span className="text-xs text-gray-400">
+                {formatTime(message.timestamp)}
+              </span>
+            </div>
           )}
         </div>
       </div>

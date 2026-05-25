@@ -1,16 +1,37 @@
 "use server";
 
 import axiosInstance from "@/utils/axiosInstance";
+import { getApiErrorMessage } from "@/utils/localized-api-error";
 import { getClientid } from "./clientCookies";
 import { safeMergeParams } from "@/utils/safeJsonParser";
+import { SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
 
-export async function getschedual(startDate, endDate) {
+const normalizeAction = (value) => String(value || "").trim().toLowerCase();
+
+export async function getschedual(
+  startDate,
+  endDate,
+  actions = SCHEDULE_VISIBLE_ACTIONS
+) {
   try {
+    const params = new URLSearchParams();
+    params.set("start_date", startDate);
+    params.set("end_date", endDate);
+    actions.forEach((action) => {
+      params.append("action", action);
+    });
     const response = await axiosInstance.get(
-      `action/scheduled-actions-by-date?start_date=${startDate}&end_date=${endDate}`
+      `action/scheduled-actions-by-date?${params.toString()}`
     );
 
-    return response.data.data.actions;
+    const serverActions = response.data?.data?.actions;
+    const actionList = Array.isArray(serverActions) ? serverActions : [];
+    const allowedActions = new Set(actions.map(normalizeAction));
+
+    // Keep a client-side guard so schedule never shows disallowed lead actions.
+    return actionList.filter((item) =>
+      allowedActions.has(normalizeAction(item?.action))
+    );
   } catch (error) {
     console.error("Failed to fetch schedule data:", error.message);
     // Return empty array instead of error to prevent server crashes
@@ -52,8 +73,9 @@ export async function createNewEmployee(paylod) {
     const response = await axiosInstance.post("sales-employees/create-employee", paylod);
     return response.data;
   } catch (error) {
-    console.error("Failed to create employee:", error.message);
-    throw new Error(error.response?.data?.message || error.message || "Failed to create employee");
+    const message = getApiErrorMessage(error, "Failed to create employee");
+    console.error("Failed to create employee:", message);
+    throw new Error(message);
   }
 }
 export async function editExistingEmployee(paylod) {
@@ -64,8 +86,9 @@ export async function editExistingEmployee(paylod) {
     );
     return response.data;
   } catch (error) {
-    console.error("Failed to update employee:", error.message);
-    throw new Error(error.response?.data?.message || error.message || "Failed to update employee");
+    const message = getApiErrorMessage(error, "Failed to update employee");
+    console.error("Failed to update employee:", message);
+    throw new Error(message);
   }
 }
 

@@ -53,7 +53,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "Add New Lead")}
+              {translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "New Lead")}
             </h3>
           </div>
           <button

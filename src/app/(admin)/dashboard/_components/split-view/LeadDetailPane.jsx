@@ -7,6 +7,7 @@ import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/sen
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
 import { useI18n } from "@/hooks/useI18n";
 import {
+  createMatchShareToken,
   deleteUser,
   getChatHistory,
   getClientActions,
@@ -38,6 +39,7 @@ import {
   Pencil,
   Plus,
   Settings2,
+  Sparkles,
   Square,
   Tag,
   Trash2,
@@ -51,14 +53,12 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
+import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
 const DEFAULT_TAB = "conversations";
 
 // ---------- Requirement summary helpers (local to this file) ----------
-
-const STATUS_DEFAULTS = new Set(["ready to move", "off-plan"]);
-const PURPOSE_DEFAULTS = new Set(["sell", "rent", "buy", "lease"]);
 
 const pickLast = (v) => (Array.isArray(v) ? v[v.length - 1] : v);
 
@@ -73,6 +73,13 @@ const isMeaningfulString = (v) => {
 const isMeaningfulNumber = (v) => {
   const n = Number(v);
   return Number.isFinite(n) && n > 0;
+};
+
+const formatAreaM2 = (v) => {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const rounded = Number.isInteger(n) ? String(Math.floor(n)) : String(n);
+  return `${rounded} m²`;
 };
 
 const toTitleCase = (value) =>
@@ -106,6 +113,7 @@ export default function LeadDetailPane({
   const [rowActions, setRowActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
+  const [creatingMatch, setCreatingMatch] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [newTagInput, setNewTagInput] = useState("");
@@ -243,6 +251,35 @@ export default function LeadDetailPane({
     queryClient.invalidateQueries({ queryKey: ["requirements", userId] });
   };
 
+  const handleOpenMatch = async () => {
+    if (!userId || creatingMatch) return;
+    setCreatingMatch(true);
+    try {
+      const req =
+        requirements && !requirements.error ? requirements : {};
+      const { token } = await createMatchShareToken({
+        client_id: clientId || req.client_id || "",
+        user_id: userId,
+        lead: {
+          name: displayName,
+          phone_number: phoneNumber,
+        },
+        requirements: req,
+      });
+      if (!token) {
+        throw new Error("No share token returned");
+      }
+      window.open(`/match/${encodeURIComponent(token)}`, "_blank", "noopener,noreferrer");
+    } catch (e) {
+      toast.error(
+        e?.message ||
+          translate("matchPage.createFailed", "Could not open match page"),
+      );
+    } finally {
+      setCreatingMatch(false);
+    }
+  };
+
   // Translate an enum-like value (e.g., "fully finished" -> property.finishing.fullyFinished).
   // Falls back to a clean title-cased label if no translation key matches.
   // We use a sentinel fallback (not null) so the i18n hook does not enter its
@@ -291,8 +328,8 @@ export default function LeadDetailPane({
       });
     }
 
-    // Location — collapse city/district/project into one chip when present.
-    const locationParts = [r.city, r.district, r.project]
+    // Location — collapse country/city/district/project into one chip when present.
+    const locationParts = [r.country, r.city, r.district, r.project]
       .filter(isMeaningfulString)
       .map((p) => String(p).trim());
     if (locationParts.length > 0) {
@@ -301,13 +338,6 @@ export default function LeadDetailPane({
         icon: MapPin,
         label: translate("propertyDetails.location", "Location"),
         value: locationParts.join(" • "),
-      });
-    } else if (isMeaningfulString(r.country)) {
-      pushChip({
-        key: "country",
-        icon: MapPin,
-        label: fields.country || "Country",
-        value: String(r.country).trim(),
       });
     }
 
@@ -338,12 +368,13 @@ export default function LeadDetailPane({
       });
     }
 
-    if (isMeaningfulNumber(r.land_area)) {
+    const landArea = formatAreaM2(r.land_area);
+    if (landArea) {
       pushChip({
         key: "land_area",
         icon: Square,
         label: fields.landArea || "Area",
-        value: `${formatCurrency(r.land_area)} m²`,
+        value: landArea,
       });
     }
 
@@ -376,22 +407,8 @@ export default function LeadDetailPane({
       });
     }
 
-    // Status & purpose — hide when the value is just the system default.
     const statusRaw = pickLast(r.propertyStatus);
-    if (
-      isMeaningfulString(statusRaw) &&
-      !STATUS_DEFAULTS.has(String(statusRaw).trim().toLowerCase())
-    ) {
-      const statusLabel = translateEnum("status", statusRaw);
-      if (statusLabel) {
-        pushChip({
-          key: "propertyStatus",
-          icon: Landmark,
-          label: fields.propertyStatus || "Status",
-          value: statusLabel,
-        });
-      }
-    } else if (isMeaningfulString(statusRaw)) {
+    if (isMeaningfulString(statusRaw)) {
       const statusLabel = translateEnum("status", statusRaw);
       if (statusLabel) {
         pushChip({
@@ -403,48 +420,77 @@ export default function LeadDetailPane({
       }
     }
 
-    const purposeRaw = pickLast(r.propertyPurpose);
+    const purposeRaw = pickLast(r.purpose ?? r.propertyPurpose);
     if (isMeaningfulString(purposeRaw)) {
-      const purposeLabel = translateEnum("purpose", purposeRaw);
-      if (purposeLabel) {
-        pushChip({
-          key: "propertyPurpose",
-          icon: Tag,
-          label: translate("propertyDetails.purpose", "Purpose"),
-          value: purposeLabel,
-        });
-      }
-    }
-
-    if (isMeaningfulNumber(r.totalPrice)) {
+      const purposeKey = String(purposeRaw).trim();
+      const purposeLabel = translate(
+        `propertyPurpose.${purposeKey}`,
+        toTitleCase(purposeKey),
+      );
       pushChip({
-        key: "totalPrice",
-        icon: DollarSign,
-        label: fields.totalPrice || "Total Price",
-        value: formatCurrency(r.totalPrice),
+        key: "purpose",
+        icon: Tag,
+        label: translate("propertyDetails.purpose", "Purpose"),
+        value: purposeLabel,
       });
     }
 
-    if (isMeaningfulNumber(r.downPayment)) {
+    const usageLabel = translateEnum("usage", r.propertyUsage);
+    if (usageLabel) {
       pushChip({
-        key: "downPayment",
-        icon: DollarSign,
-        label: fields.downPayment || "Down Payment",
-        value: formatCurrency(r.downPayment),
+        key: "propertyUsage",
+        icon: Tag,
+        label: fields.propertyUsage || "Usage",
+        value: usageLabel,
       });
     }
 
-    if (isMeaningfulNumber(r.monthlyInstallment)) {
+    const furnishingRaw = pickLast(r.furnishingType);
+    if (isMeaningfulString(furnishingRaw)) {
+      const furnishingLabel = translate(
+        `property.furnishing.${String(furnishingRaw).trim()}`,
+        toTitleCase(furnishingRaw),
+      );
       pushChip({
-        key: "monthlyInstallment",
-        icon: DollarSign,
-        label: translate(
-          "propertyDetails.fields.monthlyInstallment",
-          "Monthly Installment"
-        ),
-        value: formatCurrency(r.monthlyInstallment),
+        key: "furnishingType",
+        icon: Tag,
+        label: fields.furnishingType || "Furnishing",
+        value: furnishingLabel,
       });
     }
+
+    const gardenArea = formatAreaM2(r.gardenSize);
+    if (gardenArea) {
+      pushChip({
+        key: "gardenSize",
+        icon: Square,
+        label:
+          fields.gardenSize ||
+          translate("dashboard.requirementsDialog.fields.garden", "Garden"),
+        value: gardenArea,
+      });
+    }
+
+    const garageArea = formatAreaM2(r.garageSize);
+    if (garageArea) {
+      pushChip({
+        key: "garageSize",
+        icon: Square,
+        label:
+          fields.garageSize ||
+          translate("dashboard.requirementsDialog.fields.garage", "Garage"),
+        value: garageArea,
+      });
+    }
+
+    appendRequirementPriceChips(r, (priceChip) => {
+      pushChip({
+        key: priceChip.key,
+        icon: DollarSign,
+        label: priceChip.label,
+        value: priceChip.value,
+      });
+    }, { translate, formatPrice: formatCurrency });
 
     if (isMeaningfulString(r.deliveryDate)) {
       let prettyDate = r.deliveryDate;
@@ -458,6 +504,40 @@ export default function LeadDetailPane({
         icon: Calendar,
         label: fields.deliveryDate || "Delivery",
         value: prettyDate,
+      });
+    }
+
+    const dealBreakersText = Array.isArray(r.dealBreakers)
+      ? r.dealBreakers.filter(Boolean).join(", ")
+      : isMeaningfulString(r.dealBreakers)
+        ? String(r.dealBreakers).trim()
+        : "";
+    if (dealBreakersText) {
+      pushChip({
+        key: "dealBreakers",
+        icon: Tag,
+        label: translate(
+          "dashboard.requirementsDialog.fields.dealBreakers",
+          "Deal breakers",
+        ),
+        value: dealBreakersText,
+      });
+    }
+
+    const featuresText = Array.isArray(r.additionalFeatures)
+      ? r.additionalFeatures.filter(Boolean).join(", ")
+      : isMeaningfulString(r.additionalFeatures)
+        ? String(r.additionalFeatures).trim()
+        : "";
+    if (featuresText) {
+      pushChip({
+        key: "additionalFeatures",
+        icon: Tag,
+        label: translate(
+          "dashboard.requirementsDialog.fields.additionalFeatures",
+          "Additional features",
+        ),
+        value: featuresText,
       });
     }
 
@@ -747,33 +827,50 @@ export default function LeadDetailPane({
                 t?.leadDetail?.requirementSummary?.title,
               )}
             </h4>
-            <button
-              type="button"
-              onClick={() => setEditReqOpen(true)}
-              className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-              title={translate(
-                "leadDetail.requirementSummary.editTitle",
-                t?.leadDetail?.requirementSummary?.editTitle,
-              )}
-              aria-label={translate(
-                "leadDetail.requirementSummary.editTitle",
-                t?.leadDetail?.requirementSummary?.editTitle,
-              )}
-            >
-              {requirementChips.length > 0 ? (
-                <Pencil className="w-3.5 h-3.5" />
-              ) : (
-                <Plus className="w-3.5 h-3.5" />
-              )}
-              <span>
-                {requirementChips.length > 0
-                  ? translate("common.edit", common.edit)
-                  : translate(
-                      "leadDetail.requirementSummary.addAction",
-                      t?.leadDetail?.requirementSummary?.addAction,
-                    )}
-              </span>
-            </button>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleOpenMatch}
+                disabled={creatingMatch}
+                className="inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
+                title={translate("leadDetail.requirementSummary.matchTitle", "Match units")}
+                aria-label={translate("leadDetail.requirementSummary.matchTitle", "Match units")}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>
+                  {creatingMatch
+                    ? "..."
+                    : translate("leadDetail.requirementSummary.match", "Match")}
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditReqOpen(true)}
+                className="inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                title={translate(
+                  "leadDetail.requirementSummary.editTitle",
+                  t?.leadDetail?.requirementSummary?.editTitle,
+                )}
+                aria-label={translate(
+                  "leadDetail.requirementSummary.editTitle",
+                  t?.leadDetail?.requirementSummary?.editTitle,
+                )}
+              >
+                {requirementChips.length > 0 ? (
+                  <Pencil className="w-3.5 h-3.5" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5" />
+                )}
+                <span>
+                  {requirementChips.length > 0
+                    ? translate("common.edit", common.edit)
+                    : translate(
+                        "leadDetail.requirementSummary.addAction",
+                        t?.leadDetail?.requirementSummary?.addAction,
+                      )}
+                </span>
+              </button>
+            </div>
           </div>
 
           {requirementChips.length > 0 ? (

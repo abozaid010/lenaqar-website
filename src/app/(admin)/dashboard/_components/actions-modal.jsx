@@ -22,6 +22,8 @@ export default function ActionsModal({
   phoneNumber,
   name,
   onActionUpdate,
+  /** Raise when opened above another modal (e.g. schedule user details). */
+  overlayClassName = "z-50",
 }) {
   const { locale, translate } = useI18n();
   const [actionItems, setActionItems] = useState(actions || []);
@@ -142,7 +144,9 @@ export default function ActionsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 bg-opacity-50 p-4">
+    <div
+      className={`fixed inset-0 flex items-center justify-center bg-black/50 bg-opacity-50 p-4 ${overlayClassName}`}
+    >
       <div className="relative w-full max-w-xl max-h-full bg-white rounded-lg shadow-lg">
         <div className="flex justify-between items-center p-3">
           <h3 className="text-lg font-semibold text-gray-800 text-center flex-1">
