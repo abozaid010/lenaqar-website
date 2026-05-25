@@ -4,7 +4,6 @@ import {
   BUILDING_TYPE_VALUES,
   FINISHING_TYPE_VALUES,
   FURNISHING_TYPE_VALUES,
-  PROPERTY_PURPOSE_VALUES,
   PROPERTY_USAGE_VALUES,
   VIEW_TYPE_VALUES,
 } from "@/data/constants";
@@ -69,6 +68,8 @@ function numberToFieldValue(v) {
   return Number.isFinite(n) ? String(n) : "";
 }
 
+const PURPOSE_VALUES = ["rent", "buy"];
+
 export default function EditRequirementDialog({
   open,
   onClose,
@@ -92,7 +93,7 @@ export default function EditRequirementDialog({
     finishingType: "",
     furnishingType: "",
     propertyUsage: "",
-    propertyPurpose: "",
+    purpose: "",
     land_area: "",
     roomsCount: "",
     bathroomCount: "",
@@ -137,7 +138,7 @@ export default function EditRequirementDialog({
           finishingType: pickSingleValue(raw.finishingType),
           furnishingType: pickSingleValue(raw.furnishingType),
           propertyUsage: pickSingleValue(raw.propertyUsage),
-          propertyPurpose: pickSingleValue(raw.propertyPurpose),
+          purpose: pickSingleValue(raw.purpose ?? raw.propertyPurpose),
           land_area: numberToFieldValue(raw.land_area),
           roomsCount: numberToFieldValue(raw.roomsCount),
           bathroomCount: numberToFieldValue(raw.bathroomCount),
@@ -225,7 +226,7 @@ export default function EditRequirementDialog({
         finishingType: form.finishingType,
         furnishingType: form.furnishingType,
         propertyUsage: form.propertyUsage,
-        propertyPurpose: form.propertyPurpose,
+        purpose: form.purpose,
         land_area: toNum(form.land_area),
         roomsCount: toNum(form.roomsCount),
         bathroomCount: toNum(form.bathroomCount),
@@ -428,11 +429,11 @@ export default function EditRequirementDialog({
                 </label>
                 <select
                   className={inputClassName}
-                  value={form.propertyPurpose}
-                  onChange={(e) => set("propertyPurpose", e.target.value)}
+                  value={form.purpose}
+                  onChange={(e) => set("purpose", e.target.value)}
                 >
                   <option value="">{notSpecifiedLabel}</option>
-                  {PROPERTY_PURPOSE_VALUES.map((v) => (
+                  {PURPOSE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {tr(`propertyPurpose.${v}`, toDisplayLabel(v))}
                     </option>
