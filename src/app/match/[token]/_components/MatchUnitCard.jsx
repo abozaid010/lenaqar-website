@@ -1,10 +1,12 @@
 "use client";
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
+import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import { useI18n } from "@/hooks/useI18n";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatCurrency } from "@/utils/formatters";
 import { Bath, Bed, Heart, MapPin, Square } from "lucide-react";
+import { useState } from "react";
 
 const MAX_IMAGES = 4;
 
@@ -30,6 +32,8 @@ export default function MatchUnitCard({
   savingLike,
 }) {
   const { translate } = useI18n();
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   const unitId = getUnitId(unit);
   const images = getImages(unit);
   const title =
@@ -45,18 +49,29 @@ export default function MatchUnitCard({
   const baths = unit?.bathroomCount ?? unit?.bathrooms;
   const area = unit?.landArea ?? unit?.land_area;
 
+  const openGallery = (index) => {
+    setGalleryStartIndex(index);
+    setGalleryOpen(true);
+  };
+
   return (
     <article className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-0.5 bg-gray-100">
         {images.length > 0 ? (
           images.map((img, idx) => (
-            <div key={idx} className="relative aspect-[4/3] bg-gray-200">
+            <button
+              key={idx}
+              type="button"
+              onClick={() => openGallery(idx)}
+              className="relative aspect-[4/3] bg-gray-200 cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+              aria-label={translate("matchPage.viewImage", "View full image")}
+            >
               <ImageWithLoader
                 src={img.url}
                 alt={img.alt}
                 className="w-full h-full object-cover"
               />
-            </div>
+            </button>
           ))
         ) : (
           <div className="col-span-2 sm:col-span-4 aspect-[16/7] flex items-center justify-center text-xs text-gray-400">
@@ -133,6 +148,14 @@ export default function MatchUnitCard({
           {translate("matchPage.selectForViewing", "Select for viewing")}
         </label>
       </div>
+
+      <ImageSwiperModal
+        open={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+        images={images.map((img) => ({ url: img.url, alt: img.alt }))}
+        showMasterPlanLabel={false}
+        initialSlide={galleryStartIndex}
+      />
     </article>
   );
 }

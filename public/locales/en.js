@@ -652,6 +652,7 @@ export default {
     viewingSubmitted: "Viewing request submitted",
     noUnits: "No matching units found.",
     noImages: "No images",
+    viewImage: "View full image",
     unitFallback: "Property unit",
     invalidLinkHint: "Ask your agent for a new link.",
     unitsLoadFailed: "Failed to load units",

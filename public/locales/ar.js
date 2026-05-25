@@ -1829,6 +1829,7 @@ export default {
     viewingSubmitted: "تم إرسال طلب المعاينة",
     noUnits: "لا توجد وحدات مطابقة.",
     noImages: "لا توجد صور",
+    viewImage: "عرض الصورة بالحجم الكامل",
     unitFallback: "وحدة عقارية",
     invalidLinkHint: "اطلب من الوكيل رابطاً جديداً.",
     unitsLoadFailed: "فشل تحميل الوحدات",
