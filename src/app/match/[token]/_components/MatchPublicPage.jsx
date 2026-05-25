@@ -17,6 +17,7 @@ import {
 import { fetchPublicMatchedUnits } from "@/lib/match/public-api";
 import { requirementToFilterChips } from "@/lib/match/requirement-to-units-filter";
 import { formatPhoneForWhatsApp, copyToClipboard } from "@/utils/phone-utils";
+import SmartDateTimePicker from "@/components/ui/smart-date-time-picker";
 import MatchUnitCard from "./MatchUnitCard";
 
 export default function MatchPublicPage({ token }) {
@@ -287,11 +288,9 @@ export default function MatchPublicPage({ token }) {
               {translate("matchPage.arrangeViewing", "Arrange viewing")} (
               {selectedIds.size})
             </p>
-            <input
-              type="datetime-local"
+            <SmartDateTimePicker
               value={meetingTime}
-              onChange={(e) => setMeetingTime(e.target.value)}
-              className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              onChange={setMeetingTime}
               required
             />
             <button
