@@ -4,9 +4,7 @@ import {
   BUILDING_TYPE_VALUES,
   FINISHING_TYPE_VALUES,
   FURNISHING_TYPE_VALUES,
-  PROPERTY_INTENT_VALUES,
   PROPERTY_PURPOSE_VALUES,
-  PROPERTY_STATUS_VALUES,
   PROPERTY_USAGE_VALUES,
   VIEW_TYPE_VALUES,
 } from "@/data/constants";
@@ -16,6 +14,7 @@ import {
   getClientRequirements,
   updateUserRequirements,
 } from "@/utils/api";
+import LenaTextField from "@/components/ui/inputs/lena-text-field";
 
 // The PUT /requirements/{requirement_id} endpoint is keyed by the
 // requirement's own id (not the user id). The GET response may expose it
@@ -35,8 +34,9 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 function toNum(v) {
+  if (v === "" || v == null) return null;
   const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
+  return Number.isFinite(n) ? n : null;
 }
 
 function parseListField(v) {
@@ -51,6 +51,22 @@ function splitList(s) {
     .split(",")
     .map((x) => x.trim())
     .filter(Boolean);
+}
+
+function pickSingleValue(v) {
+  if (Array.isArray(v)) {
+    const filtered = v.filter((item) => item !== null && item !== undefined && item !== "");
+    if (!filtered.length) return "";
+    return String(filtered[filtered.length - 1]);
+  }
+  if (v == null || v === "") return "";
+  return String(v);
+}
+
+function numberToFieldValue(v) {
+  if (v === null || v === undefined || v === "") return "";
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : "";
 }
 
 export default function EditRequirementDialog({
@@ -71,25 +87,23 @@ export default function EditRequirementDialog({
     district: "",
     project: "",
     developer: "",
-    buildingType: BUILDING_TYPE_VALUES[0],
-    viewType: VIEW_TYPE_VALUES[0],
-    finishingType: FINISHING_TYPE_VALUES[0],
-    furnishingType: FURNISHING_TYPE_VALUES[0],
-    propertyStatus: PROPERTY_STATUS_VALUES[0],
-    propertyUsage: PROPERTY_USAGE_VALUES[0],
-    propertyPurpose: PROPERTY_PURPOSE_VALUES[0],
-    propertyIntent: PROPERTY_INTENT_VALUES[0],
-    land_area: 0,
-    roomsCount: 0,
-    bathroomCount: 0,
-    floor: 0,
-    gardenSize: 0,
-    garageSize: 0,
+    buildingType: "",
+    viewType: "",
+    finishingType: "",
+    furnishingType: "",
+    propertyUsage: "",
+    propertyPurpose: "",
+    land_area: "",
+    roomsCount: "",
+    bathroomCount: "",
+    floor: "",
+    gardenSize: "",
+    garageSize: "",
     deliveryDate: "",
-    totalPrice: 0,
-    downPayment: 0,
-    monthlyInstallment: 0,
-    serviceCharges: 0,
+    totalPrice: "",
+    downPayment: "",
+    monthlyInstallment: "",
+    serviceCharges: "",
     dealBreakers: "",
     additionalFeatures: "",
   }));
@@ -109,38 +123,32 @@ export default function EditRequirementDialog({
           if (raw?.error) toast.error(String(raw.error));
           return;
         }
-        const clientId = LenaCookiesManager.getClientId() || "";
-        const last = (arr) =>
-          Array.isArray(arr) && arr.length ? arr[arr.length - 1] : arr;
-
         setRequirementId(pickRequirementId(raw));
         setForm({
-          client_id: raw.client_id ?? clientId,
+          client_id: raw.client_id ?? "",
           user_id: userId,
           country: raw.country ?? "",
           city: raw.city ?? "",
           district: raw.district ?? "",
           project: raw.project ?? "",
           developer: raw.developer ?? "",
-          buildingType: last(raw.buildingType) || BUILDING_TYPE_VALUES[0],
-          viewType: last(raw.viewType) || VIEW_TYPE_VALUES[0],
-          finishingType: last(raw.finishingType) || FINISHING_TYPE_VALUES[0],
-          furnishingType: last(raw.furnishingType) || FURNISHING_TYPE_VALUES[0],
-          propertyStatus: last(raw.propertyStatus) || PROPERTY_STATUS_VALUES[0],
-          propertyUsage: last(raw.propertyUsage) || PROPERTY_USAGE_VALUES[0],
-          propertyPurpose: last(raw.propertyPurpose) || PROPERTY_PURPOSE_VALUES[0],
-          propertyIntent: last(raw.propertyIntent) || PROPERTY_INTENT_VALUES[0],
-          land_area: toNum(raw.land_area),
-          roomsCount: toNum(raw.roomsCount),
-          bathroomCount: toNum(raw.bathroomCount),
-          floor: toNum(raw.floor),
-          gardenSize: toNum(raw.gardenSize),
-          garageSize: toNum(raw.garageSize),
+          buildingType: pickSingleValue(raw.buildingType),
+          viewType: pickSingleValue(raw.viewType),
+          finishingType: pickSingleValue(raw.finishingType),
+          furnishingType: pickSingleValue(raw.furnishingType),
+          propertyUsage: pickSingleValue(raw.propertyUsage),
+          propertyPurpose: pickSingleValue(raw.propertyPurpose),
+          land_area: numberToFieldValue(raw.land_area),
+          roomsCount: numberToFieldValue(raw.roomsCount),
+          bathroomCount: numberToFieldValue(raw.bathroomCount),
+          floor: numberToFieldValue(raw.floor),
+          gardenSize: numberToFieldValue(raw.gardenSize),
+          garageSize: numberToFieldValue(raw.garageSize),
           deliveryDate: raw.deliveryDate ?? "",
-          totalPrice: toNum(raw.totalPrice),
-          downPayment: toNum(raw.downPayment),
-          monthlyInstallment: toNum(raw.monthlyInstallment),
-          serviceCharges: toNum(raw.serviceCharges),
+          totalPrice: numberToFieldValue(raw.totalPrice),
+          downPayment: numberToFieldValue(raw.downPayment),
+          monthlyInstallment: numberToFieldValue(raw.monthlyInstallment),
+          serviceCharges: numberToFieldValue(raw.serviceCharges),
           dealBreakers: parseListField(raw.dealBreakers),
           additionalFeatures: parseListField(raw.additionalFeatures),
         });
@@ -168,6 +176,10 @@ export default function EditRequirementDialog({
   const inputClassName =
     "w-full border border-gray-200 rounded-md px-2.5 py-2 mt-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary";
   const sectionClassName = "rounded-lg border border-gray-100 p-3.5 space-y-3 bg-gray-50/40";
+  const notSpecifiedLabel = tr(
+    "dashboard.requirementsDialog.fields.notSpecified",
+    locale === "ar" ? "غير محدد" : "Not specified",
+  );
 
   const toDisplayLabel = (value) =>
     String(value)
@@ -212,10 +224,8 @@ export default function EditRequirementDialog({
         viewType: form.viewType,
         finishingType: form.finishingType,
         furnishingType: form.furnishingType,
-        propertyStatus: form.propertyStatus,
         propertyUsage: form.propertyUsage,
         propertyPurpose: form.propertyPurpose,
-        propertyIntent: form.propertyIntent,
         land_area: toNum(form.land_area),
         roomsCount: toNum(form.roomsCount),
         bathroomCount: toNum(form.bathroomCount),
@@ -293,9 +303,9 @@ export default function EditRequirementDialog({
                 ["developer", tr("dashboard.requirementsDialog.fields.developer", locale === "ar" ? "المطور" : "Developer")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-xs font-medium text-gray-600">{label}</label>
-                  <input
-                    className={inputClassName}
+                  <LenaTextField
+                    name={k}
+                    label={label}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
@@ -324,6 +334,7 @@ export default function EditRequirementDialog({
                   value={form.buildingType}
                   onChange={(e) => set("buildingType", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {BUILDING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {getOptionLabel("buildingTypes", v)}
@@ -340,6 +351,7 @@ export default function EditRequirementDialog({
                   value={form.viewType}
                   onChange={(e) => set("viewType", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {VIEW_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {getOptionLabel("view", v)}
@@ -359,6 +371,7 @@ export default function EditRequirementDialog({
                   value={form.finishingType}
                   onChange={(e) => set("finishingType", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {FINISHING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {getOptionLabel("finishing", v)}
@@ -378,28 +391,10 @@ export default function EditRequirementDialog({
                   value={form.furnishingType}
                   onChange={(e) => set("furnishingType", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {FURNISHING_TYPE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {tr(`property.furnishing.${v}`, toDisplayLabel(v))}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-600">
-                  {tr(
-                    "dashboard.requirementsDialog.fields.status",
-                    locale === "ar" ? "الحالة" : "Status"
-                  )}
-                </label>
-                <select
-                  className={inputClassName}
-                  value={form.propertyStatus}
-                  onChange={(e) => set("propertyStatus", e.target.value)}
-                >
-                  {PROPERTY_STATUS_VALUES.map((v) => (
-                    <option key={v} value={v}>
-                      {getOptionLabel("status", v)}
                     </option>
                   ))}
                 </select>
@@ -416,6 +411,7 @@ export default function EditRequirementDialog({
                   value={form.propertyUsage}
                   onChange={(e) => set("propertyUsage", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {PROPERTY_USAGE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {getOptionLabel("usage", v)}
@@ -435,28 +431,10 @@ export default function EditRequirementDialog({
                   value={form.propertyPurpose}
                   onChange={(e) => set("propertyPurpose", e.target.value)}
                 >
+                  <option value="">{notSpecifiedLabel}</option>
                   {PROPERTY_PURPOSE_VALUES.map((v) => (
                     <option key={v} value={v}>
                       {tr(`propertyPurpose.${v}`, toDisplayLabel(v))}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-600">
-                  {tr(
-                    "dashboard.requirementsDialog.fields.intent",
-                    locale === "ar" ? "النية" : "Intent"
-                  )}
-                </label>
-                <select
-                  className={inputClassName}
-                  value={form.propertyIntent}
-                  onChange={(e) => set("propertyIntent", e.target.value)}
-                >
-                  {PROPERTY_INTENT_VALUES.map((v) => (
-                    <option key={v} value={v}>
-                      {tr(`propertyIntent.${v}`, toDisplayLabel(v))}
                     </option>
                   ))}
                 </select>
@@ -481,10 +459,10 @@ export default function EditRequirementDialog({
                 ["garageSize", tr("dashboard.requirementsDialog.fields.garage", locale === "ar" ? "الجراج" : "Garage")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-xs font-medium text-gray-600">{label}</label>
-                  <input
+                  <LenaTextField
+                    name={k}
                     type="number"
-                    className={inputClassName}
+                    label={label}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
@@ -500,15 +478,13 @@ export default function EditRequirementDialog({
                   locale === "ar" ? "الأسعار" : "Pricing"
                 )}
               </h4>
-            <div>
-              <label className="text-xs font-medium text-gray-600">
-                {tr(
+            <div className="md:w-56">
+              <LenaTextField
+                name="deliveryDate"
+                label={tr(
                   "dashboard.requirementsDialog.fields.deliveryDate",
                   locale === "ar" ? "تاريخ التسليم" : "Delivery Date"
                 )}
-              </label>
-              <input
-                className={`${inputClassName} md:w-56`}
                 value={form.deliveryDate}
                 onChange={(e) => set("deliveryDate", e.target.value)}
               />
@@ -521,10 +497,10 @@ export default function EditRequirementDialog({
                 ["serviceCharges", tr("dashboard.requirementsDialog.fields.service", locale === "ar" ? "الخدمات" : "Service")],
               ].map(([k, label]) => (
                 <div key={k}>
-                  <label className="text-xs font-medium text-gray-600">{label}</label>
-                  <input
+                  <LenaTextField
+                    name={k}
                     type="number"
-                    className={inputClassName}
+                    label={label}
                     value={form[k]}
                     onChange={(e) => set(k, e.target.value)}
                   />
