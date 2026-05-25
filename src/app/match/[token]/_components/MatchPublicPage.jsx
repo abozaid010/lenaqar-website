@@ -54,10 +54,7 @@ export default function MatchPublicPage({ token }) {
     if (!unitFilters || Object.keys(unitFilters).length === 0) return;
     setUnitsLoading(true);
     try {
-      const { units: list } = await fetchPublicMatchedUnits({
-        ...unitFilters,
-        page_size: 24,
-      });
+      const { units: list } = await fetchPublicMatchedUnits(unitFilters);
       setUnits(list);
     } catch (e) {
       toast.error(e?.message || translate("matchPage.unitsLoadFailed", "Failed to load units"));

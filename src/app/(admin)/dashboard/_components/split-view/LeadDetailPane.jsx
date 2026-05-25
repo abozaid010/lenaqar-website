@@ -53,14 +53,12 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
+import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
 const DEFAULT_TAB = "conversations";
 
 // ---------- Requirement summary helpers (local to this file) ----------
-
-const STATUS_DEFAULTS = new Set(["ready to move", "off-plan"]);
-const PURPOSE_DEFAULTS = new Set(["sell", "rent", "buy", "lease"]);
 
 const pickLast = (v) => (Array.isArray(v) ? v[v.length - 1] : v);
 
@@ -75,6 +73,13 @@ const isMeaningfulString = (v) => {
 const isMeaningfulNumber = (v) => {
   const n = Number(v);
   return Number.isFinite(n) && n > 0;
+};
+
+const formatAreaM2 = (v) => {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const rounded = Number.isInteger(n) ? String(Math.floor(n)) : String(n);
+  return `${rounded} m²`;
 };
 
 const toTitleCase = (value) =>
@@ -323,8 +328,8 @@ export default function LeadDetailPane({
       });
     }
 
-    // Location — collapse city/district/project into one chip when present.
-    const locationParts = [r.city, r.district, r.project]
+    // Location — collapse country/city/district/project into one chip when present.
+    const locationParts = [r.country, r.city, r.district, r.project]
       .filter(isMeaningfulString)
       .map((p) => String(p).trim());
     if (locationParts.length > 0) {
@@ -333,13 +338,6 @@ export default function LeadDetailPane({
         icon: MapPin,
         label: translate("propertyDetails.location", "Location"),
         value: locationParts.join(" • "),
-      });
-    } else if (isMeaningfulString(r.country)) {
-      pushChip({
-        key: "country",
-        icon: MapPin,
-        label: fields.country || "Country",
-        value: String(r.country).trim(),
       });
     }
 
@@ -370,12 +368,13 @@ export default function LeadDetailPane({
       });
     }
 
-    if (isMeaningfulNumber(r.land_area)) {
+    const landArea = formatAreaM2(r.land_area);
+    if (landArea) {
       pushChip({
         key: "land_area",
         icon: Square,
         label: fields.landArea || "Area",
-        value: `${formatCurrency(r.land_area)} m²`,
+        value: landArea,
       });
     }
 
@@ -408,22 +407,8 @@ export default function LeadDetailPane({
       });
     }
 
-    // Status & purpose — hide when the value is just the system default.
     const statusRaw = pickLast(r.propertyStatus);
-    if (
-      isMeaningfulString(statusRaw) &&
-      !STATUS_DEFAULTS.has(String(statusRaw).trim().toLowerCase())
-    ) {
-      const statusLabel = translateEnum("status", statusRaw);
-      if (statusLabel) {
-        pushChip({
-          key: "propertyStatus",
-          icon: Landmark,
-          label: fields.propertyStatus || "Status",
-          value: statusLabel,
-        });
-      }
-    } else if (isMeaningfulString(statusRaw)) {
+    if (isMeaningfulString(statusRaw)) {
       const statusLabel = translateEnum("status", statusRaw);
       if (statusLabel) {
         pushChip({
@@ -437,46 +422,75 @@ export default function LeadDetailPane({
 
     const purposeRaw = pickLast(r.purpose ?? r.propertyPurpose);
     if (isMeaningfulString(purposeRaw)) {
-      const purposeLabel = translateEnum("purpose", purposeRaw);
-      if (purposeLabel) {
-        pushChip({
-          key: "propertyPurpose",
-          icon: Tag,
-          label: translate("propertyDetails.purpose", "Purpose"),
-          value: purposeLabel,
-        });
-      }
-    }
-
-    if (isMeaningfulNumber(r.totalPrice)) {
+      const purposeKey = String(purposeRaw).trim();
+      const purposeLabel = translate(
+        `propertyPurpose.${purposeKey}`,
+        toTitleCase(purposeKey),
+      );
       pushChip({
-        key: "totalPrice",
-        icon: DollarSign,
-        label: fields.totalPrice || "Total Price",
-        value: formatCurrency(r.totalPrice),
+        key: "purpose",
+        icon: Tag,
+        label: translate("propertyDetails.purpose", "Purpose"),
+        value: purposeLabel,
       });
     }
 
-    if (isMeaningfulNumber(r.downPayment)) {
+    const usageLabel = translateEnum("usage", r.propertyUsage);
+    if (usageLabel) {
       pushChip({
-        key: "downPayment",
-        icon: DollarSign,
-        label: fields.downPayment || "Down Payment",
-        value: formatCurrency(r.downPayment),
+        key: "propertyUsage",
+        icon: Tag,
+        label: fields.propertyUsage || "Usage",
+        value: usageLabel,
       });
     }
 
-    if (isMeaningfulNumber(r.monthlyInstallment)) {
+    const furnishingRaw = pickLast(r.furnishingType);
+    if (isMeaningfulString(furnishingRaw)) {
+      const furnishingLabel = translate(
+        `property.furnishing.${String(furnishingRaw).trim()}`,
+        toTitleCase(furnishingRaw),
+      );
       pushChip({
-        key: "monthlyInstallment",
-        icon: DollarSign,
-        label: translate(
-          "propertyDetails.fields.monthlyInstallment",
-          "Monthly Installment"
-        ),
-        value: formatCurrency(r.monthlyInstallment),
+        key: "furnishingType",
+        icon: Tag,
+        label: fields.furnishingType || "Furnishing",
+        value: furnishingLabel,
       });
     }
+
+    const gardenArea = formatAreaM2(r.gardenSize);
+    if (gardenArea) {
+      pushChip({
+        key: "gardenSize",
+        icon: Square,
+        label:
+          fields.gardenSize ||
+          translate("dashboard.requirementsDialog.fields.garden", "Garden"),
+        value: gardenArea,
+      });
+    }
+
+    const garageArea = formatAreaM2(r.garageSize);
+    if (garageArea) {
+      pushChip({
+        key: "garageSize",
+        icon: Square,
+        label:
+          fields.garageSize ||
+          translate("dashboard.requirementsDialog.fields.garage", "Garage"),
+        value: garageArea,
+      });
+    }
+
+    appendRequirementPriceChips(r, (priceChip) => {
+      pushChip({
+        key: priceChip.key,
+        icon: DollarSign,
+        label: priceChip.label,
+        value: priceChip.value,
+      });
+    }, { translate, formatPrice: formatCurrency });
 
     if (isMeaningfulString(r.deliveryDate)) {
       let prettyDate = r.deliveryDate;
@@ -490,6 +504,40 @@ export default function LeadDetailPane({
         icon: Calendar,
         label: fields.deliveryDate || "Delivery",
         value: prettyDate,
+      });
+    }
+
+    const dealBreakersText = Array.isArray(r.dealBreakers)
+      ? r.dealBreakers.filter(Boolean).join(", ")
+      : isMeaningfulString(r.dealBreakers)
+        ? String(r.dealBreakers).trim()
+        : "";
+    if (dealBreakersText) {
+      pushChip({
+        key: "dealBreakers",
+        icon: Tag,
+        label: translate(
+          "dashboard.requirementsDialog.fields.dealBreakers",
+          "Deal breakers",
+        ),
+        value: dealBreakersText,
+      });
+    }
+
+    const featuresText = Array.isArray(r.additionalFeatures)
+      ? r.additionalFeatures.filter(Boolean).join(", ")
+      : isMeaningfulString(r.additionalFeatures)
+        ? String(r.additionalFeatures).trim()
+        : "";
+    if (featuresText) {
+      pushChip({
+        key: "additionalFeatures",
+        icon: Tag,
+        label: translate(
+          "dashboard.requirementsDialog.fields.additionalFeatures",
+          "Additional features",
+        ),
+        value: featuresText,
       });
     }
 

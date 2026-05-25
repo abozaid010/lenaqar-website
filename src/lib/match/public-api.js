@@ -1,4 +1,8 @@
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
+import {
+  LOWERCASE_UNIT_FILTER_KEYS,
+  MATCH_UNITS_PAGE_SIZE,
+} from "@/lib/match/requirement-to-units-filter";
 
 function publicHeaders(extra = {}) {
   const headers = {
@@ -30,13 +34,17 @@ async function parseJsonResponse(response) {
  */
 export async function fetchPublicMatchedUnits(filters = {}) {
   const params = new URLSearchParams();
-  params.set("page_size", String(filters.page_size ?? 24));
+  params.set("page_size", String(filters.page_size ?? MATCH_UNITS_PAGE_SIZE));
   if (filters.cursor) params.set("cursor", String(filters.cursor));
 
   Object.entries(filters).forEach(([key, value]) => {
     if (key === "page_size" || key === "cursor") return;
     if (value == null || value === "") return;
-    params.set(key, String(value));
+    let paramValue = String(value).trim();
+    if (LOWERCASE_UNIT_FILTER_KEYS.has(key)) {
+      paramValue = paramValue.toLowerCase();
+    }
+    params.set(key, paramValue);
   });
 
   const qs = params.toString();

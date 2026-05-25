@@ -13,6 +13,7 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-handler";
 import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
+import { cleanRequirementsPayload } from "./cleanRequirements";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -1911,10 +1912,11 @@ export async function updateUserRequirements(requirementId, payload) {
   if (!requirementId) {
     throw new Error("requirementId is required");
   }
+  const cleanedBody = cleanRequirementsPayload(payload);
   try {
     const response = await axiosInstance.put(
       `requirements/${requirementId}`,
-      payload,
+      cleanedBody,
     );
     return response.data;
   } catch (error) {
