@@ -106,6 +106,7 @@ export default {
     clientCreated: "تم إنشاء العميل بنجاح!",
     failedToCreateClient: "فشل إنشاء العميل",
     clientUpdated: "تم تحديث العميل بنجاح",
+    noChangesToSave: "لا توجد تغييرات للحفظ",
     failedToUpdateClient: "فشل تحديث العميل. يرجى المحاولة مرة أخرى.",
     loadingConversation: "جاري تحميل المحادثة...",
     couldNotLoadChat: "لم يتم تحميل المحادثة",
@@ -689,9 +690,11 @@ export default {
     },
   },
   editClient: {
+    noChanges: "لا توجد تغييرات للحفظ",
     whatsapp: {
       sectionTitle: "أتمتة واتساب",
       linkedBadge: "مرتبط",
+      pendingUnlinkBadge: "سيُلغى الربط عند الحفظ",
       loading: "جاري تحميل إعدادات واتساب…",
       instanceIdLabel: "معرّف UltraMsg",
       instanceIdPlaceholder: "instance177433",

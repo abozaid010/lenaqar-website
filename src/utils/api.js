@@ -2040,53 +2040,12 @@ export async function updateAdminClient(clientId, payload) {
   }
 }
 
-/** Scope profile / WhatsApp instance APIs to a specific client (king admin editing another tenant). */
-function clientScopedHeaders(clientId) {
-  return clientId ? { "x-client-id": String(clientId) } : {};
-}
-
 export async function fetchClientPermissionSchema() {
   try {
     const response = await axiosInstance.get("client/permission-schema");
     return response.data;
   } catch (error) {
     console.error("Failed to fetch permission schema:", error.message);
-    throw error;
-  }
-}
-
-export async function getClientProfile(clientId) {
-  try {
-    const response = await axiosInstance.get("client/v1/profile", {
-      headers: clientScopedHeaders(clientId),
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to fetch client profile:", error.message);
-    throw error;
-  }
-}
-
-export async function linkClientWhatsappInstance(clientId, payload) {
-  try {
-    const response = await axiosInstance.put("client/whatsapp-instance", payload, {
-      headers: clientScopedHeaders(clientId),
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to link WhatsApp instance:", error.message);
-    throw error;
-  }
-}
-
-export async function unlinkClientWhatsappInstance(clientId) {
-  try {
-    const response = await axiosInstance.delete("client/whatsapp-instance", {
-      headers: clientScopedHeaders(clientId),
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Failed to unlink WhatsApp instance:", error.message);
     throw error;
   }
 }

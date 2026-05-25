@@ -92,6 +92,7 @@ export default {
     clientCreated: "Client created successfully!",
     failedToCreateClient: "Failed to create client",
     clientUpdated: "Client updated successfully",
+    noChangesToSave: "No changes to save",
     failedToUpdateClient: "Failed to update client. Please try again.",
     loadingConversation: "Loading conversation...",
     couldNotLoadChat: "Could not load chat",
@@ -757,9 +758,11 @@ export default {
     },
   },
   editClient: {
+    noChanges: "No changes to save",
     whatsapp: {
       sectionTitle: "WhatsApp Automation",
       linkedBadge: "Linked",
+      pendingUnlinkBadge: "Will unlink on save",
       loading: "Loading WhatsApp settings…",
       instanceIdLabel: "UltraMsg Instance ID",
       instanceIdPlaceholder: "instance177433",
