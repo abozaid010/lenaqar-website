@@ -9,13 +9,14 @@ import {
 } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
 import { getActionLabel, getFilterActions } from "@/utils/actions";
-import { ChevronDown, Printer, X, UserPlus } from "lucide-react";
+import { ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDayMonthShort } from "@/utils/formateDate";
 import AverageScore from "./average-score";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
 import AddLeadDialog from "@/components/ui/add-lead-dialog";
+import ImportLeadsDialog from "@/components/ui/import-leads-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
@@ -67,6 +68,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
+  const [isImportLeadsOpen, setIsImportLeadsOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
@@ -417,6 +419,18 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             <UserPlus size={16} />
             <span>{t.dashboardFilter?.ADD || "Add Lead"}</span>
           </button>
+          <button
+            onClick={() => setIsImportLeadsOpen(true)}
+            className="flex items-center gap-2 h-9 px-3 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm"
+          >
+            <FileSpreadsheet size={16} />
+            <span>
+              {translate(
+                "dashboardFilter.importLeads.button",
+                t?.dashboardFilter?.importLeads?.button || "Import",
+              )}
+            </span>
+          </button>
           {showExportButton && (
             <ExcelExportButton searchParams={appliedFilters} compact={compact} />
           )}
@@ -465,6 +479,18 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
           <UserPlus size={18} />
           <span>{t.dashboardFilter?.ADD || "New Lead"}</span>
         </button>
+        <button
+          onClick={() => setIsImportLeadsOpen(true)}
+          className="flex items-center gap-2 h-10 px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+        >
+          <FileSpreadsheet size={18} />
+          <span>
+            {translate(
+              "dashboardFilter.importLeads.button",
+              t?.dashboardFilter?.importLeads?.button || "Import",
+            )}
+          </span>
+        </button>
         {showExportButton && (
           <ExcelExportButton searchParams={appliedFilters} compact={compact} />
         )}
@@ -506,6 +532,12 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       <AddLeadDialog
         isOpen={isAddLeadOpen}
         onClose={() => setIsAddLeadOpen(false)}
+        clientId={clientId}
+      />
+
+      <ImportLeadsDialog
+        isOpen={isImportLeadsOpen}
+        onClose={() => setIsImportLeadsOpen(false)}
         clientId={clientId}
       />
 
