@@ -138,7 +138,14 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
     throw new Error("Could not find a phone column in the uploaded sheet.");
   }
 
-  const validLeads = [];
+  const safeClientId = String(clientId ?? "").trim();
+  if (!safeClientId) {
+    throw new Error(
+      "Missing client ID. Please log out and log in again, then retry import.",
+    );
+  }
+
+  const validLeadRows = [];
   const skippedRows = [];
 
   rows.forEach((row, rowIndex) => {
@@ -160,18 +167,21 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
     const campaignRaw = campaignIndex >= 0 ? String(row[campaignIndex] ?? "").trim() : "";
     const platformRaw = platformIndex >= 0 ? String(row[platformIndex] ?? "").trim() : "";
 
-    validLeads.push({
-      user_id: crypto.randomUUID(),
-      phone_number,
-      user_name,
-      query,
-      client_id: clientId || "public",
-      platform: platformRaw || "website",
-      campaign_id: campaignRaw || "added_manually",
+    validLeadRows.push({
+      rowNumber,
+      payload: {
+        user_id: crypto.randomUUID(),
+        phone_number,
+        user_name,
+        query,
+        client_id: safeClientId,
+        platform: platformRaw || "website",
+        campaign_id: campaignRaw || "added_manually",
+      },
     });
   });
 
-  return { validLeads, skippedRows };
+  return { validLeadRows, skippedRows };
 };
 
 export function useImportLeads({ clientId } = {}) {
@@ -181,6 +191,17 @@ export function useImportLeads({ clientId } = {}) {
   const [lastSummary, setLastSummary] = useState(null);
 
   const importLeadsFromFile = async (file) => {
+    const safeClientId = String(clientId ?? "").trim();
+    if (!safeClientId) {
+      toast.error(
+        translate(
+          "dashboardFilter.importLeads.errors.missingClientId",
+          "Missing client ID. Please log out and log in again, then retry import.",
+        ),
+      );
+      return { success: false };
+    }
+
     if (!file) {
       toast.error(
         translate(
@@ -203,11 +224,15 @@ export function useImportLeads({ clientId } = {}) {
         sheetData = await parseExcelFile(file);
       }
 
-      const { validLeads, skippedRows } = buildLeadsFromSheet({
+      const { validLeadRows, skippedRows } = buildLeadsFromSheet({
         headers: sheetData.headers || [],
         rows: sheetData.rows || [],
-        clientId,
+        clientId: safeClientId,
       });
+      const validLeads = validLeadRows.map((item) => item.payload);
+      const rowNumberByUserId = new Map(
+        validLeadRows.map((item) => [String(item.payload.user_id), item.rowNumber]),
+      );
 
       if (validLeads.length === 0) {
         toast.error(
@@ -228,7 +253,9 @@ export function useImportLeads({ clientId } = {}) {
 
       const result = await addManyLeadsAction(validLeads);
       const failedRowsFromApi = (result?.data?.failed || []).map((item) => ({
-        rowNumber: Number(item.index) + 2,
+        rowNumber:
+          rowNumberByUserId.get(String(item?.user_id)) ??
+          (Number.isInteger(item?.index) && item.index >= 0 ? item.index + 2 : "—"),
         reason: item.reason || "Unknown error",
       }));
 

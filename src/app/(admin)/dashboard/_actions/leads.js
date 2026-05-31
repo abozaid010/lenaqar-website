@@ -40,8 +40,7 @@ export async function addNewLeadAction(payload) {
 }
 
 /**
- * Server action to add many leads in controlled batches.
- * Uses the existing add-new endpoint for each lead payload.
+ * Server action to add many leads in one bulk request.
  */
 export async function addManyLeadsAction(payloads = []) {
   const clientId = await getClientid();
@@ -57,11 +56,11 @@ export async function addManyLeadsAction(payloads = []) {
   const normalizedPayloads = payloads
     .map((payload) => ({
       ...payload,
-      client_id: payload?.client_id || clientId || "public",
+      client_id: payload?.client_id || clientId || "",
       platform: payload?.platform || "website",
       campaign_id: payload?.campaign_id || "added_manually",
     }))
-    .filter((payload) => payload?.phone_number && payload?.user_name);
+    .filter((payload) => payload?.phone_number && payload?.user_name && payload?.client_id);
 
   if (normalizedPayloads.length === 0) {
     return {
@@ -79,32 +78,44 @@ export async function addManyLeadsAction(payloads = []) {
     };
   }
 
-  const batchSize = 20;
   const failed = [];
   let successCount = 0;
 
   try {
-    for (let i = 0; i < normalizedPayloads.length; i += batchSize) {
-      const batch = normalizedPayloads.slice(i, i + batchSize);
-      const results = await Promise.allSettled(
-        batch.map((payload) => axiosInstance.post("/api/leads/addnew", payload)),
-      );
+    const response = await axiosInstance.post("/api/leads/bulk", {
+      leads: normalizedPayloads,
+    });
 
-      results.forEach((result, batchIndex) => {
-        if (result.status === "fulfilled") {
-          successCount += 1;
-          return;
-        }
-        const reason =
-          result.reason?.response?.data?.detail ||
-          result.reason?.response?.data?.message ||
-          result.reason?.message ||
-          "Failed to add lead";
-        failed.push({
-          index: i + batchIndex,
-          reason,
-        });
+    const body = response.data?.data || response.data || {};
+    const results = Array.isArray(body.results) ? body.results : [];
+    const succeededCount = Number(body.succeeded ?? 0);
+    const failedCount = Number(body.failed ?? 0);
+
+    successCount = succeededCount;
+
+    const userIdToIndex = new Map(
+      normalizedPayloads.map((lead, index) => [String(lead.user_id), index]),
+    );
+
+    results.forEach((item) => {
+      if (item?.success) return;
+      const rowIndex = userIdToIndex.get(String(item?.user_id));
+      failed.push({
+        index: Number.isInteger(rowIndex) ? rowIndex : -1,
+        user_id: item?.user_id || null,
+        reason: item?.error || "Failed to add lead",
       });
+    });
+
+    if (results.length === 0 && failedCount > 0) {
+      // Fallback when API does not return per-row results.
+      for (let i = 0; i < failedCount; i += 1) {
+        failed.push({
+          index: -1,
+          user_id: null,
+          reason: "Failed to add lead",
+        });
+      }
     }
 
     if (successCount > 0) {
@@ -119,10 +130,11 @@ export async function addManyLeadsAction(payloads = []) {
           ? "Some leads failed to import"
           : "Leads imported successfully",
       data: {
-        total: normalizedPayloads.length,
+        total: Number(body.total ?? normalizedPayloads.length),
         successCount,
-        failedCount: failed.length,
+        failedCount: Number(body.failed ?? failed.length),
         failed,
+        results,
       },
     };
   } catch (error) {
@@ -139,7 +151,7 @@ export async function addManyLeadsAction(payloads = []) {
         "Failed to import leads",
       data: {
         total: normalizedPayloads.length,
-        successCount,
+        successCount: 0,
         failedCount: normalizedPayloads.length - successCount,
         failed,
       },
