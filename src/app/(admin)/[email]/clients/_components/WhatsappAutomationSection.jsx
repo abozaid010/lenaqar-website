@@ -292,7 +292,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
     if (isOpenwaProvider(snap.provider)) {
       return {
-        provider: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+        platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
         openwa_session_id: snap.openwa_session_id,
         whatsapp_number:
           phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
@@ -300,7 +300,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     }
 
     const linked = {
-      provider: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+      platform: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
       whatsapp_instance_id: snap.whatsapp_instance_id,
       whatsapp_number:
         phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,

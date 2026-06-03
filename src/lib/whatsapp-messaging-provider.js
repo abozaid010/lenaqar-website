@@ -12,13 +12,15 @@ export function normalizeWhatsappPhone(raw) {
 }
 
 /**
- * Resolve provider from stored linked_automated_whatsapp (supports legacy payloads).
+ * Resolve platform from stored linked_automated_whatsapp.
+ * Priority: platform (new) → provider (legacy) → messaging_provider (legacy) → infer from fields.
  */
 export function resolveMessagingProvider(linked) {
   if (!linked || typeof linked !== "object") {
     return DEFAULT_WHATSAPP_MESSAGING_PROVIDER;
   }
-  const explicit = linked.provider ?? linked.messaging_provider;
+  // Try platform first (new naming), then provider and messaging_provider (legacy)
+  const explicit = linked.platform ?? linked.provider ?? linked.messaging_provider;
   if (
     explicit === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
     explicit === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE
