@@ -15,6 +15,11 @@ import { phoneToE164 } from "@/components/phone/phone-utils";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/hooks/useI18n";
 import {
+  DEFAULT_WHATSAPP_AGENT,
+  resolveWhatsappAgent,
+  WHATSAPP_AGENT_OPTIONS,
+} from "@/constants/whatsapp-agents";
+import {
   DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
   WHATSAPP_MESSAGING_PROVIDERS,
 } from "@/constants/whatsapp-messaging";
@@ -30,15 +35,20 @@ const SAVED_TOKEN_MASK = "••••••••••••••••";
 
 const EMPTY_WHATSAPP_FORM = {
   platform: DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  whatsapp_agent: DEFAULT_WHATSAPP_AGENT,
   openwa_session_id: "",
   whatsapp_instance_id: "",
   whatsapp_number: "",
   whatsapp_instance_token: "",
 };
 
+const agentSelectCls =
+  "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white";
+
 function snapshotForm(form) {
   return {
     platform: form.platform,
+    whatsapp_agent: form.whatsapp_agent,
     openwa_session_id: form.openwa_session_id?.trim() ?? "",
     whatsapp_instance_id: form.whatsapp_instance_id?.trim() ?? "",
     whatsapp_number: form.whatsapp_number?.trim() ?? "",
@@ -51,6 +61,7 @@ function buildBaselineFromLinked(linked) {
   const platform = resolveMessagingProvider(linked);
   return {
     platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
       (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
@@ -73,6 +84,7 @@ function formFromLinked(linked, { clearToken = true, prevToken = "" } = {}) {
 
   return {
     platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
       (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
@@ -144,7 +156,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   }, []);
 
   const initialSyncKey = enabled
-    ? `${initialLinkedWhatsapp?.provider ?? initialLinkedWhatsapp?.messaging_provider ?? ""}:${initialLinkedWhatsapp?.openwa_session_id ?? initialLinkedWhatsapp?.whatsapp_instance_id ?? ""}:${initialLinkedWhatsapp?.whatsapp_number ?? ""}:${initialLinkedWhatsapp ? "1" : "0"}`
+    ? `${initialLinkedWhatsapp?.provider ?? initialLinkedWhatsapp?.messaging_provider ?? ""}:${initialLinkedWhatsapp?.whatsapp_agent ?? ""}:${initialLinkedWhatsapp?.openwa_session_id ?? initialLinkedWhatsapp?.whatsapp_instance_id ?? ""}:${initialLinkedWhatsapp?.whatsapp_number ?? ""}:${initialLinkedWhatsapp ? "1" : "0"}`
     : null;
 
   useEffect(() => {
@@ -206,6 +218,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     }
 
     if (snap.platform !== baseline.platform) return true;
+    if (snap.whatsapp_agent !== baseline.whatsapp_agent) return true;
 
     if (isOpenwaProvider(snap.platform)) {
       if (snap.openwa_session_id !== baseline.openwa_session_id) return true;
@@ -307,10 +320,12 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     if (pendingUnlink) return null;
 
     const snap = snapshotForm(form);
+    const whatsapp_agent = resolveWhatsappAgent(snap.whatsapp_agent);
 
     if (isOpenwaProvider(snap.platform)) {
       return {
         platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+        whatsapp_agent,
         openwa_session_id: snap.openwa_session_id,
         whatsapp_number:
           phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
@@ -320,6 +335,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     if (isWhatsappCloudApiProvider(snap.platform)) {
       return {
         platform: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
+        whatsapp_agent,
         whatsapp_number:
           phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
       };
@@ -327,6 +343,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
     const linked = {
       platform: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+      whatsapp_agent,
       whatsapp_instance_id: snap.whatsapp_instance_id,
       whatsapp_number:
         phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
@@ -345,7 +362,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       setPendingUnlink(false);
       applyLinkedState(linked, { clearToken: true });
       const syncKey = linked
-        ? `${linked.provider ?? linked.messaging_provider ?? ""}:${linked.openwa_session_id ?? linked.whatsapp_instance_id ?? ""}:${linked.whatsapp_number ?? ""}:1`
+        ? `${linked.provider ?? linked.messaging_provider ?? ""}:${linked.whatsapp_agent ?? ""}:${linked.openwa_session_id ?? linked.whatsapp_instance_id ?? ""}:${linked.whatsapp_number ?? ""}:1`
         : ":::0";
       initialSyncKeyRef.current = syncKey;
     },
@@ -521,6 +538,43 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                 </div>
               </label>
             </fieldset>
+
+            <div className="flex flex-col gap-1 max-w-md">
+              <label
+                htmlFor="whatsapp_agent"
+                className="text-xs font-medium text-gray-600"
+              >
+                {translate(
+                  "editClient.whatsapp.agentLabel",
+                  "Inbound WhatsApp agent"
+                )}
+              </label>
+              <select
+                id="whatsapp_agent"
+                name="whatsapp_agent"
+                className={agentSelectCls}
+                value={form.whatsapp_agent}
+                onChange={(e) => {
+                  setPendingUnlink(false);
+                  setForm((prev) => ({
+                    ...prev,
+                    whatsapp_agent: e.target.value,
+                  }));
+                }}
+              >
+                {WHATSAPP_AGENT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {translate(option.labelKey, option.defaultLabel)}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">
+                {translate(
+                  "editClient.whatsapp.agentHint",
+                  "Controls which AI agent handles inbound WhatsApp messages for this client."
+                )}
+              </p>
+            </div>
 
             {isOpenwa ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

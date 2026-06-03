@@ -1,4 +1,5 @@
 import { phoneToE164 } from "@/components/phone/phone-utils";
+import { resolveWhatsappAgent } from "@/constants/whatsapp-agents";
 import {
   DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
   WHATSAPP_MESSAGING_PROVIDERS,
@@ -61,6 +62,7 @@ export function normalizeLinkedAutomatedWhatsapp(linked) {
 
   return {
     platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
       (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
