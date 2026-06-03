@@ -57,7 +57,7 @@ export default function SendNewMessageForm({
 
     const text = message.trim();
     const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
-    if (!providerPayload.provider) {
+    if (!providerPayload || !providerPayload.provider) {
       toast.error(
         translate(
           "editClient.whatsapp.notConfigured",

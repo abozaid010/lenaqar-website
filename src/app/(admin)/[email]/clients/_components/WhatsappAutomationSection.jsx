@@ -27,7 +27,7 @@ import {
 const SAVED_TOKEN_MASK = "••••••••••••••••";
 
 const EMPTY_WHATSAPP_FORM = {
-  provider: DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  platform: DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
   openwa_session_id: "",
   whatsapp_instance_id: "",
   whatsapp_number: "",
@@ -36,7 +36,7 @@ const EMPTY_WHATSAPP_FORM = {
 
 function snapshotForm(form) {
   return {
-    provider: form.provider,
+    platform: form.platform,
     openwa_session_id: form.openwa_session_id?.trim() ?? "",
     whatsapp_instance_id: form.whatsapp_instance_id?.trim() ?? "",
     whatsapp_number: form.whatsapp_number?.trim() ?? "",
@@ -46,12 +46,12 @@ function snapshotForm(form) {
 
 function buildBaselineFromLinked(linked) {
   if (!linked) return null;
-  const provider = resolveMessagingProvider(linked);
+  const platform = resolveMessagingProvider(linked);
   return {
-    provider,
+    platform,
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
-      (provider === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
         ? linked.whatsapp_instance_id?.trim() || ""
         : ""),
     whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
@@ -63,17 +63,17 @@ function buildBaselineFromLinked(linked) {
 function formFromLinked(linked, { clearToken = true, prevToken = "" } = {}) {
   if (!linked) return EMPTY_WHATSAPP_FORM;
 
-  const provider = resolveMessagingProvider(linked);
+  const platform = resolveMessagingProvider(linked);
   const apiToken =
     typeof linked.whatsapp_instance_token === "string"
       ? linked.whatsapp_instance_token.trim()
       : "";
 
   return {
-    provider,
+    platform,
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
-      (provider === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
         ? linked.whatsapp_instance_id?.trim() || ""
         : ""),
     whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
@@ -98,7 +98,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const baselineRef = useRef(null);
   const initialSyncKeyRef = useRef(null);
 
-  const isOpenwa = isOpenwaProvider(form.provider);
+  const isOpenwa = isOpenwaProvider(form.platform);
 
   const applyLinkedState = useCallback((linked, { clearToken = true } = {}) => {
     if (linked) {
@@ -201,9 +201,9 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       );
     }
 
-    if (snap.provider !== baseline.provider) return true;
+    if (snap.platform !== baseline.platform) return true;
 
-    if (isOpenwaProvider(snap.provider)) {
+    if (isOpenwaProvider(snap.platform)) {
       if (snap.openwa_session_id !== baseline.openwa_session_id) return true;
       if (snap.whatsapp_number !== baseline.whatsapp_number) return true;
       return false;
@@ -231,7 +231,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       return true;
     }
 
-    if (isOpenwaProvider(form.provider)) {
+    if (isOpenwaProvider(form.platform)) {
       if (!form.openwa_session_id.trim()) {
         errors.openwa_session_id = translate(
           "editClient.whatsapp.openwaSessionIdRequired",
@@ -290,7 +290,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
     const snap = snapshotForm(form);
 
-    if (isOpenwaProvider(snap.provider)) {
+    if (isOpenwaProvider(snap.platform)) {
       return {
         platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
         openwa_session_id: snap.openwa_session_id,

@@ -45,14 +45,14 @@ export function resolveMessagingProvider(linked) {
 export function normalizeLinkedAutomatedWhatsapp(linked) {
   if (!linked || typeof linked !== "object") return null;
 
-  const provider = resolveMessagingProvider(linked);
+  const platform = resolveMessagingProvider(linked);
   const whatsappNumber = normalizeWhatsappPhone(linked.whatsapp_number || "");
 
   return {
-    provider,
+    platform,
     openwa_session_id:
       linked.openwa_session_id?.trim() ||
-      (provider === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
         ? linked.whatsapp_instance_id?.trim() || ""
         : ""),
     whatsapp_number: whatsappNumber,
@@ -67,13 +67,13 @@ export function normalizeLinkedAutomatedWhatsapp(linked) {
 
 /**
  * Extra fields for POST /campaign/unified-reply (and similar send endpoints).
- * Mirrors linked_automated_whatsapp: provider, openwa_session_id, whatsapp_number.
+ * Mirrors linked_automated_whatsapp: platform, openwa_session_id, whatsapp_number.
  */
 export function buildUnifiedReplyProviderPayload(linked) {
   const config = normalizeLinkedAutomatedWhatsapp(linked);
   if (!config) return {};
 
-  if (config.provider === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE) {
+  if (config.platform === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE) {
     if (!config.whatsapp_instance_id || !config.whatsapp_number) {
       return {};
     }
