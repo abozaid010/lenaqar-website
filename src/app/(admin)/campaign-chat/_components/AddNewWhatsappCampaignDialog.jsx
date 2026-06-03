@@ -4,13 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import Dialog from "@/components/ui/Dialog";
 import LenaTextarea from "@/components/ui/inputs/lena-textarea";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
-import { API_BASE_URL } from "@/lib/apiConfig";
 import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { sendWhatsappAutomationMessages } from "@/utils/api";
+import { sendWhatsappMessages } from "@/utils/api";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 const DEFAULT_CONTACTS_JSON =
   '[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]';
@@ -19,13 +18,6 @@ const SEND_MODE = {
   API: "api",
   AUTOMATION: "automation",
 };
-
-function recipientsToContacts(recipients) {
-  return recipients.map((r) => ({
-    phone: r.phone_number,
-    name: r.user_name || r.phone_number,
-  }));
-}
 
 function getApiErrorMessage(error, fallback) {
   return (
@@ -302,46 +294,39 @@ const AddNewWhatsappCampaignDialog = ({
   const submitApiCampaign = async () => {
     if (!validateApiForm()) return;
 
-    const payload = {
-      client_id: clientId,
-      contacts: hasPrefilledRecipients
-        ? recipientsToContacts(recipientsProp)
-        : JSON.parse(contacts),
+    const contactList = hasPrefilledRecipients
+      ? recipientsProp
+      : JSON.parse(contacts).map((c) => ({
+          phone_number: c.phone,
+          user_name: c.name,
+        }));
+
+    const messages = contactList.map((contact) => ({
+      phone_number: contact.phone_number || contact.phone,
+      message: "", // Template-based, backend will use template to generate message
+      user_name: contact.user_name || contact.name || "",
       template_name: templateName,
       language_code: languageCode,
-    };
+    }));
 
-    const response = await fetch(`${API_BASE_URL}/webhook/bulk/whatsapp/send`, {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
+    return sendWhatsappMessages({
+      messages,
+      default_platform: null,
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return response.json();
   };
 
   const submitAutomationMessages = async () => {
     if (!validateAutomationForm()) return;
 
-    const leads = recipientsProp.map((recipient) => ({
+    const messages = recipientsProp.map((recipient) => ({
       phone_number: recipient.phone_number,
+      message: automationMessage.trim(),
       user_name: recipient.user_name || "",
     }));
 
-    return sendWhatsappAutomationMessages({
-      client_id: clientId,
-      message: automationMessage.trim(),
-      leads,
+    return sendWhatsappMessages({
+      messages,
+      default_platform: null,
     });
   };
 
@@ -354,21 +339,20 @@ const AddNewWhatsappCampaignDialog = ({
     try {
       if (sendMode === SEND_MODE.AUTOMATION) {
         const result = await submitAutomationMessages();
-        const queued =
-          result?.data?.queued ?? result?.queued ?? recipientsProp.length;
-        const saveErrors = result?.data?.errors ?? 0;
+        const sent = result?.data?.sent ?? 0;
+        const failed = result?.data?.failed ?? 0;
         const successKey =
-          saveErrors > 0
+          failed > 0
             ? "dashboardFilter.bulkWhatsapp.automationSuccessWithErrors"
             : "dashboardFilter.bulkWhatsapp.automationSuccess";
         const successText = translate(
           successKey,
-          saveErrors > 0
-            ? `Queued ${queued} message(s) (${saveErrors} session save error(s))`
-            : `Queued ${queued} message(s)`
+          failed > 0
+            ? `Sent ${sent} message(s) (${failed} failed)`
+            : `Sent ${sent} message(s)`
         )
-          .replace("{count}", String(queued))
-          .replace("{errors}", String(saveErrors));
+          .replace("{count}", String(sent))
+          .replace("{errors}", String(failed));
         toast.success(successText);
         setAutomationMessage("");
         handleClose();
@@ -383,13 +367,26 @@ const AddNewWhatsappCampaignDialog = ({
         setTemplateName("download_app_message1");
       }
 
+      const sent = result?.data?.sent ?? 0;
+      const failed = result?.data?.failed ?? 0;
+      
+      if (failed > 0) {
+        const warningText = translate(
+          "dashboardFilter.bulkWhatsapp.sendSuccessWithErrors",
+          `Sent ${sent} message(s) (${failed} failed)`
+        );
+        toast.success(warningText);
+      } else {
+        toast.success(
+          translate(
+            "campaignChat.bulkDialog.sendSuccess",
+            "Campaign sent successfully"
+          )
+        );
+      }
+
       setJobResult(result);
-      toast.success(
-        translate(
-          "campaignChat.bulkDialog.sendSuccess",
-          "Campaign sent successfully"
-        )
-      );
+      handleClose();
     } catch (err) {
       const message = getApiErrorMessage(
         err,

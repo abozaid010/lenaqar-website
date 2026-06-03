@@ -1834,6 +1834,92 @@ export async function sendCampaignReply({
 }
 
 /**
+ * Unified WhatsApp send endpoint for both single and bulk messaging.
+ * POST /whatsapp/send_messages
+ * 
+ * @param {Object} options
+ * @param {Array} options.messages - Array of message objects:
+ *   - phone_number (required): E.164 or normalized phone
+ *   - message (required): Text body
+ *   - user_name (optional): Display name
+ *   - platform (optional): Per-message override (openwa | ultramsg | whatsapp)
+ *   - image_url (optional): Image URL
+ *   - template_name (optional): WhatsApp template name
+ *   - language_code (optional): Template language code
+ * @param {string} options.default_platform - Optional batch default platform
+ * @returns {Promise<Object>} API response with sent/failed counts and results
+ */
+export async function sendWhatsappMessages({
+  messages = [],
+  default_platform = null,
+} = {}) {
+  if (!Array.isArray(messages) || messages.length === 0) {
+    throw new Error("messages array is required and must contain at least one message");
+  }
+
+  // Validate each message has required fields
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg.phone_number) {
+      throw new Error(`Message at index ${i} missing required field: phone_number`);
+    }
+    // Message is required unless template_name is provided (template-based messaging)
+    if (!msg.message && !msg.template_name) {
+      throw new Error(`Message at index ${i}: either 'message' or 'template_name' is required`);
+    }
+  }
+
+  try {
+    // Build payload with normalized messages
+    const payload = {
+      messages: messages.map((msg) => {
+        const normalized = {
+          phone_number: String(msg.phone_number).trim(),
+          message: msg.message ? String(msg.message).trim() : "",
+        };
+
+        // Add optional fields
+        if (msg.user_name) {
+          normalized.user_name = String(msg.user_name).trim();
+        }
+        if (msg.platform) {
+          normalized.platform = String(msg.platform).toLowerCase();
+        }
+        if (msg.image_url) {
+          normalized.image_url = String(msg.image_url).trim();
+        }
+        if (msg.template_name) {
+          normalized.template_name = String(msg.template_name).trim();
+        }
+        if (msg.language_code) {
+          normalized.language_code = String(msg.language_code).trim();
+        }
+
+        return normalized;
+      }),
+    };
+
+    // Add batch default platform if provided
+    if (default_platform) {
+      payload.default_platform = String(default_platform).toLowerCase();
+    }
+
+    const response = await axiosInstance.post("/whatsapp/send_messages", payload);
+
+    if (!response.data?.status) {
+      throw new Error(
+        response.data?.message || response.data?.error_message || "Failed to send WhatsApp messages"
+      );
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Failed to send WhatsApp messages:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Update user profile fields via POST /action/user/update
  * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string }} payload
  */

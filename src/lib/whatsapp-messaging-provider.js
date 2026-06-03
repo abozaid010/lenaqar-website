@@ -100,3 +100,43 @@ export function buildUnifiedReplyProviderPayload(linked) {
 export function isOpenwaProvider(provider) {
   return provider !== WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE;
 }
+
+/**
+ * Build message object for POST /whatsapp/send_messages (website unified endpoint).
+ * Uses `platform` field (not `provider`).
+ * 
+ * @param {Object} message - Message with phone_number, message, user_name, etc.
+ * @param {string} defaultPlatform - Default platform if message doesn't specify one
+ * @returns {Object} Normalized message object for API
+ */
+export function buildWhatsappSendMessage(message, defaultPlatform = null) {
+  if (!message || typeof message !== "object") return null;
+
+  const normalized = {
+    phone_number: String(message.phone_number || "").trim(),
+    message: String(message.message || "").trim(),
+  };
+
+  if (!normalized.phone_number || !normalized.message) {
+    return null;
+  }
+
+  // Add optional fields
+  if (message.user_name) {
+    normalized.user_name = String(message.user_name).trim();
+  }
+  if (message.platform) {
+    normalized.platform = String(message.platform).trim().toLowerCase();
+  }
+  if (message.image_url) {
+    normalized.image_url = String(message.image_url).trim();
+  }
+  if (message.template_name) {
+    normalized.template_name = String(message.template_name).trim();
+  }
+  if (message.language_code) {
+    normalized.language_code = String(message.language_code).trim();
+  }
+
+  return normalized;
+}
