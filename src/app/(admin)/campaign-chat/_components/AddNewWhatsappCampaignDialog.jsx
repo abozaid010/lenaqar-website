@@ -8,8 +8,13 @@ import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { sendWhatsappMessages } from "@/utils/api";
+import {
+  isMessagingConfigReady,
+  sendWhatsappWithClientConfig,
+  WHATSAPP_NOT_CONFIGURED_CODE,
+} from "@/lib/whatsapp-messaging-provider";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 const DEFAULT_CONTACTS_JSON =
   '[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]';
@@ -53,7 +58,20 @@ const AddNewWhatsappCampaignDialog = ({
   const [isFormValid, setIsFormValid] = useState(false);
 
   const clientId = LenaCookiesManager.getClientId() || "public";
+  const { data: messagingConfig } = useMessagingProviderConfig(clientId);
   const hasPrefilledRecipients = recipientsProp.length > 0;
+
+  const notConfiguredMessage = translate(
+    "editClient.whatsapp.notConfigured",
+    "WhatsApp messaging is not configured for this client."
+  );
+
+  const ensureMessagingConfigured = () => {
+    if (isMessagingConfigReady(messagingConfig)) return true;
+    setError(notConfiguredMessage);
+    toast.error(notConfiguredMessage);
+    return false;
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -309,9 +327,9 @@ const AddNewWhatsappCampaignDialog = ({
       language_code: languageCode,
     }));
 
-    return sendWhatsappMessages({
+    return sendWhatsappWithClientConfig({
+      config: messagingConfig,
       messages,
-      default_platform: null,
     });
   };
 
@@ -324,14 +342,16 @@ const AddNewWhatsappCampaignDialog = ({
       user_name: recipient.user_name || "",
     }));
 
-    return sendWhatsappMessages({
+    return sendWhatsappWithClientConfig({
+      config: messagingConfig,
       messages,
-      default_platform: null,
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!ensureMessagingConfigured()) return;
 
     setIsSubmitting(true);
     setError("");
@@ -388,6 +408,11 @@ const AddNewWhatsappCampaignDialog = ({
       setJobResult(result);
       handleClose();
     } catch (err) {
+      if (err?.code === WHATSAPP_NOT_CONFIGURED_CODE) {
+        setError(notConfiguredMessage);
+        toast.error(notConfiguredMessage);
+        return;
+      }
       const message = getApiErrorMessage(
         err,
         translate(

@@ -1,11 +1,12 @@
 "use client";
 
-import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
 import { useI18n } from "@/hooks/useI18n";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
-import { buildUnifiedReplyProviderPayload } from "@/lib/whatsapp-messaging-provider";
-import { sendCampaignReply } from "@/utils/api";
+import {
+  isMessagingConfigReady,
+  sendWhatsappWithClientConfig,
+  WHATSAPP_NOT_CONFIGURED_CODE,
+} from "@/lib/whatsapp-messaging-provider";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -27,8 +28,6 @@ export default function SendNewMessageForm({
   const queryClient = useQueryClient();
   const { data: messagingConfig } = useMessagingProviderConfig(clientId);
 
-  const resolvedClientId =
-    clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
   const normalizedPhone = phoneNumber
     ? normalizeCampaignPhoneParam(phoneNumber)
     : null;
@@ -56,8 +55,8 @@ export default function SendNewMessageForm({
     if (!canSend || pending) return;
 
     const text = message.trim();
-    const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
-    if (!providerPayload || !providerPayload.provider) {
+
+    if (!isMessagingConfigReady(messagingConfig)) {
       toast.error(
         translate(
           "editClient.whatsapp.notConfigured",
@@ -69,11 +68,14 @@ export default function SendNewMessageForm({
 
     setPending(true);
     try {
-      await sendCampaignReply({
-        client_id: resolvedClientId,
-        phone_number: normalizedPhone,
-        admin_reply_text: text,
-        ...providerPayload,
+      await sendWhatsappWithClientConfig({
+        config: messagingConfig,
+        messages: [
+          {
+            phone_number: normalizedPhone,
+            message: text,
+          },
+        ],
       });
 
       setMessage("");
@@ -87,6 +89,15 @@ export default function SendNewMessageForm({
       }
     } catch (error) {
       console.error("Failed to send reply:", error);
+      if (error?.code === WHATSAPP_NOT_CONFIGURED_CODE) {
+        toast.error(
+          translate(
+            "editClient.whatsapp.notConfigured",
+            "WhatsApp messaging is not configured for this client.",
+          ),
+        );
+        return;
+      }
       toast.error(
         translate(
           "dashboardFilter.bulkWhatsapp.sendFailed",

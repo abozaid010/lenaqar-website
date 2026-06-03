@@ -20,6 +20,8 @@ import {
 } from "@/constants/whatsapp-messaging";
 import {
   isOpenwaProvider,
+  isUltramessageProvider,
+  isWhatsappCloudApiProvider,
   normalizeWhatsappPhone,
   resolveMessagingProvider,
 } from "@/lib/whatsapp-messaging-provider";
@@ -99,6 +101,8 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const initialSyncKeyRef = useRef(null);
 
   const isOpenwa = isOpenwaProvider(form.platform);
+  const isUltramessage = isUltramessageProvider(form.platform);
+  const isCloudApi = isWhatsappCloudApiProvider(form.platform);
 
   const applyLinkedState = useCallback((linked, { clearToken = true } = {}) => {
     if (linked) {
@@ -251,6 +255,20 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
           "Invalid phone number"
         );
       }
+    } else if (isWhatsappCloudApiProvider(form.platform)) {
+      const phoneE164 =
+        phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+      if (!phoneE164) {
+        errors.whatsapp_number = translate(
+          "editClient.whatsapp.numberRequired",
+          "WhatsApp number is required"
+        );
+      } else if (!phoneToE164(form.whatsapp_number, "EG")) {
+        errors.whatsapp_number = translate(
+          "phoneField.invalid",
+          "Invalid phone number"
+        );
+      }
     } else {
       if (!form.whatsapp_instance_id.trim()) {
         errors.whatsapp_instance_id = translate(
@@ -294,6 +312,14 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       return {
         platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
         openwa_session_id: snap.openwa_session_id,
+        whatsapp_number:
+          phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
+      };
+    }
+
+    if (isWhatsappCloudApiProvider(snap.platform)) {
+      return {
+        platform: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
         whatsapp_number:
           phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
       };
@@ -410,14 +436,14 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
               <label className={providerOptionClass(isOpenwa)}>
                 <input
                   type="radio"
-                  name="provider"
+                  name="whatsapp_messaging_provider"
                   className="mt-1"
                   checked={isOpenwa}
                   onChange={() => {
                     setPendingUnlink(false);
                     setForm((prev) => ({
                       ...prev,
-                      provider: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
                     }));
                     setFieldErrors({});
                   }}
@@ -434,19 +460,17 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   </p>
                 </div>
               </label>
-              <label
-                className={providerOptionClass(!isOpenwa)}
-              >
+              <label className={providerOptionClass(isUltramessage)}>
                 <input
                   type="radio"
-                  name="provider"
+                  name="whatsapp_messaging_provider"
                   className="mt-1"
-                  checked={!isOpenwa}
+                  checked={isUltramessage}
                   onChange={() => {
                     setPendingUnlink(false);
                     setForm((prev) => ({
                       ...prev,
-                      provider: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
                     }));
                     setFieldErrors({});
                   }}
@@ -462,6 +486,36 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                     {translate(
                       "editClient.whatsapp.providerUltramessageHint",
                       "Instance ID, number, and API token"
+                    )}
+                  </p>
+                </div>
+              </label>
+              <label className={providerOptionClass(isCloudApi)}>
+                <input
+                  type="radio"
+                  name="whatsapp_messaging_provider"
+                  className="mt-1"
+                  checked={isCloudApi}
+                  onChange={() => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
+                    }));
+                    setFieldErrors({});
+                  }}
+                />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {translate(
+                      "editClient.whatsapp.providerCloudApi",
+                      "WhatsApp Cloud API"
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {translate(
+                      "editClient.whatsapp.providerCloudApiHint",
+                      "Only phone number required"
                     )}
                   </p>
                 </div>
@@ -494,6 +548,29 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   errorMessage={fieldErrors.openwa_session_id}
                   autoComplete="off"
                 />
+                <PhoneField
+                  className="w-full"
+                  name="whatsapp_number"
+                  label={translate(
+                    "editClient.whatsapp.numberLabel",
+                    "WhatsApp Number"
+                  )}
+                  value={form.whatsapp_number ?? ""}
+                  onChange={(next) => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      whatsapp_number: next ?? "",
+                    }));
+                    clearFieldError("whatsapp_number");
+                  }}
+                  defaultCountry="EG"
+                  required
+                  error={fieldErrors.whatsapp_number}
+                />
+              </div>
+            ) : isCloudApi ? (
+              <div className="max-w-md">
                 <PhoneField
                   className="w-full"
                   name="whatsapp_number"

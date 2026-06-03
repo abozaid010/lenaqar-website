@@ -3,6 +3,16 @@ import {
   DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
   WHATSAPP_MESSAGING_PROVIDERS,
 } from "@/constants/whatsapp-messaging";
+import { sendWhatsappMessages } from "@/utils/api";
+
+/** API transport values for POST /whatsapp/send_messages */
+export const WHATSAPP_TRANSPORT_PLATFORMS = {
+  ULTRAMSG: "ultramsg",
+  OPENWA: "openwa",
+  WHATSAPP: "whatsapp",
+};
+
+export const WHATSAPP_NOT_CONFIGURED_CODE = "WHATSAPP_NOT_CONFIGURED";
 
 export function normalizeWhatsappPhone(raw) {
   if (!raw || typeof raw !== "string") return "";
@@ -23,7 +33,8 @@ export function resolveMessagingProvider(linked) {
   const explicit = linked.platform ?? linked.provider ?? linked.messaging_provider;
   if (
     explicit === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
-    explicit === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE
+    explicit === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE ||
+    explicit === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API
   ) {
     return explicit;
   }
@@ -100,7 +111,89 @@ export function buildUnifiedReplyProviderPayload(linked) {
 }
 
 export function isOpenwaProvider(provider) {
-  return provider !== WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE;
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.OPENWA;
+}
+
+export function isUltramessageProvider(provider) {
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE;
+}
+
+export function isWhatsappCloudApiProvider(provider) {
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API;
+}
+
+/**
+ * Map internal linked_automated_whatsapp platform to API transport platform.
+ */
+export function toTransportPlatform(internalPlatform) {
+  if (!internalPlatform) return null;
+  const raw = String(internalPlatform).trim().toLowerCase();
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG;
+  }
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.OPENWA
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.OPENWA;
+  }
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.WHATSAPP
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.WHATSAPP;
+  }
+  return null;
+}
+
+/** Whether linked config has the fields required for outbound send on the saved platform. */
+export function isMessagingConfigReady(config) {
+  if (!config) return false;
+
+  if (isUltramessageProvider(config.platform)) {
+    return Boolean(
+      config.whatsapp_instance_id?.trim() && config.whatsapp_number?.trim()
+    );
+  }
+
+  if (isWhatsappCloudApiProvider(config.platform)) {
+    return Boolean(config.whatsapp_number?.trim());
+  }
+
+  if (isOpenwaProvider(config.platform)) {
+    return Boolean(
+      config.openwa_session_id?.trim() && config.whatsapp_number?.trim()
+    );
+  }
+
+  return false;
+}
+
+/** default_platform for POST /whatsapp/send_messages, or null when not ready. */
+export function getDefaultTransportPlatform(config) {
+  if (!isMessagingConfigReady(config)) return null;
+  return toTransportPlatform(config.platform);
+}
+
+/**
+ * Send via POST /whatsapp/send_messages using the client's linked_automated_whatsapp platform.
+ * @throws Error with code WHATSAPP_NOT_CONFIGURED when config is incomplete
+ */
+export async function sendWhatsappWithClientConfig({ messages, config }) {
+  if (!isMessagingConfigReady(config)) {
+    const err = new Error(WHATSAPP_NOT_CONFIGURED_CODE);
+    err.code = WHATSAPP_NOT_CONFIGURED_CODE;
+    throw err;
+  }
+
+  const default_platform = getDefaultTransportPlatform(config);
+  return sendWhatsappMessages({
+    messages,
+    default_platform,
+  });
 }
 
 /**
