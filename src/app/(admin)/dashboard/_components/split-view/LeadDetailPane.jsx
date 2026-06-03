@@ -949,7 +949,12 @@ export default function LeadDetailPane({
               <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
                 <ChatHistory data={chatHistory} />
               </div>
-              <SendNewMessageForm userId={userId} onNewMessage={onNewMessage} />
+              <SendNewMessageForm
+                userId={userId}
+                phoneNumber={phoneNumber}
+                clientId={clientId}
+                onNewMessage={onNewMessage}
+              />
             </div>
           )}
 

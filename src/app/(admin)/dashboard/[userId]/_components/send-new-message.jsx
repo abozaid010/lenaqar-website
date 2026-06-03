@@ -1,65 +1,98 @@
 "use client";
 
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { useI18n } from "@/context/translate-api";
+import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
+import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { sendCampaignReply } from "@/utils/api";
+import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
-import { sendNewMessage } from "../../_actions/actions";
-const initialState = {
-  success: false,
-  message: "",
-};
+import { useState } from "react";
+import toast from "react-hot-toast";
 
-export default function SendNewMessageForm({ userId, onNewMessage }) {
-  const [state, action, pending] = useActionState(sendNewMessage, initialState);
+export default function SendNewMessageForm({
+  userId,
+  phoneNumber,
+  clientId,
+  onNewMessage,
+}) {
   const [message, setMessage] = useState("");
-  const { t } = useI18n();
-  const client_id = LenaCookiesManager.getClientId();
+  const [pending, setPending] = useState(false);
+  const { t, translate, common } = useI18n();
+  const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    client_message: "",
-    user_id: userId,
-    platform: "website",
-    source: "human",
-  });
-  useEffect(() => {
-    if (state.success) {
-      setFormData({
-        ...formData,
-        client_message: "",
+  const resolvedClientId =
+    clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
+  const normalizedPhone = phoneNumber
+    ? normalizeCampaignPhoneParam(phoneNumber)
+    : null;
+  const canSend = Boolean(normalizedPhone && message.trim());
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!canSend || pending) return;
+
+    const text = message.trim();
+    setPending(true);
+    try {
+      await sendCampaignReply({
+        client_id: resolvedClientId,
+        phone_number: normalizedPhone,
+        admin_reply_text: text,
       });
-      setMessage(""); // Clear the message input after successful submission
-      onNewMessage(state.message); // Call the parent function to update the chat history
-    } else if (state.message) {
-      // Handle errors
-      console.error("Error sending message:", state.message);
+
+      setMessage("");
+      onNewMessage?.({
+        user_message: text,
+        timestamp: Date.now(),
+        source: "human",
+      });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
+      }
+    } catch (error) {
+      console.error("Failed to send reply:", error);
+      toast.error(
+        translate(
+          "dashboardFilter.bulkWhatsapp.sendFailed",
+          t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
+        ) || common.operationFailed,
+      );
+    } finally {
+      setPending(false);
     }
-  }, [state]);
+  };
 
   return (
     <form
       className="bg-white h-14 px-2 flex gap-2 items-center justify-center shadow-xl rounded-b-md"
-      action={action}
+      onSubmit={handleSubmit}
     >
-      <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name={COOKIE_KEYS.CLIENT_ID} value={client_id} />
-
       <input
         type="text"
         name="client_message"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder={t.typeYourMessage}
-        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder={
+          normalizedPhone
+            ? translate("typeYourMessage", t?.typeYourMessage)
+            : translate("common.noPhone", common?.noPhone)
+        }
+        disabled={!normalizedPhone || pending}
+        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed"
       />
 
       <button
-        disabled={pending || !message}
+        type="submit"
+        disabled={pending || !canSend}
         className={`w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 relative group
-    ${pending || !message ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
+    ${pending || !canSend ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
       >
-        {pending ? <Loader2 className="animate-spin" /> : t.send}
+        {pending ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          translate("send", t?.send)
+        )}
       </button>
     </form>
   );

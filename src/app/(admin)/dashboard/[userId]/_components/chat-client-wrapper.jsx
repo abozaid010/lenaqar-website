@@ -188,7 +188,12 @@ export default function ChatClientWrapper({ userId }) {
             <ChatHistory data={chatHistory} />
           </div>
 
-          <SendNewMessageForm userId={userId} onNewMessage={onNewMessage} />
+          <SendNewMessageForm
+            userId={userId}
+            phoneNumber={phoneNumber}
+            clientId={data.data.client_id}
+            onNewMessage={onNewMessage}
+          />
         </div>
       </div>
 
