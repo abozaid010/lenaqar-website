@@ -1785,7 +1785,12 @@ export async function sendCampaignReply({
   admin_reply_text = null, 
   admin_reply_image_url = null, 
   admin_reply_template_name = null, 
-  admin_reply_language_code = null 
+  admin_reply_language_code = null,
+  provider = null,
+  openwa_session_id = null,
+  whatsapp_instance_id = null,
+  whatsapp_number = null,
+  whatsapp_instance_token = null,
 } = {}) {
   if (!phone_number) {
     throw new Error("phone_number is required");
@@ -1803,12 +1808,18 @@ export async function sendCampaignReply({
       admin_reply_text,
       admin_reply_image_url,
       admin_reply_template_name,
-      admin_reply_language_code
+      admin_reply_language_code,
+      provider,
+      openwa_session_id,
+      whatsapp_instance_id,
+      whatsapp_number,
+      whatsapp_instance_token,
     };
 
-    // Remove null values
-    Object.keys(payload).forEach(key => {
-      if (payload[key] === null) delete payload[key];
+    Object.keys(payload).forEach((key) => {
+      if (payload[key] === null || payload[key] === undefined || payload[key] === "") {
+        delete payload[key];
+      }
     });
 
     const response = await axiosInstance.post(CAMPAIGN_CHAT_ENDPOINTS.UNIFIED_REPLY, payload, {

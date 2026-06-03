@@ -3,6 +3,8 @@
 import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
+import { buildUnifiedReplyProviderPayload } from "@/lib/whatsapp-messaging-provider";
 import { sendCampaignReply } from "@/utils/api";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,6 +25,7 @@ export default function SendNewMessageForm({
   const textareaRef = useRef(null);
   const { t, translate, common } = useI18n();
   const queryClient = useQueryClient();
+  const { data: messagingConfig } = useMessagingProviderConfig(clientId);
 
   const resolvedClientId =
     clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
@@ -53,12 +56,24 @@ export default function SendNewMessageForm({
     if (!canSend || pending) return;
 
     const text = message.trim();
+    const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
+    if (!providerPayload.provider) {
+      toast.error(
+        translate(
+          "editClient.whatsapp.notConfigured",
+          "WhatsApp messaging is not configured for this client.",
+        ),
+      );
+      return;
+    }
+
     setPending(true);
     try {
       await sendCampaignReply({
         client_id: resolvedClientId,
         phone_number: normalizedPhone,
         admin_reply_text: text,
+        ...providerPayload,
       });
 
       setMessage("");
