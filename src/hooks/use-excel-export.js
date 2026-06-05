@@ -83,14 +83,18 @@ export function useExcelExport(searchParams) {
     }
 
     // Applied action filter
-    if (parsedParams.action && parsedParams.action !== "all") {
+    const appliedActions = (parsedParams.action || "")
+      .split(",")
+      .map((value) => value.trim())
+      .filter((value) => value && value !== "all");
+
+    if (appliedActions.length > 0) {
       filterData.push({
         [locale === "ar" ? "المرشح" : "Filter"]:
           locale === "ar" ? "الإجراء المطبق" : "Applied Action",
-        [locale === "ar" ? "القيمة" : "Value"]: getActionLabel(
-          parsedParams.action,
-          locale
-        ),
+        [locale === "ar" ? "القيمة" : "Value"]: appliedActions
+          .map((action) => getActionLabel(action, locale))
+          .join(", "),
       });
     } else {
       filterData.push({

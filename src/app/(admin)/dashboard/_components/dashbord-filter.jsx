@@ -4,7 +4,6 @@ import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
 import {
   DASHBOARD_BUTTON,
-  DASHBOARD_CONTROL_BASE,
   DASHBOARD_TRIGGER,
 } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
@@ -31,15 +30,25 @@ const formatDate = (date) => {
   return formattedDate;
 };
 
+const parseActionsFromFilter = (actionParam) => {
+  if (!actionParam || actionParam === "all") return [];
+  return actionParam
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+};
+
 export default function DashbordFilter({ appliedFilters, compact = false }) {
   const { t, locale, translate } = useI18n();
   const router = useRouter();
 
   const ACTIONS = useMemo(() => {
-    return getFilterActions(locale).map((action) => ({
-      value: action.value,
-      label: getActionLabel(action.value, locale),
-    }));
+    return getFilterActions(locale)
+      .filter((action) => action.value)
+      .map((action) => ({
+        value: action.value,
+        label: getActionLabel(action.value, locale),
+      }));
   }, [locale]);
 
   const tomorrow = useMemo(() => {
@@ -56,7 +65,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   const [filters, setFilters] = useState(() => {
     return {
-      action: appliedFilters.action || "",
+      actions: parseActionsFromFilter(appliedFilters.action),
       start_date: appliedFilters.start_date || formatDate(twoMonthsAgo),
       end_date: appliedFilters.end_date || formatDate(tomorrow),
       campaign_ids: appliedFilters.campaign_ids
@@ -66,6 +75,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   });
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isImportLeadsOpen, setIsImportLeadsOpen] = useState(false);
@@ -74,6 +84,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const clientId = LenaCookiesManager.getClientId();
+  const actionDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -140,6 +151,12 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
+        actionDropdownRef.current &&
+        !actionDropdownRef.current.contains(event.target)
+      ) {
+        setIsActionDropdownOpen(false);
+      }
+      if (
         campaignDropdownRef.current &&
         !campaignDropdownRef.current.contains(event.target)
       ) {
@@ -147,13 +164,13 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       }
     };
 
-    if (isCampaignDropdownOpen) {
+    if (isActionDropdownOpen || isCampaignDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isCampaignDropdownOpen]);
+  }, [isActionDropdownOpen, isCampaignDropdownOpen]);
 
   const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
 
@@ -190,14 +207,16 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     const updatedFilters = { ...filters, [key]: selectdDate };
 
     Object.entries(updatedFilters).forEach(([k, v]) => {
-      if (v) {
-        if (k === "campaign_ids" && Array.isArray(v)) {
-          if (v.length > 0) {
-            params.append(k, v.join(","));
-          }
-        } else {
-          params.append(k, v);
+      if (k === "actions" && Array.isArray(v)) {
+        if (v.length > 0) {
+          params.append("action", v.join(","));
         }
+      } else if (k === "campaign_ids" && Array.isArray(v)) {
+        if (v.length > 0) {
+          params.append(k, v.join(","));
+        }
+      } else if (v) {
+        params.append(k, v);
       }
     });
 
@@ -210,6 +229,26 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     router.push(`${window.location.pathname}?${params.toString()}`, {
       replace: true,
     });
+  };
+
+  const toggleActionSelection = (actionValue) => {
+    const newActions = filters.actions.includes(actionValue)
+      ? filters.actions.filter((value) => value !== actionValue)
+      : [...filters.actions, actionValue];
+
+    setFilters((prev) => ({
+      ...prev,
+      actions: newActions,
+    }));
+    onFilterChange("actions", newActions);
+  };
+
+  const clearActionFilters = () => {
+    setFilters((prev) => ({
+      ...prev,
+      actions: [],
+    }));
+    onFilterChange("actions", []);
   };
 
   const toggleCampaignSelection = (campaignId) => {
@@ -242,26 +281,71 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     >
       <div className="flex flex-col gap-2 flex-1 min-w-0 w-full">
         <div className="flex flex-wrap items-center gap-2 flex-1 min-w-0">
-          <div className="relative w-fit min-w-[7rem] shrink-0">
-            <select
+          <div
+            className="relative z-[60] w-fit min-w-[7rem] shrink-0"
+            ref={actionDropdownRef}
+          >
+            <div
               id="action_type"
-              name="action_type"
-              value={filters.action || "all"}
-              onChange={(e) => onFilterChange("action", e.target.value)}
-              className={`${DASHBOARD_CONTROL_BASE} w-full appearance-none cursor-pointer text-sm ps-3 pe-9 ${
+              role="button"
+              tabIndex={0}
+              aria-haspopup="listbox"
+              aria-expanded={isActionDropdownOpen}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setIsActionDropdownOpen((open) => !open);
+              }}
+              onClick={() => setIsActionDropdownOpen(!isActionDropdownOpen)}
+              className={`${DASHBOARD_TRIGGER} !w-auto ${
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
-              {ACTIONS.map((action) => (
-                <option key={action.value} value={action.value}>
-                  {action.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              className="pointer-events-none absolute top-1/2 ltr:right-2 rtl:left-2 -translate-y-1/2 text-gray-400 w-5 h-5"
-              aria-hidden="true"
-            />
+              <span className="whitespace-nowrap">
+                {filters.actions.length === 0
+                  ? translate(
+                      "dashboardFilter.actions.allActions",
+                      t.dashboardFilter.actions.allActions,
+                    )
+                  : translate(
+                      "dashboardFilter.actions.selected",
+                      t.dashboardFilter.actions.selected,
+                    ).replace("{count}", filters.actions.length)}
+              </span>
+              <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
+            </div>
+
+            {isActionDropdownOpen && (
+              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
+                {filters.actions.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearActionFilters}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 mb-1"
+                  >
+                    <X size={16} />
+                    {translate(
+                      "dashboardFilter.actions.clearAll",
+                      "Clear All",
+                    )}
+                  </button>
+                )}
+
+                {ACTIONS.map((action) => (
+                  <label
+                    key={action.value}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={filters.actions.includes(action.value)}
+                      onChange={() => toggleActionSelection(action.value)}
+                      className="cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{action.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}

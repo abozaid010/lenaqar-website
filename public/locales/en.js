@@ -715,6 +715,8 @@ export default {
       qualifiedLead: "Qualified Lead",
       noAction: "No Action",
       allActions: "All Actions",
+      selected: "{count} selected",
+      clearAll: "Clear All",
     },
 
     datePicker: {

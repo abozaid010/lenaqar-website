@@ -664,7 +664,7 @@ export default function LeadDetailPane({
     return r != null && String(r).toLowerCase() === "owner";
   }, []);
 
-  // Dashboard list summary: same fields as GET /messages/all → users[]:
+  // Dashboard list summary: same fields as GET /messages/v2/all → users[]:
   // `company_name`, `requirement_name` (building type slug or free text).
   // Falls back to legacy summary* fields on conversation payload if present.
   const leadSummaryText = useMemo(() => {

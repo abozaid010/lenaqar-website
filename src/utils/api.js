@@ -85,7 +85,7 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
         : {}),
     };
 
-    const response = await axiosInstance.get(`messages/all`, {
+    const response = await axiosInstance.get(`messages/v2/all`, {
       params,
     });
 
