@@ -8,9 +8,8 @@ import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import {
   buildUnifiedReplyProviderPayload,
   getEffectiveMessagingAccount,
-  isMessagingConfigReady,
+  getDefaultTransportPlatform,
   sendWhatsappWithClientConfig,
-  toTransportPlatform,
 } from "@/lib/whatsapp-messaging-provider";
 import { sendCampaignReply, sendClientMessage } from "@/utils/api";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
@@ -83,9 +82,11 @@ export default function SendNewMessageForm({
     setPending(true);
     try {
       const account = getEffectiveMessagingAccount(messagingData, selectedPlatform);
+      const transportPlatform = account
+        ? getDefaultTransportPlatform(account)
+        : null;
 
-      if (isMessagingConfigReady(account) && normalizedPhone) {
-        const transportPlatform = toTransportPlatform(account.platform);
+      if (normalizedPhone && transportPlatform) {
         await sendWhatsappWithClientConfig({
           config: account,
           messages: [
