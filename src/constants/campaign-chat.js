@@ -15,6 +15,7 @@ export const CAMPAIGN_CHAT_ENDPOINTS = {
   TOGGLE_FAVORITE: "/campaign/toggle-favorite",
   UPDATE_NOTES: "/campaign/update-notes",
   WHATSAPP_AUTOMATION_MESSAGE: "/whatsapp/automation_message",
+  WHATSAPP_SEND_MESSAGES: "/whatsapp/send_messages",
 };
 
 // Pagination defaults

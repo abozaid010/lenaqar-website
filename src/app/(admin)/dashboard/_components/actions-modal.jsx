@@ -65,7 +65,7 @@ export default function ActionsModal({
 
   const actionOptions = useMemo(
     () =>
-      USER_ACTIONS.filter((item) => item.value && item.value !== "all").map(
+      USER_ACTIONS.filter((item) => item.value && item.value !== "new").map(
         (item) => ({
           value: item.value,
           label: getActionLabel(item.value, locale),

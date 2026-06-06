@@ -12,6 +12,8 @@ import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
 import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-states";
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useI18n } from "@/hooks/useI18n";
+import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
+import { buildUnifiedReplyProviderPayload } from "@/lib/whatsapp-messaging-provider";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -75,6 +77,7 @@ const CampaignChat = () => {
   }, [queryClient]);
 
   const campaignChatClientId = clientId || CAMPAIGN_CHAT_CLIENT_ID;
+  const { data: messagingConfig } = useMessagingProviderConfig(campaignChatClientId);
 
   const noRetryOnAuthDenial = (failureCount, error) => {
     const status = error?.response?.status;
@@ -296,21 +299,6 @@ const CampaignChat = () => {
     }
   };
 
-  // Handle sending reply
-  const handleSendReply = async (phoneNumber, message) => {
-    try {
-      await sendCampaignReply({
-        client_id: campaignChatClientId,
-        phone_number: phoneNumber,
-        admin_reply_text: message
-      });
-      await refetchSession();
-    } catch (error) {
-      console.error("Failed to send reply:", error);
-    }
-  };
-
-  // Extracts a human-readable message from an axios/fetch error.
   const getErrorMessage = (error, fallback) => {
     if (error?.message === "Network Error") {
       return "Network error — please check your connection and try again.";
@@ -321,6 +309,40 @@ const CampaignChat = () => {
       error?.message ||
       fallback
     );
+  };
+
+  const handleSendReply = async (phoneNumber, message) => {
+    const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
+    if (!providerPayload || !providerPayload.provider) {
+      toast.error(
+        translate(
+          "editClient.whatsapp.notConfigured",
+          "WhatsApp messaging is not configured for this client.",
+        ),
+      );
+      return;
+    }
+
+    try {
+      await sendCampaignReply({
+        client_id: campaignChatClientId,
+        phone_number: phoneNumber,
+        admin_reply_text: message,
+        ...providerPayload,
+      });
+      await refetchSession();
+    } catch (error) {
+      console.error("Failed to send reply:", error);
+      toast.error(
+        getErrorMessage(
+          error,
+          translate(
+            "dashboardFilter.bulkWhatsapp.sendFailed",
+            t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
+          ),
+        ),
+      );
+    }
   };
 
   // Handle rename

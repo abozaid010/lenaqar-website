@@ -14,25 +14,42 @@ import { PhoneField } from "@/components/phone/PhoneField";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useI18n } from "@/hooks/useI18n";
+import {
+  DEFAULT_WHATSAPP_AGENT,
+  resolveWhatsappAgent,
+  WHATSAPP_AGENT_OPTIONS,
+} from "@/constants/whatsapp-agents";
+import {
+  DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  WHATSAPP_MESSAGING_PROVIDERS,
+} from "@/constants/whatsapp-messaging";
+import {
+  isOpenwaProvider,
+  isUltramessageProvider,
+  isWhatsappCloudApiProvider,
+  normalizeWhatsappPhone,
+  resolveMessagingProvider,
+} from "@/lib/whatsapp-messaging-provider";
+
+const SAVED_TOKEN_MASK = "••••••••••••••••";
 
 const EMPTY_WHATSAPP_FORM = {
+  platform: DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  whatsapp_agent: DEFAULT_WHATSAPP_AGENT,
+  openwa_session_id: "",
   whatsapp_instance_id: "",
   whatsapp_number: "",
   whatsapp_instance_token: "",
 };
 
-/** Shown when a token exists server-side but is not returned in API responses. */
-const SAVED_TOKEN_MASK = "••••••••••••••••";
-
-function normalizeWhatsappPhone(raw) {
-  if (!raw || typeof raw !== "string") return "";
-  const trimmed = raw.trim();
-  if (!trimmed) return "";
-  return phoneToE164(trimmed, "EG") || trimmed;
-}
+const agentSelectCls =
+  "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white";
 
 function snapshotForm(form) {
   return {
+    platform: form.platform,
+    whatsapp_agent: form.whatsapp_agent,
+    openwa_session_id: form.openwa_session_id?.trim() ?? "",
     whatsapp_instance_id: form.whatsapp_instance_id?.trim() ?? "",
     whatsapp_number: form.whatsapp_number?.trim() ?? "",
     whatsapp_instance_token: form.whatsapp_instance_token?.trim() ?? "",
@@ -41,10 +58,41 @@ function snapshotForm(form) {
 
 function buildBaselineFromLinked(linked) {
   if (!linked) return null;
+  const platform = resolveMessagingProvider(linked);
   return {
+    platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
+    openwa_session_id:
+      linked.openwa_session_id?.trim() ||
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+        ? linked.whatsapp_instance_id?.trim() || ""
+        : ""),
     whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
     whatsapp_number: normalizeWhatsappPhone(linked.whatsapp_number),
     hasSavedToken: true,
+  };
+}
+
+function formFromLinked(linked, { clearToken = true, prevToken = "" } = {}) {
+  if (!linked) return EMPTY_WHATSAPP_FORM;
+
+  const platform = resolveMessagingProvider(linked);
+  const apiToken =
+    typeof linked.whatsapp_instance_token === "string"
+      ? linked.whatsapp_instance_token.trim()
+      : "";
+
+  return {
+    platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
+    openwa_session_id:
+      linked.openwa_session_id?.trim() ||
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+        ? linked.whatsapp_instance_id?.trim() || ""
+        : ""),
+    whatsapp_instance_id: linked.whatsapp_instance_id ?? "",
+    whatsapp_number: normalizeWhatsappPhone(linked.whatsapp_number),
+    whatsapp_instance_token: clearToken ? apiToken || "" : prevToken,
   };
 }
 
@@ -64,34 +112,31 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const baselineRef = useRef(null);
   const initialSyncKeyRef = useRef(null);
 
+  const isOpenwa = isOpenwaProvider(form.platform);
+  const isUltramessage = isUltramessageProvider(form.platform);
+  const isCloudApi = isWhatsappCloudApiProvider(form.platform);
+
   const applyLinkedState = useCallback((linked, { clearToken = true } = {}) => {
     if (linked) {
-      const instanceId = linked.whatsapp_instance_id ?? "";
-      const phone = normalizeWhatsappPhone(linked.whatsapp_number);
-      const apiToken =
-        typeof linked.whatsapp_instance_token === "string"
-          ? linked.whatsapp_instance_token.trim()
-          : "";
-
       setIsLinked(true);
-      setHasSavedToken(Boolean(apiToken) || true);
+      setHasSavedToken(
+        Boolean(
+          typeof linked.whatsapp_instance_token === "string" &&
+            linked.whatsapp_instance_token.trim()
+        ) || true
+      );
       setTokenDirty(false);
       setPendingUnlink(false);
 
       setForm((prev) => {
-        const token = clearToken ? apiToken || "" : prev.whatsapp_instance_token;
-        if (
-          prev.whatsapp_instance_id === instanceId &&
-          prev.whatsapp_number === phone &&
-          prev.whatsapp_instance_token === token
-        ) {
-          return prev;
-        }
-        return {
-          whatsapp_instance_id: instanceId,
-          whatsapp_number: phone,
-          whatsapp_instance_token: token,
-        };
+        const next = formFromLinked(linked, {
+          clearToken,
+          prevToken: prev.whatsapp_instance_token,
+        });
+        const snap = snapshotForm(prev);
+        const nextSnap = snapshotForm(next);
+        if (JSON.stringify(snap) === JSON.stringify(nextSnap)) return prev;
+        return next;
       });
 
       baselineRef.current = buildBaselineFromLinked(linked);
@@ -100,15 +145,10 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       setHasSavedToken(false);
       setTokenDirty(false);
       baselineRef.current = null;
-
       setForm((prev) => {
-        if (
-          !prev.whatsapp_instance_id &&
-          !prev.whatsapp_number &&
-          !prev.whatsapp_instance_token
-        ) {
-          return prev;
-        }
+        const snap = snapshotForm(prev);
+        const emptySnap = snapshotForm(EMPTY_WHATSAPP_FORM);
+        if (JSON.stringify(snap) === JSON.stringify(emptySnap)) return prev;
         return EMPTY_WHATSAPP_FORM;
       });
     }
@@ -116,7 +156,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   }, []);
 
   const initialSyncKey = enabled
-    ? `${initialLinkedWhatsapp?.whatsapp_instance_id ?? ""}:${initialLinkedWhatsapp?.whatsapp_number ?? ""}:${initialLinkedWhatsapp ? "1" : "0"}`
+    ? `${initialLinkedWhatsapp?.provider ?? initialLinkedWhatsapp?.messaging_provider ?? ""}:${initialLinkedWhatsapp?.whatsapp_agent ?? ""}:${initialLinkedWhatsapp?.openwa_session_id ?? initialLinkedWhatsapp?.whatsapp_instance_id ?? ""}:${initialLinkedWhatsapp?.whatsapp_number ?? ""}:${initialLinkedWhatsapp ? "1" : "0"}`
     : null;
 
   useEffect(() => {
@@ -150,7 +190,9 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const hasWhatsappDraft = useCallback(() => {
     const snap = snapshotForm(form);
     return Boolean(
-      snap.whatsapp_instance_id ||
+      snap.openwa_session_id ||
+        snap.whatsapp_number ||
+        snap.whatsapp_instance_id ||
         snap.whatsapp_number ||
         snap.whatsapp_instance_token ||
         isLinked ||
@@ -167,10 +209,21 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
     if (!baseline) {
       return Boolean(
-        snap.whatsapp_instance_id ||
+        snap.openwa_session_id ||
+          snap.whatsapp_number ||
+          snap.whatsapp_instance_id ||
           snap.whatsapp_number ||
           snap.whatsapp_instance_token
       );
+    }
+
+    if (snap.platform !== baseline.platform) return true;
+    if (snap.whatsapp_agent !== baseline.whatsapp_agent) return true;
+
+    if (isOpenwaProvider(snap.platform)) {
+      if (snap.openwa_session_id !== baseline.openwa_session_id) return true;
+      if (snap.whatsapp_number !== baseline.whatsapp_number) return true;
+      return false;
     }
 
     if (snap.whatsapp_instance_id !== baseline.whatsapp_instance_id) return true;
@@ -183,10 +236,6 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
   const validate = useCallback(() => {
     const errors = {};
-    const instanceId = form.whatsapp_instance_id.trim();
-    const phoneE164 =
-      phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
-    const token = form.whatsapp_instance_token.trim();
     const needsWhatsappSave = hasWhatsappChanges();
 
     if (!needsWhatsappSave) {
@@ -199,30 +248,67 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       return true;
     }
 
-    if (!instanceId) {
-      errors.whatsapp_instance_id = translate(
-        "editClient.whatsapp.instanceIdRequired",
-        "UltraMsg Instance ID is required"
-      );
-    }
-    if (!phoneE164) {
-      errors.whatsapp_number = translate(
-        "editClient.whatsapp.numberRequired",
-        "WhatsApp number is required"
-      );
-    } else if (!phoneToE164(form.whatsapp_number, "EG")) {
-      errors.whatsapp_number = translate(
-        "phoneField.invalid",
-        "Invalid phone number"
-      );
-    }
-
-    const tokenRequired = !isLinked || tokenDirty;
-    if (tokenRequired && !token) {
-      errors.whatsapp_instance_token = translate(
-        "editClient.whatsapp.tokenRequired",
-        "UltraMsg token is required"
-      );
+    if (isOpenwaProvider(form.platform)) {
+      if (!form.openwa_session_id.trim()) {
+        errors.openwa_session_id = translate(
+          "editClient.whatsapp.openwaSessionIdRequired",
+          "OpenWA Session ID is required"
+        );
+      }
+      const businessPhone =
+        phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+      if (!businessPhone) {
+        errors.whatsapp_number = translate(
+          "editClient.whatsapp.numberRequired",
+          "WhatsApp number is required"
+        );
+      } else if (!phoneToE164(form.whatsapp_number, "EG")) {
+        errors.whatsapp_number = translate(
+          "phoneField.invalid",
+          "Invalid phone number"
+        );
+      }
+    } else if (isWhatsappCloudApiProvider(form.platform)) {
+      const phoneE164 =
+        phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+      if (!phoneE164) {
+        errors.whatsapp_number = translate(
+          "editClient.whatsapp.numberRequired",
+          "WhatsApp number is required"
+        );
+      } else if (!phoneToE164(form.whatsapp_number, "EG")) {
+        errors.whatsapp_number = translate(
+          "phoneField.invalid",
+          "Invalid phone number"
+        );
+      }
+    } else {
+      if (!form.whatsapp_instance_id.trim()) {
+        errors.whatsapp_instance_id = translate(
+          "editClient.whatsapp.instanceIdRequired",
+          "UltraMsg Instance ID is required"
+        );
+      }
+      const phoneE164 =
+        phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
+      if (!phoneE164) {
+        errors.whatsapp_number = translate(
+          "editClient.whatsapp.numberRequired",
+          "WhatsApp number is required"
+        );
+      } else if (!phoneToE164(form.whatsapp_number, "EG")) {
+        errors.whatsapp_number = translate(
+          "phoneField.invalid",
+          "Invalid phone number"
+        );
+      }
+      const tokenRequired = !isLinked || tokenDirty;
+      if (tokenRequired && !form.whatsapp_instance_token.trim()) {
+        errors.whatsapp_instance_token = translate(
+          "editClient.whatsapp.tokenRequired",
+          "UltraMsg token is required"
+        );
+      }
     }
 
     setFieldErrors(errors);
@@ -233,15 +319,37 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     if (!hasWhatsappChanges()) return undefined;
     if (pendingUnlink) return null;
 
-    const phoneE164 =
-      phoneToE164(form.whatsapp_number, "EG") || form.whatsapp_number.trim();
-    const token = form.whatsapp_instance_token.trim();
+    const snap = snapshotForm(form);
+    const whatsapp_agent = resolveWhatsappAgent(snap.whatsapp_agent);
+
+    if (isOpenwaProvider(snap.platform)) {
+      return {
+        platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+        whatsapp_agent,
+        openwa_session_id: snap.openwa_session_id,
+        whatsapp_number:
+          phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
+      };
+    }
+
+    if (isWhatsappCloudApiProvider(snap.platform)) {
+      return {
+        platform: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
+        whatsapp_agent,
+        whatsapp_number:
+          phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
+      };
+    }
 
     const linked = {
-      whatsapp_instance_id: form.whatsapp_instance_id.trim(),
-      whatsapp_number: phoneE164,
+      platform: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+      whatsapp_agent,
+      whatsapp_instance_id: snap.whatsapp_instance_id,
+      whatsapp_number:
+        phoneToE164(snap.whatsapp_number, "EG") || snap.whatsapp_number,
     };
 
+    const token = snap.whatsapp_instance_token;
     if (token && token !== SAVED_TOKEN_MASK) {
       linked.whatsapp_instance_token = token;
     }
@@ -249,14 +357,17 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     return linked;
   }, [form, hasWhatsappChanges, pendingUnlink]);
 
-  const syncFromServer = useCallback((linked) => {
-    setPendingUnlink(false);
-    applyLinkedState(linked, { clearToken: true });
-    const syncKey = linked
-      ? `${linked.whatsapp_instance_id ?? ""}:${linked.whatsapp_number ?? ""}:1`
-      : ":::0";
-    initialSyncKeyRef.current = syncKey;
-  }, [applyLinkedState]);
+  const syncFromServer = useCallback(
+    (linked) => {
+      setPendingUnlink(false);
+      applyLinkedState(linked, { clearToken: true });
+      const syncKey = linked
+        ? `${linked.provider ?? linked.messaging_provider ?? ""}:${linked.whatsapp_agent ?? ""}:${linked.openwa_session_id ?? linked.whatsapp_instance_id ?? ""}:${linked.whatsapp_number ?? ""}:1`
+        : ":::0";
+      initialSyncKeyRef.current = syncKey;
+    },
+    [applyLinkedState]
+  );
 
   const handleUnlinkConfirm = () => {
     setPendingUnlink(true);
@@ -288,6 +399,13 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
         "Token saved — enter a new one to replace"
       )
     : translate("editClient.whatsapp.tokenPlaceholder", "••••••••••••••••");
+
+  const providerOptionClass = (active) =>
+    `flex items-start gap-2 p-3 border rounded-lg cursor-pointer transition ${
+      active
+        ? "border-primary bg-primary/5"
+        : "border-gray-300 hover:bg-gray-50"
+    }`;
 
   return (
     <>
@@ -325,30 +443,163 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
         {expanded && (
           <div className="p-4 border-t border-gray-100 space-y-4">
-            <div className="space-y-4">
+            <fieldset className="space-y-2">
+              <legend className="text-xs font-medium text-gray-600 mb-1">
+                {translate(
+                  "editClient.whatsapp.providerLabel",
+                  "Messaging provider"
+                )}
+              </legend>
+              <label className={providerOptionClass(isOpenwa)}>
+                <input
+                  type="radio"
+                  name="whatsapp_messaging_provider"
+                  className="mt-1"
+                  checked={isOpenwa}
+                  onChange={() => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+                    }));
+                    setFieldErrors({});
+                  }}
+                />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {translate("editClient.whatsapp.providerOpenwa", "OpenWA")}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {translate(
+                      "editClient.whatsapp.providerOpenwaHint",
+                      "Default — session ID and business phone"
+                    )}
+                  </p>
+                </div>
+              </label>
+              <label className={providerOptionClass(isUltramessage)}>
+                <input
+                  type="radio"
+                  name="whatsapp_messaging_provider"
+                  className="mt-1"
+                  checked={isUltramessage}
+                  onChange={() => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+                    }));
+                    setFieldErrors({});
+                  }}
+                />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {translate(
+                      "editClient.whatsapp.providerUltramessage",
+                      "UltraMessage"
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {translate(
+                      "editClient.whatsapp.providerUltramessageHint",
+                      "Instance ID, number, and API token"
+                    )}
+                  </p>
+                </div>
+              </label>
+              <label className={providerOptionClass(isCloudApi)}>
+                <input
+                  type="radio"
+                  name="whatsapp_messaging_provider"
+                  className="mt-1"
+                  checked={isCloudApi}
+                  onChange={() => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      platform: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
+                    }));
+                    setFieldErrors({});
+                  }}
+                />
+                <div>
+                  <div className="text-sm font-semibold text-gray-900">
+                    {translate(
+                      "editClient.whatsapp.providerCloudApi",
+                      "WhatsApp Cloud API"
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {translate(
+                      "editClient.whatsapp.providerCloudApiHint",
+                      "Only phone number required"
+                    )}
+                  </p>
+                </div>
+              </label>
+            </fieldset>
+
+            <div className="flex flex-col gap-1 max-w-md">
+              <label
+                htmlFor="whatsapp_agent"
+                className="text-xs font-medium text-gray-600"
+              >
+                {translate(
+                  "editClient.whatsapp.agentLabel",
+                  "Inbound WhatsApp agent"
+                )}
+              </label>
+              <select
+                id="whatsapp_agent"
+                name="whatsapp_agent"
+                className={agentSelectCls}
+                value={form.whatsapp_agent}
+                onChange={(e) => {
+                  setPendingUnlink(false);
+                  setForm((prev) => ({
+                    ...prev,
+                    whatsapp_agent: e.target.value,
+                  }));
+                }}
+              >
+                {WHATSAPP_AGENT_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {translate(option.labelKey, option.defaultLabel)}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">
+                {translate(
+                  "editClient.whatsapp.agentHint",
+                  "Controls which AI agent handles inbound WhatsApp messages for this client."
+                )}
+              </p>
+            </div>
+
+            {isOpenwa ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <LenaTextField
                   label={translate(
-                    "editClient.whatsapp.instanceIdLabel",
-                    "UltraMsg Instance ID"
+                    "editClient.whatsapp.openwaSessionIdLabel",
+                    "OpenWA Session ID"
                   )}
-                  name="whatsapp_instance_id"
-                  value={form.whatsapp_instance_id}
+                  name="openwa_session_id"
+                  value={form.openwa_session_id}
                   onChange={(e) => {
                     setPendingUnlink(false);
                     setForm((prev) => ({
                       ...prev,
-                      whatsapp_instance_id: e.target.value,
+                      openwa_session_id: e.target.value,
                     }));
-                    clearFieldError("whatsapp_instance_id");
+                    clearFieldError("openwa_session_id");
                   }}
                   placeholder={translate(
-                    "editClient.whatsapp.instanceIdPlaceholder",
-                    "instance177433"
+                    "editClient.whatsapp.openwaSessionIdPlaceholder",
+                    "your-openwa-session"
                   )}
                   required
-                  error={!!fieldErrors.whatsapp_instance_id}
-                  errorMessage={fieldErrors.whatsapp_instance_id}
+                  error={!!fieldErrors.openwa_session_id}
+                  errorMessage={fieldErrors.openwa_session_id}
                   autoComplete="off"
                 />
                 <PhoneField
@@ -372,62 +623,134 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   error={fieldErrors.whatsapp_number}
                 />
               </div>
+            ) : isCloudApi ? (
+              <div className="max-w-md">
+                <PhoneField
+                  className="w-full"
+                  name="whatsapp_number"
+                  label={translate(
+                    "editClient.whatsapp.numberLabel",
+                    "WhatsApp Number"
+                  )}
+                  value={form.whatsapp_number ?? ""}
+                  onChange={(next) => {
+                    setPendingUnlink(false);
+                    setForm((prev) => ({
+                      ...prev,
+                      whatsapp_number: next ?? "",
+                    }));
+                    clearFieldError("whatsapp_number");
+                  }}
+                  defaultCountry="EG"
+                  required
+                  error={fieldErrors.whatsapp_number}
+                />
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <LenaTextField
+                    label={translate(
+                      "editClient.whatsapp.instanceIdLabel",
+                      "UltraMsg Instance ID"
+                    )}
+                    name="whatsapp_instance_id"
+                    value={form.whatsapp_instance_id}
+                    onChange={(e) => {
+                      setPendingUnlink(false);
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_instance_id: e.target.value,
+                      }));
+                      clearFieldError("whatsapp_instance_id");
+                    }}
+                    placeholder={translate(
+                      "editClient.whatsapp.instanceIdPlaceholder",
+                      "instance177433"
+                    )}
+                    required
+                    error={!!fieldErrors.whatsapp_instance_id}
+                    errorMessage={fieldErrors.whatsapp_instance_id}
+                    autoComplete="off"
+                  />
+                  <PhoneField
+                    className="w-full"
+                    name="whatsapp_number"
+                    label={translate(
+                      "editClient.whatsapp.numberLabel",
+                      "WhatsApp Number"
+                    )}
+                    value={form.whatsapp_number ?? ""}
+                    onChange={(next) => {
+                      setPendingUnlink(false);
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_number: next ?? "",
+                      }));
+                      clearFieldError("whatsapp_number");
+                    }}
+                    defaultCountry="EG"
+                    required
+                    error={fieldErrors.whatsapp_number}
+                  />
+                </div>
 
-              <LenaTextField
-                label={translate(
-                  "editClient.whatsapp.tokenLabel",
-                  "UltraMsg Token"
-                )}
-                name="whatsapp_instance_token"
-                type="password"
-                value={tokenInputValue}
-                onChange={(e) => {
-                  const next = e.target.value;
-                  setPendingUnlink(false);
-                  setTokenDirty(true);
-                  setForm((prev) => ({
-                    ...prev,
-                    whatsapp_instance_token:
-                      next === SAVED_TOKEN_MASK ? "" : next,
-                  }));
-                  clearFieldError("whatsapp_instance_token");
-                }}
-                onFocus={() => {
-                  if (showSavedTokenMask) {
+                <LenaTextField
+                  label={translate(
+                    "editClient.whatsapp.tokenLabel",
+                    "UltraMsg Token"
+                  )}
+                  name="whatsapp_instance_token"
+                  type="password"
+                  value={tokenInputValue}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setPendingUnlink(false);
                     setTokenDirty(true);
                     setForm((prev) => ({
                       ...prev,
-                      whatsapp_instance_token: "",
+                      whatsapp_instance_token:
+                        next === SAVED_TOKEN_MASK ? "" : next,
                     }));
+                    clearFieldError("whatsapp_instance_token");
+                  }}
+                  onFocus={() => {
+                    if (showSavedTokenMask) {
+                      setTokenDirty(true);
+                      setForm((prev) => ({
+                        ...prev,
+                        whatsapp_instance_token: "",
+                      }));
+                    }
+                  }}
+                  placeholder={tokenPlaceholder}
+                  required={!isLinked || tokenDirty}
+                  error={!!fieldErrors.whatsapp_instance_token}
+                  errorMessage={fieldErrors.whatsapp_instance_token}
+                  autoComplete="new-password"
+                  helperText={
+                    showSavedTokenMask || (isLinked && hasSavedToken)
+                      ? translate(
+                          "editClient.whatsapp.tokenHelperLinked",
+                          "A token is already saved. Enter a new token to replace it."
+                        )
+                      : undefined
                   }
-                }}
-                placeholder={tokenPlaceholder}
-                required={!isLinked || tokenDirty}
-                error={!!fieldErrors.whatsapp_instance_token}
-                errorMessage={fieldErrors.whatsapp_instance_token}
-                autoComplete="new-password"
-                helperText={
-                  showSavedTokenMask || (isLinked && hasSavedToken)
-                    ? translate(
-                        "editClient.whatsapp.tokenHelperLinked",
-                        "A token is already saved. Enter a new token to replace it."
-                      )
-                    : undefined
-                }
-              />
+                />
+              </div>
+            )}
 
-              {isLinked && !pendingUnlink && (
-                <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setUnlinkOpen(true)}
-                    className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-md hover:bg-red-50"
-                  >
-                    {translate("editClient.whatsapp.unlinkButton", "Unlink")}
-                  </button>
-                </div>
-              )}
-            </div>
+            {isLinked && !pendingUnlink && (
+              <div className="flex flex-wrap items-center justify-end gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setUnlinkOpen(true)}
+                  className="px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-md hover:bg-red-50"
+                >
+                  {translate("editClient.whatsapp.unlinkButton", "Unlink")}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

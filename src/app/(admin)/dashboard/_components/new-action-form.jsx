@@ -35,7 +35,7 @@ export default function NewActionForm({
 
   // Get actions suitable for the action form (excluding "all" and null values)
   const ACTIONS = USER_ACTIONS.filter(
-    (action) => action.value && action.value !== "" && action.value !== null
+    (action) => action.value && action.value !== "new",
   ).map((action) => ({
     label: getActionLabel(action.value, locale),
     value: action.value,

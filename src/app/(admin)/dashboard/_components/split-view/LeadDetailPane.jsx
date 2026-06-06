@@ -664,7 +664,7 @@ export default function LeadDetailPane({
     return r != null && String(r).toLowerCase() === "owner";
   }, []);
 
-  // Dashboard list summary: same fields as GET /messages/all → users[]:
+  // Dashboard list summary: same fields as GET /messages/v2/all → users[]:
   // `company_name`, `requirement_name` (building type slug or free text).
   // Falls back to legacy summary* fields on conversation payload if present.
   const leadSummaryText = useMemo(() => {
@@ -949,7 +949,12 @@ export default function LeadDetailPane({
               <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
                 <ChatHistory data={chatHistory} />
               </div>
-              <SendNewMessageForm userId={userId} onNewMessage={onNewMessage} />
+              <SendNewMessageForm
+                userId={userId}
+                phoneNumber={phoneNumber}
+                clientId={clientId}
+                onNewMessage={onNewMessage}
+              />
             </div>
           )}
 

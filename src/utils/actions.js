@@ -5,7 +5,7 @@ export const USER_ACTIONS = [
     ar_label: "كل الإجراءات",
   },
   {
-    value: null,
+    value: "new",
     en_label: "New",
     ar_label: "جديد",
   },
@@ -70,15 +70,37 @@ export const SCHEDULE_VISIBLE_ACTIONS = [
 
 // Helper function to get action label by value and language
 export const getActionLabel = (value, language = "en") => {
-  const action = USER_ACTIONS.find((action) => action.value === value);
+  const lookupValue = value === null ? "new" : value;
+  const action = USER_ACTIONS.find((action) => action.value === lookupValue);
   if (!action) return value;
 
   return language === "ar" ? action.ar_label : action.en_label;
 };
 
-// Helper function to get actions for filter (excluding null values)
+// Helper function to get actions for dashboard multi-select (excludes "All Actions" only)
 export const getFilterActions = () => {
-  return USER_ACTIONS.filter((action) => action.value !== null);
+  return USER_ACTIONS.filter((action) => action.value !== "");
+};
+
+/** Checkbox options for DashbordFilter (same values sent to messages/v2/all). */
+export const getDashboardFilterOptions = (language = "en") => {
+  return getFilterActions().map((action) => ({
+    value: action.value,
+    label: getActionLabel(action.value, language),
+  }));
+};
+
+export const parseDashboardActionFilter = (actionParam) => {
+  if (!actionParam || actionParam === "all") return [];
+  return actionParam
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+};
+
+export const serializeDashboardActionFilter = (actions) => {
+  if (!Array.isArray(actions) || actions.length === 0) return null;
+  return actions.join(",");
 };
 
 // Helper function to get all actions including ongoing conversation
@@ -98,4 +120,6 @@ export const ACTIONS_COLORS = {
   Blocked: "text-red-600",
   "Qualified lead": "text-emerald-800",
   Interested: "text-indigo-900",
+  new: "text-sky-700",
+  null: "text-sky-700",
 };

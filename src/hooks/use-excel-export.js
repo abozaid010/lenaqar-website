@@ -7,7 +7,7 @@ import en from "../../public/locales/en";
 import ar from "../../public/locales/ar";
 import { useMemo } from "react";
 import { useUsersData } from "@/hooks/use-users-data";
-import { getActionLabel } from "@/utils/actions";
+import { getActionLabel, parseDashboardActionFilter } from "@/utils/actions";
 import { downloadExcelFile } from "@/utils/excel-utils";
 import { safeJsonParse } from "@/utils/safeJsonParser";
 
@@ -83,14 +83,15 @@ export function useExcelExport(searchParams) {
     }
 
     // Applied action filter
-    if (parsedParams.action && parsedParams.action !== "all") {
+    const appliedActions = parseDashboardActionFilter(parsedParams.action);
+
+    if (appliedActions.length > 0) {
       filterData.push({
         [locale === "ar" ? "المرشح" : "Filter"]:
           locale === "ar" ? "الإجراء المطبق" : "Applied Action",
-        [locale === "ar" ? "القيمة" : "Value"]: getActionLabel(
-          parsedParams.action,
-          locale
-        ),
+        [locale === "ar" ? "القيمة" : "Value"]: appliedActions
+          .map((action) => getActionLabel(action, locale))
+          .join(", "),
       });
     } else {
       filterData.push({

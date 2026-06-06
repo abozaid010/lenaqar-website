@@ -23,7 +23,8 @@ export function formatDateForDisplay(isoString, showTime = true) {
 
 export function formatTimestamp(ts) {
   if (!ts) return "";
-  const date = typeof ts === "string" ? new Date(ts) : ts;
+  const date = ts instanceof Date ? ts : new Date(ts);
+  if (Number.isNaN(date.getTime())) return "";
   const options = { year: "numeric", month: "long", day: "numeric" };
   const datePart = date.toLocaleDateString(undefined, options);
   const timePart = date.toLocaleTimeString(undefined, {

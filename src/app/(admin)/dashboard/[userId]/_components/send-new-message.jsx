@@ -1,65 +1,147 @@
 "use client";
 
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { useI18n } from "@/context/translate-api";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { useI18n } from "@/hooks/useI18n";
+import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
+import {
+  isMessagingConfigReady,
+  sendWhatsappWithClientConfig,
+  WHATSAPP_NOT_CONFIGURED_CODE,
+} from "@/lib/whatsapp-messaging-provider";
+import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
+import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { useActionState, useEffect, useState } from "react";
-import { sendNewMessage } from "../../_actions/actions";
-const initialState = {
-  success: false,
-  message: "",
-};
+import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
-export default function SendNewMessageForm({ userId, onNewMessage }) {
-  const [state, action, pending] = useActionState(sendNewMessage, initialState);
+const MAX_LINES = 3;
+
+export default function SendNewMessageForm({
+  userId,
+  phoneNumber,
+  clientId,
+  onNewMessage,
+}) {
   const [message, setMessage] = useState("");
-  const { t } = useI18n();
-  const client_id = LenaCookiesManager.getClientId();
+  const [pending, setPending] = useState(false);
+  const textareaRef = useRef(null);
+  const { t, translate, common } = useI18n();
+  const queryClient = useQueryClient();
+  const { data: messagingConfig } = useMessagingProviderConfig(clientId);
 
-  const [formData, setFormData] = useState({
-    client_message: "",
-    user_id: userId,
-    platform: "website",
-    source: "human",
-  });
+  const normalizedPhone = phoneNumber
+    ? normalizeCampaignPhoneParam(phoneNumber)
+    : null;
+  const canSend = Boolean(normalizedPhone && message.trim());
+
   useEffect(() => {
-    if (state.success) {
-      setFormData({
-        ...formData,
-        client_message: "",
-      });
-      setMessage(""); // Clear the message input after successful submission
-      onNewMessage(state.message); // Call the parent function to update the chat history
-    } else if (state.message) {
-      // Handle errors
-      console.error("Error sending message:", state.message);
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = "auto";
+    const lineHeight =
+      parseInt(getComputedStyle(textarea).lineHeight, 10) || 20;
+    const style = getComputedStyle(textarea);
+    const verticalPadding =
+      parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const maxHeight = lineHeight * MAX_LINES + verticalPadding;
+    const nextHeight = Math.min(textarea.scrollHeight, maxHeight);
+
+    textarea.style.height = `${nextHeight}px`;
+    textarea.style.overflowY =
+      textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [message]);
+
+  const handleSend = async () => {
+    if (!canSend || pending) return;
+
+    const text = message.trim();
+
+    if (!isMessagingConfigReady(messagingConfig)) {
+      toast.error(
+        translate(
+          "editClient.whatsapp.notConfigured",
+          "WhatsApp messaging is not configured for this client.",
+        ),
+      );
+      return;
     }
-  }, [state]);
+
+    setPending(true);
+    try {
+      await sendWhatsappWithClientConfig({
+        config: messagingConfig,
+        messages: [
+          {
+            phone_number: normalizedPhone,
+            message: text,
+          },
+        ],
+      });
+
+      setMessage("");
+      onNewMessage?.({
+        user_message: text,
+        timestamp: Date.now(),
+        source: "human",
+      });
+      if (userId) {
+        queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
+      }
+    } catch (error) {
+      console.error("Failed to send reply:", error);
+      if (error?.code === WHATSAPP_NOT_CONFIGURED_CODE) {
+        toast.error(
+          translate(
+            "editClient.whatsapp.notConfigured",
+            "WhatsApp messaging is not configured for this client.",
+          ),
+        );
+        return;
+      }
+      toast.error(
+        translate(
+          "dashboardFilter.bulkWhatsapp.sendFailed",
+          t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
+        ) || common.operationFailed,
+      );
+    } finally {
+      setPending(false);
+    }
+  };
 
   return (
     <form
-      className="bg-white h-14 px-2 flex gap-2 items-center justify-center shadow-xl rounded-b-md"
-      action={action}
+      className="bg-white min-h-14 py-2 px-2 flex gap-2 items-end justify-center shadow-xl rounded-b-md"
+      onSubmit={(e) => e.preventDefault()}
     >
-      <input type="hidden" name="user_id" value={userId} />
-      <input type="hidden" name={COOKIE_KEYS.CLIENT_ID} value={client_id} />
-
-      <input
-        type="text"
+      <textarea
+        ref={textareaRef}
         name="client_message"
         value={message}
+        rows={1}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder={t.typeYourMessage}
-        className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        placeholder={
+          normalizedPhone
+            ? translate("typeYourMessage", t?.typeYourMessage)
+            : translate("common.noPhone", common?.noPhone)
+        }
+        disabled={!normalizedPhone || pending}
+        className="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
+        style={{ minHeight: "40px" }}
       />
 
       <button
-        disabled={pending || !message}
-        className={`w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2 relative group
-    ${pending || !message ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
+        type="button"
+        onClick={handleSend}
+        disabled={pending || !canSend}
+        className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+    ${pending || !canSend ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
       >
-        {pending ? <Loader2 className="animate-spin" /> : t.send}
+        {pending ? (
+          <Loader2 className="animate-spin" />
+        ) : (
+          translate("send", t?.send)
+        )}
       </button>
     </form>
   );

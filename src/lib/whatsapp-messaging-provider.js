@@ -1,0 +1,239 @@
+import { phoneToE164 } from "@/components/phone/phone-utils";
+import { resolveWhatsappAgent } from "@/constants/whatsapp-agents";
+import {
+  DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  WHATSAPP_MESSAGING_PROVIDERS,
+} from "@/constants/whatsapp-messaging";
+import { sendWhatsappMessages } from "@/utils/api";
+
+/** API transport values for POST /whatsapp/send_messages */
+export const WHATSAPP_TRANSPORT_PLATFORMS = {
+  ULTRAMSG: "ultramsg",
+  OPENWA: "openwa",
+  WHATSAPP: "whatsapp",
+};
+
+export const WHATSAPP_NOT_CONFIGURED_CODE = "WHATSAPP_NOT_CONFIGURED";
+
+export function normalizeWhatsappPhone(raw) {
+  if (!raw || typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  return phoneToE164(trimmed, "EG") || trimmed;
+}
+
+/**
+ * Resolve platform from stored linked_automated_whatsapp.
+ * Priority: platform (new) → provider (legacy) → messaging_provider (legacy) → infer from fields.
+ */
+export function resolveMessagingProvider(linked) {
+  if (!linked || typeof linked !== "object") {
+    return DEFAULT_WHATSAPP_MESSAGING_PROVIDER;
+  }
+  // Try platform first (new naming), then provider and messaging_provider (legacy)
+  const explicit = linked.platform ?? linked.provider ?? linked.messaging_provider;
+  if (
+    explicit === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
+    explicit === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE ||
+    explicit === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API
+  ) {
+    return explicit;
+  }
+  if (linked.openwa_session_id) {
+    return WHATSAPP_MESSAGING_PROVIDERS.OPENWA;
+  }
+  if (
+    linked.whatsapp_instance_id ||
+    linked.whatsapp_instance_token
+  ) {
+    return WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE;
+  }
+  return DEFAULT_WHATSAPP_MESSAGING_PROVIDER;
+}
+
+/**
+ * Normalized config for UI + API payload building.
+ */
+export function normalizeLinkedAutomatedWhatsapp(linked) {
+  if (!linked || typeof linked !== "object") return null;
+
+  const platform = resolveMessagingProvider(linked);
+  const whatsappNumber = normalizeWhatsappPhone(linked.whatsapp_number || "");
+
+  return {
+    platform,
+    whatsapp_agent: resolveWhatsappAgent(linked.whatsapp_agent),
+    openwa_session_id:
+      linked.openwa_session_id?.trim() ||
+      (platform === WHATSAPP_MESSAGING_PROVIDERS.OPENWA
+        ? linked.whatsapp_instance_id?.trim() || ""
+        : ""),
+    whatsapp_number: whatsappNumber,
+    whatsapp_instance_id: linked.whatsapp_instance_id?.trim() ?? "",
+    whatsapp_instance_token:
+      typeof linked.whatsapp_instance_token === "string"
+        ? linked.whatsapp_instance_token.trim()
+        : "",
+    hasSavedToken: Boolean(linked.whatsapp_instance_token) || true,
+  };
+}
+
+/**
+ * Extra fields for POST /campaign/unified-reply (and similar send endpoints).
+ * Mirrors linked_automated_whatsapp: platform, openwa_session_id, whatsapp_number.
+ */
+export function buildUnifiedReplyProviderPayload(linked) {
+  const config = normalizeLinkedAutomatedWhatsapp(linked);
+  if (!config) return {};
+
+  if (config.platform === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE) {
+    if (!config.whatsapp_instance_id || !config.whatsapp_number) {
+      return {};
+    }
+    const payload = {
+      provider: WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE,
+      whatsapp_instance_id: config.whatsapp_instance_id,
+      whatsapp_number: config.whatsapp_number,
+    };
+    if (config.whatsapp_instance_token) {
+      payload.whatsapp_instance_token = config.whatsapp_instance_token;
+    }
+    return payload;
+  }
+
+  if (!config.openwa_session_id || !config.whatsapp_number) {
+    return {};
+  }
+
+  return {
+    provider: WHATSAPP_MESSAGING_PROVIDERS.OPENWA,
+    openwa_session_id: config.openwa_session_id,
+    whatsapp_number: config.whatsapp_number,
+  };
+}
+
+export function isOpenwaProvider(provider) {
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.OPENWA;
+}
+
+export function isUltramessageProvider(provider) {
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE;
+}
+
+export function isWhatsappCloudApiProvider(provider) {
+  return provider === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API;
+}
+
+/**
+ * Map internal linked_automated_whatsapp platform to API transport platform.
+ */
+export function toTransportPlatform(internalPlatform) {
+  if (!internalPlatform) return null;
+  const raw = String(internalPlatform).trim().toLowerCase();
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.ULTRAMSG;
+  }
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.OPENWA ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.OPENWA
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.OPENWA;
+  }
+  if (
+    raw === WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API ||
+    raw === WHATSAPP_TRANSPORT_PLATFORMS.WHATSAPP
+  ) {
+    return WHATSAPP_TRANSPORT_PLATFORMS.WHATSAPP;
+  }
+  return null;
+}
+
+/** Whether linked config has the fields required for outbound send on the saved platform. */
+export function isMessagingConfigReady(config) {
+  if (!config) return false;
+
+  if (isUltramessageProvider(config.platform)) {
+    return Boolean(
+      config.whatsapp_instance_id?.trim() && config.whatsapp_number?.trim()
+    );
+  }
+
+  if (isWhatsappCloudApiProvider(config.platform)) {
+    return Boolean(config.whatsapp_number?.trim());
+  }
+
+  if (isOpenwaProvider(config.platform)) {
+    return Boolean(
+      config.openwa_session_id?.trim() && config.whatsapp_number?.trim()
+    );
+  }
+
+  return false;
+}
+
+/** default_platform for POST /whatsapp/send_messages, or null when not ready. */
+export function getDefaultTransportPlatform(config) {
+  if (!isMessagingConfigReady(config)) return null;
+  return toTransportPlatform(config.platform);
+}
+
+/**
+ * Send via POST /whatsapp/send_messages using the client's linked_automated_whatsapp platform.
+ * @throws Error with code WHATSAPP_NOT_CONFIGURED when config is incomplete
+ */
+export async function sendWhatsappWithClientConfig({ messages, config }) {
+  if (!isMessagingConfigReady(config)) {
+    const err = new Error(WHATSAPP_NOT_CONFIGURED_CODE);
+    err.code = WHATSAPP_NOT_CONFIGURED_CODE;
+    throw err;
+  }
+
+  const default_platform = getDefaultTransportPlatform(config);
+  return sendWhatsappMessages({
+    messages,
+    default_platform,
+  });
+}
+
+/**
+ * Build message object for POST /whatsapp/send_messages (website unified endpoint).
+ * Uses `platform` field (not `provider`).
+ * 
+ * @param {Object} message - Message with phone_number, message, user_name, etc.
+ * @param {string} defaultPlatform - Default platform if message doesn't specify one
+ * @returns {Object} Normalized message object for API
+ */
+export function buildWhatsappSendMessage(message, defaultPlatform = null) {
+  if (!message || typeof message !== "object") return null;
+
+  const normalized = {
+    phone_number: String(message.phone_number || "").trim(),
+    message: String(message.message || "").trim(),
+  };
+
+  if (!normalized.phone_number || !normalized.message) {
+    return null;
+  }
+
+  // Add optional fields
+  if (message.user_name) {
+    normalized.user_name = String(message.user_name).trim();
+  }
+  if (message.platform) {
+    normalized.platform = String(message.platform).trim().toLowerCase();
+  }
+  if (message.image_url) {
+    normalized.image_url = String(message.image_url).trim();
+  }
+  if (message.template_name) {
+    normalized.template_name = String(message.template_name).trim();
+  }
+  if (message.language_code) {
+    normalized.language_code = String(message.language_code).trim();
+  }
+
+  return normalized;
+}
