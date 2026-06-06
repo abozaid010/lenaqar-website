@@ -13,7 +13,7 @@ import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-sta
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useI18n } from "@/hooks/useI18n";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
-import { buildUnifiedReplyProviderPayload } from "@/lib/whatsapp-messaging-provider";
+import { buildUnifiedReplyProviderPayload, resolveSelectedMessagingAccount } from "@/lib/whatsapp-messaging-provider";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -311,8 +311,23 @@ const CampaignChat = () => {
     );
   };
 
-  const handleSendReply = async (phoneNumber, message) => {
-    const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
+  const handleSendReply = async (phoneNumber, message, selectedPlatform) => {
+    const selectedAccount = resolveSelectedMessagingAccount(
+      messagingConfig,
+      selectedPlatform
+    );
+
+    if (messagingConfig?.hasMultipleAccounts && !selectedPlatform) {
+      toast.error(
+        translate(
+          "whatsappSend.platformRequired",
+          "Please choose which WhatsApp account to send from."
+        )
+      );
+      return;
+    }
+
+    const providerPayload = buildUnifiedReplyProviderPayload(selectedAccount);
     if (!providerPayload || !providerPayload.provider) {
       toast.error(
         translate(
@@ -638,6 +653,8 @@ const CampaignChat = () => {
                 onRename={handleRename}
                 onToggleFavorite={handleToggleFavorite}
                 onUpdateNotes={handleUpdateNotes}
+                messagingAccounts={messagingConfig?.accounts ?? []}
+                hasMultipleMessagingAccounts={messagingConfig?.hasMultipleAccounts ?? false}
               />
             ) : (
               <div className="flex-1 flex items-center justify-center bg-gray-50">

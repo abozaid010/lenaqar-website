@@ -123,18 +123,16 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
 
   const handleSubmit = async () => {
     const whatsappApi = whatsappRef.current;
-    if (whatsappApi?.hasChanges?.() && !whatsappApi.validate()) {
+    const whatsappChanged = whatsappApi?.hasChanges?.() ?? false;
+
+    if (whatsappChanged && !whatsappApi.validate()) {
       return;
     }
 
-    const whatsappPatch = whatsappApi?.getPatchValue?.();
-    const payload = buildAdminClientPatchPayload(
-      initialFormRef.current,
-      form,
-      whatsappPatch
-    );
+    const payload = buildAdminClientPatchPayload(initialFormRef.current, form);
+    const hasClientChanges = Object.keys(payload).length > 0;
 
-    if (Object.keys(payload).length === 0) {
+    if (!whatsappChanged && !hasClientChanges) {
       toast.success(
         translate("editClient.noChanges", "No changes to save")
       );
@@ -144,14 +142,26 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
 
     setIsSaving(true);
     try {
-      const result = await updateClient.mutateAsync({
-        clientId: client.client_id,
-        payload,
-      });
+      let whatsappResult = null;
+      let clientResult = null;
 
-      const updated = result?.data;
-      if (updated && whatsappApi?.syncFromServer) {
-        whatsappApi.syncFromServer(updated.linked_automated_whatsapp ?? null);
+      if (whatsappChanged) {
+        whatsappResult = await whatsappApi.applyChanges(client.client_id);
+      }
+      if (hasClientChanges) {
+        clientResult = await updateClient.mutateAsync({
+          clientId: client.client_id,
+          payload,
+        });
+      }
+
+      const updatedAccounts =
+        whatsappResult?.linked_automated_whatsapp ??
+        clientResult?.data?.linked_automated_whatsapp ??
+        null;
+
+      if (updatedAccounts != null && whatsappApi?.syncFromServer) {
+        whatsappApi.syncFromServer(updatedAccounts);
       }
 
       toast.success(t?.common?.clientUpdated);
@@ -308,6 +318,7 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       <WhatsappAutomationSection
         ref={whatsappRef}
         initialLinkedWhatsapp={client.linked_automated_whatsapp ?? null}
+        targetClientId={client.client_id}
         enabled={isOpen}
       />
     </UnifiedDialog>

@@ -8,11 +8,14 @@ import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   isMessagingConfigReady,
+  resolveSelectedMessagingAccount,
   sendWhatsappWithClientConfig,
+  toTransportPlatform,
   WHATSAPP_NOT_CONFIGURED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
@@ -56,9 +59,16 @@ const AddNewWhatsappCampaignDialog = ({
   const [error, setError] = useState("");
   const [jobResult, setJobResult] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [platformError, setPlatformError] = useState("");
 
   const clientId = LenaCookiesManager.getClientId() || "public";
-  const { data: messagingConfig } = useMessagingProviderConfig(clientId);
+  const { data: messagingData } = useMessagingProviderConfig(clientId);
+  const accounts = messagingData?.accounts ?? [];
+  const selectedAccount = resolveSelectedMessagingAccount(
+    messagingData,
+    selectedPlatform
+  );
   const hasPrefilledRecipients = recipientsProp.length > 0;
 
   const notConfiguredMessage = translate(
@@ -67,7 +77,20 @@ const AddNewWhatsappCampaignDialog = ({
   );
 
   const ensureMessagingConfigured = () => {
-    if (isMessagingConfigReady(messagingConfig)) return true;
+    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
+      const err = translate(
+        "whatsappSend.platformRequired",
+        "Please choose which WhatsApp account to send from."
+      );
+      setPlatformError(err);
+      setError(err);
+      toast.error(err);
+      return false;
+    }
+    if (isMessagingConfigReady(selectedAccount)) {
+      setPlatformError("");
+      return true;
+    }
     setError(notConfiguredMessage);
     toast.error(notConfiguredMessage);
     return false;
@@ -319,16 +342,18 @@ const AddNewWhatsappCampaignDialog = ({
           user_name: c.name,
         }));
 
+    const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const messages = contactList.map((contact) => ({
       phone_number: contact.phone_number || contact.phone,
-      message: "", // Template-based, backend will use template to generate message
+      message: "",
       user_name: contact.user_name || contact.name || "",
       template_name: templateName,
       language_code: languageCode,
+      platform: transportPlatform,
     }));
 
     return sendWhatsappWithClientConfig({
-      config: messagingConfig,
+      config: selectedAccount,
       messages,
     });
   };
@@ -336,14 +361,16 @@ const AddNewWhatsappCampaignDialog = ({
   const submitAutomationMessages = async () => {
     if (!validateAutomationForm()) return;
 
+    const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const messages = recipientsProp.map((recipient) => ({
       phone_number: recipient.phone_number,
       message: automationMessage.trim(),
       user_name: recipient.user_name || "",
+      platform: transportPlatform,
     }));
 
     return sendWhatsappWithClientConfig({
-      config: messagingConfig,
+      config: selectedAccount,
       messages,
     });
   };
@@ -716,6 +743,21 @@ const AddNewWhatsappCampaignDialog = ({
         </div>
       ) : (
         <>
+          {messagingData?.hasMultipleAccounts ? (
+            <WhatsappPlatformSelect
+              accounts={accounts}
+              hasMultipleAccounts={messagingData.hasMultipleAccounts}
+              value={selectedPlatform}
+              onChange={(next) => {
+                setSelectedPlatform(next ?? "");
+                setPlatformError("");
+              }}
+              error={platformError}
+              required
+              id="bulk_whatsapp_platform"
+              className="mb-4"
+            />
+          ) : null}
           {renderModeTabs()}
           {showAutomation ? (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
