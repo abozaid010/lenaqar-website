@@ -9,6 +9,7 @@ import {
   buildUnifiedReplyProviderPayload,
   getEffectiveMessagingAccount,
   getDefaultTransportPlatform,
+  resolveSenderPhoneNumber,
   sendWhatsappWithClientConfig,
 } from "@/lib/whatsapp-messaging-provider";
 import { sendCampaignReply, sendClientMessage } from "@/utils/api";
@@ -87,6 +88,7 @@ export default function SendNewMessageForm({
         : null;
 
       if (normalizedPhone && transportPlatform) {
+        const senderPhoneNumber = resolveSenderPhoneNumber(account);
         await sendWhatsappWithClientConfig({
           config: account,
           messages: [
@@ -94,6 +96,9 @@ export default function SendNewMessageForm({
               phone_number: normalizedPhone,
               message: text,
               platform: transportPlatform,
+              ...(senderPhoneNumber
+                ? { sender_phone_number: senderPhoneNumber }
+                : {}),
             },
           ],
         });

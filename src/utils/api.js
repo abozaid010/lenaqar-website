@@ -1886,6 +1886,7 @@ export async function sendCampaignReply({
  *   - message (required): Text body
  *   - user_name (optional): Display name
  *   - platform (optional): Per-message override (openwa | ultramsg | whatsapp)
+ *   - sender_phone_number (optional): Linked account phone to send from
  *   - image_url (optional): Image URL
  *   - template_name (optional): WhatsApp template name
  *   - language_code (optional): Template language code
@@ -1895,6 +1896,7 @@ export async function sendCampaignReply({
 export async function sendWhatsappMessages({
   messages = [],
   default_platform = null,
+  sender_phone_number = null,
 } = {}) {
   if (!Array.isArray(messages) || messages.length === 0) {
     throw new Error("messages array is required and must contain at least one message");
@@ -1936,6 +1938,10 @@ export async function sendWhatsappMessages({
         }
         if (msg.language_code) {
           normalized.language_code = String(msg.language_code).trim();
+        }
+        const resolvedSender = msg.sender_phone_number || sender_phone_number;
+        if (resolvedSender) {
+          normalized.sender_phone_number = String(resolvedSender).trim();
         }
 
         return normalized;
