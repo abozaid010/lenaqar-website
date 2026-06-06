@@ -16,10 +16,20 @@ export const WHATSAPP_TRANSPORT_PLATFORMS = {
 export const WHATSAPP_NOT_CONFIGURED_CODE = "WHATSAPP_NOT_CONFIGURED";
 
 export function normalizeWhatsappPhone(raw) {
-  if (!raw || typeof raw !== "string") return "";
-  const trimmed = raw.trim();
+  if (raw == null || raw === "") return "";
+  const trimmed = String(raw).trim();
   if (!trimmed) return "";
   return phoneToE164(trimmed, "EG") || trimmed;
+}
+
+/** Sender phone from a linked account (profile may use whatsapp_number or sender_phone_number). */
+export function resolveSenderPhoneNumber(config) {
+  if (!config || typeof config !== "object") return "";
+  return (
+    normalizeWhatsappPhone(config.sender_phone_number) ||
+    normalizeWhatsappPhone(config.whatsapp_number) ||
+    ""
+  );
 }
 
 /** Map API platform value (ultramsg) to internal constant (ultramessage). */
@@ -95,7 +105,9 @@ export function normalizeLinkedAutomatedWhatsapp(linked) {
   if (!linked || typeof linked !== "object" || Array.isArray(linked)) return null;
 
   const platform = resolveMessagingProvider(linked);
-  const whatsappNumber = normalizeWhatsappPhone(linked.whatsapp_number || "");
+  const whatsappNumber = normalizeWhatsappPhone(
+    linked.sender_phone_number || linked.whatsapp_number || ""
+  );
 
   return {
     platform,
@@ -410,9 +422,19 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
     throw err;
   }
 
+  const sender_phone_number = resolveSenderPhoneNumber(config);
+
+  const enrichedMessages = messages.map((msg) => {
+    if (!sender_phone_number || msg.sender_phone_number) {
+      return msg;
+    }
+    return { ...msg, sender_phone_number };
+  });
+
   return sendWhatsappMessages({
-    messages,
+    messages: enrichedMessages,
     default_platform,
+    sender_phone_number: sender_phone_number || null,
   });
 }
 
@@ -451,6 +473,11 @@ export function buildWhatsappSendMessage(message, defaultPlatform = null) {
   }
   if (message.language_code) {
     normalized.language_code = String(message.language_code).trim();
+  }
+  if (message.sender_phone_number) {
+    normalized.sender_phone_number = normalizeWhatsappPhone(
+      String(message.sender_phone_number)
+    );
   }
 
   return normalized;

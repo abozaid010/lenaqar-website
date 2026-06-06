@@ -14,6 +14,7 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   getEffectiveMessagingAccount,
   isMessagingConfigReady,
+  resolveSenderPhoneNumber,
   sendWhatsappWithClientConfig,
   toTransportPlatform,
   WHATSAPP_NOT_CONFIGURED_CODE,
@@ -343,6 +344,7 @@ const AddNewWhatsappCampaignDialog = ({
         }));
 
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
+    const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
     const messages = contactList.map((contact) => ({
       phone_number: contact.phone_number || contact.phone,
       message: "",
@@ -350,6 +352,9 @@ const AddNewWhatsappCampaignDialog = ({
       template_name: templateName,
       language_code: languageCode,
       platform: transportPlatform,
+      ...(senderPhoneNumber
+        ? { sender_phone_number: senderPhoneNumber }
+        : {}),
     }));
 
     return sendWhatsappWithClientConfig({
@@ -362,11 +367,15 @@ const AddNewWhatsappCampaignDialog = ({
     if (!validateAutomationForm()) return;
 
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
+    const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
     const messages = recipientsProp.map((recipient) => ({
       phone_number: recipient.phone_number,
       message: automationMessage.trim(),
       user_name: recipient.user_name || "",
       platform: transportPlatform,
+      ...(senderPhoneNumber
+        ? { sender_phone_number: senderPhoneNumber }
+        : {}),
     }));
 
     return sendWhatsappWithClientConfig({
