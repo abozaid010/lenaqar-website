@@ -150,17 +150,20 @@ export default function SendNewMessageForm({
       className="bg-white min-h-14 py-2 px-2 flex flex-col gap-2 shadow-xl rounded-b-md"
       onSubmit={(e) => e.preventDefault()}
     >
-      <WhatsappPlatformSelect
-        accounts={accounts}
-        value={selectedPlatform}
-        onChange={(next) => {
-          setSelectedPlatform(next ?? "");
-          setPlatformError("");
-        }}
-        error={platformError}
-        required={messagingData?.hasMultipleAccounts}
-        className="px-0"
-      />
+      {messagingData?.hasMultipleAccounts ? (
+        <WhatsappPlatformSelect
+          accounts={accounts}
+          hasMultipleAccounts={messagingData.hasMultipleAccounts}
+          value={selectedPlatform}
+          onChange={(next) => {
+            setSelectedPlatform(next ?? "");
+            setPlatformError("");
+          }}
+          error={platformError}
+          required
+          className="px-0"
+        />
+      ) : null}
       <div className="flex gap-2 items-end justify-center">
         <textarea
           ref={textareaRef}

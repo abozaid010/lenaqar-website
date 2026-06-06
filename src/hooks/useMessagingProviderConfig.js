@@ -1,7 +1,7 @@
 "use client";
 
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { normalizeLinkedAutomatedWhatsappList } from "@/lib/whatsapp-messaging-provider";
+import { getAccountsForOutboundSend } from "@/lib/whatsapp-messaging-provider";
 import { getProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
 
@@ -19,10 +19,10 @@ export function useMessagingProviderConfig(clientId) {
         throw new Error(response.error);
       }
       const linked = response?.data?.linked_automated_whatsapp ?? null;
-      const accounts = normalizeLinkedAutomatedWhatsappList(linked);
+      const accounts = getAccountsForOutboundSend(linked);
       return {
         accounts,
-        defaultAccount: accounts.length === 1 ? accounts[0] : null,
+        defaultAccount: accounts[0] ?? null,
         hasMultipleAccounts: accounts.length > 1,
       };
     },

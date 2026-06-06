@@ -592,17 +592,20 @@ const ChatPanel = ({
       {/* Message Input */}
       <div className="p-4 border-t border-gray-200 bg-white relative space-y-3">
         <LoadingOverlay isVisible={isSending} message="Sending message..." />
-        <WhatsappPlatformSelect
-          accounts={messagingAccounts}
-          value={selectedPlatform}
-          onChange={(next) => {
-            setSelectedPlatform(next ?? "");
-            setPlatformError("");
-          }}
-          error={platformError}
-          required={hasMultipleMessagingAccounts}
-          id="campaign_chat_whatsapp_platform"
-        />
+        {hasMultipleMessagingAccounts ? (
+          <WhatsappPlatformSelect
+            accounts={messagingAccounts}
+            hasMultipleAccounts={hasMultipleMessagingAccounts}
+            value={selectedPlatform}
+            onChange={(next) => {
+              setSelectedPlatform(next ?? "");
+              setPlatformError("");
+            }}
+            error={platformError}
+            required
+            id="campaign_chat_whatsapp_platform"
+          />
+        ) : null}
         <div className="flex gap-3">
           <textarea
             ref={textareaRef}

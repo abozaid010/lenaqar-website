@@ -137,12 +137,24 @@ function isAccountLike(value) {
   );
 }
 
+function dedupeAccountsByPlatform(accounts) {
+  if (!Array.isArray(accounts)) return [];
+  const byPlatform = new Map();
+  for (const account of accounts) {
+    if (!account?.platform) continue;
+    byPlatform.set(account.platform, account);
+  }
+  return Array.from(byPlatform.values());
+}
+
 /** Normalize linked_automated_whatsapp whether API returns array or legacy single object. */
 export function normalizeLinkedAutomatedWhatsappList(linked) {
   if (linked == null) return [];
 
   if (Array.isArray(linked)) {
-    return linked.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean);
+    return dedupeAccountsByPlatform(
+      linked.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean)
+    );
   }
 
   if (typeof linked === "object") {
@@ -153,7 +165,9 @@ export function normalizeLinkedAutomatedWhatsappList(linked) {
 
     const values = Object.values(linked);
     if (values.some(isAccountLike)) {
-      return values.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean);
+      return dedupeAccountsByPlatform(
+        values.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean)
+      );
     }
   }
 
@@ -173,7 +187,11 @@ export function getAccountByPlatform(accounts, platform) {
 export function resolveSelectedMessagingAccount(messagingData, selectedPlatform) {
   const accounts = messagingData?.accounts ?? [];
   if (accounts.length === 0) return null;
-  if (accounts.length === 1) return accounts[0];
+
+  if (!messagingData?.hasMultipleAccounts) {
+    return messagingData?.defaultAccount ?? accounts[0];
+  }
+
   if (!selectedPlatform) return null;
   return getAccountByPlatform(accounts, selectedPlatform);
 }
@@ -347,6 +365,13 @@ export function isMessagingConfigReady(config) {
   }
 
   return false;
+}
+
+/** Normalize linked accounts for outbound send (deduped; prefer send-ready). */
+export function getAccountsForOutboundSend(linked) {
+  const all = dedupeAccountsByPlatform(normalizeLinkedAutomatedWhatsappList(linked));
+  const ready = all.filter(isMessagingConfigReady);
+  return ready.length > 0 ? ready : all;
 }
 
 /** default_platform for POST /whatsapp/send_messages, or null when not ready. */

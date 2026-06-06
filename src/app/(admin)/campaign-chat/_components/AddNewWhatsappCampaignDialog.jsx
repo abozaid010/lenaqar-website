@@ -743,18 +743,21 @@ const AddNewWhatsappCampaignDialog = ({
         </div>
       ) : (
         <>
-          <WhatsappPlatformSelect
-            accounts={accounts}
-            value={selectedPlatform}
-            onChange={(next) => {
-              setSelectedPlatform(next ?? "");
-              setPlatformError("");
-            }}
-            error={platformError}
-            required={messagingData?.hasMultipleAccounts}
-            id="bulk_whatsapp_platform"
-            className="mb-4"
-          />
+          {messagingData?.hasMultipleAccounts ? (
+            <WhatsappPlatformSelect
+              accounts={accounts}
+              hasMultipleAccounts={messagingData.hasMultipleAccounts}
+              value={selectedPlatform}
+              onChange={(next) => {
+                setSelectedPlatform(next ?? "");
+                setPlatformError("");
+              }}
+              error={platformError}
+              required
+              id="bulk_whatsapp_platform"
+              className="mb-4"
+            />
+          ) : null}
           {renderModeTabs()}
           {showAutomation ? (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">

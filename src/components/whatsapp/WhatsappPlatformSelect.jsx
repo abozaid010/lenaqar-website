@@ -11,6 +11,7 @@ const agentSelectCls =
  */
 export default function WhatsappPlatformSelect({
   accounts = [],
+  hasMultipleAccounts = false,
   value,
   onChange,
   id = "whatsapp_send_platform",
@@ -20,7 +21,7 @@ export default function WhatsappPlatformSelect({
 }) {
   const { translate } = useI18n();
 
-  if (!accounts || accounts.length <= 1) {
+  if (!hasMultipleAccounts || !accounts || accounts.length <= 1) {
     return null;
   }
 
