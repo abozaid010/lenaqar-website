@@ -1,12 +1,15 @@
 "use client";
 
+import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
 import { useI18n } from "@/hooks/useI18n";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import {
+  buildUnifiedReplyProviderPayload,
   isMessagingConfigReady,
   sendWhatsappWithClientConfig,
-  WHATSAPP_NOT_CONFIGURED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
+import { sendCampaignReply, sendClientMessage } from "@/utils/api";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -28,10 +31,12 @@ export default function SendNewMessageForm({
   const queryClient = useQueryClient();
   const { data: messagingConfig } = useMessagingProviderConfig(clientId);
 
+  const resolvedClientId =
+    clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
   const normalizedPhone = phoneNumber
     ? normalizeCampaignPhoneParam(phoneNumber)
     : null;
-  const canSend = Boolean(normalizedPhone && message.trim());
+  const canSend = Boolean(message.trim() && (normalizedPhone || userId));
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -56,27 +61,41 @@ export default function SendNewMessageForm({
 
     const text = message.trim();
 
-    if (!isMessagingConfigReady(messagingConfig)) {
-      toast.error(
-        translate(
-          "editClient.whatsapp.notConfigured",
-          "WhatsApp messaging is not configured for this client.",
-        ),
-      );
-      return;
-    }
-
     setPending(true);
     try {
-      await sendWhatsappWithClientConfig({
-        config: messagingConfig,
-        messages: [
-          {
-            phone_number: normalizedPhone,
-            message: text,
-          },
-        ],
-      });
+      if (isMessagingConfigReady(messagingConfig) && normalizedPhone) {
+        await sendWhatsappWithClientConfig({
+          config: messagingConfig,
+          messages: [
+            {
+              phone_number: normalizedPhone,
+              message: text,
+            },
+          ],
+        });
+      } else if (normalizedPhone) {
+        const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
+        await sendCampaignReply({
+          client_id: resolvedClientId,
+          phone_number: normalizedPhone,
+          admin_reply_text: text,
+          ...providerPayload,
+        });
+      } else if (userId && resolvedClientId) {
+        await sendClientMessage({
+          user_id: userId,
+          client_id: resolvedClientId,
+          client_message: text,
+        });
+      } else {
+        toast.error(
+          translate(
+            "editClient.whatsapp.notConfigured",
+            "WhatsApp messaging is not configured for this client.",
+          ),
+        );
+        return;
+      }
 
       setMessage("");
       onNewMessage?.({
@@ -89,15 +108,6 @@ export default function SendNewMessageForm({
       }
     } catch (error) {
       console.error("Failed to send reply:", error);
-      if (error?.code === WHATSAPP_NOT_CONFIGURED_CODE) {
-        toast.error(
-          translate(
-            "editClient.whatsapp.notConfigured",
-            "WhatsApp messaging is not configured for this client.",
-          ),
-        );
-        return;
-      }
       toast.error(
         translate(
           "dashboardFilter.bulkWhatsapp.sendFailed",
@@ -108,6 +118,8 @@ export default function SendNewMessageForm({
       setPending(false);
     }
   };
+
+  const canType = Boolean(normalizedPhone || userId);
 
   return (
     <form
@@ -121,11 +133,11 @@ export default function SendNewMessageForm({
         rows={1}
         onChange={(e) => setMessage(e.target.value)}
         placeholder={
-          normalizedPhone
+          canType
             ? translate("typeYourMessage", t?.typeYourMessage)
             : translate("common.noPhone", common?.noPhone)
         }
-        disabled={!normalizedPhone || pending}
+        disabled={!canType || pending}
         className="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
         style={{ minHeight: "40px" }}
       />

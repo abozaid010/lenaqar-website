@@ -1368,6 +1368,40 @@ export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
   return response.data;
 }
 
+export async function sendClientMessage({
+  user_id,
+  client_id,
+  client_message,
+  platform = "website",
+  source = "human",
+} = {}) {
+  if (!user_id) {
+    throw new Error("user_id is required");
+  }
+  if (!client_id) {
+    throw new Error("client_id is required");
+  }
+  const trimmedMessage =
+    typeof client_message === "string" ? client_message.trim() : "";
+  if (!trimmedMessage) {
+    throw new Error("client_message is required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/chat/client-message", {
+      user_id,
+      client_id,
+      client_message: trimmedMessage,
+      platform,
+      source,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to send client message:", error.message);
+    throw error;
+  }
+}
+
 // Client-side decode JWT payload (no verification; API verifies when token is sent).
 function decodeJwtPayloadClient(token) {
   if (!token || typeof token !== "string") return null;

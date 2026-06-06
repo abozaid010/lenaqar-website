@@ -101,6 +101,16 @@ export function buildUnifiedReplyProviderPayload(linked) {
     return payload;
   }
 
+  if (isWhatsappCloudApiProvider(config.platform)) {
+    if (!config.whatsapp_number) {
+      return {};
+    }
+    return {
+      provider: WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API,
+      whatsapp_number: config.whatsapp_number,
+    };
+  }
+
   if (!config.openwa_session_id || !config.whatsapp_number) {
     return {};
   }
