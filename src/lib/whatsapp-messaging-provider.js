@@ -387,22 +387,29 @@ export function getAccountsForOutboundSend(linked) {
 
 /** default_platform for POST /whatsapp/send_messages, or null when not ready. */
 export function getDefaultTransportPlatform(config) {
+  if (!config) return null;
+  const fromPlatform = config.platform
+    ? toTransportPlatform(config.platform)
+    : null;
+  if (fromPlatform) return fromPlatform;
   if (!isMessagingConfigReady(config)) return null;
   return toTransportPlatform(config.platform);
 }
 
 /**
- * Send via POST /whatsapp/send_messages using the client's linked_automated_whatsapp platform.
- * @throws Error with code WHATSAPP_NOT_CONFIGURED when config is incomplete
+ * Send via POST /whatsapp/send_messages using the client's linked account platform.
+ * Backend resolves credentials from JWT client_id + platform; local profile need not
+ * include secrets (openwa_session_id, tokens are stripped in API responses).
+ * @throws Error with code WHATSAPP_NOT_CONFIGURED when platform cannot be resolved
  */
 export async function sendWhatsappWithClientConfig({ messages, config }) {
-  if (!isMessagingConfigReady(config)) {
+  const default_platform = getDefaultTransportPlatform(config);
+  if (!default_platform) {
     const err = new Error(WHATSAPP_NOT_CONFIGURED_CODE);
     err.code = WHATSAPP_NOT_CONFIGURED_CODE;
     throw err;
   }
 
-  const default_platform = getDefaultTransportPlatform(config);
   return sendWhatsappMessages({
     messages,
     default_platform,

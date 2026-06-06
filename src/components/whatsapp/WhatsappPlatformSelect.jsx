@@ -21,7 +21,11 @@ export default function WhatsappPlatformSelect({
 }) {
   const { translate } = useI18n();
 
-  if (!hasMultipleAccounts || !accounts || accounts.length <= 1) {
+  if (!hasMultipleAccounts) {
+    return null;
+  }
+
+  if (!Array.isArray(accounts) || accounts.length <= 1) {
     return null;
   }
 

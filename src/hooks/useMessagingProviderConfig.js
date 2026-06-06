@@ -24,12 +24,13 @@ export function useMessagingProviderConfig(clientId) {
       const linked = response?.data?.linked_automated_whatsapp ?? null;
       const allAccounts = normalizeLinkedAutomatedWhatsappList(linked);
       const readyAccounts = allAccounts.filter(isMessagingConfigReady);
-      const accounts = readyAccounts.length > 0 ? readyAccounts : allAccounts;
 
       return {
-        accounts,
-        defaultAccount: accounts[0] ?? null,
-        hasMultipleAccounts: accounts.length > 1,
+        /** All linked platforms (profile may omit secrets — still show in picker). */
+        accounts: allAccounts,
+        readyAccounts,
+        defaultAccount: readyAccounts[0] ?? allAccounts[0] ?? null,
+        hasMultipleAccounts: allAccounts.length > 1,
       };
     },
     enabled: Boolean(resolvedClientId),
