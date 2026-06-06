@@ -7,8 +7,8 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import {
   buildUnifiedReplyProviderPayload,
+  getEffectiveMessagingAccount,
   isMessagingConfigReady,
-  resolveSelectedMessagingAccount,
   sendWhatsappWithClientConfig,
   toTransportPlatform,
 } from "@/lib/whatsapp-messaging-provider";
@@ -34,13 +34,10 @@ export default function SendNewMessageForm({
   const textareaRef = useRef(null);
   const { t, translate, common } = useI18n();
   const queryClient = useQueryClient();
-  const { data: messagingData } = useMessagingProviderConfig(clientId);
+  const { data: messagingData, isLoading: isMessagingLoading } =
+    useMessagingProviderConfig(clientId);
 
   const accounts = messagingData?.accounts ?? [];
-  const selectedAccount = resolveSelectedMessagingAccount(
-    messagingData,
-    selectedPlatform
-  );
 
   const resolvedClientId =
     clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
@@ -85,10 +82,12 @@ export default function SendNewMessageForm({
     setPlatformError("");
     setPending(true);
     try {
-      if (isMessagingConfigReady(selectedAccount) && normalizedPhone) {
-        const transportPlatform = toTransportPlatform(selectedAccount.platform);
+      const account = getEffectiveMessagingAccount(messagingData, selectedPlatform);
+
+      if (isMessagingConfigReady(account) && normalizedPhone) {
+        const transportPlatform = toTransportPlatform(account.platform);
         await sendWhatsappWithClientConfig({
-          config: selectedAccount,
+          config: account,
           messages: [
             {
               phone_number: normalizedPhone,
@@ -97,8 +96,10 @@ export default function SendNewMessageForm({
             },
           ],
         });
-      } else if (normalizedPhone && selectedAccount) {
-        const providerPayload = buildUnifiedReplyProviderPayload(selectedAccount);
+      } else if (normalizedPhone) {
+        const providerPayload = account
+          ? buildUnifiedReplyProviderPayload(account)
+          : {};
         await sendCampaignReply({
           client_id: resolvedClientId,
           phone_number: normalizedPhone,
@@ -184,9 +185,9 @@ export default function SendNewMessageForm({
         <button
           type="button"
           onClick={handleSend}
-          disabled={pending || !canSend}
+          disabled={pending || !canSend || isMessagingLoading}
           className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
-    ${pending || !canSend ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
+    ${pending || !canSend || isMessagingLoading ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
         >
           {pending ? (
             <Loader2 className="animate-spin" />

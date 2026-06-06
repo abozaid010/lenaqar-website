@@ -12,8 +12,8 @@ import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
+  getEffectiveMessagingAccount,
   isMessagingConfigReady,
-  resolveSelectedMessagingAccount,
   sendWhatsappWithClientConfig,
   toTransportPlatform,
   WHATSAPP_NOT_CONFIGURED_CODE,
@@ -65,7 +65,7 @@ const AddNewWhatsappCampaignDialog = ({
   const clientId = LenaCookiesManager.getClientId() || "public";
   const { data: messagingData } = useMessagingProviderConfig(clientId);
   const accounts = messagingData?.accounts ?? [];
-  const selectedAccount = resolveSelectedMessagingAccount(
+  const selectedAccount = getEffectiveMessagingAccount(
     messagingData,
     selectedPlatform
   );

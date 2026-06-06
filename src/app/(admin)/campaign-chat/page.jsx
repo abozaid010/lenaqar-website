@@ -13,7 +13,7 @@ import { LoadingSpinner, ContactListSkeleton } from "@/components/ui/loading-sta
 import ErrorBoundary from "@/components/ui/error-boundary";
 import { useI18n } from "@/hooks/useI18n";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
-import { buildUnifiedReplyProviderPayload, resolveSelectedMessagingAccount } from "@/lib/whatsapp-messaging-provider";
+import { buildUnifiedReplyProviderPayload, getEffectiveMessagingAccount } from "@/lib/whatsapp-messaging-provider";
 
 // Components
 import ContactList from "./_components/ContactList";
@@ -312,11 +312,6 @@ const CampaignChat = () => {
   };
 
   const handleSendReply = async (phoneNumber, message, selectedPlatform) => {
-    const selectedAccount = resolveSelectedMessagingAccount(
-      messagingConfig,
-      selectedPlatform
-    );
-
     if (messagingConfig?.hasMultipleAccounts && !selectedPlatform) {
       toast.error(
         translate(
@@ -327,16 +322,10 @@ const CampaignChat = () => {
       return;
     }
 
-    const providerPayload = buildUnifiedReplyProviderPayload(selectedAccount);
-    if (!providerPayload || !providerPayload.provider) {
-      toast.error(
-        translate(
-          "editClient.whatsapp.notConfigured",
-          "WhatsApp messaging is not configured for this client.",
-        ),
-      );
-      return;
-    }
+    const account = getEffectiveMessagingAccount(messagingConfig, selectedPlatform);
+    const providerPayload = account
+      ? buildUnifiedReplyProviderPayload(account)
+      : {};
 
     try {
       await sendCampaignReply({
