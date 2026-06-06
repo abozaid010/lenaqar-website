@@ -50,6 +50,7 @@ export default {
     operationFailed: "Operation failed",
     phoneCopied: "Phone number copied",
     failedToCopyPhone: "Failed to copy phone number",
+    noPhone: "Phone number not available",
     clickToCopy: "Click to copy",
     copied: "Copied!",
     copyLink: "Copy with Link",

@@ -48,6 +48,7 @@ export default {
     operationFailed: "فشلت العملية",
     phoneCopied: "تم نسخ رقم الهاتف",
     failedToCopyPhone: "فشل نسخ رقم الهاتف",
+    noPhone: "رقم الهاتف غير متوفر",
     clickToCopy: "انقر للنسخ",
     copied: "تم النسخ!",
     copyLink: "نسخ مع الرابط",
