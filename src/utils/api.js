@@ -1,6 +1,7 @@
 "use client";
 
 import { axiosInstance } from "@/lib/axiosInstance";
+import { PUBLIC_X_API_KEY, MISSING_X_API_KEY_MESSAGE } from "@/lib/apiConfig";
 import { safeMergeParams } from "./safeJsonParser";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
@@ -1565,8 +1566,14 @@ export async function fetchDataProjection() {
 
 /** `/campaign/*` expects `x-client-id` to match `client_id` (query/body); JWT-only `sub` can otherwise 403. */
 function campaignChatRequestHeaders(client_id) {
+  if (!PUBLIC_X_API_KEY) {
+    // Fail loudly: without the key the backend 401/403s and the UI shows a
+    // generic "send failed" with no clue that the build is misconfigured.
+    console.error(`[campaign-chat] ${MISSING_X_API_KEY_MESSAGE}`);
+    throw new Error(MISSING_X_API_KEY_MESSAGE);
+  }
   return {
-    "X-API-Key": process.env.NEXT_PUBLIC_X_API_KEY,
+    "X-API-Key": PUBLIC_X_API_KEY,
     "x-client-id": String(client_id),
   };
 }
