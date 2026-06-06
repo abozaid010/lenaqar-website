@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
+import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubble from "./MessageBubble";
 import { useI18n } from "@/hooks/useI18n";
@@ -40,9 +41,13 @@ const ChatPanel = ({
   onRename,
   onToggleFavorite,
   onUpdateNotes,
+  messagingAccounts = [],
+  hasMultipleMessagingAccounts = false,
 }) => {
   const { t, translate } = useI18n();
   const [message, setMessage] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [platformError, setPlatformError] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
 
@@ -122,9 +127,21 @@ const ChatPanel = ({
 
   const handleSendReply = async () => {
     if (!message.trim() || isSending) return;
+
+    if (hasMultipleMessagingAccounts && !selectedPlatform) {
+      const err = translate(
+        "whatsappSend.platformRequired",
+        "Please choose which WhatsApp account to send from."
+      );
+      setPlatformError(err);
+      toast.error(err);
+      return;
+    }
+
+    setPlatformError("");
     setIsSending(true);
     try {
-      await onSendReply(contact.phone_number, message.trim());
+      await onSendReply(contact.phone_number, message.trim(), selectedPlatform);
       setMessage("");
       await refetchSession();
     } catch (error) {
@@ -573,8 +590,19 @@ const ChatPanel = ({
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-200 bg-white relative">
+      <div className="p-4 border-t border-gray-200 bg-white relative space-y-3">
         <LoadingOverlay isVisible={isSending} message="Sending message..." />
+        <WhatsappPlatformSelect
+          accounts={messagingAccounts}
+          value={selectedPlatform}
+          onChange={(next) => {
+            setSelectedPlatform(next ?? "");
+            setPlatformError("");
+          }}
+          error={platformError}
+          required={hasMultipleMessagingAccounts}
+          id="campaign_chat_whatsapp_platform"
+        />
         <div className="flex gap-3">
           <textarea
             ref={textareaRef}

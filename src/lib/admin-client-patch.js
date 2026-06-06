@@ -54,15 +54,9 @@ function fieldValuesEqual(key, a, b) {
 
 /**
  * Build a PATCH body with only fields that changed vs. the dialog's initial state.
- * @param {object} initial - Snapshot when the dialog opened
- * @param {object} current - Current form state
- * @param {object|null|undefined} linkedAutomatedWhatsappPatch - undefined = omit; null = unlink; object = link/update
+ * WhatsApp linking is handled separately via PUT/DELETE /client/whatsapp-instance.
  */
-export function buildAdminClientPatchPayload(
-  initial,
-  current,
-  linkedAutomatedWhatsappPatch
-) {
+export function buildAdminClientPatchPayload(initial, current) {
   const patch = {};
 
   for (const key of PATCHABLE_FIELDS) {
@@ -71,10 +65,6 @@ export function buildAdminClientPatchPayload(
     if (!fieldValuesEqual(key, next, prev)) {
       patch[key] = next;
     }
-  }
-
-  if (linkedAutomatedWhatsappPatch !== undefined) {
-    patch.linked_automated_whatsapp = linkedAutomatedWhatsappPatch;
   }
 
   return patch;

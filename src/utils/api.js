@@ -2175,6 +2175,64 @@ export async function updateAdminClient(clientId, payload) {
   }
 }
 
+/**
+ * PUT /client/whatsapp-instance — upsert one WhatsApp account by platform (king admin via Next proxy).
+ */
+export async function upsertClientWhatsappInstance(account, { targetClientId } = {}) {
+  const params = new URLSearchParams();
+  if (targetClientId) params.set("target_client_id", targetClientId);
+  const qs = params.toString();
+  const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;
+  const token = LenaCookiesManager.getAccessToken();
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(account),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.error || data.detail || "Failed to update WhatsApp instance"
+    );
+  }
+  return data;
+}
+
+/**
+ * DELETE /client/whatsapp-instance — unlink one platform or all accounts.
+ */
+export async function deleteClientWhatsappInstance({
+  platform,
+  targetClientId,
+} = {}) {
+  const params = new URLSearchParams();
+  if (platform) params.set("platform", platform);
+  if (targetClientId) params.set("target_client_id", targetClientId);
+  const qs = params.toString();
+  const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;
+  const token = LenaCookiesManager.getAccessToken();
+
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(
+      data.error || data.detail || "Failed to unlink WhatsApp instance"
+    );
+  }
+  return data;
+}
+
 export async function fetchClientPermissionSchema() {
   try {
     const response = await axiosInstance.get("client/permission-schema");

@@ -1,13 +1,16 @@
 "use client";
 
 import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
+import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import {
   buildUnifiedReplyProviderPayload,
   isMessagingConfigReady,
+  resolveSelectedMessagingAccount,
   sendWhatsappWithClientConfig,
+  toTransportPlatform,
 } from "@/lib/whatsapp-messaging-provider";
 import { sendCampaignReply, sendClientMessage } from "@/utils/api";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
@@ -26,10 +29,18 @@ export default function SendNewMessageForm({
 }) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [platformError, setPlatformError] = useState("");
   const textareaRef = useRef(null);
   const { t, translate, common } = useI18n();
   const queryClient = useQueryClient();
-  const { data: messagingConfig } = useMessagingProviderConfig(clientId);
+  const { data: messagingData } = useMessagingProviderConfig(clientId);
+
+  const accounts = messagingData?.accounts ?? [];
+  const selectedAccount = resolveSelectedMessagingAccount(
+    messagingData,
+    selectedPlatform
+  );
 
   const resolvedClientId =
     clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
@@ -61,20 +72,33 @@ export default function SendNewMessageForm({
 
     const text = message.trim();
 
+    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
+      const err = translate(
+        "whatsappSend.platformRequired",
+        "Please choose which WhatsApp account to send from."
+      );
+      setPlatformError(err);
+      toast.error(err);
+      return;
+    }
+
+    setPlatformError("");
     setPending(true);
     try {
-      if (isMessagingConfigReady(messagingConfig) && normalizedPhone) {
+      if (isMessagingConfigReady(selectedAccount) && normalizedPhone) {
+        const transportPlatform = toTransportPlatform(selectedAccount.platform);
         await sendWhatsappWithClientConfig({
-          config: messagingConfig,
+          config: selectedAccount,
           messages: [
             {
               phone_number: normalizedPhone,
               message: text,
+              platform: transportPlatform,
             },
           ],
         });
-      } else if (normalizedPhone) {
-        const providerPayload = buildUnifiedReplyProviderPayload(messagingConfig);
+      } else if (normalizedPhone && selectedAccount) {
+        const providerPayload = buildUnifiedReplyProviderPayload(selectedAccount);
         await sendCampaignReply({
           client_id: resolvedClientId,
           phone_number: normalizedPhone,
@@ -123,38 +147,51 @@ export default function SendNewMessageForm({
 
   return (
     <form
-      className="bg-white min-h-14 py-2 px-2 flex gap-2 items-end justify-center shadow-xl rounded-b-md"
+      className="bg-white min-h-14 py-2 px-2 flex flex-col gap-2 shadow-xl rounded-b-md"
       onSubmit={(e) => e.preventDefault()}
     >
-      <textarea
-        ref={textareaRef}
-        name="client_message"
-        value={message}
-        rows={1}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder={
-          canType
-            ? translate("typeYourMessage", t?.typeYourMessage)
-            : translate("common.noPhone", common?.noPhone)
-        }
-        disabled={!canType || pending}
-        className="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
-        style={{ minHeight: "40px" }}
+      <WhatsappPlatformSelect
+        accounts={accounts}
+        value={selectedPlatform}
+        onChange={(next) => {
+          setSelectedPlatform(next ?? "");
+          setPlatformError("");
+        }}
+        error={platformError}
+        required={messagingData?.hasMultipleAccounts}
+        className="px-0"
       />
+      <div className="flex gap-2 items-end justify-center">
+        <textarea
+          ref={textareaRef}
+          name="client_message"
+          value={message}
+          rows={1}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder={
+            canType
+              ? translate("typeYourMessage", t?.typeYourMessage)
+              : translate("common.noPhone", common?.noPhone)
+          }
+          disabled={!canType || pending}
+          className="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
+          style={{ minHeight: "40px" }}
+        />
 
-      <button
-        type="button"
-        onClick={handleSend}
-        disabled={pending || !canSend}
-        className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={pending || !canSend}
+          className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
     ${pending || !canSend ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
-      >
-        {pending ? (
-          <Loader2 className="animate-spin" />
-        ) : (
-          translate("send", t?.send)
-        )}
-      </button>
+        >
+          {pending ? (
+            <Loader2 className="animate-spin" />
+          ) : (
+            translate("send", t?.send)
+          )}
+        </button>
+      </div>
     </form>
   );
 }
