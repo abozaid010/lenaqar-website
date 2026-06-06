@@ -196,6 +196,17 @@ export function resolveSelectedMessagingAccount(messagingData, selectedPlatform)
   return getAccountByPlatform(accounts, selectedPlatform);
 }
 
+/** Best account for send: explicit pick, default, or first linked. */
+export function getEffectiveMessagingAccount(messagingData, selectedPlatform) {
+  if (!messagingData) return null;
+  return (
+    resolveSelectedMessagingAccount(messagingData, selectedPlatform) ??
+    messagingData.defaultAccount ??
+    messagingData.accounts?.[0] ??
+    null
+  );
+}
+
 /** Human-readable platform label key suffix for i18n. */
 export function getPlatformLabelKey(platform) {
   if (isOpenwaProvider(platform)) return "editClient.whatsapp.platformOpenwa";
