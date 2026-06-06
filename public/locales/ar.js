@@ -618,6 +618,7 @@ export default {
       qualifiedLead: "جاد",
       noAction: "لا يوجد إجراء",
       allActions: "كل الإجراءات",
+      new: "جديد",
       selected: "{count} محدد",
       clearAll: "مسح الكل",
     },

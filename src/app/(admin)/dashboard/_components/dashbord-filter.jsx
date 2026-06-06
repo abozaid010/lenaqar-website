@@ -7,7 +7,12 @@ import {
   DASHBOARD_TRIGGER,
 } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
-import { getActionLabel, getFilterActions } from "@/utils/actions";
+import {
+  getActionLabel,
+  getDashboardFilterOptions,
+  parseDashboardActionFilter,
+  serializeDashboardActionFilter,
+} from "@/utils/actions";
 import { ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -30,26 +35,14 @@ const formatDate = (date) => {
   return formattedDate;
 };
 
-const parseActionsFromFilter = (actionParam) => {
-  if (!actionParam || actionParam === "all") return [];
-  return actionParam
-    .split(",")
-    .map((value) => value.trim())
-    .filter(Boolean);
-};
-
 export default function DashbordFilter({ appliedFilters, compact = false }) {
   const { t, locale, translate } = useI18n();
   const router = useRouter();
 
-  const ACTIONS = useMemo(() => {
-    return getFilterActions(locale)
-      .filter((action) => action.value)
-      .map((action) => ({
-        value: action.value,
-        label: getActionLabel(action.value, locale),
-      }));
-  }, [locale]);
+  const ACTIONS = useMemo(
+    () => getDashboardFilterOptions(locale),
+    [locale],
+  );
 
   const tomorrow = useMemo(() => {
     const date = new Date();
@@ -65,7 +58,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   const [filters, setFilters] = useState(() => {
     return {
-      actions: parseActionsFromFilter(appliedFilters.action),
+      actions: parseDashboardActionFilter(appliedFilters.action),
       start_date: appliedFilters.start_date || formatDate(twoMonthsAgo),
       end_date: appliedFilters.end_date || formatDate(tomorrow),
       campaign_ids: appliedFilters.campaign_ids
@@ -73,6 +66,28 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         : [],
     };
   });
+
+  const actionFilterLabel = useMemo(() => {
+    if (filters.actions.length === 0) {
+      return translate(
+        "dashboardFilter.actions.allActions",
+        t.dashboardFilter?.actions?.allActions || "All Actions",
+      );
+    }
+    if (filters.actions.length === 1) {
+      return getActionLabel(filters.actions[0], locale);
+    }
+    return translate(
+      "dashboardFilter.actions.selected",
+      t.dashboardFilter?.actions?.selected || "{count} selected",
+    ).replace("{count}", filters.actions.length);
+  }, [
+    filters.actions,
+    locale,
+    t.dashboardFilter?.actions?.allActions,
+    t.dashboardFilter?.actions?.selected,
+    translate,
+  ]);
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
@@ -208,8 +223,9 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
     Object.entries(updatedFilters).forEach(([k, v]) => {
       if (k === "actions" && Array.isArray(v)) {
-        if (v.length > 0) {
-          params.append("action", v.join(","));
+        const serializedAction = serializeDashboardActionFilter(v);
+        if (serializedAction != null) {
+          params.append("action", serializedAction);
         }
       } else if (k === "campaign_ids" && Array.isArray(v)) {
         if (v.length > 0) {
@@ -300,17 +316,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
-              <span className="whitespace-nowrap">
-                {filters.actions.length === 0
-                  ? translate(
-                      "dashboardFilter.actions.allActions",
-                      t.dashboardFilter.actions.allActions,
-                    )
-                  : translate(
-                      "dashboardFilter.actions.selected",
-                      t.dashboardFilter.actions.selected,
-                    ).replace("{count}", filters.actions.length)}
-              </span>
+              <span className="whitespace-nowrap">{actionFilterLabel}</span>
               <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
             </div>
 

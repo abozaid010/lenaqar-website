@@ -7,7 +7,7 @@ import en from "../../public/locales/en";
 import ar from "../../public/locales/ar";
 import { useMemo } from "react";
 import { useUsersData } from "@/hooks/use-users-data";
-import { getActionLabel } from "@/utils/actions";
+import { getActionLabel, parseDashboardActionFilter } from "@/utils/actions";
 import { downloadExcelFile } from "@/utils/excel-utils";
 import { safeJsonParse } from "@/utils/safeJsonParser";
 
@@ -83,10 +83,7 @@ export function useExcelExport(searchParams) {
     }
 
     // Applied action filter
-    const appliedActions = (parsedParams.action || "")
-      .split(",")
-      .map((value) => value.trim())
-      .filter((value) => value && value !== "all");
+    const appliedActions = parseDashboardActionFilter(parsedParams.action);
 
     if (appliedActions.length > 0) {
       filterData.push({

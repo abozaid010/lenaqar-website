@@ -715,6 +715,7 @@ export default {
       qualifiedLead: "Qualified Lead",
       noAction: "No Action",
       allActions: "All Actions",
+      new: "New",
       selected: "{count} selected",
       clearAll: "Clear All",
     },
