@@ -35,6 +35,24 @@ function getScheduledActionUserId(item) {
   return item?.user_id ?? item?.userId ?? null;
 }
 
+/** Stable row id from API payload (id field name varies). */
+function getScheduledActionId(item) {
+  return item?.id ?? item?.action_id ?? item?.actionId ?? item?._id ?? null;
+}
+
+/** Unique React key — never use numeric `+` on a missing id (yields NaN). */
+function getScheduledActionKey(item, index) {
+  const id = getScheduledActionId(item);
+  if (id != null && id !== "") {
+    return String(id);
+  }
+  const uid = getScheduledActionUserId(item) ?? "unknown";
+  const time = item?.meeting_time || item?.created_at || "";
+  const action = item?.action || "";
+  const phone = item?.phone_number || "";
+  return `schedule-${uid}-${time}-${action}-${phone}-${index}`;
+}
+
 /** Local calendar date + time from meeting_time or created_at. */
 function getAppointmentDateTimeParts(appointment) {
   const raw = appointment?.meeting_time || appointment?.created_at;
@@ -335,7 +353,7 @@ const Schedule = ({ data, dataSales }) => {
               ) : (
                 filteredData?.map((appointment, index) => (
                   <div
-                    key={appointment.id + index}
+                    key={getScheduledActionKey(appointment, index)}
                     className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
                   >
                     <div className="p-6">
@@ -654,7 +672,7 @@ const Schedule = ({ data, dataSales }) => {
                 "Submitting updates the current action with the details below."}
             </p>
             <NewActionForm
-              key={`schedule-edit-${editAppointment.id}`}
+              key={`schedule-edit-${getScheduledActionKey(editAppointment, 0)}`}
               userId={String(getScheduledActionUserId(editAppointment) ?? "")}
               phoneNumber={
                 phoneToE164(editAppointment.phone_number, "EG") ||

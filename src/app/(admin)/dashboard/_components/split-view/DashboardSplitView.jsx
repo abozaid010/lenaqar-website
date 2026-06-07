@@ -79,10 +79,14 @@ function DashboardSplitViewComponent() {
     }
   }, [allUsers, isLoading, isFetching, setAverageScore, setLoading]);
 
-  const selectedLead = useMemo(
-    () => allUsers.find((u) => u.user_id === selectedUserId) || null,
-    [allUsers, selectedUserId]
-  );
+  const selectedLead = useMemo(() => {
+    if (!selectedUserId) return null;
+    return (
+      filteredUsers.find((u) => u.user_id === selectedUserId) ||
+      allUsers.find((u) => u.user_id === selectedUserId) ||
+      null
+    );
+  }, [filteredUsers, allUsers, selectedUserId]);
 
   const onSelectLead = useCallback(
     (user) => {

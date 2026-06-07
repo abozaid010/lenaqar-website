@@ -18,7 +18,7 @@ import {
   addLeadTags,
   removeLeadTags,
 } from "@/utils/api";
-import { phoneToE164 } from "@/components/phone/phone-utils";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import { getActionLabel } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
@@ -195,17 +195,21 @@ export default function LeadDetailPane({
   }, [isLoading, data, userId]);
 
   const phoneNumber =
+    leadSummary?.phone_number ||
     data?.data?.phoneNumber ||
     data?.data?.phone_number ||
-    leadSummary?.phone_number ||
     null;
 
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
     : null;
 
+  const headerPhoneDisplay = phoneNumber
+    ? formatPhoneForDisplay(phoneNumber, "EG") || phoneNumber
+    : null;
+
   const clientId = data?.data?.client_id;
-  const displayName = data?.data?.name || leadSummary?.name || "";
+  const displayName = leadSummary?.name || data?.data?.name || "";
 
   const clearSelection = useCallback(() => {
     const usp = new URLSearchParams(searchParams.toString());
@@ -874,12 +878,21 @@ export default function LeadDetailPane({
       <div className="flex flex-col min-h-0 flex-1 bg-white border-l border-gray-100">
         {/* Always-visible identity header — pure lead identity, no controls */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
             <ChatWith
+              key={userId}
               name={displayName}
               userId={userId}
               onNameUpdate={() => afterMutation()}
             />
+            {headerPhoneDisplay ? (
+              <span
+                dir="ltr"
+                className="shrink-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%]"
+              >
+                {headerPhoneDisplay}
+              </span>
+            ) : null}
           </div>
           {actionsPermissionReady &&
             canCreateAction &&
