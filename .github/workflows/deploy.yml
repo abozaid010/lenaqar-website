@@ -54,6 +54,7 @@ jobs:
           echo "👤 SSH user: ${{ env.VM_SSH_USER }}"
           echo "🖥️  VM: ${{ env.VM_NAME }}"
           echo "📍 Zone: ${{ env.GCP_ZONE }}"
+          echo "📌 Deploying commit: ${{ github.sha }}"
 
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
@@ -64,35 +65,51 @@ jobs:
         run: |
           set -Eeuo pipefail
           echo "🔐 Deploying lenaAI-website via secure IAP tunnel..."
+          echo "📌 Expected commit: ${{ github.sha }}"
 
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
-            --command='
+            --command="
               set -Eeuo pipefail
-              trap "echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1" ERR
+              trap 'echo \"❌ Remote deploy failed on line \$LINENO\"; exit 1' ERR
 
-              REPO_PATH="$HOME/lenaai-website"
-              REPO_URL="git@github-website:abozaid010/lenaai-website.git"
+              REPO_PATH=\"\$HOME/lenaai-website\"
+              REPO_URL=\"git@github-website:abozaid010/lenaai-website.git\"
+              EXPECTED_SHA=\"${{ github.sha }}\"
 
-              echo "🏠 HOME on VM: $HOME"
-              echo "📁 Using repository path: $REPO_PATH"
+              echo \"🏠 HOME on VM: \$HOME\"
+              echo \"📁 Repository path: \$REPO_PATH\"
 
-              if [ -d "$REPO_PATH/.git" ]; then
-                cd "$REPO_PATH"
-                git -c safe.directory="$REPO_PATH" pull origin main || echo "Git pull failed, continuing with existing code..."
-              else
-                if [ -d "$REPO_PATH" ]; then
-                  echo "⚠️ Directory $REPO_PATH exists but is not a git repo, removing..."
-                  rm -rf "$REPO_PATH"
+              # Bootstrap: clone once so deploy scripts exist on a fresh VM
+              if [ ! -f \"\$REPO_PATH/.deploy/deploy.sh\" ]; then
+                echo \"📥 Bootstrapping repository (first deploy)...\"
+                if [ -e \"\$REPO_PATH\" ]; then
+                  rm -rf \"\$REPO_PATH\"
                 fi
-                echo "📦 Cloning repository..."
-                mkdir -p "$(dirname "$REPO_PATH")"
-                git clone "$REPO_URL" "$REPO_PATH" || {
-                  echo "❌ Failed to clone repository"
-                  exit 1
-                }
+                mkdir -p \"\$(dirname \"\$REPO_PATH\")\"
+                git clone --branch main --single-branch \"\$REPO_URL\" \"\$REPO_PATH\"
               fi
 
-              bash "$REPO_PATH/.deploy/deploy.sh"
-            '
+              export REPO_PATH REPO_URL EXPECTED_SHA
+
+              # Sync before deploy (handles first push after this change lands)
+              if [ -f \"\$REPO_PATH/.deploy/sync-repo.sh\" ]; then
+                bash \"\$REPO_PATH/.deploy/sync-repo.sh\"
+              else
+                echo \"⚠️  sync-repo.sh missing — inline git sync (legacy VM)\"
+                cd \"\$REPO_PATH\"
+                git -c safe.directory=\"\$REPO_PATH\" fetch origin main --prune
+                git -c safe.directory=\"\$REPO_PATH\" checkout main
+                git -c safe.directory=\"\$REPO_PATH\" reset --hard origin/main
+                git -c safe.directory=\"\$REPO_PATH\" clean -fd
+                DEPLOYED_SHA=\$(git -c safe.directory=\"\$REPO_PATH\" rev-parse HEAD)
+                echo \"📌 VM commit: \$DEPLOYED_SHA\"
+                if [ \"\$DEPLOYED_SHA\" != \"\$EXPECTED_SHA\" ]; then
+                  echo \"❌ Commit mismatch — deploy aborted.\"
+                  exit 1
+                fi
+              fi
+
+              bash \"\$REPO_PATH/.deploy/deploy.sh\"
+            "
