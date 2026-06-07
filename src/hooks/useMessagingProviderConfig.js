@@ -9,7 +9,6 @@ import {
 } from "@/lib/whatsapp-messaging-provider";
 import { getProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 
 function summarizeAccounts(accounts) {
   return accounts.map((account) => ({
@@ -126,37 +125,6 @@ export function useMessagingProviderConfig(clientId) {
     refetchOnWindowFocus: false,
     retry: 2,
   });
-
-  useEffect(() => {
-    if (query.isLoading) return;
-
-    if (query.isError) {
-      logWhatsappMessaging("profile_messaging_query_error", {
-        clientId: resolvedClientId,
-        message: query.error?.message ?? String(query.error),
-      });
-      return;
-    }
-
-    if (query.isSuccess && query.data) {
-      logWhatsappMessaging("profile_messaging_query_ready", {
-        clientId: resolvedClientId,
-        canSendWhatsapp: query.data.canSendWhatsapp,
-        defaultSenderPhone: query.data.defaultSenderPhone || null,
-        fromCache: !query.isFetching,
-        fetchStatus: query.fetchStatus,
-      });
-    }
-  }, [
-    query.isLoading,
-    query.isError,
-    query.isSuccess,
-    query.isFetching,
-    query.fetchStatus,
-    query.data,
-    query.error,
-    resolvedClientId,
-  ]);
 
   return query;
 }
