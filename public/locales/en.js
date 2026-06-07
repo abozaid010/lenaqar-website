@@ -738,6 +738,7 @@ export default {
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
     ADD: "New Lead",
+    notes: "Notes",
     importLeads: {
       button: "Import",
       title: "Import Leads",
@@ -998,6 +999,7 @@ export default {
       garageSize: "Garage Size",
       gardenSize: "Garden Size",
       finishingType: "Finishing",
+      furnishingType: "Furnishing Type",
       developer: "Developer",
       downPayment: "Down Payment",
       deliveryDate: "Delivery Date",

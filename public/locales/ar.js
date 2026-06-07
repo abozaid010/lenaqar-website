@@ -641,6 +641,7 @@ export default {
     whatsappButton: " عملاء واتساب",
     premuim: "ميزة مدفوعة",
     ADD: "اضافة عميل  جديد",
+    notes: "ملاحظات",
     importLeads: {
       button: "استيراد",
       title: "استيراد العملاء",
@@ -899,6 +900,7 @@ export default {
       garageSize: "مساحة الجراج",
       gardenSize: "مساحة الحديقة",
       finishingType: "التشطيب",
+      furnishingType: "نوع الفرش",
       developer: "المطور",
       downPayment: "المقدم",
       deliveryDate: "تاريخ التسليم",
