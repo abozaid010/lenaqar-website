@@ -738,6 +738,7 @@ export default {
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
     ADD: "New Lead",
+    notes: "Notes",
     importLeads: {
       button: "Import",
       title: "Import Leads",
@@ -790,6 +791,15 @@ export default {
       automationSuccessWithErrors:
         "Queued {count} message(s) ({errors} session save error(s))",
       sendFailed: "Failed to send. Please try again.",
+    },
+    bulkAction: {
+      openButton: "Set action ({count})",
+      dialogTitle: "Set action for {count} lead(s)",
+      selectedCount: "{count} selected",
+      applyButton: "Set action",
+      applying: "Applying...",
+      success: "Action set for {count} lead(s)",
+      error: "Failed to set action. Please try again.",
     },
   },
   searchPlaceholder: "Search name or phone...",
@@ -998,6 +1008,7 @@ export default {
       garageSize: "Garage Size",
       gardenSize: "Garden Size",
       finishingType: "Finishing",
+      furnishingType: "Furnishing Type",
       developer: "Developer",
       downPayment: "Down Payment",
       deliveryDate: "Delivery Date",

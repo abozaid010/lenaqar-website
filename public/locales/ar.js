@@ -641,6 +641,7 @@ export default {
     whatsappButton: " عملاء واتساب",
     premuim: "ميزة مدفوعة",
     ADD: "اضافة عميل  جديد",
+    notes: "ملاحظات",
     importLeads: {
       button: "استيراد",
       title: "استيراد العملاء",
@@ -693,6 +694,15 @@ export default {
       automationSuccessWithErrors:
         "تمت جدولة {count} رسالة ({errors} خطأ في حفظ الجلسة)",
       sendFailed: "فشل الإرسال. حاول مرة أخرى.",
+    },
+    bulkAction: {
+      openButton: "تعيين إجراء ({count})",
+      dialogTitle: "تعيين إجراء لـ {count} عميل",
+      selectedCount: "{count} محدد",
+      applyButton: "تعيين الإجراء",
+      applying: "جارٍ التطبيق...",
+      success: "تم تعيين الإجراء لـ {count} عميل",
+      error: "فشل تعيين الإجراء. حاول مرة أخرى.",
     },
   },
   searchPlaceholder: "ابحث بالاسم أو الرقم...",
@@ -899,6 +909,7 @@ export default {
       garageSize: "مساحة الجراج",
       gardenSize: "مساحة الحديقة",
       finishingType: "التشطيب",
+      furnishingType: "نوع الفرش",
       developer: "المطور",
       downPayment: "المقدم",
       deliveryDate: "تاريخ التسليم",

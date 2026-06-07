@@ -6,6 +6,8 @@ import ChatWith from "@/app/(admin)/dashboard/[userId]/_components/chat-with";
 import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/send-new-message";
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
 import { useI18n } from "@/hooks/useI18n";
+import { useModuleActions } from "@/hooks/useModuleActions";
+import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import {
   createMatchShareToken,
   deleteUser,
@@ -16,7 +18,7 @@ import {
   addLeadTags,
   removeLeadTags,
 } from "@/utils/api";
-import { phoneToE164 } from "@/components/phone/phone-utils";
+import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import { getActionLabel } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
@@ -33,6 +35,7 @@ import {
   FileText,
   Home,
   Landmark,
+  ListChecks,
   ListPlus,
   MapPin,
   MessageCircle,
@@ -53,6 +56,7 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
+import BulkLeadActionDialog from "./BulkLeadActionDialog";
 import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
@@ -108,6 +112,10 @@ export default function LeadDetailPane({
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const { selectedLeads, hasSelection, clearLeadSelection } = useDashboardLeadsBulk();
+  const { canCreate: canCreateAction, isReady: actionsPermissionReady } =
+    useModuleActions("conversation");
+  const [bulkActionOpen, setBulkActionOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [openActionsModal, setOpenActionsModal] = useState(false);
   const [rowActions, setRowActions] = useState(null);
@@ -187,17 +195,21 @@ export default function LeadDetailPane({
   }, [isLoading, data, userId]);
 
   const phoneNumber =
+    leadSummary?.phone_number ||
     data?.data?.phoneNumber ||
     data?.data?.phone_number ||
-    leadSummary?.phone_number ||
     null;
 
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
     : null;
 
+  const headerPhoneDisplay = phoneNumber
+    ? formatPhoneForDisplay(phoneNumber, "EG") || phoneNumber
+    : null;
+
   const clientId = data?.data?.client_id;
-  const displayName = data?.data?.name || leadSummary?.name || "";
+  const displayName = leadSummary?.name || data?.data?.name || "";
 
   const clearSelection = useCallback(() => {
     const usp = new URLSearchParams(searchParams.toString());
@@ -866,13 +878,44 @@ export default function LeadDetailPane({
       <div className="flex flex-col min-h-0 flex-1 bg-white border-l border-gray-100">
         {/* Always-visible identity header — pure lead identity, no controls */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white">
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 flex items-center gap-2">
             <ChatWith
+              key={userId}
               name={displayName}
               userId={userId}
               onNameUpdate={() => afterMutation()}
             />
+            {headerPhoneDisplay ? (
+              <span
+                dir="ltr"
+                className="shrink-0 text-sm leading-snug text-gray-700 font-mono tabular-nums truncate max-w-[40%]"
+              >
+                {headerPhoneDisplay}
+              </span>
+            ) : null}
           </div>
+          {actionsPermissionReady &&
+            canCreateAction &&
+            hasSelection &&
+            selectedLeads.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setBulkActionOpen(true)}
+                className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                title={translate("dashboardFilter.bulkAction.openButton").replace(
+                  "{count}",
+                  String(selectedLeads.length)
+                )}
+              >
+                <ListChecks className="w-3.5 h-3.5" aria-hidden />
+                <span>
+                  {translate("dashboardFilter.bulkAction.openButton").replace(
+                    "{count}",
+                    String(selectedLeads.length)
+                  )}
+                </span>
+              </button>
+            )}
           {leadSummary?.updated_at && (
             <span
               dir="ltr"
@@ -1031,6 +1074,16 @@ export default function LeadDetailPane({
           )}
         </div>
       </div>
+
+      <BulkLeadActionDialog
+        isOpen={bulkActionOpen}
+        onClose={() => setBulkActionOpen(false)}
+        selectedLeads={selectedLeads}
+        onSuccess={() => {
+          clearLeadSelection();
+          onInvalidateList?.();
+        }}
+      />
 
       {openActionsModal && (
         <ActionsModal

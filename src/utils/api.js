@@ -2073,6 +2073,44 @@ export async function updateUserRequirements(requirementId, payload) {
 }
 
 /**
+ * Create actions for multiple leads (POST /action/v1/create/bulk)
+ * @param {Array<Record<string, unknown>>} payloads - One action object per lead
+ */
+export async function createBulkUserActions(payloads) {
+  if (!Array.isArray(payloads) || payloads.length === 0) {
+    throw new Error("At least one action payload is required");
+  }
+
+  const body = payloads.map((payload) => {
+    const actionVal =
+      typeof payload.action === "string"
+        ? payload.action
+        : Array.isArray(payload.action)
+          ? payload.action[0]
+          : payload.action;
+    return {
+      phone_number: payload.phone_number ?? "",
+      name: payload.name ?? "",
+      client_id: payload.client_id,
+      user_id: payload.user_id,
+      comment: payload.comment ?? "",
+      meeting_time: payload.meeting_time ?? null,
+      created_at: payload.created_at ?? new Date().toISOString(),
+      action: actionVal,
+      author: payload.author ?? "",
+    };
+  });
+
+  try {
+    const response = await axiosInstance.post("action/v1/create/bulk", body);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to create bulk actions:", error.message);
+    throw error;
+  }
+}
+
+/**
  * Create a new action (POST /action/v1/create) — client-side helper
  */
 export async function createUserAction(payload) {

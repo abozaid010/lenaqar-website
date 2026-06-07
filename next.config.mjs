@@ -1,25 +1,9 @@
 import nextEnv from "@next/env";
+import { buildImageRemotePatterns } from "./src/config/imageHosts.js";
 
 // Ensure .env* are on process.env before any reads (recommended for next.config)
 const { loadEnvConfig } = nextEnv;
 loadEnvConfig(process.cwd());
-
-// Image hostname from NEXT_PUBLIC_IMAGE_BASE_URL (fallback API) for next/image remotePatterns
-const imageBaseUrlRaw =
-  process.env.NEXT_PUBLIC_IMAGE_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  "https://api.lenaai.net";
-const imageBaseUrl = imageBaseUrlRaw.startsWith("http")
-  ? imageBaseUrlRaw
-  : `https://${imageBaseUrlRaw}`;
-const imageHostname = (() => {
-  try {
-    return new URL(imageBaseUrl).hostname;
-  } catch {
-    return "api.lenaai.net";
-  }
-})();
-
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -40,23 +24,7 @@ const nextConfig = {
   compress: true,
   poweredByHeader: false,
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "ik.imagekit.io",
-        pathname: "/lenaai/**",
-      },
-      {
-        protocol: "https",
-        hostname: imageHostname,
-        pathname: "/**",
-      },
-      {
-        protocol: "http",
-        hostname: imageHostname,
-        pathname: "/**",
-      },
-    ],
+    remotePatterns: buildImageRemotePatterns(),
     // Add better error handling for images
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',

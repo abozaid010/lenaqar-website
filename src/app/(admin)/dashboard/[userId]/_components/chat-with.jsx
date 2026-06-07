@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { useI18n } from "@/context/translate-api";
 import { Pencil, Check, X } from "lucide-react";
 import { updateUserName } from "@/utils/api";
@@ -13,6 +13,13 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
   const [displayName, setDisplayName] = useState(initialName || "");
   const [isSaving, setIsSaving] = useState(false);
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    const nextName = initialName || "";
+    setDisplayName(nextName);
+    setNameValue(nextName);
+    setIsEditing(false);
+  }, [userId, initialName]);
 
   const startEditing = useCallback(() => {
     setNameValue(displayName);
