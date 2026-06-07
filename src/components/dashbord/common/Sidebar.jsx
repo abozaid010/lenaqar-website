@@ -18,7 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { useI18n } from "@/hooks/useI18n";
 import { getProfileData } from "@/utils/api";
@@ -32,6 +32,7 @@ import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
+import { seedMessagingProviderConfigCache } from "@/hooks/useMessagingProviderConfig";
 
 const SidebarComponent = ({
   clientId = null,
@@ -52,6 +53,7 @@ const SidebarComponent = ({
   const [isMounted, setIsMounted] = useState(false);
   const [brandImgFailed, setBrandImgFailed] = useState(false);
   const currentClientId = clientId || LenaCookiesManager.getClientId() || null;
+  const queryClient = useQueryClient();
 
   // Profile API is the source of truth for `module_actions` (not embedded in JWT in v2).
   const { setModuleActions } = useModuleActionsContext();
@@ -86,6 +88,14 @@ const SidebarComponent = ({
       setModuleActions(profileModuleActions);
     }
   }, [profilePayload, setModuleActions]);
+
+  // Reuse login-time profile (server RSC or sidebar cache) for WhatsApp send — no extra browser GET until stale.
+  useEffect(() => {
+    if (!profilePayload) return;
+    seedMessagingProviderConfigCache(queryClient, currentClientId, profilePayload, {
+      source: serverProfileInitial != null ? "server_rsc" : "sidebar_profile",
+    });
+  }, [profilePayload, currentClientId, queryClient, serverProfileInitial]);
 
   const profileClientId =
     pd?.client_id ??
