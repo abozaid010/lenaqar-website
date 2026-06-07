@@ -40,9 +40,9 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
   const canShowAdminActions = canEditProject || canDeleteProject;
 
   const callLabel =
-    translate('buttons.call', t?.buttons?.call) || (locale === 'ar' ? 'اتصال' : 'Call');
+    translate('buttons.call') || (locale === 'ar' ? 'اتصال' : 'Call');
   const whatsappLabel =
-    translate('buttons.whatsapp', t?.buttons?.whatsapp) || (locale === 'ar' ? 'واتساب' : 'WhatsApp');
+    translate('buttons.whatsapp') || (locale === 'ar' ? 'واتساب' : 'WhatsApp');
 
   useEffect(() => {
     let cancelled = false;

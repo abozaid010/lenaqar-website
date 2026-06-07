@@ -104,7 +104,7 @@ export default function LeadDetailPane({
   onInvalidateList,
   onLeadRemoved,
 }) {
-  const { t, translate, common, property, localeUtils, locale } = useI18n();
+  const { translate, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
@@ -312,7 +312,7 @@ export default function LeadDetailPane({
     if (!r) return [];
 
     const chips = [];
-    const fields = t?.propertyDetails?.fields || {};
+    const fieldLabel = (key) => translate(`propertyDetails.fields.${key}`);
     const pushChip = (chip) => {
       if (chip && chip.value) chips.push(chip);
     };
@@ -323,7 +323,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "buildingType",
         icon: Home,
-        label: fields.buildingType || "Building Type",
+        label: fieldLabel("buildingType"),
         value: buildingTypeLabel,
       });
     }
@@ -345,7 +345,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "developer",
         icon: Landmark,
-        label: fields.developer || "Developer",
+        label: fieldLabel("developer"),
         value: String(r.developer).trim(),
       });
     }
@@ -354,7 +354,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "roomsCount",
         icon: Bed,
-        label: fields.roomsCount || "Rooms",
+        label: fieldLabel("roomsCount"),
         value: String(Math.floor(Number(r.roomsCount))),
       });
     }
@@ -363,7 +363,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "bathroomCount",
         icon: Bath,
-        label: fields.bathroomCount || "Bathrooms",
+        label: fieldLabel("bathroomCount"),
         value: String(Math.floor(Number(r.bathroomCount))),
       });
     }
@@ -373,7 +373,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "land_area",
         icon: Square,
-        label: fields.landArea || "Area",
+        label: fieldLabel("landArea"),
         value: landArea,
       });
     }
@@ -382,7 +382,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "floor",
         icon: Building2,
-        label: fields.floor || "Floor",
+        label: fieldLabel("floor"),
         value: String(Math.floor(Number(r.floor))),
       });
     }
@@ -392,7 +392,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "viewType",
         icon: Eye,
-        label: fields.viewType || "View",
+        label: fieldLabel("viewType"),
         value: viewLabel,
       });
     }
@@ -402,7 +402,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "finishingType",
         icon: Tag,
-        label: fields.finishingType || "Finishing",
+        label: fieldLabel("finishingType"),
         value: finishingLabel,
       });
     }
@@ -414,7 +414,7 @@ export default function LeadDetailPane({
         pushChip({
           key: "propertyStatus",
           icon: Landmark,
-          label: fields.propertyStatus || "Status",
+          label: fieldLabel("propertyStatus"),
           value: statusLabel,
         });
       }
@@ -440,7 +440,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "propertyUsage",
         icon: Tag,
-        label: fields.propertyUsage || "Usage",
+        label: fieldLabel("propertyUsage"),
         value: usageLabel,
       });
     }
@@ -454,7 +454,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "furnishingType",
         icon: Tag,
-        label: fields.furnishingType || "Furnishing",
+        label: fieldLabel("furnishingType"),
         value: furnishingLabel,
       });
     }
@@ -464,9 +464,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "gardenSize",
         icon: Square,
-        label:
-          fields.gardenSize ||
-          translate("dashboard.requirementsDialog.fields.garden", "Garden"),
+        label: fieldLabel("gardenSize"),
         value: gardenArea,
       });
     }
@@ -476,9 +474,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "garageSize",
         icon: Square,
-        label:
-          fields.garageSize ||
-          translate("dashboard.requirementsDialog.fields.garage", "Garage"),
+        label: fieldLabel("garageSize"),
         value: garageArea,
       });
     }
@@ -502,7 +498,7 @@ export default function LeadDetailPane({
       pushChip({
         key: "deliveryDate",
         icon: Calendar,
-        label: fields.deliveryDate || "Delivery",
+        label: fieldLabel("deliveryDate"),
         value: prettyDate,
       });
     }
@@ -542,7 +538,7 @@ export default function LeadDetailPane({
     }
 
     return chips;
-  }, [requirements, t, translate, translateEnum]);
+  }, [requirements, translate, translateEnum]);
 
   // Tag management functions
   const handleAddTag = async (e) => {
@@ -684,14 +680,8 @@ export default function LeadDetailPane({
       ? ""
       : translateEnum("buildingTypes", reqRaw) || reqRaw;
 
-    const companyLabel = translate(
-      "leadDetail.leadSummary.companyLabel",
-      t?.leadDetail?.leadSummary?.companyLabel,
-    );
-    const requirementLabel = translate(
-      "leadDetail.leadSummary.requirementLabel",
-      t?.leadDetail?.leadSummary?.requirementLabel,
-    );
+    const companyLabel = translate("leadDetail.leadSummary.companyLabel");
+    const requirementLabel = translate("leadDetail.leadSummary.requirementLabel");
 
     const lines = [];
     if (company) lines.push(`${companyLabel}: ${company}`);
@@ -748,34 +738,22 @@ export default function LeadDetailPane({
   const tabItems = [
     {
       id: "conversations",
-      label: translate(
-        "leadDetail.tabs.conversations",
-        t?.leadDetail?.tabs?.conversations,
-      ),
+      label: translate("leadDetail.tabs.conversations"),
       icon: MessageCircle,
     },
     {
       id: "requirements",
-      label: translate(
-        "leadDetail.tabs.requirements",
-        t?.leadDetail?.tabs?.requirements,
-      ),
+      label: translate("leadDetail.tabs.requirements"),
       icon: FileText,
     },
     {
       id: "actions",
-      label: translate(
-        "leadDetail.tabs.actions",
-        t?.leadDetail?.tabs?.actions,
-      ),
+      label: translate("leadDetail.tabs.actions"),
       icon: Settings2,
     },
   ];
 
-  const lastActivityLabel = translate(
-    "leadDetail.header.lastActivity",
-    t?.leadDetail?.header?.lastActivity,
-  );
+  const lastActivityLabel = translate("leadDetail.header.lastActivity");
 
   // Read-only AI/lead summary card shown on top of the Actions tab so the
   // user can scan context (not the requirement chips — those live on the
@@ -788,10 +766,7 @@ export default function LeadDetailPane({
         </div>
         <div className="flex-1 min-w-0">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-            {translate(
-              "leadDetail.leadSummary.title",
-              t?.leadDetail?.leadSummary?.title,
-            )}
+            {translate("leadDetail.leadSummary.title")}
           </h4>
           {leadSummaryText ? (
             <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap break-words">
@@ -799,10 +774,7 @@ export default function LeadDetailPane({
             </p>
           ) : (
             <p className="text-xs text-gray-500">
-              {translate(
-                "leadDetail.leadSummary.empty",
-                t?.leadDetail?.leadSummary?.empty,
-              )}
+              {translate("leadDetail.leadSummary.empty")}
             </p>
           )}
         </div>
@@ -822,10 +794,7 @@ export default function LeadDetailPane({
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between gap-2 mb-2">
             <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              {translate(
-                "leadDetail.requirementSummary.title",
-                t?.leadDetail?.requirementSummary?.title,
-              )}
+              {translate("leadDetail.requirementSummary.title")}
             </h4>
             <div className="flex items-center gap-1 shrink-0">
               <button
@@ -847,14 +816,8 @@ export default function LeadDetailPane({
                 type="button"
                 onClick={() => setEditReqOpen(true)}
                 className="inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                title={translate(
-                  "leadDetail.requirementSummary.editTitle",
-                  t?.leadDetail?.requirementSummary?.editTitle,
-                )}
-                aria-label={translate(
-                  "leadDetail.requirementSummary.editTitle",
-                  t?.leadDetail?.requirementSummary?.editTitle,
-                )}
+                title={translate("leadDetail.requirementSummary.editTitle")}
+                aria-label={translate("leadDetail.requirementSummary.editTitle")}
               >
                 {requirementChips.length > 0 ? (
                   <Pencil className="w-3.5 h-3.5" />
@@ -864,10 +827,7 @@ export default function LeadDetailPane({
                 <span>
                   {requirementChips.length > 0
                     ? translate("common.edit", common.edit)
-                    : translate(
-                        "leadDetail.requirementSummary.addAction",
-                        t?.leadDetail?.requirementSummary?.addAction,
-                      )}
+                    : translate("leadDetail.requirementSummary.addAction")}
                 </span>
               </button>
             </div>
@@ -893,10 +853,7 @@ export default function LeadDetailPane({
             </div>
           ) : (
             <p className="text-xs text-gray-500">
-              {translate(
-                "leadDetail.requirementSummary.empty",
-                t?.leadDetail?.requirementSummary?.empty,
-              )}
+              {translate("leadDetail.requirementSummary.empty")}
             </p>
           )}
         </div>
@@ -932,10 +889,7 @@ export default function LeadDetailPane({
           value={activeTab}
           onChange={setActiveTab}
           tabs={tabItems}
-          ariaLabel={translate(
-            "leadDetail.tabs.ariaLabel",
-            t?.leadDetail?.tabs?.ariaLabel,
-          )}
+          ariaLabel={translate("leadDetail.tabs.ariaLabel")}
         />
 
         {/* Active panel */}
@@ -972,10 +926,7 @@ export default function LeadDetailPane({
               {/* Tags */}
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate(
-                    "leadDetail.actionsTab.sections.tags",
-                    t?.leadDetail?.actionsTab?.sections?.tags,
-                  )}
+                  {translate("leadDetail.actionsTab.sections.tags")}
                 </h5>
                 <div className="space-y-2">
                   {leadSummary?.tags && leadSummary.tags.length > 0 ? (
@@ -992,10 +943,7 @@ export default function LeadDetailPane({
                     </div>
                   ) : (
                     <p className="text-xs text-gray-500">
-                      {translate(
-                        "leadDetail.actionsTab.noTags",
-                        t?.leadDetail?.actionsTab?.noTags,
-                      )}
+                      {translate("leadDetail.actionsTab.noTags")}
                     </p>
                   )}
                   <form
@@ -1006,10 +954,7 @@ export default function LeadDetailPane({
                       type="text"
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
-                      placeholder={translate(
-                        "clientsTable.tags.addPlaceholder",
-                        t?.clientsTable?.tags?.addPlaceholder,
-                      )}
+                      placeholder={translate("clientsTable.tags.addPlaceholder")}
                       className="flex-1 min-w-[140px] px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                       disabled={isAddingTag}
                     />
@@ -1020,10 +965,7 @@ export default function LeadDetailPane({
                     >
                       {isAddingTag
                         ? "..."
-                        : translate(
-                            "clientsTable.tags.addButton",
-                            t?.clientsTable?.tags?.addButton,
-                          )}
+                        : translate("clientsTable.tags.addButton")}
                     </button>
                   </form>
                 </div>
@@ -1032,10 +974,7 @@ export default function LeadDetailPane({
               {/* Actions log */}
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate(
-                    "leadDetail.actionsTab.sections.actionsLog",
-                    t?.leadDetail?.actionsTab?.sections?.actionsLog,
-                  )}
+                  {translate("leadDetail.actionsTab.sections.actionsLog")}
                 </h5>
                 <button
                   type="button"
@@ -1052,10 +991,7 @@ export default function LeadDetailPane({
               {/*
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate(
-                    "leadDetail.actionsTab.sections.replyMode",
-                    t?.leadDetail?.actionsTab?.sections?.replyMode,
-                  )}
+                  {translate("leadDetail.actionsTab.sections.replyMode")}
                 </h5>
                 <div className="flex flex-wrap items-center gap-2">
                   <ToggleReplyType
@@ -1065,10 +1001,7 @@ export default function LeadDetailPane({
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] text-gray-400">
-                  {translate(
-                    "leadDetail.actionsTab.replyModeHint",
-                    t?.leadDetail?.actionsTab?.replyModeHint,
-                  )}
+                  {translate("leadDetail.actionsTab.replyModeHint")}
                 </p>
               </section>
               */}
@@ -1078,16 +1011,10 @@ export default function LeadDetailPane({
                 <section className="rounded-lg border border-red-200 bg-red-50/40 p-3">
                   <h5 className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700 uppercase tracking-wide mb-2">
                     <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
-                    {translate(
-                      "leadDetail.actionsTab.sections.dangerZone",
-                      t?.leadDetail?.actionsTab?.sections?.dangerZone,
-                    )}
+                    {translate("leadDetail.actionsTab.sections.dangerZone")}
                   </h5>
                   <p className="text-[11px] text-red-700/80 mb-2">
-                    {translate(
-                      "leadDetail.actionsTab.dangerZoneHint",
-                      t?.leadDetail?.actionsTab?.dangerZoneHint,
-                    )}
+                    {translate("leadDetail.actionsTab.dangerZoneHint")}
                   </p>
                   <button
                     type="button"
@@ -1096,10 +1023,7 @@ export default function LeadDetailPane({
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs border border-red-300 bg-white text-red-700 rounded-md hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    {translate(
-                      "leadDetail.actionsTab.deleteLead",
-                      t?.leadDetail?.actionsTab?.deleteLead,
-                    )}
+                    {translate("leadDetail.actionsTab.deleteLead")}
                   </button>
                 </section>
               )}

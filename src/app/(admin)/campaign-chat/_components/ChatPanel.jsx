@@ -278,10 +278,7 @@ const ChatPanel = ({
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
             <p className="text-gray-500">
-              {translate(
-                "campaignChat.loadingConversation",
-                t?.campaignChat?.loadingConversation
-              )}
+              {translate("campaignChat.loadingConversation")}
             </p>
           </div>
         </div>
@@ -293,10 +290,7 @@ const ChatPanel = ({
     const errMsg =
       sessionError?.response?.data?.error_message ||
       sessionError?.message ||
-      translate(
-        "campaignChat.failedToLoadConversation",
-        t?.campaignChat?.failedToLoadConversation
-      );
+      translate("campaignChat.failedToLoadConversation");
 
     return (
       <div className="flex-1 flex flex-col">
@@ -309,7 +303,7 @@ const ChatPanel = ({
               onClick={() => onRetrySession?.()}
               className="px-4 py-2 bg-primary text-white rounded-lg text-sm hover:bg-primary/90"
             >
-              {translate("common.retry", t?.common?.retry)}
+              {translate("common.retry")}
             </button>
           </div>
         </div>
@@ -571,18 +565,12 @@ const ChatPanel = ({
             <div className="text-center">
               <Bot className="h-12 w-12 text-gray-400 mx-auto mb-3" />
               <p className="text-gray-500">
-                {translate("campaignChat.noMessages", t?.campaignChat?.noMessages)}
+                {translate("campaignChat.noMessages")}
               </p>
               <p className="text-sm text-gray-400 mt-1">
                 {currentAIStatus
-                  ? translate(
-                      "campaignChat.noMessagesAiOn",
-                      t?.campaignChat?.noMessagesAiOn
-                    )
-                  : translate(
-                      "campaignChat.noMessagesStart",
-                      t?.campaignChat?.noMessagesStart
-                    )}
+                  ? translate("campaignChat.noMessagesAiOn")
+                  : translate("campaignChat.noMessagesStart")}
               </p>
             </div>
           </div>

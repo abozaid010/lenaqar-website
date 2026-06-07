@@ -42,7 +42,7 @@ export default function LeadsListPane({
   onToggleSelectAllVisible,
   hasBulkSelection = false,
 }) {
-  const { t, translate, common, property, localeUtils } = useI18n();
+  const { translate, common, property, localeUtils } = useI18n();
   const isMounted = useClientMounted();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const showBulkCheckbox = isMounted && canShowBulkButton;
@@ -207,7 +207,7 @@ export default function LeadsListPane({
         ) : showNoSearchMatches ? (
           <>
             <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-gray-600">
-              {translate("common.noResultsFound", t?.common?.noResultsFound || "No results found")}
+              {translate("common.noResultsFound")}
             </div>
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
             {isFetchingNextPage && (

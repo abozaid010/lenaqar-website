@@ -40,7 +40,7 @@ const SidebarComponent = ({
   /** Server-provided display name (fallback until profile loads) */
   clientName = null,
 }) => {
-  const { t, translate, locale } = useI18n();
+  const { translate, locale } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const unitsSection = useUnitsSectionSource();
@@ -313,10 +313,10 @@ const SidebarComponent = ({
                 <AlertTriangle className="h-6 w-6 text-red-500" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800">
-                {translate("sidebar.logoutConfirm.title", t?.sidebar?.logoutConfirm?.title)}
+                {translate("sidebar.logoutConfirm.title")}
               </h3>
               <p className="text-gray-600 mt-2">
-                {translate("sidebar.logoutConfirm.message", t?.sidebar?.logoutConfirm?.message)}
+                {translate("sidebar.logoutConfirm.message")}
               </p>
             </div>
             <div className="flex gap-3 mt-6">
@@ -324,13 +324,13 @@ const SidebarComponent = ({
                 onClick={cancelLogout}
                 className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
               >
-                {translate("sidebar.logoutConfirm.cancel", t?.sidebar?.logoutConfirm?.cancel)}
+                {translate("sidebar.logoutConfirm.cancel")}
               </button>
               <button
                 onClick={() => setShowLogoutConfirm(false)}
                 className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
               >
-                {translate("sidebar.logoutConfirm.confirm", t?.sidebar?.logoutConfirm?.confirm)}
+                {translate("sidebar.logoutConfirm.confirm")}
               </button>
             </div>
           </div>
@@ -401,7 +401,7 @@ const SidebarComponent = ({
               }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.dashboard", t?.sidebar?.dashboard)}</span>
+              <span>{translate("sidebar.dashboard")}</span>
             </Link>
           )}
 
@@ -476,7 +476,7 @@ const SidebarComponent = ({
               }`}
             >
               <Home className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.units", t?.sidebar?.units)}</span>
+              <span>{translate("sidebar.units")}</span>
             </Link>
           )}
 
@@ -491,7 +491,7 @@ const SidebarComponent = ({
               }`}
             >
               <Home className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.pendingApproval", t?.sidebar?.pendingApproval ?? "Resale")}</span>
+              <span>{translate("sidebar.pendingApproval")}</span>
             </Link>
           )}
 
@@ -506,7 +506,7 @@ const SidebarComponent = ({
               }`}
             >
               <Users2 className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.team", t?.sidebar?.team)}</span>
+              <span>{translate("sidebar.team")}</span>
             </Link>
           )}
 
@@ -536,7 +536,7 @@ const SidebarComponent = ({
               }`}
             >
               <FolderKanban className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.myProjects", t?.sidebar?.myProjects)}</span>
+              <span>{translate("sidebar.myProjects")}</span>
             </Link>
           )}
 
@@ -551,7 +551,7 @@ const SidebarComponent = ({
               }`}
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.developers", t?.sidebar?.developers)}</span>
+              <span>{translate("sidebar.developers")}</span>
             </Link>
           )}
 
@@ -566,7 +566,7 @@ const SidebarComponent = ({
               }`}
             >
               <Newspaper className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.news", t?.sidebar?.news)}</span>
+              <span>{translate("sidebar.news")}</span>
             </Link>
           )}
 
@@ -581,7 +581,7 @@ const SidebarComponent = ({
               }`}
             >
               <MapPin className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.map", t?.sidebar?.map)}</span>
+              <span>{translate("sidebar.map")}</span>
             </Link>
           )}
         </div>

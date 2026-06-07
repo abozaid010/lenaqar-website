@@ -273,20 +273,16 @@ export function useImportLeads({ clientId } = {}) {
 
       if (summary.createdRows > 0) {
         toast.success(
-          translate(
-            "dashboardFilter.importLeads.success",
-            t?.dashboardFilter?.importLeads?.success || "Imported {count} lead(s)",
-          ).replace("{count}", String(summary.createdRows)),
+          translate("dashboardFilter.importLeads.success").replace(
+            "{count}",
+            String(summary.createdRows),
+          ),
         );
       }
 
       if (summary.skippedRows.length > 0 || summary.failedRows.length > 0) {
         toast(
-          translate(
-            "dashboardFilter.importLeads.partialResult",
-            t?.dashboardFilter?.importLeads?.partialResult ||
-              "Some rows were skipped or failed. Please review the summary.",
-          ),
+          translate("dashboardFilter.importLeads.partialResult"),
           { icon: "⚠️" },
         );
       }

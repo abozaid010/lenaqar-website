@@ -71,11 +71,8 @@ export default function ScheduleUserDetailsDialog({
   onDataChanged,
 }) {
   const { t, translate, common, locale } = useI18n();
-  const closeLabel = translate("schaduall.dialogClose", t?.schaduall?.dialogClose);
-  const closeAriaLabel = translate(
-    "schaduall.dialogCloseAriaLabel",
-    t?.schaduall?.dialogCloseAriaLabel
-  );
+  const closeLabel = translate("schaduall.dialogClose");
+  const closeAriaLabel = translate("schaduall.dialogCloseAriaLabel");
   const queryClient = useQueryClient();
 
   const userId =
@@ -241,42 +238,30 @@ export default function ScheduleUserDetailsDialog({
   const tabItems = [
     {
       id: "conversations",
-      label: translate(
-        "leadDetail.tabs.conversations",
-        t?.leadDetail?.tabs?.conversations
-      ),
+      label: translate("leadDetail.tabs.conversations"),
       icon: MessageCircle,
     },
     {
       id: "requirements",
-      label: translate(
-        "leadDetail.tabs.requirements",
-        t?.leadDetail?.tabs?.requirements
-      ),
+      label: translate("leadDetail.tabs.requirements"),
       icon: FileText,
     },
     {
       id: "actions",
-      label: translate(
-        "leadDetail.tabs.actions",
-        t?.leadDetail?.tabs?.actions
-      ),
+      label: translate("leadDetail.tabs.actions"),
       icon: Settings2,
     },
   ];
 
   const dialogTitle =
     displayName ||
-    translate("schaduall.userDetailsTitle", t?.schaduall?.userDetailsTitle);
+    translate("schaduall.userDetailsTitle");
 
   const renderBody = () => {
     if (!userId) {
       return (
         <div className="flex flex-1 items-center justify-center p-8 text-sm text-gray-500 text-center">
-          {translate(
-            "schaduall.cannotOpenDetailsMissingUser",
-            t?.schaduall?.cannotOpenDetailsMissingUser
-          )}
+          {translate("schaduall.cannotOpenDetailsMissingUser")}
         </div>
       );
     }
@@ -324,10 +309,7 @@ export default function ScheduleUserDetailsDialog({
             if (VALID_TABS.has(tab)) setActiveTab(tab);
           }}
           tabs={tabItems}
-          ariaLabel={translate(
-            "leadDetail.tabs.ariaLabel",
-            t?.leadDetail?.tabs?.ariaLabel
-          )}
+          ariaLabel={translate("leadDetail.tabs.ariaLabel")}
         />
 
         <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -355,10 +337,7 @@ export default function ScheduleUserDetailsDialog({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                        {translate(
-                          "leadDetail.requirementSummary.title",
-                          t?.leadDetail?.requirementSummary?.title
-                        )}
+                        {translate("leadDetail.requirementSummary.title")}
                       </h4>
                       <button
                         type="button"
@@ -373,10 +352,7 @@ export default function ScheduleUserDetailsDialog({
                         <span>
                           {requirementLines.length > 0
                             ? translate("common.edit", common.edit)
-                            : translate(
-                                "leadDetail.requirementSummary.addAction",
-                                t?.leadDetail?.requirementSummary?.addAction
-                              )}
+                            : translate("leadDetail.requirementSummary.addAction")}
                         </span>
                       </button>
                     </div>
@@ -395,10 +371,7 @@ export default function ScheduleUserDetailsDialog({
                       </ul>
                     ) : (
                       <p className="text-xs text-gray-500">
-                        {translate(
-                          "leadDetail.requirementSummary.empty",
-                          t?.leadDetail?.requirementSummary?.empty
-                        )}
+                        {translate("leadDetail.requirementSummary.empty")}
                       </p>
                     )}
                   </div>
@@ -412,10 +385,7 @@ export default function ScheduleUserDetailsDialog({
               {appointment?.comment?.trim() ? (
                 <div className="rounded-lg border border-gray-200 bg-white p-3">
                   <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
-                    {translate(
-                      "schaduall.scheduledTaskNote",
-                      t?.schaduall?.scheduledTaskNote
-                    )}
+                    {translate("schaduall.scheduledTaskNote")}
                   </h5>
                   <p className="text-sm text-gray-800 whitespace-pre-wrap">
                     {appointment.comment.trim()}
@@ -425,10 +395,7 @@ export default function ScheduleUserDetailsDialog({
 
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate(
-                    "leadDetail.actionsTab.sections.tags",
-                    t?.leadDetail?.actionsTab?.sections?.tags
-                  )}
+                  {translate("leadDetail.actionsTab.sections.tags")}
                 </h5>
                 <div className="space-y-2">
                   {tags.length > 0 ? (
@@ -445,10 +412,7 @@ export default function ScheduleUserDetailsDialog({
                     </div>
                   ) : (
                     <p className="text-xs text-gray-500">
-                      {translate(
-                        "leadDetail.actionsTab.noTags",
-                        t?.leadDetail?.actionsTab?.noTags
-                      )}
+                      {translate("leadDetail.actionsTab.noTags")}
                     </p>
                   )}
                   <form onSubmit={handleAddTag} className="flex flex-wrap gap-2">
@@ -456,10 +420,7 @@ export default function ScheduleUserDetailsDialog({
                       type="text"
                       value={newTagInput}
                       onChange={(e) => setNewTagInput(e.target.value)}
-                      placeholder={translate(
-                        "clientsTable.tags.addPlaceholder",
-                        t?.clientsTable?.tags?.addPlaceholder
-                      )}
+                      placeholder={translate("clientsTable.tags.addPlaceholder")}
                       className="flex-1 min-w-[140px] px-2.5 py-1.5 text-xs border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                       disabled={isAddingTag}
                     />
@@ -470,10 +431,7 @@ export default function ScheduleUserDetailsDialog({
                     >
                       {isAddingTag
                         ? "..."
-                        : translate(
-                            "clientsTable.tags.addButton",
-                            t?.clientsTable?.tags?.addButton
-                          )}
+                        : translate("clientsTable.tags.addButton")}
                     </button>
                   </form>
                 </div>
@@ -481,10 +439,7 @@ export default function ScheduleUserDetailsDialog({
 
               <section className="rounded-lg border border-gray-200 bg-white p-3">
                 <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate(
-                    "leadDetail.actionsTab.sections.actionsLog",
-                    t?.leadDetail?.actionsTab?.sections?.actionsLog
-                  )}
+                  {translate("leadDetail.actionsTab.sections.actionsLog")}
                 </h5>
                 <button
                   type="button"

@@ -60,7 +60,7 @@ export default function VideoInstructionsDialog({
   zIndex = 50,
 }) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  const { t } = useI18n();
+  const { translate } = useI18n();
 
   // Use external state if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
@@ -84,18 +84,19 @@ export default function VideoInstructionsDialog({
   const content = DEFAULT_MESSAGES[variant];
   const displayTitle =
     title ||
-    t.videoInstructions?.titles?.[variant] ||
-    content?.title ||
-    "Instructions";
+    translate(
+      `videoInstructions.titles.${variant}`,
+      content?.title || "Instructions",
+    );
   const displayDescription =
     description ||
-    t.videoInstructions?.descriptions?.[variant] ||
-    content?.description ||
-    "";
+    translate(`videoInstructions.descriptions.${variant}`, content?.description || "");
   const displayTooltip =
     tooltipText ||
-    t.videoInstructions?.tooltips?.[variant] ||
-    "View instructions";
+    translate(
+      `videoInstructions.tooltips.${variant}`,
+      "View instructions",
+    );
 
   const getYouTubeEmbedUrl = () => {
     if (!videoId) return null;

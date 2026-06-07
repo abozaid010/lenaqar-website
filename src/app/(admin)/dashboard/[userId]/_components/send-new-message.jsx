@@ -32,7 +32,7 @@ export default function SendNewMessageForm({
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [platformError, setPlatformError] = useState("");
   const textareaRef = useRef(null);
-  const { t, translate, common } = useI18n();
+  const { translate, common } = useI18n();
   const queryClient = useQueryClient();
   const { data: messagingData, isLoading: isMessagingLoading } =
     useMessagingProviderConfig(clientId);
@@ -140,10 +140,8 @@ export default function SendNewMessageForm({
     } catch (error) {
       console.error("Failed to send reply:", error);
       toast.error(
-        translate(
-          "dashboardFilter.bulkWhatsapp.sendFailed",
-          t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
-        ) || common.operationFailed,
+        translate("dashboardFilter.bulkWhatsapp.sendFailed") ||
+          common.operationFailed,
       );
     } finally {
       setPending(false);
@@ -180,7 +178,7 @@ export default function SendNewMessageForm({
           onChange={(e) => setMessage(e.target.value)}
           placeholder={
             canType
-              ? translate("typeYourMessage", t?.typeYourMessage)
+              ? translate("typeYourMessage")
               : translate("common.noPhone", common?.noPhone)
           }
           disabled={!canType || pending}
@@ -198,7 +196,7 @@ export default function SendNewMessageForm({
           {pending ? (
             <Loader2 className="animate-spin" />
           ) : (
-            translate("send", t?.send)
+            translate("send")
           )}
         </button>
       </div>
