@@ -8,6 +8,11 @@ trap 'echo "❌ sync-repo failed on line $LINENO"; exit 1' ERR
 REPO_PATH="${REPO_PATH:-$HOME/lenaai-website}"
 REPO_URL="${REPO_URL:-git@github-website:abozaid010/lenaai-website.git}"
 BRANCH="${BRANCH:-main}"
+GIT_SSH_IDENTITY="${GIT_SSH_IDENTITY:-$HOME/.ssh/id_ed25519_website}"
+
+if [ -f "$GIT_SSH_IDENTITY" ]; then
+  export GIT_SSH_COMMAND="ssh -i ${GIT_SSH_IDENTITY} -o IdentitiesOnly=yes"
+fi
 
 echo "📦 Syncing repository..."
 echo "   Path:   $REPO_PATH"

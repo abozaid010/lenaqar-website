@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 env:
   GCP_ZONE: ${{ secrets.GCP_ZONE }}
@@ -48,6 +49,12 @@ jobs:
           echo "✅ SSH key loaded from VM_SSH_PRIVATE_KEY secret"
           ls -la ~/.ssh
 
+      - name: Provision GitHub deploy key on runner
+        run: |
+          set -Eeuo pipefail
+          echo "${{ secrets.DEPLOY_KEY }}" > ~/.ssh/github_deploy_key
+          chmod 600 ~/.ssh/github_deploy_key
+
       - name: SSH warmup — verify IAP access before deploy
         run: |
           set -Eeuo pipefail
@@ -61,11 +68,10 @@ jobs:
             --tunnel-through-iap \
             --command="echo '✅ Connected as:'; whoami; hostname"
 
-      - name: Provision SSH key on VM
+      - name: Provision GitHub deploy key on VM
         run: |
           set -Eeuo pipefail
 
-          # Ensure ~/.ssh exists on the VM
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
@@ -74,31 +80,27 @@ jobs:
               chmod 700 ~/.ssh
             "
 
-          # Copy deploy key to VM for git@github-website
-          gcloud compute scp ~/.ssh/google_compute_engine \
-            "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}:~/.ssh/id_rsa" \
+          gcloud compute scp ~/.ssh/github_deploy_key \
+            "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}:~/.ssh/id_ed25519_website" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap
 
-          # Configure GitHub SSH on VM
           gcloud compute ssh "${{ env.VM_SSH_USER }}@${{ env.VM_NAME }}" \
             --zone="${{ env.GCP_ZONE }}" \
             --tunnel-through-iap \
             --command="
               set -Eeuo pipefail
-              chmod 600 ~/.ssh/id_rsa
-              touch ~/.ssh/config
-              if ! grep -q '^Host github-website' ~/.ssh/config; then
-                printf '%s\n' \
-                  'Host github-website' \
-                  '  HostName github.com' \
-                  '  User git' \
-                  '  IdentityFile ~/.ssh/id_rsa' \
-                  '  StrictHostKeyChecking accept-new' \
-                  >> ~/.ssh/config
-              fi
+              chmod 600 ~/.ssh/id_ed25519_website
+              printf '%s\n' \
+                'Host github-website' \
+                '  HostName github.com' \
+                '  User git' \
+                '  IdentityFile ~/.ssh/id_ed25519_website' \
+                '  IdentitiesOnly yes' \
+                > ~/.ssh/config
               chmod 600 ~/.ssh/config
               ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+              git config --global core.sshCommand 'ssh -i ~/.ssh/id_ed25519_website -o IdentitiesOnly=yes'
               echo '✅ GitHub SSH configured on VM'
             "
 
@@ -122,7 +124,6 @@ jobs:
               echo \"🏠 HOME on VM: \$HOME\"
               echo \"📁 Repository path: \$REPO_PATH\"
 
-              # Bootstrap: clone once so deploy scripts exist on a fresh VM
               if [ ! -f \"\$REPO_PATH/.deploy/deploy.sh\" ]; then
                 echo \"📥 Bootstrapping repository (first deploy)...\"
                 if [ -e \"\$REPO_PATH\" ]; then
@@ -134,12 +135,12 @@ jobs:
 
               export REPO_PATH REPO_URL EXPECTED_SHA
 
-              # Sync before deploy
               if [ -f \"\$REPO_PATH/.deploy/sync-repo.sh\" ]; then
                 bash \"\$REPO_PATH/.deploy/sync-repo.sh\"
               else
                 echo \"⚠️  sync-repo.sh missing — inline git sync (legacy VM)\"
                 cd \"\$REPO_PATH\"
+                git -c safe.directory=\"\$REPO_PATH\" remote set-url origin \"\$REPO_URL\"
                 git -c safe.directory=\"\$REPO_PATH\" fetch origin main --prune
                 git -c safe.directory=\"\$REPO_PATH\" checkout main
                 git -c safe.directory=\"\$REPO_PATH\" reset --hard origin/main
