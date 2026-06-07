@@ -2,7 +2,8 @@
  * Image utility functions for handling various image loading scenarios
  */
 
-import { IMAGE_HOSTNAME, IMAGE_BASE_URL } from "@/lib/apiConfig";
+import { IMAGE_BASE_URL } from "@/lib/apiConfig";
+import { getAllowedImageHostnames } from "@/config/imageHosts";
 
 /**
  * For presentation only: given a full image URL from the API, use IMAGE_BASE_URL
@@ -91,9 +92,9 @@ export function isConfiguredHostname(url) {
   
   try {
     const { hostname } = new URL(url);
-    const allowed = ['ik.imagekit.io', IMAGE_HOSTNAME].filter(Boolean);
-    
-    return allowed.some(allowedHost => {
+    const allowed = getAllowedImageHostnames();
+
+    return allowed.some((allowedHost) => {
       // Exact match or subdomain match
       return hostname === allowedHost || hostname.endsWith('.' + allowedHost);
     });
