@@ -695,6 +695,15 @@ export default {
         "تمت جدولة {count} رسالة ({errors} خطأ في حفظ الجلسة)",
       sendFailed: "فشل الإرسال. حاول مرة أخرى.",
     },
+    bulkAction: {
+      openButton: "تعيين إجراء ({count})",
+      dialogTitle: "تعيين إجراء لـ {count} عميل",
+      selectedCount: "{count} محدد",
+      applyButton: "تعيين الإجراء",
+      applying: "جارٍ التطبيق...",
+      success: "تم تعيين الإجراء لـ {count} عميل",
+      error: "فشل تعيين الإجراء. حاول مرة أخرى.",
+    },
   },
   searchPlaceholder: "ابحث بالاسم أو الرقم...",
   search: {
