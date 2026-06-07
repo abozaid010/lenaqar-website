@@ -510,7 +510,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </span>
           </button>
           {showExportButton && (
-            <ExcelExportButton searchParams={appliedFilters} compact={compact} />
+            <ExcelExportButton compact={compact} />
           )}
           {showWhatsappToolbarButton && (
             <button
@@ -561,7 +561,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
           </span>
         </button>
         {showExportButton && (
-          <ExcelExportButton searchParams={appliedFilters} compact={compact} />
+          <ExcelExportButton compact={compact} />
         )}
         {showWhatsappToolbarButton && (
           <button

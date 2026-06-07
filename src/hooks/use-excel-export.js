@@ -5,15 +5,19 @@ import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../public/locales/en";
 import ar from "../../public/locales/ar";
-import { useMemo } from "react";
-import { useUsersData } from "@/hooks/use-users-data";
+import { useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { fetchUsersData } from "@/utils/api";
 import { getActionLabel, parseDashboardActionFilter } from "@/utils/actions";
 import { downloadExcelFile } from "@/utils/excel-utils";
 import { safeJsonParse } from "@/utils/safeJsonParser";
+import { userKeys } from "@/utils/query-utils";
 
-export function useExcelExport(searchParams) {
+export function useExcelExport(filterKey) {
   const { t, locale } = useI18n();
-  const { data: users, isLoading } = useUsersData(JSON.stringify(searchParams));
+  const queryClient = useQueryClient();
+  const [isExporting, setIsExporting] = useState(false);
+
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -57,9 +61,9 @@ export function useExcelExport(searchParams) {
     };
   };
 
-  const createFilterInfo = (searchParams) => {
+  const createFilterInfo = (filterKeyString, totalRecords) => {
     const filterData = [];
-    const parsedParams = safeJsonParse(searchParams, {});
+    const parsedParams = safeJsonParse(filterKeyString, {});
 
     // Date range
     if (parsedParams.start_date) {
@@ -106,7 +110,7 @@ export function useExcelExport(searchParams) {
     filterData.push({
       [locale === "ar" ? "المرشح" : "Filter"]:
         locale === "ar" ? "إجمالي السجلات" : "Total Records",
-      [locale === "ar" ? "القيمة" : "Value"]: String(users?.length || 0),
+      [locale === "ar" ? "القيمة" : "Value"]: String(totalRecords || 0),
     });
 
     // Export date
@@ -135,10 +139,30 @@ export function useExcelExport(searchParams) {
   }
 
   const exportToExcel = async (filename = "users_data") => {
-    const currentUsers = users || [];
+    setIsExporting(true);
+    let currentUsers = [];
+
+    try {
+      const result = await queryClient.fetchQuery({
+        queryKey: userKeys.list(filterKey),
+        queryFn: () => fetchUsersData(filterKey),
+        staleTime: 1000 * 60 * 5,
+      });
+      currentUsers = result?.users || [];
+    } catch (error) {
+      console.error("Error loading users for export:", error);
+      alert(
+        locale === "ar"
+          ? "حدث خطأ أثناء تحميل البيانات للتصدير"
+          : "Error loading data for export",
+      );
+      setIsExporting(false);
+      return;
+    }
 
     if (currentUsers.length === 0) {
       alert(locale === "ar" ? "لا توجد بيانات للتصدير" : "No data to export");
+      setIsExporting(false);
       return;
     }
 
@@ -219,7 +243,7 @@ export function useExcelExport(searchParams) {
       });
 
       // 2. Create Filter Info Sheet
-      const filterData = createFilterInfo(searchParams);
+      const filterData = createFilterInfo(filterKey, currentUsers.length);
       const filterSheetName = locale === "ar" ? "معلومات المرشح" : "Filter Info";
       const filterWorksheet = workbook.addWorksheet(filterSheetName);
       
@@ -291,12 +315,13 @@ export function useExcelExport(searchParams) {
           ? "حدث خطأ أثناء التصدير"
           : "Error occurred while exporting"
       );
+    } finally {
+      setIsExporting(false);
     }
   };
 
   return {
     exportToExcel,
-    isLoading,
-    users,
+    isExporting,
   };
 }

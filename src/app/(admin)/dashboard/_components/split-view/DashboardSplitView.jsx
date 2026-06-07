@@ -9,10 +9,8 @@ import { useEffect, useMemo, useCallback } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
-import {
-  leadMatchesSearchQuery,
-  normalizeSearchQueryForApi,
-} from "@/utils/lead-list-search";
+import { buildDashboardFilterKey } from "@/utils/dashboard-filter-key";
+import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -40,21 +38,10 @@ function DashboardSplitViewComponent() {
     hasSelection,
   } = useDashboardLeadsBulk();
 
-  const filterKey = useMemo(() => {
-    const o = Object.fromEntries(searchParams.entries());
-    delete o.userId;
-    delete o.cursor;
-    delete o.direction;
-    if (o.query && typeof o.query === "string") {
-      const trimmed = o.query.trim();
-      if (!trimmed) {
-        delete o.query;
-      } else {
-        o.query = normalizeSearchQueryForApi(trimmed);
-      }
-    }
-    return JSON.stringify(o);
-  }, [searchParams]);
+  const filterKey = useMemo(
+    () => buildDashboardFilterKey(searchParams),
+    [searchParams],
+  );
 
   const selectedUserId = searchParams.get("userId") || undefined;
 
