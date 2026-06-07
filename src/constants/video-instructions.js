@@ -45,6 +45,11 @@ export const DEFAULT_MESSAGES = {
     description:
       "Watch this video to learn how to upload units using the Excel template.",
   },
+  dashboard: {
+    title: "How to Use the Dashboard",
+    description:
+      "Watch this guide to learn how to use the dashboard effectively.",
+  },
   default: {
     title: "No Data Available",
     description: "There's nothing to display at the moment.",

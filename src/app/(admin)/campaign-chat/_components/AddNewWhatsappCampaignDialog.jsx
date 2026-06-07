@@ -42,7 +42,7 @@ const AddNewWhatsappCampaignDialog = ({
   onClose,
   recipients: recipientsProp = [],
 }) => {
-  const { t, translate } = useI18n();
+  const { translate } = useI18n();
   const {
     canUseApiTemplate: hasApiModule,
     canUseAutomation: hasAutomationModule,
@@ -475,10 +475,7 @@ const AddNewWhatsappCampaignDialog = ({
     onClose();
   }, [onClose]);
 
-  const dialogTitle = translate(
-    "dashboardFilter.bulkWhatsapp.dialogTitle",
-    t?.dashboardFilter?.bulkWhatsapp?.dialogTitle || "Send WhatsApp"
-  );
+  const dialogTitle = translate("dashboardFilter.bulkWhatsapp.dialogTitle");
 
   const recipientSummary = translate(
     "dashboardFilter.bulkWhatsapp.recipientCount",
@@ -526,7 +523,7 @@ const AddNewWhatsappCampaignDialog = ({
     <div className="relative flex flex-col flex-1 min-h-0">
       <LoadingOverlay
         isVisible={isSubmitting}
-        message={translate("common.sending", t?.common?.sending || "Sending...")}
+        message={translate("common.sending")}
       />
       {hasPrefilledRecipients && (
         <p className="mb-3 text-sm text-gray-600">{recipientSummary}</p>
@@ -557,7 +554,7 @@ const AddNewWhatsappCampaignDialog = ({
     <form onSubmit={handleSubmit} className="h-full flex flex-col relative">
       <LoadingOverlay
         isVisible={isSubmitting}
-        message={translate("common.sending", t?.common?.sending || "Sending...")}
+        message={translate("common.sending")}
       />
 
       {error && (
@@ -638,13 +635,13 @@ const AddNewWhatsappCampaignDialog = ({
           disabled={isSubmitting}
           className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {translate("common.cancel", t?.common?.cancel || "Cancel")}
+          {translate("common.cancel")}
         </button>
         <LoadingButton
           type="submit"
           isLoading={isSubmitting}
           disabled={!isFormValid}
-          loadingText={translate("common.sending", t?.common?.sending || "Sending...")}
+          loadingText={translate("common.sending")}
           className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
         >
           <Send size={16} />
@@ -746,7 +743,7 @@ const AddNewWhatsappCampaignDialog = ({
               onClick={handleClose}
               className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-colors"
             >
-              {translate("common.done", t?.common?.done || "Done")}
+              {translate("common.done")}
             </button>
           </div>
         </div>
@@ -783,20 +780,17 @@ const AddNewWhatsappCampaignDialog = ({
                   disabled={isSubmitting}
                   className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 disabled:opacity-50"
                 >
-                  {translate("common.cancel", t?.common?.cancel || "Cancel")}
+                  {translate("common.cancel")}
                 </button>
                 <LoadingButton
                   type="submit"
                   isLoading={isSubmitting}
                   disabled={!isFormValid}
-                  loadingText={translate(
-                    "common.sending",
-                    t?.common?.sending || "Sending..."
-                  )}
+                  loadingText={translate("common.sending")}
                   className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 flex items-center gap-2"
                 >
                   <Send size={16} />
-                  {translate("send", t?.send || "Send")}
+                  {translate("send")}
                 </LoadingButton>
               </div>
             </form>

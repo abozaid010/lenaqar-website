@@ -340,10 +340,7 @@ const CampaignChat = () => {
       toast.error(
         getErrorMessage(
           error,
-          translate(
-            "dashboardFilter.bulkWhatsapp.sendFailed",
-            t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
-          ),
+          translate("dashboardFilter.bulkWhatsapp.sendFailed"),
         ),
       );
     }
@@ -540,8 +537,8 @@ const CampaignChat = () => {
               type="button"
               onClick={() => setIsAddLeadOpen(true)}
               className={`${DASHBOARD_ICON_BUTTON} !h-10 !w-10 !min-h-10 !min-w-10 border-primary text-primary hover:bg-primary/5 hover:text-primary`}
-              title={translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "Add New Lead")}
-              aria-label={translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "Add New Lead")}
+              title={translate("dashboardFilter.ADD")}
+              aria-label={translate("dashboardFilter.ADD")}
             >
               <UserPlus className="w-[18px] h-[18px] shrink-0" strokeWidth={2} aria-hidden />
             </button>
@@ -549,14 +546,8 @@ const CampaignChat = () => {
               type="button"
               onClick={() => setIsCreateDialogOpen(true)}
               className={`${DASHBOARD_ICON_BUTTON} !h-10 !w-10 !min-h-10 !min-w-10 hover:text-green-600 hover:border-green-400 hover:bg-green-50`}
-              title={translate(
-                "dashboardFilter.bulkWhatsapp.sendButton",
-                t?.dashboardFilter?.bulkWhatsapp?.sendButton || "Send WhatsApp"
-              )}
-              aria-label={translate(
-                "dashboardFilter.bulkWhatsapp.sendButton",
-                t?.dashboardFilter?.bulkWhatsapp?.sendButton || "Send WhatsApp"
-              )}
+              title={translate("dashboardFilter.bulkWhatsapp.sendButton")}
+              aria-label={translate("dashboardFilter.bulkWhatsapp.sendButton")}
             >
               <svg
                 className="w-[18px] h-[18px] shrink-0"

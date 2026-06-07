@@ -9,7 +9,7 @@ import { PhoneField } from "@/components/phone/PhoneField";
 import { useAddLead } from "@/hooks/use-add-lead";
 
 export default function AddLeadDialog({ isOpen, onClose, clientId }) {
-  const { t, translate, locale } = useI18n();
+  const { translate, locale } = useI18n();
   const isRTL = locale === "ar";
   
   const [formData, setFormData] = useState({
@@ -53,7 +53,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
               <UserPlus className="h-5 w-5 text-primary" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900">
-              {translate("dashboardFilter.ADD", t?.dashboardFilter?.ADD || "New Lead")}
+              {translate("dashboardFilter.ADD")}
             </h3>
           </div>
           <button
@@ -68,7 +68,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <LenaTextField
-            label={translate("clientsTable.headers.name", t?.clientsTable?.headers?.name || "Name")}
+            label={translate("clientsTable.headers.name")}
             name="user_name"
             value={formData.user_name}
             onChange={handleChange}
@@ -80,10 +80,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
           <PhoneField
             className="w-full"
             name="phone_number"
-            label={translate(
-              "clientsTable.headers.userNumber",
-              t?.clientsTable?.headers?.userNumber || "Number",
-            )}
+            label={translate("clientsTable.headers.userNumber")}
             required
             defaultCountry="EG"
             value={formData.phone_number}
@@ -94,7 +91,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
           />
 
           <LenaTextarea
-            label={translate("dashboardFilter.notes", t?.dashboardFilter?.notes || "Notes")}
+            label={translate("dashboardFilter.notes")}
             name="query"
             value={formData.query}
             onChange={handleChange}
@@ -109,7 +106,7 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
               disabled={isSubmitting}
               className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              {translate("common.cancel", t?.common?.cancel || "Cancel")}
+              {translate("common.cancel")}
             </button>
             <button
               type="submit"
@@ -119,10 +116,10 @@ export default function AddLeadDialog({ isOpen, onClose, clientId }) {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>{translate("common.adding", t?.common?.adding || "Adding...")}</span>
+                  <span>{translate("common.adding")}</span>
                 </>
               ) : (
-                <span>{translate("common.save", t?.common?.save || "Save Lead")}</span>
+                <span>{translate("common.save")}</span>
               )}
             </button>
           </div>

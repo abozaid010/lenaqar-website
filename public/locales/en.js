@@ -922,6 +922,11 @@ export default {
     platformRequired: "Please choose which WhatsApp account to send from.",
     multipleAccountsHint:
       "This client has multiple WhatsApp accounts. Choose which one to send from.",
+    configLoading: "Loading WhatsApp accounts…",
+    configLoadFailed: "Could not load WhatsApp accounts.",
+    senderPhoneRequired:
+      "Sender phone number is missing for the selected WhatsApp account.",
+    sendingFrom: "Sending from",
   },
   clientsTable: {
     noClients: "No clients found",
@@ -2055,6 +2060,8 @@ export default {
       projects: "How to manage projects",
       analytics: "How to use analytics",
       schedule: "How to manage schedule",
+      dashboard: "How to use the Dashboard",
+      upload: "How to upload units via Excel",
     },
     titles: {
       team: "How to Manage Team Members",
@@ -2063,6 +2070,8 @@ export default {
       projects: "How to Manage Projects",
       analytics: "Understanding Analytics",
       schedule: "How to Manage Schedule",
+      dashboard: "How to Use the Dashboard",
+      upload: "How to Upload Units via Excel",
     },
     descriptions: {
       team: "Watch this quick guide to learn how to add and manage your team members.",
@@ -2075,6 +2084,10 @@ export default {
       analytics: "Learn how to track and analyze your data in this tutorial.",
       schedule:
         "Watch this video to learn how to manage your schedule effectively.",
+      dashboard:
+        "Watch this guide to learn how to use the dashboard effectively.",
+      upload:
+        "Watch this video to learn how to upload units using the Excel template.",
     },
     emptyState: {
       team: {

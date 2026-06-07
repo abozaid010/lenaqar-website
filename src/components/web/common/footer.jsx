@@ -34,11 +34,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              {translate("footer.companyInfo.title", t?.footer?.companyInfo?.title)}
+              {translate("footer.companyInfo.title")}
             </h3>
             <div className="flex items-start space-x-3">
               <Building className="mt-1 flex-shrink-0" />
-              <p>{translate("footer.companyInfo.address", t?.footer?.companyInfo?.address)}</p>
+              <p>{translate("footer.companyInfo.address")}</p>
             </div>
 
             {/* Privacy Policy Link */}
@@ -50,7 +50,7 @@ const Footer = () => {
                 <div className="p-2 bg-white/10 rounded-full transition-colors">
                   <MessageCircle size={20} />
                 </div>
-                <span>{translate("footer.connect.privacyPolicy", t?.footer?.connect?.privacyPolicy)}</span>
+                <span>{translate("footer.connect.privacyPolicy")}</span>
               </Link>
             </div>
             {/* iOS App Store Link */}
@@ -63,7 +63,7 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Apple size={20} />
               </div>
-              <span>{translate("footer.connect.dowenloadios", t?.footer?.connect?.dowenloadios)} </span>
+              <span>{translate("footer.connect.dowenloadios")} </span>
             </Link>
 
             {/* Google Play Store Link */}
@@ -77,13 +77,13 @@ const Footer = () => {
                 <ShoppingBag size={20} />
               </div>
 
-              <span>{translate("footer.connect.dowenloadAndroid", t?.footer?.connect?.dowenloadAndroid)} </span>
+              <span>{translate("footer.connect.dowenloadAndroid")} </span>
             </Link>
           </div>
 
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              {translate("footer.contact.title", t?.footer?.contact?.title)}
+              {translate("footer.contact.title")}
             </h3>
             <div className="space-y-3">
               <div className="flex items-center p-4 gap-2 border-gray-200">
@@ -105,7 +105,7 @@ const Footer = () => {
                     </div> */}
                     <div className="flex items-center gap-2">
                       <span className="text-white font-medium">
-                        {translate("footer.contact.support", t?.footer?.contact?.support)} :
+                        {translate("footer.contact.support")} :
                       </span>
                       <a
                         href="tel:01016080323"
@@ -122,7 +122,7 @@ const Footer = () => {
 
           <div className="space-y-4">
             <h3 className="text-xl font-bold border-b border-white pb-2">
-              {translate("footer.connect.title", t?.footer?.connect?.title)}
+              {translate("footer.connect.title")}
             </h3>
 
             {/* LinkedIn Link */}
@@ -135,7 +135,7 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Linkedin size={20} />
               </div>
-              <span>{translate("footer.connect.linkedin", t?.footer?.connect?.linkedin)}</span>
+              <span>{translate("footer.connect.linkedin")}</span>
             </Link>
 
             {/* Facebook Link */}
@@ -148,7 +148,7 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Facebook size={20} />
               </div>
-              <span>{translate("footer.connect.Facebook", t?.footer?.connect?.Facebook)}</span>
+              <span>{translate("footer.connect.Facebook")}</span>
             </Link>
 
             {/* Chatbot Link in footer */}
@@ -163,16 +163,16 @@ const Footer = () => {
               <div className="p-2 bg-white/10 rounded-full transition-colors">
                 <Bot size={20} />
               </div>
-              <span>{translate("footer.connect.chat", t?.footer?.connect?.chat)}</span>
+              <span>{translate("footer.connect.chat")}</span>
             </Link>
           </div>
         </div>
 
         <div className="mt-10 pt-6 border-t border-white/30 text-center">
           <p>
-            {translate("footer.copyright", t?.footer?.copyright)} {new Date().getFullYear()}{" "}
-            {translate("footer.companyName", t?.footer?.companyName)}. {translate("footer.rightsReserved", t?.footer?.rightsReserved)},{" "}
-            {translate("footer.version", t?.footer?.version)} 0.0.001
+            {translate("footer.copyright")} {new Date().getFullYear()}{" "}
+            {translate("footer.companyName")}. {translate("footer.rightsReserved")},{" "}
+            {translate("footer.version")} 0.0.001
           </p>
         </div>
       </div>

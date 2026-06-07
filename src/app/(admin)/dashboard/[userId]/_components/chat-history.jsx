@@ -6,7 +6,7 @@ import UserMessageCard from "./user-message";
 import BotMessageCard from "./bot-message";
 
 export default function ChatHistory({ data }) {
-  const { t, translate } = useI18n();
+  const { translate } = useI18n();
   const chatEndRef = useRef(null);
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function ChatHistory({ data }) {
     return (
       <div className="flex items-center justify-center h-full">
         <p className="text-gray-500 text-2xl font-meduim">
-          {translate("chatHistory.noMessages", t?.chatHistory?.noMessages)}
+          {translate("chatHistory.noMessages")}
         </p>
       </div>
     );

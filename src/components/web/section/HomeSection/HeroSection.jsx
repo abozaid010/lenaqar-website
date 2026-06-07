@@ -13,12 +13,12 @@ const HeroSection = () => {
   const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
 
   const messages = [
-    translate("heroSection.message1", t?.heroSection?.message1),
-    translate("heroSection.message2", t?.heroSection?.message2),
-    translate("heroSection.message3", t?.heroSection?.message3),
-    translate("heroSection.message4", t?.heroSection?.message4),
-    translate("heroSection.message5", t?.heroSection?.message5),
-    translate("heroSection.message6", t?.heroSection?.message6),
+    translate("heroSection.message1"),
+    translate("heroSection.message2"),
+    translate("heroSection.message3"),
+    translate("heroSection.message4"),
+    translate("heroSection.message5"),
+    translate("heroSection.message6"),
   ];
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <Image
           src={"/images/web2.jpg"}
-          alt={translate("heroSection.backgroundAlt", t?.heroSection?.backgroundAlt)}
+          alt={translate("heroSection.backgroundAlt")}
           fill
           className="object-cover"
           priority={true}
@@ -71,7 +71,7 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            {translate("heroSection.subtitle", t?.heroSection?.subtitle)}
+            {translate("heroSection.subtitle")}
           </motion.div>
 
           <motion.h1
@@ -80,11 +80,11 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            {translate("heroSection.title1", t?.heroSection?.title1)}
+            {translate("heroSection.title1")}
 
             <br />
 
-            {translate("heroSection.title2", t?.heroSection?.title2)}
+            {translate("heroSection.title2")}
           </motion.h1>
 
           <motion.p
@@ -93,11 +93,11 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
           >
-            {translate("heroSection.description", t?.heroSection?.description)}
+            {translate("heroSection.description")}
           </motion.p>
 
           <CalendarModal
-            buttonText={translate("heroSection.ctaButton", t?.heroSection?.ctaButton)}
+            buttonText={translate("heroSection.ctaButton")}
             style={
               "bg-gradient-to-r from-[#3926A7] to-[#21EAF4] hover:opacity-90 px-8 py-3 rounded-md text-white font-medium transition-all shadow-lg mt-4"
             }
@@ -119,7 +119,7 @@ const HeroSection = () => {
           <motion.div className="absolute top-1/2 rtl:left-[100px] ltr:right-[100px] -translate-y-1/2 w-80 h-80 md:w-96 md:h-96">
             <Image
               src={"/images/happy man.png"}
-              alt={translate("heroSection.aiImageAlt", t?.heroSection?.aiImageAlt)}
+              alt={translate("heroSection.aiImageAlt")}
               fill
               className="object-contain"
               priority

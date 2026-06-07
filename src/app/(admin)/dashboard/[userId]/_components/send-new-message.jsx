@@ -6,13 +6,15 @@ import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import {
-  buildUnifiedReplyProviderPayload,
-  getEffectiveMessagingAccount,
-  getDefaultTransportPlatform,
-  resolveSenderPhoneNumber,
+  logWhatsappMessaging,
+  resolveWhatsappSendContext,
   sendWhatsappWithClientConfig,
+  WHATSAPP_MESSAGING_NOT_LOADED_CODE,
+  WHATSAPP_NOT_CONFIGURED_CODE,
+  WHATSAPP_PLATFORM_REQUIRED_CODE,
+  WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
-import { sendCampaignReply, sendClientMessage } from "@/utils/api";
+import { sendClientMessage } from "@/utils/api";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
@@ -20,6 +22,31 @@ import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const MAX_LINES = 3;
+
+function getSendContextErrorMessage(code, translate) {
+  if (code === WHATSAPP_MESSAGING_NOT_LOADED_CODE) {
+    return translate(
+      "whatsappSend.configLoading",
+      "WhatsApp settings are still loading. Please wait and try again.",
+    );
+  }
+  if (code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
+    return translate(
+      "whatsappSend.platformRequired",
+      "Please choose which WhatsApp account to send from.",
+    );
+  }
+  if (code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE) {
+    return translate(
+      "whatsappSend.senderPhoneRequired",
+      "Sender phone number is missing for the selected WhatsApp account.",
+    );
+  }
+  return translate(
+    "editClient.whatsapp.notConfigured",
+    "WhatsApp messaging is not configured for this client.",
+  );
+}
 
 export default function SendNewMessageForm({
   userId,
@@ -32,19 +59,64 @@ export default function SendNewMessageForm({
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [platformError, setPlatformError] = useState("");
   const textareaRef = useRef(null);
-  const { t, translate, common } = useI18n();
+  const { translate, common } = useI18n();
   const queryClient = useQueryClient();
-  const { data: messagingData, isLoading: isMessagingLoading } =
-    useMessagingProviderConfig(clientId);
-
-  const accounts = messagingData?.accounts ?? [];
 
   const resolvedClientId =
     clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
+
+  const {
+    data: messagingData,
+    isLoading: isMessagingLoading,
+    isFetching: isMessagingFetching,
+    isError: isMessagingError,
+    refetch: refetchMessagingConfig,
+  } = useMessagingProviderConfig(resolvedClientId);
+
+  const accounts = messagingData?.accounts ?? [];
   const normalizedPhone = phoneNumber
     ? normalizeCampaignPhoneParam(phoneNumber)
     : null;
+  const usesWhatsappApi = Boolean(normalizedPhone);
+  const sendContext = usesWhatsappApi
+    ? resolveWhatsappSendContext(messagingData, selectedPlatform)
+    : null;
+
   const canSend = Boolean(message.trim() && (normalizedPhone || userId));
+  const messagingReady =
+    !usesWhatsappApi || (!isMessagingLoading && !isMessagingFetching);
+  const canSendWhatsapp =
+    !usesWhatsappApi ||
+    sendContext?.ok === true ||
+    (isMessagingError && messagingReady);
+
+  useEffect(() => {
+    logWhatsappMessaging("send_form_messaging_state", {
+      clientId: resolvedClientId,
+      usesWhatsappApi,
+      isLoading: isMessagingLoading,
+      isFetching: isMessagingFetching,
+      isError: isMessagingError,
+      hasData: Boolean(messagingData),
+      canSendWhatsapp: messagingData?.canSendWhatsapp ?? null,
+      defaultSenderPhone: messagingData?.defaultSenderPhone ?? null,
+      selectedPlatform: selectedPlatform || null,
+      sendContextOk: sendContext?.ok ?? null,
+      sendContextCode: sendContext?.code ?? null,
+      senderPhoneNumber: sendContext?.senderPhoneNumber ?? null,
+    });
+  }, [
+    resolvedClientId,
+    usesWhatsappApi,
+    isMessagingLoading,
+    isMessagingFetching,
+    isMessagingError,
+    messagingData,
+    selectedPlatform,
+    sendContext?.ok,
+    sendContext?.code,
+    sendContext?.senderPhoneNumber,
+  ]);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -69,49 +141,99 @@ export default function SendNewMessageForm({
 
     const text = message.trim();
 
-    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
-      const err = translate(
-        "whatsappSend.platformRequired",
-        "Please choose which WhatsApp account to send from."
-      );
-      setPlatformError(err);
-      toast.error(err);
-      return;
-    }
-
     setPlatformError("");
     setPending(true);
-    try {
-      const account = getEffectiveMessagingAccount(messagingData, selectedPlatform);
-      const transportPlatform = account
-        ? getDefaultTransportPlatform(account)
-        : null;
 
-      if (normalizedPhone && transportPlatform) {
-        const senderPhoneNumber = resolveSenderPhoneNumber(account);
-        await sendWhatsappWithClientConfig({
-          config: account,
-          messages: [
-            {
-              phone_number: normalizedPhone,
-              message: text,
-              platform: transportPlatform,
-              ...(senderPhoneNumber
-                ? { sender_phone_number: senderPhoneNumber }
-                : {}),
-            },
-          ],
-        });
-      } else if (normalizedPhone) {
-        const providerPayload = account
-          ? buildUnifiedReplyProviderPayload(account)
-          : {};
-        await sendCampaignReply({
-          client_id: resolvedClientId,
-          phone_number: normalizedPhone,
-          admin_reply_text: text,
-          ...providerPayload,
-        });
+    try {
+      if (usesWhatsappApi) {
+        if (isMessagingLoading || isMessagingFetching) {
+          const err = getSendContextErrorMessage(
+            WHATSAPP_MESSAGING_NOT_LOADED_CODE,
+            translate,
+          );
+          toast.error(err);
+          return;
+        }
+
+        if (isMessagingError || !messagingData) {
+          logWhatsappMessaging("send_form_refetch_messaging", {
+            clientId: resolvedClientId,
+          });
+          const { data: refreshed } = await refetchMessagingConfig();
+          const refreshedContext = resolveWhatsappSendContext(
+            refreshed,
+            selectedPlatform,
+          );
+          if (!refreshedContext.ok) {
+            const err = getSendContextErrorMessage(
+              refreshedContext.code,
+              translate,
+            );
+            if (refreshedContext.code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
+              setPlatformError(err);
+            }
+            toast.error(err);
+            return;
+          }
+
+          logWhatsappMessaging("send_form_dispatch", {
+            clientId: resolvedClientId,
+            platform: refreshedContext.transportPlatform,
+            senderPhoneNumber: refreshedContext.senderPhoneNumber,
+            recipientPhone: normalizedPhone,
+          });
+
+          await sendWhatsappWithClientConfig({
+            config: refreshedContext.account,
+            messages: [
+              {
+                phone_number: normalizedPhone,
+                message: text,
+                platform: refreshedContext.transportPlatform,
+                sender_phone_number: refreshedContext.senderPhoneNumber,
+              },
+            ],
+          });
+        } else {
+          const context = resolveWhatsappSendContext(
+            messagingData,
+            selectedPlatform,
+          );
+
+          if (!context.ok) {
+            const err = getSendContextErrorMessage(context.code, translate);
+            if (context.code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
+              setPlatformError(err);
+            }
+            logWhatsappMessaging("send_form_blocked", {
+              clientId: resolvedClientId,
+              code: context.code,
+              selectedPlatform: selectedPlatform || null,
+              defaultSenderPhone: messagingData?.defaultSenderPhone ?? null,
+            });
+            toast.error(err);
+            return;
+          }
+
+          logWhatsappMessaging("send_form_dispatch", {
+            clientId: resolvedClientId,
+            platform: context.transportPlatform,
+            senderPhoneNumber: context.senderPhoneNumber,
+            recipientPhone: normalizedPhone,
+          });
+
+          await sendWhatsappWithClientConfig({
+            config: context.account,
+            messages: [
+              {
+                phone_number: normalizedPhone,
+                message: text,
+                platform: context.transportPlatform,
+                sender_phone_number: context.senderPhoneNumber,
+              },
+            ],
+          });
+        }
       } else if (userId && resolvedClientId) {
         await sendClientMessage({
           user_id: userId,
@@ -139,11 +261,17 @@ export default function SendNewMessageForm({
       }
     } catch (error) {
       console.error("Failed to send reply:", error);
+      const code = error?.code;
+      if (
+        code === WHATSAPP_NOT_CONFIGURED_CODE ||
+        code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE
+      ) {
+        toast.error(getSendContextErrorMessage(code, translate));
+        return;
+      }
       toast.error(
-        translate(
-          "dashboardFilter.bulkWhatsapp.sendFailed",
-          t?.dashboardFilter?.bulkWhatsapp?.sendFailed,
-        ) || common.operationFailed,
+        translate("dashboardFilter.bulkWhatsapp.sendFailed") ||
+          common.operationFailed,
       );
     } finally {
       setPending(false);
@@ -157,6 +285,24 @@ export default function SendNewMessageForm({
       className="bg-white min-h-14 py-2 px-2 flex flex-col gap-2 shadow-xl rounded-b-md"
       onSubmit={(e) => e.preventDefault()}
     >
+      {usesWhatsappApi && isMessagingLoading ? (
+        <p className="text-xs text-gray-500 px-0.5">
+          {translate(
+            "whatsappSend.configLoading",
+            "Loading WhatsApp accounts…",
+          )}
+        </p>
+      ) : null}
+
+      {usesWhatsappApi && isMessagingError ? (
+        <p className="text-xs text-red-600 px-0.5">
+          {translate(
+            "whatsappSend.configLoadFailed",
+            "Could not load WhatsApp accounts.",
+          )}
+        </p>
+      ) : null}
+
       {messagingData?.hasMultipleAccounts ? (
         <WhatsappPlatformSelect
           accounts={accounts}
@@ -171,6 +317,17 @@ export default function SendNewMessageForm({
           className="px-0"
         />
       ) : null}
+
+      {usesWhatsappApi &&
+      messagingData &&
+      !isMessagingLoading &&
+      sendContext?.ok ? (
+        <p className="text-xs text-gray-500 px-0.5" dir="ltr">
+          {translate("whatsappSend.sendingFrom", "Sending from")}:{" "}
+          {sendContext.senderPhoneNumber}
+        </p>
+      ) : null}
+
       <div className="flex gap-2 items-end justify-center">
         <textarea
           ref={textareaRef}
@@ -180,7 +337,7 @@ export default function SendNewMessageForm({
           onChange={(e) => setMessage(e.target.value)}
           placeholder={
             canType
-              ? translate("typeYourMessage", t?.typeYourMessage)
+              ? translate("typeYourMessage")
               : translate("common.noPhone", common?.noPhone)
           }
           disabled={!canType || pending}
@@ -191,14 +348,16 @@ export default function SendNewMessageForm({
         <button
           type="button"
           onClick={handleSend}
-          disabled={pending || !canSend || isMessagingLoading}
+          disabled={
+            pending || !canSend || !messagingReady || !canSendWhatsapp
+          }
           className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
-    ${pending || !canSend || isMessagingLoading ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
+    ${pending || !canSend || !messagingReady || !canSendWhatsapp ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
         >
           {pending ? (
             <Loader2 className="animate-spin" />
           ) : (
-            translate("send", t?.send)
+            translate("send")
           )}
         </button>
       </div>
