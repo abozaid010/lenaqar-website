@@ -922,6 +922,11 @@ export default {
     platformRequired: "Please choose which WhatsApp account to send from.",
     multipleAccountsHint:
       "This client has multiple WhatsApp accounts. Choose which one to send from.",
+    configLoading: "Loading WhatsApp accounts…",
+    configLoadFailed: "Could not load WhatsApp accounts.",
+    senderPhoneRequired:
+      "Sender phone number is missing for the selected WhatsApp account.",
+    sendingFrom: "Sending from",
   },
   clientsTable: {
     noClients: "No clients found",

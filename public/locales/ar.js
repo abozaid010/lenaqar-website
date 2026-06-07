@@ -825,6 +825,10 @@ export default {
     platformRequired: "يرجى اختيار حساب واتساب للإرسال منه.",
     multipleAccountsHint:
       "لدى هذا العميل أكثر من حساب واتساب. اختر الحساب الذي تريد الإرسال منه.",
+    configLoading: "جاري تحميل حسابات واتساب…",
+    configLoadFailed: "تعذر تحميل حسابات واتساب.",
+    senderPhoneRequired: "رقم هاتف المرسل غير متوفر لحساب واتساب المحدد.",
+    sendingFrom: "الإرسال من",
   },
   clientsTable: {
     noClients: "لا يوجد عملاء",

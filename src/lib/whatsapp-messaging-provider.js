@@ -14,6 +14,21 @@ export const WHATSAPP_TRANSPORT_PLATFORMS = {
 };
 
 export const WHATSAPP_NOT_CONFIGURED_CODE = "WHATSAPP_NOT_CONFIGURED";
+export const WHATSAPP_MESSAGING_NOT_LOADED_CODE = "WHATSAPP_MESSAGING_NOT_LOADED";
+export const WHATSAPP_PLATFORM_REQUIRED_CODE = "WHATSAPP_PLATFORM_REQUIRED";
+export const WHATSAPP_SENDER_PHONE_REQUIRED_CODE = "WHATSAPP_SENDER_PHONE_REQUIRED";
+
+export const WHATSAPP_MESSAGING_LOG_PREFIX = "[whatsapp-messaging]";
+
+/** Structured logs for production debugging (filter console by prefix). */
+export function logWhatsappMessaging(event, payload = {}) {
+  const entry = {
+    event,
+    ts: new Date().toISOString(),
+    ...payload,
+  };
+  console.info(`${WHATSAPP_MESSAGING_LOG_PREFIX} ${event}`, entry);
+}
 
 export function normalizeWhatsappPhone(raw) {
   if (raw == null || raw === "") return "";
@@ -217,6 +232,64 @@ export function getEffectiveMessagingAccount(messagingData, selectedPlatform) {
     messagingData.accounts?.[0] ??
     null
   );
+}
+
+/**
+ * Validate hook data + optional picker before POST /whatsapp/send_messages.
+ * Ensures platform and sender_phone_number are present for the API payload.
+ */
+export function resolveWhatsappSendContext(messagingData, selectedPlatform) {
+  if (!messagingData) {
+    return {
+      ok: false,
+      code: WHATSAPP_MESSAGING_NOT_LOADED_CODE,
+      account: null,
+      transportPlatform: null,
+      senderPhoneNumber: "",
+    };
+  }
+
+  if (messagingData.hasMultipleAccounts && !selectedPlatform) {
+    return {
+      ok: false,
+      code: WHATSAPP_PLATFORM_REQUIRED_CODE,
+      account: null,
+      transportPlatform: null,
+      senderPhoneNumber: "",
+    };
+  }
+
+  const account = getEffectiveMessagingAccount(messagingData, selectedPlatform);
+  const transportPlatform = account ? getDefaultTransportPlatform(account) : null;
+  const senderPhoneNumber = resolveSenderPhoneNumber(account);
+
+  if (!account || !transportPlatform) {
+    return {
+      ok: false,
+      code: WHATSAPP_NOT_CONFIGURED_CODE,
+      account,
+      transportPlatform,
+      senderPhoneNumber,
+    };
+  }
+
+  if (!senderPhoneNumber) {
+    return {
+      ok: false,
+      code: WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
+      account,
+      transportPlatform,
+      senderPhoneNumber: "",
+    };
+  }
+
+  return {
+    ok: true,
+    code: null,
+    account,
+    transportPlatform,
+    senderPhoneNumber,
+  };
 }
 
 /** Human-readable platform label key suffix for i18n. */
@@ -423,19 +496,42 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
   }
 
   const sender_phone_number = resolveSenderPhoneNumber(config);
+  if (!sender_phone_number) {
+    logWhatsappMessaging("send_blocked_missing_sender", {
+      platform: config?.platform ?? null,
+    });
+    const err = new Error(WHATSAPP_SENDER_PHONE_REQUIRED_CODE);
+    err.code = WHATSAPP_SENDER_PHONE_REQUIRED_CODE;
+    throw err;
+  }
 
-  const enrichedMessages = messages.map((msg) => {
-    if (!sender_phone_number || msg.sender_phone_number) {
-      return msg;
-    }
-    return { ...msg, sender_phone_number };
+  const enrichedMessages = messages.map((msg) => ({
+    ...msg,
+    sender_phone_number: msg.sender_phone_number || sender_phone_number,
+  }));
+
+  logWhatsappMessaging("send_request", {
+    default_platform,
+    sender_phone_number,
+    messageCount: enrichedMessages.length,
+    platforms: [...new Set(enrichedMessages.map((m) => m.platform).filter(Boolean))],
   });
 
-  return sendWhatsappMessages({
+  const result = await sendWhatsappMessages({
     messages: enrichedMessages,
     default_platform,
-    sender_phone_number: sender_phone_number || null,
+    sender_phone_number,
   });
+
+  logWhatsappMessaging("send_response", {
+    default_platform,
+    sender_phone_number,
+    status: result?.status ?? null,
+    sent: result?.data?.sent ?? null,
+    failed: result?.data?.failed ?? null,
+  });
+
+  return result;
 }
 
 /**
