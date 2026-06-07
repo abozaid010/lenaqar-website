@@ -11,9 +11,21 @@ echo "🌐 Starting secure deployment for lenaAI-website..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_PATH="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-echo "✅ Using repository at: $REPO_PATH"
+echo "✅ Repository root: $REPO_PATH"
 
-# Change to repo directory (code is expected to be up-to-date already)
+# Always fetch latest code before building (fails deploy if git sync fails)
+export REPO_PATH
+if [ -f "$SCRIPT_DIR/sync-repo.sh" ]; then
+  bash "$SCRIPT_DIR/sync-repo.sh"
+else
+  echo "⚠️  sync-repo.sh not found — using inline git sync (legacy VM)"
+  git -c safe.directory="$REPO_PATH" fetch origin main --prune
+  git -c safe.directory="$REPO_PATH" checkout main
+  git -c safe.directory="$REPO_PATH" reset --hard origin/main
+  git -c safe.directory="$REPO_PATH" clean -fd
+  echo "📌 VM commit: $(git -c safe.directory="$REPO_PATH" rev-parse HEAD)"
+fi
+
 cd "$REPO_PATH" || {
   echo "❌ Failed to change to directory: $REPO_PATH"
   exit 1
