@@ -612,6 +612,19 @@ export default {
     header: {
       lastActivity: "Last activity",
     },
+    aiAutoReply: {
+      ariaLabel: "Toggle AI auto-reply for this lead",
+      label: "AI Auto-Reply",
+      onLabel: "AI On",
+      offLabel: "AI Off",
+      onTitle: "AI agent replies automatically to this client",
+      offTitle:
+        "AI auto-reply is off — the agent will not reply to this client",
+      toastOn: "AI auto-reply enabled for this client",
+      toastOff:
+        "AI auto-reply stopped — you reply manually to this client",
+      switching: "Switching…",
+    },
     leadSummary: {
       title: "Lead summary",
       companyLabel: "Company",

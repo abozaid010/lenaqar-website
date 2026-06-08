@@ -1,71 +1,120 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { toggleAutoReply } from "@/utils/api";
-import { useState } from "react";
+import {
+  Bot,
+  Check,
+  CircleSlash,
+  Loader2,
+  ToggleLeft,
+  ToggleRight,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
-const REPLY_OPTIONS = [
-  { value: "auto_reply", labelKey: "Ai" },
-  { value: "manual_reply", labelKey: "manual" },
-];
+function toReplyMode(enabled) {
+  return enabled === false ? "manual_reply" : "auto_reply";
+}
 
-export default function ToggleReplyType({ userId, clientID, source }) {
-  const [autoReply, setAutoReply] = useState("auto_reply");
+export default function ToggleReplyType({
+  userId,
+  clientID,
+  source,
+  initialEnabled,
+}) {
+  const [autoReply, setAutoReply] = useState(() => toReplyMode(initialEnabled));
   const [isLoading, setIsLoading] = useState(false);
-  const { t } = useI18n();
+  const { translate } = useI18n();
+  const isAiOn = autoReply === "auto_reply";
 
-  const handleChange = async (value) => {
-    if (isLoading || value === autoReply) return;
+  useEffect(() => {
+    setAutoReply(toReplyMode(initialEnabled));
+  }, [userId, initialEnabled]);
+
+  const handleToggle = async () => {
+    if (isLoading) return;
+    const nextValue = isAiOn ? "manual_reply" : "auto_reply";
     const previous = autoReply;
-    setAutoReply(value);
+    setAutoReply(nextValue);
     setIsLoading(true);
 
-    const result = await toggleAutoReply(
-      userId,
-      clientID,
-      value === "auto_reply",
-      source,
-    );
+    try {
+      const result = await toggleAutoReply(
+        userId,
+        clientID,
+        nextValue === "auto_reply",
+        source,
+      );
 
-    if (result.success) {
-      toast.success(t?.common?.autoReplyToggled);
-    } else {
+      if (result.success) {
+        toast.success(
+          nextValue === "auto_reply"
+            ? translate("leadDetail.aiAutoReply.toastOn")
+            : translate("leadDetail.aiAutoReply.toastOff"),
+        );
+      } else {
+        setAutoReply(previous);
+        toast.error(translate("common.failedToToggleAutoReply"));
+      }
+    } catch {
       setAutoReply(previous);
-      toast.error(t?.common?.failedToToggleAutoReply);
+      toast.error(translate("common.failedToToggleAutoReply"));
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div
-      role="radiogroup"
-      aria-label={t?.common?.autoReplyToggled || "Reply type"}
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isAiOn}
       aria-busy={isLoading}
-      className={`inline-flex items-center gap-0.5 p-0.5 rounded-md border border-gray-200 bg-gray-50 text-[11px] font-medium ${
-        isLoading ? "opacity-70 pointer-events-none" : ""
+      aria-label={translate("leadDetail.aiAutoReply.ariaLabel")}
+      title={
+        isAiOn
+          ? translate("leadDetail.aiAutoReply.onTitle")
+          : translate("leadDetail.aiAutoReply.offTitle")
+      }
+      disabled={isLoading}
+      onClick={handleToggle}
+      className={`inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+        isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"
+      } ${
+        isAiOn
+          ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
+          : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
       }`}
     >
-      {REPLY_OPTIONS.map((option) => {
-        const isActive = autoReply === option.value;
-        return (
-          <button
-            key={option.value}
-            type="button"
-            role="radio"
-            aria-checked={isActive}
-            disabled={isLoading}
-            onClick={() => handleChange(option.value)}
-            className={`px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
-              isActive
-                ? "bg-white text-primary shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            {t?.[option.labelKey]}
-          </button>
-        );
-      })}
-    </div>
+      {isLoading ? (
+        <>
+          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" aria-hidden />
+          <span>{translate("leadDetail.aiAutoReply.switching")}</span>
+        </>
+      ) : (
+        <>
+          <Bot
+            className={`h-3.5 w-3.5 shrink-0 ${isAiOn ? "text-emerald-700" : "text-gray-400"}`}
+            aria-hidden
+          />
+          {isAiOn ? (
+            <Check className="h-3 w-3 shrink-0 text-emerald-600" aria-hidden />
+          ) : (
+            <CircleSlash className="h-3 w-3 shrink-0 text-gray-500" aria-hidden />
+          )}
+          <span className="whitespace-nowrap">
+            {isAiOn
+              ? translate("leadDetail.aiAutoReply.onLabel")
+              : translate("leadDetail.aiAutoReply.offLabel")}
+          </span>
+          {isAiOn ? (
+            <ToggleRight className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+          ) : (
+            <ToggleLeft className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+          )}
+        </>
+      )}
+    </button>
   );
 }
