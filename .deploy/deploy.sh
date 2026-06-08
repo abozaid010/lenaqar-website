@@ -37,8 +37,56 @@ docker network inspect lenaai-network >/dev/null 2>&1 || \
   docker network create lenaai-network
 
 # ─── 2. Build latest image ────────────────────────────────────────
+# NEXT_PUBLIC_* must be passed at build time (inlined by Next.js, not read at runtime).
+ENV_FILE="$REPO_PATH/.env"
+DOCKER_BUILD_ARGS=()
+
+read_env_var() {
+  local name="$1"
+  if [ ! -f "$ENV_FILE" ]; then
+    return 1
+  fi
+  local line
+  line="$(grep -E "^${name}=" "$ENV_FILE" | tail -1 || true)"
+  [ -n "$line" ] || return 1
+  local value="${line#*=}"
+  value="${value%$'\r'}"
+  value="${value#\"}"; value="${value%\"}"
+  value="${value#\'}"; value="${value%\'}"
+  printf '%s' "$value"
+}
+
+add_build_arg() {
+  local name="$1"
+  local default="${2:-}"
+  local value
+  value="$(read_env_var "$name" || true)"
+  if [ -z "$value" ] && [ -n "$default" ]; then
+    value="$default"
+  fi
+  if [ -n "$value" ]; then
+    DOCKER_BUILD_ARGS+=(--build-arg "${name}=${value}")
+  fi
+}
+
+if [ ! -f "$ENV_FILE" ]; then
+  echo "❌ Missing $ENV_FILE — required for NEXT_PUBLIC_X_API_KEY at build time"
+  exit 1
+fi
+
+add_build_arg NEXT_PUBLIC_X_API_KEY
+add_build_arg NEXT_PUBLIC_API_BASE_URL "https://api.lenaai.net"
+add_build_arg NEXT_PUBLIC_SITE_URL "https://www.lenaai.net"
+add_build_arg NEXT_PUBLIC_IMAGE_BASE_URL
+add_build_arg NEXT_PUBLIC_META_PIXEL_ID
+
+if ! printf '%s\n' "${DOCKER_BUILD_ARGS[@]}" | grep -q 'NEXT_PUBLIC_X_API_KEY='; then
+  echo "❌ NEXT_PUBLIC_X_API_KEY is missing from $ENV_FILE"
+  exit 1
+fi
+
 echo "🔨 Building Docker image..."
-docker build -t lenaai_website:latest .
+docker build "${DOCKER_BUILD_ARGS[@]}" -t lenaai_website:latest .
 
 # ─── 3. Stop old container if exists ──────────────────────────────
 echo "🧹 Stopping old container if exists..."
