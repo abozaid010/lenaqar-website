@@ -19,7 +19,7 @@ const Header = ({ ci }) => {
 
   const sendMessageWhatsApp = () => {
     trackMetaContact();
-    const phoneNumber = "201556720323";
+    const phoneNumber = "201036364340";
     const url = `https://wa.me/${phoneNumber}`;
     window.open(url, "_blank");
   };
