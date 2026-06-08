@@ -57,8 +57,15 @@ jobs:
           ssh-keygen -y -f ~/.ssh/github_deploy_key > ~/.ssh/github_deploy_key.pub
           chmod 644 ~/.ssh/github_deploy_key.pub
           echo "✅ DEPLOY_KEY is a valid SSH private key"
-          echo "📌 Deploy key fingerprint:"
+          echo "📌 Deploy key fingerprint (must match a key at github.com/.../settings/keys):"
           ssh-keygen -lf ~/.ssh/github_deploy_key.pub
+          SSH_TEST="$(ssh -i ~/.ssh/github_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new -T git@github.com 2>&1 || true)"
+          echo "$SSH_TEST"
+          if ! echo "$SSH_TEST" | grep -qiE 'successfully authenticated|does not provide shell access'; then
+            echo "❌ DEPLOY_KEY secret does not match any deploy key on the repo"
+            exit 1
+          fi
+          echo "✅ DEPLOY_KEY authenticated with GitHub"
 
       - name: SSH warmup — verify IAP access before deploy
         run: |
@@ -109,8 +116,10 @@ jobs:
               chmod 600 ~/.ssh/config
               ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null || true
               git config --global core.sshCommand 'ssh -i ~/.ssh/id_ed25519_website -o IdentitiesOnly=yes'
-              if ! ssh -T git@github-website 2>&1 | grep -q 'successfully authenticated'; then
-                echo '❌ GitHub SSH auth failed — DEPLOY_KEY must match a deploy key on the repo'
+              SSH_TEST="\$(ssh -T git@github-website 2>&1 || true)"
+              echo "\$SSH_TEST"
+              if ! echo "\$SSH_TEST" | grep -qiE 'successfully authenticated|does not provide shell access'; then
+                echo '❌ GitHub SSH auth failed on VM — check DEPLOY_KEY matches repo deploy keys'
                 exit 1
               fi
               echo '✅ GitHub SSH configured on VM'
