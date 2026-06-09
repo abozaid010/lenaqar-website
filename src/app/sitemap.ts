@@ -100,8 +100,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Dynamic unit/property pages
   // These are the properties that the AI agent recommends, shows master plans, payment plans for
   // Limited to 5000 most recent/important units to keep sitemap manageable
-  const unitPages: MetadataRoute.Sitemap = units.slice(0, 5000).map((unit: any) => ({
-    url: `${MAIN_SITE_URL}/allProberties/${unit.id || unit.unitId}`,
+  const unitPages: MetadataRoute.Sitemap = units
+    .filter((unit: any) => unit?.code?.trim())
+    .slice(0, 5000)
+    .map((unit: any) => ({
+    url: `${MAIN_SITE_URL}/allProberties/${encodeURIComponent(String(unit.code).trim())}`,
     lastModified: unit.updatedAt
       ? new Date(unit.updatedAt)
       : unit.createdAt

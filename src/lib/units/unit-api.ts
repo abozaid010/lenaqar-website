@@ -1,95 +1,81 @@
 import axiosInstance from '@/utils/axiosInstance';
+import { normalizeUnitCodeParam } from '@/lib/units/unit-share-links';
 import type { UnitApiResponse } from './unit-types';
+
+const NOT_FOUND_RESPONSE: UnitApiResponse = {
+  status: false,
+  code: 404,
+  message: 'Not Found',
+  data: { units: [] },
+};
+
+function wrapSingleUnitResponse(unitData: unknown): UnitApiResponse {
+  if (unitData) {
+    return {
+      status: true,
+      code: 200,
+      message: 'Success',
+      data: { units: [unitData as UnitApiResponse['data']['units'][0]] },
+    };
+  }
+  return NOT_FOUND_RESPONSE;
+}
+
+function handleUnitFetchError(error: unknown): UnitApiResponse | never {
+  const statusCode = (error as { response?: { status?: number } })?.response?.status;
+  if (statusCode === 404 || statusCode === 409) {
+    return NOT_FOUND_RESPONSE;
+  }
+  if ((error as { message?: string })?.message === 'No unit data found') {
+    return NOT_FOUND_RESPONSE;
+  }
+  throw error;
+}
 
 export async function getUnitById(unitId: string): Promise<UnitApiResponse> {
   try {
     const response = await axiosInstance.get(`/units/details/${unitId}`);
-    // Transform the response to match the expected UnitApiResponse structure
-    const unitData = response.data?.data;
-    if (unitData) {
-      return {
-        status: true,
-        code: 200,
-        message: 'Success',
-        data: {
-          units: [unitData]
-        }
-      };
-    }
+    return wrapSingleUnitResponse(response.data?.data);
   } catch (error) {
-    const statusCode = (error as any)?.response?.status;
-    // Treat "not found" as a non-exceptional result so pages can render NotFound UI
-    if (statusCode === 404) {
-      return {
-        status: false,
-        code: 404,
-        message: 'Not Found',
-        data: { units: [] },
-      };
-    }
-    // If the API returned a 2xx but missing payload, also return empty result
-    if ((error as any)?.message === 'No unit data found') {
-      return {
-        status: false,
-        code: 404,
-        message: 'Not Found',
-        data: { units: [] },
-      };
-    }
-    throw error;
+    return handleUnitFetchError(error);
   }
+}
 
-  // Fallback: response had no data payload
-  return {
-    status: false,
-    code: 404,
-    message: 'Not Found',
-    data: { units: [] },
-  };
+export async function getUnitByCode(code: string): Promise<UnitApiResponse> {
+  const normalized = normalizeUnitCodeParam(code);
+  if (!normalized) return NOT_FOUND_RESPONSE;
+
+  try {
+    const response = await axiosInstance.get(
+      `/units/by-code/${encodeURIComponent(normalized)}`
+    );
+    return wrapSingleUnitResponse(response.data?.data);
+  } catch (error) {
+    return handleUnitFetchError(error);
+  }
 }
 
 export async function getPublicUnitById(unitId: string): Promise<UnitApiResponse> {
   try {
     const response = await axiosInstance.get(`/public/unit-details/${unitId}`);
-    // Transform the response to match the expected UnitApiResponse structure
-    const unitData = response.data?.data;
-    if (unitData) {
-      return {
-        status: true,
-        code: 200,
-        message: 'Success',
-        data: {
-          units: [unitData]
-        }
-      };
-    }
+    return wrapSingleUnitResponse(response.data?.data);
   } catch (error) {
-    const statusCode = (error as any)?.response?.status;
-    if (statusCode === 404) {
-      return {
-        status: false,
-        code: 404,
-        message: 'Not Found',
-        data: { units: [] },
-      };
-    }
-    if ((error as any)?.message === 'No unit data found') {
-      return {
-        status: false,
-        code: 404,
-        message: 'Not Found',
-        data: { units: [] },
-      };
-    }
-    throw error;
+    return handleUnitFetchError(error);
   }
+}
 
-  return {
-    status: false,
-    code: 404,
-    message: 'Not Found',
-    data: { units: [] },
-  };
+export async function getPublicUnitByCode(code: string): Promise<UnitApiResponse> {
+  const normalized = normalizeUnitCodeParam(code);
+  if (!normalized) return NOT_FOUND_RESPONSE;
+
+  try {
+    const response = await axiosInstance.get(
+      `/public/unit-by-code/${encodeURIComponent(normalized)}`
+    );
+    return wrapSingleUnitResponse(response.data?.data);
+  } catch (error) {
+    return handleUnitFetchError(error);
+  }
 }
 
 export async function getUnits(): Promise<UnitApiResponse> {

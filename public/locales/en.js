@@ -500,7 +500,7 @@ export default {
     clients: "Clients",
     analytics: "Analytics",
     units: "Units",
-    pendingApproval: "Resale",
+    pendingApproval: "Hidden units",
     team: "Team",
     darkMode: "Dark Mode",
     logout: "Log Out",
@@ -2253,6 +2253,16 @@ export default {
     contactPrefix: "Contact",
     deletePropertyConfirm:
       "Are you sure you want to delete this property?",
+  },
+  unitShare: {
+    title: "Share Property",
+    websiteLink: "Website link",
+    whatsappLink: "WhatsApp link",
+    copyWebsite: "Copy website link",
+    openWhatsapp: "Open WhatsApp",
+    noWhatsapp: "No linked WhatsApp number is configured for this client.",
+    noCode: "This unit does not have a reference code yet.",
+    copied: "Copied!",
   },
   unitLabels: {
     bedrooms: "Bedrooms",

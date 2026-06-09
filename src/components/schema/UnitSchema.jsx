@@ -1,14 +1,15 @@
 import { SITE_URL } from "@/app/metadata";
+import { buildPublicUnitShareUrl } from "@/lib/units/unit-share-links";
 
 export default function UnitSchema({ unit, isPublic = false }) {
   if (!unit) return null;
 
-  const id = unit.unitId ?? unit.id;
-  if (!id) return null;
+  const code = unit.code ?? unit.referenceCode;
+  if (!code?.trim()) return null;
 
   const baseUrl = isPublic
-    ? `${SITE_URL}/allProberties/${id}`
-    : `${SITE_URL}/units/${id}`;
+    ? buildPublicUnitShareUrl(code)
+    : `${SITE_URL}/units/${encodeURIComponent(code.trim())}`;
 
   const schema = {
     "@context": "https://schema.org",

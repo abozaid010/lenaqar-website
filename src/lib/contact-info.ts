@@ -185,13 +185,18 @@ class ContactInfo {
     // Refresh contacts if needed
     await this.refreshContactsIfNeeded();
 
-    // Rule 1: Owner contact - client id == curretn client id && isPrimary == false
-    if (unit.clientId && currentClientId && unit.clientId === currentClientId && !unit.isPrimary && unit.ownerMobile) {
+    // Rule 1: Owner contact — same client as logged-in profile
+    if (
+      unit.clientId &&
+      currentClientId &&
+      unit.clientId === currentClientId &&
+      (unit.ownerName || unit.ownerMobile)
+    ) {
       return {
         name: unit.ownerName,
         phone: unit.ownerMobile,
         whatsapp: unit.ownerMobile,
-        type: 'Owner'
+        type: 'Owner',
       };
     }
 

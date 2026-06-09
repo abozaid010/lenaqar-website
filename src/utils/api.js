@@ -832,6 +832,22 @@ export async function fetchUnitById(id, isPublic = false) {
   }
 }
 
+export async function fetchUnitByCode(code, isPublic = false) {
+  const trimmed = String(code ?? "").trim();
+  if (!trimmed) return { error: "Invalid unit code" };
+
+  const url = isPublic
+    ? `/public/unit-by-code/${encodeURIComponent(trimmed)}`
+    : `/units/by-code/${encodeURIComponent(trimmed)}`;
+  try {
+    const response = await axiosInstance.get(url);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch unit by code:", error.message);
+    return { error: error.message };
+  }
+}
+
 export const addUnit = withErrorHandling(async (unitData) => {
   const response = await axiosInstance.post(`/units/v1/add-sale`, unitData);
   return response.data;

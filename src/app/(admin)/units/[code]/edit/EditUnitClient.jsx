@@ -2,24 +2,24 @@
 
 import { useRouter } from "next/navigation";
 import EditUnitForm from "@/components/ui/unit-forms/add-unit-Modal";
+import { buildAdminUnitDetailPath } from "@/lib/units/unit-share-links";
 
-export default function EditUnitClient({ rawUnit, slug }) {
+export default function EditUnitClient({ rawUnit, unitCode, clientId }) {
   const router = useRouter();
+  const detailPath = buildAdminUnitDetailPath(unitCode, clientId);
 
   const handleClose = () => {
-    // Redirect back to unit details when edit form is closed/cancelled
-    router.push(`/admin/units/${slug}`);
+    router.push(detailPath);
   };
 
   return (
-    <EditUnitForm 
+    <EditUnitForm
       unitData={rawUnit}
       isEdit={true}
       isPageMode={true}
       onClose={handleClose}
       onUnitsExtracted={() => {
-        // Called after successful unit update
-        router.push(`/admin/units/${slug}`);
+        router.push(detailPath);
       }}
     />
   );
