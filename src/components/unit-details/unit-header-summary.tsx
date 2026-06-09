@@ -15,7 +15,16 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">
           {unit.title || `${buildingTypeLabel || 'Property'} Details`}
         </h1>
-        
+
+        {unit.referenceCode && (
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
+            <Tag className="w-4 h-4" />
+            <span>
+              {translate('unitLabels.referenceCode', 'Reference Code')}: {unit.referenceCode}
+            </span>
+          </div>
+        )}
+
         {/* Project and Developer Links */}
         <div className="flex flex-wrap items-center gap-4 text-sm">
           {unit.projectHref && unit.projectName && (

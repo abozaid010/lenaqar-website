@@ -25,6 +25,7 @@ import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
 import StickyInquiryCard from './sticky-inquiry-card';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
+import UnitShareLinksDialog from './unit-share-links-dialog';
 
 interface UnitDetailsPageProps {
   unit: UnitViewModel;
@@ -33,15 +34,26 @@ interface UnitDetailsPageProps {
 
 export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
   const { t, locale, translate } = useI18n();
-  const [showMobileActionBar, setShowMobileActionBar] = useState(true);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const unitNotes = typeof unit.notes === 'string' ? unit.notes.trim() : '';
+  const canShare = Boolean(unit.referenceCode?.trim());
 
   return (
     <div className="bg-gray-50 flex-1">
-      {/* Back Button */}
+      {/* Back + Share */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="mb-6">
-          <BackButton fallbackRoute="/admin/units" />
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <BackButton fallbackRoute="/units" />
+          {canShare && (
+            <button
+              type="button"
+              onClick={() => setShowShareDialog(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors"
+            >
+              <Share2 className="w-4 h-4" />
+              {translate('unitShare.title', 'Share Property')}
+            </button>
+          )}
         </div>
       </div>
 
@@ -51,7 +63,12 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Hero Gallery */}
-            <UnitHeroGallery images={unit.heroImages} isPrimary={unit.isPrimary} />
+            <UnitHeroGallery
+              images={unit.heroImages}
+              isPrimary={unit.isPrimary}
+              canShare={canShare}
+              onShare={() => setShowShareDialog(true)}
+            />
 
             {/* Header Summary */}
             <UnitHeaderSummary unit={unit} />
@@ -77,7 +94,11 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
             <div className="lg:sticky lg:top-8 space-y-6">
               {/* Sticky Inquiry Card - Desktop Only */}
               <div className="hidden lg:block">
-                <StickyInquiryCard unit={unit} />
+                <StickyInquiryCard
+                  unit={unit}
+                  canShare={canShare}
+                  onShare={() => setShowShareDialog(true)}
+                />
               </div>
 
               {/* Trust/Metadata */}
@@ -103,6 +124,12 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
       <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg z-50">
         <MobileStickyActionBar unit={unit} />
       </div>
+
+      <UnitShareLinksDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        unitCode={unit.referenceCode}
+      />
     </div>
   );
 }

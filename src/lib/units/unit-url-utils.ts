@@ -227,13 +227,11 @@ export async function findUnitBySlug(slug: string): Promise<string | null> {
 }
 
 export function getUnitUrl(unit: {
-  unitId?: string | null;
-  buildingType?: string | null;
-  project?: string | null;
   code?: string | null;
 }): string {
-  if (!unit.unitId) {
-    return "/units/not-found";
+  const code = unit?.code;
+  if (!code || !String(code).trim()) {
+    return "/units";
   }
-  return `/units/${generateUnitSlug(unit)}`;
+  return `/units/${encodeURIComponent(String(code).trim())}`;
 }

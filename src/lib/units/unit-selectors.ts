@@ -167,9 +167,21 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     developerHref,
     developerPhone: null,
     developerWhatsapp: null,
-    ownerName: null,
-    ownerMobile: null,
-    ownerWhatsapp: null,
+    ownerName: isNonEmptyString((rawUnit as any).owner_name)
+      ? (rawUnit as any).owner_name
+      : isNonEmptyString((rawUnit as any).ownerName)
+        ? (rawUnit as any).ownerName
+        : null,
+    ownerMobile: isNonEmptyString((rawUnit as any).owner_mobile)
+      ? (rawUnit as any).owner_mobile
+      : isNonEmptyString((rawUnit as any).ownerMobile)
+        ? (rawUnit as any).ownerMobile
+        : null,
+    ownerWhatsapp: isNonEmptyString((rawUnit as any).owner_mobile)
+      ? (rawUnit as any).owner_mobile
+      : isNonEmptyString((rawUnit as any).ownerMobile)
+        ? (rawUnit as any).ownerMobile
+        : null,
     clientId: (rawUnit as any).clientId || (rawUnit as any).client_id || null,
     locationLabel,
     heroImages,

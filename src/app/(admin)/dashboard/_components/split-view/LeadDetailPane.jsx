@@ -876,7 +876,6 @@ export default function LeadDetailPane({
   return (
     <>
       <div className="flex flex-col min-h-0 flex-1 bg-white border-l border-gray-100">
-        {/* Always-visible identity header — pure lead identity, no controls */}
         <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white">
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <ChatWith
@@ -894,6 +893,15 @@ export default function LeadDetailPane({
               </span>
             ) : null}
           </div>
+          {clientId && userId && !isLoading && data?.data ? (
+            <ToggleReplyType
+              key={userId}
+              userId={userId}
+              clientID={clientId}
+              source={data.data.source || null}
+              initialEnabled={data.data.toggle_ai_auto_reply}
+            />
+          ) : null}
           {actionsPermissionReady &&
             canCreateAction &&
             hasSelection &&
@@ -1029,25 +1037,6 @@ export default function LeadDetailPane({
                   {common.actions} · {lastActionLabel}
                 </button>
               </section>
-
-              {/* Reply mode — temporarily hidden. Re-enable when product is ready. */}
-              {/*
-              <section className="rounded-lg border border-gray-200 bg-white p-3">
-                <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate("leadDetail.actionsTab.sections.replyMode")}
-                </h5>
-                <div className="flex flex-wrap items-center gap-2">
-                  <ToggleReplyType
-                    userId={userId}
-                    clientID={data.data.client_id}
-                    source={data.data.source || null}
-                  />
-                </div>
-                <p className="mt-1.5 text-[11px] text-gray-400">
-                  {translate("leadDetail.actionsTab.replyModeHint")}
-                </p>
-              </section>
-              */}
 
               {/* Danger zone */}
               {canDeleteLead && (

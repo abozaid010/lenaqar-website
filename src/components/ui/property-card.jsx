@@ -18,6 +18,8 @@ import ImageWithLoader from "./image-with-loader";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeLabel } from "@/lib/enums/buildingTypes";
+import { buildAdminUnitDetailPath } from "@/lib/units/unit-share-links";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 const InfoItem = ({ icon, label, value }) => (
   <div className="flex items-center gap-1">
@@ -47,6 +49,7 @@ export default function PropertyCard({ data }) {
     bathroomCount,
     city,
     unitId,
+    code,
     landArea,
     view,
     finishing,
@@ -56,11 +59,17 @@ export default function PropertyCard({ data }) {
   } = data;
 
   const buildingTypeLabel = getBuildingTypeLabel(buildingType, translate, buildingType);
+  const clientId = LenaCookiesManager.getClientId();
+  const unitHref = code?.trim()
+    ? buildAdminUnitDetailPath(code, clientId)
+    : unitId
+      ? `/units/${unitId}`
+      : "#";
 
   return (
     <div className="flex flex-col gap-2 rounded-md overflow-hidden bg-gray-200 shadow-md p-2 m-2 w-72 h-96">
       <Link
-        href={`/units/${unitId}`}
+        href={unitHref}
         className="rounded-md bg-gray-100 h-44 overflow-hidden relative"
       >
         {data.images?.length > 0 && (hoveredImage || data.images[0].url) ? (
@@ -82,7 +91,7 @@ export default function PropertyCard({ data }) {
 
       <div>
         <Link
-          href={`/units/${unitId}`}
+          href={unitHref}
           className="mb-2 line-clamp-1 text-sm font-medium text-gray-800 hover:text-primary hover:underline"
         >
           {unitTitle} | {buildingTypeLabel}{" "}

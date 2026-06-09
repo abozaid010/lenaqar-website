@@ -500,7 +500,7 @@ export default {
     clients: "Clients",
     analytics: "Analytics",
     units: "Units",
-    pendingApproval: "Resale",
+    pendingApproval: "Hidden units",
     team: "Team",
     darkMode: "Dark Mode",
     logout: "Log Out",
@@ -611,6 +611,19 @@ export default {
     },
     header: {
       lastActivity: "Last activity",
+    },
+    aiAutoReply: {
+      ariaLabel: "Toggle AI auto-reply for this lead",
+      label: "AI Auto-Reply",
+      onLabel: "AI On",
+      offLabel: "AI Off",
+      onTitle: "AI agent replies automatically to this client",
+      offTitle:
+        "AI auto-reply is off — the agent will not reply to this client",
+      toastOn: "AI auto-reply enabled for this client",
+      toastOff:
+        "AI auto-reply stopped — you reply manually to this client",
+      switching: "Switching…",
     },
     leadSummary: {
       title: "Lead summary",
@@ -2240,6 +2253,16 @@ export default {
     contactPrefix: "Contact",
     deletePropertyConfirm:
       "Are you sure you want to delete this property?",
+  },
+  unitShare: {
+    title: "Share Property",
+    websiteLink: "Website link",
+    whatsappLink: "WhatsApp link",
+    copyWebsite: "Copy website link",
+    openWhatsapp: "Open WhatsApp",
+    noWhatsapp: "No linked WhatsApp number is configured for this client.",
+    noCode: "This unit does not have a reference code yet.",
+    copied: "Copied!",
   },
   unitLabels: {
     bedrooms: "Bedrooms",

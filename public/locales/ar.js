@@ -506,7 +506,7 @@ export default {
     clients: "العملاء",
     analytics: "التحليلات",
     units: "الوحدات",
-    pendingApproval: "إعادة البيع",
+    pendingApproval: "الوحدات المخفية",
     team: "الفريق",
     darkMode: "الوضع المظلم",
     logout: "تسجيل الخروج",
@@ -1886,6 +1886,19 @@ export default {
     header: {
       lastActivity: "آخر نشاط",
     },
+    aiAutoReply: {
+      ariaLabel: "تبديل الرد التلقائي بالذكاء الاصطناعي لهذا العميل",
+      label: "الرد التلقائي",
+      onLabel: "الذكاء مفعّل",
+      offLabel: "الذكاء متوقف",
+      onTitle: "الوكيل الذكي يرد تلقائياً على هذا العميل",
+      offTitle:
+        "الرد التلقائي متوقف — الوكيل لن يرد على هذا العميل",
+      toastOn: "تم تفعيل الرد التلقائي لهذا العميل",
+      toastOff:
+        "تم إيقاف الرد التلقائي — أنت ترد يدوياً على هذا العميل",
+      switching: "جارٍ التبديل…",
+    },
     leadSummary: {
       title: "ملخص العميل",
       companyLabel: "الشركة",
@@ -2304,6 +2317,16 @@ export default {
     loadingContact: "جاري تحميل بيانات التواصل...",
     contactPrefix: "جهة التواصل",
     deletePropertyConfirm: "هل أنت متأكد أنك تريد حذف هذا العقار؟",
+  },
+  unitShare: {
+    title: "مشاركة العقار",
+    websiteLink: "رابط الموقع",
+    whatsappLink: "رابط واتساب",
+    copyWebsite: "نسخ رابط الموقع",
+    openWhatsapp: "فتح واتساب",
+    noWhatsapp: "لا يوجد رقم واتساب مرتبط لهذا العميل.",
+    noCode: "لا يوجد كود مرجعي لهذه الوحدة بعد.",
+    copied: "تم النسخ!",
   },
   unitLabels: {
     bedrooms: "غرف نوم",

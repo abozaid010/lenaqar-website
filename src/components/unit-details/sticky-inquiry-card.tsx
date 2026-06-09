@@ -1,17 +1,21 @@
-import { MessageCircle, Edit, Trash2, PhoneCall } from 'lucide-react';
+import { MessageCircle, Edit, Trash2, PhoneCall, Share2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
-import { generateUnitSlug } from '@/lib/units/unit-url-utils';
+import { buildAdminUnitEditPath } from '@/lib/units/unit-share-links';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
 import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
 import toast from 'react-hot-toast';
 import type { UseMutationResult } from '@tanstack/react-query';
 
-export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
+export default function StickyInquiryCard({
+  unit,
+  canShare = false,
+  onShare,
+}: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
   const deleteUnitMutation = useDeleteUnit() as unknown as UseMutationResult<string, Error, string, unknown>;
@@ -25,6 +29,12 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
   };
 
   const currentClientId = getCurrentClientId();
+  const isOwnClientUnit = Boolean(
+    unit.clientId && currentClientId && unit.clientId === currentClientId
+  );
+  const showOwnerContact = Boolean(
+    isOwnClientUnit && (unit.ownerName?.trim() || unit.ownerMobile?.trim())
+  );
   // Hide edit/delete for primary inventory when the viewer is not the unit's client.
   const showUnitAdminActions =
     !unit.isPrimary || (unit.clientId ?? null) === (currentClientId ?? null);
@@ -42,16 +52,29 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
     const loadContactInfo = async () => {
       try {
         setLoading(true);
-        const currentClientId = getCurrentClientId();
-        const contact = await contactInfo.get_contact_info({
-          clientId: unit.clientId,
-          developerId: unit.developerId,
-          isPrimary: unit.isPrimary,
-          ownerName: unit.ownerName,
-          ownerMobile: unit.ownerMobile,
-          developerName: unit.developerName
-        }, currentClientId);
-        
+
+        if (showOwnerContact) {
+          setContactData({
+            name: unit.ownerName?.trim() || null,
+            phone: unit.ownerMobile?.trim() || null,
+            whatsapp: unit.ownerMobile?.trim() || null,
+            type: 'Owner',
+          });
+          return;
+        }
+
+        const contact = await contactInfo.get_contact_info(
+          {
+            clientId: unit.clientId,
+            developerId: unit.developerId,
+            isPrimary: unit.isPrimary,
+            ownerName: unit.ownerName,
+            ownerMobile: unit.ownerMobile,
+            developerName: unit.developerName,
+          },
+          currentClientId
+        );
+
         setContactData(contact);
       } catch (error) {
         console.error('Error loading contact info:', error);
@@ -59,7 +82,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
           name: null,
           phone: null,
           whatsapp: null,
-          type: null
+          type: null,
         });
       } finally {
         setLoading(false);
@@ -67,7 +90,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
     };
 
     loadContactInfo();
-  }, [unit]);
+  }, [unit, showOwnerContact, currentClientId]);
 
   const handleCall = () => {
     if (contactData?.phone) {
@@ -89,23 +112,9 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
 
   
   const handleEdit = () => {
-    // Navigate to admin edit page for the unit using new slug-based URL
-    try {
-      const slug = generateUnitSlug({
-        buildingType: unit.buildingType,
-        project: unit.projectName,
-        code: unit.referenceCode, // Use referenceCode as fallback for code
-        unitId: unit.id
-      });
-      const editUrl = `/admin/units/${slug}/edit`;
-      router.push(editUrl);
-    } catch (error) {
-      console.error('Error navigating to edit page:', error);
-      // Fallback to old URL format if needed
-      if (unit.id) {
-        router.push(`/admin/units/${unit.id}/edit`);
-      }
-    }
+    if (!unit.referenceCode?.trim()) return;
+    const editUrl = buildAdminUnitEditPath(unit.referenceCode, currentClientId);
+    router.push(editUrl);
   };
 
   const handleDelete = async () => {
@@ -138,14 +147,27 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
             {translate("unitInquiry.loadingContact")}
           </div>
         </div>
-      ) : (contactData?.phone || contactData?.whatsapp) ? (
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <div className="text-xs text-gray-600 mb-1">
-            {translate("unitInquiry.contactPrefix")} ({contactData?.type}):
+      ) : (contactData?.name || contactData?.phone || contactData?.whatsapp) ? (
+        <div className="bg-gray-50 rounded-lg p-3 text-center space-y-1">
+          <div className="text-xs text-gray-600">
+            {translate("unitInquiry.contactPrefix")}
+            {contactData?.type ? ` (${contactData.type})` : ""}
           </div>
-          <div className="text-sm font-medium text-gray-900">{contactData?.name}</div>
-          {contactData?.phone && (
-            <div className="text-xs text-gray-500 mt-1">{contactData.phone}</div>
+          {showOwnerContact && unit.ownerName?.trim() && (
+            <div className="text-sm font-medium text-gray-900">
+              {translate("saleDetails.ownerName", "Owner Name")}: {unit.ownerName}
+            </div>
+          )}
+          {showOwnerContact && unit.ownerMobile?.trim() && (
+            <div className="text-sm text-gray-800">
+              {translate("saleDetails.ownerMobile", "Owner Mobile")}: {unit.ownerMobile}
+            </div>
+          )}
+          {!showOwnerContact && contactData?.name && (
+            <div className="text-sm font-medium text-gray-900">{contactData.name}</div>
+          )}
+          {!showOwnerContact && contactData?.phone && (
+            <div className="text-xs text-gray-500">{contactData.phone}</div>
           )}
         </div>
       ) : null}
@@ -171,10 +193,22 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
         </button>
       </div>
 
+      {canShare && onShare && (
+        <button
+          type="button"
+          onClick={onShare}
+          className="w-full border border-primary/30 text-primary rounded-lg py-2 px-3 font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 text-sm"
+        >
+          <Share2 className="w-4 h-4" />
+          {translate("unitShare.title", "Share Property")}
+        </button>
+      )}
+
       {/* Admin Actions — not shown for primary units when the viewer is another client */}
       {showUnitAdminActions ? (
         <div className="border-t pt-4">
-          <div className="grid grid-cols-2 gap-3">
+          <div className={`grid gap-3 ${unit.referenceCode?.trim() ? 'grid-cols-2' : 'grid-cols-1'}`}>
+            {unit.referenceCode?.trim() && (
             <button
               onClick={handleEdit}
               className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
@@ -182,6 +216,7 @@ export default function StickyInquiryCard({ unit }: StickyInquiryCardProps) {
               <Edit className="w-4 h-4" />
               {translate("buttons.edit")}
             </button>
+            )}
 
             <button
               onClick={() => setShowDeleteConfirm(true)}

@@ -40,6 +40,8 @@ export interface RawUnit {
   roof_area: number;
   finishing: string;
   developer: string;
+  owner_name?: string;
+  owner_mobile?: string;
   notes?: string;
   video?: string;
 }
@@ -122,6 +124,8 @@ export interface UnitViewModel {
 export interface UnitHeroGalleryProps {
   images: HeroImage[];
   isPrimary: boolean;
+  canShare?: boolean;
+  onShare?: () => void;
 }
 
 export interface UnitHeaderSummaryProps {
@@ -155,6 +159,8 @@ export interface RelatedEntityLinksProps {
 export interface StickyInquiryCardProps {
   unit: UnitViewModel;
   rawUnit?: RawUnit;
+  canShare?: boolean;
+  onShare?: () => void;
 }
 
 export interface MobileStickyActionBarProps {

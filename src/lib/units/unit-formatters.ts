@@ -182,9 +182,9 @@ export const buildDeveloperHref = (unit: any): string | null => {
 };
 
 export const buildUnitHref = (unit: any): string | null => {
-  if (!unit.unitId) return null;
-  if (unit.unitTitle) return `/properties/${unit.unitId}/${slugify(unit.unitTitle)}`;
-  return `/properties/${unit.unitId}`;
+  const code = unit?.code ?? unit?.referenceCode;
+  if (!code || !String(code).trim()) return null;
+  return `/allProberties/${encodeURIComponent(String(code).trim())}`;
 };
 
 /**

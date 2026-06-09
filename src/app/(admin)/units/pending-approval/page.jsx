@@ -7,9 +7,9 @@ import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
 export async function generateMetadata() {
   return {
-    title: "Resale - Units | LENAAI AI Sales Agent",
+    title: "Hidden units - Units | LENAAI AI Sales Agent",
     description:
-      "View and manage resale property units. Same layout as Units with data from the resale (pending approval) API.",
+      "View and manage hidden property units. Same layout as Units with data from the pending approval API.",
     robots: {
       index: false,
       follow: false,
@@ -31,7 +31,7 @@ export default async function PendingApprovalUnitsPage({
         items={[
           { name: "Units", url: `${SITE_URL}/units` },
           {
-            name: "Resale",
+            name: "Hidden units",
             url: `${SITE_URL}/units/pending-approval`,
           },
         ]}
