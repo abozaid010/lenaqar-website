@@ -3,6 +3,7 @@
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "@/components/services/clientCookies";
 import { revalidatePath } from "next/cache";
+import { NEW_LEAD_ACTION } from "@/utils/actions";
 
 /**
  * Server action to add a new lead.
@@ -18,6 +19,7 @@ export async function addNewLeadAction(payload) {
       client_id: payload.client_id || clientId || "public",
       platform: payload.platform || "website",
       campaign_id: payload.campaign_id || "added_manually",
+      last_action: NEW_LEAD_ACTION,
     };
 
     const response = await axiosInstance.post("/api/leads/addnew", finalPayload);
@@ -59,6 +61,7 @@ export async function addManyLeadsAction(payloads = []) {
       client_id: payload?.client_id || clientId || "",
       platform: payload?.platform || "website",
       campaign_id: payload?.campaign_id || "added_manually",
+      last_action: NEW_LEAD_ACTION,
     }))
     .filter((payload) => payload?.phone_number && payload?.user_name && payload?.client_id);
 

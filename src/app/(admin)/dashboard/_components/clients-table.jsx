@@ -5,7 +5,11 @@ import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
-import { ACTIONS_COLORS, getActionLabel } from "@/utils/actions";
+import {
+  ACTIONS_COLORS,
+  getActionLabel,
+  normalizeLastAction,
+} from "@/utils/actions";
 import { getClientActions, getClientRequirements, deleteClient } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
@@ -377,7 +381,8 @@ export default function ClientsTable({ users, pagination }) {
 
                       <td
                         className={`px-2 py-2 text-center font-bold underline cursor-pointer whitespace-nowrap max-w-[120px] truncate ${
-                          ACTIONS_COLORS[user.last_action] || "text-gray-400"
+                          ACTIONS_COLORS[normalizeLastAction(user.last_action)] ||
+                          "text-gray-400"
                         }`}
                         onClick={(e) => handleclientAction(e, user)}
                       >
@@ -391,10 +396,7 @@ export default function ClientsTable({ users, pagination }) {
                           </div>
                         ) : (
                           <span className="line-clamp-1">
-                            {getActionLabel(
-                              user.last_action ? user.last_action : null,
-                              locale
-                            )}
+                            {getActionLabel(user.last_action, locale)}
                           </span>
                         )}
                       </td>

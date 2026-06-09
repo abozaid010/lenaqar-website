@@ -16,6 +16,7 @@ import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
 import { cleanRequirementsPayload } from "./cleanRequirements";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+import { normalizeLastAction } from "@/utils/actions";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -103,7 +104,14 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
     if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
       throw new Error("Expected users array but received invalid data format");
     }
-    return response.data.data;
+
+    return {
+      ...response.data.data,
+      users: response.data.data.users.map((user) => ({
+        ...user,
+        last_action: normalizeLastAction(user.last_action),
+      })),
+    };
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
     // Re-throw the error so TanStack Query can handle it properly

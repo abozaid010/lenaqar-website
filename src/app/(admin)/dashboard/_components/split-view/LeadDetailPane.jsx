@@ -19,7 +19,7 @@ import {
   removeLeadTags,
 } from "@/utils/api";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
-import { getActionLabel } from "@/utils/actions";
+import { getActionLabel, normalizeLastAction } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
 import { userKeys } from "@/utils/query-utils";
@@ -666,7 +666,7 @@ export default function LeadDetailPane({
   };
 
   const lastActionLabel = useMemo(
-    () => getActionLabel(leadSummary?.last_action || null, locale),
+    () => getActionLabel(normalizeLastAction(leadSummary?.last_action), locale),
     [leadSummary?.last_action, locale]
   );
 
