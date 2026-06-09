@@ -824,9 +824,13 @@ export default {
       maxPerMonthInvalid: "يجب أن يكون الحد الشهري بين 1 و 5000",
       unlinkPlatformConfirmTitle: "إزالة حساب واتساب هذا؟",
       unlinkPlatformConfirmMessage:
-        "سيؤدي هذا إلى إلغاء ربط حساب هذه المنصة. ستبقى الحسابات الأخرى المرتبطة.",
+        "سيؤدي هذا إلى إلغاء ربط حساب واتساب هذا. ستبقى الحسابات الأخرى المرتبطة.",
       allPlatformsLinked: "جميع المنصات المتاحة مرتبطة بالفعل.",
       linkedCountBadge: "{count} مرتبط",
+      multipleSameTypeHint: "يمكنك ربط عدة حسابات من نفس المزود.",
+      platformGroupTitle: "{platform} ({count})",
+      addPlatformAccount: "إضافة {platform}",
+      duplicateAccount: "يوجد حساب بهذه البيانات مرتبط بالفعل.",
     },
   },
   whatsappSend: {

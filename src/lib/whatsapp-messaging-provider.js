@@ -165,14 +165,48 @@ function isAccountLike(value) {
   );
 }
 
-function dedupeAccountsByPlatform(accounts) {
-  if (!Array.isArray(accounts)) return [];
-  const byPlatform = new Map();
-  for (const account of accounts) {
-    if (!account?.platform) continue;
-    byPlatform.set(account.platform, account);
+/** Stable key for one linked account (supports multiple accounts per platform). */
+export function getWhatsappAccountKey(account) {
+  if (!account?.platform) return "";
+
+  const platform = toInternalPlatform(account.platform) || account.platform;
+
+  if (isOpenwaProvider(platform)) {
+    const session = account.openwa_session_id?.trim();
+    if (session) return `${platform}:session:${session}`;
   }
-  return Array.from(byPlatform.values());
+
+  if (isUltramessageProvider(platform)) {
+    const instance = account.whatsapp_instance_id?.trim();
+    if (instance) return `${platform}:instance:${instance}`;
+  }
+
+  const phone = normalizeWhatsappPhone(account.whatsapp_number);
+  if (phone) return `${platform}:phone:${phone}`;
+
+  return `${platform}:unknown`;
+}
+
+/** Build account key from an unsaved form snapshot (add/edit validation). */
+export function getWhatsappAccountKeyFromSnapshot(snap) {
+  if (!snap?.platform) return "";
+  return getWhatsappAccountKey({
+    platform: snap.platform,
+    openwa_session_id: snap.openwa_session_id,
+    whatsapp_instance_id: snap.whatsapp_instance_id,
+    whatsapp_number: snap.whatsapp_number,
+  });
+}
+
+function dedupeAccountsByKey(accounts) {
+  if (!Array.isArray(accounts)) return [];
+  const byKey = new Map();
+  for (const account of accounts) {
+    const key = getWhatsappAccountKey(account);
+    if (!key || key.endsWith(":unknown")) continue;
+    if (!byKey.has(key)) byKey.set(key, account);
+  }
+  return Array.from(byKey.values());
 }
 
 /** Normalize linked_automated_whatsapp whether API returns array or legacy single object. */
@@ -180,7 +214,7 @@ export function normalizeLinkedAutomatedWhatsappList(linked) {
   if (linked == null) return [];
 
   if (Array.isArray(linked)) {
-    return dedupeAccountsByPlatform(
+    return dedupeAccountsByKey(
       linked.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean)
     );
   }
@@ -193,7 +227,7 @@ export function normalizeLinkedAutomatedWhatsappList(linked) {
 
     const values = Object.values(linked);
     if (values.some(isAccountLike)) {
-      return dedupeAccountsByPlatform(
+      return dedupeAccountsByKey(
         values.map(normalizeLinkedAutomatedWhatsapp).filter(Boolean)
       );
     }
@@ -202,17 +236,57 @@ export function normalizeLinkedAutomatedWhatsappList(linked) {
   return [];
 }
 
-/** Find account by internal or API platform alias. */
-export function getAccountByPlatform(accounts, platform) {
-  if (!platform || !Array.isArray(accounts)) return null;
-  const target = toInternalPlatform(platform) || platform;
+/** Find account by stable account key. */
+export function getAccountByKey(accounts, accountKey) {
+  if (!accountKey || !Array.isArray(accounts)) return null;
   return (
-    accounts.find((account) => account.platform === target) ?? null
+    accounts.find((account) => getWhatsappAccountKey(account) === accountKey) ??
+    null
   );
 }
 
+/** Find account by internal or API platform alias (first match; legacy). */
+export function getAccountByPlatform(accounts, platform) {
+  if (!platform || !Array.isArray(accounts)) return null;
+  if (String(platform).includes(":")) {
+    return getAccountByKey(accounts, platform);
+  }
+  const target = toInternalPlatform(platform) || platform;
+  return accounts.find((account) => account.platform === target) ?? null;
+}
+
+/** Human-readable subtitle for account cards and pickers. */
+export function formatWhatsappAccountSubtitle(account) {
+  if (!account) return "";
+  if (isOpenwaProvider(account.platform) && account.openwa_session_id?.trim()) {
+    return account.openwa_session_id.trim();
+  }
+  if (
+    isUltramessageProvider(account.platform) &&
+    account.whatsapp_instance_id?.trim()
+  ) {
+    return account.whatsapp_instance_id.trim();
+  }
+  return account.whatsapp_number?.trim() ?? "";
+}
+
+/** Query/body params for DELETE /client/whatsapp-instance. */
+export function buildWhatsappAccountDeleteParams(account) {
+  if (!account) return {};
+  const params = {
+    platform: toApiAccountPlatform(account.platform),
+  };
+  const phone = normalizeWhatsappPhone(account.whatsapp_number);
+  if (phone) params.whatsapp_number = phone;
+  const session = account.openwa_session_id?.trim();
+  if (session) params.openwa_session_id = session;
+  const instance = account.whatsapp_instance_id?.trim();
+  if (instance) params.whatsapp_instance_id = instance;
+  return params;
+}
+
 /** Resolve the account to use for outbound send from hook data + optional picker value. */
-export function resolveSelectedMessagingAccount(messagingData, selectedPlatform) {
+export function resolveSelectedMessagingAccount(messagingData, selectedAccountKey) {
   const accounts = messagingData?.accounts ?? [];
   if (accounts.length === 0) return null;
 
@@ -220,15 +294,15 @@ export function resolveSelectedMessagingAccount(messagingData, selectedPlatform)
     return messagingData?.defaultAccount ?? accounts[0];
   }
 
-  if (!selectedPlatform) return null;
-  return getAccountByPlatform(accounts, selectedPlatform);
+  if (!selectedAccountKey) return null;
+  return getAccountByKey(accounts, selectedAccountKey);
 }
 
 /** Best account for send: explicit pick, default, or first linked. */
-export function getEffectiveMessagingAccount(messagingData, selectedPlatform) {
+export function getEffectiveMessagingAccount(messagingData, selectedAccountKey) {
   if (!messagingData) return null;
   return (
-    resolveSelectedMessagingAccount(messagingData, selectedPlatform) ??
+    resolveSelectedMessagingAccount(messagingData, selectedAccountKey) ??
     messagingData.defaultAccount ??
     messagingData.accounts?.[0] ??
     null
@@ -239,7 +313,7 @@ export function getEffectiveMessagingAccount(messagingData, selectedPlatform) {
  * Validate hook data + optional picker before POST /whatsapp/send_messages.
  * Ensures platform and sender_phone_number are present for the API payload.
  */
-export function resolveWhatsappSendContext(messagingData, selectedPlatform) {
+export function resolveWhatsappSendContext(messagingData, selectedAccountKey) {
   if (!messagingData) {
     return {
       ok: false,
@@ -250,7 +324,7 @@ export function resolveWhatsappSendContext(messagingData, selectedPlatform) {
     };
   }
 
-  if (messagingData.hasMultipleAccounts && !selectedPlatform) {
+  if (messagingData.hasMultipleAccounts && !selectedAccountKey) {
     return {
       ok: false,
       code: WHATSAPP_PLATFORM_REQUIRED_CODE,
@@ -260,7 +334,7 @@ export function resolveWhatsappSendContext(messagingData, selectedPlatform) {
     };
   }
 
-  const account = getEffectiveMessagingAccount(messagingData, selectedPlatform);
+  const account = getEffectiveMessagingAccount(messagingData, selectedAccountKey);
   const transportPlatform = account ? getDefaultTransportPlatform(account) : null;
   const senderPhoneNumber = resolveSenderPhoneNumber(account);
 
@@ -466,7 +540,7 @@ export function isMessagingConfigReady(config) {
 
 /** Normalize linked accounts for outbound send (deduped; prefer send-ready). */
 export function getAccountsForOutboundSend(linked) {
-  const all = dedupeAccountsByPlatform(normalizeLinkedAutomatedWhatsappList(linked));
+  const all = dedupeAccountsByKey(normalizeLinkedAutomatedWhatsappList(linked));
   const ready = all.filter(isMessagingConfigReady);
   return ready.length > 0 ? ready : all;
 }

@@ -7,8 +7,16 @@ function buildBackendUrl(request) {
   const { searchParams } = new URL(request.url);
   const backendParams = new URLSearchParams();
   const platform = searchParams.get("platform");
+  const whatsappNumber = searchParams.get("whatsapp_number");
+  const openwaSessionId = searchParams.get("openwa_session_id");
+  const whatsappInstanceId = searchParams.get("whatsapp_instance_id");
   const targetClientId = searchParams.get("target_client_id");
   if (platform) backendParams.set("platform", platform);
+  if (whatsappNumber) backendParams.set("whatsapp_number", whatsappNumber);
+  if (openwaSessionId) backendParams.set("openwa_session_id", openwaSessionId);
+  if (whatsappInstanceId) {
+    backendParams.set("whatsapp_instance_id", whatsappInstanceId);
+  }
   if (targetClientId) backendParams.set("target_client_id", targetClientId);
   const qs = backendParams.toString();
   return `${API_BASE_URL}/client/whatsapp-instance${qs ? `?${qs}` : ""}`;

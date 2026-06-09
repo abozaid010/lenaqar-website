@@ -934,9 +934,14 @@ export default {
       maxPerMonthInvalid: "Monthly limit must be between 1 and 5000",
       unlinkPlatformConfirmTitle: "Remove this WhatsApp account?",
       unlinkPlatformConfirmMessage:
-        "This will unlink this platform account. Other linked accounts will remain.",
+        "This will unlink this WhatsApp account. Other linked accounts will remain.",
       allPlatformsLinked: "All available platforms are linked.",
       linkedCountBadge: "{count} linked",
+      multipleSameTypeHint:
+        "You can link multiple accounts of the same provider.",
+      platformGroupTitle: "{platform} ({count})",
+      addPlatformAccount: "Add {platform}",
+      duplicateAccount: "An account with these credentials is already linked.",
     },
   },
   whatsappSend: {

@@ -2276,14 +2276,22 @@ export async function upsertClientWhatsappInstance(account, { targetClientId } =
 }
 
 /**
- * DELETE /client/whatsapp-instance — unlink one platform or all accounts.
+ * DELETE /client/whatsapp-instance — unlink one account or all accounts.
  */
 export async function deleteClientWhatsappInstance({
   platform,
+  whatsapp_number,
+  openwa_session_id,
+  whatsapp_instance_id,
   targetClientId,
 } = {}) {
   const params = new URLSearchParams();
   if (platform) params.set("platform", platform);
+  if (whatsapp_number) params.set("whatsapp_number", whatsapp_number);
+  if (openwa_session_id) params.set("openwa_session_id", openwa_session_id);
+  if (whatsapp_instance_id) {
+    params.set("whatsapp_instance_id", whatsapp_instance_id);
+  }
   if (targetClientId) params.set("target_client_id", targetClientId);
   const qs = params.toString();
   const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;

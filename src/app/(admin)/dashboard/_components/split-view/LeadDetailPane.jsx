@@ -901,7 +901,11 @@ export default function LeadDetailPane({
               key={userId}
               userId={userId}
               clientID={clientId}
-              initialEnabled={data.data.toggle_ai_auto_reply}
+              initialEnabled={
+                leadSummary?.ai_reply_enabled ??
+                data.data.ai_reply_enabled ??
+                data.data.toggle_ai_auto_reply
+              }
             />
           ) : null}
           {actionsPermissionReady &&
