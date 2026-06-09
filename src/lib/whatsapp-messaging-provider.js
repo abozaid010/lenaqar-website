@@ -5,6 +5,7 @@ import {
   WHATSAPP_MESSAGING_PROVIDERS,
 } from "@/constants/whatsapp-messaging";
 import { sendWhatsappMessages } from "@/utils/api";
+import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 
 /** API transport values for POST /whatsapp/send_messages */
 export const WHATSAPP_TRANSPORT_PLATFORMS = {
@@ -545,12 +546,13 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
 export function buildWhatsappSendMessage(message, defaultPlatform = null) {
   if (!message || typeof message !== "object") return null;
 
+  const recipient = resolveWhatsappRecipientFields(message);
   const normalized = {
-    phone_number: String(message.phone_number || "").trim(),
+    ...recipient,
     message: String(message.message || "").trim(),
   };
 
-  if (!normalized.phone_number || !normalized.message) {
+  if (!recipient || !normalized.message) {
     return null;
   }
 

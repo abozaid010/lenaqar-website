@@ -103,6 +103,7 @@ export default function ChatClientWrapper({ userId }) {
 
   // Get phone number from data (try different possible field names)
   const phoneNumber = data?.data?.phoneNumber || data?.data?.phone_number || null;
+  const chatId = data?.data?.chat_id || null;
 
   return (
     <>
@@ -190,6 +191,7 @@ export default function ChatClientWrapper({ userId }) {
           <SendNewMessageForm
             userId={userId}
             phoneNumber={phoneNumber}
+            chatId={chatId}
             clientId={data.data.client_id}
             onNewMessage={onNewMessage}
           />

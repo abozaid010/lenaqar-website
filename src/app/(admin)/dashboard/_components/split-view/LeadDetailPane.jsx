@@ -200,6 +200,9 @@ export default function LeadDetailPane({
     data?.data?.phone_number ||
     null;
 
+  const chatId =
+    leadSummary?.chat_id || data?.data?.chat_id || null;
+
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
     : null;
@@ -956,6 +959,7 @@ export default function LeadDetailPane({
               <SendNewMessageForm
                 userId={userId}
                 phoneNumber={phoneNumber}
+                chatId={chatId}
                 clientId={clientId}
                 onNewMessage={onNewMessage}
               />

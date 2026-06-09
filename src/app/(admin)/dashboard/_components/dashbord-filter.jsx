@@ -113,7 +113,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       toast.error(
         translate(
           "dashboardFilter.bulkWhatsapp.noRecipients",
-          "No leads with valid phone numbers to send."
+          "No leads with a phone number or WhatsApp chat to send."
         )
       );
       return;

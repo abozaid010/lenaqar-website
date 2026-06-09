@@ -82,6 +82,7 @@ export default function ScheduleUserDetailsDialog({
     () => ({
       name: appointment?.name || "",
       phone_number: appointment?.phone_number || "",
+      chat_id: appointment?.chat_id || "",
       last_action: appointment?.action || null,
       tags: appointment?.tags || [],
       company_name: appointment?.company_name,
@@ -141,6 +142,9 @@ export default function ScheduleUserDetailsDialog({
     data?.data?.phone_number ||
     leadSummary?.phone_number ||
     null;
+
+  const chatId =
+    data?.data?.chat_id || leadSummary?.chat_id || null;
 
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
@@ -321,6 +325,7 @@ export default function ScheduleUserDetailsDialog({
               <SendNewMessageForm
                 userId={userId}
                 phoneNumber={phoneNumber}
+                chatId={chatId}
                 clientId={data?.data?.client_id}
                 onNewMessage={onNewMessage}
               />

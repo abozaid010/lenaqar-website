@@ -14,8 +14,8 @@ import {
   WHATSAPP_PLATFORM_REQUIRED_CODE,
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
+import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { sendClientMessage } from "@/utils/api";
-import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -51,6 +51,7 @@ function getSendContextErrorMessage(code, translate) {
 export default function SendNewMessageForm({
   userId,
   phoneNumber,
+  chatId,
   clientId,
   onNewMessage,
 }) {
@@ -74,15 +75,18 @@ export default function SendNewMessageForm({
   } = useMessagingProviderConfig(resolvedClientId);
 
   const accounts = messagingData?.accounts ?? [];
-  const normalizedPhone = phoneNumber
-    ? normalizeCampaignPhoneParam(phoneNumber)
-    : null;
-  const usesWhatsappApi = Boolean(normalizedPhone);
+  const resolvedChatId = chatId ? String(chatId).trim() : "";
+  const resolvedPhone = phoneNumber ? String(phoneNumber).trim() : "";
+  const whatsappRecipient = resolveWhatsappRecipientFields({
+    chat_id: resolvedChatId,
+    phone_number: resolvedPhone,
+  });
+  const usesWhatsappApi = Boolean(whatsappRecipient);
   const sendContext = usesWhatsappApi
     ? resolveWhatsappSendContext(messagingData, selectedPlatform)
     : null;
 
-  const canSend = Boolean(message.trim() && (normalizedPhone || userId));
+  const canSend = Boolean(message.trim() && (usesWhatsappApi || userId));
   const messagingReady =
     !usesWhatsappApi || (!isMessagingLoading && !isMessagingFetching);
   const canSendWhatsapp =
@@ -180,14 +184,14 @@ export default function SendNewMessageForm({
             clientId: resolvedClientId,
             platform: refreshedContext.transportPlatform,
             senderPhoneNumber: refreshedContext.senderPhoneNumber,
-            recipientPhone: normalizedPhone,
+            recipient: whatsappRecipient,
           });
 
           await sendWhatsappWithClientConfig({
             config: refreshedContext.account,
             messages: [
               {
-                phone_number: normalizedPhone,
+                ...whatsappRecipient,
                 message: text,
                 platform: refreshedContext.transportPlatform,
                 sender_phone_number: refreshedContext.senderPhoneNumber,
@@ -219,14 +223,14 @@ export default function SendNewMessageForm({
             clientId: resolvedClientId,
             platform: context.transportPlatform,
             senderPhoneNumber: context.senderPhoneNumber,
-            recipientPhone: normalizedPhone,
+            recipient: whatsappRecipient,
           });
 
           await sendWhatsappWithClientConfig({
             config: context.account,
             messages: [
               {
-                phone_number: normalizedPhone,
+                ...whatsappRecipient,
                 message: text,
                 platform: context.transportPlatform,
                 sender_phone_number: context.senderPhoneNumber,
@@ -278,7 +282,7 @@ export default function SendNewMessageForm({
     }
   };
 
-  const canType = Boolean(normalizedPhone || userId);
+  const canType = Boolean(usesWhatsappApi || userId);
 
   return (
     <form

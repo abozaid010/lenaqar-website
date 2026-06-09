@@ -1,0 +1,89 @@
+import { isPossiblePhoneNumber } from "libphonenumber-js/min";
+import { phoneToE164 } from "@/components/phone/phone-utils";
+
+const WHATSAPP_CHAT_ID_PATTERN = /@(lid|c\.us|s\.whatsapp\.net|g\.us)$/i;
+
+/**
+ * True when the value looks like a WhatsApp chat id (e.g. 26405727404146@lid).
+ */
+export function isWhatsappChatId(value) {
+  const trimmed = String(value ?? "").trim();
+  if (!trimmed) return false;
+  return trimmed.includes("@") || WHATSAPP_CHAT_ID_PATTERN.test(trimmed);
+}
+
+/**
+ * Normalize a valid phone for POST /whatsapp/send_messages (digits only, no "+").
+ */
+export function toWhatsappApiPhoneDigits(raw, defaultCountry = "EG") {
+  const trimmed = String(raw ?? "").trim();
+  if (!trimmed || isWhatsappChatId(trimmed)) return null;
+
+  const e164 = phoneToE164(trimmed, defaultCountry);
+  if (!e164 || !isPossiblePhoneNumber(e164, defaultCountry)) {
+    return null;
+  }
+
+  return e164.replace(/^\+/, "");
+}
+
+/**
+ * Resolve recipient fields for POST /whatsapp/send_messages.
+ * Uses phone_number when the value is a valid phone; otherwise chat_id.
+ *
+ * @returns {{ phone_number: string } | { chat_id: string } | null}
+ */
+export function resolveWhatsappRecipientFields(
+  { phone_number, chat_id } = {},
+  defaultCountry = "EG",
+) {
+  const explicitChatId = String(chat_id ?? "").trim();
+  if (explicitChatId) {
+    return { chat_id: explicitChatId };
+  }
+
+  const raw = String(phone_number ?? "").trim();
+  if (!raw) return null;
+
+  if (isWhatsappChatId(raw)) {
+    return { chat_id: raw };
+  }
+
+  const apiPhone = toWhatsappApiPhoneDigits(raw, defaultCountry);
+  if (apiPhone) {
+    return { phone_number: apiPhone };
+  }
+
+  return { chat_id: raw };
+}
+
+/** Stable key for deduplicating WhatsApp recipients in bulk sends. */
+export function getWhatsappRecipientDedupeKey(recipient) {
+  if (!recipient) return "";
+  return (
+    String(recipient.chat_id ?? "").trim() ||
+    String(recipient.phone_number ?? "").trim()
+  );
+}
+
+/**
+ * Build a lead/dashboard row into a WhatsApp recipient ({ chat_id } or { phone_number }).
+ */
+export function leadToWhatsappRecipient(lead) {
+  if (!lead) return null;
+
+  const resolved = resolveWhatsappRecipientFields({
+    chat_id: lead.chat_id,
+    phone_number: lead.phone_number,
+  });
+  if (!resolved) return null;
+
+  const user_name = String(lead.name || "").trim();
+  const fallback =
+    resolved.chat_id || resolved.phone_number || "";
+
+  return {
+    ...resolved,
+    user_name: user_name || fallback,
+  };
+}

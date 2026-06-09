@@ -15,6 +15,7 @@ import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-hand
 import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
 import { cleanRequirementsPayload } from "./cleanRequirements";
+import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -1898,7 +1899,7 @@ export async function sendCampaignReply({
  * 
  * @param {Object} options
  * @param {Array} options.messages - Array of message objects:
- *   - phone_number (required): E.164 or normalized phone
+ *   - phone_number or chat_id (one required): recipient phone or WhatsApp chat id
  *   - message (required): Text body
  *   - user_name (optional): Display name
  *   - platform (optional): Per-message override (openwa | ultramsg | whatsapp)
@@ -1921,8 +1922,11 @@ export async function sendWhatsappMessages({
   // Validate each message has required fields
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
-    if (!msg.phone_number) {
-      throw new Error(`Message at index ${i} missing required field: phone_number`);
+    const recipient = resolveWhatsappRecipientFields(msg);
+    if (!recipient) {
+      throw new Error(
+        `Message at index ${i} missing recipient: provide phone_number or chat_id`,
+      );
     }
     // Message is required unless template_name is provided (template-based messaging)
     if (!msg.message && !msg.template_name) {
@@ -1934,8 +1938,9 @@ export async function sendWhatsappMessages({
     // Build payload with normalized messages
     const payload = {
       messages: messages.map((msg) => {
+        const recipient = resolveWhatsappRecipientFields(msg);
         const normalized = {
-          phone_number: String(msg.phone_number).trim(),
+          ...recipient,
           message: msg.message ? String(msg.message).trim() : "",
         };
 
