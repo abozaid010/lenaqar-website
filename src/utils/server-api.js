@@ -1,5 +1,5 @@
 import axios from "axios";
-import { API_BASE_URL } from "@/lib/apiConfig";
+import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 
 export async function loginUser(credentials) {
     const isDev = process.env.NODE_ENV === "development";
@@ -19,37 +19,56 @@ export async function loginUser(credentials) {
         });
     }
 
+    const headers = {
+        Accept: "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+    };
+    if (PUBLIC_X_API_KEY) {
+        headers["X-API-Key"] = PUBLIC_X_API_KEY;
+    }
+
     let response;
     try {
         response = await axios.post(url, params, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            validateStatus: status => status >= 200 && status < 500
+            headers,
+            validateStatus: (status) => status >= 200 && status < 500,
+            timeout: 30000,
         });
-    } finally {
+    } catch (error) {
         if (isDev) {
-            const ms = Date.now() - startedAt;
-            const body = response?.data;
-            const data = body?.data;
-            const dataKeys =
-                data && typeof data === "object" && !Array.isArray(data)
-                    ? Object.keys(data).filter((k) => !String(k).includes("token"))
-                    : null;
             console.log("[auth][login][response]", {
                 method: "POST",
                 url,
-                status: response?.status ?? null,
-                durationMs: ms,
-                ok: Boolean(body?.status),
-                message: body?.message ?? null,
-                dataKeys,
+                status: null,
+                durationMs: Date.now() - startedAt,
+                ok: false,
+                message: error?.message ?? null,
+                dataKeys: null,
             });
         }
+        throw error;
     }
 
-    if (!response.data) {
+    if (isDev) {
+        const ms = Date.now() - startedAt;
+        const body = response?.data;
+        const data = body?.data;
+        const dataKeys =
+            data && typeof data === "object" && !Array.isArray(data)
+                ? Object.keys(data).filter((k) => !String(k).includes("token"))
+                : null;
+        console.log("[auth][login][response]", {
+            method: "POST",
+            url,
+            status: response?.status ?? null,
+            durationMs: ms,
+            ok: Boolean(body?.status),
+            message: body?.message ?? body?.error_message ?? null,
+            dataKeys,
+        });
+    }
+
+    if (!response?.data) {
         throw new Error("No data received from server");
     }
 

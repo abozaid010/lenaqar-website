@@ -171,7 +171,6 @@ export default function ChatClientWrapper({ userId }) {
           <ToggleReplyType
             userId={userId}
             clientID={data.data.client_id}
-            source={data.data.source || null}
           />
           <Link
             href={`/dashboard`}

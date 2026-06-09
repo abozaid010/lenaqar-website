@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useActionState, useEffect } from "react";
+import { useActionState, useEffect } from "react";
 import { loginAction } from "../_actions/actions";
 import { Loader2 } from "lucide-react";
 import { toast } from "react-hot-toast";
@@ -14,10 +14,6 @@ const initialState = {
 export default function LoginForm() {
   const { t } = useI18n();
   const [state, action, pending] = useActionState(loginAction, initialState);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
 
   useEffect(() => {
     if (state.success) {
@@ -29,15 +25,15 @@ export default function LoginForm() {
         window.location.assign(destination);
       }, 350);
     } else if (state.success === false) {
-      toast.error(t.login.errorMessage);
+      toast.error(state.message || t.login.errorMessage);
     }
-  }, [state]);
+  }, [state.success, state.message, state.clientId, t]);
 
   return (
     <form action={action} className="space-y-3">
       <div>
         <label
-          htmlFor="username"
+          htmlFor="email"
           className="block text-sm font-medium text-gray-700 mb-1"
         >
           {t.login.usernameLabel}
@@ -46,10 +42,7 @@ export default function LoginForm() {
           id="email"
           name="email"
           type="email"
-          value={formData.email}
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
+          autoComplete="username"
           required
           className="w-full px-4 py-2 rounded-lg border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
           placeholder={t.login.usernamePlaceholder}
@@ -65,12 +58,9 @@ export default function LoginForm() {
         </label>
         <input
           id="password"
-          type="password"
-          value={formData.password}
           name="password"
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
+          type="password"
+          autoComplete="current-password"
           required
           className="w-full px-4 py-2 rounded-lg border bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
           placeholder={t.login.passwordPlaceholder}
@@ -78,8 +68,9 @@ export default function LoginForm() {
       </div>
 
       <button
+        type="submit"
         disabled={pending}
-        className="w-full flex cursor-pointer justify-center py-2 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
+        className="w-full flex cursor-pointer justify-center py-2 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 disabled:opacity-70"
       >
         {pending ? <Loader2 className="animate-spin" /> : t.login.signInButton}
       </button>

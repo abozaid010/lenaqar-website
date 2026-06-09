@@ -4,6 +4,10 @@ import { cookies } from "next/headers";
 import { loginUser } from "@/utils/server-api";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getServerCookieOptions } from "@/lib/CookieConfig";
+import {
+  getErrorMessage,
+  isSuccessResponse,
+} from "@/utils/api-response-handler";
 
 export async function loginAction(prevState, formData) {
   // Input validation and sanitization
@@ -34,10 +38,13 @@ export async function loginAction(prevState, formData) {
       password
     });
     // Handle non-successful responses
-    if (!response.status) {
+    if (!isSuccessResponse(response)) {
       return {
         success: false,
-        message: response.message || "Login failed. Please check your credentials."
+        message: getErrorMessage(
+          response,
+          "Login failed. Please check your credentials."
+        ),
       };
     }
 

@@ -898,7 +898,6 @@ export default function LeadDetailPane({
               key={userId}
               userId={userId}
               clientID={clientId}
-              source={data.data.source || null}
               initialEnabled={data.data.toggle_ai_auto_reply}
             />
           ) : null}

@@ -20,7 +20,6 @@ function toReplyMode(enabled) {
 export default function ToggleReplyType({
   userId,
   clientID,
-  source,
   initialEnabled,
 }) {
   const [autoReply, setAutoReply] = useState(() => toReplyMode(initialEnabled));
@@ -44,7 +43,6 @@ export default function ToggleReplyType({
         userId,
         clientID,
         nextValue === "auto_reply",
-        source,
       );
 
       if (result.success) {

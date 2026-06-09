@@ -1269,12 +1269,11 @@ export async function deleteEmployee(id) {
   await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
 }
 
-export async function toggleAutoReply(user_id, client_id, value, source) {
+export async function toggleAutoReply(user_id, client_id, value) {
   const payload = {
     user_id,
     client_id,
     toggle_ai_auto_reply: value,
-    platform: source,
   };
 
   try {
