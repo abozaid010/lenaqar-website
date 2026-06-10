@@ -15,6 +15,8 @@ import { withErrorHandling, createApiError, ERROR_TYPES } from "./api-error-hand
 import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
 import { cleanRequirementsPayload } from "./cleanRequirements";
+import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+import { normalizeLastAction } from "@/utils/actions";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -102,7 +104,14 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
     if (!response.data.data.users || !Array.isArray(response.data.data.users)) {
       throw new Error("Expected users array but received invalid data format");
     }
-    return response.data.data;
+
+    return {
+      ...response.data.data,
+      users: response.data.data.users.map((user) => ({
+        ...user,
+        last_action: normalizeLastAction(user.last_action),
+      })),
+    };
   } catch (error) {
     console.error("Failed to fetch users:", error.message);
     // Re-throw the error so TanStack Query can handle it properly
@@ -1269,12 +1278,11 @@ export async function deleteEmployee(id) {
   await axiosInstance.delete(`sales-employees/delete-employee/${id}`);
 }
 
-export async function toggleAutoReply(user_id, client_id, value, source) {
+export async function toggleAutoReply(user_id, client_id, value) {
   const payload = {
     user_id,
     client_id,
     toggle_ai_auto_reply: value,
-    platform: source,
   };
 
   try {
@@ -1899,7 +1907,7 @@ export async function sendCampaignReply({
  * 
  * @param {Object} options
  * @param {Array} options.messages - Array of message objects:
- *   - phone_number (required): E.164 or normalized phone
+ *   - phone_number or chat_id (one required): recipient phone or WhatsApp chat id
  *   - message (required): Text body
  *   - user_name (optional): Display name
  *   - platform (optional): Per-message override (openwa | ultramsg | whatsapp)
@@ -1922,8 +1930,11 @@ export async function sendWhatsappMessages({
   // Validate each message has required fields
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
-    if (!msg.phone_number) {
-      throw new Error(`Message at index ${i} missing required field: phone_number`);
+    const recipient = resolveWhatsappRecipientFields(msg);
+    if (!recipient) {
+      throw new Error(
+        `Message at index ${i} missing recipient: provide phone_number or chat_id`,
+      );
     }
     // Message is required unless template_name is provided (template-based messaging)
     if (!msg.message && !msg.template_name) {
@@ -1935,8 +1946,9 @@ export async function sendWhatsappMessages({
     // Build payload with normalized messages
     const payload = {
       messages: messages.map((msg) => {
+        const recipient = resolveWhatsappRecipientFields(msg);
         const normalized = {
-          phone_number: String(msg.phone_number).trim(),
+          ...recipient,
           message: msg.message ? String(msg.message).trim() : "",
         };
 
@@ -2272,14 +2284,22 @@ export async function upsertClientWhatsappInstance(account, { targetClientId } =
 }
 
 /**
- * DELETE /client/whatsapp-instance — unlink one platform or all accounts.
+ * DELETE /client/whatsapp-instance — unlink one account or all accounts.
  */
 export async function deleteClientWhatsappInstance({
   platform,
+  whatsapp_number,
+  openwa_session_id,
+  whatsapp_instance_id,
   targetClientId,
 } = {}) {
   const params = new URLSearchParams();
   if (platform) params.set("platform", platform);
+  if (whatsapp_number) params.set("whatsapp_number", whatsapp_number);
+  if (openwa_session_id) params.set("openwa_session_id", openwa_session_id);
+  if (whatsapp_instance_id) {
+    params.set("whatsapp_instance_id", whatsapp_instance_id);
+  }
   if (targetClientId) params.set("target_client_id", targetClientId);
   const qs = params.toString();
   const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;

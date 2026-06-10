@@ -12,7 +12,7 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
-import { getActionLabel } from "@/utils/actions";
+import { getActionLabel, normalizeLastAction } from "@/utils/actions";
 import { formatCurrency } from "@/utils/formatters";
 import {
   addLeadTags,
@@ -82,7 +82,8 @@ export default function ScheduleUserDetailsDialog({
     () => ({
       name: appointment?.name || "",
       phone_number: appointment?.phone_number || "",
-      last_action: appointment?.action || null,
+      chat_id: appointment?.chat_id || "",
+      last_action: normalizeLastAction(appointment?.action),
       tags: appointment?.tags || [],
       company_name: appointment?.company_name,
       requirement_name: appointment?.requirement_name,
@@ -142,6 +143,9 @@ export default function ScheduleUserDetailsDialog({
     leadSummary?.phone_number ||
     null;
 
+  const chatId =
+    data?.data?.chat_id || leadSummary?.chat_id || null;
+
   const phoneE164ForLinks = phoneNumber
     ? phoneToE164(phoneNumber, "EG") || phoneNumber
     : null;
@@ -168,8 +172,10 @@ export default function ScheduleUserDetailsDialog({
   const lastActionLabel = useMemo(
     () =>
       getActionLabel(
-        leadSummary?.last_action || appointment?.action || null,
-        locale
+        normalizeLastAction(
+          leadSummary?.last_action ?? appointment?.action,
+        ),
+        locale,
       ),
     [leadSummary?.last_action, appointment?.action, locale]
   );
@@ -321,6 +327,7 @@ export default function ScheduleUserDetailsDialog({
               <SendNewMessageForm
                 userId={userId}
                 phoneNumber={phoneNumber}
+                chatId={chatId}
                 clientId={data?.data?.client_id}
                 onNewMessage={onNewMessage}
               />

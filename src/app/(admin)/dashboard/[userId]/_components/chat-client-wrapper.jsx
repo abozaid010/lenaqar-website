@@ -103,6 +103,7 @@ export default function ChatClientWrapper({ userId }) {
 
   // Get phone number from data (try different possible field names)
   const phoneNumber = data?.data?.phoneNumber || data?.data?.phone_number || null;
+  const chatId = data?.data?.chat_id || null;
 
   return (
     <>
@@ -171,7 +172,9 @@ export default function ChatClientWrapper({ userId }) {
           <ToggleReplyType
             userId={userId}
             clientID={data.data.client_id}
-            source={data.data.source || null}
+            initialEnabled={
+              data.data.ai_reply_enabled ?? data.data.toggle_ai_auto_reply
+            }
           />
           <Link
             href={`/dashboard`}
@@ -191,6 +194,7 @@ export default function ChatClientWrapper({ userId }) {
           <SendNewMessageForm
             userId={userId}
             phoneNumber={phoneNumber}
+            chatId={chatId}
             clientId={data.data.client_id}
             onNewMessage={onNewMessage}
           />

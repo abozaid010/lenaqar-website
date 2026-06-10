@@ -1,7 +1,11 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import { getPlatformLabelKey } from "@/lib/whatsapp-messaging-provider";
+import {
+  formatWhatsappAccountSubtitle,
+  getPlatformLabelKey,
+  getWhatsappAccountKey,
+} from "@/lib/whatsapp-messaging-provider";
 
 const agentSelectCls =
   "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white";
@@ -54,15 +58,21 @@ export default function WhatsappPlatformSelect({
           {translate("whatsappSend.selectPlatformPlaceholder", "Choose an account…")}
         </option>
         {accounts.map((account) => {
+          const accountKey = getWhatsappAccountKey(account);
           const labelKey = getPlatformLabelKey(account.platform);
           const platformName = translate(
             labelKey,
             platformDefaults[account.platform] ?? account.platform
           );
-          const phone = account.whatsapp_number ? ` (${account.whatsapp_number})` : "";
+          const subtitle = formatWhatsappAccountSubtitle(account);
+          const phone = account.whatsapp_number ? ` · ${account.whatsapp_number}` : "";
+          const detail = subtitle && subtitle !== account.whatsapp_number
+            ? ` · ${subtitle}`
+            : "";
           return (
-            <option key={account.platform} value={account.platform}>
+            <option key={accountKey} value={accountKey}>
               {platformName}
+              {detail}
               {phone}
             </option>
           );

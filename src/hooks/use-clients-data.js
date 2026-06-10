@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useMutation, useQuery, useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { fetchAdminClients, fetchClientPermissionSchema, updateAdminClient } from "@/utils/api";
 import { filterBySearchQuery } from "@/utils/search-utils";
 import { clientKeys } from "@/utils/query-utils";
@@ -111,12 +111,7 @@ export function useClientPermissionSchema(enabled = true) {
 }
 
 export function useUpdateClient() {
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: ({ clientId, payload }) => updateAdminClient(clientId, payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clientKeys.all });
-    },
   });
 }

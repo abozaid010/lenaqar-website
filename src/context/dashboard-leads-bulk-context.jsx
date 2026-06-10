@@ -7,19 +7,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
+import {
+  getWhatsappRecipientDedupeKey,
+  leadToWhatsappRecipient,
+} from "@/lib/whatsapp-recipient";
 
 const DashboardLeadsBulkContext = createContext(null);
 
-export function leadToWhatsappRecipient(lead) {
-  if (!lead?.phone_number) return null;
-  const phone_number = normalizeCampaignPhoneParam(lead.phone_number);
-  if (!phone_number) return null;
-  return {
-    phone_number,
-    user_name: String(lead.name || "").trim() || phone_number,
-  };
-}
+export { leadToWhatsappRecipient };
 
 export function DashboardLeadsBulkProvider({ children }) {
   const [visibleLeads, setVisibleLeads] = useState([]);
@@ -72,8 +67,9 @@ export function DashboardLeadsBulkProvider({ children }) {
     const recipients = [];
     for (const lead of source) {
       const recipient = leadToWhatsappRecipient(lead);
-      if (!recipient || seen.has(recipient.phone_number)) continue;
-      seen.add(recipient.phone_number);
+      const dedupeKey = getWhatsappRecipientDedupeKey(recipient);
+      if (!recipient || !dedupeKey || seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
       recipients.push(recipient);
     }
     return recipients;

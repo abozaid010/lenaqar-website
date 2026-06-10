@@ -14,13 +14,12 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 function toReplyMode(enabled) {
-  return enabled === false ? "manual_reply" : "auto_reply";
+  return enabled === true ? "auto_reply" : "manual_reply";
 }
 
 export default function ToggleReplyType({
   userId,
   clientID,
-  source,
   initialEnabled,
 }) {
   const [autoReply, setAutoReply] = useState(() => toReplyMode(initialEnabled));
@@ -44,7 +43,6 @@ export default function ToggleReplyType({
         userId,
         clientID,
         nextValue === "auto_reply",
-        source,
       );
 
       if (result.success) {

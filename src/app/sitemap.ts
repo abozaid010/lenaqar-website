@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { SITE_URL } from './metadata';
-import { API_BASE_URL } from '@/lib/apiConfig';
+import { API_BASE_URL, PUBLIC_X_API_KEY } from '@/lib/apiConfig';
 import { SEO_BLOG_POST_KEY_TO_SLUG } from '@/content/seo';
 
 const CHAT_URL = 'https://chat.lenaai.net';
@@ -10,9 +10,15 @@ const MAIN_SITE_URL = SITE_URL;
 // These are the properties that the AI agent talks about, recommends, shows master plans and payment plans for
 async function getPublicUnits() {
   try {
+    const headers: HeadersInit = { accept: 'application/json' };
+    if (PUBLIC_X_API_KEY) {
+      headers['X-API-Key'] = PUBLIC_X_API_KEY;
+    }
+
     const response = await fetch(
       `${API_BASE_URL}/public/units?limit=1000`,
       {
+        headers,
         next: { revalidate: 3600 }, // Revalidate every hour
       }
     );

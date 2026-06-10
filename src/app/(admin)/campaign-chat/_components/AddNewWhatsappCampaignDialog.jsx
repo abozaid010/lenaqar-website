@@ -19,6 +19,7 @@ import {
   toTransportPlatform,
   WHATSAPP_NOT_CONFIGURED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
+import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 const DEFAULT_CONTACTS_JSON =
   '[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]';
@@ -346,7 +347,10 @@ const AddNewWhatsappCampaignDialog = ({
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
     const messages = contactList.map((contact) => ({
-      phone_number: contact.phone_number || contact.phone,
+      ...resolveWhatsappRecipientFields({
+        chat_id: contact.chat_id,
+        phone_number: contact.phone_number || contact.phone,
+      }),
       message: "",
       user_name: contact.user_name || contact.name || "",
       template_name: templateName,
@@ -369,7 +373,7 @@ const AddNewWhatsappCampaignDialog = ({
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
     const messages = recipientsProp.map((recipient) => ({
-      phone_number: recipient.phone_number,
+      ...resolveWhatsappRecipientFields(recipient),
       message: automationMessage.trim(),
       user_name: recipient.user_name || "",
       platform: transportPlatform,

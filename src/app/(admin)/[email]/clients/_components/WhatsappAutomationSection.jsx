@@ -25,14 +25,17 @@ import {
   WHATSAPP_MESSAGING_PROVIDERS,
 } from "@/constants/whatsapp-messaging";
 import {
+  buildWhatsappAccountDeleteParams,
   buildWhatsappInstancePayload,
+  formatWhatsappAccountSubtitle,
   getPlatformLabelKey,
+  getWhatsappAccountKey,
+  getWhatsappAccountKeyFromSnapshot,
   isOpenwaProvider,
   isUltramessageProvider,
   isWhatsappCloudApiProvider,
   normalizeLinkedAutomatedWhatsappList,
   normalizeWhatsappPhone,
-  toApiAccountPlatform,
 } from "@/lib/whatsapp-messaging-provider";
 import {
   deleteClientWhatsappInstance,
@@ -98,8 +101,7 @@ function formFromAccount(account, { clearToken = true } = {}) {
 function accountsSyncKey(linked) {
   return JSON.stringify(
     normalizeLinkedAutomatedWhatsappList(linked).map((a) => [
-      a.platform,
-      a.whatsapp_number,
+      getWhatsappAccountKey(a),
       a.whatsapp_agent,
       a.max_messages_per_day,
       a.max_messages_per_month,
@@ -119,8 +121,15 @@ function extractAccountsFromResponse(result) {
   return null;
 }
 
+const PLATFORM_DEFAULT_LABELS = {
+  [WHATSAPP_MESSAGING_PROVIDERS.OPENWA]: "OpenWA",
+  [WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API]: "WhatsApp Cloud API",
+  [WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE]: "UltraMessage",
+};
+
 function LinkedAccountCard({
   account,
+  accountKey,
   agentLabel,
   onEdit,
   onUnlink,
@@ -128,11 +137,11 @@ function LinkedAccountCard({
   translate,
 }) {
   const platformLabelKey = getPlatformLabelKey(account.platform);
-  const platformDefaults = {
-    [WHATSAPP_MESSAGING_PROVIDERS.OPENWA]: "OpenWA",
-    [WHATSAPP_MESSAGING_PROVIDERS.WHATSAPP_CLOUD_API]: "WhatsApp Cloud API",
-    [WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE]: "UltraMessage",
-  };
+  const subtitle = formatWhatsappAccountSubtitle(account);
+  const showSubtitle =
+    subtitle &&
+    subtitle !== account.whatsapp_number &&
+    !subtitle.startsWith("+");
 
   const todayUsed = account.current_messages_sent_today ?? 0;
   const todayMax = account.max_messages_per_day ?? 60;
@@ -151,7 +160,10 @@ function LinkedAccountCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-semibold text-gray-900">
-              {translate(platformLabelKey, platformDefaults[account.platform])}
+              {translate(
+                platformLabelKey,
+                PLATFORM_DEFAULT_LABELS[account.platform]
+              )}
             </span>
             {pendingUnlink ? (
               <span className="text-xs font-medium bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">
@@ -166,21 +178,30 @@ function LinkedAccountCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-gray-700 mt-0.5">{account.whatsapp_number}</p>
+          {account.whatsapp_number ? (
+            <p className="text-sm text-gray-700 mt-0.5" dir="ltr">
+              {account.whatsapp_number}
+            </p>
+          ) : null}
+          {showSubtitle ? (
+            <p className="text-xs text-gray-500 font-mono truncate" dir="ltr">
+              {subtitle}
+            </p>
+          ) : null}
           <p className="text-xs text-gray-500">{agentLabel}</p>
         </div>
         {!pendingUnlink && (
           <div className="flex shrink-0 gap-2">
             <button
               type="button"
-              onClick={() => onEdit(account.platform)}
+              onClick={() => onEdit(accountKey)}
               className="px-3 py-1.5 text-xs font-medium text-primary border border-primary/30 rounded-md hover:bg-primary/5"
             >
               {translate("editClient.whatsapp.editAccount", "Edit")}
             </button>
             <button
               type="button"
-              onClick={() => onUnlink(account.platform)}
+              onClick={() => onUnlink(accountKey)}
               className="px-3 py-1.5 text-xs font-medium text-red-600 border border-red-200 rounded-md hover:bg-red-50"
             >
               {translate("editClient.whatsapp.unlinkButton", "Unlink")}
@@ -211,6 +232,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const [accounts, setAccounts] = useState([]);
   const [pendingUnlinks, setPendingUnlinks] = useState(() => new Set());
   const [formMode, setFormMode] = useState(null);
+  const [editingAccountKey, setEditingAccountKey] = useState(null);
   const [form, setForm] = useState(EMPTY_WHATSAPP_FORM);
   const [isFormLinked, setIsFormLinked] = useState(false);
   const [hasSavedToken, setHasSavedToken] = useState(false);
@@ -229,30 +251,36 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     [accounts]
   );
 
-  const linkedPlatforms = useMemo(
+  const visibleAccounts = useMemo(
     () =>
-      new Set(
-        safeAccounts
-          .filter((a) => !pendingUnlinks.has(a.platform))
-          .map((a) => a.platform)
+      safeAccounts.filter(
+        (a) => !pendingUnlinks.has(getWhatsappAccountKey(a))
       ),
     [safeAccounts, pendingUnlinks]
   );
 
-  const availablePlatforms = useMemo(
-    () => ALL_PLATFORMS.filter((p) => !linkedPlatforms.has(p)),
-    [linkedPlatforms]
-  );
-
-  const visibleAccounts = useMemo(
-    () => safeAccounts.filter((a) => !pendingUnlinks.has(a.platform)),
-    [safeAccounts, pendingUnlinks]
-  );
+  const groupedAccounts = useMemo(() => {
+    const groups = new Map();
+    for (const account of safeAccounts) {
+      const key = getWhatsappAccountKey(account);
+      if (!groups.has(account.platform)) {
+        groups.set(account.platform, []);
+      }
+      groups.get(account.platform).push({ account, accountKey: key });
+    }
+    return ALL_PLATFORMS.filter((platform) => groups.has(platform)).map(
+      (platform) => ({
+        platform,
+        items: groups.get(platform),
+      })
+    );
+  }, [safeAccounts]);
 
   const initialSyncKey = enabled ? accountsSyncKey(initialLinkedWhatsapp) : null;
 
   const resetFormState = useCallback(() => {
     setFormMode(null);
+    setEditingAccountKey(null);
     setForm(EMPTY_WHATSAPP_FORM);
     setIsFormLinked(false);
     setHasSavedToken(false);
@@ -295,10 +323,10 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     });
   };
 
-  const startAddAccount = () => {
-    const platform = availablePlatforms[0] ?? DEFAULT_WHATSAPP_MESSAGING_PROVIDER;
-    const nextForm = { ...EMPTY_WHATSAPP_FORM, platform };
+  const startAddAccount = (preferredPlatform = DEFAULT_WHATSAPP_MESSAGING_PROVIDER) => {
+    const nextForm = { ...EMPTY_WHATSAPP_FORM, platform: preferredPlatform };
     setFormMode("add");
+    setEditingAccountKey(null);
     setForm(nextForm);
     setIsFormLinked(false);
     setHasSavedToken(false);
@@ -307,14 +335,19 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
     setFieldErrors({});
   };
 
-  const startEditAccount = (platform) => {
-    const account = safeAccounts.find((a) => a.platform === platform);
+  const startEditAccount = (accountKey) => {
+    const account = safeAccounts.find(
+      (a) => getWhatsappAccountKey(a) === accountKey
+    );
     if (!account) return;
     const nextForm = formFromAccount(account);
     setFormMode("edit");
+    setEditingAccountKey(accountKey);
     setForm(nextForm);
     setIsFormLinked(true);
-    setHasSavedToken(account.platform === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE);
+    setHasSavedToken(
+      account.platform === WHATSAPP_MESSAGING_PROVIDERS.ULTRAMESSAGE
+    );
     setTokenDirty(false);
     baselineRef.current = snapshotForm(nextForm);
     setFieldErrors({});
@@ -440,14 +473,30 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       }
     }
 
+    const nextKey = getWhatsappAccountKeyFromSnapshot(snapshotForm(form));
+    const isDuplicate = safeAccounts.some((account) => {
+      const existingKey = getWhatsappAccountKey(account);
+      if (existingKey === editingAccountKey) return false;
+      if (pendingUnlinks.has(existingKey)) return false;
+      return existingKey === nextKey;
+    });
+    if (isDuplicate) {
+      errors.duplicate_account = translate(
+        "editClient.whatsapp.duplicateAccount",
+        "An account with these credentials is already linked."
+      );
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   }, [
+    editingAccountKey,
     form,
     formMode,
     hasFormChanges,
     isFormLinked,
-    pendingUnlinks.size,
+    pendingUnlinks,
+    safeAccounts,
     tokenDirty,
     translate,
   ]);
@@ -461,9 +510,13 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
       let lastResult = null;
 
-      for (const platform of pendingUnlinks) {
+      for (const accountKey of pendingUnlinks) {
+        const account = safeAccounts.find(
+          (a) => getWhatsappAccountKey(a) === accountKey
+        );
+        if (!account) continue;
         lastResult = await deleteClientWhatsappInstance({
-          platform: toApiAccountPlatform(platform),
+          ...buildWhatsappAccountDeleteParams(account),
           targetClientId: targetId,
         });
       }
@@ -487,7 +540,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       }
 
       const nextAccounts = safeAccounts.filter(
-        (a) => !pendingUnlinks.has(a.platform)
+        (a) => !pendingUnlinks.has(getWhatsappAccountKey(a))
       );
       if (hasFormChanges() && formMode) {
         const payload = buildWhatsappInstancePayload(snapshotForm(form), {
@@ -495,8 +548,11 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
           tokenDirty,
         });
         if (payload) {
+          const currentKey = editingAccountKey;
           const merged = normalizeLinkedAutomatedWhatsappList([
-            ...nextAccounts.filter((a) => a.platform !== form.platform),
+            ...nextAccounts.filter(
+              (a) => getWhatsappAccountKey(a) !== currentKey
+            ),
             { ...payload, platform: form.platform },
           ]);
           syncAccountsFromServer(merged);
@@ -513,6 +569,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       formMode,
       hasFormChanges,
       isFormLinked,
+      editingAccountKey,
       pendingUnlinks,
       syncAccountsFromServer,
       targetClientId,
@@ -530,7 +587,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
   const handleUnlinkConfirm = () => {
     if (!unlinkTarget) return;
     setPendingUnlinks((prev) => new Set([...prev, unlinkTarget]));
-    if (formMode && form.platform === unlinkTarget) {
+    if (formMode && editingAccountKey === unlinkTarget) {
       resetFormState();
     }
     setUnlinkTarget(null);
@@ -622,7 +679,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
 
         {expanded && (
           <div className="p-4 border-t border-gray-100 space-y-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <h4 className="text-xs font-medium text-gray-600">
                 {translate("editClient.whatsapp.accountsTitle", "Linked accounts")}
               </h4>
@@ -636,23 +693,70 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   )}
                 </p>
               )}
-              {safeAccounts.map((account) => (
-                <LinkedAccountCard
-                  key={account.platform}
-                  account={account}
-                  agentLabel={getAgentLabel(account.whatsapp_agent)}
-                  onEdit={startEditAccount}
-                  onUnlink={setUnlinkTarget}
-                  pendingUnlink={pendingUnlinks.has(account.platform)}
-                  translate={translate}
-                />
-              ))}
+              {groupedAccounts.map(({ platform, items }) => {
+                const platformLabelKey = getPlatformLabelKey(platform);
+                const visibleCount = items.filter(
+                  ({ accountKey }) => !pendingUnlinks.has(accountKey)
+                ).length;
+                return (
+                  <div key={platform} className="space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-semibold text-gray-700">
+                        {translate(
+                          "editClient.whatsapp.platformGroupTitle",
+                          "{platform} ({count})"
+                        )
+                          .replace(
+                            "{platform}",
+                            translate(
+                              platformLabelKey,
+                              PLATFORM_DEFAULT_LABELS[platform]
+                            )
+                          )
+                          .replace("{count}", String(visibleCount))}
+                      </p>
+                      {!formMode && (
+                        <button
+                          type="button"
+                          onClick={() => startAddAccount(platform)}
+                          className="text-xs font-medium text-primary hover:underline shrink-0"
+                        >
+                          {translate(
+                            "editClient.whatsapp.addPlatformAccount",
+                            "Add {platform}"
+                          ).replace(
+                            "{platform}",
+                            translate(
+                              platformLabelKey,
+                              PLATFORM_DEFAULT_LABELS[platform]
+                            )
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      {items.map(({ account, accountKey }) => (
+                        <LinkedAccountCard
+                          key={accountKey}
+                          account={account}
+                          accountKey={accountKey}
+                          agentLabel={getAgentLabel(account.whatsapp_agent)}
+                          onEdit={startEditAccount}
+                          onUnlink={setUnlinkTarget}
+                          pendingUnlink={pendingUnlinks.has(accountKey)}
+                          translate={translate}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
-            {!formMode && availablePlatforms.length > 0 && (
+            {!formMode && (
               <button
                 type="button"
-                onClick={startAddAccount}
+                onClick={() => startAddAccount()}
                 className="px-4 py-2 text-sm font-medium text-primary border border-primary/30 rounded-md hover:bg-primary/5"
               >
                 {translate(
@@ -660,15 +764,6 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   "Link another account"
                 )}
               </button>
-            )}
-
-            {!formMode && availablePlatforms.length === 0 && linkedCount > 0 && (
-              <p className="text-xs text-gray-500">
-                {translate(
-                  "editClient.whatsapp.allPlatformsLinked",
-                  "All available platforms are linked."
-                )}
-              </p>
             )}
 
             {formMode && (
@@ -691,6 +786,21 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   </button>
                 </div>
 
+                {formMode === "add" ? (
+                  <p className="text-xs text-gray-500">
+                    {translate(
+                      "editClient.whatsapp.multipleSameTypeHint",
+                      "You can link multiple accounts of the same provider."
+                    )}
+                  </p>
+                ) : null}
+
+                {fieldErrors.duplicate_account ? (
+                  <p className="text-xs text-red-600">
+                    {fieldErrors.duplicate_account}
+                  </p>
+                ) : null}
+
                 <fieldset className="space-y-2" disabled={formMode === "edit"}>
                   <legend className="text-xs font-medium text-gray-600 mb-1">
                     {translate(
@@ -700,9 +810,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
                   </legend>
                   {ALL_PLATFORMS.map((platform) => {
                     const active = form.platform === platform;
-                    const disabled =
-                      formMode === "edit" ||
-                      (formMode === "add" && linkedPlatforms.has(platform));
+                    const disabled = formMode === "edit";
                     const isPlatformOpenwa = isOpenwaProvider(platform);
                     const isPlatformUltramessage = isUltramessageProvider(platform);
                     const isPlatformCloudApi = isWhatsappCloudApiProvider(platform);
@@ -1010,7 +1118,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
         )}
         message={translate(
           "editClient.whatsapp.unlinkPlatformConfirmMessage",
-          "This will unlink this platform account. Other linked accounts will remain."
+          "This will unlink this WhatsApp account. Other linked accounts will remain."
         )}
         confirmLabel={translate("editClient.whatsapp.unlinkConfirmButton", "Remove")}
         cancelLabel={translate("buttons.cancel", "Cancel")}

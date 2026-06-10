@@ -68,9 +68,25 @@ export const SCHEDULE_VISIBLE_ACTIONS = [
   "Follow up later",
 ];
 
+/** Canonical last_action for leads without history (null, empty, or legacy "New"). */
+export const NEW_LEAD_ACTION = "new";
+
+/**
+ * Normalize API `last_action` to the canonical value used in filters and display.
+ * - null / empty / "New" → "new"
+ * - existing actions → unchanged (latest value from backend)
+ */
+export const normalizeLastAction = (value) => {
+  if (value == null) return NEW_LEAD_ACTION;
+  const trimmed = String(value).trim();
+  if (!trimmed) return NEW_LEAD_ACTION;
+  if (trimmed.toLowerCase() === NEW_LEAD_ACTION) return NEW_LEAD_ACTION;
+  return trimmed;
+};
+
 // Helper function to get action label by value and language
 export const getActionLabel = (value, language = "en") => {
-  const lookupValue = value === null ? "new" : value;
+  const lookupValue = normalizeLastAction(value);
   const action = USER_ACTIONS.find((action) => action.value === lookupValue);
   if (!action) return value;
 

@@ -1,7 +1,7 @@
 "use server";
 import axios from "axios";
 import { cookies } from "next/headers";
-import { API_BASE_URL } from "@/lib/apiConfig";
+import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 
@@ -14,6 +14,11 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use(async (config) => {
+  const url = String(config.url ?? "");
+  if (PUBLIC_X_API_KEY && url.startsWith("/public/")) {
+    config.headers["X-API-Key"] = PUBLIC_X_API_KEY;
+  }
+
   if (!config.headers.Authorization) {
     const cookieStore = await cookies();
     const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
