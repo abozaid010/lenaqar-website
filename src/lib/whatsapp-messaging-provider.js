@@ -2,8 +2,14 @@ import { phoneToE164 } from "@/components/phone/phone-utils";
 import { resolveWhatsappAgent } from "@/constants/whatsapp-agents";
 import {
   DEFAULT_WHATSAPP_MESSAGING_PROVIDER,
+  DEFAULT_WHATSAPP_MESSAGE_SOURCE,
+  resolveWhatsappMessageSource,
+  WHATSAPP_MESSAGE_SOURCES,
   WHATSAPP_MESSAGING_PROVIDERS,
+  WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/constants/whatsapp-messaging";
+
+export { WHATSAPP_MESSAGE_SOURCES, WHATSAPP_RATE_LIMIT_EXCEEDED_CODE };
 import { sendWhatsappMessages } from "@/utils/api";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 
@@ -583,6 +589,7 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
   const enrichedMessages = messages.map((msg) => ({
     ...msg,
     sender_phone_number: msg.sender_phone_number || sender_phone_number,
+    source: resolveWhatsappMessageSource(msg.source ?? DEFAULT_WHATSAPP_MESSAGE_SOURCE),
   }));
 
   logWhatsappMessaging("send_request", {
@@ -651,6 +658,7 @@ export function buildWhatsappSendMessage(message, defaultPlatform = null) {
       String(message.sender_phone_number)
     );
   }
+  normalized.source = resolveWhatsappMessageSource(message.source);
 
   return normalized;
 }

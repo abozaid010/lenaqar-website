@@ -219,6 +219,7 @@ export default {
     },
     logoutSuccess: "تم تسجيل الخروج بنجاح",
     sendMessage: "تواصل معنا",
+    settingsLoginRequired: "يرجى تسجيل الدخول مرة أخرى لعرض الإعدادات",
   },
   welcome: "مرحبا",
   dashboard: "العملاء ",
@@ -520,6 +521,7 @@ export default {
     developers: "المطورين",
     news: "الأخبار",
     map: "الخريطة",
+    openMenu: "فتح القائمة",
   },
   campaigns: {
     total: "الإجمالي",
@@ -843,6 +845,8 @@ export default {
     configLoadFailed: "تعذر تحميل حسابات واتساب.",
     senderPhoneRequired: "رقم هاتف المرسل غير متوفر لحساب واتساب المحدد.",
     sendingFrom: "الإرسال من",
+    rateLimitExceeded:
+      "تم تجاوز الحد اليومي للرسائل. يرجى المحاولة مرة أخرى لاحقًا.",
   },
   clientsTable: {
     noClients: "لا يوجد عملاء",

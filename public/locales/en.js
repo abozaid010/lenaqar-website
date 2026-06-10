@@ -222,6 +222,7 @@ export default {
     },
     logoutSuccess: "Logout Successful",
     sendMessage: "Chat with us",
+    settingsLoginRequired: "Please login again to view settings",
   },
   welcome: "Welcome",
   dashboard: "Dashboard",
@@ -514,6 +515,7 @@ export default {
     developers: "Developers",
     news: "News",
     map: "Map",
+    openMenu: "Open menu",
   },
   campaigns: {
     total: "Total",
@@ -955,6 +957,8 @@ export default {
     senderPhoneRequired:
       "Sender phone number is missing for the selected WhatsApp account.",
     sendingFrom: "Sending from",
+    rateLimitExceeded:
+      "Daily message limit exceeded. Please try again later.",
   },
   clientsTable: {
     noClients: "No clients found",
