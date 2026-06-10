@@ -12,7 +12,9 @@ import {
   WHATSAPP_MESSAGING_NOT_LOADED_CODE,
   WHATSAPP_NOT_CONFIGURED_CODE,
   WHATSAPP_PLATFORM_REQUIRED_CODE,
+  WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
+  WHATSAPP_MESSAGE_SOURCES,
 } from "@/lib/whatsapp-messaging-provider";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { sendClientMessage } from "@/utils/api";
@@ -195,6 +197,7 @@ export default function SendNewMessageForm({
                 message: text,
                 platform: refreshedContext.transportPlatform,
                 sender_phone_number: refreshedContext.senderPhoneNumber,
+                source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
               },
             ],
           });
@@ -234,6 +237,7 @@ export default function SendNewMessageForm({
                 message: text,
                 platform: context.transportPlatform,
                 sender_phone_number: context.senderPhoneNumber,
+                source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
               },
             ],
           });
@@ -271,6 +275,16 @@ export default function SendNewMessageForm({
         code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE
       ) {
         toast.error(getSendContextErrorMessage(code, translate));
+        return;
+      }
+      if (code === WHATSAPP_RATE_LIMIT_EXCEEDED_CODE || error?.status === 429) {
+        toast.error(
+          error?.message ||
+            translate(
+              "whatsappSend.rateLimitExceeded",
+              "Daily message limit exceeded. Please try again later.",
+            ),
+        );
         return;
       }
       toast.error(

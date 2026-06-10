@@ -16,6 +16,10 @@ import { validateClientId, createSafeClientId } from "./clientId-validator";
 import { with2SecondRetry } from "./api-retry";
 import { cleanRequirementsPayload } from "./cleanRequirements";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+import {
+  resolveWhatsappMessageSource,
+  WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
+} from "@/constants/whatsapp-messaging";
 import { normalizeLastAction } from "@/utils/actions";
 
 // Auth API
@@ -1915,6 +1919,7 @@ export async function sendCampaignReply({
  *   - image_url (optional): Image URL
  *   - template_name (optional): WhatsApp template name
  *   - language_code (optional): Template language code
+ *   - source (optional): "human" | "ai" — defaults to "human" (rate limited)
  * @param {string} options.default_platform - Optional batch default platform
  * @returns {Promise<Object>} API response with sent/failed counts and results
  */
@@ -1972,6 +1977,7 @@ export async function sendWhatsappMessages({
         if (resolvedSender) {
           normalized.sender_phone_number = String(resolvedSender).trim();
         }
+        normalized.source = resolveWhatsappMessageSource(msg.source);
 
         return normalized;
       }),
@@ -1992,6 +1998,17 @@ export async function sendWhatsappMessages({
 
     return response.data;
   } catch (error) {
+    if (error?.response?.status === 429) {
+      const responseData = error.response?.data;
+      const rateLimitMessage =
+        responseData?.message ||
+        responseData?.error_message ||
+        "Daily message limit exceeded. Please try again later.";
+      const rateLimitError = new Error(rateLimitMessage);
+      rateLimitError.code = WHATSAPP_RATE_LIMIT_EXCEEDED_CODE;
+      rateLimitError.status = 429;
+      throw rateLimitError;
+    }
     console.error("Failed to send WhatsApp messages:", error.message);
     throw error;
   }

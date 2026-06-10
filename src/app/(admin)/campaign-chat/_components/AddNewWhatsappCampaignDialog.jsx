@@ -17,7 +17,9 @@ import {
   resolveSenderPhoneNumber,
   sendWhatsappWithClientConfig,
   toTransportPlatform,
+  WHATSAPP_MESSAGE_SOURCES,
   WHATSAPP_NOT_CONFIGURED_CODE,
+  WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
@@ -359,6 +361,7 @@ const AddNewWhatsappCampaignDialog = ({
       ...(senderPhoneNumber
         ? { sender_phone_number: senderPhoneNumber }
         : {}),
+      source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
     }));
 
     return sendWhatsappWithClientConfig({
@@ -380,6 +383,7 @@ const AddNewWhatsappCampaignDialog = ({
       ...(senderPhoneNumber
         ? { sender_phone_number: senderPhoneNumber }
         : {}),
+      source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
     }));
 
     return sendWhatsappWithClientConfig({
@@ -451,6 +455,17 @@ const AddNewWhatsappCampaignDialog = ({
       if (err?.code === WHATSAPP_NOT_CONFIGURED_CODE) {
         setError(notConfiguredMessage);
         toast.error(notConfiguredMessage);
+        return;
+      }
+      if (err?.code === WHATSAPP_RATE_LIMIT_EXCEEDED_CODE || err?.status === 429) {
+        const rateLimitMessage =
+          err?.message ||
+          translate(
+            "whatsappSend.rateLimitExceeded",
+            "Daily message limit exceeded. Please try again later.",
+          );
+        setError(rateLimitMessage);
+        toast.error(rateLimitMessage);
         return;
       }
       const message = getApiErrorMessage(
