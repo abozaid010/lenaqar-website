@@ -69,3 +69,14 @@ export function buildAdminClientPatchPayload(initial, current) {
 
   return patch;
 }
+
+/** Normalized snapshot of all admin-editable client fields (for full PATCH on save). */
+export function buildAdminClientFullPayload(form) {
+  const payload = {};
+
+  for (const key of PATCHABLE_FIELDS) {
+    payload[key] = normalizeFieldValue(key, form[key]);
+  }
+
+  return payload;
+}

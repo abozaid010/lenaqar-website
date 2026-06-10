@@ -3,8 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import { useQueryClient } from "@tanstack/react-query";
 import { useClientPermissionSchema, useUpdateClient } from "@/hooks/use-clients-data";
-import { buildAdminClientPatchPayload } from "@/lib/admin-client-patch";
+import { clientKeys } from "@/utils/query-utils";
+import {
+  buildAdminClientPatchPayload,
+} from "@/lib/admin-client-patch";
 import {
   getResolvedPermissionSchema,
   sanitizeModuleActions,
@@ -79,7 +83,7 @@ function buildInitialState(client) {
     sharing_policy: client.sharing_policy || "only_my_units",
     developer_sharing_policy: client.developer_sharing_policy || "only_my_developers",
     projects_sharing_policy: client.projects_sharing_policy || "only_my_projects",
-    module_actions: client.module_actions || {},
+    module_actions: { ...(client.module_actions || {}) },
   };
 }
 
@@ -90,6 +94,7 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
   const [isSaving, setIsSaving] = useState(false);
   const whatsappRef = useRef(null);
   const initialFormRef = useRef(buildInitialState(client));
+  const queryClient = useQueryClient();
   const updateClient = useUpdateClient();
   const { rawSchema, isLoading: permissionSchemaLoading } =
     useClientPermissionSchema(isOpen);
@@ -129,8 +134,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       return;
     }
 
-    const payload = buildAdminClientPatchPayload(initialFormRef.current, form);
-    const hasClientChanges = Object.keys(payload).length > 0;
+    const clientPatch = buildAdminClientPatchPayload(initialFormRef.current, form);
+    const hasClientChanges = Object.keys(clientPatch).length > 0;
 
     if (!whatsappChanged && !hasClientChanges) {
       toast.success(
@@ -145,14 +150,15 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       let whatsappResult = null;
       let clientResult = null;
 
-      if (whatsappChanged) {
-        whatsappResult = await whatsappApi.applyChanges(client.client_id);
-      }
       if (hasClientChanges) {
         clientResult = await updateClient.mutateAsync({
           clientId: client.client_id,
-          payload,
+          payload: clientPatch,
         });
+      }
+
+      if (whatsappChanged) {
+        whatsappResult = await whatsappApi.applyChanges(client.client_id);
       }
 
       const updatedAccounts =
@@ -163,6 +169,8 @@ export default function EditClientDialog({ client, isOpen, onClose }) {
       if (updatedAccounts != null && whatsappApi?.syncFromServer) {
         whatsappApi.syncFromServer(updatedAccounts);
       }
+
+      await queryClient.invalidateQueries({ queryKey: clientKeys.all });
 
       toast.success(t?.common?.clientUpdated);
       onClose();
