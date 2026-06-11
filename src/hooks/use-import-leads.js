@@ -6,6 +6,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { userKeys } from "@/utils/query-utils";
 import { useI18n } from "@/hooks/useI18n";
 import { addManyLeadsAction } from "@/app/(admin)/dashboard/_actions/leads";
+import {
+  DEFAULT_LEAD_CAMPAIGN_ID,
+  DEFAULT_LEAD_PLATFORM,
+  formatAllowedPlatformsList,
+  normalizeLeadPlatform,
+} from "@/constants/lead-import";
 import { parseExcelFile } from "@/utils/excel-utils";
 import {
   normalizeDigits,
@@ -127,16 +133,113 @@ const normalizeImportedPhone = (value) => {
   return null;
 };
 
-const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
-  const nameIndex = detectColumnIndex(headers, HEADER_ALIASES.user_name);
-  const phoneIndex = detectColumnIndex(headers, HEADER_ALIASES.phone_number);
-  const queryIndex = detectColumnIndex(headers, HEADER_ALIASES.query);
-  const campaignIndex = detectColumnIndex(headers, HEADER_ALIASES.campaign_id);
-  const platformIndex = detectColumnIndex(headers, HEADER_ALIASES.platform);
+const detectColumnIndices = (headers) => ({
+  nameIndex: detectColumnIndex(headers, HEADER_ALIASES.user_name),
+  phoneIndex: detectColumnIndex(headers, HEADER_ALIASES.phone_number),
+  queryIndex: detectColumnIndex(headers, HEADER_ALIASES.query),
+  campaignIndex: detectColumnIndex(headers, HEADER_ALIASES.campaign_id),
+  platformIndex: detectColumnIndex(headers, HEADER_ALIASES.platform),
+});
 
-  if (phoneIndex === -1) {
-    throw new Error("Could not find a phone column in the uploaded sheet.");
+const validateSheetStructure = ({ headers, rows, translate }) => {
+  const errors = [];
+  const safeHeaders = Array.isArray(headers) ? headers : [];
+  const safeRows = Array.isArray(rows) ? rows : [];
+  const nonEmptyHeaders = safeHeaders
+    .map((header) => String(header ?? "").trim())
+    .filter(Boolean);
+
+  console.log("[ImportLeads] validateSheetStructure", {
+    headerCount: safeHeaders.length,
+    nonEmptyHeaderCount: nonEmptyHeaders.length,
+    headers: safeHeaders,
+    normalizedHeaders: safeHeaders.map(normalizeHeader),
+    rowCount: safeRows.length,
+  });
+
+  if (nonEmptyHeaders.length === 0) {
+    errors.push({
+      code: "NO_HEADERS",
+      message: translate(
+        "dashboardFilter.importLeads.errors.noHeaders",
+        "The file has no column headers. Please use the template or add a header row.",
+      ),
+    });
   }
+
+  if (safeRows.length === 0) {
+    errors.push({
+      code: "NO_DATA_ROWS",
+      message: translate(
+        "dashboardFilter.importLeads.errors.noDataRows",
+        "The file has no data rows. Add at least one lead below the header row.",
+      ),
+    });
+  }
+
+  const columnIndices = detectColumnIndices(safeHeaders);
+  console.log("[ImportLeads] detected column indices", columnIndices);
+
+  if (columnIndices.phoneIndex === -1) {
+    const foundHeadersLabel = nonEmptyHeaders.length
+      ? nonEmptyHeaders.join(", ")
+      : translate("common.none", "none");
+
+    errors.push({
+      code: "MISSING_PHONE_COLUMN",
+      message: translate(
+        "dashboardFilter.importLeads.errors.missingPhoneColumn",
+        "Could not find a phone column. Expected a column named phone (or mobile, contact, etc.). Found columns: {headers}",
+      ).replace("{headers}", foundHeadersLabel),
+      foundHeaders: nonEmptyHeaders,
+    });
+  }
+
+  const recognizedColumnCount = Object.values(columnIndices).filter(
+    (index) => index !== -1,
+  ).length;
+
+  if (nonEmptyHeaders.length > 0 && recognizedColumnCount === 0) {
+    errors.push({
+      code: "UNRECOGNIZED_COLUMNS",
+      message: translate(
+        "dashboardFilter.importLeads.errors.unrecognizedColumns",
+        "None of the columns match the expected format. Found: {headers}. Required: phone. Optional: name, notes, campaign_id, platform.",
+      ).replace("{headers}", nonEmptyHeaders.join(", ")),
+      foundHeaders: nonEmptyHeaders,
+    });
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    columnIndices,
+  };
+};
+
+const isHeaderLikeValue = (value, aliases) => {
+  const normalized = normalizeHeader(value);
+  if (!normalized) return false;
+  return aliases.some((alias) => normalizeHeader(alias) === normalized);
+};
+
+const buildInvalidPlatformReason = (value, translate) =>
+  translate(
+    "dashboardFilter.importLeads.errors.invalidPlatform",
+    'Invalid platform "{value}". Allowed values: {allowed}. Leave empty to use "{default}".',
+  )
+    .replace("{value}", value)
+    .replace("{allowed}", formatAllowedPlatformsList())
+    .replace("{default}", DEFAULT_LEAD_PLATFORM);
+
+const buildLeadsFromSheet = ({ headers, rows, clientId, columnIndices, translate }) => {
+  const {
+    nameIndex,
+    phoneIndex,
+    queryIndex,
+    campaignIndex,
+    platformIndex,
+  } = columnIndices ?? detectColumnIndices(headers);
 
   const safeClientId = String(clientId ?? "").trim();
   if (!safeClientId) {
@@ -151,12 +254,32 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
   rows.forEach((row, rowIndex) => {
     const rowNumber = rowIndex + 2;
     const rawPhone = row[phoneIndex];
+    const platformRaw = platformIndex >= 0 ? String(row[platformIndex] ?? "").trim() : "";
+
+    if (
+      isHeaderLikeValue(rawPhone, HEADER_ALIASES.phone_number) ||
+      (platformRaw && isHeaderLikeValue(platformRaw, HEADER_ALIASES.platform))
+    ) {
+      skippedRows.push({
+        rowNumber,
+        code: "HEADER_ROW",
+        reason: translate(
+          "dashboardFilter.importLeads.errors.headerRowSkipped",
+          "Skipped header row. Remove duplicate column titles from your data rows.",
+        ),
+      });
+      return;
+    }
+
     const phone_number = normalizeImportedPhone(rawPhone);
 
     if (!phone_number) {
       skippedRows.push({
         rowNumber,
-        reason: "Phone is missing or invalid",
+        reason: translate(
+          "dashboardFilter.importLeads.errors.invalidPhone",
+          "Phone is missing or invalid",
+        ),
       });
       return;
     }
@@ -165,7 +288,22 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
     const user_name = rawName || phone_number;
     const query = queryIndex >= 0 ? String(row[queryIndex] ?? "").trim() : "";
     const campaignRaw = campaignIndex >= 0 ? String(row[campaignIndex] ?? "").trim() : "";
-    const platformRaw = platformIndex >= 0 ? String(row[platformIndex] ?? "").trim() : "";
+
+    if (platformRaw) {
+      const normalizedPlatform = normalizeLeadPlatform(platformRaw);
+      if (!normalizedPlatform) {
+        skippedRows.push({
+          rowNumber,
+          code: "INVALID_PLATFORM",
+          reason: buildInvalidPlatformReason(platformRaw, translate),
+        });
+        return;
+      }
+    }
+
+    const platform = platformRaw
+      ? normalizeLeadPlatform(platformRaw)
+      : DEFAULT_LEAD_PLATFORM;
 
     validLeadRows.push({
       rowNumber,
@@ -175,8 +313,8 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
         user_name,
         query,
         client_id: safeClientId,
-        platform: platformRaw || "website",
-        campaign_id: campaignRaw || "added_manually",
+        platform,
+        campaign_id: campaignRaw || DEFAULT_LEAD_CAMPAIGN_ID,
       },
     });
   });
@@ -184,32 +322,69 @@ const buildLeadsFromSheet = ({ headers, rows, clientId }) => {
   return { validLeadRows, skippedRows };
 };
 
+const buildImportFailureMessage = ({ result, translate, failedRows }) => {
+  if (failedRows.length > 0) {
+    const firstFailure = failedRows[0];
+    const rowLabel =
+      firstFailure.rowNumber !== "—"
+        ? translate("dashboardFilter.importLeads.errors.rowPrefix", "Row {row}:").replace(
+            "{row}",
+            String(firstFailure.rowNumber),
+          )
+        : "";
+    return `${translate(
+      "dashboardFilter.importLeads.errors.importFailed",
+      "Failed to import leads. Please check your file and try again.",
+    )} ${rowLabel} ${firstFailure.reason}`.trim();
+  }
+
+  return (
+    result?.message ||
+    translate(
+      "dashboardFilter.importLeads.errors.importFailed",
+      "Failed to import leads. Please check your file and try again.",
+    )
+  );
+};
+
 export function useImportLeads({ clientId } = {}) {
   const { t, translate } = useI18n();
   const queryClient = useQueryClient();
   const [isImporting, setIsImporting] = useState(false);
   const [lastSummary, setLastSummary] = useState(null);
+  const [importError, setImportError] = useState(null);
 
   const importLeadsFromFile = async (file) => {
+    setImportError(null);
+
     const safeClientId = String(clientId ?? "").trim();
+    console.log("[ImportLeads] importLeadsFromFile started", {
+      fileName: file?.name,
+      fileType: file?.type,
+      fileSize: file?.size,
+      clientId: safeClientId || "(missing)",
+    });
+
     if (!safeClientId) {
-      toast.error(
-        translate(
-          "dashboardFilter.importLeads.errors.missingClientId",
-          "Missing client ID. Please log out and log in again, then retry import.",
-        ),
+      const message = translate(
+        "dashboardFilter.importLeads.errors.missingClientId",
+        "Missing client ID. Please log out and log in again, then retry import.",
       );
-      return { success: false };
+      console.error("[ImportLeads] aborted: missing clientId");
+      setImportError(message);
+      toast.error(message);
+      return { success: false, error: message };
     }
 
     if (!file) {
-      toast.error(
-        translate(
-          "dashboardFilter.importLeads.errors.fileRequired",
-          "Please choose a file first.",
-        ),
+      const message = translate(
+        "dashboardFilter.importLeads.errors.fileRequired",
+        "Please choose a file first.",
       );
-      return { success: false };
+      console.error("[ImportLeads] aborted: no file selected");
+      setImportError(message);
+      toast.error(message);
+      return { success: false, error: message };
     }
 
     setIsImporting(true);
@@ -218,29 +393,88 @@ export function useImportLeads({ clientId } = {}) {
       const fileName = String(file.name || "").toLowerCase();
       const isCsv = file.type === "text/csv" || fileName.endsWith(".csv");
 
+      console.log("[ImportLeads] parsing file", { fileName, isCsv });
+
       if (isCsv) {
         sheetData = await parseCsvFile(file);
       } else {
         sheetData = await parseExcelFile(file);
       }
 
+      console.log("[ImportLeads] file parsed", {
+        headers: sheetData?.headers,
+        rowCount: sheetData?.rows?.length,
+        sheetName: sheetData?.sheetName,
+        sampleRow: sheetData?.rows?.[0],
+      });
+
+      const validation = validateSheetStructure({
+        headers: sheetData.headers || [],
+        rows: sheetData.rows || [],
+        translate,
+      });
+
+      if (!validation.valid) {
+        const primaryError = validation.errors[0]?.message;
+        console.error("[ImportLeads] sheet validation failed — API will NOT be called", {
+          errors: validation.errors,
+          headers: sheetData.headers,
+          rowCount: sheetData.rows?.length,
+        });
+        setImportError(primaryError);
+        toast.error(primaryError);
+        setLastSummary({
+          totalRows: sheetData.rows?.length || 0,
+          queuedRows: 0,
+          createdRows: 0,
+          skippedRows: [],
+          failedRows: [],
+          validationErrors: validation.errors,
+        });
+        return { success: false, error: primaryError, validationErrors: validation.errors };
+      }
+
       const { validLeadRows, skippedRows } = buildLeadsFromSheet({
         headers: sheetData.headers || [],
         rows: sheetData.rows || [],
         clientId: safeClientId,
+        columnIndices: validation.columnIndices,
+        translate,
       });
       const validLeads = validLeadRows.map((item) => item.payload);
       const rowNumberByUserId = new Map(
         validLeadRows.map((item) => [String(item.payload.user_id), item.rowNumber]),
       );
 
+      console.log("[ImportLeads] rows processed", {
+        totalRows: sheetData.rows?.length || 0,
+        validLeads: validLeads.length,
+        skippedRows: skippedRows.length,
+        skippedSample: skippedRows.slice(0, 3),
+      });
+
       if (validLeads.length === 0) {
-        toast.error(
-          translate(
-            "dashboardFilter.importLeads.errors.noValidRows",
-            "No valid leads were found in the file.",
-          ),
+        const hasInvalidPlatform = skippedRows.some(
+          (row) => row.code === "INVALID_PLATFORM",
         );
+        const message = hasInvalidPlatform
+          ? translate(
+              "dashboardFilter.importLeads.errors.allRowsInvalidPlatform",
+              "No leads were imported. Every row has an invalid platform value. Allowed values: {allowed}. Leave platform empty to use {default}.",
+            )
+              .replace("{allowed}", formatAllowedPlatformsList())
+              .replace("{default}", DEFAULT_LEAD_PLATFORM)
+          : translate(
+              "dashboardFilter.importLeads.errors.noValidRows",
+              "No valid leads were found in the file.",
+            );
+        console.error("[ImportLeads] no valid leads — API will NOT be called", {
+          totalRows: sheetData.rows?.length,
+          skippedRows,
+          hasInvalidPlatform,
+        });
+        setImportError(message);
+        toast.error(message);
         setLastSummary({
           totalRows: sheetData.rows?.length || 0,
           queuedRows: 0,
@@ -248,15 +482,31 @@ export function useImportLeads({ clientId } = {}) {
           skippedRows,
           failedRows: [],
         });
-        return { success: false };
+        return { success: false, error: message, skippedRows };
       }
 
+      console.log("[ImportLeads] calling addManyLeadsAction", {
+        leadCount: validLeads.length,
+        sampleLead: {
+          ...validLeads[0],
+          phone_number: validLeads[0]?.phone_number?.slice(0, 6) + "…",
+        },
+      });
+
       const result = await addManyLeadsAction(validLeads);
+      console.log("[ImportLeads] API response", {
+        success: result?.success,
+        message: result?.message,
+        successCount: result?.data?.successCount,
+        failedCount: result?.data?.failed?.length,
+        failedSample: result?.data?.failed?.slice(0, 3),
+      });
+
       const failedRowsFromApi = (result?.data?.failed || []).map((item) => ({
         rowNumber:
           rowNumberByUserId.get(String(item?.user_id)) ??
           (Number.isInteger(item?.index) && item.index >= 0 ? item.index + 2 : "—"),
-        reason: item.reason || "Unknown error",
+        reason: item.reason || translate("common.unknownError", "Unknown error"),
       }));
 
       const summary = {
@@ -268,16 +518,30 @@ export function useImportLeads({ clientId } = {}) {
       };
       setLastSummary(summary);
 
-      queryClient.invalidateQueries({ queryKey: userKeys.all });
-      queryClient.invalidateQueries({ queryKey: ["campaignSessions"] });
-
       if (summary.createdRows > 0) {
+        queryClient.invalidateQueries({ queryKey: userKeys.all });
+        queryClient.invalidateQueries({ queryKey: ["campaignSessions"] });
         toast.success(
           translate("dashboardFilter.importLeads.success").replace(
             "{count}",
             String(summary.createdRows),
           ),
         );
+      }
+
+      if (summary.createdRows === 0) {
+        const failureMessage = buildImportFailureMessage({
+          result,
+          translate,
+          failedRows: failedRowsFromApi,
+        });
+        console.error("[ImportLeads] API import failed with zero created rows", {
+          failureMessage,
+          failedRowsFromApi,
+        });
+        setImportError(failureMessage);
+        toast.error(failureMessage);
+        return { success: false, error: failureMessage, summary };
       }
 
       if (summary.skippedRows.length > 0 || summary.failedRows.length > 0) {
@@ -287,25 +551,34 @@ export function useImportLeads({ clientId } = {}) {
         );
       }
 
-      return { success: summary.createdRows > 0, summary };
+      return { success: true, summary };
     } catch (error) {
-      console.error("Import leads failed:", error);
-      toast.error(
+      const message =
         error?.message ||
-          translate(
-            "dashboardFilter.importLeads.errors.importFailed",
-            "Failed to import leads. Please check your file and try again.",
-          ),
-      );
-      return { success: false, error };
+        translate(
+          "dashboardFilter.importLeads.errors.importFailed",
+          "Failed to import leads. Please check your file and try again.",
+        );
+      console.error("[ImportLeads] import failed", {
+        message: error?.message,
+        stack: error?.stack,
+        error,
+      });
+      setImportError(message);
+      toast.error(message);
+      return { success: false, error: message };
     } finally {
       setIsImporting(false);
     }
   };
 
+  const clearImportError = () => setImportError(null);
+
   return {
     importLeadsFromFile,
     isImporting,
     lastSummary,
+    importError,
+    clearImportError,
   };
 }
