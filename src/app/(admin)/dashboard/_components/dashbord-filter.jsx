@@ -2,6 +2,7 @@
 
 import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
+import { SELECTION_COLORS } from "@/constants/colors";
 import {
   DASHBOARD_BUTTON,
   DASHBOARD_TRIGGER,
@@ -13,8 +14,8 @@ import {
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
 } from "@/utils/actions";
-import { ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { ArrowDownUp, ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDayMonthShort } from "@/utils/formateDate";
 import AverageScore from "./average-score";
@@ -43,6 +44,8 @@ const FILTER_CAMPAIGN_MIN_WIDTH = "min-w-[6.25rem]";
 export default function DashbordFilter({ appliedFilters, compact = false }) {
   const { locale, translate } = useI18n();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const sortScore = searchParams.get("sort_score");
 
   const ACTIONS = useMemo(
     () => getDashboardFilterOptions(locale),
@@ -289,6 +292,20 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     window.print();
   };
 
+  const handleScoreSortToggle = () => {
+    const params = new URLSearchParams(window.location.search);
+    if (!sortScore) {
+      params.set("sort_score", "desc");
+    } else if (sortScore === "desc") {
+      params.set("sort_score", "asc");
+    } else {
+      params.delete("sort_score");
+    }
+    router.push(`${window.location.pathname}?${params.toString()}`, {
+      replace: true,
+    });
+  };
+
   return (
     <div
       className={`flex flex-col gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
@@ -500,6 +517,31 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            onClick={handleScoreSortToggle}
+            aria-pressed={sortScore === "desc" || sortScore === "asc"}
+            title={translate("dashboardFilter.sortByScore.title")}
+            className={`${DASHBOARD_TRIGGER} !w-auto shrink-0 gap-1.5 ${
+              compact ? "h-9 min-h-[36px]" : "h-10"
+            } ${
+              sortScore === "desc" || sortScore === "asc"
+                ? SELECTION_COLORS.SELECTED
+                : ""
+            }`}
+          >
+            <ArrowDownUp className="w-4 h-4 text-gray-500 shrink-0" aria-hidden />
+            <span className="whitespace-nowrap">
+              {translate("dashboardFilter.sortByScore.label")}
+            </span>
+            {sortScore === "desc" && (
+              <span aria-hidden="true">↓</span>
+            )}
+            {sortScore === "asc" && (
+              <span aria-hidden="true">↑</span>
+            )}
+          </button>
       </div>
 
       {/* Row 2: actions */}

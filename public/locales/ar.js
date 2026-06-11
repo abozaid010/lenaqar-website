@@ -640,6 +640,10 @@ export default {
         campaignIdEnglishOnly: "معرف الحملة يقبل أحرف إنجليزية فقط.",
       },
     },
+    sortByScore: {
+      label: "النتيجة",
+      title: "ترتيب العملاء الظاهرين حسب النتيجة",
+    },
     whatsappButton: " عملاء واتساب",
     premuim: "ميزة مدفوعة",
     ADD: "اضافة عميل  جديد",

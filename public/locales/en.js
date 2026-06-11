@@ -750,6 +750,10 @@ export default {
         campaignIdEnglishOnly: "Campaign ID accepts English letters only.",
       },
     },
+    sortByScore: {
+      label: "Score",
+      title: "Sort visible leads by score",
+    },
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
     ADD: "New Lead",
