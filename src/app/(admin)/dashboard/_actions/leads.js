@@ -2,8 +2,54 @@
 
 import axiosInstance from "@/utils/axiosInstance";
 import { getClientid } from "@/components/services/clientCookies";
+import { normalizeApiDetail } from "@/constants/permissionsAuth";
 import { revalidatePath } from "next/cache";
 import { NEW_LEAD_ACTION } from "@/utils/actions";
+
+const parseBulkImportValidationErrors = (error) => {
+  const responseData = error?.response?.data;
+  const detail = responseData?.detail;
+  const validationErrors = Array.isArray(responseData?.errors)
+    ? responseData.errors
+    : Array.isArray(detail)
+      ? detail
+      : [];
+
+  if (validationErrors.length === 0) {
+    return {
+      message: normalizeApiDetail(detail) || error?.message || "Failed to import leads",
+      failed: [],
+    };
+  }
+
+  const failed = validationErrors.map((item) => {
+    const location = Array.isArray(item?.loc) ? item.loc : [];
+    const leadIndex = location[2];
+    const field = location[3] || "field";
+    const input = item?.input;
+    const reason =
+      item?.ctx?.error ||
+      item?.msg ||
+      normalizeApiDetail(item) ||
+      "Validation error";
+
+    return {
+      index: Number.isInteger(leadIndex) ? leadIndex : -1,
+      user_id: null,
+      field,
+      input,
+      reason,
+    };
+  });
+
+  const firstReason = failed[0]?.reason;
+  const message =
+    firstReason ||
+    normalizeApiDetail(detail) ||
+    "Failed to import leads due to validation errors";
+
+  return { message, failed };
+};
 
 /**
  * Server action to add a new lead.
@@ -141,22 +187,29 @@ export async function addManyLeadsAction(payloads = []) {
       },
     };
   } catch (error) {
+    const parsedValidation = parseBulkImportValidationErrors(error);
     console.error(
       "Server Action Error (addManyLeadsAction):",
       error.response?.data || error.message,
+      parsedValidation,
     );
+    const failedFromValidation =
+      parsedValidation.failed.length > 0
+        ? parsedValidation.failed
+        : normalizedPayloads.map((lead, index) => ({
+            index,
+            user_id: lead.user_id,
+            reason: parsedValidation.message,
+          }));
+
     return {
       success: false,
-      message:
-        error.response?.data?.detail ||
-        error.response?.data?.message ||
-        error.message ||
-        "Failed to import leads",
+      message: parsedValidation.message,
       data: {
         total: normalizedPayloads.length,
         successCount: 0,
-        failedCount: normalizedPayloads.length - successCount,
-        failed,
+        failedCount: failedFromValidation.length,
+        failed: failedFromValidation,
       },
     };
   }

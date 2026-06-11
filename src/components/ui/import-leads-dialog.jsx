@@ -2,6 +2,12 @@
 
 import { useMemo, useRef, useState } from "react";
 import { Download, FileSpreadsheet, Loader2, Upload, X } from "lucide-react";
+import {
+  DEFAULT_LEAD_PLATFORM,
+  formatAllowedPlatformsList,
+  LEAD_IMPORT_TEMPLATE_COLUMNS,
+  LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW,
+} from "@/constants/lead-import";
 import { useI18n } from "@/hooks/useI18n";
 import { useImportLeads } from "@/hooks/use-import-leads";
 
@@ -10,7 +16,13 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
   const isRTL = locale === "ar";
   const fileInputRef = useRef(null);
   const [selectedFile, setSelectedFile] = useState(null);
-  const { importLeadsFromFile, isImporting, lastSummary } = useImportLeads({ clientId });
+  const {
+    importLeadsFromFile,
+    isImporting,
+    lastSummary,
+    importError,
+    clearImportError,
+  } = useImportLeads({ clientId });
 
   const requiredColumns = useMemo(
     () => [
@@ -44,16 +56,21 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
     [translate],
   );
 
+  const allowedPlatforms = useMemo(() => formatAllowedPlatformsList(), []);
+
   const downloadTemplate = () => {
-    const headerLine = ["name", "phone", "notes", "campaign_id", "platform"].join(",");
-    const exampleLine = [
-      "John Doe",
-      "+201012345678",
-      "Interested in 2 bedroom apartment",
-      "summer_campaign",
-      "website",
-    ].join(",");
-    const csvContent = `${headerLine}\n${exampleLine}\n`;
+    const headerLine = LEAD_IMPORT_TEMPLATE_COLUMNS.join(",");
+    const exampleLines = [
+      LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW,
+      [
+        "Jane Smith",
+        "+201098765432",
+        "Follow up next week",
+        "summer_campaign",
+        "whatsapp",
+      ],
+    ].map((row) => row.join(","));
+    const csvContent = `${headerLine}\n${exampleLines.join("\n")}\n`;
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -67,6 +84,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
 
   const resetAndClose = () => {
     setSelectedFile(null);
+    clearImportError();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -76,6 +94,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     setSelectedFile(file || null);
+    clearImportError();
   };
 
   const handleImport = async () => {
@@ -132,6 +151,18 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
             <p className="text-xs text-gray-600">
               {translate("dashboardFilter.importLeads.aliasesNotice")}
             </p>
+            <div className="rounded-md border border-gray-200 bg-white p-2 text-xs text-gray-600 space-y-1">
+              <p className="font-medium text-gray-700">
+                {translate("dashboardFilter.importLeads.platformGuideTitle")}
+              </p>
+              <p>
+                {translate("dashboardFilter.importLeads.platformGuideText")
+                  .replace("{default}", DEFAULT_LEAD_PLATFORM)}
+              </p>
+              <p className="font-mono text-[11px] break-words text-primary">
+                {allowedPlatforms}
+              </p>
+            </div>
             <div>
               <button
                 type="button"
@@ -167,6 +198,36 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
             <div className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700">
               {translate("dashboardFilter.importLeads.selectedFile")}{" "}
               <span className="font-medium">{selectedFile.name}</span>
+            </div>
+          )}
+
+          {importError && (
+            <div
+              role="alert"
+              className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 space-y-2"
+            >
+              <p className="font-medium">
+                {translate("dashboardFilter.importLeads.errors.importFailedTitle")}
+              </p>
+              <p>{importError}</p>
+              {lastSummary?.skippedRows?.length > 0 && (
+                <ul className="text-xs space-y-1 max-h-28 overflow-y-auto pt-1 border-t border-red-200/60">
+                  {lastSummary.skippedRows.slice(0, 8).map((item) => (
+                    <li key={`error-skipped-${item.rowNumber}`}>
+                      #{item.rowNumber}: {item.reason}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {lastSummary?.failedRows?.length > 0 && (
+                <ul className="text-xs space-y-1 max-h-28 overflow-y-auto pt-1 border-t border-red-200/60">
+                  {lastSummary.failedRows.slice(0, 8).map((item) => (
+                    <li key={`error-failed-${item.rowNumber}`}>
+                      #{item.rowNumber}: {item.reason}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 

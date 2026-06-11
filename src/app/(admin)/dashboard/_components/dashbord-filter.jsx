@@ -35,6 +35,11 @@ const formatDate = (date) => {
   return formattedDate;
 };
 
+/** w-72 (18rem) at 70% — tighter filter triggers and dropdown panels */
+const FILTER_MENU_WIDTH = "w-[12.6rem]";
+const FILTER_ACTION_MIN_WIDTH = "min-w-[6rem]";
+const FILTER_CAMPAIGN_MIN_WIDTH = "min-w-[6.25rem]";
+
 export default function DashbordFilter({ appliedFilters, compact = false }) {
   const { locale, translate } = useI18n();
   const router = useRouter();
@@ -89,6 +94,8 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
+  const isFilterMenuOpen =
+    isActionDropdownOpen || isCampaignDropdownOpen || isDatePickerOpen;
   const clientId = LenaCookiesManager.getClientId();
   const actionDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
@@ -286,10 +293,14 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     <div
       className={`flex flex-col gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
     >
-      {/* Row 1: filters stay on one line */}
-      <div className="flex flex-nowrap items-center gap-2 min-w-0 overflow-x-auto">
+      {/* Row 1: filters stay on one line — keep above row 2 so open menus receive clicks */}
+      <div
+        className={`relative flex flex-wrap sm:flex-nowrap items-center justify-start gap-2 min-w-0 ${
+          isFilterMenuOpen ? "z-50" : "z-30"
+        }`}
+      >
           <div
-            className="relative z-[60] min-w-[8.5rem] shrink-0"
+            className={`relative z-[60] ${FILTER_ACTION_MIN_WIDTH} shrink-0`}
             ref={actionDropdownRef}
           >
             <div
@@ -312,7 +323,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isActionDropdownOpen && (
-              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.actions.length > 0 && (
                   <button
                     type="button"
@@ -347,7 +358,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
           {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
-            className="relative z-[60] min-w-[9rem] shrink-0"
+            className={`relative z-[60] ${FILTER_CAMPAIGN_MIN_WIDTH} shrink-0`}
             ref={campaignDropdownRef}
           >
             <div
@@ -376,7 +387,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isCampaignDropdownOpen && (
-              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto">
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.campaign_ids.length > 0 && (
                   <button
                     onClick={clearCampaignFilters}
@@ -411,7 +422,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             )}
           </div>
 
-          <div className="relative z-[60] min-w-[11rem] shrink-0">
+          <div className={`relative z-[60] ${FILTER_MENU_WIDTH} shrink-0`}>
             <div
               role="button"
               tabIndex={0}
@@ -422,7 +433,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                   setIsDatePickerOpen((o) => !o);
               }}
               onClick={() => setIsDatePickerOpen(!isDatePickerOpen)}
-              className={`relative ${DASHBOARD_TRIGGER} !w-auto justify-start ps-3 pe-9 ${
+              className={`relative ${DASHBOARD_TRIGGER} !w-full justify-start ps-3 pe-9 ${
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
@@ -439,7 +450,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isDatePickerOpen && (
-              <div className="absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 w-72 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
                 <div className="space-y-2">
                   <FormInput
                     type="date"
@@ -492,7 +503,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       </div>
 
       {/* Row 2: actions */}
-      <div className="flex items-center justify-end gap-2 flex-wrap">
+      <div className="relative z-10 flex items-center justify-start gap-2 flex-wrap">
         <button
           onClick={() => setIsAddLeadOpen(true)}
           className={`flex items-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${

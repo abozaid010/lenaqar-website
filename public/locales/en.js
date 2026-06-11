@@ -766,7 +766,13 @@ export default {
       requiredColumnsText: "Required column:",
       optionalColumnsText: "Optional columns:",
       aliasesNotice: "Common alias names are accepted for these columns.",
+      platformGuideTitle: "Platform column values",
+      platformGuideText:
+        "Use one of the exact values below in the platform column. Leave it empty to use {default}.",
       downloadTemplate: "Download template",
+      template: {
+        platformReference: "ALLOWED_PLATFORM_VALUES",
+      },
       columns: {
         name: "name",
         phone: "phone",
@@ -788,6 +794,24 @@ export default {
         fileRequired: "Please choose a file first.",
         noValidRows: "No valid leads were found in the file.",
         importFailed: "Failed to import leads. Please check your file and try again.",
+        sheetInvalid: "The sheet does not match the expected format.",
+        noHeaders: "The file has no column headers. Please use the template or add a header row.",
+        noDataRows: "The file has no data rows. Add at least one lead below the header row.",
+        missingPhoneColumn:
+          "Could not find a phone column. Expected a column named phone (or mobile, contact, etc.). Found columns: {headers}",
+        unrecognizedColumns:
+          "None of the columns match the expected format. Found: {headers}. Required: phone. Optional: name, notes, campaign_id, platform.",
+        missingClientId:
+          "Missing client ID. Please log out and log in again, then retry import.",
+        invalidPlatform:
+          'Invalid platform "{value}". Allowed values: {allowed}. Leave empty to use "{default}".',
+        invalidPhone: "Phone is missing or invalid",
+        allRowsInvalidPlatform:
+          "No leads were imported. Every row has an invalid platform value. Allowed values: {allowed}. Leave platform empty to use {default}.",
+        importFailedTitle: "Import failed",
+        rowPrefix: "Row {row}:",
+        headerRowSkipped:
+          "Skipped header row. Remove duplicate column titles from your data rows.",
       },
     },
     bulkWhatsapp: {

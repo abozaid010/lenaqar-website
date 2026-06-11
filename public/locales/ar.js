@@ -656,7 +656,13 @@ export default {
       requiredColumnsText: "عمود مطلوب:",
       optionalColumnsText: "أعمدة اختيارية:",
       aliasesNotice: "يتم قبول الأسماء البديلة الشائعة لهذه الأعمدة.",
+      platformGuideTitle: "قيم عمود المنصة (platform)",
+      platformGuideText:
+        "استخدم إحدى القيم التالية حرفياً في عمود platform. اتركه فارغاً لاستخدام {default}.",
       downloadTemplate: "تحميل قالب",
+      template: {
+        platformReference: "ALLOWED_PLATFORM_VALUES",
+      },
       columns: {
         name: "name",
         phone: "phone",
@@ -678,6 +684,24 @@ export default {
         fileRequired: "يرجى اختيار ملف أولاً.",
         noValidRows: "لم يتم العثور على عملاء صالحين داخل الملف.",
         importFailed: "فشل استيراد العملاء. يرجى مراجعة الملف والمحاولة مرة أخرى.",
+        sheetInvalid: "الشيت لا يطابق التنسيق المتوقع.",
+        noHeaders: "الملف لا يحتوي على عناوين أعمدة. يرجى استخدام القالب أو إضافة صف عناوين.",
+        noDataRows: "الملف لا يحتوي على صفوف بيانات. أضف عميلاً واحداً على الأقل أسفل صف العناوين.",
+        missingPhoneColumn:
+          "تعذر العثور على عمود الهاتف. المتوقع عمود باسم phone (أو mobile أو contact وغيرها). الأعمدة الموجودة: {headers}",
+        unrecognizedColumns:
+          "لا يطابق أي عمود التنسيق المتوقع. الموجود: {headers}. المطلوب: phone. اختياري: name و notes و campaign_id و platform.",
+        missingClientId:
+          "معرف العميل مفقود. يرجى تسجيل الخروج ثم الدخول مرة أخرى وإعادة المحاولة.",
+        invalidPlatform:
+          'قيمة منصة غير صالحة "{value}". القيم المسموحة: {allowed}. اترك الحقل فارغاً لاستخدام "{default}".',
+        invalidPhone: "رقم الهاتف مفقود أو غير صالح",
+        allRowsInvalidPlatform:
+          "لم يتم استيراد أي عميل. كل الصفوف تحتوي على قيمة platform غير صالحة. القيم المسموحة: {allowed}. اترك platform فارغاً لاستخدام {default}.",
+        importFailedTitle: "فشل الاستيراد",
+        rowPrefix: "الصف {row}:",
+        headerRowSkipped:
+          "تم تخطي صف العناوين. أزل عناوين الأعمدة المكررة من صفوف البيانات.",
       },
     },
     bulkWhatsapp: {

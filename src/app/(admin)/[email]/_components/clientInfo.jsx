@@ -1,18 +1,20 @@
 "use client";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getProfileData, updateProfileData } from "@/utils/api";
-import { useQuery } from "@tanstack/react-query";
-import { Loader2, ChevronDown, Copy, Share2 } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { AlertTriangle, Loader2, ChevronDown, Copy, Share2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { PhoneField } from "@/components/phone/PhoneField";
 
 export default function ClientInfo({ client_email }) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
+  const queryClient = useQueryClient();
   const MAX_SUGGESTED_QUESTIONS = 5;
   const { data, isLoading } = useQuery({
     queryKey: ["clientData"],
@@ -33,6 +35,7 @@ export default function ClientInfo({ client_email }) {
   });
   const [isChanged, setIsChanged] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Helper function to count words
   const countWords = (text) => {
@@ -263,8 +266,66 @@ export default function ClientInfo({ client_email }) {
     }
   };
 
+  const handleLogout = () => setShowLogoutConfirm(true);
+
+  const cancelLogout = () => setShowLogoutConfirm(false);
+
+  const confirmLogout = async () => {
+    try {
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
+      LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
+      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
+
+      if (typeof window !== "undefined") {
+        queryClient.removeQueries({ queryKey: ["data-projection"] });
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      toast.success(translate("header.logoutSuccess"));
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <>
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="bg-red-100 p-3 rounded-full mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-500" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {translate("header.logoutConfirm.title")}
+              </h3>
+              <p className="text-gray-600 mt-2">
+                {translate("header.logoutConfirm.message")}
+              </p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={cancelLogout}
+                className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors"
+              >
+                {translate("header.logoutConfirm.cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={confirmLogout}
+                className="flex-1 py-2 px-4 bg-red-500 text-white rounded-md font-medium transition-colors"
+              >
+                {translate("header.logoutConfirm.confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isLoading ? (
         <LoadingSpinner />
       ) : (
@@ -517,6 +578,17 @@ export default function ClientInfo({ client_email }) {
               )}
             </button>
           )}
+
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-sm font-medium text-red-600 hover:bg-red-50 py-2 px-3 rounded-md transition-colors"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>{translate("header.userMenu.logout")}</span>
+            </button>
+          </div>
         </form>
       )}
     </>
