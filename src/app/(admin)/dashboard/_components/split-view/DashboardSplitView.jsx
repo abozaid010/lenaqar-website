@@ -10,6 +10,7 @@ import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { buildDashboardFilterKey } from "@/utils/dashboard-filter-key";
+import { sortDashboardLeadsByScore } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
@@ -60,10 +61,13 @@ function DashboardSplitViewComponent() {
   const allUsers = useMemo(() => flattenUsers(data), [data]);
 
   const searchQueryTrimmed = (searchParams.get("query") || "").trim();
+  const sortScore = searchParams.get("sort_score");
   const filteredUsers = useMemo(() => {
-    if (!searchQueryTrimmed) return allUsers;
-    return allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed));
-  }, [allUsers, searchQueryTrimmed]);
+    const searchFiltered = searchQueryTrimmed
+      ? allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed))
+      : allUsers;
+    return sortDashboardLeadsByScore(searchFiltered, sortScore);
+  }, [allUsers, searchQueryTrimmed, sortScore]);
 
   useEffect(() => {
     setVisibleLeadsFromList(filteredUsers);
