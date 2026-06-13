@@ -114,6 +114,26 @@ function DashboardSplitViewComponent() {
     [queryClient, filterKey]
   );
 
+  useEffect(() => {
+    if (!selectedUserId || selectedLead) return;
+    if (!hasNextPage || isFetchingNextPage) return;
+    fetchNextPage();
+  }, [
+    selectedUserId,
+    selectedLead,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  ]);
+
+  useEffect(() => {
+    if (!selectedUserId || !selectedLead) return;
+    const el = document.querySelector(
+      `[data-user-id="${CSS.escape(selectedUserId)}"]`
+    );
+    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [selectedUserId, selectedLead]);
+
   return (
     <div className="flex flex-col min-h-0 flex-1 gap-1">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,360px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">

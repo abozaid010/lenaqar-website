@@ -1492,6 +1492,63 @@ export function getValidatedApiClientId() {
   return createSafeClientId(clientId);
 }
 
+// Notifications API //
+export async function fetchNotifications({ since, unreadOnly, limit = 50 } = {}) {
+  try {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (since) params.set("since", since);
+    if (unreadOnly) params.set("unread_only", "true");
+
+    const response = await axiosInstance.get(`/notifications?${params.toString()}`);
+
+    if (!response.data?.status || !response.data?.data) {
+      throw new Error("Invalid response format from server");
+    }
+
+    const { notifications, unread_count } = response.data.data;
+    if (!Array.isArray(notifications)) {
+      throw new Error("Expected notifications array in response");
+    }
+
+    return { notifications, unread_count: unread_count ?? 0 };
+  } catch (error) {
+    console.error("Failed to fetch notifications:", error.message);
+    throw error;
+  }
+}
+
+export async function markNotificationRead(notificationId) {
+  try {
+    const response = await axiosInstance.post(
+      `/notifications/${encodeURIComponent(notificationId)}/read`
+    );
+
+    if (!response.data?.status) {
+      throw new Error("Failed to mark notification as read");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to mark notification as read:", error.message);
+    throw error;
+  }
+}
+
+export async function markAllNotificationsRead() {
+  try {
+    const response = await axiosInstance.post("/notifications/read-all");
+
+    if (!response.data?.status) {
+      throw new Error("Failed to mark all notifications as read");
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Failed to mark all notifications as read:", error.message);
+    throw error;
+  }
+}
+
 // News API //
 export async function fetchNews() {
   try {
