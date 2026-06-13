@@ -25,6 +25,7 @@ export default function LeadRow({
     <div
       role="option"
       aria-selected={selected}
+      data-user-id={user.user_id}
       onClick={() => onSelect(user)}
       tabIndex={0}
       onKeyDown={(e) => {

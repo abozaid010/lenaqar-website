@@ -33,6 +33,7 @@ import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 import { seedMessagingProviderConfigCache } from "@/hooks/useMessagingProviderConfig";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 const SidebarComponent = ({
   clientId = null,
@@ -376,6 +377,13 @@ const SidebarComponent = ({
 
         {/* Navigation Menu */}
         <div className={`flex-1 overflow-y-auto min-h-0 ${SELECTION_COLORS.BG}`}>
+          {isMounted && (
+            <NotificationBell
+              navHref={navHref}
+              isLinkActive={isLinkActive}
+            />
+          )}
+
           {isMounted && conversation.canView && (
             <Link
               href={navHref("/dashboard")}

@@ -7,7 +7,7 @@ const SITE_HOME_PAGE =
 // Admin route segments (without leading slash) that require authentication
 const adminPaths = [
   'dashboard', 'campaigns', 'campaign-chat', 'schedule',
-  'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map',
+  'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
 ];
 
 export function proxy(request) {

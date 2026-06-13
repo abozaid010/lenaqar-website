@@ -12,6 +12,11 @@ export const userKeys = {
   detail: (id) => [...userKeys.details(), id],
 };
 
+export const notificationKeys = {
+  all: ["notifications"],
+  list: () => [...notificationKeys.all, "list"],
+};
+
 /**
  * Removes a user from the dashboard infinite-users cache without refetching.
  * @param {import("@tanstack/react-query").QueryClient} queryClient

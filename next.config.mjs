@@ -61,7 +61,7 @@ const nextConfig = {
   async rewrites() {
     const adminPaths = [
       'dashboard', 'campaigns', 'campaign-chat', 'schedule',
-      'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map',
+      'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
     ];
     return adminPaths.flatMap((path) => [
       { source: `/:clientId/${path}`, destination: `/${path}` },
