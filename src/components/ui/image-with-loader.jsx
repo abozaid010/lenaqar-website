@@ -102,21 +102,21 @@ export default function ImageWithLoader({
     switch (loadingVariant) {
       case "minimal":
         return (
-          <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+          <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center pointer-events-none">
             <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"></div>
           </div>
         );
 
       case "skeleton":
         return (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse">
+          <div className="absolute inset-0 bg-gray-200 animate-pulse pointer-events-none">
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer transform -skew-x-12"></div>
           </div>
         );
 
       default:
         return (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse-soft">
+          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse-soft pointer-events-none">
             {/* Shimmer overlay effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer transform -skew-x-12"></div>
 
@@ -174,7 +174,7 @@ export default function ImageWithLoader({
   };
 
   const errorState = (
-    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+    <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center pointer-events-none">
       <div className="text-center text-gray-400">
         <div className="relative mb-3">
           <svg

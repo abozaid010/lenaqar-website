@@ -158,7 +158,8 @@ export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
 
 /**
  * Fetches units from /units/all for the Resale page.
- * Always sends is_primary: false. When filter is "all", only is_primary is sent; otherwise
+ * Always sends is_primary: false and client_id for the current session.
+ * When filter is "all", only is_primary is sent; otherwise
  * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
  */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
@@ -203,6 +204,11 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     }
     if (parsed.max_price != null && parsed.max_price !== "") {
       params.max_price = parsed.max_price;
+    }
+
+    const clientId = getValidatedApiClientId();
+    if (clientId) {
+      params.client_id = clientId;
     }
 
     const response = await axiosInstance.get("/units/all", { params });

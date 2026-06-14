@@ -23,6 +23,55 @@ export function encodeUnitCodeForPath(code: string): string {
   return encodeURIComponent(code);
 }
 
+type UnitListLinkFields = {
+  code?: unknown;
+  unitId?: unknown;
+  unit_id?: unknown;
+  id?: unknown;
+};
+
+/** Safely read a unit code from list/API payloads (string or number). */
+export function resolveUnitCodeFromListItem(
+  unit: UnitListLinkFields | null | undefined
+): string | null {
+  if (unit?.code == null) return null;
+  const trimmed = String(unit.code).trim();
+  return trimmed || null;
+}
+
+/** Safely read a unit id from list/API payloads. */
+export function resolveUnitIdFromListItem(
+  unit: UnitListLinkFields | null | undefined
+): string | null {
+  const raw = unit?.unitId ?? unit?.unit_id ?? unit?.id;
+  if (raw == null) return null;
+  const trimmed = String(raw).trim();
+  return trimmed || null;
+}
+
+/**
+ * Detail href for a unit card: prefers code, falls back to unitId (legacy route resolves by id).
+ * Returns null when neither identifier is available.
+ */
+export function buildUnitDetailHrefFromListItem(
+  unit: UnitListLinkFields | null | undefined,
+  opts?: {
+    readonly?: boolean;
+    clientId?: string | null;
+    queryParams?: string;
+  }
+): string | null {
+  const code = resolveUnitCodeFromListItem(unit);
+  const unitId = resolveUnitIdFromListItem(unit);
+  const segment = code ?? unitId;
+  if (!segment) return null;
+
+  const path = opts?.readonly
+    ? buildPublicUnitDetailPath(segment)
+    : buildAdminUnitDetailPath(segment, opts?.clientId);
+  return path + (opts?.queryParams || '');
+}
+
 /** Public marketing share URL: https://lenaai.net/allProberties/{code} */
 export function buildPublicUnitShareUrl(code: string): string {
   const normalized = normalizeUnitCodeParam(code);
