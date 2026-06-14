@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { useLocaleConstants } from '@/utils/localeConstants';
+import { isRentVisibilityAvailable } from '@/constants/property-visibility';
 
 export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   const { formatDate } = useLocaleConstants();
@@ -15,6 +16,8 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   const missing = missingRequiredFields || [];
   const isMissing = (field) => missing.includes(field);
   const isSale = u.purpose === "sell";
+  const unitVisibility = u.visibility ?? u.status;
+  const isAvailableForRent = isRentVisibilityAvailable(unitVisibility);
   const rentDurationType = u.rentDurationType || {};
   const durationKeys = Object.keys(rentDurationType);
   const activeRent = durationKeys.length > 0 && rentDurationType[activeDuration] != null
@@ -272,7 +275,7 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
           </div>
 
           {/* Availability */}
-          {u.isAvailable && (
+          {isAvailableForRent && (
             <div className="mt-3 p-2 bg-green-50 rounded-md">
               <div className="text-sm font-medium text-green-900">
                 {getTranslation(
@@ -287,7 +290,7 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
             </div>
           )}
 
-          {!u.isAvailable && (
+          {!isAvailableForRent && (
             <div className="mt-4 p-3 bg-red-50 rounded-md">
               <div className="text-sm font-medium text-red-900">
                 {getTranslation(

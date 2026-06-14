@@ -1,5 +1,6 @@
 import { SITE_URL } from "@/app/metadata";
 import { buildPublicUnitShareUrl } from "@/lib/units/unit-share-links";
+import { isRentVisibilityAvailable } from "@/constants/property-visibility";
 
 export default function UnitSchema({ unit, isPublic = false }) {
   if (!unit) return null;
@@ -31,7 +32,7 @@ export default function UnitSchema({ unit, isPublic = false }) {
       "@type": "Offer",
       price: String(unit.price ?? unit.totalPrice ?? "0"),
       priceCurrency: "EGP",
-      availability: unit.isAvailable
+      availability: isRentVisibilityAvailable(unit.visibility ?? unit.status)
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",
     },

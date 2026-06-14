@@ -25,6 +25,9 @@ import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 import { MAX_UNIT_IMAGES } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { normalizeViewTypeValue } from "@/data/constants";
+import {
+  PROPERTY_VISIBILITY,
+} from "@/constants/property-visibility";
 
 /** Parse value to number for API (strip commas/formatting). */
 function normalizeToEnglishDigits(value) {
@@ -250,6 +253,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     // Owner details (shown only for brokers)
     owner_name: unitData?.owner_name || "",
     owner_mobile: unitData?.owner_mobile || "",
+    visibility:
+      unitData?.visibility ??
+      unitData?.status ??
+      PROPERTY_VISIBILITY.VISIBLE,
   }));
 
   // specific sell form data
@@ -267,7 +274,6 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   // specific rent form data
   const [rentFormData, setRentFormData] = useState(() => ({
-    isAvailable: true,
     availabilityDate: unitData?.availabilityDate
       ? new Date(unitData.availabilityDate).toISOString().split("T")[0]
       : new Date().toISOString().split("T")[0],
@@ -815,6 +821,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       } else if (formData.purpose === "rent") {
         finalFormData = { ...finalFormData, ...rentFormData };
       }
+
+      delete finalFormData.isAvailable;
+      delete finalFormData.is_available;
 
       const normalizedFinalFormData = normalizeNumbersInPayload(finalFormData);
       let payload = sanitizeAmountsForApi(normalizedFinalFormData);

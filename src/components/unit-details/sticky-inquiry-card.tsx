@@ -7,17 +7,24 @@ import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath } from '@/lib/units/unit-share-links';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
+import { useUnitsSectionSource } from '@/hooks/use-units-section-source';
 import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
+import UnitApproveButton, { isUnitPendingApproval } from './unit-approve-button';
 import toast from 'react-hot-toast';
 import type { UseMutationResult } from '@tanstack/react-query';
 
 export default function StickyInquiryCard({
   unit,
+  rawUnit,
   canShare = false,
   onShare,
 }: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
+  const unitsSection = useUnitsSectionSource();
+  const showApproveButton = Boolean(
+    rawUnit && isUnitPendingApproval(rawUnit, unitsSection === 'pending_approval')
+  );
   const deleteUnitMutation = useDeleteUnit() as unknown as UseMutationResult<string, Error, string, unknown>;
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -206,26 +213,51 @@ export default function StickyInquiryCard({
 
       {/* Admin Actions — not shown for primary units when the viewer is another client */}
       {showUnitAdminActions ? (
-        <div className="border-t pt-4">
-          <div className={`grid gap-3 ${unit.referenceCode?.trim() ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            {unit.referenceCode?.trim() && (
-            <button
-              onClick={handleEdit}
-              className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
-            >
-              <Edit className="w-4 h-4" />
-              {translate("buttons.edit")}
-            </button>
-            )}
-
-            <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
-            >
-              <Trash2 className="w-4 h-4" />
-              {translate("buttons.delete")}
-            </button>
-          </div>
+        <div className="border-t pt-4 space-y-3">
+          {showApproveButton && rawUnit ? (
+            <>
+              {unit.referenceCode?.trim() ? (
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handleEdit}
+                    className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
+                  >
+                    <Edit className="w-4 h-4" />
+                    {translate("buttons.edit")}
+                  </button>
+                  <UnitApproveButton rawUnit={rawUnit} variant="inline" />
+                </div>
+              ) : (
+                <UnitApproveButton rawUnit={rawUnit} variant="inline" />
+              )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="w-full border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                {translate("buttons.delete")}
+              </button>
+            </>
+          ) : (
+            <div className={`grid gap-3 ${unit.referenceCode?.trim() ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              {unit.referenceCode?.trim() && (
+                <button
+                  onClick={handleEdit}
+                  className="border border-blue-300 text-blue-600 rounded-lg py-2 px-3 font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2 text-sm"
+                >
+                  <Edit className="w-4 h-4" />
+                  {translate("buttons.edit")}
+                </button>
+              )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="border border-red-300 text-red-600 rounded-lg py-2 px-3 font-medium hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm"
+              >
+                <Trash2 className="w-4 h-4" />
+                {translate("buttons.delete")}
+              </button>
+            </div>
+          )}
         </div>
       ) : null}
 

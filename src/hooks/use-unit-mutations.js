@@ -4,6 +4,7 @@ import {
   addUnit,
   addUnitRent,
   addUnitSaleViaExcel,
+  approveUnitVisibility,
   deleteUnit,
   updateUnit,
   updateUnitRent,
@@ -142,6 +143,34 @@ export function useUpdateUnit() {
       if (context?.previousUnits) {
         context.previousUnits.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
+        });
+      }
+    },
+  });
+}
+
+// Hook for approving a pending unit (visibility: pending_approval -> visible)
+export function useApproveUnitVisibility() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (rawUnit) => {
+      const res = await approveUnitVisibility(rawUnit);
+
+      if (!isSuccessfulApiResponse(res)) {
+        throw new Error(
+          res?.error || res?.error_message || res?.message || "Failed to approve unit"
+        );
+      }
+
+      return rawUnit?.unitId;
+    },
+    onSuccess: (unitId) => {
+      queryClient.invalidateQueries({ queryKey: unitKeys.all });
+
+      if (unitId) {
+        queryClient.invalidateQueries({
+          queryKey: unitKeys.detail(unitId),
         });
       }
     },

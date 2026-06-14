@@ -4,6 +4,10 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { useI18n } from "@/hooks/useI18n";
 import { convertArabicToEnglishNumbers } from "@/utils/formatters";
+import {
+  isRentVisibilityAvailable,
+  resolveRentVisibilityForCheckbox,
+} from "@/constants/property-visibility";
 import { useState } from "react";
 
 const availableAmenities = [
@@ -35,6 +39,15 @@ export default function RentalDetailsStep({
 }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t, translate, translateStrict } = useI18n();
+  const unitVisibility = commonFormData?.visibility ?? commonFormData?.status;
+  const isRentAvailable = isRentVisibilityAvailable(unitVisibility);
+
+  const handleRentAvailabilityChange = (e) => {
+    const checked = e.target.checked;
+    updateCommonFormData({
+      visibility: resolveRentVisibilityForCheckbox(checked, unitVisibility),
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked, dataset } = e.target;
@@ -96,7 +109,7 @@ export default function RentalDetailsStep({
     <div>
       <h3 className="text-xl font-semibold mb-3 text-slate-800">
         {t.rentalDetails.availability}{" "}
-        {!formData.isAvailable ? (
+        {!isRentAvailable ? (
           <span className="text-sm text-gray-400 font-normal">
             {t.rentalDetails.chooseAvailabilityDate}{" "}
             <span className="text-red-500">*</span>
@@ -109,14 +122,13 @@ export default function RentalDetailsStep({
         <div className="flex items-center">
           <input
             type="checkbox"
-            id="isAvailable"
-            name="isAvailable"
-            checked={formData.isAvailable}
-            onChange={handleChange}
+            id="rentAvailable"
+            checked={isRentAvailable}
+            onChange={handleRentAvailabilityChange}
             className="h-4 w-4"
           />
           <label
-            htmlFor="isAvailable"
+            htmlFor="rentAvailable"
             className="ml-2 block text-sm text-gray-700"
           >
             {t.rentalDetails.availableForRent}
@@ -129,10 +141,10 @@ export default function RentalDetailsStep({
             type="date"
             name="availabilityDate"
             value={formData.availabilityDate}
-            disabled={formData.isAvailable}
+            disabled={isRentAvailable}
             onChange={handleChange}
             className={`block w-full min-h-[40px] rounded-md border border-gray-300 py-2 px-3 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 ${
-              formData.isAvailable ? "bg-gray-100 cursor-not-allowed" : ""
+              isRentAvailable ? "bg-gray-100 cursor-not-allowed" : ""
             }`}
           />
         </div>
