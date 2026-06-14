@@ -166,10 +166,9 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
 export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
 
 /**
- * Fetches units from /units/all for the Resale page.
- * Always sends is_primary: false and client_id for the current session.
- * When filter is "all", only is_primary is sent; otherwise
- * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
+ * Fetches units from /units/all for the Hidden Units page.
+ * Always sends is_primary: false, client_id, and visibility
+ * ("pending_approval" by default, or "hidden" when selected).
  */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
@@ -193,12 +192,10 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
         : {}),
     };
 
-    // "All" = only is_primary: false. Otherwise: dataSource XOR visibility
-    if (parsed.dataSource === "ai_generated") {
-      params.dataSource = "ai_generated";
-    } else if (parsed.visibility != null && parsed.visibility !== "") {
-      params.visibility = parsed.visibility;
-    }
+    params.visibility =
+      parsed.visibility != null && parsed.visibility !== ""
+        ? parsed.visibility
+        : "pending_approval";
 
     // Filter by updated_at (ISO 8601, e.g. '2024-01-01T00:00:00Z')
     if (parsed.updated_at) {

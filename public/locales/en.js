@@ -1102,6 +1102,8 @@ export default {
     allCompounds: "All Projects",
     allPurposes: "All Purposes",
     allPropertyTypes: "All Property Types",
+    pendingApproval: "Pending Approval",
+    hidden: "Hidden",
     price: "price",
     applay: "Apply",
     min: " Min Price",

@@ -999,6 +999,8 @@ export default {
     allCompounds: "جميع المجمعات",
     allPurposes: "جميع الأغراض",
     allPropertyTypes: "جميع أنواع العقارات",
+    pendingApproval: "بانتظار الموافقة",
+    hidden: "مخفي",
     price: "السعر",
     max: "اعلى سعر",
     min: "اقل سعر",
