@@ -3,6 +3,7 @@
 import { CheckCircle2, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
+import type { UseMutationResult } from '@tanstack/react-query';
 import { useI18n } from '@/hooks/useI18n';
 import { useApproveUnitVisibility } from '@/hooks/use-unit-mutations';
 import { useUnitsSectionSource } from '@/hooks/use-units-section-source';
@@ -33,7 +34,12 @@ export default function UnitApproveButton({
 }: UnitApproveButtonProps) {
   const { translate } = useI18n();
   const router = useRouter();
-  const approveMutation = useApproveUnitVisibility();
+  const approveMutation = useApproveUnitVisibility() as unknown as UseMutationResult<
+    string | undefined,
+    Error,
+    RawUnit,
+    unknown
+  >;
   const unitsSection = useUnitsSectionSource();
   const fromPendingSection = unitsSection === 'pending_approval';
 
