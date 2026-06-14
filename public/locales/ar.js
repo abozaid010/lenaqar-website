@@ -142,6 +142,7 @@ export default {
     reset: "إعادة تعيين",
     saving: "جاري الحفظ...",
     saveUnit: "حفظ الوحدة",
+    approveUnit: "اعتماد",
   },
   breadcrumbs: {
     home: "الرئيسية",
@@ -1654,6 +1655,7 @@ export default {
     unitAdded: "تم إضافة الوحدة بنجاح",
     unitUpdated: "تم تحديث الوحدة بنجاح",
     unitDeleted: "تم حذف الوحدة بنجاح",
+    unitApproved: "تم اعتماد الوحدة بنجاح",
   },
   phase: "المرحلة",
   viewOnGoogleMaps: "عرض على خرائط جوجل",

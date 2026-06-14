@@ -132,6 +132,7 @@ export default {
     reset: "Reset",
     saving: "Saving...",
     saveUnit: "Save Unit",
+    approveUnit: "Approve",
   },
   breadcrumbs: {
     home: "Home",
@@ -1773,6 +1774,7 @@ export default {
     unitAdded: "Unit added successfully",
     unitUpdated: "Unit updated successfully",
     unitDeleted: "Unit deleted successfully",
+    unitApproved: "Unit approved successfully",
   },
   formLabels: {
     unitTitle: "Unit Title",

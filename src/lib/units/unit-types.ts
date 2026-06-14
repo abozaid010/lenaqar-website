@@ -44,6 +44,8 @@ export interface RawUnit {
   owner_mobile?: string;
   notes?: string;
   video?: string;
+  visibility?: string;
+  status?: string;
 }
 
 export interface UnitApiResponse {
@@ -118,14 +120,13 @@ export interface UnitViewModel {
   furnishing: string | null;
   phase: string | null;
   notes?: string | null;
+  visibility: string | null;
 }
 
 // Component prop types
 export interface UnitHeroGalleryProps {
   images: HeroImage[];
   isPrimary: boolean;
-  canShare?: boolean;
-  onShare?: () => void;
 }
 
 export interface UnitHeaderSummaryProps {

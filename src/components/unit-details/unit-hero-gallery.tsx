@@ -2,30 +2,16 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle, Share2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle } from 'lucide-react';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitHeroGallery({
   images,
   isPrimary,
-  canShare = false,
-  onShare,
 }: UnitHeroGalleryProps) {
-  const { t, translate } = useI18n();
+  const { t } = useI18n();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
-  const shareButton =
-    canShare && onShare ? (
-      <button
-        type="button"
-        onClick={onShare}
-        className="absolute top-3 end-3 z-30 p-2 rounded-full bg-white/90 text-primary shadow-md hover:bg-white transition-colors"
-        aria-label={translate('unitShare.title', 'Share Property')}
-      >
-        <Share2 className="w-4 h-4" />
-      </button>
-    ) : null;
 
   if (images.length === 0) {
     return (
@@ -35,7 +21,6 @@ export default function UnitHeroGallery({
           <p className="text-lg font-medium">{t?.unitLabels?.noImages || 'No images available'}</p>
           <p className="text-sm mt-2">{t?.unitLabels?.noImagesDescription || 'This property has no photos yet'}</p>
         </div>
-        {shareButton}
       </div>
     );
   }
@@ -129,7 +114,6 @@ export default function UnitHeroGallery({
           </div>
         )}
 
-        {shareButton}
       </div>
 
       {/* Thumbnail Strip */}

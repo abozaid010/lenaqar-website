@@ -107,7 +107,7 @@ export default async function PrivateUnitDetailsPage({ params }) {
             },
           ]}
         />
-        <UnitDetailsPage unit={unit} />
+        <UnitDetailsPage unit={unit} rawUnit={rawUnit} />
       </>
     );
   } catch (error) {

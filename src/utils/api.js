@@ -920,6 +920,19 @@ export const updateUnitRent = withErrorHandling(async (unit) => {
   return response.data;
 });
 
+export const approveUnitVisibility = withErrorHandling(async (unit) => {
+  const purpose = String(unit?.purpose || "sell").toLowerCase();
+  const endpoint =
+    purpose === "rent" ? `/units/v1/update-rent` : `/units/v1/update-sale`;
+  const response = await axiosInstance.post(endpoint, {
+    ...unit,
+    unitId: unit?.unitId,
+    purpose: purpose === "rent" ? "rent" : "sell",
+    visibility: "visible",
+  });
+  return response.data;
+});
+
 export async function getClientRequirements(user_id) {
   try {
     const response = await axiosInstance.get(`requirements/${user_id}`);

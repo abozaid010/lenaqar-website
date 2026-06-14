@@ -1,22 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  Bed,
-  Bath,
-  Maximize,
-  Calendar,
-  Phone,
-  MessageCircle,
-  Home,
-  MapPin,
-  Building,
-  User,
-  ChevronRight,
-  Image as ImageIcon,
-  Share2,
-  Heart
-} from 'lucide-react';
 import { useI18n } from '@/hooks/useI18n';
 import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
@@ -40,20 +24,10 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
 
   return (
     <div className="bg-gray-50 flex-1">
-      {/* Back + Share */}
+      {/* Back */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
+        <div className="mb-6">
           <BackButton fallbackRoute="/units" />
-          {canShare && (
-            <button
-              type="button"
-              onClick={() => setShowShareDialog(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:opacity-90 transition-colors"
-            >
-              <Share2 className="w-4 h-4" />
-              {translate('unitShare.title', 'Share Property')}
-            </button>
-          )}
         </div>
       </div>
 
@@ -66,8 +40,6 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
             <UnitHeroGallery
               images={unit.heroImages}
               isPrimary={unit.isPrimary}
-              canShare={canShare}
-              onShare={() => setShowShareDialog(true)}
             />
 
             {/* Header Summary */}
@@ -96,6 +68,7 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
               <div className="hidden lg:block">
                 <StickyInquiryCard
                   unit={unit}
+                  rawUnit={rawUnit}
                   canShare={canShare}
                   onShare={() => setShowShareDialog(true)}
                 />

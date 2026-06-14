@@ -112,6 +112,8 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   const facebookEmbed = rawVideoUrl ? toFacebookEmbedUrl(rawVideoUrl) : null;
   const isDirectVideo = rawVideoUrl ? isDirectVideoFile(rawVideoUrl) : false;
   const notes = isNonEmptyString(rawUnit.notes) ? rawUnit.notes.trim() : null;
+  const rawVisibility = (rawUnit as RawUnit).visibility ?? (rawUnit as RawUnit).status;
+  const visibility = isNonEmptyString(rawVisibility) ? rawVisibility.trim() : null;
 
   const videoHeroItem = youtubeEmbed
     ? {
@@ -203,6 +205,7 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     phase,
     notes,
     isPrimary,
+    visibility,
   };
 };
 
