@@ -123,10 +123,19 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
   }
 }
 
-const fetchUnitsFilterBase = async (searchParams, publicOnly = false) => {
+/**
+ * @typedef {Object} FetchUnitsFilterOptions
+ * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/units`; otherwise `/units/all`.
+ */
+
+/**
+ * Fetches a paginated, filtered units list.
+ * All filters (visibility, city, purpose, etc.) belong in searchParams / query payload.
+ */
+const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
-    const url = `${!publicOnly ? "/units/all" : "/public/units"}`;
+    const url = usePublicEndpoint ? "/public/units" : "/units/all";
     const qs = new URLSearchParams(params).toString();
 
     const response = await axiosInstance.get(qs ? `${url}?${qs}` : url);
