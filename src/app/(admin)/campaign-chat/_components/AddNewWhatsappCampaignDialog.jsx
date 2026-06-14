@@ -44,6 +44,9 @@ const AddNewWhatsappCampaignDialog = ({
   isOpen,
   onClose,
   recipients: recipientsProp = [],
+  defaultAutomationMessage = "",
+  appendUnitLinkPerRecipient = false,
+  onSendSuccess,
 }) => {
   const { translate } = useI18n();
   const {
@@ -102,6 +105,10 @@ const AddNewWhatsappCampaignDialog = ({
 
   useEffect(() => {
     if (!isOpen) return;
+    if (appendUnitLinkPerRecipient && hasAutomationModule) {
+      setSendMode(SEND_MODE.AUTOMATION);
+      return;
+    }
     if (hasApiModule && !hasAutomationModule) {
       setSendMode(SEND_MODE.API);
     } else if (!hasApiModule && hasAutomationModule) {
@@ -113,7 +120,20 @@ const AddNewWhatsappCampaignDialog = ({
           : SEND_MODE.API
       );
     }
-  }, [isOpen, hasApiModule, hasAutomationModule, hasBothModules]);
+  }, [
+    isOpen,
+    hasApiModule,
+    hasAutomationModule,
+    hasBothModules,
+    appendUnitLinkPerRecipient,
+  ]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    if (hasPrefilledRecipients && defaultAutomationMessage) {
+      setAutomationMessage(defaultAutomationMessage);
+    }
+  }, [isOpen, hasPrefilledRecipients, defaultAutomationMessage]);
 
   const validatePhoneNumber = (phone) => phone.trim().length > 0;
 
@@ -370,6 +390,14 @@ const AddNewWhatsappCampaignDialog = ({
     });
   };
 
+  const buildAutomationMessageForRecipient = (recipient) => {
+    const base = automationMessage.trim();
+    if (appendUnitLinkPerRecipient && recipient?.unitLink) {
+      return `${base}\n\n${recipient.unitLink}`.trim();
+    }
+    return base;
+  };
+
   const submitAutomationMessages = async () => {
     if (!validateAutomationForm()) return;
 
@@ -377,7 +405,7 @@ const AddNewWhatsappCampaignDialog = ({
     const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
     const messages = recipientsProp.map((recipient) => ({
       ...resolveWhatsappRecipientFields(recipient),
-      message: automationMessage.trim(),
+      message: buildAutomationMessageForRecipient(recipient),
       user_name: recipient.user_name || "",
       platform: transportPlatform,
       ...(senderPhoneNumber
@@ -418,7 +446,8 @@ const AddNewWhatsappCampaignDialog = ({
           .replace("{count}", String(sent))
           .replace("{errors}", String(failed));
         toast.success(successText);
-        setAutomationMessage("");
+        setAutomationMessage(defaultAutomationMessage || "");
+        onSendSuccess?.();
         handleClose();
         return;
       }

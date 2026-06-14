@@ -73,6 +73,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
 
   const requestParams = useMemo(() => {
     const params = {
+      visibility: "visible",
       ...(clientId ? { client_id: clientId } : {}),
     };
 
@@ -95,7 +96,7 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
 
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: ["unit-selector", paramsKey],
-    queryFn: () => fetchUnitsFilter(requestParams, false),
+    queryFn: () => fetchUnitsFilter(requestParams),
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     enabled: isOpen,

@@ -123,10 +123,19 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
   }
 }
 
-const fetchUnitsFilterBase = async (searchParams, publicOnly = false) => {
+/**
+ * @typedef {Object} FetchUnitsFilterOptions
+ * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/units`; otherwise `/units/all`.
+ */
+
+/**
+ * Fetches a paginated, filtered units list.
+ * All filters (visibility, city, purpose, etc.) belong in searchParams / query payload.
+ */
+const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
-    const url = `${!publicOnly ? "/units/all" : "/public/units"}`;
+    const url = usePublicEndpoint ? "/public/units" : "/units/all";
     const qs = new URLSearchParams(params).toString();
 
     const response = await axiosInstance.get(qs ? `${url}?${qs}` : url);
@@ -157,10 +166,9 @@ const fetchUnitsFilterBase = async (searchParams, publicOnly = false) => {
 export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
 
 /**
- * Fetches units from /units/all for the Resale page.
- * Always sends is_primary: false and client_id for the current session.
- * When filter is "all", only is_primary is sent; otherwise
- * sends visibility (e.g. "pending_approval", "visible", "hidden") or dataSource: "ai_generated".
+ * Fetches units from /units/all for the Hidden Units page.
+ * Always sends is_primary: false, client_id, and visibility
+ * ("pending_approval" by default, or "hidden" when selected).
  */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
@@ -184,12 +192,10 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
         : {}),
     };
 
-    // "All" = only is_primary: false. Otherwise: dataSource XOR visibility
-    if (parsed.dataSource === "ai_generated") {
-      params.dataSource = "ai_generated";
-    } else if (parsed.visibility != null && parsed.visibility !== "") {
-      params.visibility = parsed.visibility;
-    }
+    params.visibility =
+      parsed.visibility != null && parsed.visibility !== ""
+        ? parsed.visibility
+        : "pending_approval";
 
     // Filter by updated_at (ISO 8601, e.g. '2024-01-01T00:00:00Z')
     if (parsed.updated_at) {

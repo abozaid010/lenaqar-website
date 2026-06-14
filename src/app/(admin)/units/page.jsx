@@ -1,8 +1,5 @@
-import LoadingSpinner from "@/components/ui/loading-spinner";
-import UnitsFilter from "@/components/ui/units-filter";
-import UnitsPageQueryOptimized from "@/components/ui/units-page-query-optimized";
+import UnitsPageClient from "./units-page-client";
 import { cookies } from "next/headers";
-import { Suspense } from "react";
 
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
@@ -63,20 +60,7 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <div className="h-full flex flex-col">
-        <Suspense fallback={<div className="h-16 rounded-lg bg-gray-100 animate-pulse" />}>
-          <UnitsFilter clientId={clientId} isPublic={false} />
-        </Suspense>
-
-        <div className="mt-4">
-          <Suspense fallback={<LoadingSpinner />}>
-            <UnitsPageQueryOptimized
-              searchParams={searchParams}
-              clientId={clientId}
-            />
-          </Suspense>
-        </div>
-      </div>
+      <UnitsPageClient searchParams={searchParams} clientId={clientId} />
     </>
   );
 }

@@ -1102,6 +1102,8 @@ export default {
     allCompounds: "All Projects",
     allPurposes: "All Purposes",
     allPropertyTypes: "All Property Types",
+    pendingApproval: "Pending Approval",
+    hidden: "Hidden",
     price: "price",
     applay: "Apply",
     min: " Min Price",
@@ -1119,6 +1121,16 @@ export default {
       rent: "Rent",
       sell: "Sell",
       lease: "Lease",
+    },
+    bulkAvailability: {
+      checkButton: "Check Availability",
+      selectAll: "Select all on page",
+      selectUnit: "Select unit",
+      selectedUnits: "{count} selected",
+      noOwnerPhone: "No owner phone",
+      noRecipients: "Selected units have no valid owner phone numbers.",
+      defaultMessage:
+        "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
     },
   },
   shareModel: {

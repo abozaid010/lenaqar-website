@@ -14,24 +14,15 @@ import ar from "../../../public/locales/ar";
 import { ChevronDown } from "lucide-react";
 import { useMemo, useState, useEffect, useRef } from "react";
 
-const VISIBILITY_OPTIONS = [
-  { value: "all", label: null },
-  { value: "pending_approval", label: null },
-  { value: "visible", label: null },
-  { value: "hidden", label: null },
-  { value: "ai_generated", label: null },
-];
+const DEFAULT_VISIBILITY = "pending_approval";
 
 export default function ResalePageQuery({ searchParams }) {
   const { t, locale } = useI18n();
   const visibilityOptions = useMemo(() => ([
-    { value: "all", label: t?.common?.all ?? "All" },
     { value: "pending_approval", label: t?.unitsFilter?.pendingApproval ?? "Pending Approval" },
-    { value: "visible", label: t?.common?.show ?? "Visible" },
-    { value: "hidden", label: t?.common?.hide ?? "Hidden" },
-    { value: "ai_generated", label: t?.common?.aiGenerated ?? "AI Generated" },
+    { value: "hidden", label: t?.unitsFilter?.hidden ?? "Hidden" },
   ]), [t]);
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState(DEFAULT_VISIBILITY);
   const [updatedAtDate, setUpdatedAtDate] = useState("");
   const [propertyType, setPropertyType] = useState("");
   const [minPrice, setMinPrice] = useState("");
@@ -52,12 +43,7 @@ export default function ResalePageQuery({ searchParams }) {
 
   const searchParamsKey = useMemo(() => {
     const base = searchParams || {};
-    const withFilter =
-      filter === "all"
-        ? base
-        : filter === "ai_generated"
-          ? { ...base, dataSource: "ai_generated" }
-          : { ...base, visibility: filter };
+    const withFilter = { ...base, visibility: filter || DEFAULT_VISIBILITY };
     const withDate =
       updatedAtDate && updatedAtDate.trim() !== ""
         ? { ...withFilter, updated_at: `${updatedAtDate.trim()}T00:00:00.000Z` }
@@ -82,7 +68,7 @@ export default function ResalePageQuery({ searchParams }) {
 
   const handleFilterChange = (e) => {
     const next = e?.target?.value || "";
-    setFilter(next || "all");
+    setFilter(next || DEFAULT_VISIBILITY);
   };
 
   function formatPriceInput(value) {
