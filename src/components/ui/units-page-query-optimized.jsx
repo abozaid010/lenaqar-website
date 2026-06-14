@@ -4,8 +4,8 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { useMemo } from "react";
+import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
+import { useEffect, useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
   searchParams,
@@ -68,6 +68,15 @@ export default function UnitsPageQueryOptimized({
   // When searchParamsKey changes, a new query is created and fetched automatically
   const { isFetching, units, pagination, isLoading, isError, error, refetch } =
     useUnitsPageData(searchParamsKey, unitsFetchOptions);
+
+  const bulkSelection = useUnitsBulkSelectionOptional();
+  const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;
+
+  useEffect(() => {
+    if (!publicUnits && setVisibleUnitsFromList) {
+      setVisibleUnitsFromList(units);
+    }
+  }, [units, publicUnits, setVisibleUnitsFromList]);
 
   if (isLoading | isFetching) {
     return <LoadingSpinner message="Loading units data..." />;

@@ -1019,6 +1019,16 @@ export default {
       sell: "بيع",
       lease: "تأجير",
     },
+    bulkAvailability: {
+      checkButton: "التحقق من التوفر",
+      selectAll: "تحديد الكل في الصفحة",
+      selectUnit: "تحديد الوحدة",
+      selectedUnits: "تم تحديد {count}",
+      noOwnerPhone: "لا يوجد هاتف للمالك",
+      noRecipients: "الوحدات المحددة لا تحتوي على أرقام هواتف مالك صالحة.",
+      defaultMessage:
+        "السلام عليكم . حضرتك عندنا عميل عايز الشقه بتاعتك.. هل متاح مواعيد للمعاينة؟",
+    },
   },
   unitsSearch: {
     placeholder: "ابحث بالاسم أو الموقع...",

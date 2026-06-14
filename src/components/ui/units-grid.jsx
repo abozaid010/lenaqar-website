@@ -12,7 +12,7 @@ import {
   resolveUnitCodeFromListItem,
 } from "@/lib/units/unit-share-links";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   handleImageError,
   getFirstValidImage,
@@ -20,6 +20,12 @@ import {
   getDisplayImageUrl,
 } from "@/utils/imageUtils";
 import EmptyStateVideo from "./empty-state-video";
+import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
+import {
+  getUnitSelectionIdFromListItem,
+  isUnitSelectableForBulkWhatsapp,
+} from "@/lib/units/unit-whatsapp-recipient";
 
 export default function UnitsGrid({
   units,
@@ -31,8 +37,16 @@ export default function UnitsGrid({
 }) {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUnitCode, setShareUnitCode] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
   const { t, locale, translate, localeUtils } = useI18n();
   const clientId = LenaCookiesManager.getClientId();
+  const { canShowBulkButton } = useWhatsappBulkAccess();
+  const bulkSelection = useUnitsBulkSelectionOptional();
+  const showBulkCheckbox = !readonly && isMounted && canShowBulkButton && bulkSelection;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const egpLabel = translate("currency.egp") || "EGP";
 
@@ -69,6 +83,12 @@ export default function UnitsGrid({
             const unitHref = getUnitHref(u);
             const unitCode = resolveUnitCodeFromListItem(u);
             const cardKey = u.unitId ?? unitCode ?? idx;
+            const unitSelectionId = getUnitSelectionIdFromListItem(u);
+            const canSelectUnit = isUnitSelectableForBulkWhatsapp(u, clientId);
+            const isSelected =
+              showBulkCheckbox &&
+              unitSelectionId &&
+              bulkSelection.isUnitSelected(unitSelectionId);
 
             const cardBody = (
               <>
@@ -208,7 +228,10 @@ export default function UnitsGrid({
             );
 
             return (
-              <div key={cardKey} className="relative">
+              <div
+                key={cardKey}
+                className={`relative ${isSelected ? "ring-2 ring-primary rounded-md" : ""}`}
+              >
                 {unitHref ? (
                   <Link href={unitHref} className="relative block">
                     {cardBody}
@@ -217,6 +240,44 @@ export default function UnitsGrid({
                   <div className="relative block" aria-disabled="true">
                     {cardBody}
                   </div>
+                )}
+
+                {showBulkCheckbox && unitSelectionId && (
+                  <label
+                    className={`absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md ${
+                      canSelectUnit ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
+                    }`}
+                    title={
+                      canSelectUnit
+                        ? undefined
+                        : translate(
+                            "unitsFilter.bulkAvailability.noOwnerPhone",
+                            "No owner phone"
+                          )
+                    }
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 accent-primary rounded border-gray-300"
+                      checked={Boolean(isSelected)}
+                      disabled={!canSelectUnit}
+                      aria-label={
+                        canSelectUnit
+                          ? translate("unitsFilter.bulkAvailability.selectUnit", "Select unit")
+                          : translate(
+                              "unitsFilter.bulkAvailability.noOwnerPhone",
+                              "No owner phone"
+                            )
+                      }
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        if (!canSelectUnit) return;
+                        bulkSelection.toggleUnitSelection(unitSelectionId);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </label>
                 )}
 
                 {unitCode && (

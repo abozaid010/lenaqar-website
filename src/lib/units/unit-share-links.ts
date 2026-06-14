@@ -106,6 +106,14 @@ export function buildAdminUnitEditPath(
   return `${detail}/edit`;
 }
 
+/** Full admin CRM share URL: https://example.com/{clientId}/units/{code} */
+export function buildAdminUnitShareUrl(
+  code: string,
+  clientId?: string | null
+): string {
+  return `${SITE_URL}${buildAdminUnitDetailPath(code, clientId)}`;
+}
+
 /** WhatsApp share URL with pre-filled interest message. */
 export function buildUnitWhatsAppShareUrl(
   code: string,

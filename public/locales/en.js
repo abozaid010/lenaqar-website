@@ -1122,6 +1122,16 @@ export default {
       sell: "Sell",
       lease: "Lease",
     },
+    bulkAvailability: {
+      checkButton: "Check Availability",
+      selectAll: "Select all on page",
+      selectUnit: "Select unit",
+      selectedUnits: "{count} selected",
+      noOwnerPhone: "No owner phone",
+      noRecipients: "Selected units have no valid owner phone numbers.",
+      defaultMessage:
+        "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
+    },
   },
   shareModel: {
     Content: "Share Unit Content",
