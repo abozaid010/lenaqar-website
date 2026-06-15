@@ -29,7 +29,7 @@ export function toWhatsappApiPhoneDigits(raw, defaultCountry = "EG") {
 
 /**
  * Resolve recipient fields for POST /whatsapp/send_messages.
- * Uses phone_number when the value is a valid phone; otherwise chat_id.
+ * Prefers phone_number when present; uses chat_id only when phone_number is missing.
  *
  * @returns {{ phone_number: string } | { chat_id: string } | null}
  */
@@ -37,32 +37,34 @@ export function resolveWhatsappRecipientFields(
   { phone_number, chat_id } = {},
   defaultCountry = "EG",
 ) {
+  const rawPhone = String(phone_number ?? "").trim();
+  if (rawPhone) {
+    if (isWhatsappChatId(rawPhone)) {
+      return { chat_id: rawPhone };
+    }
+
+    const apiPhone = toWhatsappApiPhoneDigits(rawPhone, defaultCountry);
+    if (apiPhone) {
+      return { phone_number: apiPhone };
+    }
+
+    return { chat_id: rawPhone };
+  }
+
   const explicitChatId = String(chat_id ?? "").trim();
   if (explicitChatId) {
     return { chat_id: explicitChatId };
   }
 
-  const raw = String(phone_number ?? "").trim();
-  if (!raw) return null;
-
-  if (isWhatsappChatId(raw)) {
-    return { chat_id: raw };
-  }
-
-  const apiPhone = toWhatsappApiPhoneDigits(raw, defaultCountry);
-  if (apiPhone) {
-    return { phone_number: apiPhone };
-  }
-
-  return { chat_id: raw };
+  return null;
 }
 
 /** Stable key for deduplicating WhatsApp recipients in bulk sends. */
 export function getWhatsappRecipientDedupeKey(recipient) {
   if (!recipient) return "";
   return (
-    String(recipient.chat_id ?? "").trim() ||
-    String(recipient.phone_number ?? "").trim()
+    String(recipient.phone_number ?? "").trim() ||
+    String(recipient.chat_id ?? "").trim()
   );
 }
 

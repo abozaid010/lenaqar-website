@@ -1,9 +1,12 @@
 "use client";
 
-import { fetchNotifications } from "@/utils/api";
+import {
+  fetchNotifications,
+  markAllNotificationsRead,
+} from "@/utils/api";
 import { notificationKeys } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef } from "react";
 
 const LAST_POLL_KEY = "lastNotificationPollAt";
 const READ_IDS_KEY = "lenaNotificationReadIds";
@@ -24,6 +27,10 @@ function persistReadIds(ids) {
   localStorage.setItem(READ_IDS_KEY, JSON.stringify([...ids]));
 }
 
+function readIdsToArray(ids) {
+  return [...ids];
+}
+
 function mergeNotifications(newItems, existingItems) {
   const map = new Map();
   for (const item of newItems || []) {
@@ -41,7 +48,30 @@ function mergeNotifications(newItems, existingItems) {
 export function useNotifications() {
   const queryClient = useQueryClient();
   const hasInitialLoadRef = useRef(false);
-  const [readIds, setReadIds] = useState(() => loadReadIds());
+
+  const readIdsQuery = useQuery({
+    queryKey: notificationKeys.readIds(),
+    queryFn: () => readIdsToArray(loadReadIds()),
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+
+  const readIds = useMemo(
+    () => new Set(readIdsQuery.data || []),
+    [readIdsQuery.data]
+  );
+
+  const updateReadIds = useCallback(
+    (updater) => {
+      queryClient.setQueryData(notificationKeys.readIds(), (prev) => {
+        const current = new Set(prev || loadReadIds());
+        const next = updater(current);
+        persistReadIds(next);
+        return readIdsToArray(next);
+      });
+    },
+    [queryClient]
+  );
 
   const query = useQuery({
     queryKey: notificationKeys.list(),
@@ -75,7 +105,7 @@ export function useNotifications() {
 
       return {
         notifications: merged,
-        unread_count: merged.length,
+        unread_count: incremental.unread_count ?? prev?.unread_count ?? 0,
       };
     },
     staleTime: 0,
@@ -99,26 +129,38 @@ export function useNotifications() {
     [notifications]
   );
 
-  const markAsRead = useCallback((notificationId) => {
-    setReadIds((prev) => {
-      if (prev.has(notificationId)) return prev;
-      const next = new Set(prev);
-      next.add(notificationId);
-      persistReadIds(next);
-      return next;
-    });
-  }, []);
+  const markAsRead = useCallback(
+    (notificationId) => {
+      updateReadIds((prev) => {
+        if (prev.has(notificationId)) return prev;
+        const next = new Set(prev);
+        next.add(notificationId);
+        return next;
+      });
+    },
+    [updateReadIds]
+  );
 
-  const markAllAsRead = useCallback(() => {
-    setReadIds((prev) => {
+  const markAllAsRead = useCallback(async () => {
+    updateReadIds((prev) => {
       const next = new Set(prev);
       for (const n of rawNotifications) {
         if (n?.id) next.add(n.id);
       }
-      persistReadIds(next);
       return next;
     });
-  }, [rawNotifications]);
+
+    queryClient.setQueryData(notificationKeys.list(), (old) => {
+      if (!old) return old;
+      return { ...old, unread_count: 0 };
+    });
+
+    try {
+      await markAllNotificationsRead();
+    } catch (error) {
+      console.error("Failed to mark all notifications as read:", error);
+    }
+  }, [rawNotifications, updateReadIds, queryClient]);
 
   return {
     notifications,
