@@ -55,10 +55,19 @@ const LenaTextField = forwardRef(({
     setIsHovered((prev) => (prev === next ? prev : next));
   };
 
+  const [documentDir, setDocumentDir] = useState(undefined);
+
+  useEffect(() => {
+    if (dir != null) return;
+    const htmlDir = document.documentElement.getAttribute("dir");
+    if (htmlDir === "ltr" || htmlDir === "rtl") {
+      setDocumentDir(htmlDir);
+    }
+  }, [dir]);
+
   const resolvedDir =
     dir ??
-    (typeof document !== "undefined" ? document.documentElement.getAttribute("dir") : undefined) ??
-    undefined;
+    (type === "money" || type === "number" ? "ltr" : documentDir);
 
   // Expose refs for parent components
   useImperativeHandle(ref, () => ({
