@@ -22,6 +22,7 @@ export default function UnitShareLinksDialog({
   const { data: messagingConfig } = useMessagingProviderConfig();
   const defaultSenderPhone = messagingConfig?.defaultSenderPhone ?? null;
   const [copiedWebsite, setCopiedWebsite] = useState(false);
+  const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
 
   const code = unitCode?.trim() || null;
   const { websiteUrl, whatsappUrl } = code
@@ -34,6 +35,17 @@ export default function UnitShareLinksDialog({
       await navigator.clipboard.writeText(websiteUrl);
       setCopiedWebsite(true);
       setTimeout(() => setCopiedWebsite(false), 2000);
+    } catch {
+      // ignore clipboard errors
+    }
+  };
+
+  const handleCopyWhatsapp = async () => {
+    if (!whatsappUrl) return;
+    try {
+      await navigator.clipboard.writeText(whatsappUrl);
+      setCopiedWhatsapp(true);
+      setTimeout(() => setCopiedWhatsapp(false), 2000);
     } catch {
       // ignore clipboard errors
     }
@@ -72,23 +84,25 @@ export default function UnitShareLinksDialog({
             </div>
             <div className="p-4 space-y-3">
               <p className="text-sm text-gray-700 break-all">{websiteUrl}</p>
-              <button
-                type="button"
-                onClick={handleCopyWebsite}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-colors"
-              >
-                {copiedWebsite ? (
-                  <>
-                    <Check className="w-4 h-4" />
-                    {translate('unitShare.copied', 'Copied!')}
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    {translate('unitShare.copyWebsite', 'Copy website link')}
-                  </>
-                )}
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyWebsite}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-colors"
+                >
+                  {copiedWebsite ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      {translate('unitShare.copied', 'Copied!')}
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      {translate('unitShare.copyWebsite', 'Copy website link')}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -100,16 +114,36 @@ export default function UnitShareLinksDialog({
                   {translate('unitShare.whatsappLink', 'WhatsApp link')}
                 </span>
               </div>
-              <div className="p-4">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <Share2 className="w-4 h-4" />
-                  {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
-                </a>
+              <div className="p-4 space-y-3">
+                <p className="text-sm text-gray-700 break-all">{whatsappUrl}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyWhatsapp}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-colors"
+                  >
+                    {copiedWhatsapp ? (
+                      <>
+                        <Check className="w-4 h-4" />
+                        {translate('unitShare.copied', 'Copied!')}
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-4 h-4" />
+                        {translate('unitShare.copyWhatsapp', 'Copy WhatsApp link')}
+                      </>
+                    )}
+                  </button>
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Share2 className="w-4 h-4" />
+                    {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
+                  </a>
+                </div>
               </div>
             </div>
           ) : (

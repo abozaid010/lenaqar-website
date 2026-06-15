@@ -2321,6 +2321,7 @@ export default {
     websiteLink: "Website link",
     whatsappLink: "WhatsApp link",
     copyWebsite: "Copy website link",
+    copyWhatsapp: "Copy WhatsApp link",
     openWhatsapp: "Open WhatsApp",
     noWhatsapp: "No linked WhatsApp number is configured for this client.",
     noCode: "This unit does not have a reference code yet.",

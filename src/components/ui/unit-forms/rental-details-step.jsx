@@ -32,6 +32,7 @@ export default function RentalDetailsStep({
   formData,
   commonFormData,
   clientType,
+  ownerMobileRequired = true,
   updateFormData,
   updateCommonFormData,
   invalidFields = [],
@@ -294,7 +295,7 @@ export default function RentalDetailsStep({
               className="w-full"
               name="owner_mobile"
               label={translateStrict("saleDetails.ownerMobile")}
-              required
+              required={ownerMobileRequired}
               defaultCountry="EG"
               value={commonFormData.owner_mobile ?? ""}
               onChange={(next) => {
@@ -305,7 +306,9 @@ export default function RentalDetailsStep({
               }}
               error={
                 invalidFields?.includes("owner_mobile")
-                  ? translate("phoneField.invalid", "Invalid phone number")
+                  ? !String(commonFormData.owner_mobile ?? "").trim()
+                    ? translate("phoneField.required", "Phone number is required")
+                    : translate("phoneField.invalid", "Invalid phone number")
                   : undefined
               }
             />

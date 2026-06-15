@@ -2384,6 +2384,7 @@ export default {
     websiteLink: "رابط الموقع",
     whatsappLink: "رابط واتساب",
     copyWebsite: "نسخ رابط الموقع",
+    copyWhatsapp: "نسخ رابط واتساب",
     openWhatsapp: "فتح واتساب",
     noWhatsapp: "لا يوجد رقم واتساب مرتبط لهذا العميل.",
     noCode: "لا يوجد كود مرجعي لهذه الوحدة بعد.",
