@@ -1109,6 +1109,7 @@ export default {
     min: " Min Price",
     max: "Max Price",
     allCities: "All Cities",
+    allDistricts: "All Districts",
     activeFilter: " Active Filters:",
     clearall: " Clear All",
     from: "From",
@@ -1116,6 +1117,7 @@ export default {
     myInventory: "My Inventory",
     resale: "Resale",
     minArea: "Min Area",
+    maxArea: "Max Area",
     purposes: {
       buy: "Buy",
       rent: "Rent",

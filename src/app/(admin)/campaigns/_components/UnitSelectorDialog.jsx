@@ -21,6 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 const EnumPropertyIntent = ["rent", "sell"];
 
 function getFirstUnitImage(unit) {
+  if (unit?.image) return String(unit.image);
   const imgs = Array.isArray(unit?.images) ? unit.images : [];
   const first = imgs.find((x) => x?.url)?.url;
   return first || "/images/property_placeholder.jpg";
@@ -295,7 +296,10 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                   </div>
                   <div className="p-3">
                     <div className="font-semibold text-gray-900 line-clamp-1">
-                      {u?.unitTitle || translate("campaigns.unnamedUnit")}
+                      {u?.unitTitle ||
+                        u?.project ||
+                        u?.code ||
+                        translate("campaigns.unnamedUnit")}
                     </div>
                     <div className="text-xs text-gray-600 mt-1 line-clamp-2">
                       {u?.project ? `${translate("campaigns.project")}: ${u.project}` : null}
@@ -308,9 +312,9 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                           {String(u.purpose)}
                         </span>
                       ) : null}
-                      {u?.totalPrice ? (
+                      {u?.totalPrice ?? u?.price ? (
                         <span className="px-2 py-1 rounded bg-gray-100">
-                          {formatPrice(u.totalPrice)} EGP
+                          {formatPrice(u.totalPrice ?? u.price)} EGP
                         </span>
                       ) : null}
                     </div>

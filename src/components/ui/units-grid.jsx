@@ -124,6 +124,12 @@ export default function UnitsGrid({
                         }
                       }}
                     />
+                  ) : u.image ? (
+                    <ImageWithLoader
+                      src={getDisplayImageUrl(String(u.image))}
+                      alt={u.name || u.compound || t?.common?.property || "Property"}
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
                       <div className="text-center text-gray-400">
@@ -169,10 +175,10 @@ export default function UnitsGrid({
                   <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
                     <div className="flex items-center gap-2 line-clamp-1">
                       <span className="text-[14px] font-bold">
-                        {u.buildingType ? (
+                        {u.buildingType || u.property_type ? (
                           translate(
-                            `buildingTypes.${String(u.buildingType).toLowerCase()}`,
-                            String(u.buildingType)
+                            `buildingTypes.${String(u.buildingType || u.property_type).toLowerCase()}`,
+                            String(u.buildingType || u.property_type)
                           )
                         ) : (allowMissingFields ? "—" : "Unit Type")}
                       </span>
@@ -216,9 +222,11 @@ export default function UnitsGrid({
                         <span className="font-semibold text-[21px]">
                           {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
                             ? `${formatPrice(u.totalPrice)} ${egpLabel}`
-                            : allowMissingFields
-                              ? "—"
-                              : t?.common?.na || "N/A"}
+                            : u.price != null && u.price !== "" && formatPrice(u.price)
+                              ? `${formatPrice(u.price)} ${egpLabel}`
+                              : allowMissingFields
+                                ? "—"
+                                : t?.common?.na || "N/A"}
                         </span>
                       </div>
                     )}

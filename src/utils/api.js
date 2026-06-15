@@ -3,6 +3,9 @@
 import { axiosInstance } from "@/lib/axiosInstance";
 import { PUBLIC_X_API_KEY, MISSING_X_API_KEY_MESSAGE } from "@/lib/apiConfig";
 import { safeMergeParams } from "./safeJsonParser";
+import {
+  mapSlimUnitsListResponse,
+} from "@/lib/units/slim-unit-list-mapper";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
@@ -125,17 +128,18 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
 
 /**
  * @typedef {Object} FetchUnitsFilterOptions
- * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/units`; otherwise `/units/all`.
+ * @property {boolean} [usePublicEndpoint=false] - When true, calls `/public/v1/slim-list`; otherwise `/units/v1/slim-list`.
  */
 
 /**
- * Fetches a paginated, filtered units list.
+ * Fetches a paginated, filtered units list (slim payload for grid cards).
  * All filters (visibility, city, purpose, etc.) belong in searchParams / query payload.
+ * Full unit documents remain on `/units/all` and detail endpoints.
  */
 const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
-    const url = usePublicEndpoint ? "/public/units" : "/units/all";
+    const url = usePublicEndpoint ? "/public/v1/slim-list" : "/units/v1/slim-list";
     const qs = new URLSearchParams(params).toString();
 
     const response = await axiosInstance.get(qs ? `${url}?${qs}` : url);
@@ -155,7 +159,7 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
       console.warn("Pagination data missing in response");
     }
 
-    return response.data;
+    return mapSlimUnitsListResponse(response.data);
   } catch (error) {
     console.error("Failed to fetch units:", error.message);
     // Re-throw the error so TanStack Query can handle it properly

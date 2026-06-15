@@ -1008,11 +1008,13 @@ export default {
     activeFilter: " الفلاتر النشطه :",
     clearall: "مسح جميع الفلاتر",
     allCities: "جميع المدن",
+    allDistricts: "جميع المناطق",
     from: "من",
     upTo: "إلى",
     myInventory: "مخزوني",
     resale: "إعادة بيع",
     minArea: "الحد الأدنى للمساحة",
+    maxArea: "الحد الأقصى للمساحة",
     purposes: {
       buy: "شراء",
       rent: "إيجار",

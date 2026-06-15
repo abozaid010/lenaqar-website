@@ -1,5 +1,5 @@
 /**
- * Maps lead requirement objects to /public/units query params.
+ * Maps lead requirement objects to /public/v1/slim-list query params.
  * Purpose-aware pricing; rent daily vs monthly are mutually exclusive.
  */
 
@@ -43,7 +43,7 @@ function normalizeFilterString(value) {
   return s ? s.toLowerCase() : null;
 }
 
-/** Query keys sent to /public/units that must be lowercase before iteration. */
+/** Query keys sent to /public/v1/slim-list that must be lowercase before iteration. */
 export const LOWERCASE_UNIT_FILTER_KEYS = new Set([
   "city",
   "district",
