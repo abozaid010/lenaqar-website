@@ -5,7 +5,7 @@ import { Check, Copy, Globe, MessageCircle, Share2 } from 'lucide-react';
 import UnifiedDialog from '@/components/ui/UnifiedDialog';
 import { useI18n } from '@/hooks/useI18n';
 import { useMessagingProviderConfig } from '@/hooks/useMessagingProviderConfig';
-import { buildUnitShareLinks } from '@/lib/units/unit-share-links';
+import { buildUnitShareLinks, buildUnitWhatsappShareMessage } from '@/lib/units/unit-share-links';
 
 interface UnitShareLinksDialogProps {
   isOpen: boolean;
@@ -25,9 +25,10 @@ export default function UnitShareLinksDialog({
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
 
   const code = unitCode?.trim() || null;
-  const { websiteUrl, whatsappUrl } = code
+  const { websiteUrl, whatsappUrl, whatsappDirectUrl } = code
     ? buildUnitShareLinks({ code, whatsappNumber: defaultSenderPhone })
-    : { websiteUrl: '', whatsappUrl: null };
+    : { websiteUrl: '', whatsappUrl: null, whatsappDirectUrl: null };
+  const whatsappOpenUrl = whatsappDirectUrl ?? whatsappUrl;
 
   const handleCopyWebsite = async () => {
     if (!websiteUrl) return;
@@ -41,9 +42,10 @@ export default function UnitShareLinksDialog({
   };
 
   const handleCopyWhatsapp = async () => {
-    if (!whatsappUrl) return;
+    const linkToCopy = whatsappUrl || whatsappDirectUrl;
+    if (!linkToCopy) return;
     try {
-      await navigator.clipboard.writeText(whatsappUrl);
+      await navigator.clipboard.writeText(linkToCopy);
       setCopiedWhatsapp(true);
       setTimeout(() => setCopiedWhatsapp(false), 2000);
     } catch {
@@ -106,7 +108,7 @@ export default function UnitShareLinksDialog({
             </div>
           </div>
 
-          {whatsappUrl ? (
+          {whatsappDirectUrl ? (
             <div className="rounded-lg border border-gray-200 overflow-hidden">
               <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-primary" />
@@ -115,7 +117,12 @@ export default function UnitShareLinksDialog({
                 </span>
               </div>
               <div className="p-4 space-y-3">
-                <p className="text-sm text-gray-700 break-all">{whatsappUrl}</p>
+                <p className="text-sm text-gray-700 break-all">
+                  {whatsappUrl || whatsappDirectUrl}
+                </p>
+                <p className="text-sm text-gray-700">
+                  {buildUnitWhatsappShareMessage(code)}
+                </p>
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
@@ -134,15 +141,17 @@ export default function UnitShareLinksDialog({
                       </>
                     )}
                   </button>
-                  <a
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
-                  </a>
+                  {whatsappOpenUrl ? (
+                    <a
+                      href={whatsappOpenUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Share2 className="w-4 h-4" />
+                      {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
+                    </a>
+                  ) : null}
                 </div>
               </div>
             </div>
