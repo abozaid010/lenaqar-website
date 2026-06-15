@@ -42,11 +42,8 @@ export function formatPhoneForWhatsApp(phoneNumber, message) {
 
   if (!digitsOnly) return "";
 
-  // Use api.whatsapp.com/send when a message is provided — it preserves the
-  // `text` param more reliably than wa.me on WhatsApp Web when a chat with
-  // the contact is already open.
   if (message && String(message).trim()) {
-    return `https://api.whatsapp.com/send?phone=${digitsOnly}&text=${encodeURIComponent(message)}`;
+    return `https://wa.me/${digitsOnly}?text=${encodeURIComponent(message)}`;
   }
 
   return `https://wa.me/${digitsOnly}`;

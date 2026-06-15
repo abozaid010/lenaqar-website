@@ -73,6 +73,10 @@ export function useCitiesDistricts() {
     [locale]
   );
 
+  const getAllDistrictsWithLabels = useCallback(async () => {
+    return await manager.getDistrictsWithLabels(null, locale);
+  }, [locale]);
+
   return {
     getCities,
     getDistricts,
@@ -80,5 +84,6 @@ export function useCitiesDistricts() {
     getDistrictLabel,
     getAllCitiesWithLabels,
     getDistrictsWithLabels,
+    getAllDistrictsWithLabels,
   };
 }

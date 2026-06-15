@@ -3,6 +3,7 @@ import {
   LOWERCASE_UNIT_FILTER_KEYS,
   MATCH_UNITS_PAGE_SIZE,
 } from "@/lib/match/requirement-to-units-filter";
+import { mapSlimPublicUnitsPayload } from "@/lib/units/slim-unit-list-mapper";
 
 function publicHeaders(extra = {}) {
   const headers = {
@@ -30,7 +31,7 @@ async function parseJsonResponse(response) {
 }
 
 /**
- * Fetch public units with filter params (no auth).
+ * Fetch public units with filter params (no auth) — slim list payload.
  */
 export async function fetchPublicMatchedUnits(filters = {}) {
   const params = new URLSearchParams();
@@ -48,7 +49,7 @@ export async function fetchPublicMatchedUnits(filters = {}) {
   });
 
   const qs = params.toString();
-  const url = `${API_BASE_URL}/public/units${qs ? `?${qs}` : ""}`;
+  const url = `${API_BASE_URL}/public/v1/slim-list${qs ? `?${qs}` : ""}`;
   const response = await fetch(url, {
     method: "GET",
     headers: publicHeaders(),
@@ -56,10 +57,11 @@ export async function fetchPublicMatchedUnits(filters = {}) {
   });
 
   const data = await parseJsonResponse(response);
-  const units = Array.isArray(data?.units) ? data.units : [];
-  const pagination = data?.pagination ?? {
+  const mapped = mapSlimPublicUnitsPayload(data);
+  const units = mapped.units;
+  const pagination = mapped.pagination ?? {
     next_cursor: null,
     has_more_next: false,
   };
-  return { units, pagination, count: data?.count ?? units.length };
+  return { units, pagination, count: mapped.count ?? units.length };
 }

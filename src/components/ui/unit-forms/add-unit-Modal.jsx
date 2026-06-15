@@ -125,6 +125,10 @@ function normalizeNumbersInPayload(value) {
   return value;
 }
 
+function isOwnerMobileMissing(formData) {
+  return !formData?.owner_mobile || String(formData.owner_mobile).trim() === "";
+}
+
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
   const modalRef = useRef(null);
   const { t, locale, translate } = useI18n();
@@ -580,10 +584,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        // Phone number (owner_mobile) is now optional
-        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-        //   missingFields.push("owner_mobile");
-        // }
+        if (!isEdit && isOwnerMobileMissing(formData)) {
+          missingFields.push("owner_mobile");
+        }
 
         if (
           SellFormData.deliveryDate &&
@@ -618,11 +621,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        // Phone number (owner_mobile) is now optional
-        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-        //   setInvalidFields(["owner_mobile"]);
-        //   return false;
-        // }
+        if (!isEdit && isOwnerMobileMissing(formData)) {
+          setInvalidFields(["owner_mobile"]);
+          return false;
+        }
 
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
@@ -708,10 +710,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        // Phone number (owner_mobile) is now optional
-        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-        //   missingFields.push("owner_mobile");
-        // }
+        if (!isEdit && isOwnerMobileMissing(formData)) {
+          missingFields.push("owner_mobile");
+        }
 
         if (
           SellFormData.deliveryDate &&
@@ -746,11 +747,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        // Phone number (owner_mobile) is now optional
-        // if (!formData.owner_mobile || String(formData.owner_mobile).trim() === "") {
-        //   setInvalidFields(["owner_mobile"]);
-        //   return;
-        // }
+        if (!isEdit && isOwnerMobileMissing(formData)) {
+          setInvalidFields(["owner_mobile"]);
+          return;
+        }
 
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
@@ -793,6 +793,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isEdit && isOwnerMobileMissing(formData)) {
+      setInvalidFields(["owner_mobile"]);
+      setCurrentStep(2);
+      toast.error(translate("phoneField.required", "Phone number is required"));
+      return;
+    }
 
     // Validate step 3 fields
     if (currentStep === 3) {
@@ -1028,6 +1035,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             formData={SellFormData}
             commonFormData={formData}
             clientType={clientType}
+            ownerMobileRequired={!isEdit}
             updateFormData={(newData) =>
               setSellFormData((prev) => ({ ...prev, ...newData }))
             }
@@ -1042,6 +1050,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             formData={rentFormData}
             commonFormData={formData}
             clientType={clientType}
+            ownerMobileRequired={!isEdit}
             updateFormData={(newData) =>
               setRentFormData((prev) => ({ ...prev, ...newData }))
             }
@@ -1072,15 +1081,18 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       <div className="bg-white rounded-lg shadow-sm border">
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <div className="flex items-center gap-3">
-            {isEdit ? null : (
-              <button
-                type="button"
-                onClick={handleClose}
-                className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
-              >
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label={translate("buttons.cancel")}
+            >
+              {locale === "ar" ? (
+                <ArrowRight className="w-5 h-5 text-gray-600" />
+              ) : (
                 <ArrowLeft className="w-5 h-5 text-gray-600" />
-              </button>
-            )}
+              )}
+            </button>
             <h2 className="text-lg font-semibold text-gray-900">{modalTitle}</h2>
           </div>
           <div className="flex items-center gap-2">

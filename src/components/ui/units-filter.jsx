@@ -4,13 +4,13 @@ import AddUnitButton from "@/components/ui/unit-forms/add-unit-button";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
-import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
+import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -93,6 +93,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   // Derived from searchParams so they always reflect the actual URL.
   const filters = useMemo(() => ({
     city: searchParams.get("city") || "",
+    district: searchParams.get("district") || "",
     developer_name: searchParams.get("developer_name") || "",
     project_name: searchParams.get("project_name") || "",
     purpose: searchParams.get("purpose") || "",
@@ -100,6 +101,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     min_price: searchParams.get("min_price") || "",
     max_price: searchParams.get("max_price") || "",
     min_area: searchParams.get("min_area") || "",
+    max_area: searchParams.get("max_area") || "",
     my_inventory: searchParams.get("my_inventory") === "true",
     resale: searchParams.get("resale") === "true",
   }), [searchParams]);
@@ -109,15 +111,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [localMinPrice, setLocalMinPrice] = useState(filters.min_price);
   const [localMaxPrice, setLocalMaxPrice] = useState(filters.max_price);
   const [localMinArea, setLocalMinArea] = useState(filters.min_area);
+  const [localMaxArea, setLocalMaxArea] = useState(filters.max_area);
 
   // Sync local numeric inputs when URL changes externally (browser back/forward)
   useEffect(() => {
     setLocalMinPrice(searchParams.get("min_price") || "");
     setLocalMaxPrice(searchParams.get("max_price") || "");
     setLocalMinArea(searchParams.get("min_area") || "");
+    setLocalMaxArea(searchParams.get("max_area") || "");
   }, [searchParams]);
 
   const [priceRangeError, setPriceRangeError] = useState("");
+  const [areaRangeError, setAreaRangeError] = useState("");
 
   // Debounced numeric search (price/area) to avoid spamming backend
   const numericDebounceRef = useRef(null);
@@ -161,6 +166,26 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [locale]);
 
   useEffect(() => {
+    const loadDistrictLabels = async () => {
+      try {
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const districts = await manager.getDistrictsWithLabels(null, locale);
+        const labels = {};
+
+        for (const district of districts) {
+          labels[district.value] = district.label;
+        }
+
+        setDistrictLabels(labels);
+      } catch (error) {
+        console.error("Failed to load district labels:", error);
+      }
+    };
+
+    loadDistrictLabels();
+  }, [locale]);
+
+  useEffect(() => {
     return () => {
       if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
     };
@@ -171,6 +196,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [cityLabels, setCityLabels] = useState({});
+  const [districtLabels, setDistrictLabels] = useState({});
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
 
@@ -209,11 +235,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.resale) {
       list.push({ key: "resale", value: t.unitsFilter.resale });
     }
-    if (nextFilters.min_area) {
-      list.push({
-        key: "min_area",
-        value: `${t.unitsFilter.minArea}: ${nextFilters.min_area} m²`,
-      });
+    if (nextFilters.min_area || nextFilters.max_area) {
+      const min = nextFilters.min_area || "";
+      const max = nextFilters.max_area || "";
+      let value = t.unitsFilter.minArea;
+      if (min && max) value = `${min} - ${max} m²`;
+      else if (min) value = `${t.unitsFilter.minArea}: ${min} m²`;
+      else if (max) value = `${t.unitsFilter.maxArea}: ${max} m²`;
+      list.push({ key: "area_range", value });
     }
     if (nextFilters.developer_name) {
       list.push({ key: "developer_name", value: getSelectedDeveloper() });
@@ -239,8 +268,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.city) {
       list.push({ key: "city", value: getSelectedCity() });
     }
+    if (nextFilters.district) {
+      list.push({ key: "district", value: getSelectedDistrict() });
+    }
     return list;
-  }, [locale, t, compounds, developers, cityLabels]);
+  }, [locale, t, compounds, developers, cityLabels, districtLabels]);
 
   // Only show active developer filter if developer exists in loaded list
   // This prevents showing stale filter chips when data reloads
@@ -260,9 +292,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [filters, buildActiveFilters, hasValidDeveloper]);
 
   const applyNumericFiltersToUrl = useCallback((nextFilters) => {
-    const minN = parseNumeric(nextFilters.min_price);
-    const maxN = parseNumeric(nextFilters.max_price);
-    if (minN != null && maxN != null && maxN < minN) {
+    const minPriceN = parseNumeric(nextFilters.min_price);
+    const maxPriceN = parseNumeric(nextFilters.max_price);
+    if (minPriceN != null && maxPriceN != null && maxPriceN < minPriceN) {
       setPriceRangeError(
         locale === "ar"
           ? "يجب أن يكون الحد الأقصى للسعر أكبر من أو يساوي الحد الأدنى"
@@ -271,6 +303,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       return;
     }
     setPriceRangeError("");
+
+    const minAreaN = parseNumeric(nextFilters.min_area);
+    const maxAreaN = parseNumeric(nextFilters.max_area);
+    if (minAreaN != null && maxAreaN != null && maxAreaN < minAreaN) {
+      setAreaRangeError(
+        locale === "ar"
+          ? "يجب أن يكون الحد الأقصى للمساحة أكبر من أو يساوي الحد الأدنى"
+          : "Max area must be greater than or equal to min area"
+      );
+      return;
+    }
+    setAreaRangeError("");
 
     const newParams = new URLSearchParams(searchParams.toString());
 
@@ -282,6 +326,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     setOrDelete("min_price", nextFilters.min_price);
     setOrDelete("max_price", nextFilters.max_price);
     setOrDelete("min_area", nextFilters.min_area);
+    setOrDelete("max_area", nextFilters.max_area);
 
     const qs = newParams.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -311,7 +356,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       } else {
         newParams.delete(key);
       }
-    } else if (key === "min_area" || key === "min_price" || key === "max_price") {
+    } else if (key === "min_area" || key === "max_area" || key === "min_price" || key === "max_price") {
       // Numeric filters are applied via debounce/onBlur, not here.
       // Keep URL changes centralized in applyNumericFiltersToUrl().
       scheduleNumericSearch({ ...filters, [key]: value });
@@ -319,10 +364,16 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     } else {
       // Existing filters
       if (value && value !== "" && value !== "all") {
-        newParams.set(key, value);
+        const normalizedValue =
+          key === "district" ? String(value).toLowerCase().trim() : value;
+        newParams.set(key, normalizedValue);
       } else {
         newParams.delete(key);
       }
+    }
+
+    if (key === "city") {
+      newParams.delete("district");
     }
 
     const qs = newParams.toString();
@@ -371,6 +422,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     setLocalMinPrice("");
     setLocalMaxPrice("");
     setLocalMinArea("");
+    setLocalMaxArea("");
     router.replace(pathname, { scroll: false });
   };
 
@@ -383,9 +435,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       newParams.delete("max_price");
       setLocalMinPrice("");
       setLocalMaxPrice("");
+    } else if (key === "area_range") {
+      newParams.delete("min_area");
+      newParams.delete("max_area");
+      setLocalMinArea("");
+      setLocalMaxArea("");
     } else if (key === "min_area") {
       newParams.delete("min_area");
       setLocalMinArea("");
+    } else if (key === "max_area") {
+      newParams.delete("max_area");
+      setLocalMaxArea("");
     } else if (key === "min_price") {
       newParams.delete("min_price");
       setLocalMinPrice("");
@@ -450,6 +510,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return cityLabels[filters.city] || filters.city;
   }
 
+  function getSelectedDistrict() {
+    if (!filters.district || filters.district === "all" || filters.district === "") {
+      return translate("unitsFilter.allDistricts", "All Districts");
+    }
+    return districtLabels[filters.district] || filters.district;
+  }
+
   function getFilterDisplayText(key, value) {
     switch (key) {
       case "my_inventory":
@@ -458,6 +525,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return t.unitsFilter.resale;
       case "min_area":
         return value || t.unitsFilter.minArea;
+      case "max_area":
+        return value || t.unitsFilter.maxArea;
+      case "area_range":
+        return value;
       case "min_price":
         return value ? `${locale === "ar" ? "من" : "From"} ${formatPriceInput(value)} EGP` : "";
       case "max_price":
@@ -472,6 +543,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedPropertyType();
       case "city":
         return getSelectedCity();
+      case "district":
+        return getSelectedDistrict();
       case "price_range":
         return getPriceDisplayText();
       default:
@@ -495,6 +568,23 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCities || "All Cities"}
             placeholder={t.unitsFilter.allCities || "All Cities"}
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
+          />
+        </div>
+
+        {/* District Dropdown */}
+        <div className="flex-1 min-w-[140px] max-w-[200px]">
+          <SearchableDistrictSelect
+            value={filters.district === "all" ? "" : filters.district}
+            onChange={(e) => {
+              const districtValue = e.target.value || "all";
+              handleFilterChange("district", districtValue);
+            }}
+            name="district"
+            city={filters.city && filters.city !== "all" ? filters.city : ""}
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
+            placeholder={translate("unitsFilter.allDistricts", "All Districts")}
             buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
@@ -705,12 +795,32 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             type="number"
             label={t.unitsFilter.minArea}
             value={localMinArea}
+            error={areaRangeError}
             onChange={(e) => {
               const value = e.target.value.replace(/[^0-9]/g, "");
               setLocalMinArea(value);
               scheduleNumericSearch({ ...filters, min_area: value });
             }}
             onBlur={() => flushNumericSearch({ ...filters, min_area: localMinArea })}
+            className="w-full min-w-0"
+            adornment="m²"
+          />
+        </div>
+
+        {/* Max Area Field */}
+        <div className="flex-shrink-0 w-[10.85rem] min-w-0">
+          <LenaTextField
+            name="max_area"
+            type="number"
+            label={translate("unitsFilter.maxArea", "Max Area")}
+            value={localMaxArea}
+            error={areaRangeError}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              setLocalMaxArea(value);
+              scheduleNumericSearch({ ...filters, max_area: value });
+            }}
+            onBlur={() => flushNumericSearch({ ...filters, max_area: localMaxArea })}
             className="w-full min-w-0"
             adornment="m²"
           />

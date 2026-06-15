@@ -114,21 +114,48 @@ export function buildAdminUnitShareUrl(
   return `${SITE_URL}${buildAdminUnitDetailPath(code, clientId)}`;
 }
 
-/** WhatsApp share URL with pre-filled interest message. */
+/** Arabic prefix for the pre-filled WhatsApp message when sharing a unit. */
+export const UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX = 'ايه تفاصيل الوحده دى';
+
+/** Build the full WhatsApp message for a unit (Arabic + reference code). */
+export function buildUnitWhatsappShareMessage(code: string): string {
+  const normalized = normalizeUnitCodeParam(code);
+  if (!normalized) return UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX;
+  return `${UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX}  ${normalized}`;
+}
+
+/** Branded public share page that redirects to WhatsApp with the default message. */
+export function buildPublicUnitWhatsAppPageUrl(code: string): string {
+  const normalized = normalizeUnitCodeParam(code);
+  if (!normalized) return `${SITE_URL}/allProberties`;
+  return `${SITE_URL}/allProberties/${encodeUnitCodeForPath(normalized)}/whatsapp`;
+}
+
+/** Direct WhatsApp deep link (wa.me) with pre-filled message. */
 export function buildUnitWhatsAppShareUrl(
-  code: string,
-  whatsappNumber: string
+  whatsappNumber: string,
+  code: string
 ): string {
-  return formatPhoneForWhatsApp(whatsappNumber, `I'm interested in ${code}`);
+  return formatPhoneForWhatsApp(
+    whatsappNumber,
+    buildUnitWhatsappShareMessage(code)
+  );
 }
 
 export function buildUnitShareLinks(opts: {
   code: string;
   whatsappNumber?: string | null;
-}): { websiteUrl: string; whatsappUrl: string | null } {
+}): {
+  websiteUrl: string;
+  whatsappUrl: string | null;
+  whatsappDirectUrl: string | null;
+} {
   const websiteUrl = buildPublicUnitShareUrl(opts.code);
-  const whatsappUrl = opts.whatsappNumber
-    ? buildUnitWhatsAppShareUrl(opts.code, opts.whatsappNumber)
+  const whatsappUrl = normalizeUnitCodeParam(opts.code)
+    ? buildPublicUnitWhatsAppPageUrl(opts.code)
     : null;
-  return { websiteUrl, whatsappUrl };
+  const whatsappDirectUrl = opts.whatsappNumber
+    ? buildUnitWhatsAppShareUrl(opts.whatsappNumber, opts.code)
+    : null;
+  return { websiteUrl, whatsappUrl, whatsappDirectUrl };
 }
