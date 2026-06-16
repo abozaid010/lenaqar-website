@@ -13,24 +13,18 @@ import { cityKeys, compoundKeys, developerKeys, paginatedProjectKeys, projectNam
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 
 // Hook for fetching developers (full data for developers tab) with infinite scroll
-export function useDevelopers(client_id, isPublic = false) {
-  console.log(`🔧 useDevelopers (infinite) called with: client_id=${client_id}, isPublic=${isPublic}`);
-
+export function useDevelopers(client_id, isPublic = false, initialData = undefined) {
   const query = useInfiniteQuery({
     queryKey: developerKeys.infiniteList(client_id, isPublic),
-    queryFn: ({ pageParam }) => {
-      console.log(`🚀 Executing fetchDevelopers infinite queryFn (pageParam: ${pageParam})`);
-      return fetchDevelopers({ pageParam, pageSize: 20 });
-    },
+    queryFn: ({ pageParam }) => fetchDevelopers({ pageParam, pageSize: 20 }),
     initialPageParam: undefined,
-    getNextPageParam: (lastPage) => {
-      console.log(`📄 Getting next page param, hasNext: ${lastPage.hasNext}, nextCursor: ${lastPage.nextCursor}`);
-      return lastPage.hasNext ? lastPage.nextCursor : undefined;
-    },
-    staleTime: 1000 * 60 * 15, // 15 minutes - keeps data fresh across tab navigation
-    gcTime: 1000 * 60 * 30, // 30 minutes - keeps data in cache longer
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNext ? lastPage.nextCursor : undefined,
+    staleTime: 1000 * 60 * 15,
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
-    enabled: true, // Ensure the query is always enabled
+    enabled: true,
+    ...(initialData != null ? { initialData } : {}),
   });
   
   // Flatten all pages into a single array
@@ -41,14 +35,6 @@ export function useDevelopers(client_id, isPublic = false) {
   const hasNextPage = lastPage?.hasNext || false;
   const nextCursor = lastPage?.nextCursor || null;
   
-  console.log(`📊 useDevelopers infinite query state:`, {
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    data: `${developers.length} items across ${query.data?.pages.length || 0} pages`,
-    hasNextPage,
-    nextCursor,
-    error: query.error?.message || 'none'
-  });
   
   return {
     ...query,
@@ -134,7 +120,7 @@ export function useProjectsNames(isPublic = false) {
 
 // Hook for fetching paginated projects (full project data, cursor-based)
 // OPTIMIZED: 5min cache times for memory stability with 800+ projects
-export function useProjectsPaginated({ cityEnName, developerId, enabled = true } = {}) {
+export function useProjectsPaginated({ cityEnName, developerId, enabled = true, initialData } = {}) {
   return useInfiniteQuery({
     queryKey: paginatedProjectKeys.list({ cityEnName, developerId }),
     queryFn: ({ pageParam }) =>
@@ -142,10 +128,11 @@ export function useProjectsPaginated({ cityEnName, developerId, enabled = true }
     initialPageParam: undefined,
     getNextPageParam: (lastPage) =>
       lastPage.has_more ? lastPage.last_doc_id : undefined,
-    staleTime: 1000 * 60 * 5, // 5 minutes (reduced from 15 for memory stability)
-    gcTime: 1000 * 60 * 5, // 5 minutes (reduced from 30 for memory stability)
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
     enabled,
+    ...(initialData != null ? { initialData } : {}),
   });
 }
 

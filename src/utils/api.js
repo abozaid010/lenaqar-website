@@ -274,16 +274,7 @@ const fetchDevelopersBase = async ({ pageParam, pageSize = 20 } = {}) => {
   }
 
   const url = `/developers/v1/get_all_slim?${params.toString()}`;
-  
-  console.log(`🔍 Fetching developers with pagination: ${url}`);
-
-  // Debug: Check if access token is available
-  const accessToken = require("@/lib/LenaCookiesManager").LenaCookiesManager?.getAccessToken?.();
-  console.log(`🔐 Access token available: ${!!accessToken ? 'YES' : 'NO'}`);
-
   const response = await axiosInstance.get(url);
-  
-  console.log(`✅ Developers pagination API response status: ${response.status}`);
   
   // Validate response data structure according to API specification
   if (!response.data) {

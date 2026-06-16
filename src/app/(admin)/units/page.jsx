@@ -1,9 +1,8 @@
 import UnitsPageClient from "./units-page-client";
 import { cookies } from "next/headers";
-
+import { fetchUnitsFilterServer } from "@/lib/units/unit-api";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
-
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 export async function generateMetadata() {
@@ -47,8 +46,12 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
   const searchParams = await rawSearchParams;
 
   const cookieStore = await cookies();
-
   const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || "";
+
+  // Prefetch the first page server-side so the initial render never hits
+  // /units/v1/slim-list from the browser. On failure, initialData is null
+  // and the client hook fetches transparently — no broken UI.
+  const initialUnitsData = await fetchUnitsFilterServer(searchParams, clientId);
 
   return (
     <>
@@ -60,7 +63,11 @@ export default async function UnitsPage({ searchParams: rawSearchParams }) {
           },
         ]}
       />
-      <UnitsPageClient searchParams={searchParams} clientId={clientId} />
+      <UnitsPageClient
+        searchParams={searchParams}
+        clientId={clientId}
+        initialUnitsData={initialUnitsData}
+      />
     </>
   );
 }

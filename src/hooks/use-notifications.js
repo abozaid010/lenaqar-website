@@ -1,12 +1,30 @@
 "use client";
 
-import {
-  fetchNotifications,
-  markAllNotificationsRead,
-} from "@/utils/api";
 import { notificationKeys } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo, useRef } from "react";
+
+// All notification fetches go through the same-origin BFF so the backend
+// URL never appears in the browser Network tab.
+async function fetchNotificationsBFF({ since, unreadOnly, limit = 50 } = {}) {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (since) params.set("since", since);
+  if (unreadOnly) params.set("unread_only", "true");
+
+  const res = await fetch(`/api/crm/notifications?${params.toString()}`);
+  if (!res.ok) throw new Error(`Notifications BFF error: ${res.status}`);
+  return res.json();
+}
+
+async function markAllNotificationsReadBFF() {
+  const res = await fetch("/api/crm/notifications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ markAll: true }),
+  });
+  if (!res.ok) throw new Error(`Mark-all-read BFF error: ${res.status}`);
+  return res.json();
+}
 
 const LAST_POLL_KEY = "lastNotificationPollAt";
 const READ_IDS_KEY = "lenaNotificationReadIds";
@@ -78,7 +96,7 @@ export function useNotifications() {
     queryFn: async () => {
       if (!hasInitialLoadRef.current) {
         hasInitialLoadRef.current = true;
-        const data = await fetchNotifications({ limit: 50 });
+        const data = await fetchNotificationsBFF({ limit: 50 });
         if (typeof window !== "undefined") {
           sessionStorage.setItem(LAST_POLL_KEY, new Date().toISOString());
         }
@@ -91,8 +109,8 @@ export function useNotifications() {
           : null;
 
       const incremental = since
-        ? await fetchNotifications({ since, limit: 50 })
-        : await fetchNotifications({ limit: 50 });
+        ? await fetchNotificationsBFF({ since, limit: 50 })
+        : await fetchNotificationsBFF({ limit: 50 });
 
       if (typeof window !== "undefined") {
         sessionStorage.setItem(LAST_POLL_KEY, new Date().toISOString());
@@ -156,7 +174,7 @@ export function useNotifications() {
     });
 
     try {
-      await markAllNotificationsRead();
+      await markAllNotificationsReadBFF();
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }

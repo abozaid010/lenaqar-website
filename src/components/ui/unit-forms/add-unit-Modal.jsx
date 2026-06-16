@@ -803,6 +803,14 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
     // Validate step 3 fields
     if (currentStep === 3) {
+      const imageCount = Array.isArray(formData.images) ? formData.images.length : 0;
+      if (imageCount > MAX_UNIT_IMAGES) {
+        toast.error(
+          String(t.maxImagesError).replace("{max}", String(MAX_UNIT_IMAGES))
+        );
+        return;
+      }
+
       // Images are optional; send empty array to API if none uploaded
       // Furnishing required only for rent; for sell only finishing (developer is optional)
       let requiredFields;

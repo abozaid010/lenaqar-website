@@ -6,7 +6,7 @@ import { UnitsBulkSelectionProvider } from "@/context/units-bulk-selection-conte
 import { Suspense } from "react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
-export default function UnitsPageClient({ searchParams, clientId }) {
+export default function UnitsPageClient({ searchParams, clientId, initialUnitsData }) {
   return (
     <UnitsBulkSelectionProvider clientId={clientId}>
       <div className="h-full flex flex-col">
@@ -19,6 +19,7 @@ export default function UnitsPageClient({ searchParams, clientId }) {
             <UnitsPageQueryOptimized
               searchParams={searchParams}
               clientId={clientId}
+              initialUnitsData={initialUnitsData}
             />
           </Suspense>
         </div>

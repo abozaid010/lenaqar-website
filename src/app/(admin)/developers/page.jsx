@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import DevelopersClientWrapper from "./_components/developers-client-wrapper";
+import { fetchDevelopersServer } from "@/lib/developers/developer-api";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
@@ -36,6 +37,8 @@ export default async function DevelopersPage() {
   const cookieStore = await cookies();
   const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
 
+  const initialDevelopersData = await fetchDevelopersServer(20);
+
   return (
     <>
       <BreadcrumbSchema
@@ -46,7 +49,7 @@ export default async function DevelopersPage() {
           },
         ]}
       />
-      <DevelopersClientWrapper clientId={clientId} />
+      <DevelopersClientWrapper clientId={clientId} initialDevelopersData={initialDevelopersData} />
     </>
   );
 }

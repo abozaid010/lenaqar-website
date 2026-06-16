@@ -22,9 +22,9 @@ import ImageWithLoader from "@/components/ui/image-with-loader";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 
-export default function DevelopersClientWrapper({ clientId }) {
+export default function DevelopersClientWrapper({ clientId, initialDevelopersData }) {
   const router = useRouter();
-  
+
   // List: slim API + infinite scroll. Header search dropdown: full names (`get_all_names`).
   const {
     data: developersData,
@@ -36,7 +36,7 @@ export default function DevelopersClientWrapper({ clientId }) {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useDevelopers(clientId, true);
+  } = useDevelopers(clientId, true, initialDevelopersData);
 
   const {
     data: developerNamesData,
