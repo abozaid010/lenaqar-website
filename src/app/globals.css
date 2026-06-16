@@ -53,11 +53,25 @@ div {
 
 button {
   cursor: pointer;
-  min-height: 2.5rem; /* 40px - fixed height for all buttons */
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
+}
+
+/* Full-size action buttons (Save, Next, etc.) */
+button:not(.icon-btn) {
+  min-height: 2.5rem;
+}
+
+/* Compact circular icon-only buttons (image remove, dialog close, etc.) */
+button.icon-btn {
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  line-height: 0;
+  aspect-ratio: 1 / 1;
+  flex-shrink: 0;
 }
 
 .timeline {

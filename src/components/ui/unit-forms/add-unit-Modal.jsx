@@ -343,7 +343,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="icon-btn absolute top-4 right-4 h-8 w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             aria-label={t.buttons?.close || "Close"}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -892,7 +892,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 p-1 rounded text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            className="icon-btn absolute top-4 right-4 h-8 w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             aria-label={t.buttons?.close || "Close"}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1092,7 +1092,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
             <button
               type="button"
               onClick={handleClose}
-              className="p-1.5 rounded-full hover:bg-gray-100 transition-colors"
+              className="icon-btn h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
               aria-label={translate("buttons.cancel")}
             >
               {locale === "ar" ? (

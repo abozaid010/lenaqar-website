@@ -338,10 +338,10 @@ export default function ImageUploader({
             </div>
           )}
           {!isSelected && (
-            <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
+            <div className="absolute top-1 left-1 z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-3.5 w-3.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -364,7 +364,7 @@ export default function ImageUploader({
                   removeUploadedImage(imageId);
                 }
               }}
-              className="absolute top-1 right-1 z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
+              className="icon-btn absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"

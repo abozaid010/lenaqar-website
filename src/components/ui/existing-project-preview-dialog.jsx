@@ -82,7 +82,7 @@ export default function ExistingProjectPreviewDialog({
               {onEdit && (
                 <button
                   onClick={() => onEdit(projectData)}
-                  className="text-white hover:text-gray-200 focus:outline-none p-1 rounded hover:bg-white/10 transition-colors"
+                  className="icon-btn h-8 w-8 rounded-full text-white hover:text-gray-200 hover:bg-white/10 transition-colors focus:outline-none"
                   title={t?.formLabels?.edit}
                 >
                   <Edit className="w-5 h-5" />
@@ -90,7 +90,7 @@ export default function ExistingProjectPreviewDialog({
               )}
               <button
                 onClick={onClose}
-                className="text-white hover:text-gray-200 focus:outline-none"
+                className="icon-btn h-8 w-8 rounded-full text-white hover:text-gray-200 hover:bg-white/10 focus:outline-none"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

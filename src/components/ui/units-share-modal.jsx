@@ -72,7 +72,7 @@ export default function ShareModal({
           </h2>
           <button
             onClick={() => setShowModal(false)}
-            className="rounded-full p-1 hover:bg-gray-100 transition-colors"
+            className="icon-btn h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-gray-500" />

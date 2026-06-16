@@ -142,7 +142,7 @@ export default function SmartDateTimePicker({
                   type="button"
                   onClick={() => setMonth(subMonths(month, 1))}
                   disabled={isPrevMonthDisabled}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600 disabled:opacity-40 disabled:pointer-events-none"
+                  className="icon-btn h-8 w-8 rounded-full text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:pointer-events-none"
                   aria-label={translate("calendar.previousMonth", "Previous month")}
                 >
                   {isRTL ? (
@@ -157,7 +157,7 @@ export default function SmartDateTimePicker({
                 <button
                   type="button"
                   onClick={() => setMonth(addMonths(month, 1))}
-                  className="p-1.5 rounded-full hover:bg-gray-100 text-gray-600"
+                  className="icon-btn h-8 w-8 rounded-full text-gray-600 hover:bg-gray-100"
                   aria-label={translate("calendar.nextMonth", "Next month")}
                 >
                   {isRTL ? (

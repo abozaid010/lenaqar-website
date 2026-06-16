@@ -322,11 +322,11 @@ export default function ClientLogoUploader({
                       e.stopPropagation();
                       removeLogo();
                     }}
-                    className="absolute top-1 end-1 h-6 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="icon-btn absolute top-1 end-1 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
+                      className="h-3.5 w-3.5"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                     >
