@@ -1,22 +1,19 @@
 import axiosInstance from '@/utils/axiosInstance';
-import { fetchProjectById, fetchProjects } from '@/utils/api';
 import type { ProjectApiResponse, RawProject, ProjectViewModel, HeroImage, QuickFact, SpecItem, TrustItem, ProjectUnit } from './project-types';
 
 export async function getProjectById(projectId: string): Promise<ProjectApiResponse> {
   try {
-    const response = await fetchProjectById(projectId, false);
-    
-    if (response?.data?.project) {
+    const response = await axiosInstance.get(`/projects/id/${projectId}`);
+
+    if (response?.data?.data?.project) {
       return {
         status: true,
         code: 200,
         message: 'Success',
-        data: {
-          project: response.data.project
-        }
+        data: { project: response.data.data.project },
       };
     }
-    
+
     throw new Error('No project data found');
   } catch (error) {
     console.error('Error fetching project by ID:', error);
@@ -338,6 +335,37 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
     isPrimary: false,
     clientId: rawProject.client_id,
   };
+}
+
+/**
+ * Server-side first-page fetch for the paginated projects list.
+ * Called from `myProjects/page.jsx` (RSC) to seed the infinite query cache.
+ * Returns a TanStack `useInfiniteQuery`-compatible shape:
+ *   `{ pages: [firstPage], pageParams: [undefined] }`
+ * Returns null on error so the client hook retries silently.
+ */
+export async function fetchProjectsPaginatedServer(
+  limit = 20,
+  cityEnName?: string,
+  developerId?: string
+): Promise<{ pages: unknown[]; pageParams: unknown[] } | null> {
+  try {
+    const params = new URLSearchParams({ limit: String(limit) });
+    if (cityEnName) params.append('city_en_name', cityEnName);
+    if (developerId) params.append('developer_id', developerId);
+
+    const response = await axiosInstance.get(`/projectsv2/all?${params.toString()}`);
+    const data = response.data?.data ?? response.data;
+
+    if (!data || !Array.isArray(data.projects)) return null;
+
+    return {
+      pages: [data],
+      pageParams: [undefined],
+    };
+  } catch {
+    return null;
+  }
 }
 
 export async function getProjectUnits(projectId: string): Promise<ProjectUnit[]> {

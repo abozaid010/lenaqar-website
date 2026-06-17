@@ -4,6 +4,31 @@ import { NextResponse } from "next/server";
 const SITE_HOME_PAGE =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
 
+const IS_DEV = process.env.NODE_ENV === "development";
+
+/**
+ * DEV-ONLY observability for verifying the auth + refresh flow.
+ * Logs each protected-route decision and tags the response with `x-mw-decision`
+ * (`next` | `redirect`) so it can be read in DevTools. No-op in production.
+ * Use `GET /api/auth/status?action=expire-access` to simulate an expired token,
+ * then navigate to a protected route to watch the refresh bounce here.
+ */
+function withProxyDebug(response, request) {
+  if (!IS_DEV) return response;
+  const { pathname, search } = request.nextUrl;
+  const location = response?.headers?.get?.("location");
+  // eslint-disable-next-line no-console
+  console.log(
+    `[proxy] ${request.method} ${pathname}${search} → ${location ? `redirect → ${location}` : "next"}`
+  );
+  try {
+    response?.headers?.set?.("x-mw-decision", location ? "redirect" : "next");
+  } catch {
+    // rewrites may have immutable headers — ignore
+  }
+  return response;
+}
+
 // Admin route segments (without leading slash) that require authentication
 const adminPaths = [
   'dashboard', 'campaigns', 'campaign-chat', 'schedule',
@@ -61,7 +86,7 @@ export function proxy(request) {
     const dest = cookieClientId
       ? `/${cookieClientId}/${remainingPath}`
       : '/login';
-    return NextResponse.redirect(new URL(dest, SITE_HOME_PAGE));
+    return withProxyDebug(NextResponse.redirect(new URL(dest, SITE_HOME_PAGE)), request);
   }
 
   // Backward compat: bare /{adminPath} → /{clientId}/{adminPath}
@@ -69,7 +94,7 @@ export function proxy(request) {
     const dest = cookieClientId
       ? `/${cookieClientId}/${pathname.slice(1)}`
       : '/login';
-    return NextResponse.redirect(new URL(dest, SITE_HOME_PAGE));
+    return withProxyDebug(NextResponse.redirect(new URL(dest, SITE_HOME_PAGE)), request);
   }
 
   // Detect /{clientId}/{adminPath}[/*] as protected
@@ -82,23 +107,29 @@ export function proxy(request) {
       response.cookies.delete(COOKIE_KEYS.ACCESS_TOKEN);
       response.cookies.delete(COOKIE_KEYS.REFRESH_TOKEN);
       response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
-      return response;
+      return withProxyDebug(response, request);
     }
     // Access token missing but refresh token present: refresh then continue
     if (!accessToken) {
       const redirectParam = encodeURIComponent(
         request.nextUrl.pathname + request.nextUrl.search
       );
-      return NextResponse.redirect(
-        new URL(`/api/refresh-token?redirect=${redirectParam}`, SITE_HOME_PAGE)
+      return withProxyDebug(
+        NextResponse.redirect(
+          new URL(`/api/refresh-token?redirect=${redirectParam}`, SITE_HOME_PAGE)
+        ),
+        request
       );
     }
+    // Authenticated protected route: allow through (logged in dev for visibility)
+    return withProxyDebug(NextResponse.next(), request);
   }
 
   // Home page: redirect logged-in user to their dashboard
   if (pathname === "/" && accessToken && cookieClientId) {
-    return NextResponse.redirect(
-      new URL(`/${cookieClientId}/dashboard`, SITE_HOME_PAGE)
+    return withProxyDebug(
+      NextResponse.redirect(new URL(`/${cookieClientId}/dashboard`, SITE_HOME_PAGE)),
+      request
     );
   }
 

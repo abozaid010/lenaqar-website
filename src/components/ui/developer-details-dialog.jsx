@@ -70,7 +70,7 @@ export default function DeveloperDetailsDialog({
             </h2>
             <button
               onClick={onClose}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="icon-btn h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -103,7 +103,7 @@ export default function DeveloperDetailsDialog({
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="icon-btn h-8 w-8 rounded-full hover:bg-gray-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>

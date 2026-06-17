@@ -15,6 +15,38 @@ import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+/** Resolve GCS file id from API fields or URL path (/gcs/… or /images/…). */
+function resolveImageFileId(img) {
+  if (!img || typeof img !== "object") return "";
+  const direct = img.fileId ?? img.file_id ?? img.id;
+  if (direct) return String(direct);
+  const url = img.url || img.image_url || "";
+  if (!url) return "";
+  const match = String(url).match(/\/(gcs|images)\/([^/?#]+)/);
+  return match ? match[2] : "";
+}
+
+/** Stable per-image key for React keys and delete — never rely on empty fileId alone. */
+function getImageIdentity(img) {
+  const fileId = resolveImageFileId(img);
+  if (fileId) return fileId;
+  return img?.url || img?.image_url || "";
+}
+
+function normalizeUploaderImage(img) {
+  const url = img?.url || img?.image_url || "";
+  const fileId = resolveImageFileId(img) || getImageIdentity(img);
+  return {
+    ...(img?.source ? { source: img.source } : {}),
+    url,
+    fileId,
+  };
+}
+
+function sanitizeImagesForParent(images) {
+  return images.map(({ preview, name, id, ...rest }) => rest);
+}
+
 export default function ImageUploader({
   maxImages = 8,
   initialImages = [],
@@ -29,12 +61,19 @@ export default function ImageUploader({
   const fileInputRef = useRef(null);
   const [dragActive, setDragActive] = useState(false);
   const [selectedImages, setSelectedImages] = useState([]);
-  const [uploadedImages, setUploadedImages] = useState(initialImages);
+  const [uploadedImages, setUploadedImages] = useState(() =>
+    (Array.isArray(initialImages) ? initialImages : [])
+      .map(normalizeUploaderImage)
+      .filter((img) => img.url)
+  );
   const [uploadStatus, setUploadStatus] = useState({});
 
-  // Sync when initialImages changes (e.g. opening edit with existing campaign images)
+  // Sync when initialImages changes (e.g. opening edit with existing images)
   useEffect(() => {
-    setUploadedImages(Array.isArray(initialImages) ? initialImages : []);
+    const normalized = (Array.isArray(initialImages) ? initialImages : [])
+      .map(normalizeUploaderImage)
+      .filter((img) => img.url);
+    setUploadedImages(normalized);
   }, [initialImages]);
 
   const totalImagesCount = selectedImages.length + uploadedImages.length;
@@ -69,7 +108,9 @@ export default function ImageUploader({
       selectedImages.length + uploadedImages.length + files.length >
       maxImages
     ) {
-      toast.error(t.maxImagesError);
+      toast.error(
+        String(t.maxImagesError).replace("{max}", String(maxImages))
+      );
       return;
     }
     const newSelectedImages = [];
@@ -139,12 +180,11 @@ export default function ImageUploader({
         console.error(`Failed to upload image ${image.name}:`, error);
       }
     }
-    // Only pass url/fileId to parent and API; never pass preview or internal id
-    const sanitizedUploads = [...uploadedImages, ...successfulUploads].map(
-      ({ preview, name, id, ...rest }) => rest
+    const mergedUploads = [...uploadedImages, ...successfulUploads].map(
+      normalizeUploaderImage
     );
-    setUploadedImages([...uploadedImages, ...successfulUploads]);
-    onImagesChange(sanitizedUploads);
+    setUploadedImages(mergedUploads);
+    onImagesChange(sanitizeImagesForParent(mergedUploads));
 
     // Remove successfully uploaded images from selectedImages
     const remainingSelected = selectedImages.filter(
@@ -166,14 +206,20 @@ export default function ImageUploader({
     }
   };
 
-  const removeUploadedImage = async (id) => {
+  const removeUploadedImage = async (identity) => {
+    const newUploadedImages = uploadedImages.filter(
+      (image) => getImageIdentity(image) !== identity
+    );
+    setUploadedImages(newUploadedImages);
+    onImagesChange(sanitizeImagesForParent(newUploadedImages));
+
+    const gcsId = resolveImageFileId({ fileId: identity, url: identity });
+    if (!gcsId || gcsId.startsWith("http://") || gcsId.startsWith("https://")) {
+      return;
+    }
+
     try {
-      const newUploadedImages = uploadedImages.filter(
-        (image) => image.fileId !== id
-      );
-      setUploadedImages(newUploadedImages);
-      onImagesChange(newUploadedImages);
-      await deleteImage(id);
+      await deleteImage(gcsId);
       toast.success(t.imageDeletedSuccess);
     } catch (error) {
       toast.error(t.failedToDeleteImage);
@@ -193,7 +239,7 @@ export default function ImageUploader({
   };
 
   const renderImageItem = (image, isSelected = false) => {
-    const imageId = isSelected ? image.id : image.fileId;
+    const imageId = isSelected ? image.id : getImageIdentity(image);
     const isProcessing = isSelected && (uploadStatus[imageId] === "uploading" || uploadStatus[imageId] === "compressing");
     return (
       <div key={imageId} className="relative group aspect-square">
@@ -292,10 +338,10 @@ export default function ImageUploader({
             </div>
           )}
           {!isSelected && (
-            <div className="absolute top-1 left-1 bg-green-500 text-white rounded-full p-1">
+            <div className="absolute top-1 left-1 z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-green-500 text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-3.5 w-3.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >
@@ -318,11 +364,11 @@ export default function ImageUploader({
                   removeUploadedImage(imageId);
                 }
               }}
-              className="absolute top-1 right-1 h-6 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="icon-btn absolute top-1 right-1 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-0 shadow-sm transition-opacity group-hover:opacity-100"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-3.5 w-3.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
               >

@@ -11,6 +11,7 @@ export default function UnitsPageQueryOptimized({
   searchParams,
   clientId,
   publicUnits = false,
+  initialUnitsData = null,
 }) {
   const currentClientId = clientId || "";
 
@@ -65,9 +66,11 @@ export default function UnitsPageQueryOptimized({
   );
 
   // Fetch all required data using the combined hook
-  // When searchParamsKey changes, a new query is created and fetched automatically
+  // When searchParamsKey changes, a new query is created and fetched automatically.
+  // initialUnitsData is the server-prefetched first page — passed here only on the
+  // initial load (no filters applied yet); null on filter changes (client fetches fresh).
   const { isFetching, units, pagination, isLoading, isError, error, refetch } =
-    useUnitsPageData(searchParamsKey, unitsFetchOptions);
+    useUnitsPageData(searchParamsKey, unitsFetchOptions, initialUnitsData);
 
   const bulkSelection = useUnitsBulkSelectionOptional();
   const setVisibleUnitsFromList = bulkSelection?.setVisibleUnitsFromList;

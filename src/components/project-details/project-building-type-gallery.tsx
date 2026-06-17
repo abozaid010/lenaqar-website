@@ -31,14 +31,14 @@ function TypeGallery({ label, urls }: { label: string; urls: string[] }) {
           <>
             <button
               onClick={() => setIdx(p => (p === 0 ? urls.length - 1 : p - 1))}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="icon-btn absolute left-2 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full bg-white/80 opacity-0 transition-opacity group-hover:opacity-100"
               aria-label={translate('common.previous')}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setIdx(p => (p === urls.length - 1 ? 0 : p + 1))}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="icon-btn absolute right-2 top-1/2 h-7 w-7 -translate-y-1/2 rounded-full bg-white/80 opacity-0 transition-opacity group-hover:opacity-100"
               aria-label={translate('common.next')}
             >
               <ChevronRight className="w-4 h-4" />

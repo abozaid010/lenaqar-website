@@ -58,7 +58,7 @@ export default function CalendarModal({ buttonText = "Try Lena Now", style }) {
       >
         <button
           onClick={closeModal}
-          className="absolute top-1 right-2 p-2 rounded-full text-gray-500 z-10"
+          className="icon-btn absolute top-1 right-2 z-10 h-8 w-8 rounded-full text-gray-500 hover:bg-gray-100"
         >
           <X className="h-5 w-5" />
           <span className="sr-only">{t.calendarModal.closeButton}</span>

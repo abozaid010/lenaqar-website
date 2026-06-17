@@ -1593,7 +1593,7 @@ export default {
   imageDeletedSuccess: "Image deleted successfully",
   failedToDeleteImage: "Failed to delete image. Please try again.",
   maxImagesError:
-    "You can only upload a maximum of 5 images. Please remove some images before adding new ones.",
+    "You can only upload a maximum of {max} images. Please remove some images before adding new ones.",
   invalidFileType: "Invalid file type. Please upload JPG, PNG, or WEBP images.",
   fileSizeExceeds: "exceeds 3MB. Please upload smaller images.",
   failedToUploadImage: "Failed to upload image",

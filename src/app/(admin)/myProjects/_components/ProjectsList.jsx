@@ -265,7 +265,7 @@ function ProjectCard({
   );
 }
 
-export default function ProjectsList({ clientId }) {
+export default function ProjectsList({ clientId, initialProjectsData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -344,7 +344,11 @@ export default function ProjectsList({ clientId }) {
   } = useProjectsPaginated({
     cityEnName,
     developerId: selectedDeveloper || undefined,
-    enabled: !translations.isLoading, // Wait for translations to validate filters
+    enabled: !translations.isLoading,
+    // Seed cache with server-prefetched first page (no filters applied).
+    // Only valid when no URL filters are active — if filters are set, the
+    // query key differs and initialData is ignored anyway.
+    initialData: !cityEnName && !selectedDeveloper ? initialProjectsData : undefined,
   });
 
   const projectsList = useMemo(() => {

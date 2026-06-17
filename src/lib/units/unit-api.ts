@@ -1,5 +1,7 @@
 import axiosInstance from '@/utils/axiosInstance';
 import { normalizeUnitCodeParam } from '@/lib/units/unit-share-links';
+import { mapSlimUnitsListResponse } from '@/lib/units/slim-unit-list-mapper';
+import { safeMergeParams } from '@/utils/safeJsonParser';
 import type { UnitApiResponse } from './unit-types';
 
 const NOT_FOUND_RESPONSE: UnitApiResponse = {
@@ -85,5 +87,63 @@ export async function getUnits(): Promise<UnitApiResponse> {
   } catch (error) {
     console.error('Error fetching units:', error);
     throw error;
+  }
+}
+
+/**
+ * Server-side equivalent of `fetchUnitsFilter` from `src/utils/api.js`.
+ * Called from `units/page.jsx` (RSC) so the first page of the units list is
+ * rendered server-side — the browser Network tab never sees `/units/v1/slim-list`
+ * on initial load. Subsequent filter/page changes still go through the client hook.
+ *
+ * @param searchParams - Raw Next.js searchParams from the page (object, not string)
+ * @param clientId - From cookie; used to scope My-Inventory filter server-side
+ */
+export async function fetchUnitsFilterServer(
+  searchParams: Record<string, string | string[] | undefined>,
+  clientId: string
+): Promise<Record<string, unknown> | null> {
+  try {
+    const base: Record<string, unknown> = { ...(searchParams ?? {}) };
+
+    // Mirror the client-side logic in units-page-query-optimized.jsx
+    delete base.client_id;
+    delete base.clientId;
+
+    const params: Record<string, unknown> = {
+      ...base,
+      page_size: Number(base.page_size) || 16,
+      visibility: 'visible',
+    };
+
+    if (base.resale === 'true') {
+      params.is_primary = false;
+    }
+
+    if (base.my_inventory === 'true' && clientId) {
+      params.client_id = clientId;
+    }
+
+    // Drop empty/undefined values
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v === undefined || v === null || v === '') delete params[k];
+    });
+
+    const qs = new URLSearchParams(
+      Object.entries(params).map(([k, v]) => [k, String(v)])
+    ).toString();
+
+    const url = `/units/v1/slim-list${qs ? `?${qs}` : ''}`;
+    const response = await axiosInstance.get(url);
+
+    if (!response.data?.data?.units || !Array.isArray(response.data.data.units)) {
+      return null;
+    }
+
+    return mapSlimUnitsListResponse(response.data) as Record<string, unknown>;
+  } catch {
+    // On server-fetch failure, return null — the client hook will retry transparently.
+    return null;
   }
 }

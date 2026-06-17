@@ -151,7 +151,7 @@ export default function UnifiedDialog({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="text-white/90 hover:text-white focus:outline-none p-1"
+                  className="icon-btn h-8 w-8 rounded-full text-white/90 hover:text-white hover:bg-white/10 focus:outline-none"
                   aria-label="Close"
                 >
                   <X size={22} />

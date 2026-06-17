@@ -3,12 +3,25 @@
  * Normalizes to full URL (adds https:// if missing) and exports hostname for image/config use.
  */
 
-const api_base_url = process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+// Prefer the server-only `API_BASE_URL`; fall back to the public var during migration.
+// On the client bundle `process.env.API_BASE_URL` is statically `undefined` (only
+// `NEXT_PUBLIC_*` is inlined), so the public value is used there until client axios is removed.
+const api_base_url =
+  process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
 export const API_BASE_URL =
   api_base_url.startsWith("http://") || api_base_url.startsWith("https://") ? api_base_url : `https://${api_base_url}`;
 
-/** Public tier key for `X-API-Key` on unauthenticated routes (set `NEXT_PUBLIC_X_API_KEY` in `.env`). */
-export const PUBLIC_X_API_KEY = (process.env.NEXT_PUBLIC_X_API_KEY ?? "").trim();
+/**
+ * Tier key for `X-API-Key` on unauthenticated routes.
+ * Prefer server-only `X_API_KEY`; fall back to `NEXT_PUBLIC_X_API_KEY` during migration.
+ * Once all `/public/*` calls are proxied through the server, drop the public fallback so the
+ * key leaves the client bundle entirely.
+ */
+export const PUBLIC_X_API_KEY = (
+  process.env.X_API_KEY ??
+  process.env.NEXT_PUBLIC_X_API_KEY ??
+  ""
+).trim();
 
 /** True when the `X-API-Key` header value is available in this build. */
 export const HAS_X_API_KEY = PUBLIC_X_API_KEY.length > 0;
@@ -38,7 +51,8 @@ export const API_HOSTNAME = apiHostname;
 
 // Image base URL: optional; defaults to API so images work when API is same origin.
 // In dev, set NEXT_PUBLIC_IMAGE_BASE_URL=https://api.lenaai.net so images load from prod while API is localhost.
-const imageBaseRaw = process.env.NEXT_PUBLIC_IMAGE_BASE_URL || api_base_url;
+const imageBaseRaw =
+  process.env.IMAGE_BASE_URL || process.env.NEXT_PUBLIC_IMAGE_BASE_URL || api_base_url;
 export const IMAGE_BASE_URL =
   imageBaseRaw.startsWith("http://") || imageBaseRaw.startsWith("https://")
     ? imageBaseRaw

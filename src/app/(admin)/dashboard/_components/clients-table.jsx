@@ -258,8 +258,7 @@ export default function ClientsTable({ users, pagination }) {
                                   phoneToE164(user.phone_number, "EG") || user.phone_number,
                                 )
                               }
-                              className="p-1 h-6 w-6 bg-green-500 hover:bg-green-600 rounded-full shadow transition-all duration-200 flex items-center justify-center flex-shrink-0 aspect-square"
-                              style={{ height: '24px', width: '24px', minHeight: '24px', maxHeight: '24px' }}
+                              className="icon-btn h-6 w-6 rounded-full bg-green-500 shadow transition-all duration-200 hover:bg-green-600"
                               title={t('clientsTable.openWhatsApp')}
                             >
                               <svg

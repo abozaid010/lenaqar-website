@@ -124,7 +124,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
           </div>
           <button
             onClick={resetAndClose}
-            className="p-1 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
+            className="icon-btn h-8 w-8 rounded-full text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none"
             aria-label={translate("common.close", "Close")}
           >
             <X size={20} />

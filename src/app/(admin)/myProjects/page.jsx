@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import ProjectsList from "./_components/ProjectsList";
+import { fetchProjectsPaginatedServer } from "@/lib/projects/project-api";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 
@@ -36,6 +37,8 @@ export default async function ProjectsPage() {
   const cookieStore = await cookies();
   const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
 
+  const initialProjectsData = await fetchProjectsPaginatedServer(20);
+
   return (
     <>
       <BreadcrumbSchema
@@ -46,7 +49,7 @@ export default async function ProjectsPage() {
           },
         ]}
       />
-      <ProjectsList clientId={clientId} />
+      <ProjectsList clientId={clientId} initialProjectsData={initialProjectsData} />
     </>
   );
 }

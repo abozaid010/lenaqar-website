@@ -2,13 +2,15 @@
 
 import { SELECTION_COLORS } from "@/constants/colors";
 import { useI18n } from "@/hooks/useI18n";
-import { useNotifications } from "@/hooks/use-notifications";
 import { Bell } from "lucide-react";
 import Link from "next/link";
 
-export default function NotificationBell({ navHref, isLinkActive }) {
+export default function NotificationBell({
+  navHref,
+  isLinkActive,
+  unreadCount = 0,
+}) {
   const { translate } = useI18n();
-  const { unreadCount } = useNotifications();
 
   const href = navHref("/notifications");
   const active = isLinkActive("/notifications");

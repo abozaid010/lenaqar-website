@@ -186,12 +186,12 @@ export default function SingleImageUploader({
                   type="button"
                   onClick={handleRemoveImage}
                   disabled={deleteLoading}
-                  className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-80 hover:opacity-100 transition-opacity disabled:pointer-events-none disabled:cursor-auto"
+                  className="icon-btn absolute top-2 right-2 z-10 h-6 w-6 rounded-full bg-red-500 text-white opacity-80 shadow-sm transition-opacity hover:opacity-100 disabled:pointer-events-none disabled:cursor-auto"
                 >
                   {deleteLoading ? (
-                    <Loader2 className="animate-spin h-4 w-4" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                   ) : (
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   )}
                 </button>
               )}

@@ -1,16 +1,20 @@
 "use client";
 
-import {
-  fetchNotifications,
-  markAllNotificationsRead,
-} from "@/utils/api";
 import { notificationKeys } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo } from "react";
 
-const LAST_POLL_KEY = "lastNotificationPollAt";
+async function markAllNotificationsReadBFF() {
+  const res = await fetch("/api/crm/notifications", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ markAll: true }),
+  });
+  if (!res.ok) throw new Error(`Mark-all-read BFF error: ${res.status}`);
+  return res.json();
+}
+
 const READ_IDS_KEY = "lenaNotificationReadIds";
-const POLL_INTERVAL_MS = 60_000;
 
 function loadReadIds() {
   if (typeof window === "undefined") return new Set();
@@ -31,23 +35,11 @@ function readIdsToArray(ids) {
   return [...ids];
 }
 
-function mergeNotifications(newItems, existingItems) {
-  const map = new Map();
-  for (const item of newItems || []) {
-    if (item?.id) map.set(item.id, item);
-  }
-  for (const item of existingItems || []) {
-    if (item?.id && !map.has(item.id)) map.set(item.id, item);
-  }
-  return Array.from(map.values()).sort(
-    (a, b) =>
-      new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
-  );
-}
-
-export function useNotifications() {
+export function useNotifications({
+  initialNotifications = [],
+  initialUnreadCount = 0,
+} = {}) {
   const queryClient = useQueryClient();
-  const hasInitialLoadRef = useRef(false);
 
   const readIdsQuery = useQuery({
     queryKey: notificationKeys.readIds(),
@@ -73,47 +65,9 @@ export function useNotifications() {
     [queryClient]
   );
 
-  const query = useQuery({
-    queryKey: notificationKeys.list(),
-    queryFn: async () => {
-      if (!hasInitialLoadRef.current) {
-        hasInitialLoadRef.current = true;
-        const data = await fetchNotifications({ limit: 50 });
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(LAST_POLL_KEY, new Date().toISOString());
-        }
-        return data;
-      }
-
-      const since =
-        typeof window !== "undefined"
-          ? sessionStorage.getItem(LAST_POLL_KEY)
-          : null;
-
-      const incremental = since
-        ? await fetchNotifications({ since, limit: 50 })
-        : await fetchNotifications({ limit: 50 });
-
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem(LAST_POLL_KEY, new Date().toISOString());
-      }
-
-      const prev = queryClient.getQueryData(notificationKeys.list());
-      const prevNotifications = prev?.notifications || [];
-      const newItems = incremental.notifications || [];
-      const merged = mergeNotifications(newItems, prevNotifications);
-
-      return {
-        notifications: merged,
-        unread_count: incremental.unread_count ?? prev?.unread_count ?? 0,
-      };
-    },
-    staleTime: 0,
-    refetchInterval: POLL_INTERVAL_MS,
-    refetchOnWindowFocus: true,
-  });
-
-  const rawNotifications = query.data?.notifications || [];
+  // Notifications are fetched on the server and passed in as initial props.
+  // Keeping this hook client-only avoids a browser-visible GET to `/api/crm/notifications`.
+  const rawNotifications = initialNotifications || [];
 
   const notifications = useMemo(
     () =>
@@ -124,10 +78,11 @@ export function useNotifications() {
     [rawNotifications, readIds]
   );
 
-  const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.read).length,
-    [notifications]
-  );
+  const unreadCount = useMemo(() => {
+    // Prefer derived count from readIds (client overrides server unread).
+    const derived = notifications.filter((n) => !n.read).length;
+    return Number.isFinite(derived) ? derived : initialUnreadCount ?? 0;
+  }, [notifications, initialUnreadCount]);
 
   const markAsRead = useCallback(
     (notificationId) => {
@@ -150,26 +105,21 @@ export function useNotifications() {
       return next;
     });
 
-    queryClient.setQueryData(notificationKeys.list(), (old) => {
-      if (!old) return old;
-      return { ...old, unread_count: 0 };
-    });
-
     try {
-      await markAllNotificationsRead();
+      await markAllNotificationsReadBFF();
     } catch (error) {
       console.error("Failed to mark all notifications as read:", error);
     }
-  }, [rawNotifications, updateReadIds, queryClient]);
+  }, [rawNotifications, updateReadIds]);
 
   return {
     notifications,
     unreadCount,
-    isLoading: query.isLoading,
-    isError: query.isError,
-    error: query.error,
-    refetch: query.refetch,
-    isFetching: query.isFetching,
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: async () => {},
+    isFetching: false,
     markAsRead,
     markAllAsRead,
   };
