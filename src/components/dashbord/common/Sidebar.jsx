@@ -41,6 +41,8 @@ const SidebarComponent = ({
   serverProfileInitial = null,
   /** Server-provided display name (fallback until profile loads) */
   clientName = null,
+  /** Server-provided unread notifications count */
+  unreadNotificationsCount = 0,
 }) => {
   const { translate, locale } = useI18n();
   const pathname = usePathname();
@@ -381,6 +383,7 @@ const SidebarComponent = ({
             <NotificationBell
               navHref={navHref}
               isLinkActive={isLinkActive}
+              unreadCount={unreadNotificationsCount ?? 0}
             />
           )}
 

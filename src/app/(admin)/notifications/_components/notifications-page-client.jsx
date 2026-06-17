@@ -7,7 +7,10 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 
-export default function NotificationsPageClient() {
+export default function NotificationsPageClient({
+  initialNotifications = [],
+  initialUnreadCount = 0,
+}) {
   const { translate } = useI18n();
   const router = useRouter();
   const {
@@ -19,7 +22,10 @@ export default function NotificationsPageClient() {
     isFetching,
     markAsRead,
     markAllAsRead,
-  } = useNotifications();
+  } = useNotifications({
+    initialNotifications,
+    initialUnreadCount,
+  });
 
   const handleNotificationClick = useCallback(
     (notification) => {

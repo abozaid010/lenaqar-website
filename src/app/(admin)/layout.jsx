@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getCachedClientProfile } from "@/lib/getCachedClientProfile.server";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
+import { getUnreadNotificationsCount } from "@/lib/notifications.server";
 
 import { cookies } from "next/headers";
 import { safeCookieParse } from "@/utils/safeJsonParser";
@@ -22,6 +23,7 @@ const Layout = async ({ children }) => {
     : null;
   const profileResponse = await getCachedClientProfile();
   const initialModuleActions = extractModuleActionsFromProfile(profileResponse);
+  const unreadNotificationsCount = await getUnreadNotificationsCount();
 
   // Get the initial locale from the cookie
   const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;
@@ -40,6 +42,7 @@ const Layout = async ({ children }) => {
               serverProfileInitial={profileResponse}
               clientId={clientID}
               clientName={clientName}
+              unreadNotificationsCount={unreadNotificationsCount}
             />
 
           <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
