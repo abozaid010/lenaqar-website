@@ -46,10 +46,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-export default async function EditUnitPage({ params }) {
+export default async function EditUnitPage({ params, searchParams: rawSearchParams }) {
   const { code: rawCode } = await params;
+  const searchParams = await rawSearchParams;
   const cookieStore = await cookies();
   const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
+  const fromPendingApproval = searchParams?.pending === "1";
 
   if (!normalizeUnitCodeParam(rawCode)) {
     notFound();
@@ -77,7 +79,12 @@ export default async function EditUnitPage({ params }) {
         ]}
       />
 
-      <EditUnitClient rawUnit={rawUnit} unitCode={unitCode} clientId={clientId} />
+      <EditUnitClient
+        rawUnit={rawUnit}
+        unitCode={unitCode}
+        clientId={clientId}
+        fromPendingApproval={fromPendingApproval}
+      />
     </>
   );
 }

@@ -24,7 +24,6 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import {
   getUnitSelectionIdFromListItem,
-  isUnitSelectableForBulkWhatsapp,
 } from "@/lib/units/unit-whatsapp-recipient";
 
 export default function UnitsGrid({
@@ -57,6 +56,41 @@ export default function UnitsGrid({
     return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
+  const getRentPeriodLabel = (period) =>
+    translate(
+      `rental.${period}`,
+      period === "daily"
+        ? locale === "ar"
+          ? "يومي"
+          : "day"
+        : period === "weekly"
+          ? locale === "ar"
+            ? "أسبوعي"
+            : "week"
+          : locale === "ar"
+            ? "شهري"
+            : "month"
+    );
+
+  const formatRentPriceWithPeriod = (price, period) => {
+    const formatted = formatPrice(price);
+    if (!formatted) return null;
+    return `${formatted} ${egpLabel}/${getRentPeriodLabel(period)}`;
+  };
+
+  const getRentPriceLabel = (unit) => {
+    const durations = [
+      ["daily", unit.rentDurationType?.daily?.price],
+      ["weekly", unit.rentDurationType?.weekly?.price],
+      ["monthly", unit.rentDurationType?.monthly?.price],
+    ];
+    for (const [period, price] of durations) {
+      const label = formatRentPriceWithPeriod(price, period);
+      if (label) return label;
+    }
+    return formatRentPriceWithPeriod(unit.rentPrice, "monthly");
+  };
+
   const getUnitHref = (unit) =>
     buildUnitDetailHrefFromListItem(unit, {
       readonly,
@@ -84,7 +118,6 @@ export default function UnitsGrid({
             const unitCode = resolveUnitCodeFromListItem(u);
             const cardKey = u.unitId ?? unitCode ?? idx;
             const unitSelectionId = getUnitSelectionIdFromListItem(u);
-            const canSelectUnit = isUnitSelectableForBulkWhatsapp(u, clientId);
             const isSelected =
               showBulkCheckbox &&
               unitSelectionId &&
@@ -155,7 +188,7 @@ export default function UnitsGrid({
                     <div>
                       <p
                         style={{ fontWeight: "500" }}
-                        className="absolute text-[14px] top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"
+                        className="absolute text-[14px] top-3 rounded-sm start-5 cursor-pointer bg-primary text-white px-2 capitalize"
                       >
                         {t.for}
                         {u.purpose === "rent" || u.purpose === "Rent"
@@ -204,17 +237,10 @@ export default function UnitsGrid({
                     {u.purpose === "Rent" || u.purpose === "rent" ? (
                       <div className="flex items-center justify-between w-full">
                         <div className="font-semibold text-[21px]">
-                          {u.rentDurationType?.daily?.price && formatPrice(u.rentDurationType.daily.price)
-                            ? `${formatPrice(u.rentDurationType.daily.price)} ${egpLabel}/day`
-                            : u.rentDurationType?.weekly?.price && formatPrice(u.rentDurationType.weekly.price)
-                              ? `${formatPrice(u.rentDurationType.weekly.price)} ${egpLabel}/week`
-                              : u.rentDurationType?.monthly?.price && formatPrice(u.rentDurationType.monthly.price)
-                                ? `${formatPrice(u.rentDurationType.monthly.price)} ${egpLabel}/month`
-                                : u.rentPrice && formatPrice(u.rentPrice)
-                                  ? `${formatPrice(u.rentPrice)} ${egpLabel}`
-                                  : allowMissingFields
-                                    ? "—"
-                                    : t?.common?.na || "N/A"}
+                          {getRentPriceLabel(u) ||
+                            (allowMissingFields
+                              ? "—"
+                              : t?.common?.na || "N/A")}
                         </div>
                       </div>
                     ) : (
@@ -252,35 +278,19 @@ export default function UnitsGrid({
 
                 {showBulkCheckbox && unitSelectionId && (
                   <label
-                    className={`absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md ${
-                      canSelectUnit ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
-                    }`}
-                    title={
-                      canSelectUnit
-                        ? undefined
-                        : translate(
-                            "unitsFilter.bulkAvailability.noOwnerPhone",
-                            "No owner phone"
-                          )
-                    }
+                    className="absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md cursor-pointer hover:bg-white"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
                       type="checkbox"
                       className="h-4 w-4 accent-primary rounded border-gray-300"
                       checked={Boolean(isSelected)}
-                      disabled={!canSelectUnit}
-                      aria-label={
-                        canSelectUnit
-                          ? translate("unitsFilter.bulkAvailability.selectUnit", "Select unit")
-                          : translate(
-                              "unitsFilter.bulkAvailability.noOwnerPhone",
-                              "No owner phone"
-                            )
-                      }
+                      aria-label={translate(
+                        "unitsFilter.bulkAvailability.selectUnit",
+                        "Select unit"
+                      )}
                       onChange={(e) => {
                         e.stopPropagation();
-                        if (!canSelectUnit) return;
                         bulkSelection.toggleUnitSelection(unitSelectionId);
                       }}
                       onClick={(e) => e.stopPropagation()}

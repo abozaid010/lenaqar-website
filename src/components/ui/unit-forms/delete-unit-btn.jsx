@@ -2,6 +2,9 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { useDeleteUnit } from "@/hooks/use-unit-mutations";
+import { useUnitsSectionSource } from "@/hooks/use-units-section-source";
+import { buildAdminPendingApprovalListPath } from "@/utils/units-navigation-source";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { Loader2, Trash2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -12,6 +15,8 @@ export default function DeleteUnitBtn({ unitId, disabled = false }) {
   const modalRef = useRef(null);
   const router = useRouter();
   const { t } = useI18n();
+  const unitsSection = useUnitsSectionSource();
+  const clientId = LenaCookiesManager.getClientId();
 
   const deleteUnitMutation = useDeleteUnit();
 
@@ -29,7 +34,11 @@ export default function DeleteUnitBtn({ unitId, disabled = false }) {
     try {
       await deleteUnitMutation.mutateAsync(unitId);
       toast.success(t.toasts?.unitDeleted || "Unit deleted successfully");
-      router.push("/units");
+      router.push(
+        unitsSection === "pending_approval"
+          ? buildAdminPendingApprovalListPath(clientId)
+          : "/units"
+      );
     } catch (error) {
       toast.error(error.message || "Failed to delete unit");
     } finally {

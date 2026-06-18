@@ -7,6 +7,7 @@ import type { UseMutationResult } from '@tanstack/react-query';
 import { useI18n } from '@/hooks/useI18n';
 import { useApproveUnitVisibility } from '@/hooks/use-unit-mutations';
 import { useUnitsSectionSource } from '@/hooks/use-units-section-source';
+import { buildAdminPendingApprovalListPath } from '@/utils/units-navigation-source';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import type { RawUnit } from '@/lib/units/unit-types';
 
@@ -55,11 +56,11 @@ export default function UnitApproveButton({
       );
 
       const clientId = LenaCookiesManager.getClientId();
-      const pendingPath = clientId
-        ? `/${clientId}/units/pending-approval`
-        : '/units/pending-approval';
+      const pendingPath = buildAdminPendingApprovalListPath(clientId);
 
-      if (typeof window !== 'undefined' && window.history.length > 2) {
+      if (fromPendingSection) {
+        router.push(pendingPath);
+      } else if (typeof window !== 'undefined' && window.history.length > 2) {
         router.back();
       } else {
         router.push(pendingPath);

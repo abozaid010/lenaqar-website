@@ -5,6 +5,7 @@ import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath } from '@/lib/units/unit-share-links';
+import { appendUnitsSourcePendingQuery, buildAdminPendingApprovalListPath } from '@/utils/units-navigation-source';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
 import { useUnitsSectionSource } from '@/hooks/use-units-section-source';
@@ -120,7 +121,10 @@ export default function StickyInquiryCard({
   
   const handleEdit = () => {
     if (!unit.referenceCode?.trim()) return;
-    const editUrl = buildAdminUnitEditPath(unit.referenceCode, currentClientId);
+    const editUrl = appendUnitsSourcePendingQuery(
+      buildAdminUnitEditPath(unit.referenceCode, currentClientId),
+      unitsSection === 'pending_approval'
+    );
     router.push(editUrl);
   };
 
@@ -130,7 +134,11 @@ export default function StickyInquiryCard({
       await deleteUnitMutation.mutateAsync(unit.id);
       toast.success(translate("toasts.unitDeleted") || (locale === "ar" ? "تم حذف الوحدة بنجاح" : "Unit deleted successfully"));
       setShowDeleteConfirm(false);
-      router.push('/units');
+      router.push(
+        unitsSection === 'pending_approval'
+          ? buildAdminPendingApprovalListPath(currentClientId)
+          : '/units'
+      );
     } catch (error: any) {
       toast.error(error?.message || translate("toasts.errorProcessing") || (locale === "ar" ? "حدث خطأ أثناء معالجة الطلب" : "Failed to process request"));
     }

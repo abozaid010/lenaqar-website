@@ -402,6 +402,36 @@ const SidebarComponent = ({
             </Link>
           )}
 
+          {isMounted && units.canView && (
+            <Link
+              href={navHref("/units")}
+              prefetch={true}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isUnitsLinkActive
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <Home className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.units")}</span>
+            </Link>
+          )}
+
+          {isMounted && resale.canView && (
+            <Link
+              href={navHref("/units/pending-approval")}
+              prefetch={true}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isPendingApprovalLinkActive
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <Home className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.pendingApproval")}</span>
+            </Link>
+          )}
+
           {isMounted && campaign.canView && (
             <Link
               href={navHref("/campaigns")}
@@ -459,36 +489,6 @@ const SidebarComponent = ({
             >
               <BarChart2 className="h-5 w-5 mr-3" />
               <span>{translate('sidebar.analytics')}</span>
-            </Link>
-          )}
-
-          {isMounted && units.canView && (
-            <Link
-              href={navHref("/units")}
-              prefetch={true}
-              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isUnitsLinkActive
-                  ? SELECTION_COLORS.SELECTED
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <Home className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.units")}</span>
-            </Link>
-          )}
-
-          {isMounted && resale.canView && (
-            <Link
-              href={navHref("/units/pending-approval")}
-              prefetch={true}
-              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
-                isPendingApprovalLinkActive
-                  ? SELECTION_COLORS.SELECTED
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <Home className="h-5 w-5 mr-3" />
-              <span>{translate("sidebar.pendingApproval")}</span>
             </Link>
           )}
 

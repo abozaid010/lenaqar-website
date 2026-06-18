@@ -31,3 +31,11 @@ export function resolveRentVisibilityForCheckbox(checked, currentVisibility) {
 export function getUnitVisibility(unit) {
   return normalizePropertyVisibility(unit?.visibility ?? unit?.status);
 }
+
+/** True when unit belongs on the hidden / pending-approval list. */
+export function isPendingOrHiddenVisibility(value) {
+  const v = normalizePropertyVisibility(value);
+  return (
+    v === PROPERTY_VISIBILITY.PENDING_APPROVAL || v === PROPERTY_VISIBILITY.HIDDEN
+  );
+}

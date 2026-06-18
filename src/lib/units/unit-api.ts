@@ -147,3 +147,81 @@ export async function fetchUnitsFilterServer(
     return null;
   }
 }
+
+/**
+ * Server-side equivalent of `fetchPendingApprovalUnits` from `src/utils/api.js`.
+ * Prefetches the Hidden Units list in RSC so the browser never calls `/units/all`
+ * on initial load. Filter changes still fetch from the client hook.
+ */
+export async function fetchPendingApprovalUnitsServer(
+  searchParams: Record<string, string | string[] | undefined>,
+  clientId: string
+): Promise<Record<string, unknown> | null> {
+  try {
+    const base: Record<string, unknown> = { ...(searchParams ?? {}) };
+    delete base.client_id;
+    delete base.clientId;
+
+    const params: Record<string, unknown> = {
+      page_size: Number(base.page_size) || 16,
+      direction: base.direction || 'forward',
+    };
+
+    if (base.cursor != null && base.cursor !== '') {
+      params.cursor = base.cursor;
+    }
+
+    params.visibility =
+      base.visibility != null && base.visibility !== ''
+        ? base.visibility
+        : 'pending_approval';
+
+    if (base.updated_at) {
+      params.updated_at = base.updated_at;
+    }
+    if (base.property_type) {
+      params.property_type = base.property_type;
+    }
+    if (base.min_price != null && base.min_price !== '') {
+      params.min_price = base.min_price;
+    }
+    if (base.max_price != null && base.max_price !== '') {
+      params.max_price = base.max_price;
+    }
+
+    if (clientId) {
+      params.client_id = clientId;
+    }
+
+    Object.keys(params).forEach((k) => {
+      const v = params[k];
+      if (v === undefined || v === null || v === '') delete params[k];
+    });
+
+    const response = await axiosInstance.get('/units/all', { params });
+
+    if (!response.data?.data) {
+      return null;
+    }
+
+    const data = response.data.data;
+    const units = Array.isArray(data.units) ? data.units : [];
+    const pagination = data.pagination ?? {
+      next_cursor: null,
+      prev_cursor: null,
+      has_more_next: false,
+      has_more_prev: false,
+    };
+
+    return {
+      ...response.data,
+      data: {
+        units,
+        count: data.count ?? units.length,
+        pagination,
+      },
+    } as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}

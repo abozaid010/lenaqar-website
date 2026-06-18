@@ -37,3 +37,16 @@ export function getUnitsSectionFromUrl(pathname, searchParams) {
 export function unitsSourcePendingQueryString(fromPendingApproval) {
   return fromPendingApproval ? `?${UNITS_SOURCE_PENDING_PARAM}=1` : "";
 }
+
+/** Admin hidden-units list path: /{clientId}/units/pending-approval or /units/pending-approval */
+export function buildAdminPendingApprovalListPath(clientId) {
+  return clientId ? `/${clientId}/units/pending-approval` : "/units/pending-approval";
+}
+
+/** Append ?pending=1 when linking from the hidden-units section. */
+export function appendUnitsSourcePendingQuery(path, fromPendingApproval) {
+  if (!fromPendingApproval) return path;
+  const query = unitsSourcePendingQueryString(true);
+  if (!query) return path;
+  return path.includes("?") ? `${path}&${query.slice(1)}` : `${path}${query}`;
+}

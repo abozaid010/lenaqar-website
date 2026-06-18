@@ -2,14 +2,25 @@
 
 import { useRouter } from "next/navigation";
 import EditUnitForm from "@/components/ui/unit-forms/add-unit-Modal";
-import { buildAdminUnitDetailPath } from "@/lib/units/unit-share-links";
+import {
+  buildAdminUnitDetailPath,
+} from "@/lib/units/unit-share-links";
+import { buildAdminPendingApprovalListPath } from "@/utils/units-navigation-source";
 
-export default function EditUnitClient({ rawUnit, unitCode, clientId }) {
+export default function EditUnitClient({
+  rawUnit,
+  unitCode,
+  clientId,
+  fromPendingApproval = false,
+}) {
   const router = useRouter();
   const detailPath = buildAdminUnitDetailPath(unitCode, clientId);
+  const returnPath = fromPendingApproval
+    ? buildAdminPendingApprovalListPath(clientId)
+    : detailPath;
 
   const handleClose = () => {
-    router.push(detailPath);
+    router.push(returnPath);
   };
 
   return (
@@ -18,9 +29,7 @@ export default function EditUnitClient({ rawUnit, unitCode, clientId }) {
       isEdit={true}
       isPageMode={true}
       onClose={handleClose}
-      onUnitsExtracted={() => {
-        router.push(detailPath);
-      }}
+      onUnitsExtracted={handleClose}
     />
   );
 }

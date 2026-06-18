@@ -171,8 +171,9 @@ export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
 
 /**
  * Fetches units from /units/all for the Hidden Units page.
- * Always sends is_primary: false, client_id, and visibility
- * ("pending_approval" by default, or "hidden" when selected).
+ * Sends client_id from the CLIENT_ID cookie (active tenant workspace, e.g. homey)
+ * and visibility ("pending_approval" by default, or "hidden" when selected).
+ * Does not send is_primary — pending/hidden units may be primary or resale.
  */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
@@ -190,7 +191,6 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     const params = {
       page_size: Number(parsed.page_size) || 16,
       direction: parsed.direction || "forward",
-      is_primary: false,
       ...(parsed.cursor != null && parsed.cursor !== ""
         ? { cursor: parsed.cursor }
         : {}),
@@ -216,7 +216,8 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
       params.max_price = parsed.max_price;
     }
 
-    const clientId = getValidatedApiClientId();
+    // Tenant scope: cookie CLIENT_ID (e.g. homey), not JWT client_id (often "public").
+    const clientId = createSafeClientId(LenaCookiesManager.getClientId());
     if (clientId) {
       params.client_id = clientId;
     }

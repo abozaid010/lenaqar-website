@@ -262,11 +262,82 @@ export function removeUnitFromCache(queryClient, unitId) {
     if (!oldData?.data?.units) return oldData;
 
     return {
+      ...oldData,
       data: {
         ...oldData.data,
-        units: oldData.data.units.filter((unit) => unit.unitId !== unitId),
+        units: oldData.data.units.filter((unit) => !unitMatchesId(unit, unitId)),
       },
     };
+  });
+}
+
+const pendingApprovalListKeyPrefix = [...unitKeys.all, "pending-approval", "list"];
+
+function unitMatchesId(unit, unitId) {
+  if (unitId == null || unitId === "") return false;
+  const target = String(unitId);
+  return [unit?.unitId, unit?.unit_id, unit?.id].some(
+    (value) => value != null && String(value) === target
+  );
+}
+
+/** Update a unit in all pending-approval list caches (no refetch). */
+export function updateUnitInPendingApprovalCache(queryClient, unitId, updateFn) {
+  queryClient.setQueriesData({ queryKey: pendingApprovalListKeyPrefix }, (oldData) => {
+    if (!oldData?.data?.units) return oldData;
+
+    return {
+      ...oldData,
+      data: {
+        ...oldData.data,
+        units: oldData.data.units.map((unit) =>
+          unitMatchesId(unit, unitId) ? updateFn(unit) : unit
+        ),
+      },
+    };
+  });
+}
+
+/**
+ * Remove a unit from pending-approval list caches after approve/edit.
+ * Returns query keys whose cached unit arrays are now empty (caller may refetch those only).
+ */
+export function removeUnitFromPendingApprovalCache(queryClient, unitId) {
+  const keysToRefetch = [];
+
+  queryClient.getQueriesData({ queryKey: pendingApprovalListKeyPrefix }).forEach(
+    ([queryKey, oldData]) => {
+      if (!oldData?.data?.units) return;
+
+      const units = oldData.data.units;
+      if (!units.some((unit) => unitMatchesId(unit, unitId))) return;
+
+      const nextUnits = units.filter((unit) => !unitMatchesId(unit, unitId));
+      queryClient.setQueryData(queryKey, {
+        ...oldData,
+        data: {
+          ...oldData.data,
+          units: nextUnits,
+          count:
+            typeof oldData.data.count === "number"
+              ? Math.max(0, oldData.data.count - 1)
+              : nextUnits.length,
+        },
+      });
+
+      if (nextUnits.length === 0) {
+        keysToRefetch.push(queryKey);
+      }
+    }
+  );
+
+  return keysToRefetch;
+}
+
+/** Refetch pending-approval lists only when the local cache page became empty. */
+export function refetchPendingApprovalQueriesIfEmpty(queryClient, queryKeys) {
+  queryKeys.forEach((queryKey) => {
+    queryClient.refetchQueries({ queryKey });
   });
 }
 

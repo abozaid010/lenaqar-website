@@ -17,9 +17,19 @@ function getUnitSelectionId(unit) {
   );
 }
 
+function extractOwnerPhone(unit) {
+  return String(
+    unit.owner_mobile ??
+      unit.ownerMobile ??
+      unit.phone_number ??
+      unit.phoneNumber ??
+      ""
+  ).trim();
+}
+
 /**
  * Build a units list row into a WhatsApp recipient for bulk availability checks.
- * Uses owner_mobile only; returns null when phone is missing or invalid.
+ * Selection does not require a phone; send still skips rows without a valid number.
  *
  * @param {object} unit
  * @param {string|null|undefined} clientId
@@ -31,7 +41,7 @@ export function unitToWhatsappRecipient(unit, clientId = null) {
   const unitId = getUnitSelectionId(unit);
   if (!unitId) return null;
 
-  const ownerPhone = String(unit.owner_mobile ?? unit.ownerMobile ?? "").trim();
+  const ownerPhone = extractOwnerPhone(unit);
   if (!ownerPhone) return null;
 
   const resolved = resolveWhatsappRecipientFields({
@@ -59,6 +69,6 @@ export function getUnitSelectionIdFromListItem(unit) {
   return getUnitSelectionId(unit);
 }
 
-export function isUnitSelectableForBulkWhatsapp(unit, clientId = null) {
-  return unitToWhatsappRecipient(unit, clientId) != null;
+export function isUnitSelectableForBulkWhatsapp(unit) {
+  return getUnitSelectionId(unit) != null;
 }

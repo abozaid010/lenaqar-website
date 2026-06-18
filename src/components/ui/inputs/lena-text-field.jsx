@@ -55,7 +55,11 @@ const LenaTextField = forwardRef(({
     setIsHovered((prev) => (prev === next ? prev : next));
   };
 
-  const [documentDir, setDocumentDir] = useState(undefined);
+  const [documentDir, setDocumentDir] = useState(() => {
+    if (typeof document === "undefined") return undefined;
+    const htmlDir = document.documentElement.getAttribute("dir");
+    return htmlDir === "ltr" || htmlDir === "rtl" ? htmlDir : undefined;
+  });
 
   useEffect(() => {
     if (dir != null) return;
@@ -68,6 +72,10 @@ const LenaTextField = forwardRef(({
   const resolvedDir =
     dir ??
     (type === "money" || type === "number" ? "ltr" : documentDir);
+
+  // Page direction drives visual alignment; numeric fields keep dir=ltr for digit order.
+  const layoutDir = documentDir ?? resolvedDir ?? "ltr";
+  const textAlignClass = layoutDir === "rtl" ? "text-right" : "text-left";
 
   // Expose refs for parent components
   useImperativeHandle(ref, () => ({
@@ -159,7 +167,7 @@ const LenaTextField = forwardRef(({
           <label
             htmlFor={name}
             className={`absolute transition-all duration-200 pointer-events-none ${
-              resolvedDir === "rtl" ? "right-3" : "left-3"
+              layoutDir === "rtl" ? "right-3" : "left-3"
             } ${
               shouldFloatLabel
                 ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5`
@@ -181,7 +189,7 @@ const LenaTextField = forwardRef(({
           placeholder={displayPlaceholder}
           required={required}
           disabled={disabled}
-          className={`block w-full min-h-[40px] rounded-md border py-2.5 px-3 focus:outline-none focus:ring-2 bg-white text-gray-900 appearance-none transition-all duration-200 text-start ${
+          className={`block w-full min-h-[40px] rounded-md border py-2.5 px-3 focus:outline-none focus:ring-2 bg-white text-gray-900 appearance-none transition-all duration-200 ${textAlignClass} ${
             shouldFloatLabel && label ? "pt-4" : ""
           } ${
             getBorderColor()

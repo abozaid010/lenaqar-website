@@ -2412,6 +2412,7 @@ export default {
     whatsapp: "واتساب",
     delete: "حذف",
     edit: "تعديل",
+    approveUnit: "اعتماد",
   },
   unitPricing: {
     title: "التسعير والدفع",
