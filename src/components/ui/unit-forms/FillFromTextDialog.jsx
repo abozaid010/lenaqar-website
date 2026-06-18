@@ -77,7 +77,7 @@ export default function FillFromTextDialog({
       onCancel={handleCancel}
       headerTrailing={headerTrailing}
       closeOnOutsideClick={false}
-      closeOnEscape={true}
+      closeOnEscape={false}
     >
       <div className="p-4 md:p-6 space-y-4">
         <LenaTextarea

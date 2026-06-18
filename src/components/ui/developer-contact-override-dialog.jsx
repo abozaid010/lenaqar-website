@@ -162,7 +162,6 @@ export default function DeveloperContactOverrideDialog({
       onSubmit={handleSave}
       submitDisabled={loading || saving}
       submitLoading={saving}
-      closeOnOutsideClick
       bodyClassName="max-h-[70vh] overflow-y-auto"
     >
       <p className="text-sm text-gray-600 mb-4">

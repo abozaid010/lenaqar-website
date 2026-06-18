@@ -199,11 +199,9 @@ export default function VideoInstructionsDialog({
         <div
           className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
           style={{ zIndex }}
-          onClick={handleClose}
         >
           <div
             className="relative bg-white rounded-lg shadow-2xl w-full max-w-7xl"
-            onClick={(e) => e.stopPropagation()}
           >
             {/* Video Content with Close Button Overlay */}
             <div className="relative w-full aspect-video rounded-lg overflow-hidden shadow-lg bg-gray-100">

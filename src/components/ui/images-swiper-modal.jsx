@@ -44,9 +44,6 @@ export default function ImageSwiperModal({
   return createPortal(
     <div
       className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
     >
       <div className="relative p-4 w-[85%] h-[85vh] max-w-7xl max-h-screen bg-white rounded-lg overflow-hidden flex flex-col">
         <X

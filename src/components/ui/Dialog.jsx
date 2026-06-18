@@ -13,8 +13,8 @@ export default function Dialog({
   headerLeading = null,
   headerActions = null,
   showCloseButton = true,
-  closeOnOutsideClick = true,
-  closeOnEscape = true,
+  closeOnOutsideClick = false,
+  closeOnEscape = false,
   /** Override scrollable body region (default padding + overflow) */
   bodyClassName = "p-4 overflow-y-auto bg-white flex-1",
 }) {
