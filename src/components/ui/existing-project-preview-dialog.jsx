@@ -42,35 +42,20 @@ export default function ExistingProjectPreviewDialog({
     });
   }, []);
 
-  // Handle Escape key - MUST be called before any conditional returns
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleEscape = (e) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleEscape);
     document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener("keydown", handleEscape);
       document.body.style.overflow = "auto";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   if (!projectData || !isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center transition-opacity duration-300 ease-in-out bg-black/50">
       <div className="rounded-lg shadow-xl overflow-hidden w-[90%] h-[90vh] flex flex-col transform transition-all duration-300 ease-in-out">
         {/* Custom Header with Red Background */}
         <div className="flex flex-col justify-between items-start p-3 bg-red-600 flex-shrink-0">

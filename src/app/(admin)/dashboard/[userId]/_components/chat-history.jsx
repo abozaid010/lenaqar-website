@@ -2,6 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { useI18n } from "@/hooks/useI18n";
+import {
+  hasBotTurnContent,
+  hasUserTurnContent,
+  resolveUserTurnImageUrl,
+} from "@/utils/imageUtils";
 import UserMessageCard from "./user-message";
 import BotMessageCard from "./bot-message";
 
@@ -29,18 +34,21 @@ export default function ChatHistory({ data }) {
     <>
       {data.map((message, index) => (
         <div key={index} className="w-full flex flex-col">
-          {message.user_message && (
+          {hasUserTurnContent(message) && (
             <div className="flex justify-end mb-3">
               <UserMessageCard
                 message={message.user_message}
+                imageUrl={resolveUserTurnImageUrl(message)}
                 timestamp={message.timestamp}
               />
             </div>
           )}
 
-          <div className="flex justify-start mb-3">
-            <BotMessageCard message={message} />
-          </div>
+          {hasBotTurnContent(message) && (
+            <div className="flex justify-start mb-3">
+              <BotMessageCard message={message} />
+            </div>
+          )}
         </div>
       ))}
 

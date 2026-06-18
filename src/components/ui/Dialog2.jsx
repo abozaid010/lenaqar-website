@@ -35,7 +35,8 @@ const Dialog = ({
   onClose,
   title,
   children,
-  closeOnOverlayClick = true,
+  closeOnOverlayClick = false,
+  closeOnEscape = false,
   showCloseButton,
   className = "",
 }) => {
@@ -44,7 +45,7 @@ const Dialog = ({
 
   // Handle Escape key press
   const onkeyDown = (e) => {
-    if (isOpen && e.key === "Escape") onClose();
+    if (isOpen && closeOnEscape && e.key === "Escape") onClose();
   };
 
   // Handle click outside dialog

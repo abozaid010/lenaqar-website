@@ -23,12 +23,6 @@ export default function DeleteUnitBtn({ unitId, disabled = false }) {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleOutsideClick = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      setIsOpen(false);
-    }
-  };
-
   const handleDeleteUnit = async () => {
     setLoading(true);
     try {
@@ -63,7 +57,6 @@ export default function DeleteUnitBtn({ unitId, disabled = false }) {
       {isOpen &&
         createPortal(
           <div
-            onClick={handleOutsideClick}
             className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
           >
             <div

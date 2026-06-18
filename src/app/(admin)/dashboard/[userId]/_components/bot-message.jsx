@@ -5,7 +5,11 @@ import PropertyCard from "@/components/ui/property-card";
 import { useI18n } from "@/context/translate-api";
 import { formatTimestamp } from "@/utils/formateDate";
 import SafeImage from "@/components/ui/safe-image";
-import { getDisplayImageUrl } from "@/utils/imageUtils";
+import {
+  getDisplayImageUrl,
+  hasBotTurnContent,
+  resolveBotTurnImageUrl,
+} from "@/utils/imageUtils";
 import Link from "next/link";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -15,6 +19,7 @@ export default function BotMessageCard({ message }) {
   const {
     properties,
     bot_response,
+    bot_message,
     timestamp,
     source,
     project_data,
@@ -30,10 +35,27 @@ export default function BotMessageCard({ message }) {
   const { t } = useI18n();
   const isWhatsappAutomationSource =
     source === "whatsapp_automation" || source === "wa_automation";
+  const botText = String(bot_response ?? bot_message ?? "").trim();
+  const messageImageUrl = resolveBotTurnImageUrl(message);
+
+  if (!hasBotTurnContent(message)) {
+    return null;
+  }
 
   return (
     <div className="rounded-lg p-3 bg-[#e2dbff] flex flex-col max-w-xl">
-      {bot_response && (
+      {messageImageUrl && (
+        <SafeImage
+          src={messageImageUrl}
+          alt=""
+          width={240}
+          height={240}
+          className="max-w-[240px] max-h-[240px] rounded-md mb-2 object-cover border border-white/60 cursor-pointer"
+          onClick={() => setFullscreenImg(messageImageUrl)}
+        />
+      )}
+
+      {botText && (
         <div className="text-sm text-primary markdown-content" style={{ whiteSpace: "normal" }}>
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -119,7 +141,7 @@ export default function BotMessageCard({ message }) {
             }}
           >
             {(() => {
-              const content = String(bot_response || "");
+              const content = botText;
               // Normalize line endings first
               let processed = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
               

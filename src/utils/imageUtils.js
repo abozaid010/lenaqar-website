@@ -5,6 +5,35 @@
 import { IMAGE_BASE_URL } from "@/lib/imageConfig";
 import { getAllowedImageHostnames } from "@/config/imageHosts";
 
+/** Auto-generated caption when a user sends unit images via WhatsApp. */
+export const USER_MESSAGE_IMAGE_PLACEHOLDER =
+  "i have unit wanna offer, here is the images of it";
+
+export function isPlaceholderUserMessage(text) {
+  if (text == null) return true;
+  const trimmed = String(text).trim();
+  if (!trimmed) return true;
+  return trimmed.toLowerCase() === USER_MESSAGE_IMAGE_PLACEHOLDER.toLowerCase();
+}
+
+/** True only for the known auto-caption, not for empty messages. */
+export function isExactPlaceholderUserMessage(text) {
+  if (text == null) return false;
+  const trimmed = String(text).trim();
+  if (!trimmed) return false;
+  return trimmed.toLowerCase() === USER_MESSAGE_IMAGE_PLACEHOLDER.toLowerCase();
+}
+
+/** User-visible text; treats empty and placeholder captions as no text. */
+export function getDisplayUserMessageText(text) {
+  if (isPlaceholderUserMessage(text)) return "";
+  return String(text ?? "").trim();
+}
+
+export function hasDisplayUserMessageText(text) {
+  return getDisplayUserMessageText(text).length > 0;
+}
+
 /**
  * For presentation only: given a full image URL from the API, use IMAGE_BASE_URL
  * (NEXT_PUBLIC_IMAGE_BASE_URL) as base and replace /images/ with /gcs/ in the path.
@@ -50,7 +79,107 @@ export function getClientLogoDisplayUrl(url) {
   return absolute;
 }
 
-// Cache for known broken images to avoid repeated failed requests
+/** Resolve chat message media URLs (full or API-relative paths). */
+export function resolveChatMessageImageUrl(url) {
+  if (!url) return null;
+
+  const trimmed = String(url).trim();
+  if (!trimmed) return null;
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return getDisplayImageUrl(trimmed);
+  }
+
+  return getClientLogoDisplayUrl(trimmed);
+}
+
+/** Pick shared image URL fields from a conversation turn. */
+export function pickConversationImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const url =
+    message.image_url ??
+    message.media_url ??
+    (typeof message.image === "string" ? message.image : null);
+
+  if (url == null) return null;
+  const trimmed = String(url).trim();
+  return trimmed || null;
+}
+
+export function resolveUserTurnImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const explicit = message.user_image_url ?? message.user_media_url;
+  if (explicit) return resolveChatMessageImageUrl(explicit);
+
+  const shared = pickConversationImageUrl(message);
+  if (!shared) return null;
+
+  const hasUserText = hasDisplayUserMessageText(message.user_message);
+  const hasBotText = Boolean(
+    String(message.bot_response ?? message.bot_message ?? "").trim()
+  );
+
+  if (hasUserText || !hasBotText) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  if (isExactPlaceholderUserMessage(message.user_message)) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  return null;
+}
+
+export function resolveBotTurnImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const explicit =
+    message.bot_image_url ??
+    message.bot_media_url ??
+    message.admin_reply_image_url;
+  if (explicit) return resolveChatMessageImageUrl(explicit);
+
+  const shared = pickConversationImageUrl(message);
+  if (!shared) return null;
+
+  const hasUserText = hasDisplayUserMessageText(message.user_message);
+  const hasBotText = Boolean(
+    String(message.bot_response ?? message.bot_message ?? "").trim()
+  );
+
+  if (hasBotText && !hasUserText) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  return null;
+}
+
+export function hasUserTurnContent(message) {
+  if (!message || typeof message !== "object") return false;
+  return (
+    hasDisplayUserMessageText(message.user_message) ||
+    Boolean(resolveUserTurnImageUrl(message))
+  );
+}
+
+export function hasBotTurnContent(message) {
+  if (!message || typeof message !== "object") return false;
+
+  const botText = String(message.bot_response ?? message.bot_message ?? "").trim();
+  if (botText) return true;
+  if (resolveBotTurnImageUrl(message)) return true;
+  if (message.properties && Object.keys(message.properties).length > 0) return true;
+  if (message.project_data && Object.keys(message.project_data).length > 0) return true;
+  if (Array.isArray(message.project_phases) && message.project_phases.length > 0) {
+    return true;
+  }
+  if (message.crm_link) return true;
+
+  return false;
+}
+
 const brokenImageCache = new Set();
 
 // Cache for retry attempts per image

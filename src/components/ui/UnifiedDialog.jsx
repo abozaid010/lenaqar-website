@@ -25,8 +25,8 @@ export default function UnifiedDialog({
   submitDisabled = false,
   submitLoading = false,
   children,
-  closeOnOutsideClick = true,
-  closeOnEscape = true,
+  closeOnOutsideClick = false,
+  closeOnEscape = false,
   showCloseButton = false,
   /** "default" = primary bg + white text; "unified" = UnifiedHeader (#E2dbff + primary) */
   headerVariant = "default",

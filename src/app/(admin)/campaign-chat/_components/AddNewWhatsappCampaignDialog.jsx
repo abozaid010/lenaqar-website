@@ -712,8 +712,6 @@ const AddNewWhatsappCampaignDialog = ({
       onClose={handleClose}
       title={dialogTitle}
       showCloseButton={!isSubmitting}
-      closeOnOutsideClick={!isSubmitting}
-      closeOnEscape={!isSubmitting}
     >
       {jobResult ? (
         <div className="flex flex-col gap-4">
