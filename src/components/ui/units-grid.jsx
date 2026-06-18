@@ -190,7 +190,7 @@ export default function UnitsGrid({
                     <div>
                       <p
                         style={{ fontWeight: "500" }}
-                        className="absolute text-[14px] top-3 rounded-sm left-5 cursor-pointer bg-primary text-white px-2 capitalize"
+                        className="absolute text-[14px] top-3 rounded-sm start-5 cursor-pointer bg-primary text-white px-2 capitalize"
                       >
                         {t.for}
                         {u.purpose === "rent" || u.purpose === "Rent"
