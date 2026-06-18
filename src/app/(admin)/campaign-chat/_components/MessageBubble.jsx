@@ -1,8 +1,10 @@
 "use client";
 
 import { Bot, User } from "lucide-react";
+import SafeImage from "@/components/ui/safe-image";
 import { useI18n } from "@/hooks/useI18n";
 import { useLocaleConstants } from "@/utils/localeConstants";
+import { getClientLogoDisplayUrl, getDisplayImageUrl } from "@/utils/imageUtils";
 
 const MessageBubble = ({ message }) => {
   const { locale, translate } = useI18n();
@@ -49,8 +51,14 @@ const MessageBubble = ({ message }) => {
   // Only show template tag for admin messages that have template_name
   const showTemplateTag = isAdmin && message.template_name;
   const showAutomationBadge = message.source === "wa_automation";
+  const messageText = message.content ? String(message.content).trim() : "";
+  const imageUrl = resolveChatImageUrl(message.image_url);
 
   if (!isUser && !isAssistant && !isAdmin) {
+    return null;
+  }
+
+  if (!messageText && !imageUrl && !showTemplateTag) {
     return null;
   }
 
@@ -102,30 +110,34 @@ const MessageBubble = ({ message }) => {
           )}
 
           {/* Image */}
-          {message.image_url && (
-            <img 
-              src={message.image_url} 
-              alt="Message media" 
-              className="max-w-[200px] max-h-[200px] rounded-lg mb-2 object-cover"
+          {imageUrl && (
+            <SafeImage
+              src={imageUrl}
+              alt={translate("campaignChat.messageImage", "Message image")}
+              width={240}
+              height={240}
+              className="max-w-[240px] max-h-[240px] rounded-lg mb-2 object-cover border border-gray-200"
             />
           )}
 
           {/* Bubble */}
-          <div
-            className={`px-4 py-2 rounded-2xl ${
-              isUser
-                ? "bg-white border border-gray-200 text-gray-800 rounded-tl-sm"
-                : isAssistant
-                ? "bg-primary text-white rounded-tr-sm"
-                : "bg-blue-500 text-white rounded-tr-sm"
-            }`}
-          >
-            <p className={`text-sm whitespace-pre-wrap break-words ${
-              isUser ? "text-gray-800" : "text-white"
-            }`}>
-              {formatMessageContent(message.content)}
-            </p>
-          </div>
+          {messageText && (
+            <div
+              className={`px-4 py-2 rounded-2xl ${
+                isUser
+                  ? "bg-white border border-gray-200 text-gray-800 rounded-tl-sm"
+                  : isAssistant
+                  ? "bg-primary text-white rounded-tr-sm"
+                  : "bg-blue-500 text-white rounded-tr-sm"
+              }`}
+            >
+              <p className={`text-sm whitespace-pre-wrap break-words ${
+                isUser ? "text-gray-800" : "text-white"
+              }`}>
+                {formatMessageContent(messageText)}
+              </p>
+            </div>
+          )}
 
           {/* Timestamp + automation badge */}
           {message.timestamp && (
@@ -152,5 +164,18 @@ const MessageBubble = ({ message }) => {
     </div>
   );
 };
+
+function resolveChatImageUrl(url) {
+  if (!url) return null;
+
+  const trimmed = String(url).trim();
+  if (!trimmed) return null;
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return getDisplayImageUrl(trimmed);
+  }
+
+  return getClientLogoDisplayUrl(trimmed);
+}
 
 export default MessageBubble;

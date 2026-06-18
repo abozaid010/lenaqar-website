@@ -68,6 +68,76 @@ function normalizeRole(msg) {
   return "user";
 }
 
+function pickMediaUrl(msg) {
+  if (!msg || typeof msg !== "object") return null;
+
+  const url =
+    msg.image_url ??
+    msg.media_url ??
+    (typeof msg.image === "string" ? msg.image : null) ??
+    msg.admin_reply_image_url ??
+    null;
+
+  if (url == null) return null;
+  const trimmed = String(url).trim();
+  return trimmed || null;
+}
+
+function resolveMessageImageUrl(msg) {
+  if (!msg || typeof msg !== "object") return null;
+
+  if (Object.prototype.hasOwnProperty.call(msg, "image_url")) {
+    if (msg.image_url == null || msg.image_url === "") return null;
+    const trimmed = String(msg.image_url).trim();
+    return trimmed || null;
+  }
+
+  return pickMediaUrl(msg);
+}
+
+function hasText(value) {
+  return value != null && String(value).trim().length > 0;
+}
+
+function isTurnBasedHistoryItem(msg) {
+  return Boolean(
+    hasText(msg?.user_message) ||
+    hasText(msg?.bot_message) ||
+    hasText(msg?.bot_response)
+  );
+}
+
+function resolveTurnImageUrl(msg, side) {
+  const shared = pickMediaUrl(msg);
+  const userImage = msg.user_image_url ?? msg.user_media_url ?? null;
+  const botImage =
+    msg.bot_image_url ??
+    msg.bot_media_url ??
+    msg.admin_reply_image_url ??
+    null;
+
+  if (side === "user") {
+    const explicit = userImage != null ? String(userImage).trim() : "";
+    if (explicit) return explicit;
+    if (hasText(msg.user_message) && shared) return shared;
+    if (!hasText(msg.bot_message) && !hasText(msg.bot_response) && shared) {
+      return shared;
+    }
+    return null;
+  }
+
+  const explicit = botImage != null ? String(botImage).trim() : "";
+  if (explicit) return explicit;
+  if (
+    (hasText(msg.bot_message) || hasText(msg.bot_response)) &&
+    shared &&
+    !hasText(msg.user_message)
+  ) {
+    return shared;
+  }
+  return null;
+}
+
 function normalizeCampaignMessage(msg) {
   if (!msg || typeof msg !== "object") return null;
 
@@ -76,6 +146,9 @@ function normalizeCampaignMessage(msg) {
     msg.text ??
     msg.body ??
     msg.message ??
+    msg.user_message ??
+    msg.bot_message ??
+    msg.bot_response ??
     msg.admin_reply_text ??
     "";
 
@@ -87,16 +160,64 @@ function normalizeCampaignMessage(msg) {
     msg.meeting_time ??
     null;
 
-  return {
+  const normalized = {
     ...msg,
     role: normalizeRole(msg),
     content: String(content ?? ""),
     timestamp,
-    image_url: msg.image_url ?? msg.media_url ?? msg.image ?? null,
-    template_name: msg.template_name ?? msg.template ?? null,
-    language_code: msg.language_code ?? msg.lang ?? null,
+    image_url: resolveMessageImageUrl(msg),
+    template_name: msg.template_name ?? msg.template ?? msg.admin_reply_template_name ?? null,
+    language_code: msg.language_code ?? msg.lang ?? msg.admin_reply_language_code ?? null,
     source: msg.source ?? null,
   };
+
+  const hasPayload =
+    hasText(normalized.content) ||
+    Boolean(normalized.image_url) ||
+    Boolean(normalized.template_name);
+
+  return hasPayload ? normalized : null;
+}
+
+function expandCampaignHistoryItem(msg) {
+  if (!isTurnBasedHistoryItem(msg)) {
+    const single = normalizeCampaignMessage(msg);
+    return single ? [single] : [];
+  }
+
+  const results = [];
+  const userText = hasText(msg.user_message) ? String(msg.user_message).trim() : "";
+  const botText = String(
+    msg.bot_message ?? msg.bot_response ?? msg.admin_reply_text ?? ""
+  ).trim();
+  const userImage = resolveTurnImageUrl(msg, "user");
+  const botImage = resolveTurnImageUrl(msg, "bot");
+  const botTemplate = msg.template_name ?? msg.admin_reply_template_name ?? null;
+
+  if (userText || userImage) {
+    const userMsg = normalizeCampaignMessage({
+      ...msg,
+      role: "user",
+      content: userText,
+      image_url: userImage,
+      template_name: null,
+    });
+    if (userMsg) results.push(userMsg);
+  }
+
+  if (botText || botImage || botTemplate) {
+    const botMsg = normalizeCampaignMessage({
+      ...msg,
+      role: msg.is_admin === true ? "admin" : "assistant",
+      content: botText,
+      image_url: botImage,
+      template_name: botTemplate,
+      language_code: msg.language_code ?? msg.admin_reply_language_code ?? null,
+    });
+    if (botMsg) results.push(botMsg);
+  }
+
+  return results;
 }
 
 /**
@@ -113,7 +234,7 @@ export function normalizeCampaignSessionData(raw) {
       : null;
 
   const history = pickHistoryArray(raw)
-    .map(normalizeCampaignMessage)
+    .flatMap(expandCampaignHistoryItem)
     .filter(Boolean);
 
   const phone_number =

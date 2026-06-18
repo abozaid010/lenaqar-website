@@ -50,7 +50,103 @@ export function getClientLogoDisplayUrl(url) {
   return absolute;
 }
 
-// Cache for known broken images to avoid repeated failed requests
+/** Resolve chat message media URLs (full or API-relative paths). */
+export function resolveChatMessageImageUrl(url) {
+  if (!url) return null;
+
+  const trimmed = String(url).trim();
+  if (!trimmed) return null;
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return getDisplayImageUrl(trimmed);
+  }
+
+  return getClientLogoDisplayUrl(trimmed);
+}
+
+/** Pick shared image URL fields from a conversation turn. */
+export function pickConversationImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const url =
+    message.image_url ??
+    message.media_url ??
+    (typeof message.image === "string" ? message.image : null);
+
+  if (url == null) return null;
+  const trimmed = String(url).trim();
+  return trimmed || null;
+}
+
+export function resolveUserTurnImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const explicit = message.user_image_url ?? message.user_media_url;
+  if (explicit) return resolveChatMessageImageUrl(explicit);
+
+  const shared = pickConversationImageUrl(message);
+  if (!shared) return null;
+
+  const hasUserText = Boolean(String(message.user_message ?? "").trim());
+  const hasBotText = Boolean(
+    String(message.bot_response ?? message.bot_message ?? "").trim()
+  );
+
+  if (hasUserText || !hasBotText) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  return null;
+}
+
+export function resolveBotTurnImageUrl(message) {
+  if (!message || typeof message !== "object") return null;
+
+  const explicit =
+    message.bot_image_url ??
+    message.bot_media_url ??
+    message.admin_reply_image_url;
+  if (explicit) return resolveChatMessageImageUrl(explicit);
+
+  const shared = pickConversationImageUrl(message);
+  if (!shared) return null;
+
+  const hasUserText = Boolean(String(message.user_message ?? "").trim());
+  const hasBotText = Boolean(
+    String(message.bot_response ?? message.bot_message ?? "").trim()
+  );
+
+  if (hasBotText && !hasUserText) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  return null;
+}
+
+export function hasUserTurnContent(message) {
+  if (!message || typeof message !== "object") return false;
+  return (
+    Boolean(String(message.user_message ?? "").trim()) ||
+    Boolean(resolveUserTurnImageUrl(message))
+  );
+}
+
+export function hasBotTurnContent(message) {
+  if (!message || typeof message !== "object") return false;
+
+  const botText = String(message.bot_response ?? message.bot_message ?? "").trim();
+  if (botText) return true;
+  if (resolveBotTurnImageUrl(message)) return true;
+  if (message.properties && Object.keys(message.properties).length > 0) return true;
+  if (message.project_data && Object.keys(message.project_data).length > 0) return true;
+  if (Array.isArray(message.project_phases) && message.project_phases.length > 0) {
+    return true;
+  }
+  if (message.crm_link) return true;
+
+  return false;
+}
+
 const brokenImageCache = new Set();
 
 // Cache for retry attempts per image
