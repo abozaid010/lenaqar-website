@@ -35,25 +35,46 @@ const nextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
-  // Cache-Control for contact page (CEO digital business card) – CDN & browser
   async headers() {
+    const securityHeaders = [
+      // Prevent the site from being framed by another origin (clickjacking).
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      // Stop browsers from MIME-sniffing the Content-Type.
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      // Legacy XSS filter — kept for older browser compat.
+      { key: "X-XSS-Protection", value: "1; mode=block" },
+      // Limit referrer info sent to third parties.
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      // Disable browser features not used by this app.
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+      // Force HTTPS for 2 years once visited (set by server, respected by browser).
+      {
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains; preload",
+      },
+    ];
+
     return [
+      // Apply security headers to every route.
+      {
+        source: "/(.*)",
+        headers: securityHeaders,
+      },
+      // Cache-Control for contact page (CEO digital business card) – CDN & browser.
       {
         source: "/contact",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=86400, s-maxage=604800",
-          },
-        ],
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" }],
       },
       {
         source: "/contact/",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400, s-maxage=604800" }],
+      },
+      // API routes: no caching, no CORS from unknown origins.
+      {
+        source: "/api/:path*",
         headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=86400, s-maxage=604800",
-          },
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate" },
+          { key: "Pragma", value: "no-cache" },
         ],
       },
     ];

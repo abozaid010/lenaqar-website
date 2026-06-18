@@ -13,6 +13,19 @@ export const COOKIE_CONFIG = {
     path: "/",
     secure: true,
     sameSite: "lax",
+    httpOnly: true,
+  },
+
+  /**
+   * Access token expiry timestamp (non-httpOnly mirror of ACCESS_TOKEN's exp claim).
+   * Stores only the unix seconds value — no JWT payload visible in browser.
+   * Cleared alongside ACCESS_TOKEN on logout/refresh.
+   */
+  ACCESS_TOKEN_EXP: {
+    maxAge: 60 * 60, // 1 hour — matches ACCESS_TOKEN
+    path: "/",
+    secure: true,
+    sameSite: "lax",
     httpOnly: false,
   },
 

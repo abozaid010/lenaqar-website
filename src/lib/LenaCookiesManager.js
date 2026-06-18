@@ -20,7 +20,14 @@ export class LenaCookiesManager {
     }
 
     static getAccessToken() {
+        // Returns undefined for httpOnly cookies. Kept for backwards compat.
         return Cookies.get(COOKIE_KEYS.ACCESS_TOKEN);
+    }
+
+    static getAccessTokenExp() {
+        const raw = Cookies.get(COOKIE_KEYS.ACCESS_TOKEN_EXP);
+        const n = Number(raw);
+        return Number.isFinite(n) && n > 0 ? n : null;
     }
 
     static getRefreshToken() {
@@ -93,8 +100,9 @@ export class LenaCookiesManager {
      * Clears all authentication-related cookies
      */
     static clearAuthCookies() {
-        this.remove(COOKIE_KEYS.ACCESS_TOKEN);
-        this.remove(COOKIE_KEYS.REFRESH_TOKEN);
+        // ACCESS_TOKEN and REFRESH_TOKEN are httpOnly — cleared server-side by /api/auth/clear-session.
+        // Remove the client-visible ones here.
+        this.remove(COOKIE_KEYS.ACCESS_TOKEN_EXP);
         this.remove(COOKIE_KEYS.CLIENT_ID);
         this.remove(COOKIE_KEYS.CLIENT_INFO);
     }

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
+import { bffFetch } from "@/lib/bffFetch";
 
 export async function PATCH(request, { params }) {
   try {
@@ -18,7 +19,7 @@ export async function PATCH(request, { params }) {
     const { clientId } = await params;
     const body = await request.json();
 
-    const response = await fetch(
+    const response = await bffFetch(
       `${API_BASE_URL}/client/admin/clients/${clientId}`,
       {
         method: "PATCH",

@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
+import { bffFetch } from "@/lib/bffFetch";
 
 export async function GET(request) {
   try {
@@ -28,7 +29,7 @@ export async function GET(request) {
       backendParams.set("search", search);
     }
 
-    const response = await fetch(
+    const response = await bffFetch(
       `${API_BASE_URL}/client/admin/clients?${backendParams.toString()}`,
       {
         method: "GET",

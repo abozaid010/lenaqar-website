@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
+import { bffFetch } from "@/lib/bffFetch";
 
 function buildBackendUrl(request) {
   const { searchParams } = new URL(request.url);
@@ -48,7 +49,7 @@ async function forwardRequest(request, method) {
     init.body = await request.text();
   }
 
-  const response = await fetch(url, init);
+  const response = await bffFetch(url, init);
   const data = await response.json();
 
   if (!response.ok) {

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { addViewingRequest } from "@/lib/match/share-token-server";
+import { bffFetch } from "@/lib/bffFetch";
 
 /**
  * POST /api/match/share/[token]/viewing-request
@@ -39,7 +40,7 @@ export async function POST(request, { params }) {
       };
       if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
 
-      const res = await fetch(
+      const res = await bffFetch(
         `${API_BASE_URL}/match/share/v1/${encodeURIComponent(token)}/viewing-request`,
         {
           method: "POST",

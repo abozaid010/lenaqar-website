@@ -3,6 +3,19 @@ import { NextResponse } from "next/server";
 import { getServerCookieOptions } from "@/lib/CookieConfig";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { bffFetch } from "@/lib/bffFetch";
+
+function extractJwtExp(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(Buffer.from(base64, "base64").toString("utf-8"));
+    return typeof payload.exp === "number" ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Shared refresh logic: read refresh_token from cookies, call backend, return new tokens.
@@ -19,12 +32,14 @@ async function performRefresh() {
 
   let response;
   try {
-    const url = `${API_BASE_URL.replace(/\/$/, "")}/client/refresh-token?refresh_token=${encodeURIComponent(refreshToken)}`;
-    response = await fetch(url, {
+    const url = `${API_BASE_URL.replace(/\/$/, "")}/client/refresh-token`;
+    response = await bffFetch(url, {
       method: "POST",
       headers: {
         Accept: "application/json",
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({ refresh_token: refreshToken }),
       signal: AbortSignal.timeout(5000),
     });
   } catch (fetchError) {
@@ -59,6 +74,17 @@ function setTokenCookies(responseObj, newAccessToken, newRefreshToken) {
   responseObj.cookies.set(COOKIE_KEYS.ACCESS_TOKEN, newAccessToken, accessTokenOptions);
   if (newRefreshToken) {
     responseObj.cookies.set(COOKIE_KEYS.REFRESH_TOKEN, newRefreshToken, refreshTokenOptions);
+  }
+
+  // Keep the non-httpOnly exp-timestamp cookie in sync so the client can
+  // schedule proactive refresh without reading the token itself.
+  const exp = extractJwtExp(newAccessToken);
+  if (exp !== null) {
+    responseObj.cookies.set(
+      COOKIE_KEYS.ACCESS_TOKEN_EXP,
+      String(exp),
+      getServerCookieOptions("ACCESS_TOKEN_EXP")
+    );
   }
 }
 

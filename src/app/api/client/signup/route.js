@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
+import { bffFetch } from "@/lib/bffFetch";
 
 /**
  * POST /api/client/signup
@@ -91,7 +92,7 @@ export async function POST(request) {
     // Call the external API
     let response;
     try {
-      response = await fetch(`${API_BASE_URL}/client/signup`, {
+      response = await bffFetch(`${API_BASE_URL}/client/signup`, {
         method: "POST",
         headers: {
           "Accept": "application/json",
