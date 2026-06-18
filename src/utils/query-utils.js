@@ -265,7 +265,7 @@ export function removeUnitFromCache(queryClient, unitId) {
       ...oldData,
       data: {
         ...oldData.data,
-        units: oldData.data.units.filter((unit) => unit.unitId !== unitId),
+        units: oldData.data.units.filter((unit) => !unitMatchesId(unit, unitId)),
       },
     };
   });

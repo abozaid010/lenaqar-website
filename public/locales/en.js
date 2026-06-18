@@ -2349,6 +2349,7 @@ export default {
     whatsapp: "WhatsApp",
     delete: "Delete",
     edit: "Edit",
+    approveUnit: "Approve",
   },
   unitPricing: {
     title: "Pricing & Payment",

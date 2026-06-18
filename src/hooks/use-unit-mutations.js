@@ -206,31 +206,37 @@ export function useDeleteUnit() {
       return unitId;
     },
     onMutate: async (unitId) => {
-      // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: unitKeys.all });
 
-      // Snapshot the previous value
       const previousUnits = queryClient.getQueriesData({
         queryKey: unitKeys.all,
       });
 
-      // Optimistically remove the unit from all relevant queries
       removeUnitFromCache(queryClient, unitId);
+      const pendingEmptyKeys = removeUnitFromPendingApprovalCache(
+        queryClient,
+        unitId
+      );
 
-      // Return a context object with the snapshotted value
-      return { previousUnits };
+      return { previousUnits, pendingEmptyKeys };
+    },
+    onSuccess: (unitId, _variables, context) => {
+      if (context?.pendingEmptyKeys?.length) {
+        refetchPendingApprovalQueriesIfEmpty(queryClient, context.pendingEmptyKeys);
+      }
+
+      if (unitId) {
+        queryClient.invalidateQueries({
+          queryKey: unitKeys.detail(unitId),
+        });
+      }
     },
     onError: (err, unitId, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousUnits) {
         context.previousUnits.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data);
         });
       }
-    },
-    onSettled: () => {
-      // Always refetch after error or success to ensure data consistency
-      queryClient.invalidateQueries({ queryKey: unitKeys.all });
     },
   });
 }
