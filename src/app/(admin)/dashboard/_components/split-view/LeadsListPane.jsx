@@ -3,7 +3,9 @@
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+const SEARCH_DEBOUNCE_MS = 3000;
 
 function useClientMounted() {
   const [isMounted, setIsMounted] = useState(false);
@@ -51,6 +53,7 @@ export default function LeadsListPane({
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(() => searchParams.get("query") || "");
   const debounceTimer = useRef(null);
+  const lastPushedQueryRef = useRef(searchParams.get("query") || "");
   const observerRef = useRef(null);
   const sentinelRef = useRef(null);
   const scrollRootRef = useRef(null);
@@ -65,31 +68,50 @@ export default function LeadsListPane({
     isFetchingNextPageRef.current = isFetchingNextPage;
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
-  useEffect(() => {
-    setSearchInput(searchParams.get("query") || "");
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
+  const applySearch = useCallback(
+    (raw) => {
+      const next = (raw ?? "").trim();
       const current = searchParams.get("query") || "";
-      const next = searchInput.trim();
-      if (current === next) return;
+      if (current === next && lastPushedQueryRef.current === next) return;
+
+      lastPushedQueryRef.current = next;
       const usp = new URLSearchParams(searchParams.toString());
       if (next) usp.set("query", next);
       else usp.delete("query");
       router.replace(`${window.location.pathname}?${usp.toString()}`, {
         scroll: false,
       });
-    }, 400);
+    },
+    [router, searchParams]
+  );
+
+  const handleSearchSubmit = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    applySearch(searchInput);
+  }, [applySearch, searchInput]);
+
+  // Sync input only when the URL query changes externally (e.g. back/forward, filters).
+  useEffect(() => {
+    const urlQuery = searchParams.get("query") || "";
+    if (urlQuery !== lastPushedQueryRef.current) {
+      lastPushedQueryRef.current = urlQuery;
+      setSearchInput(urlQuery);
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      applySearch(searchInput);
+    }, SEARCH_DEBOUNCE_MS);
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [searchInput, router, searchParams]);
+  }, [searchInput, applySearch]);
 
-  const trimmedSearch = searchInput.trim();
+  const appliedSearchQuery = (searchParams.get("query") || "").trim();
   const clientFilteredEmpty =
-    Boolean(trimmedSearch) && users.length === 0 && totalLoadedLeads > 0;
+    Boolean(appliedSearchQuery) && users.length === 0 && totalLoadedLeads > 0;
   /** When false, list area still shows skeleton — no sentinel in DOM yet. */
   const initialListPaint = !(isLoading && !data);
 
@@ -144,7 +166,7 @@ export default function LeadsListPane({
     !isError &&
     users.length === 0 &&
     totalLoadedLeads > 0 &&
-    trimmedSearch;
+    appliedSearchQuery;
 
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-gray-200 bg-white">
@@ -183,16 +205,31 @@ export default function LeadsListPane({
             </span>
           </label>
         )}
-        <div className="relative">
-          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={translate('searchPlaceholder')}
-            className="w-full pl-8 pr-2 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-            autoComplete="off"
-          />
+        <div className="flex gap-2 items-center">
+          <div className="relative flex-1 min-w-0">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearchSubmit();
+                }
+              }}
+              placeholder={translate("searchPlaceholder")}
+              className="w-full h-[34px] pl-8 pr-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              autoComplete="off"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleSearchSubmit}
+            className="shrink-0 h-[34px] px-3 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors inline-flex items-center justify-center"
+          >
+            {translate("common.search")}
+          </button>
         </div>
       </div>
 
