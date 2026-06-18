@@ -21,15 +21,25 @@ export function mapSlimUnitToListItem(slim) {
   if (!slim || typeof slim !== "object") return slim;
 
   const purpose = normalizeSlimPurpose(slim.purpose);
-  const price = slim.price;
+  const price = slim.price ?? slim.totalPrice ?? slim.rentPrice ?? null;
   const imageUrl = slim.image;
+  const existingImages = Array.isArray(slim.images) ? slim.images : [];
 
-  const images = imageUrl
-    ? [{ url: String(imageUrl), fileId: "", source: "slim" }]
-    : [];
+  const images =
+    existingImages.length > 0
+      ? existingImages
+      : imageUrl
+        ? [{ url: String(imageUrl), fileId: "", source: "slim" }]
+        : [];
 
   const buildingType = slim.buildingType ?? slim.property_type ?? null;
   const project = slim.project ?? null;
+  const ownerMobile =
+    slim.owner_mobile ??
+    slim.ownerMobile ??
+    slim.phone_number ??
+    slim.phoneNumber ??
+    null;
 
   return {
     ...slim,
@@ -38,6 +48,8 @@ export function mapSlimUnitToListItem(slim) {
     purpose,
     buildingType,
     project,
+    owner_mobile: ownerMobile,
+    ownerMobile,
     unitTitle:
       slim.unitTitle ??
       slim.unit_title ??
@@ -47,8 +59,8 @@ export function mapSlimUnitToListItem(slim) {
       null,
     city: slim.city ?? null,
     district: slim.district ?? null,
-    totalPrice: purpose === "rent" ? null : price,
-    rentPrice: purpose === "rent" ? price : null,
+    totalPrice: slim.totalPrice ?? (purpose === "rent" ? null : price),
+    rentPrice: slim.rentPrice ?? (purpose === "rent" ? price : null),
     landArea: slim.landArea ?? slim.area ?? null,
     roomsCount: slim.roomsCount ?? slim.bedrooms ?? null,
     images,

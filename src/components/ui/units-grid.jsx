@@ -24,7 +24,6 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import {
   getUnitSelectionIdFromListItem,
-  isUnitSelectableForBulkWhatsapp,
 } from "@/lib/units/unit-whatsapp-recipient";
 
 export default function UnitsGrid({
@@ -119,7 +118,6 @@ export default function UnitsGrid({
             const unitCode = resolveUnitCodeFromListItem(u);
             const cardKey = u.unitId ?? unitCode ?? idx;
             const unitSelectionId = getUnitSelectionIdFromListItem(u);
-            const canSelectUnit = isUnitSelectableForBulkWhatsapp(u, clientId);
             const isSelected =
               showBulkCheckbox &&
               unitSelectionId &&
@@ -280,35 +278,19 @@ export default function UnitsGrid({
 
                 {showBulkCheckbox && unitSelectionId && (
                   <label
-                    className={`absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md ${
-                      canSelectUnit ? "cursor-pointer hover:bg-white" : "cursor-not-allowed opacity-60"
-                    }`}
-                    title={
-                      canSelectUnit
-                        ? undefined
-                        : translate(
-                            "unitsFilter.bulkAvailability.noOwnerPhone",
-                            "No owner phone"
-                          )
-                    }
+                    className="absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md cursor-pointer hover:bg-white"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
                       type="checkbox"
                       className="h-4 w-4 accent-primary rounded border-gray-300"
                       checked={Boolean(isSelected)}
-                      disabled={!canSelectUnit}
-                      aria-label={
-                        canSelectUnit
-                          ? translate("unitsFilter.bulkAvailability.selectUnit", "Select unit")
-                          : translate(
-                              "unitsFilter.bulkAvailability.noOwnerPhone",
-                              "No owner phone"
-                            )
-                      }
+                      aria-label={translate(
+                        "unitsFilter.bulkAvailability.selectUnit",
+                        "Select unit"
+                      )}
                       onChange={(e) => {
                         e.stopPropagation();
-                        if (!canSelectUnit) return;
                         bulkSelection.toggleUnitSelection(unitSelectionId);
                       }}
                       onClick={(e) => e.stopPropagation()}

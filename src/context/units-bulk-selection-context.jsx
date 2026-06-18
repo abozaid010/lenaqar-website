@@ -16,6 +16,12 @@ const UnitsBulkSelectionContext = createContext(null);
 
 export { unitToWhatsappRecipient };
 
+function getVisibleSelectionIds(units) {
+  return units
+    .map((unit) => getUnitSelectionIdFromListItem(unit))
+    .filter(Boolean);
+}
+
 export function UnitsBulkSelectionProvider({ children, clientId = "" }) {
   const [visibleUnits, setVisibleUnits] = useState([]);
   const [selectedUnitIds, setSelectedUnitIds] = useState(() => new Set());
@@ -36,13 +42,7 @@ export function UnitsBulkSelectionProvider({ children, clientId = "" }) {
 
   const toggleSelectAllVisible = useCallback(() => {
     setSelectedUnitIds((prev) => {
-      const selectableIds = visibleUnits
-        .map((unit) => {
-          if (!unitToWhatsappRecipient(unit, clientId)) return null;
-          return getUnitSelectionIdFromListItem(unit);
-        })
-        .filter(Boolean);
-
+      const selectableIds = getVisibleSelectionIds(visibleUnits);
       if (selectableIds.length === 0) return prev;
 
       const allSelected = selectableIds.every((id) => prev.has(id));
@@ -50,7 +50,7 @@ export function UnitsBulkSelectionProvider({ children, clientId = "" }) {
 
       return new Set(selectableIds);
     });
-  }, [visibleUnits, clientId]);
+  }, [visibleUnits]);
 
   const clearUnitSelection = useCallback(() => {
     setSelectedUnitIds(new Set());
@@ -80,24 +80,15 @@ export function UnitsBulkSelectionProvider({ children, clientId = "" }) {
   }, [selectedUnits, clientId]);
 
   const selectableVisibleCount = useMemo(
-    () =>
-      visibleUnits.filter(
-        (unit) => unitToWhatsappRecipient(unit, clientId) != null
-      ).length,
-    [visibleUnits, clientId]
+    () => getVisibleSelectionIds(visibleUnits).length,
+    [visibleUnits]
   );
 
   const allSelectableVisibleSelected = useMemo(() => {
-    const selectableIds = visibleUnits
-      .map((unit) => {
-        if (!unitToWhatsappRecipient(unit, clientId)) return null;
-        return getUnitSelectionIdFromListItem(unit);
-      })
-      .filter(Boolean);
-
+    const selectableIds = getVisibleSelectionIds(visibleUnits);
     if (selectableIds.length === 0) return false;
     return selectableIds.every((id) => selectedUnitIds.has(id));
-  }, [visibleUnits, selectedUnitIds, clientId]);
+  }, [visibleUnits, selectedUnitIds]);
 
   const value = useMemo(
     () => ({
