@@ -10,6 +10,7 @@ export default function SaleDetailsStep({
   formData,
   commonFormData,
   clientType,
+  showOwnerFields = true,
   ownerMobileRequired = true,
   updateFormData,
   updateCommonFormData,
@@ -68,7 +69,7 @@ export default function SaleDetailsStep({
       </div>
 
       {/* Owner Details */}
-      {(
+      {showOwnerFields && (
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-4 text-slate-800">
             {t.steps.ownerDetails || "Owner Details"}

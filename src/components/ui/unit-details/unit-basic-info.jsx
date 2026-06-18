@@ -1,5 +1,6 @@
 "use client";
 import { useI18n } from "@/hooks/useI18n";
+import { useUnitOwnership } from "@/hooks/useUnitOwnership";
 import { useMemo } from "react";
 import { getBuildingTypeLabel } from "@/lib/enums/buildingTypes";
 import {
@@ -27,6 +28,7 @@ export default function UnitBasicInfo({
   missingRequiredFields = [],
 }) {
   const { locale, common, property, localeUtils, translate } = useI18n();
+  const { isOwnUnit } = useUnitOwnership(unit);
   const { t } = useRawTranslations();
   const missing = missingRequiredFields || [];
   const isMissing = (field) => missing.includes(field);
@@ -245,8 +247,8 @@ export default function UnitBasicInfo({
         )}
       </div>
 
-      {/* Owner Details - Only show for brokers when owner info is available */}
-      {(u.owner_name || u.owner_mobile) && (
+      {/* Owner Details - only for units owned by the logged-in client */}
+      {isOwnUnit && (u.owner_name || u.owner_mobile) && (
         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-3 text-slate-800">
             {property.getOwnerDetails()}

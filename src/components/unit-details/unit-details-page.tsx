@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useI18n } from '@/hooks/useI18n';
+import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import BackButton from '@/components/ui/back-button';
 import type { UnitViewModel, RawUnit } from '@/lib/units/unit-types';
 import UnitHeroGallery from './unit-hero-gallery';
@@ -18,6 +19,7 @@ interface UnitDetailsPageProps {
 
 export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
   const { t, locale, translate } = useI18n();
+  const { isOwnUnit } = useUnitOwnership(unit);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const unitNotes = typeof unit.notes === 'string' ? unit.notes.trim() : '';
   const canShare = Boolean(unit.referenceCode?.trim());
@@ -69,6 +71,7 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
                 <StickyInquiryCard
                   unit={unit}
                   rawUnit={rawUnit}
+                  isOwnUnit={isOwnUnit}
                   canShare={canShare}
                   onShare={() => setShowShareDialog(true)}
                 />

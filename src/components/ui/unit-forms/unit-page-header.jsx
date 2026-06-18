@@ -5,15 +5,15 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AddUnitButton from "./add-unit-button";
 import DeleteUnitBtn from "./delete-unit-btn";
-import { useBrokerPermission } from "@/hooks/useBrokerPermission";
+import { useUnitOwnership } from "@/hooks/useUnitOwnership";
 
 export default function UnitPageHeader({ unit }) {
   const router = useRouter();
   const { t, locale } = useI18n();
   const u = unit || {};
   const unitId = u.unitId ?? u.id;
-  const { canModify } = useBrokerPermission();
-  const canEdit = canModify(u);
+  const { isOwnUnit } = useUnitOwnership(u);
+  const canEdit = isOwnUnit;
 
   const handleBackToUnits = () => {
     router.back();
@@ -30,8 +30,8 @@ export default function UnitPageHeader({ unit }) {
       </button>
 
       <div className="flex gap-2">
-        <AddUnitButton isEdit={true} unitData={u} disabled={!canEdit} />
-        {unitId && <DeleteUnitBtn unitId={unitId} disabled={!canEdit} />}
+        {canEdit && <AddUnitButton isEdit={true} unitData={u} />}
+        {canEdit && unitId && <DeleteUnitBtn unitId={unitId} />}
       </div>
     </div>
   );

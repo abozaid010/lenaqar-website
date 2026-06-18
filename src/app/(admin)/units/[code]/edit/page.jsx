@@ -4,6 +4,7 @@ import { SITE_URL } from "../../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { resolveAdminEditByCodeParam } from "@/lib/units/unit-legacy-redirect";
+import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import {
   buildAdminUnitEditPath,
   normalizeUnitCodeParam,
@@ -59,6 +60,10 @@ export default async function EditUnitPage({ params, searchParams: rawSearchPara
 
   const rawUnit = await resolveAdminEditByCodeParam(rawCode, clientId);
   if (!rawUnit) {
+    notFound();
+  }
+
+  if (!isOwnClientUnit(rawUnit, clientId)) {
     notFound();
   }
 
