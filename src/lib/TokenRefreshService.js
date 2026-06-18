@@ -2,7 +2,6 @@
 
 import { LenaCookiesManager } from "./LenaCookiesManager";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { getClientCookieOptions } from "./CookieConfig";
 
 const LOGIN_PATH = "/login";
 
@@ -39,56 +38,18 @@ export class TokenRefreshService {
         throw new Error(errorMessage);
       }
 
-      const data = await refreshResponse.json();
-      const newAccessToken = data.access_token;
-      const newRefreshToken = data.refresh_token;
-
-      if (!newAccessToken) {
-        throw new Error("No access token received from refresh endpoint");
-      }
-
-      // CRITICAL FIX: Update client-side cookie immediately after server refresh
-      // This ensures client-side cookie is in sync with server-side cookie
-      this.updateClientCookie(newAccessToken);
-
-      // Note: Refresh token is HttpOnly, so we can't update it client-side
-      // The server handles refresh token rotation automatically
-
+      // Server sets the httpOnly ACCESS_TOKEN and non-httpOnly ACCESS_TOKEN_EXP
+      // cookies in the response — no client-side cookie update needed.
       if (process.env.NODE_ENV === "development") {
         console.log("[TokenRefreshService] Token refreshed successfully");
       }
-      return newAccessToken;
+      return true;
     } catch (error) {
       // Log error details only in development
       if (process.env.NODE_ENV === "development") {
         console.error("[TokenRefreshService] Token refresh failed:", error);
       }
       throw error;
-    }
-  }
-
-  /**
-   * Updates the client-side access token cookie
-   * This is critical to keep client and server cookies in sync
-   * @param {string} token - The new access token
-   */
-  static updateClientCookie(token) {
-    try {
-      const cookieOptions = getClientCookieOptions("ACCESS_TOKEN");
-      LenaCookiesManager.set(COOKIE_KEYS.ACCESS_TOKEN, token, cookieOptions);
-      // Only log in development
-      if (process.env.NODE_ENV === "development") {
-        console.log("[TokenRefreshService] Client-side cookie updated");
-      }
-    } catch (error) {
-      // Log error only in development
-      if (process.env.NODE_ENV === "development") {
-        console.error(
-          "[TokenRefreshService] Failed to update client-side cookie:",
-          error
-        );
-      }
-      // Don't throw - server cookie is still set, just client sync failed
     }
   }
 
@@ -105,10 +66,11 @@ export class TokenRefreshService {
         credentials: "include",
       });
     } catch {
-      /* best-effort: still clear client-visible cookies */
+      /* best-effort: server route handles httpOnly cookie deletion */
     }
 
-    LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
+    // Clear the client-visible cookies (httpOnly ones are cleared by the server route above).
+    LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN_EXP);
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
     LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
 

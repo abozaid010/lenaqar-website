@@ -64,12 +64,13 @@ export function proxy(request) {
     return response;
   }
 
-  // Handle API image requests
+  // Handle API image requests — restrict CORS to own domain only.
   if (pathname.startsWith('/api/images/') || pathname.startsWith('/images/')) {
     const response = NextResponse.next();
-    response.headers.set('Access-Control-Allow-Origin', '*');
+    const allowedOrigin = process.env.NEXT_PUBLIC_SITE_URL || "https://www.lenaai.net";
+    response.headers.set('Access-Control-Allow-Origin', allowedOrigin);
     response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Content-Type');
+    response.headers.set('Vary', 'Origin');
     return response;
   }
 

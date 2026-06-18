@@ -1,44 +1,32 @@
 /**
- * Single source of truth for API base URL from NEXT_PUBLIC_API_BASE_URL.
- * Normalizes to full URL (adds https:// if missing) and exports hostname for image/config use.
+ * Single source of truth for server-side API base URL.
+ *
+ * IMPORTANT: Never use NEXT_PUBLIC_API_BASE_URL for the API origin.
+ * NEXT_PUBLIC_* vars are inlined into the client bundle at build time, which
+ * would expose the backend hostname in the browser. All client calls go through
+ * the same-origin BFF (/api/crm/*) — only server-side code needs API_BASE_URL.
+ * Set API_BASE_URL (no NEXT_PUBLIC_ prefix) in your server environment.
  */
-
-// Prefer the server-only `API_BASE_URL`; fall back to the public var during migration.
-// On the client bundle `process.env.API_BASE_URL` is statically `undefined` (only
-// `NEXT_PUBLIC_*` is inlined), so the public value is used there until client axios is removed.
-const api_base_url =
-  process.env.API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL || "https://api.lenaai.net";
+const api_base_url = process.env.API_BASE_URL || "https://api.lenaai.net";
 export const API_BASE_URL =
-  api_base_url.startsWith("http://") || api_base_url.startsWith("https://") ? api_base_url : `https://${api_base_url}`;
+  api_base_url.startsWith("http://") || api_base_url.startsWith("https://")
+    ? api_base_url
+    : `https://${api_base_url}`;
 
 /**
- * Tier key for `X-API-Key` on unauthenticated routes.
- * Prefer server-only `X_API_KEY`; fall back to `NEXT_PUBLIC_X_API_KEY` during migration.
- * Once all `/public/*` calls are proxied through the server, drop the public fallback so the
- * key leaves the client bundle entirely.
+ * X-API-Key for unauthenticated backend endpoints (/public/*, /campaign/*, /whatsapp/*).
+ * Server-only: set X_API_KEY (no NEXT_PUBLIC_ prefix) in your server environment.
+ * The BFF catch-all (/api/crm/[...path]) adds this header server-side — the key
+ * never reaches the browser or client bundle.
  */
-export const PUBLIC_X_API_KEY = (
-  process.env.X_API_KEY ??
-  process.env.NEXT_PUBLIC_X_API_KEY ??
-  ""
-).trim();
-
-/** True when the `X-API-Key` header value is available in this build. */
+export const PUBLIC_X_API_KEY = (process.env.X_API_KEY ?? "").trim();
 export const HAS_X_API_KEY = PUBLIC_X_API_KEY.length > 0;
 
-/**
- * Shared message for the missing key. `NEXT_PUBLIC_*` vars are inlined at
- * `next build` time, so a key absent from the build environment is `undefined`
- * forever in that bundle (works in `next dev`, silently 401/403s in prod).
- */
-export const MISSING_X_API_KEY_MESSAGE =
-  "NEXT_PUBLIC_X_API_KEY is missing from this build. " +
-  "Set it in the production build environment (NEXT_PUBLIC_* vars are inlined at `next build` time) and redeploy. " +
-  "See src/app/(admin)/campaign-chat/README.md.";
-
-// Fail loudly at module load instead of silently dropping the header later.
-if (!HAS_X_API_KEY) {
-  console.error(`[apiConfig] ${MISSING_X_API_KEY_MESSAGE}`);
+if (!HAS_X_API_KEY && process.env.NODE_ENV !== "test") {
+  console.error(
+    "[apiConfig] X_API_KEY is not set. /public/* and /campaign/* endpoints will return 401/403. " +
+    "Set X_API_KEY (server-only, no NEXT_PUBLIC_ prefix) in your server environment."
+  );
 }
 
 let apiHostname = "api.lenaai.net";

@@ -1,14 +1,14 @@
 "use client";
 
 import axios from "axios";
-import { LenaCookiesManager } from "./LenaCookiesManager";
-import { getClientIdFromToken } from "./getRoleFromToken.client";
 import { TokenRefreshService } from "./TokenRefreshService";
-import { API_BASE_URL } from "./apiConfig";
 import { isPermissionsUpdatedError } from "@/constants/permissionsAuth";
 
+// All API calls route through the same-origin BFF at /api/crm/*.
+// The BFF server reads the httpOnly access_token cookie directly —
+// Authorization headers are never set client-side.
 export const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "/api/crm",
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,33 +18,15 @@ const isDev = process.env.NODE_ENV === "development";
 
 axiosInstance.interceptors.request.use((config) => {
   if (isDev) {
-    console.log(`🚀 Axios Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+    console.log(`🚀 BFF Request: ${config.method?.toUpperCase()} ${config.url}`);
   }
-
-  // Add Authorization header from access token
-  if (!config.headers.Authorization) {
-    const token = LenaCookiesManager.getAccessToken();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-  }
-
-  // Add x-client-id header from JWT token (not cookie) for backend validation
-  if (!config.headers['x-client-id']) {
-    const clientIdFromToken = getClientIdFromToken();
-    if (clientIdFromToken) {
-      config.headers['x-client-id'] = clientIdFromToken;
-    }
-  }
-
   return config;
 });
 
 axiosInstance.interceptors.response.use(
   (response) => {
     if (isDev) {
-      console.log(`📥 Axios Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.baseURL}${response.config.url}`);
-      console.log(`📥 Response URL: ${response.request?.responseURL || 'N/A'}`);
+      console.log(`📥 BFF Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
     }
     return response;
   },
@@ -65,20 +47,16 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        // Use TokenRefreshService to handle token refresh and cookie sync
-        const newAccessToken = await TokenRefreshService.refreshToken();
+        const refreshed = await TokenRefreshService.refreshToken();
 
-        if (newAccessToken) {
-          // Update the Authorization header with the new token
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          // Retry the original request with the new token
+        if (refreshed) {
+          // Server has set the new httpOnly cookie — retry without any manual header.
           return axiosInstance(originalRequest);
         } else {
-          throw new Error("Token refresh returned no token");
+          throw new Error("Token refresh failed");
         }
       } catch (refreshError) {
-        // Log error only in development
-        if (process.env.NODE_ENV === "development") {
+        if (isDev) {
           console.error("[axiosInstance] Token refresh failed:", refreshError);
         }
         await TokenRefreshService.handleRefreshFailure();

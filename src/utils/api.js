@@ -1,7 +1,7 @@
 "use client";
 
 import { axiosInstance } from "@/lib/axiosInstance";
-import { PUBLIC_X_API_KEY, MISSING_X_API_KEY_MESSAGE } from "@/lib/apiConfig";
+// PUBLIC_X_API_KEY removed — now added server-side by /api/crm/[...path]/route.js
 import { safeMergeParams } from "./safeJsonParser";
 import {
   mapSlimUnitsListResponse,
@@ -1453,27 +1453,10 @@ export async function sendClientMessage({
   }
 }
 
-// Client-side decode JWT payload (no verification; API verifies when token is sent).
-function decodeJwtPayloadClient(token) {
-  if (!token || typeof token !== "string") return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-    const payload = JSON.parse(atob(padded));
-    return typeof payload === "object" && payload !== null ? payload : null;
-  } catch {
-    return null;
-  }
-}
-
-/** Prefer client_id from access token; fallback to CLIENT_ID cookie. */
+/** Read client_id from the CLIENT_ID cookie (access_token is now httpOnly). */
 function getClientIdFromToken() {
   if (typeof window === "undefined") return null;
-  const token = LenaCookiesManager.getAccessToken();
-  const payload = decodeJwtPayloadClient(token);
-  return payload?.client_id ?? payload?.sub ?? null;
+  return LenaCookiesManager.getClientId() ?? null;
 }
 
 // HELPER FUNCTIONS //
@@ -1671,16 +1654,11 @@ export async function fetchDataProjection() {
   }
 }
 
-/** `/campaign/*` expects `x-client-id` to match `client_id` (query/body); JWT-only `sub` can otherwise 403. */
+// X-API-Key is now added server-side by the BFF catch-all (/api/crm/[...path]/route.js)
+// for /campaign/* and /whatsapp/* paths — it no longer needs to be in the client bundle.
+/** `/campaign/*` expects `x-client-id` to match `client_id` (query/body). */
 function campaignChatRequestHeaders(client_id) {
-  if (!PUBLIC_X_API_KEY) {
-    // Fail loudly: without the key the backend 401/403s and the UI shows a
-    // generic "send failed" with no clue that the build is misconfigured.
-    console.error(`[campaign-chat] ${MISSING_X_API_KEY_MESSAGE}`);
-    throw new Error(MISSING_X_API_KEY_MESSAGE);
-  }
   return {
-    "X-API-Key": PUBLIC_X_API_KEY,
     "x-client-id": String(client_id),
   };
 }
@@ -2322,15 +2300,14 @@ export async function deleteUser(userId, clientId = "public") {
 
 export async function fetchAdminClients(page = 1, pageSize = 20, search = "") {
   try {
-    const params = { page, page_size: pageSize };
+    const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
     const trimmedSearch = typeof search === "string" ? search.trim() : "";
-    if (trimmedSearch) {
-      params.search = trimmedSearch;
-    }
-    const response = await axiosInstance.get("/api/client/admin/clients", {
-      params,
-    });
-    return response.data;
+    if (trimmedSearch) params.set("search", trimmedSearch);
+    // Call the existing king-admin BFF route directly — skip the /api/crm catch-all
+    // so we don't double-proxy through /api/crm/api/client/admin/clients.
+    const res = await fetch(`/api/client/admin/clients?${params.toString()}`);
+    if (!res.ok) throw new Error(`fetchAdminClients: ${res.status}`);
+    return res.json();
   } catch (error) {
     console.error("Failed to fetch admin clients:", error.message);
     throw error;
@@ -2339,11 +2316,13 @@ export async function fetchAdminClients(page = 1, pageSize = 20, search = "") {
 
 export async function updateAdminClient(clientId, payload) {
   try {
-    const response = await axiosInstance.patch(
-      `/api/client/admin/clients/${clientId}`,
-      payload
-    );
-    return response.data;
+    const res = await fetch(`/api/client/admin/clients/${encodeURIComponent(clientId)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) throw new Error(`updateAdminClient: ${res.status}`);
+    return res.json();
   } catch (error) {
     console.error("Failed to update client:", error.message);
     throw error;
@@ -2358,14 +2337,10 @@ export async function upsertClientWhatsappInstance(account, { targetClientId } =
   if (targetClientId) params.set("target_client_id", targetClientId);
   const qs = params.toString();
   const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;
-  const token = LenaCookiesManager.getAccessToken();
 
   const response = await fetch(url, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(account),
   });
 
@@ -2398,13 +2373,9 @@ export async function deleteClientWhatsappInstance({
   if (targetClientId) params.set("target_client_id", targetClientId);
   const qs = params.toString();
   const url = `/api/client/whatsapp-instance${qs ? `?${qs}` : ""}`;
-  const token = LenaCookiesManager.getAccessToken();
 
   const response = await fetch(url, {
     method: "DELETE",
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
   });
 
   const data = await response.json();

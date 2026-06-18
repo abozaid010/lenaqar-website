@@ -9,6 +9,18 @@ import {
   isSuccessResponse,
 } from "@/utils/api-response-handler";
 
+function extractJwtExp(token) {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const payload = JSON.parse(Buffer.from(base64, "base64").toString("utf-8"));
+    return typeof payload.exp === "number" ? payload.exp : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function loginAction(prevState, formData) {
   // Input validation and sanitization
   const email = String(formData.get("email") || "").trim();
@@ -72,9 +84,20 @@ export async function loginAction(prevState, formData) {
     const cookieStore = await cookies();
 
     // Set cookies using centralized CookieConfig for consistency
-    // Access token: 1 hour expiration
+    // Access token: 1 hour expiration (httpOnly — never readable by client JS)
     const accessTokenOptions = getServerCookieOptions("ACCESS_TOKEN");
     cookieStore.set(COOKIE_KEYS.ACCESS_TOKEN, access_token, accessTokenOptions);
+
+    // Non-httpOnly mirror: stores only the exp unix-seconds timestamp so client
+    // code can schedule proactive refresh without touching the token itself.
+    const exp = extractJwtExp(access_token);
+    if (exp !== null) {
+      cookieStore.set(
+        COOKIE_KEYS.ACCESS_TOKEN_EXP,
+        String(exp),
+        getServerCookieOptions("ACCESS_TOKEN_EXP")
+      );
+    }
 
     // Refresh token: 30 days expiration (explicit, not inheriting from default)
     const refreshTokenOptions = getServerCookieOptions("REFRESH_TOKEN");

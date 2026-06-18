@@ -19,9 +19,9 @@ export function useTokenRefresh() {
    * @returns {Promise<string|null>} New access token or null if refresh failed
    */
   const refreshToken = useCallback(async () => {
-    // Allow refresh when we have an access token (refresh token is httpOnly, sent by browser to /api/refresh-token)
-    if (!LenaCookiesManager.getAccessToken()) {
-      setError(new Error("No access token available"));
+    // Use CLIENT_ID as the session presence signal (access_token is httpOnly, unreadable client-side).
+    if (!LenaCookiesManager.getClientId()) {
+      setError(new Error("No active session"));
       return null;
     }
 
@@ -29,9 +29,9 @@ export function useTokenRefresh() {
     setError(null);
 
     try {
-      const newToken = await TokenRefreshService.refreshToken();
+      const result = await TokenRefreshService.refreshToken();
       setIsLoading(false);
-      return newToken;
+      return result;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Token refresh failed";
       setError(new Error(errorMessage));

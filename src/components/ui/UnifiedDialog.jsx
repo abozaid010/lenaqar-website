@@ -36,6 +36,8 @@ export default function UnifiedDialog({
   headerTrailing,
   /** Optional class for the content body */
   bodyClassName = "",
+  /** Optional class for the dialog panel (e.g. max-width) */
+  dialogClassName = "",
 }) {
   const { t, locale } = useI18n();
   const isRTL = locale === "ar";
@@ -84,7 +86,7 @@ export default function UnifiedDialog({
     >
       <div
         ref={dialogRef}
-        className="rounded-lg shadow-xl overflow-hidden w-[90%] max-h-[90vh] flex flex-col bg-white transform transition-all duration-300 ease-in-out"
+        className={`rounded-lg shadow-xl overflow-hidden w-[90%] max-h-[90vh] flex flex-col bg-white transform transition-all duration-300 ease-in-out ${dialogClassName}`}
       >
         {/* Header: default = primary bg + white; unified = UnifiedHeader (#E2dbff + primary) */}
         {headerVariant === "unified" ? (

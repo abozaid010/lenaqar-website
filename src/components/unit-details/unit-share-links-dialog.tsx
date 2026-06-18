@@ -1,16 +1,68 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Copy, Globe, MessageCircle, Share2 } from 'lucide-react';
+import { Check, Copy, ExternalLink, Globe, MessageCircle } from 'lucide-react';
 import UnifiedDialog from '@/components/ui/UnifiedDialog';
 import { useI18n } from '@/hooks/useI18n';
 import { useMessagingProviderConfig } from '@/hooks/useMessagingProviderConfig';
 import { buildUnitShareLinks, buildUnitWhatsappShareMessage } from '@/lib/units/unit-share-links';
+import { normalizeWhatsappPhone } from '@/lib/whatsapp-messaging-provider';
 
 interface UnitShareLinksDialogProps {
   isOpen: boolean;
   onClose: () => void;
   unitCode: string | null | undefined;
+}
+
+interface ShareLinkRowProps {
+  icon: typeof Globe;
+  label: string;
+  value: string;
+  copied: boolean;
+  copyLabel: string;
+  copiedLabel: string;
+  onCopy: () => void;
+}
+
+function ShareLinkRow({
+  icon: Icon,
+  label,
+  value,
+  copied,
+  copyLabel,
+  copiedLabel,
+  onCopy,
+}: ShareLinkRowProps) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E2DBFF]/40">
+          <Icon className="h-3.5 w-3.5 text-primary" aria-hidden />
+        </span>
+        <span className="text-sm font-medium text-primary">{label}</span>
+      </div>
+      <div className="flex items-stretch gap-2">
+        <div className="flex min-w-0 flex-1 items-center rounded-lg border border-primary/10 bg-[#E2DBFF]/10 px-3 py-2.5">
+          <span className="truncate text-sm text-gray-700" dir="ltr" title={value}>
+            {value}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onCopy}
+          className="icon-btn flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-primary/15 bg-white text-primary transition-colors hover:bg-[#E2DBFF]/30 focus:outline-none focus:ring-2 focus:ring-primary/20"
+          aria-label={copied ? copiedLabel : copyLabel}
+          title={copied ? copiedLabel : copyLabel}
+        >
+          {copied ? (
+            <Check className="h-4 w-4 text-green-600" aria-hidden />
+          ) : (
+            <Copy className="h-4 w-4" aria-hidden />
+          )}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export default function UnitShareLinksDialog({
@@ -20,15 +72,21 @@ export default function UnitShareLinksDialog({
 }: UnitShareLinksDialogProps) {
   const { translate } = useI18n();
   const { data: messagingConfig } = useMessagingProviderConfig();
-  const defaultSenderPhone = messagingConfig?.defaultSenderPhone ?? null;
+  const primaryAccount =
+    messagingConfig?.readyAccounts?.[0] ?? messagingConfig?.accounts?.[0] ?? null;
+  const linkedWhatsappNumberRaw = primaryAccount?.whatsapp_number ?? null;
+  const linkedWhatsappNumber = linkedWhatsappNumberRaw
+    ? normalizeWhatsappPhone(linkedWhatsappNumberRaw)
+    : null;
   const [copiedWebsite, setCopiedWebsite] = useState(false);
   const [copiedWhatsapp, setCopiedWhatsapp] = useState(false);
 
   const code = unitCode?.trim() || null;
   const { websiteUrl, whatsappUrl, whatsappDirectUrl } = code
-    ? buildUnitShareLinks({ code, whatsappNumber: defaultSenderPhone })
+    ? buildUnitShareLinks({ code, whatsappNumber: linkedWhatsappNumber })
     : { websiteUrl: '', whatsappUrl: null, whatsappDirectUrl: null };
   const whatsappOpenUrl = whatsappDirectUrl ?? whatsappUrl;
+  const whatsappMessage = code ? buildUnitWhatsappShareMessage(code) : '';
 
   const handleCopyWebsite = async () => {
     if (!websiteUrl) return;
@@ -42,7 +100,7 @@ export default function UnitShareLinksDialog({
   };
 
   const handleCopyWhatsapp = async () => {
-    const linkToCopy = whatsappUrl || whatsappDirectUrl;
+    const linkToCopy = whatsappDirectUrl || whatsappUrl;
     if (!linkToCopy) return;
     try {
       await navigator.clipboard.writeText(linkToCopy);
@@ -66,104 +124,90 @@ export default function UnitShareLinksDialog({
       headerTrailing={null}
       submitLabel={null}
       onSubmit={null}
-      bodyClassName="space-y-4"
+      dialogClassName="max-w-md"
+      bodyClassName="space-y-5 py-5"
     >
       {!code ? (
-        <p className="text-sm text-gray-600 text-center py-4">
+        <p className="py-6 text-center text-sm text-gray-500">
           {translate(
             'unitShare.noCode',
             'This unit does not have a reference code yet.'
           )}
         </p>
       ) : (
-        <div className="space-y-4">
-          <div className="rounded-lg border border-gray-200 overflow-hidden">
-            <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
-              <Globe className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-gray-700">
-                {translate('unitShare.websiteLink', 'Website link')}
-              </span>
-            </div>
-            <div className="p-4 space-y-3">
-              <p className="text-sm text-gray-700 break-all">{websiteUrl}</p>
-              <div className="flex flex-wrap items-center gap-2">
+        <>
+          <p className="text-center text-sm text-gray-500">
+            {translate(
+              'unitShare.subtitle',
+              'Copy a link and share it with your clients.'
+            )}
+          </p>
+
+          <ShareLinkRow
+            icon={Globe}
+            label={translate('unitShare.websiteLink', 'Website link')}
+            value={websiteUrl}
+            copied={copiedWebsite}
+            copyLabel={translate('unitShare.copyWebsite', 'Copy website link')}
+            copiedLabel={translate('unitShare.copied', 'Copied!')}
+            onCopy={handleCopyWebsite}
+          />
+
+          {whatsappDirectUrl ? (
+            <div className="space-y-3 border-t border-primary/10 pt-5">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#E2DBFF]/40">
+                  <MessageCircle className="h-3.5 w-3.5 text-primary" aria-hidden />
+                </span>
+                <span className="text-sm font-medium text-primary">
+                  {translate('unitShare.whatsappLink', 'WhatsApp link')}
+                </span>
+              </div>
+
+              <div className="rounded-lg border border-primary/10 bg-[#E2DBFF]/10 px-3 py-2.5">
+                <p className="text-sm leading-relaxed text-gray-700">{whatsappMessage}</p>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
-                  onClick={handleCopyWebsite}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-colors"
+                  onClick={handleCopyWhatsapp}
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white px-4 py-2.5 text-sm font-medium text-primary transition-colors hover:bg-[#E2DBFF]/20"
                 >
-                  {copiedWebsite ? (
+                  {copiedWhatsapp ? (
                     <>
-                      <Check className="w-4 h-4" />
+                      <Check className="h-4 w-4 text-green-600" aria-hidden />
                       {translate('unitShare.copied', 'Copied!')}
                     </>
                   ) : (
                     <>
-                      <Copy className="w-4 h-4" />
-                      {translate('unitShare.copyWebsite', 'Copy website link')}
+                      <Copy className="h-4 w-4" aria-hidden />
+                      {translate('unitShare.copyWhatsapp', 'Copy WhatsApp link')}
                     </>
                   )}
                 </button>
-              </div>
-            </div>
-          </div>
-
-          {whatsappDirectUrl ? (
-            <div className="rounded-lg border border-gray-200 overflow-hidden">
-              <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center gap-2">
-                <MessageCircle className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-gray-700">
-                  {translate('unitShare.whatsappLink', 'WhatsApp link')}
-                </span>
-              </div>
-              <div className="p-4 space-y-3">
-                <p className="text-sm text-gray-700 break-all">
-                  {whatsappUrl || whatsappDirectUrl}
-                </p>
-                <p className="text-sm text-gray-700">
-                  {buildUnitWhatsappShareMessage(code)}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCopyWhatsapp}
-                    className="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm rounded-lg hover:opacity-90 transition-colors"
+                {whatsappOpenUrl ? (
+                  <a
+                    href={whatsappOpenUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-white transition-opacity hover:opacity-90"
                   >
-                    {copiedWhatsapp ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        {translate('unitShare.copied', 'Copied!')}
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        {translate('unitShare.copyWhatsapp', 'Copy WhatsApp link')}
-                      </>
-                    )}
-                  </button>
-                  {whatsappOpenUrl ? (
-                    <a
-                      href={whatsappOpenUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors"
-                    >
-                      <Share2 className="w-4 h-4" />
-                      {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
-                    </a>
-                  ) : null}
-                </div>
+                    <ExternalLink className="h-4 w-4" aria-hidden />
+                    {translate('unitShare.openWhatsapp', 'Open WhatsApp')}
+                  </a>
+                ) : null}
               </div>
             </div>
           ) : (
-            <p className="text-sm text-gray-500 text-center">
+            <p className="border-t border-primary/10 pt-5 text-center text-sm text-gray-500">
               {translate(
                 'unitShare.noWhatsapp',
                 'No linked WhatsApp number is configured for this client.'
               )}
             </p>
           )}
-        </div>
+        </>
       )}
     </UnifiedDialog>
   );

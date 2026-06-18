@@ -2318,6 +2318,7 @@ export default {
   },
   unitShare: {
     title: "Share Property",
+    subtitle: "Copy a link and share it with your clients.",
     websiteLink: "Website link",
     whatsappLink: "WhatsApp link",
     copyWebsite: "Copy website link",

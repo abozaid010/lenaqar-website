@@ -22,13 +22,12 @@ export function useModuleAccess({ initialModuleActions = undefined } = {}) {
 
   useEffect(() => {
     if (initialModuleActions !== undefined) {
-      const token = LenaCookiesManager.getAccessToken();
-      setHasToken(!!token);
+      setHasToken(!!LenaCookiesManager.getClientId());
       return;
     }
 
     setModuleActions(null);
-    setHasToken(!!LenaCookiesManager.getAccessToken());
+    setHasToken(!!LenaCookiesManager.getClientId());
     setIsReady(true);
   }, [initialModuleActions]);
 

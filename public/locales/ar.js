@@ -2381,6 +2381,7 @@ export default {
   },
   unitShare: {
     title: "مشاركة العقار",
+    subtitle: "انسخ الرابط وشاركه مع عملائك.",
     websiteLink: "رابط الموقع",
     whatsappLink: "رابط واتساب",
     copyWebsite: "نسخ رابط الموقع",

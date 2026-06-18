@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
+import { bffFetch } from "@/lib/bffFetch";
 import {
   verifyMatchShareToken,
   getMatchInteractions,
@@ -24,7 +25,7 @@ export async function GET(_request, { params }) {
       const headers = { accept: "application/json" };
       if (PUBLIC_X_API_KEY) headers["X-API-Key"] = PUBLIC_X_API_KEY;
 
-      const res = await fetch(`${API_BASE_URL}/match/share/v1/${encodeURIComponent(token)}`, {
+      const res = await bffFetch(`${API_BASE_URL}/match/share/v1/${encodeURIComponent(token)}`, {
         method: "GET",
         headers,
         cache: "no-store",

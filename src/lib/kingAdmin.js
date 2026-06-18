@@ -80,10 +80,8 @@ export async function isRequestFromKingAdmin(request) {
       return false;
     }
 
-    // Get client ID from multiple sources for validation
-    const clientIdFromHeader = request.headers.get('x-client-id');
-    const clientIdFromCookie = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
-    const clientId = clientIdFromHeader || clientIdFromCookie;
+    // Use only the signed cookie — never the x-client-id header (spoofable by proxies).
+    const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
 
     // Verify the client ID is 'public' (king admin)
     return isKingAdmin(clientId);

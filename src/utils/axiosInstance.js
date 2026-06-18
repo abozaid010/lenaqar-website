@@ -13,10 +13,18 @@ const axiosInstance = axios.create({
   },
 });
 
+const BFF_SECRET = process.env.BFF_SECRET ?? "";
+
 axiosInstance.interceptors.request.use(async (config) => {
   const url = String(config.url ?? "");
   if (PUBLIC_X_API_KEY && url.startsWith("/public/")) {
     config.headers["X-API-Key"] = PUBLIC_X_API_KEY;
+  }
+
+  // Shared secret — backend middleware rejects requests without it so the
+  // backend is unreachable even if its URL leaks (e.g. in server logs).
+  if (BFF_SECRET) {
+    config.headers["X-BFF-Secret"] = BFF_SECRET;
   }
 
   if (!config.headers.Authorization) {

@@ -1,55 +1,32 @@
 "use client";
 
 /**
- * Client-side: get current user role from the JWT access token (cookie).
- * Uses the same decode logic as getRoleFromToken.js (server version).
- * Do not trust the CLIENT_INFO cookie for authorization – it can be tampered with.
+ * Client-side: get current user role and client_id from non-httpOnly cookies.
+ * The access_token is now httpOnly — these functions read from CLIENT_INFO and
+ * CLIENT_ID cookies set at login/refresh (server-side) instead.
+ *
+ * These are UX-only helpers — do not use for server-side authorization.
  */
 
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
-function decodeJwtPayload(token) {
-  if (!token || typeof token !== "string") return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const padded = base64.padEnd(
-      base64.length + ((4 - (base64.length % 4)) % 4),
-      "="
-    );
-    const payload = JSON.parse(atob(padded));
-    return typeof payload === "object" && payload !== null ? payload : null;
-  } catch {
-    return null;
-  }
-}
-
 /**
- * Get the current user's role from the access token cookie (client-side).
- * Reads client_type or role from the JWT payload — same fields as server version.
- *
- * @returns {string|null} Role/client_type from JWT, or null if not logged in
+ * Get the current user's role (client_type) from the CLIENT_INFO cookie.
+ * @returns {string|null}
  */
 export function getRoleFromToken() {
-  const token = LenaCookiesManager.getAccessToken();
-  const payload = decodeJwtPayload(token);
-  if (!payload) return null;
-  const role = payload.client_type ?? payload.role ?? null;
+  const info = LenaCookiesManager.getClientInfo();
+  if (!info) return null;
+  const role = info.client_type ?? info.role ?? null;
   return role != null && typeof role === "string" ? role : null;
 }
 
 /**
- * Get the client_id from the access token cookie (client-side).
- * Reads client_id or sub from the JWT payload.
- *
- * @returns {string|null} Client ID from JWT, or null if not logged in
+ * Get the client_id from the CLIENT_ID cookie.
+ * @returns {string|null}
  */
 export function getClientIdFromToken() {
-  const token = LenaCookiesManager.getAccessToken();
-  const payload = decodeJwtPayload(token);
-  if (!payload) return null;
-  const clientId = payload.client_id ?? payload.sub ?? null;
+  const clientId = LenaCookiesManager.getClientId();
   return clientId != null && typeof clientId === "string" ? clientId : null;
 }
 
@@ -57,8 +34,8 @@ export function getClientIdFromToken() {
  * Whether to show a sidebar item for this module (UX only; use SSR/context data).
  * Deny when `moduleActions` is unknown. Key omitted or `[]` → hide.
  *
- * @param {string|null|undefined} moduleKey - e.g. "projects", "team_members"
- * @param {Record<string, string[]>|null|undefined} moduleActions - from login/profile only (not JWT)
+ * @param {string|null|undefined} moduleKey
+ * @param {Record<string, string[]>|null|undefined} moduleActions
  * @returns {boolean}
  */
 export function shouldShowModuleNavItem(moduleKey, moduleActions) {

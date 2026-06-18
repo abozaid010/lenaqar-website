@@ -1,21 +1,11 @@
-import { API_BASE_URL, PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import {
   LOWERCASE_UNIT_FILTER_KEYS,
   MATCH_UNITS_PAGE_SIZE,
 } from "@/lib/match/requirement-to-units-filter";
 import { mapSlimPublicUnitsPayload } from "@/lib/units/slim-unit-list-mapper";
 
-function publicHeaders(extra = {}) {
-  const headers = {
-    accept: "application/json",
-    "Content-Type": "application/json",
-    ...extra,
-  };
-  if (PUBLIC_X_API_KEY) {
-    headers["X-API-Key"] = PUBLIC_X_API_KEY;
-  }
-  return headers;
-}
+// X-API-Key is added server-side by /api/crm/[...path]/route.js for /public/* paths.
+// No key or backend URL in the client bundle.
 
 async function parseJsonResponse(response) {
   const body = await response.json().catch(() => ({}));
@@ -32,6 +22,8 @@ async function parseJsonResponse(response) {
 
 /**
  * Fetch public units with filter params (no auth) — slim list payload.
+ * Routes through the same-origin BFF catch-all (/api/crm/public/v1/slim-list)
+ * so the backend URL never appears in the browser Network tab.
  */
 export async function fetchPublicMatchedUnits(filters = {}) {
   const params = new URLSearchParams();
@@ -49,12 +41,8 @@ export async function fetchPublicMatchedUnits(filters = {}) {
   });
 
   const qs = params.toString();
-  const url = `${API_BASE_URL}/public/v1/slim-list${qs ? `?${qs}` : ""}`;
-  const response = await fetch(url, {
-    method: "GET",
-    headers: publicHeaders(),
-    cache: "no-store",
-  });
+  const url = `/api/crm/public/v1/slim-list${qs ? `?${qs}` : ""}`;
+  const response = await fetch(url, { method: "GET", cache: "no-store" });
 
   const data = await parseJsonResponse(response);
   const mapped = mapSlimPublicUnitsPayload(data);

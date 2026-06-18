@@ -1,7 +1,9 @@
-import { API_BASE_URL, PUBLIC_X_API_KEY } from '@/lib/apiConfig';
 import type { RawUnit } from '@/lib/units/unit-types';
 import { formatPhoneForWhatsApp } from '@/utils/phone-utils';
 import { buildUnitWhatsappShareMessage } from '@/lib/units/unit-share-links';
+
+// X-API-Key is added server-side by the BFF catch-all for /public/* paths.
+// API_BASE_URL is not referenced here — all calls go through /api/crm/*.
 
 type DeveloperContact = {
   id: string;
@@ -16,12 +18,8 @@ type ClientContact = {
 };
 
 async function fetchDeveloperContacts(): Promise<Map<string, DeveloperContact>> {
-  const response = await fetch(`${API_BASE_URL}/developers/get_contact`, {
+  const response = await fetch('/api/crm/developers/get_contact', {
     method: 'GET',
-    headers: {
-      accept: 'application/json',
-      'X-API-Key': PUBLIC_X_API_KEY,
-    },
     cache: 'no-store',
   });
 
@@ -40,12 +38,8 @@ async function fetchDeveloperContacts(): Promise<Map<string, DeveloperContact>> 
 }
 
 async function fetchClientContacts(): Promise<Map<string, ClientContact>> {
-  const response = await fetch(`${API_BASE_URL}/client/public/contact_data`, {
+  const response = await fetch('/api/crm/client/public/contact_data', {
     method: 'GET',
-    headers: {
-      accept: 'application/json',
-      'X-API-Key': PUBLIC_X_API_KEY,
-    },
     cache: 'no-store',
   });
 

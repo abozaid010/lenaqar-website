@@ -115,13 +115,13 @@ export function buildAdminUnitShareUrl(
 }
 
 /** Arabic prefix for the pre-filled WhatsApp message when sharing a unit. */
-export const UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX = 'ايه تفاصيل الوحده دى';
+export const UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX = 'تفاصيل';
 
 /** Build the full WhatsApp message for a unit (Arabic + reference code). */
 export function buildUnitWhatsappShareMessage(code: string): string {
   const normalized = normalizeUnitCodeParam(code);
   if (!normalized) return UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX;
-  return `${UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX}  ${normalized}`;
+  return `${UNIT_WHATSAPP_SHARE_MESSAGE_PREFIX} ${normalized}`;
 }
 
 /** Branded public share page that redirects to WhatsApp with the default message. */
