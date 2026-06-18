@@ -6,7 +6,7 @@ import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath } from '@/lib/units/unit-share-links';
 import { appendUnitsSourcePendingQuery, buildAdminPendingApprovalListPath } from '@/utils/units-navigation-source';
-import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
+import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
 import { useUnitsSectionSource } from '@/hooks/use-units-section-source';
 import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
@@ -17,11 +17,14 @@ import type { UseMutationResult } from '@tanstack/react-query';
 export default function StickyInquiryCard({
   unit,
   rawUnit,
+  isOwnUnit: isOwnUnitProp,
   canShare = false,
   onShare,
 }: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
+  const { myClientId: currentClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
+  const isOwnUnit = isOwnUnitProp ?? isOwnUnitFromHook;
   const unitsSection = useUnitsSectionSource();
   const showApproveButton = Boolean(
     rawUnit && isUnitPendingApproval(rawUnit, unitsSection === 'pending_approval')
@@ -31,21 +34,10 @@ export default function StickyInquiryCard({
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Get current user's client ID from access token (this would come from auth context)
-  const getCurrentClientId = () => {
-    return LenaCookiesManager.getClientId() || null;
-  };
-
-  const currentClientId = getCurrentClientId();
-  const isOwnClientUnit = Boolean(
-    unit.clientId && currentClientId && unit.clientId === currentClientId
-  );
   const showOwnerContact = Boolean(
-    isOwnClientUnit && (unit.ownerName?.trim() || unit.ownerMobile?.trim())
+    isOwnUnit && (unit.ownerName?.trim() || unit.ownerMobile?.trim())
   );
-  // Hide edit/delete for primary inventory when the viewer is not the unit's client.
-  const showUnitAdminActions =
-    !unit.isPrimary || (unit.clientId ?? null) === (currentClientId ?? null);
+  const showUnitAdminActions = isOwnUnit;
 
   const callLabel = translate(
     "buttons.call",

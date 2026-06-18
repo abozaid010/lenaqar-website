@@ -160,6 +160,7 @@ export interface RelatedEntityLinksProps {
 export interface StickyInquiryCardProps {
   unit: UnitViewModel;
   rawUnit?: RawUnit;
+  isOwnUnit?: boolean;
   canShare?: boolean;
   onShare?: () => void;
 }

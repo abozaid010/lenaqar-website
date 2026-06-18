@@ -24,6 +24,7 @@ import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
 import { MAX_UNIT_IMAGES } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
+import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { normalizeViewTypeValue } from "@/data/constants";
 import {
   PROPERTY_VISIBILITY,
@@ -380,6 +381,59 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     );
   }
 
+  const isOwnUnit = !isEdit || isOwnClientUnit(unitData, clientIdState.clientId);
+  const showOwnerFields = isOwnUnit;
+  const ownerMobileRequired = !isEdit && showOwnerFields;
+
+  if (isEdit && !isOwnUnit) {
+    const accessDeniedContent = (
+      <div className={isPageMode ? "bg-white rounded-lg shadow-sm border p-6 max-w-md mx-auto mt-8" : "bg-white rounded-md shadow-xl p-6 max-w-md w-full relative"}>
+        {!isPageMode && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="icon-btn absolute top-4 right-4 h-8 w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+            aria-label={t.buttons?.close || "Close"}
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+
+        <h2 className="text-lg font-semibold text-red-600 mb-2">
+          {translate("common.accessDenied", locale === "ar" ? "غير مصرح" : "Access Denied")}
+        </h2>
+        <p className="text-gray-600 mb-4">
+          {translate(
+            "unitPage.editOwnUnitsOnly",
+            locale === "ar"
+              ? "يمكنك تعديل وحداتك فقط."
+              : "You can only edit units that belong to your account."
+          )}
+        </p>
+        <button
+          type="button"
+          onClick={onClose}
+          className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
+        >
+          {t.buttons?.close || "Close"}
+        </button>
+      </div>
+    );
+
+    if (isPageMode) {
+      return accessDeniedContent;
+    }
+
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-3">
+        {accessDeniedContent}
+      </div>,
+      document.body
+    );
+  }
+
   const updateFormData = (newData) => {
     setFormData((prev) => ({ ...prev, ...newData }));
   };
@@ -588,7 +642,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        if (!isEdit && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
           missingFields.push("owner_mobile");
         }
 
@@ -625,7 +679,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        if (!isEdit && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
           setInvalidFields(["owner_mobile"]);
           return false;
         }
@@ -714,7 +768,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        if (!isEdit && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
           missingFields.push("owner_mobile");
         }
 
@@ -751,7 +805,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        if (!isEdit && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
           setInvalidFields(["owner_mobile"]);
           return;
         }
@@ -798,7 +852,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
 
-    if (!isEdit && isOwnerMobileMissing(formData)) {
+    if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
       setInvalidFields(["owner_mobile"]);
       setCurrentStep(2);
       toast.error(translate("phoneField.required", "Phone number is required"));
@@ -868,6 +922,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         ...payload,
         author: authorEmail,
       };
+
+      if (!showOwnerFields) {
+        delete payload.owner_name;
+        delete payload.owner_mobile;
+      }
 
       if (!isEdit) {
         await addUnitMutation.mutateAsync(payload);
@@ -1109,7 +1168,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           formData={SellFormData}
           commonFormData={formData}
           clientType={clientType}
-          ownerMobileRequired={!isEdit}
+          showOwnerFields={showOwnerFields}
+          ownerMobileRequired={ownerMobileRequired}
           updateFormData={(newData) =>
             setSellFormData((prev) => ({ ...prev, ...newData }))
           }
@@ -1124,7 +1184,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           formData={rentFormData}
           commonFormData={formData}
           clientType={clientType}
-          ownerMobileRequired={!isEdit}
+          showOwnerFields={showOwnerFields}
+          ownerMobileRequired={ownerMobileRequired}
           updateFormData={(newData) =>
             setRentFormData((prev) => ({ ...prev, ...newData }))
           }
