@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { axiosInstance } from "@/lib/axiosInstance";
-import { IMAGE_BASE_URL } from "@/lib/apiConfig";
+import { IMAGE_BASE_URL } from "@/lib/imageConfig";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 
 const resolveImageUrl = (url) => {
