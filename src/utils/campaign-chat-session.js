@@ -4,6 +4,12 @@
  * { role, content, timestamp }.
  */
 
+import {
+  getDisplayUserMessageText,
+  hasDisplayUserMessageText,
+  isExactPlaceholderUserMessage,
+} from "@/utils/imageUtils";
+
 function pickHistoryArray(raw) {
   if (!raw || typeof raw !== "object") return [];
 
@@ -101,7 +107,8 @@ function hasText(value) {
 
 function isTurnBasedHistoryItem(msg) {
   return Boolean(
-    hasText(msg?.user_message) ||
+    hasDisplayUserMessageText(msg?.user_message) ||
+    isExactPlaceholderUserMessage(msg?.user_message) ||
     hasText(msg?.bot_message) ||
     hasText(msg?.bot_response)
   );
@@ -119,8 +126,11 @@ function resolveTurnImageUrl(msg, side) {
   if (side === "user") {
     const explicit = userImage != null ? String(userImage).trim() : "";
     if (explicit) return explicit;
-    if (hasText(msg.user_message) && shared) return shared;
+    if (hasDisplayUserMessageText(msg.user_message) && shared) return shared;
     if (!hasText(msg.bot_message) && !hasText(msg.bot_response) && shared) {
+      return shared;
+    }
+    if (isExactPlaceholderUserMessage(msg.user_message) && shared) {
       return shared;
     }
     return null;
@@ -131,7 +141,7 @@ function resolveTurnImageUrl(msg, side) {
   if (
     (hasText(msg.bot_message) || hasText(msg.bot_response)) &&
     shared &&
-    !hasText(msg.user_message)
+    !hasDisplayUserMessageText(msg.user_message)
   ) {
     return shared;
   }
@@ -141,7 +151,9 @@ function resolveTurnImageUrl(msg, side) {
 function normalizeCampaignMessage(msg) {
   if (!msg || typeof msg !== "object") return null;
 
-  const content =
+  const role = normalizeRole(msg);
+
+  let content =
     msg.content ??
     msg.text ??
     msg.body ??
@@ -151,6 +163,12 @@ function normalizeCampaignMessage(msg) {
     msg.bot_response ??
     msg.admin_reply_text ??
     "";
+
+  if (role === "user") {
+    content = getDisplayUserMessageText(content);
+  } else {
+    content = String(content ?? "");
+  }
 
   const timestamp =
     msg.timestamp ??
@@ -162,8 +180,8 @@ function normalizeCampaignMessage(msg) {
 
   const normalized = {
     ...msg,
-    role: normalizeRole(msg),
-    content: String(content ?? ""),
+    role,
+    content,
     timestamp,
     image_url: resolveMessageImageUrl(msg),
     template_name: msg.template_name ?? msg.template ?? msg.admin_reply_template_name ?? null,
@@ -186,7 +204,7 @@ function expandCampaignHistoryItem(msg) {
   }
 
   const results = [];
-  const userText = hasText(msg.user_message) ? String(msg.user_message).trim() : "";
+  const userText = getDisplayUserMessageText(msg.user_message);
   const botText = String(
     msg.bot_message ?? msg.bot_response ?? msg.admin_reply_text ?? ""
   ).trim();
@@ -194,7 +212,7 @@ function expandCampaignHistoryItem(msg) {
   const botImage = resolveTurnImageUrl(msg, "bot");
   const botTemplate = msg.template_name ?? msg.admin_reply_template_name ?? null;
 
-  if (userText || userImage) {
+  if (userText || userImage || isExactPlaceholderUserMessage(msg.user_message)) {
     const userMsg = normalizeCampaignMessage({
       ...msg,
       role: "user",

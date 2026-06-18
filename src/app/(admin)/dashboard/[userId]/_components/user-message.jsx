@@ -2,10 +2,10 @@
 
 import SafeImage from "@/components/ui/safe-image";
 import { formatTimestamp } from "@/utils/formateDate";
-import { resolveChatMessageImageUrl } from "@/utils/imageUtils";
+import { resolveChatMessageImageUrl, getDisplayUserMessageText } from "@/utils/imageUtils";
 
 export default function UserMessageCard({ message, imageUrl, timestamp }) {
-  const messageText = message ? String(message).trim() : "";
+  const messageText = getDisplayUserMessageText(message);
   const resolvedImageUrl = resolveChatMessageImageUrl(imageUrl);
 
   if (!messageText && !resolvedImageUrl) {

@@ -4,7 +4,7 @@ import { Bot, User } from "lucide-react";
 import SafeImage from "@/components/ui/safe-image";
 import { useI18n } from "@/hooks/useI18n";
 import { useLocaleConstants } from "@/utils/localeConstants";
-import { getClientLogoDisplayUrl, getDisplayImageUrl } from "@/utils/imageUtils";
+import { getClientLogoDisplayUrl, getDisplayImageUrl, getDisplayUserMessageText } from "@/utils/imageUtils";
 
 const MessageBubble = ({ message }) => {
   const { locale, translate } = useI18n();
@@ -51,7 +51,11 @@ const MessageBubble = ({ message }) => {
   // Only show template tag for admin messages that have template_name
   const showTemplateTag = isAdmin && message.template_name;
   const showAutomationBadge = message.source === "wa_automation";
-  const messageText = message.content ? String(message.content).trim() : "";
+  const messageText = isUser
+    ? getDisplayUserMessageText(message.content)
+    : message.content
+      ? String(message.content).trim()
+      : "";
   const imageUrl = resolveChatImageUrl(message.image_url);
 
   if (!isUser && !isAssistant && !isAdmin) {

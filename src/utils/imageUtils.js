@@ -5,6 +5,35 @@
 import { IMAGE_BASE_URL } from "@/lib/imageConfig";
 import { getAllowedImageHostnames } from "@/config/imageHosts";
 
+/** Auto-generated caption when a user sends unit images via WhatsApp. */
+export const USER_MESSAGE_IMAGE_PLACEHOLDER =
+  "i have unit wanna offer, here is the images of it";
+
+export function isPlaceholderUserMessage(text) {
+  if (text == null) return true;
+  const trimmed = String(text).trim();
+  if (!trimmed) return true;
+  return trimmed.toLowerCase() === USER_MESSAGE_IMAGE_PLACEHOLDER.toLowerCase();
+}
+
+/** True only for the known auto-caption, not for empty messages. */
+export function isExactPlaceholderUserMessage(text) {
+  if (text == null) return false;
+  const trimmed = String(text).trim();
+  if (!trimmed) return false;
+  return trimmed.toLowerCase() === USER_MESSAGE_IMAGE_PLACEHOLDER.toLowerCase();
+}
+
+/** User-visible text; treats empty and placeholder captions as no text. */
+export function getDisplayUserMessageText(text) {
+  if (isPlaceholderUserMessage(text)) return "";
+  return String(text ?? "").trim();
+}
+
+export function hasDisplayUserMessageText(text) {
+  return getDisplayUserMessageText(text).length > 0;
+}
+
 /**
  * For presentation only: given a full image URL from the API, use IMAGE_BASE_URL
  * (NEXT_PUBLIC_IMAGE_BASE_URL) as base and replace /images/ with /gcs/ in the path.
@@ -87,12 +116,16 @@ export function resolveUserTurnImageUrl(message) {
   const shared = pickConversationImageUrl(message);
   if (!shared) return null;
 
-  const hasUserText = Boolean(String(message.user_message ?? "").trim());
+  const hasUserText = hasDisplayUserMessageText(message.user_message);
   const hasBotText = Boolean(
     String(message.bot_response ?? message.bot_message ?? "").trim()
   );
 
   if (hasUserText || !hasBotText) {
+    return resolveChatMessageImageUrl(shared);
+  }
+
+  if (isExactPlaceholderUserMessage(message.user_message)) {
     return resolveChatMessageImageUrl(shared);
   }
 
@@ -111,7 +144,7 @@ export function resolveBotTurnImageUrl(message) {
   const shared = pickConversationImageUrl(message);
   if (!shared) return null;
 
-  const hasUserText = Boolean(String(message.user_message ?? "").trim());
+  const hasUserText = hasDisplayUserMessageText(message.user_message);
   const hasBotText = Boolean(
     String(message.bot_response ?? message.bot_message ?? "").trim()
   );
@@ -126,7 +159,7 @@ export function resolveBotTurnImageUrl(message) {
 export function hasUserTurnContent(message) {
   if (!message || typeof message !== "object") return false;
   return (
-    Boolean(String(message.user_message ?? "").trim()) ||
+    hasDisplayUserMessageText(message.user_message) ||
     Boolean(resolveUserTurnImageUrl(message))
   );
 }
