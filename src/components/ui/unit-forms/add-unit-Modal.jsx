@@ -210,6 +210,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     "buttons.saveUnit",
     locale === "ar" ? "حفظ الوحدة" : "Save Unit"
   );
+  const savingLabel = translate(
+    "buttons.saving",
+    locale === "ar" ? "جاري الحفظ..." : "Saving..."
+  );
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   // Track over all upload statecl
@@ -1110,7 +1114,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
                 onClick={() => setCurrentStep((prev) => prev - 1)}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
-                {t.buttons?.back || t.buttons?.previous || "Previous"}
+                {backLabel}
               </button>
             )}
             {currentStep < 3 ? (
@@ -1122,7 +1126,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
                 }}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
               >
-                {t.buttons?.next || "Next"}
+                {nextLabel}
               </button>
             ) : (
               <button
@@ -1132,8 +1136,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {isUploading || updateUnitMutation?.isPending
-                  ? t.buttons?.saving || "Saving..."
-                  : t.buttons?.saveUnit || "Save Unit"}
+                  ? savingLabel
+                  : saveUnitLabel}
               </button>
             )}
           </div>

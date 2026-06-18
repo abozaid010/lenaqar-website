@@ -1,9 +1,12 @@
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import ResalePageQuery from "@/components/ui/resale_page_query";
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 
 import { SITE_URL } from "../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { fetchPendingApprovalUnitsServer } from "@/lib/units/unit-api";
 
 export async function generateMetadata() {
   return {
@@ -25,6 +28,14 @@ export default async function PendingApprovalUnitsPage({
 }) {
   const searchParams = await rawSearchParams;
 
+  const cookieStore = await cookies();
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || "";
+
+  const initialUnitsData = await fetchPendingApprovalUnitsServer(
+    searchParams,
+    clientId
+  );
+
   return (
     <>
       <BreadcrumbSchema
@@ -38,7 +49,10 @@ export default async function PendingApprovalUnitsPage({
       />
       <div className="h-full flex flex-col">
         <Suspense fallback={<LoadingSpinner />}>
-          <ResalePageQuery searchParams={searchParams} />
+          <ResalePageQuery
+            searchParams={searchParams}
+            initialUnitsData={initialUnitsData}
+          />
         </Suspense>
       </div>
     </>

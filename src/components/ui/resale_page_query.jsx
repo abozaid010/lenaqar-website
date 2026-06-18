@@ -12,11 +12,11 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { ChevronDown } from "lucide-react";
-import { useMemo, useState, useEffect, useRef } from "react";
+import { useMemo, useState, useRef } from "react";
 
 const DEFAULT_VISIBILITY = "pending_approval";
 
-export default function ResalePageQuery({ searchParams }) {
+export default function ResalePageQuery({ searchParams, initialUnitsData = null }) {
   const { t, locale } = useI18n();
   const visibilityOptions = useMemo(() => ([
     { value: "pending_approval", label: t?.unitsFilter?.pendingApproval ?? "Pending Approval" },
@@ -58,13 +58,18 @@ export default function ResalePageQuery({ searchParams }) {
     return JSON.stringify(withPrice);
   }, [searchParams, filter, updatedAtDate, propertyType, minPrice, maxPrice]);
 
-  const { isFetching, units, pagination, isLoading, isError, error, refetch } =
-    usePendingApprovalUnitsPageData(searchParamsKey);
+  const hasActiveClientFilters =
+    Boolean(updatedAtDate?.trim()) ||
+    Boolean(propertyType?.trim()) ||
+    Boolean(minPrice) ||
+    Boolean(maxPrice) ||
+    filter !== DEFAULT_VISIBILITY;
 
-  // Refetch when filters change to ensure API is triggered
-  useEffect(() => {
-    refetch();
-  }, [filter, updatedAtDate, propertyType, minPrice, maxPrice, refetch]);
+  const initialDataForQuery =
+    !hasActiveClientFilters && initialUnitsData != null ? initialUnitsData : null;
+
+  const { isFetching, units, pagination, isLoading, isError, error, refetch } =
+    usePendingApprovalUnitsPageData(searchParamsKey, initialDataForQuery);
 
   const handleFilterChange = (e) => {
     const next = e?.target?.value || "";

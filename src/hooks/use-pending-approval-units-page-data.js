@@ -2,9 +2,13 @@
 
 import { fetchPendingApprovalUnits } from "@/utils/api";
 import { unitKeys } from "@/utils/query-utils";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
-export function usePendingApprovalUnitsPageData(searchParams) {
+/**
+ * @param {string|object} searchParams - Serialized filter payload
+ * @param {object|null} [initialData] - Server-prefetched first page (from RSC)
+ */
+export function usePendingApprovalUnitsPageData(searchParams, initialData = null) {
   const safeSearchParams =
     typeof searchParams === "string" && searchParams ? searchParams : "{}";
 
@@ -12,7 +16,11 @@ export function usePendingApprovalUnitsPageData(searchParams) {
     queryKey: unitKeys.pendingApprovalList(safeSearchParams),
     queryFn: () => fetchPendingApprovalUnits(safeSearchParams),
     staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    placeholderData: keepPreviousData,
+    ...(initialData != null ? { initialData } : {}),
   });
 
   return {
