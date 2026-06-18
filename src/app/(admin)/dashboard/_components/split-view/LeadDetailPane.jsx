@@ -52,7 +52,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
-import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
@@ -113,8 +112,11 @@ export default function LeadDetailPane({
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { selectedLeads, hasSelection, clearLeadSelection } = useDashboardLeadsBulk();
-  const { canCreate: canCreateAction, isReady: actionsPermissionReady } =
-    useModuleActions("conversation");
+  const {
+    canCreate: canCreateAction,
+    canDelete: canDeleteLead,
+    isReady: actionsPermissionReady,
+  } = useModuleActions("conversation");
   const [bulkActionOpen, setBulkActionOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
   const [openActionsModal, setOpenActionsModal] = useState(false);
@@ -669,11 +671,6 @@ export default function LeadDetailPane({
     () => getActionLabel(normalizeLastAction(leadSummary?.last_action), locale),
     [leadSummary?.last_action, locale]
   );
-
-  const canDeleteLead = useMemo(() => {
-    const r = getRoleFromToken();
-    return r != null && String(r).toLowerCase() === "owner";
-  }, []);
 
   // Dashboard list summary: same fields as GET /messages/v2/all → users[]:
   // `company_name`, `requirement_name` (building type slug or free text).

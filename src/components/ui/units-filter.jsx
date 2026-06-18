@@ -589,7 +589,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Developer Dropdown */}
+        {/* Developer Dropdown — temporarily hidden; filter by developer not needed at this stage
         <div className="flex-1 min-w-[140px] max-w-[200px]">
           <SearchableDropdownSelect
             options={developers}
@@ -621,6 +621,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
+        */}
 
         {/* Compounds Dropdown */}
         <div className="flex-1 min-w-[140px] max-w-[200px]">
