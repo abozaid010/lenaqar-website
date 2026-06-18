@@ -19,6 +19,24 @@ import { rateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rateLim
 const BFF_RATE_LIMIT = 300; // requests
 const BFF_WINDOW_MS = 60_000; // 60 seconds
 
+async function parseProxyBody(request) {
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("application/json")) {
+    const raw = await request.text().catch(() => "");
+    if (!raw.trim()) return { body: undefined, multipart: false };
+    try {
+      return { body: JSON.parse(raw), multipart: false };
+    } catch {
+      return { body: {}, multipart: false };
+    }
+  }
+  if (contentType.includes("multipart/form-data")) {
+    return { body: null, multipart: true };
+  }
+  const text = await request.text().catch(() => "");
+  return { body: text || undefined, multipart: false };
+}
+
 async function handleRequest(request, context) {
   // ── Rate limiting ──────────────────────────────────────────────────────────
   const ip = getClientIp(request);
@@ -60,19 +78,21 @@ async function handleRequest(request, context) {
   try {
     let response;
 
-    if (method === "get" || method === "delete") {
-      response = await axiosInstance[method](url, { headers: extraHeaders });
+    if (method === "get") {
+      response = await axiosInstance.get(url, { headers: extraHeaders });
     } else {
-      const contentType = request.headers.get("content-type") || "";
-      let body;
-      if (contentType.includes("application/json")) {
-        body = await request.json().catch(() => ({}));
-      } else if (contentType.includes("multipart/form-data")) {
+      const { body, multipart } = await parseProxyBody(request);
+      if (multipart) {
         return NextResponse.json({ error: "Use /api/upload for file uploads" }, { status: 400 });
-      } else {
-        body = await request.text().catch(() => "");
       }
-      response = await axiosInstance[method](url, body, { headers: extraHeaders });
+
+      if (method === "delete") {
+        const config = { headers: extraHeaders };
+        if (body !== undefined) config.data = body;
+        response = await axiosInstance.delete(url, config);
+      } else {
+        response = await axiosInstance[method](url, body, { headers: extraHeaders });
+      }
     }
 
     return NextResponse.json(response.data, { status: response.status || 200 });

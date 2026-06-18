@@ -1157,7 +1157,7 @@ export default {
     },
   },
   uploadExcel: {
-    button: "Upload Excel",
+    button: "Excel",
     title: "Upload Units Excel Sheet",
     dragDrop: "Drag and drop your Excel file here, or",
     browseFiles: "Choose file",

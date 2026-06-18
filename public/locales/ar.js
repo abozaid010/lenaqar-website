@@ -1044,7 +1044,7 @@ export default {
     },
   },
   uploadExcel: {
-    button: "رفع ملف إكسل",
+    button: " ملف",
     title: "رفع ملف إكسل للوحدات",
     dragDrop: "اسحب وأفلت ملف الإكسل هنا، أو",
     browseFiles: "Choose file",

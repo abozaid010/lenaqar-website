@@ -2,7 +2,7 @@
  * Image utility functions for handling various image loading scenarios
  */
 
-import { IMAGE_BASE_URL } from "@/lib/apiConfig";
+import { IMAGE_BASE_URL } from "@/lib/imageConfig";
 import { getAllowedImageHostnames } from "@/config/imageHosts";
 
 /**
