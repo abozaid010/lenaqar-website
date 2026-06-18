@@ -12,9 +12,13 @@ import {
 import {
   addUnitToCache,
   removeUnitFromCache,
+  removeUnitFromPendingApprovalCache,
+  refetchPendingApprovalQueriesIfEmpty,
   unitKeys,
+  updateUnitInPendingApprovalCache,
   updateUnitsInCache,
 } from "@/utils/query-utils";
+import { isPendingOrHiddenVisibility } from "@/constants/property-visibility";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 function isSuccessfulApiResponse(res) {
@@ -110,7 +114,6 @@ export function useUpdateUnit() {
         queryKey: unitKeys.all,
       });
 
-      console.log("Previous units before update:", previousUnits);
       // Optimistically update the unit in the cache
       updateUnitsInCache(queryClient, formData.unitId, (oldUnit) => ({
         ...oldUnit,
@@ -122,19 +125,29 @@ export function useUpdateUnit() {
       return { previousUnits };
     },
     onSuccess: (data, variables) => {
-      // Mark the unit as no longer optimistic
-      updateUnitsInCache(queryClient, variables.unitId, (unit) => ({
+      const unitId = variables.unitId;
+      const visibility = variables.visibility ?? variables.status;
+
+      updateUnitsInCache(queryClient, unitId, (unit) => ({
         ...unit,
+        ...variables,
         _isOptimistic: false,
       }));
 
-      // Invalidate queries to refresh the data
-      queryClient.invalidateQueries({ queryKey: unitKeys.all });
+      if (!isPendingOrHiddenVisibility(visibility)) {
+        const emptyKeys = removeUnitFromPendingApprovalCache(queryClient, unitId);
+        refetchPendingApprovalQueriesIfEmpty(queryClient, emptyKeys);
+      } else {
+        updateUnitInPendingApprovalCache(queryClient, unitId, (unit) => ({
+          ...unit,
+          ...variables,
+          _isOptimistic: false,
+        }));
+      }
 
-      // Also invalidate unit details if it exists
-      if (data.unitId) {
+      if (unitId) {
         queryClient.invalidateQueries({
-          queryKey: unitKeys.detail(data.unitId),
+          queryKey: unitKeys.detail(unitId),
         });
       }
     },
@@ -166,9 +179,10 @@ export function useApproveUnitVisibility() {
       return rawUnit?.unitId;
     },
     onSuccess: (unitId) => {
-      queryClient.invalidateQueries({ queryKey: unitKeys.all });
-
       if (unitId) {
+        const emptyKeys = removeUnitFromPendingApprovalCache(queryClient, unitId);
+        refetchPendingApprovalQueriesIfEmpty(queryClient, emptyKeys);
+
         queryClient.invalidateQueries({
           queryKey: unitKeys.detail(unitId),
         });

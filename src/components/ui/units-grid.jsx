@@ -57,6 +57,41 @@ export default function UnitsGrid({
     return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
+  const getRentPeriodLabel = (period) =>
+    translate(
+      `rental.${period}`,
+      period === "daily"
+        ? locale === "ar"
+          ? "يومي"
+          : "day"
+        : period === "weekly"
+          ? locale === "ar"
+            ? "أسبوعي"
+            : "week"
+          : locale === "ar"
+            ? "شهري"
+            : "month"
+    );
+
+  const formatRentPriceWithPeriod = (price, period) => {
+    const formatted = formatPrice(price);
+    if (!formatted) return null;
+    return `${formatted} ${egpLabel}/${getRentPeriodLabel(period)}`;
+  };
+
+  const getRentPriceLabel = (unit) => {
+    const durations = [
+      ["daily", unit.rentDurationType?.daily?.price],
+      ["weekly", unit.rentDurationType?.weekly?.price],
+      ["monthly", unit.rentDurationType?.monthly?.price],
+    ];
+    for (const [period, price] of durations) {
+      const label = formatRentPriceWithPeriod(price, period);
+      if (label) return label;
+    }
+    return formatRentPriceWithPeriod(unit.rentPrice, "monthly");
+  };
+
   const getUnitHref = (unit) =>
     buildUnitDetailHrefFromListItem(unit, {
       readonly,
@@ -204,17 +239,10 @@ export default function UnitsGrid({
                     {u.purpose === "Rent" || u.purpose === "rent" ? (
                       <div className="flex items-center justify-between w-full">
                         <div className="font-semibold text-[21px]">
-                          {u.rentDurationType?.daily?.price && formatPrice(u.rentDurationType.daily.price)
-                            ? `${formatPrice(u.rentDurationType.daily.price)} ${egpLabel}/day`
-                            : u.rentDurationType?.weekly?.price && formatPrice(u.rentDurationType.weekly.price)
-                              ? `${formatPrice(u.rentDurationType.weekly.price)} ${egpLabel}/week`
-                              : u.rentDurationType?.monthly?.price && formatPrice(u.rentDurationType.monthly.price)
-                                ? `${formatPrice(u.rentDurationType.monthly.price)} ${egpLabel}/month`
-                                : u.rentPrice && formatPrice(u.rentPrice)
-                                  ? `${formatPrice(u.rentPrice)} ${egpLabel}`
-                                  : allowMissingFields
-                                    ? "—"
-                                    : t?.common?.na || "N/A"}
+                          {getRentPriceLabel(u) ||
+                            (allowMissingFields
+                              ? "—"
+                              : t?.common?.na || "N/A")}
                         </div>
                       </div>
                     ) : (
