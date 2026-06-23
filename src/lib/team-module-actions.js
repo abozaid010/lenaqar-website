@@ -75,7 +75,12 @@ export function deriveTeamMemberModuleActionsFromParent(parentModuleActions, rol
     const keySet = new Set(baseKeys);
     TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER.forEach((m) => keySet.add(m));
     for (const key of keySet) {
-      out[key] = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
+      let actions = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
+      // Add WhatsApp actions for conversation module
+      if (key === "conversation") {
+        actions = [...actions, "whatsapp", "whatsapp_automation"];
+      }
+      out[key] = actions;
     }
     return out;
   }

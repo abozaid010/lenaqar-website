@@ -884,7 +884,10 @@ export const addUnitSaleViaExcel = withErrorHandling(async (formData) => {
   // including projects_not_updated for optional cleanup.
   const response = await axiosInstance.post(
     `/units/v2/import_units_by_developer`,
-    formData
+    formData,
+    {
+      timeout: 300000, // 5 minutes
+    }
   );
   return response.data;
 });
