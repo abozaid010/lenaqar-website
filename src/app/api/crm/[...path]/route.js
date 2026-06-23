@@ -75,11 +75,20 @@ async function handleRequest(request, context) {
   const qs = searchParams.toString();
   const url = `${backendPath}${qs ? `?${qs}` : ""}`;
 
+  // Check if this is the import units endpoint that needs longer timeout
+  const isImportUnitsEndpoint = backendPath === "/units/v2/import_units_by_developer";
+  const longTimeout = 300000; // 5 minutes
+
   try {
     let response;
+    const config = { headers: extraHeaders };
+    
+    if (isImportUnitsEndpoint) {
+      config.timeout = longTimeout;
+    }
 
     if (method === "get") {
-      response = await axiosInstance.get(url, { headers: extraHeaders });
+      response = await axiosInstance.get(url, config);
     } else {
       const { body, multipart } = await parseProxyBody(request);
       if (multipart) {
@@ -87,11 +96,10 @@ async function handleRequest(request, context) {
       }
 
       if (method === "delete") {
-        const config = { headers: extraHeaders };
         if (body !== undefined) config.data = body;
         response = await axiosInstance.delete(url, config);
       } else {
-        response = await axiosInstance[method](url, body, { headers: extraHeaders });
+        response = await axiosInstance[method](url, body, config);
       }
     }
 
