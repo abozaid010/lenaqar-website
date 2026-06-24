@@ -13,6 +13,10 @@ export default function DashboardPageClient({ appliedFilters }) {
   const { translate } = useI18n();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
+  const filterPanelTitle = translate("dashboardFilter.panel.title");
+  const filterPanelOpenLabel = translate("dashboardFilter.panel.open");
+  const filterPanelCloseLabel = translate("dashboardFilter.panel.close");
+
   useEffect(() => {
     if (!isFiltersOpen) return;
     const onKeyDown = (event) => {
@@ -32,19 +36,17 @@ export default function DashboardPageClient({ appliedFilters }) {
               onClick={() => setIsFiltersOpen(true)}
               aria-expanded={false}
               className="no-print absolute end-3 top-3 z-30 inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-3 rounded-md bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 hover:shadow-md active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
-              aria-label={translate("dashboardFilter.panel.open", "Open filters")}
+              aria-label={filterPanelOpenLabel}
             >
               <SlidersHorizontal className="w-4 h-4 shrink-0" aria-hidden />
-              <span className="hidden sm:inline">
-                {translate("dashboardFilter.panel.title", "Filters")}
-              </span>
+              <span>{filterPanelTitle}</span>
             </button>
           ) : null}
 
           {isFiltersOpen ? (
             <button
               type="button"
-              aria-label={translate("dashboardFilter.panel.close", "Close filters")}
+              aria-label={filterPanelCloseLabel}
               className="no-print absolute inset-0 z-40 bg-black/20"
               onClick={() => setIsFiltersOpen(false)}
             />
@@ -60,13 +62,13 @@ export default function DashboardPageClient({ appliedFilters }) {
           >
             <div className="flex items-center justify-between gap-2 border-b border-gray-100 px-3 py-2.5 shrink-0">
               <h2 className="text-sm font-semibold text-gray-900">
-                {translate("dashboardFilter.panel.title", "Filters")}
+                {filterPanelTitle}
               </h2>
               <button
                 type="button"
                 onClick={() => setIsFiltersOpen(false)}
                 className="inline-flex items-center justify-center rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                aria-label={translate("dashboardFilter.panel.close", "Close filters")}
+                aria-label={filterPanelCloseLabel}
               >
                 <X className="w-4 h-4" aria-hidden />
               </button>

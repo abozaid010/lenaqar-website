@@ -246,7 +246,7 @@ export default function LeadsListPane({
               "leadsSearchPlaceholder",
               "Search by name, phone, or company",
             )}
-            className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm"
+            className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm focus:!border-primary focus:!shadow-[0_0_0_1px] focus:!shadow-primary/25"
             autoComplete="off"
           />
           <button
