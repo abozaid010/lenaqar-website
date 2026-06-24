@@ -158,7 +158,7 @@ export default function PaymentPlansList({
   };
 
   // Custom search fields for payment plans
-  const paymentPlanSearchFields = ["name", "downpayment_percentage", "installment_years", "installments_years", "maintenance_fee"];
+  const paymentPlanSearchFields = ["name", "downpayment_percentage", "installment_years", "installments_years", "installment_increasing_percentage", "maintenance_fee"];
 
   // Custom renderer for payment plan options
   const renderPaymentPlanOption = (plan, index, isSelected, isHighlighted) => {

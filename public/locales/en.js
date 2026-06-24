@@ -88,6 +88,7 @@ export default {
     failedToRenameContact: "Failed to rename contact",
     contactUpdated: "Contact updated",
     failedToUpdateContact: "Failed to update contact",
+    updateFailed: "Update failed",
     requirementsSaved: "Requirements saved",
     failedToSaveRequirements: "Failed to save requirements",
     clientCreated: "Client created successfully!",
@@ -606,6 +607,22 @@ export default {
       somethingWentWrong: "Something went wrong.",
     },
   },
+  leadsSearchPlaceholder: "Search by name, phone, or company",
+  ownerType: {
+    owner: "Owner",
+    broker: "Broker",
+    developer: "Developer",
+  },
+  editContact: {
+    title: "Edit contact",
+    name: "Name",
+    company: "Company / Agency",
+    ownerType: "Lead type",
+    ownerTypePlaceholder: "Not set",
+    notes: "Notes",
+    notesPlaceholder: "Add a note...",
+    notesHint: "New note is appended, not overwritten.",
+  },
   leadDetail: {
     requirementSummary: {
       title: "Lead Requirement",
@@ -746,6 +763,10 @@ export default {
       clearAll: "Clear All",
     },
 
+    ownerType: {
+      allTypes: "All Types",
+      selected: "{count} selected",
+    },
     datePicker: {
       startDate: "Start Date",
       endDate: "End Date",
@@ -1415,6 +1436,9 @@ export default {
     selectCompound: "Select project",
     selectPurpose: "Select purpose",
     selectCity: "Select city",
+    selectDistrict: "Select district",
+    selectCityFirst: "Select a city first",
+    locationFromProject: "Location filled from project — you can change it",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",

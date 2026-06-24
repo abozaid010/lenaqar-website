@@ -54,8 +54,10 @@ import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import TagChip from "@/components/ui/tag-chip";
 import EditRequirementDialog from "./EditRequirementDialog";
+import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
+import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
 import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
@@ -123,6 +125,7 @@ export default function LeadDetailPane({
   const [rowActions, setRowActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
   const [editReqOpen, setEditReqOpen] = useState(false);
+  const [editContactOpen, setEditContactOpen] = useState(false);
   const [creatingMatch, setCreatingMatch] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -215,6 +218,12 @@ export default function LeadDetailPane({
 
   const clientId = data?.data?.client_id;
   const displayName = leadSummary?.name || data?.data?.name || "";
+  const ownerType = normalizeOwnerType(
+    leadSummary?.owner_type ?? data?.data?.owner_type,
+  );
+  const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
+  const companyName =
+    leadSummary?.company_name ?? data?.data?.company_name ?? "";
 
   const clearSelection = useCallback(() => {
     const usp = new URLSearchParams(searchParams.toString());
@@ -892,7 +901,32 @@ export default function LeadDetailPane({
                 {headerPhoneDisplay}
               </span>
             ) : null}
+            {ownerTypeLabel ? (
+              <span
+                className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none ${
+                  ownerType === "broker"
+                    ? "bg-amber-50 text-amber-700"
+                    : ownerType === "developer"
+                      ? "bg-purple-50 text-purple-700"
+                      : "bg-sky-50 text-sky-700"
+                }`}
+              >
+                {ownerTypeLabel}
+              </span>
+            ) : null}
           </div>
+          <button
+            type="button"
+            onClick={() => setEditContactOpen(true)}
+            className="shrink-0 inline-flex items-center gap-1 text-xs text-primary hover:bg-primary/5 px-2 py-1 rounded transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+            title={translate("editContact.title", "Edit contact")}
+            aria-label={translate("editContact.title", "Edit contact")}
+          >
+            <Pencil className="w-3.5 h-3.5" aria-hidden />
+            <span className="hidden sm:inline">
+              {translate("common.edit", common.edit)}
+            </span>
+          </button>
           {clientId && userId && !isLoading && data?.data ? (
             <ToggleReplyType
               key={userId}
@@ -953,8 +987,8 @@ export default function LeadDetailPane({
           className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white"
         >
           {activeTab === "conversations" && (
-            <div className="flex-1 min-h-0 flex flex-col bg-gray-100 overflow-hidden">
-              <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-y-auto py-3 px-2 chat-messages-canvas">
                 <ChatHistory data={chatHistory} />
               </div>
               <SendNewMessageForm
@@ -1093,6 +1127,17 @@ export default function LeadDetailPane({
         open={editReqOpen}
         onClose={() => setEditReqOpen(false)}
         userId={userId}
+        onSuccess={afterMutation}
+      />
+
+      <EditUserInfoDialog
+        open={editContactOpen}
+        onClose={() => setEditContactOpen(false)}
+        userId={userId}
+        initialName={displayName}
+        initialPhone={phoneNumber || ""}
+        initialCompany={companyName}
+        initialOwnerType={ownerType}
         onSuccess={afterMutation}
       />
 

@@ -169,10 +169,10 @@ export default function LeadsListPane({
     appliedSearchQuery;
 
   return (
-    <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-gray-200 bg-white">
-      <div className="p-2 border-b border-gray-100 shrink-0 space-y-2">
+    <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-chat-border chat-list-panel">
+      <div className="p-2 border-b border-chat-border shrink-0 space-y-2 bg-chat-panel-bg">
         {showBulkCheckbox && users.length > 0 && (
-          <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer select-none">
+          <label className="flex items-center gap-2 text-xs text-chat-text-muted cursor-pointer select-none">
             <input
               type="checkbox"
               checked={
@@ -207,7 +207,7 @@ export default function LeadsListPane({
         )}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none" />
             <input
               type="search"
               value={searchInput}
@@ -218,8 +218,8 @@ export default function LeadsListPane({
                   handleSearchSubmit();
                 }
               }}
-              placeholder={translate("searchPlaceholder")}
-              className="w-full h-[34px] pl-8 pr-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder={translate("leadsSearchPlaceholder", "Search by name, phone, or company")}
+              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-2 text-sm"
               autoComplete="off"
             />
           </div>
@@ -243,12 +243,12 @@ export default function LeadsListPane({
           <ListSkeleton />
         ) : showNoSearchMatches ? (
           <>
-            <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-gray-600">
+            <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-chat-text-muted">
               {translate("common.noResultsFound")}
             </div>
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
             {isFetchingNextPage && (
-              <div className="py-2 text-center text-xs text-gray-500">
+              <div className="py-2 text-center text-xs text-chat-text-faint">
                 {common.loadingMore}
               </div>
             )}
@@ -257,7 +257,7 @@ export default function LeadsListPane({
                 <button
                   type="button"
                   onClick={() => fetchNextPage()}
-                  className="w-full py-1 text-xs text-primary border border-gray-200 rounded hover:bg-gray-50"
+                  className="w-full py-1 text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
                 >
                   {common.loadMore}
                 </button>
@@ -283,7 +283,7 @@ export default function LeadsListPane({
             ))}
             <div ref={sentinelRef} className="h-4 w-full shrink-0" aria-hidden />
             {isFetchingNextPage && (
-              <div className="py-2 text-center text-xs text-gray-500">
+              <div className="py-2 text-center text-xs text-chat-text-faint">
                 {common.loadingMore}
               </div>
             )}
@@ -292,7 +292,7 @@ export default function LeadsListPane({
                 <button
                   type="button"
                   onClick={() => fetchNextPage()}
-                  className="w-full py-1 text-xs text-primary border border-gray-200 rounded hover:bg-gray-50"
+                  className="w-full py-1 text-xs text-[#25d366] border border-chat-border rounded hover:bg-chat-hover"
                 >
                   {common.loadMore}
                 </button>

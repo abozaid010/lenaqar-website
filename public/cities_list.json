@@ -1,258 +1,6 @@
 [
   {
     "alias": [
-      "القاهرة",
-      "قاهرة",
-      "القاهرة الجديدة",
-      "قاهره",
-      "مصر",
-      "كايرو",
-      "New Cairo",
-      "new-cairo",
-      "Al qahira",
-      "Alqahira"
-    ],
-    "districts": [
-      {
-        "en_name": "Al Shorouk",
-        "ar_name": "الشروق",
-        "aliases": []
-      },
-      {
-        "en_name": "Sheraton",
-        "ar_name": "الشيراتون",
-        "aliases": []
-      },
-      {
-        "en_name": "Madinaty",
-        "ar_name": "مدينتي",
-        "aliases": []
-      },
-      {
-        "en_name": "Maadi",
-        "ar_name": "المعادي",
-        "aliases": []
-      },
-      {
-        "en_name": "Nour",
-        "ar_name": "نور",
-        "aliases": [
-          "nour tmg",
-          "noor city",
-          "مدينة نور"
-        ]
-      },
-      {
-        "en_name": "Sarai",
-        "ar_name": "سراي",
-        "aliases": []
-      },
-      {
-        "en_name": "Madinet Nasr",
-        "ar_name": "مدينة نصر",
-        "aliases": [
-          "مكرم عبيد"
-        ]
-      },
-      {
-        "en_name": "Fifth Settlement",
-        "ar_name": "التجمع الخامس",
-        "aliases": [
-          "التجمع الخامس",
-          "الحي الخامس",
-          "التجمع 5",
-          "التجمع ٥",
-          "الحي 5",
-          "الحي الخامس",
-          "التجمع",
-          "التعسين الشمالى",
-          "التعسين الجنوبى",
-          "بيت الوطن"
-        ]
-      },
-      {
-        "en_name": "New Heliopolis",
-        "ar_name": "هيليوبوليس الجديدة",
-        "aliases": [
-          "مصر الجديده",
-          "هليوبوليس",
-          "هليوبولس الجديده"
-        ]
-      },
-      {
-        "en_name": "Fustat",
-        "ar_name": "الفسطاط",
-        "aliases": [
-          "فسطاط",
-          "الفسطاط الجديده",
-          "مصر القديمة"
-        ]
-      },
-      {
-        "en_name": "Downtown",
-        "ar_name": "الداون تاون",
-        "aliases": []
-      },
-      {
-        "en_name": "First Settlement",
-        "ar_name": "التجمع الأول",
-        "aliases": [
-          "التجمع الأول",
-          "الحي الأول",
-          "التجمع 1",
-          "الحي 1"
-        ]
-      },
-      {
-        "en_name": "Second Settlement",
-        "ar_name": "التجمع الثاني",
-        "aliases": []
-      },
-      {
-        "en_name": "Third Settlement",
-        "ar_name": "التجمع الثالث",
-        "aliases": [
-          "التجمع الثالث",
-          "الحي الثالث",
-          "التجمع 3",
-          "الحي 3"
-        ]
-      },
-      {
-        "en_name": "Fourth Settlement",
-        "ar_name": "التجمع الرابع",
-        "aliases": [
-          "التجمع الرابع",
-          "التجمع 4",
-          "الحي 4"
-        ]
-      },
-      {
-        "en_name": "Sixth Settlement",
-        "ar_name": "التجمع السادس",
-        "aliases": [
-          "التجمع 6",
-          "الحي 6"
-        ]
-      },
-      {
-        "en_name": "Mostaqbal City",
-        "ar_name": "مدينة المستقبل",
-        "aliases": [
-          " المستقبل سيتى"
-        ]
-      },
-      {
-        "en_name": "El Mokattam",
-        "ar_name": "المقطم",
-        "aliases": []
-      },
-      {
-        "en_name": "El Katameya",
-        "ar_name": "القطامية",
-        "aliases": []
-      },
-      {
-        "en_name": "Badr",
-        "ar_name": "بدر",
-        "aliases": []
-      }
-    ],
-    "ar_name": "القاهرة",
-    "id": "Cairo",
-    "en_name": "Cairo"
-  },
-  {
-    "alias": [
-      "مدينة 6 أكتوبر",
-      "6 October",
-      "6th of October",
-      "٦ اكتوبر"
-    ],
-    "districts": [
-      {
-        "en_name": "The First District",
-        "ar_name": "الحى الاول",
-        "aliases": []
-      },
-      {
-        "en_name": "New October",
-        "ar_name": "6 أكتوبر الجديدة",
-        "aliases": []
-      },
-      {
-        "en_name": "The Second District",
-        "ar_name": "الحى الثاني",
-        "aliases": []
-      },
-      {
-        "en_name": "The Third District",
-        "ar_name": "الحى الثالث",
-        "aliases": []
-      },
-      {
-        "en_name": "The Fourth District",
-        "ar_name": "الحى الرابع",
-        "aliases": []
-      },
-      {
-        "en_name": "The Fifth District",
-        "ar_name": "الحى الخامس",
-        "aliases": []
-      },
-      {
-        "en_name": "The Sixth District",
-        "ar_name": "الحى السادس",
-        "aliases": []
-      },
-      {
-        "en_name": "The Seventh District",
-        "ar_name": "الحى السابع",
-        "aliases": []
-      },
-      {
-        "en_name": "The Eighth District",
-        "ar_name": "الحى الثامن",
-        "aliases": []
-      },
-      {
-        "en_name": "West Somid",
-        "ar_name": "غرب سوميد",
-        "aliases": []
-      },
-      {
-        "en_name": "New Giza",
-        "ar_name": "نيو جيزة",
-        "aliases": [
-          "نيو جيزا"
-        ]
-      },
-      {
-        "en_name": "Al Bashayer District",
-        "ar_name": "حي البشاير",
-        "aliases": []
-      },
-      {
-        "en_name": "Northern Expansions ",
-        "ar_name": "التوسعات الشمالية",
-        "aliases": [
-          "Al-Tosaat Al-Shamalyia"
-        ]
-      },
-      {
-        "en_name": "Eastern Expansions ",
-        "ar_name": "التوسعات الشرقية",
-        "aliases": [
-          "Al-Tosaat Al-Sharqia"
-        ]
-      }
-    ],
-    "ar_name": "6 أكتوبر",
-    "id": "6 October",
-    "en_name": "6 October"
-  },
-  {
-    "alias": [
       "الشيخ زايد",
       "مدينة الشيخ زايد",
       "Sheikh Zayed City"
@@ -263,6 +11,23 @@
         "ar_name": "الحي الأول",
         "aliases": [
           "District 1"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Hyper One Area",
+            "ar_name": "منطقة هايبر وان",
+            "aliases": [
+              "هايبر وان",
+              "Hyperone"
+            ]
+          },
+          {
+            "en_name": "Cairo University Area",
+            "ar_name": "منطقة جامعة القاهرة",
+            "aliases": [
+              "جامعة القاهرة فرع الشيخ زايد"
+            ]
+          }
         ]
       },
       {
@@ -270,27 +35,39 @@
         "ar_name": "الحي الثاني",
         "aliases": [
           "District 2"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Third District",
         "ar_name": "الحي الثالث",
         "aliases": [
           "District 3"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Fourth District",
         "ar_name": "الحي الرابع",
         "aliases": [
           "District 4"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Fifth District",
         "ar_name": "الحي الخامس",
         "aliases": [
           "District 5"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Sheikh Zayed Specialized Hospital Area",
+            "ar_name": "منطقة مستشفى الشيخ زايد التخصصي",
+            "aliases": [
+              "مستشفى الشيخ زايد التخصصي"
+            ]
+          }
         ]
       },
       {
@@ -298,7 +75,8 @@
         "ar_name": "الحي السابع",
         "aliases": [
           "District 7"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Eighth District",
@@ -306,25 +84,39 @@
         "aliases": [
           "District 8",
           "حي الفيلات"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Villas Area",
+            "ar_name": "منطقة الفيلات",
+            "aliases": [
+              "حي الفيلات"
+            ]
+          }
         ]
-      },
-      {
-        "en_name": "Green Belt",
-        "ar_name": "الحزام الأخضر",
-        "aliases": []
       },
       {
         "en_name": "Ninth District",
         "ar_name": "الحي التاسع",
         "aliases": [
           "District 9"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Tenth District",
         "ar_name": "الحي العاشر",
         "aliases": [
           "District 10"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Youth Center Area",
+            "ar_name": "منطقة مركز شباب الشيخ زايد",
+            "aliases": [
+              "مركز شباب الشيخ زايد"
+            ]
+          }
         ]
       },
       {
@@ -332,6 +124,48 @@
         "ar_name": "الحي الحادي عشر",
         "aliases": [
           "District 11"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Mostakbal Axis Area",
+            "ar_name": "منطقة محور المستقبل",
+            "aliases": [
+              "محور المستقبل"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Twelfth District",
+        "ar_name": "الحي الثاني عشر",
+        "aliases": [
+          "District 12"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Thirteenth District",
+        "ar_name": "الحي الثالث عشر",
+        "aliases": [
+          "District 13"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Al Rabwa",
+            "ar_name": "الربوة",
+            "aliases": [
+              "الرابوة",
+              "Al Rabwa Compound"
+            ]
+          },
+          {
+            "en_name": "Al Gehaz Area",
+            "ar_name": "منطقة الجهاز",
+            "aliases": [
+              "عمارات الجهاز",
+              "الجهاز"
+            ]
+          }
         ]
       },
       {
@@ -340,14 +174,47 @@
         "aliases": [
           "District 14",
           "Al Rabwa area"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Sixteenth District",
+        "ar_name": "الحي السادس عشر",
+        "aliases": [
+          "District 16"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Beverly Hills",
+            "ar_name": "بيفرلي هيلز",
+            "aliases": [
+              "Sodic West",
+              "سوديك ويست"
+            ]
+          }
         ]
       },
       {
-        "en_name": "Beverly Hills",
-        "ar_name": "بيفرلي هيلز",
-        "aliases": [
-          "Sodic West",
-          "سوديك ويست"
+        "en_name": "Green Belt",
+        "ar_name": "الحزام الأخضر",
+        "aliases": [],
+        "sub_districts": [
+          {
+            "en_name": "Basin 1",
+            "ar_name": "حوض 1",
+            "aliases": [
+              "حوض ١",
+              "Basin One"
+            ]
+          },
+          {
+            "en_name": "Basin 2",
+            "ar_name": "حوض 2",
+            "aliases": [
+              "حوض ٢",
+              "Basin Two"
+            ]
+          }
         ]
       },
       {
@@ -355,18 +222,35 @@
         "ar_name": "الثورة الخضراء",
         "aliases": [
           "El Thawra El Khadra"
-        ]
+        ],
+        "sub_districts": []
       },
       {
         "en_name": "Sheikh Zayed Axis",
         "ar_name": "محور الشيخ زايد",
-        "aliases": []
+        "aliases": [],
+        "sub_districts": []
       },
       {
         "en_name": "New Zayed",
         "ar_name": "الشيخ زايد الجديدة",
         "aliases": [
-          "نيو زايد"
+          "نيو زايد",
+          "New Sheikh Zayed"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Zayed Greens",
+            "ar_name": "زايد جرينز",
+            "aliases": []
+          },
+          {
+            "en_name": "Waslet Dahshur Area",
+            "ar_name": "منطقة وصلة دهشور",
+            "aliases": [
+              "وصلة دهشور"
+            ]
+          }
         ]
       }
     ],
@@ -381,44 +265,953 @@
     ],
     "districts": [
       {
-        "en_name": "Mohandessin",
-        "ar_name": "المهندسين",
-        "aliases": []
-      },
-      {
-        "en_name": "Hadayek October",
-        "ar_name": "حدائق أكتوبر",
-        "aliases": []
-      },
-      {
-        "en_name": "Agouza",
-        "ar_name": "العجوزة",
-        "aliases": []
-      },
-      {
-        "en_name": "Haram",
-        "ar_name": "الهرم",
-        "aliases": []
-      },
-      {
-        "en_name": "Imbaba",
-        "ar_name": "إمبابة",
-        "aliases": []
-      },
-      {
-        "en_name": "Giza District",
-        "ar_name": "حي الجيزة",
-        "aliases": []
+        "en_name": "Giza",
+        "ar_name": "الجيزة",
+        "aliases": [
+          "حي الجيزة"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Sarayat Al Giza",
+            "ar_name": "سرايات الجيزة",
+            "aliases": [
+              "سرايات الجيزة"
+            ]
+          },
+          {
+            "en_name": "Bahr Al Aazam",
+            "ar_name": "بحر الأعظم",
+            "aliases": [
+              "بحر الاعظم"
+            ]
+          },
+          {
+            "en_name": "Monib",
+            "ar_name": "المنيب",
+            "aliases": []
+          }
+        ]
       },
       {
         "en_name": "Dokki",
         "ar_name": "الدقي",
-        "aliases": []
+        "aliases": [],
+        "sub_districts": [
+          {
+            "en_name": "Mohandessin",
+            "ar_name": "المهندسين",
+            "aliases": [
+              "مهندسين",
+              "المهندسـين"
+            ]
+          },
+          {
+            "en_name": "Bein Al Sarayat",
+            "ar_name": "بين السرايات",
+            "aliases": [
+              "بين السرايات"
+            ]
+          },
+          {
+            "en_name": "Al Masaha",
+            "ar_name": "المساحة",
+            "aliases": [
+              "المساحه"
+            ]
+          },
+          {
+            "en_name": "Al Behoos",
+            "ar_name": "البحوث",
+            "aliases": [
+              "البحوث"
+            ]
+          },
+          {
+            "en_name": "Old Dokki",
+            "ar_name": "الدقي القديم",
+            "aliases": [
+              "الدقي القديم"
+            ]
+          },
+          {
+            "en_name": "New Dokki",
+            "ar_name": "الدقي الجديد",
+            "aliases": [
+              "الدقي الجديد"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Agouza",
+        "ar_name": "العجوزة",
+        "aliases": [],
+        "sub_districts": [
+          {
+            "en_name": "Mohandessin",
+            "ar_name": "المهندسين",
+            "aliases": [
+              "مهندسين"
+            ]
+          },
+          {
+            "en_name": "Mit Oqba",
+            "ar_name": "ميت عقبة",
+            "aliases": [
+              "میت عقبة",
+              "ميت عقبه"
+            ]
+          },
+          {
+            "en_name": "Kafr El Gabal",
+            "ar_name": "كفر الجبل",
+            "aliases": [
+              "كفر الجبل"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Haram",
+        "ar_name": "الهرم",
+        "aliases": [],
+        "sub_districts": [
+          {
+            "en_name": "Hadayek Al Ahram",
+            "ar_name": "حدائق الأهرام",
+            "aliases": [
+              "حدائق الاهرام",
+              "Hadayek El Ahram"
+            ]
+          },
+          {
+            "en_name": "Faisal",
+            "ar_name": "فيصل",
+            "aliases": [
+              "الطالبية",
+              "Faysal"
+            ]
+          },
+          {
+            "en_name": "Al Mariouteya",
+            "ar_name": "المريوطية",
+            "aliases": [
+              "المريوطيه"
+            ]
+          },
+          {
+            "en_name": "Kafr Tuhurmus",
+            "ar_name": "كفر طهرمس",
+            "aliases": [
+              "كفر طهرمس"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Imbaba",
+        "ar_name": "إمبابة",
+        "aliases": [
+          "امبابة",
+          "امبابه"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Warraq",
+            "ar_name": "الوراق",
+            "aliases": [
+              "الوراق"
+            ]
+          },
+          {
+            "en_name": "Bulaq El Dakrour",
+            "ar_name": "بولاق الدكرور",
+            "aliases": [
+              "بولاق الدكرور"
+            ]
+          },
+          {
+            "en_name": "Kerdasa",
+            "ar_name": "كرداسة",
+            "aliases": [
+              "كرداسه"
+            ]
+          },
+          {
+            "en_name": "Qorsaya",
+            "ar_name": "القرصاية",
+            "aliases": [
+              "قرصاية"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Omrania",
+        "ar_name": "العمرانية",
+        "aliases": [
+          "الامبابة",
+          "العمراينة"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Bulaq El Dakrour",
+        "ar_name": "بولاق الدكرور",
+        "aliases": [
+          "بولاق الدكرور"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Hadayek October",
+        "ar_name": "حدائق أكتوبر",
+        "aliases": [
+          "حدايق اكتوبر",
+          "Hadayek October",
+          "October Gardens"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Ibny Beitak",
+            "ar_name": "ابني بيتك",
+            "aliases": [
+              "ابنى بيتك"
+            ]
+          },
+          {
+            "en_name": "Karma",
+            "ar_name": "الكرمة",
+            "aliases": [
+              "الكرمه"
+            ]
+          },
+          {
+            "en_name": "Dreamland",
+            "ar_name": "دريم لاند",
+            "aliases": [
+              "دريم لاند"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "6 October City",
+        "ar_name": "مدينة 6 أكتوبر",
+        "aliases": [
+          "6 October",
+          "مدينة السادس من اكتوبر",
+          "٦ اكتوبر"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "The First District",
+            "ar_name": "الحى الاول",
+            "aliases": [
+              "الحي الاول"
+            ]
+          },
+          {
+            "en_name": "The Second District",
+            "ar_name": "الحى الثاني",
+            "aliases": [
+              "الحي الثاني"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Sheikh Zayed City",
+        "ar_name": "مدينة الشيخ زايد",
+        "aliases": [
+          "الشيخ زايد"
+        ],
+        "sub_districts": []
       }
     ],
     "ar_name": "الجيزة",
     "id": "Giza",
     "en_name": "Giza"
+  },
+  {
+    "alias": [
+      "مدينة 6 أكتوبر",
+      "6 October",
+      "6th of October",
+      "٦ اكتوبر"
+    ],
+    "districts": [
+      {
+        "en_name": "6 October City",
+        "ar_name": "6 أكتوبر",
+        "aliases": [
+          "مدينة 6 أكتوبر",
+          "مدينة السادس من اكتوبر",
+          "Sixth of October",
+          "6th October"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "The First District",
+            "ar_name": "الحى الاول",
+            "aliases": [
+              "الحي الاول",
+              "الحى الأول",
+              "1st District"
+            ]
+          },
+          {
+            "en_name": "The Second District",
+            "ar_name": "الحى الثاني",
+            "aliases": [
+              "الحي الثاني",
+              "الحى الثانى",
+              "2nd District"
+            ]
+          },
+          {
+            "en_name": "The Third District",
+            "ar_name": "الحى الثالث",
+            "aliases": [
+              "الحي الثالث",
+              "الحى الثالث",
+              "3rd District"
+            ]
+          },
+          {
+            "en_name": "The Fourth District",
+            "ar_name": "الحى الرابع",
+            "aliases": [
+              "الحي الرابع",
+              "الحى الرابع",
+              "4th District"
+            ]
+          },
+          {
+            "en_name": "The Fifth District",
+            "ar_name": "الحى الخامس",
+            "aliases": [
+              "الحي الخامس",
+              "الحى الخامس",
+              "5th District"
+            ]
+          },
+          {
+            "en_name": "The Sixth District",
+            "ar_name": "الحى السادس",
+            "aliases": [
+              "الحي السادس",
+              "الحى السادس",
+              "6th District"
+            ]
+          },
+          {
+            "en_name": "The Seventh District",
+            "ar_name": "الحى السابع",
+            "aliases": [
+              "الحي السابع",
+              "الحى السابع",
+              "7th District"
+            ]
+          },
+          {
+            "en_name": "The Eighth District",
+            "ar_name": "الحى الثامن",
+            "aliases": [
+              "الحي الثامن",
+              "الحى الثامن",
+              "8th District"
+            ]
+          },
+          {
+            "en_name": "The Ninth District",
+            "ar_name": "الحى التاسع",
+            "aliases": [
+              "الحي التاسع",
+              "9th District"
+            ]
+          },
+          {
+            "en_name": "The Tenth District",
+            "ar_name": "الحى العاشر",
+            "aliases": [
+              "الحي العاشر",
+              "10th District"
+            ]
+          },
+          {
+            "en_name": "The Eleventh District",
+            "ar_name": "الحى الحادي عشر",
+            "aliases": [
+              "الحى الحادي عشر",
+              "11th District"
+            ]
+          },
+          {
+            "en_name": "The Twelfth District",
+            "ar_name": "الحى الثاني عشر",
+            "aliases": [
+              "الحى الثاني عشر",
+              "12th District"
+            ]
+          },
+          {
+            "en_name": "West Somid",
+            "ar_name": "غرب سوميد",
+            "aliases": [
+              "غرب سوميد",
+              "West Soumid"
+            ]
+          },
+          {
+            "en_name": "Al Motamayez District",
+            "ar_name": "الحي المتميز",
+            "aliases": [
+              "الحي المتميز",
+              "حي المتميز",
+              "Motamayez"
+            ]
+          },
+          {
+            "en_name": "Al Bashayer District",
+            "ar_name": "حي البشاير",
+            "aliases": [
+              "البشاير",
+              "Bashayer"
+            ]
+          },
+          {
+            "en_name": "Northern Expansions",
+            "ar_name": "التوسعات الشمالية",
+            "aliases": [
+              "Al-Tosaat Al-Shamalyia",
+              "التوسعات الشماليه"
+            ]
+          },
+          {
+            "en_name": "Eastern Expansions",
+            "ar_name": "التوسعات الشرقية",
+            "aliases": [
+              "Al-Tosaat Al-Sharqia",
+              "التوسعات الشرقيه"
+            ]
+          },
+          {
+            "en_name": "Southern Residential Area",
+            "ar_name": "منطقة جنوبية سكنية",
+            "aliases": [
+              "المنطقة السكنية الجنوبية",
+              "South Residential Area"
+            ]
+          },
+          {
+            "en_name": "Hadayek October",
+            "ar_name": "حدائق أكتوبر",
+            "aliases": [
+              "Hadayek October",
+              "October Gardens",
+              "حدايق اكتوبر"
+            ]
+          },
+          {
+            "en_name": "Industrial Zone",
+            "ar_name": "المنطقة الصناعية",
+            "aliases": [
+              "المنطقة الصناعية",
+              "Industrial Area"
+            ]
+          },
+          {
+            "en_name": "Media Production City",
+            "ar_name": "مدينة الإنتاج الإعلامي",
+            "aliases": [
+              "مدينة الانتاج الاعلامي",
+              "Media City"
+            ]
+          },
+          {
+            "en_name": "Al Ashgar District",
+            "ar_name": "حي الأشجار",
+            "aliases": [
+              "الاشجار",
+              "Ashgar"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "New October",
+        "ar_name": "6 أكتوبر الجديدة",
+        "aliases": [
+          "مدينة 6 أكتوبر الجديدة",
+          "New 6 October"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "New October Core",
+            "ar_name": "مركز أكتوبر الجديدة",
+            "aliases": []
+          },
+          {
+            "en_name": "New October Expansion Areas",
+            "ar_name": "مناطق توسع أكتوبر الجديدة",
+            "aliases": []
+          }
+        ]
+      },
+      {
+        "en_name": "October Gardens",
+        "ar_name": "حدائق أكتوبر",
+        "aliases": [
+          "Hadayek October",
+          "Hadayek El October",
+          "October Gardens"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Ibny Beitak Area",
+            "ar_name": "ابني بيتك",
+            "aliases": [
+              "ابنى بيتك"
+            ]
+          },
+          {
+            "en_name": "National Housing Area",
+            "ar_name": "الإسكان القومي",
+            "aliases": [
+              "الاسكان القومي"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "New Giza",
+        "ar_name": "نيو جيزة",
+        "aliases": [
+          "نيو جيزا"
+        ],
+        "sub_districts": []
+      }
+    ],
+    "ar_name": "6 أكتوبر",
+    "id": "6 October",
+    "en_name": "6 October"
+  },
+  {
+    "alias": [
+      "القاهرة",
+      "قاهرة",
+      "القاهرة الجديدة",
+      "قاهره",
+      "مصر",
+      "كايرو",
+      "New Cairo",
+      "new-cairo",
+      "Al qahira",
+      "Alqahira"
+    ],
+    "districts": [
+      {
+        "en_name": "Abbassia",
+        "ar_name": "العباسية",
+        "aliases": [
+          "العباسيه",
+          "Abbasiya"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Zamalek",
+        "ar_name": "الزمالك",
+        "aliases": [],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Mokattam",
+        "ar_name": "المقطم",
+        "aliases": [
+          "Moqattam",
+          "Muqattam"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Maadi",
+        "ar_name": "المعادي",
+        "aliases": [],
+        "sub_districts": [
+          {
+            "en_name": "Maadi Sarayat",
+            "ar_name": "سرايات المعادي",
+            "aliases": [
+              "سرايات المعادي",
+              "Maadi Sarayat"
+            ]
+          },
+          {
+            "en_name": "Degla",
+            "ar_name": "دجلة",
+            "aliases": [
+              "دجله",
+              "Maadi Degla"
+            ]
+          },
+          {
+            "en_name": "New Maadi",
+            "ar_name": "المعادي الجديدة",
+            "aliases": [
+              "المعادي الجديدة"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Heliopolis",
+        "ar_name": "مصر الجديدة",
+        "aliases": [
+          "مصر الجديده",
+          "Masr El Gedida"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Sheraton",
+            "ar_name": "شيراتون",
+            "aliases": [
+              "الشيراتون"
+            ]
+          },
+          {
+            "en_name": "Korba",
+            "ar_name": "الكوربة",
+            "aliases": [
+              "الكوربه"
+            ]
+          },
+          {
+            "en_name": "Nozha",
+            "ar_name": "النزهة",
+            "aliases": [
+              "النزهه"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "New Cairo",
+        "ar_name": "القاهرة الجديدة",
+        "aliases": [
+          "القاهرة الجديدة",
+          "New Cairo City"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "First Settlement",
+            "ar_name": "التجمع الأول",
+            "aliases": [
+              "التجمع الأول",
+              "الحي الأول",
+              "التجمع 1",
+              "الحي 1"
+            ]
+          },
+          {
+            "en_name": "Second Settlement",
+            "ar_name": "التجمع الثاني",
+            "aliases": [
+              "التجمع الثاني",
+              "الحي الثاني",
+              "التجمع 2",
+              "الحي 2"
+            ]
+          },
+          {
+            "en_name": "Third Settlement",
+            "ar_name": "التجمع الثالث",
+            "aliases": [
+              "التجمع الثالث",
+              "الحي الثالث",
+              "التجمع 3",
+              "الحي 3"
+            ]
+          },
+          {
+            "en_name": "Fourth Settlement",
+            "ar_name": "التجمع الرابع",
+            "aliases": [
+              "التجمع الرابع",
+              "التجمع 4",
+              "الحي 4"
+            ]
+          },
+          {
+            "en_name": "Fifth Settlement",
+            "ar_name": "التجمع الخامس",
+            "aliases": [
+              "التجمع الخامس",
+              "الحي الخامس",
+              "التجمع 5",
+              "التجمع ٥",
+              "الحي 5",
+              "الحي الخامس",
+              "التجمع",
+              "بيت الوطن"
+            ],
+            "sub_districts": [
+              {
+                "en_name": "Al Narges",
+                "ar_name": "النرجس",
+                "aliases": [
+                  "النرجس",
+                  "Al Nargis"
+                ]
+              },
+              {
+                "en_name": "Al Banafseg",
+                "ar_name": "البنفسج",
+                "aliases": [
+                  "البنفسج"
+                ]
+              },
+              {
+                "en_name": "Al Yasmeen",
+                "ar_name": "الياسمين",
+                "aliases": [
+                  "الياسمين"
+                ]
+              },
+              {
+                "en_name": "Al Lotus",
+                "ar_name": "اللوتس",
+                "aliases": [
+                  "اللوتس"
+                ]
+              },
+              {
+                "en_name": "Al Andalus",
+                "ar_name": "الأندلس",
+                "aliases": [
+                  "الاندلس"
+                ]
+              },
+              {
+                "en_name": "North Investors",
+                "ar_name": "شمال المستثمرين",
+                "aliases": [
+                  "شمال المستثمرين"
+                ]
+              },
+              {
+                "en_name": "South Investors",
+                "ar_name": "جنوب المستثمرين",
+                "aliases": [
+                  "جنوب المستثمرين"
+                ]
+              },
+              {
+                "en_name": "East Academy",
+                "ar_name": "شرق الأكاديمية",
+                "aliases": [
+                  "شرق الاكاديمية"
+                ]
+              },
+              {
+                "en_name": "South Academy",
+                "ar_name": "جنوب الأكاديمية",
+                "aliases": [
+                  "جنوب الاكاديمية"
+                ]
+              },
+              {
+                "en_name": "Street 90",
+                "ar_name": "شارع التسعين",
+                "aliases": [
+                  "التسعين",
+                  "90 Street",
+                  "North 90",
+                  "South 90"
+                ]
+              },
+              {
+                "en_name": "Choueifat",
+                "ar_name": "الشويفات",
+                "aliases": [
+                  "الشويفات"
+                ]
+              },
+              {
+                "en_name": "Katameya Heights",
+                "ar_name": "قطامية هايتس",
+                "aliases": [
+                  "كاتامية هايتس"
+                ]
+              },
+              {
+                "en_name": "Cairo Festival City",
+                "ar_name": "كايرو فستيفال سيتي",
+                "aliases": [
+                  "CFC"
+                ]
+              },
+              {
+                "en_name": "Taj City",
+                "ar_name": "تاج سيتي",
+                "aliases": [
+                  "تاج سيتى"
+                ]
+              },
+              {
+                "en_name": "Rehab City",
+                "ar_name": "الرحاب",
+                "aliases": [
+                  "مدينة الرحاب",
+                  "Rehab"
+                ]
+              },
+              {
+                "en_name": "Madinaty",
+                "ar_name": "مدينتي",
+                "aliases": []
+              },
+              {
+                "en_name": "New Heliopolis",
+                "ar_name": "هيليوبوليس الجديدة",
+                "aliases": [
+                  "هليوبوليس الجديدة"
+                ]
+              }
+            ]
+          },
+          {
+            "en_name": "Sixth Settlement",
+            "ar_name": "التجمع السادس",
+            "aliases": [
+              "التجمع 6",
+              "الحي 6"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Old Cairo",
+        "ar_name": "القاهرة القديمة",
+        "aliases": [
+          "مصر القديمة"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Fustat",
+            "ar_name": "الفسطاط",
+            "aliases": [
+              "فسطاط",
+              "الفسطاط الجديدة"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "Downtown",
+        "ar_name": "وسط البلد",
+        "aliases": [
+          "الداون تاون"
+        ],
+        "sub_districts": []
+      }
+    ],
+    "ar_name": "القاهرة",
+    "id": "Cairo",
+    "en_name": "Cairo"
+  },
+  {
+    "id": "Helwan",
+    "en_name": "Helwan",
+    "ar_name": "حلوان",
+    "alias": [
+      "حلوان",
+      "Helwan",
+      "Hulwan"
+    ],
+    "districts": [
+      {
+        "en_name": "Helwan",
+        "ar_name": "حي حلوان",
+        "aliases": [
+          "وسط حلوان",
+          "Helwan Center",
+          "الحديقة اليابانية",
+          "الحديقه اليابانيه",
+          "Japanese Garden"
+        ]
+      },
+      {
+        "en_name": "Ain Helwan",
+        "ar_name": "عين حلوان",
+        "aliases": []
+      },
+      {
+        "en_name": "Wadi El Hof",
+        "ar_name": "وادي الحوف",
+        "aliases": [
+          "وادى حوف"
+        ]
+      },
+      {
+        "en_name": "Hadaeq Helwan",
+        "ar_name": "حدائق حلوان",
+        "aliases": []
+      },
+      {
+        "en_name": "Maasara",
+        "ar_name": "المعصرة",
+        "aliases": [
+          "Al-Maasara"
+        ]
+      },
+      {
+        "en_name": "El-Tebeen",
+        "ar_name": "التبين",
+        "aliases": [
+          "Al-Tabin"
+        ]
+      },
+      {
+        "en_name": "Kafr El-Elw",
+        "ar_name": "كفر العلو",
+        "aliases": []
+      },
+      {
+        "en_name": "15th of May City",
+        "ar_name": "مدينة 15 مايو",
+        "aliases": [
+          "15 مايو",
+          "15 of May"
+        ]
+      },
+      {
+        "en_name": "El-Masnaa District",
+        "ar_name": "حي المصانع",
+        "aliases": []
+      },
+      {
+        "en_name": "El-Zelzal District",
+        "ar_name": "مساكن الزلزال",
+        "aliases": []
+      },
+      {
+        "en_name": "El-Shrouk District",
+        "ar_name": "حي الشروق بحلوان ",
+        "aliases": []
+      },
+      {
+        "en_name": "Arab Ghoneim",
+        "ar_name": "عرب غنيم",
+        "aliases": []
+      },
+      {
+        "en_name": "Arab El-Walda",
+        "ar_name": "عرب الوالدة",
+        "aliases": []
+      }
+    ]
   },
   {
     "alias": [

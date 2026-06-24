@@ -300,7 +300,7 @@ export default function SendNewMessageForm({
 
   return (
     <form
-      className="bg-white min-h-14 py-2 px-2 flex flex-col gap-2 shadow-xl rounded-b-md"
+      className="chat-composer min-h-14 py-2.5 px-3 flex flex-col gap-2 shrink-0"
       onSubmit={(e) => e.preventDefault()}
     >
       {usesWhatsappApi && isMessagingLoading ? (
@@ -359,8 +359,8 @@ export default function SendNewMessageForm({
               : translate("common.noPhone", common?.noPhone)
           }
           disabled={!canType || pending}
-          className="w-full resize-none p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
-          style={{ minHeight: "40px" }}
+          className="chat-input-field w-full resize-none px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed text-sm leading-5 overflow-hidden"
+          style={{ minHeight: "42px" }}
         />
 
         <button
@@ -369,8 +369,8 @@ export default function SendNewMessageForm({
           disabled={
             pending || !canSend || !messagingReady || !canSendWhatsapp
           }
-          className={`shrink-0 w-[80px] text-white px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center justify-center gap-2
-    ${pending || !canSend || !messagingReady || !canSendWhatsapp ? "bg-gray-400 cursor-not-allowed" : "bg-primary hover:bg-primary-dark cursor-pointer"}`}
+          className={`shrink-0 min-w-[80px] text-white px-4 py-2.5 rounded-full text-sm font-medium transition-all flex items-center justify-center gap-2
+    ${pending || !canSend || !messagingReady || !canSendWhatsapp ? "bg-chat-panel-alt text-chat-text-faint cursor-not-allowed" : "bg-[#25d366] hover:opacity-90 cursor-pointer"}`}
         >
           {pending ? (
             <Loader2 className="animate-spin" />

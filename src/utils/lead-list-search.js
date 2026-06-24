@@ -23,16 +23,24 @@ export function normalizeSearchQueryForApi(trimmed) {
 }
 
 /**
- * Client filter: name contains query (case-insensitive), or phone contains query.
- * For digit-heavy input, compares after removing spaces and non-digits so "55727254"
- * matches "+20 557 272 654" style values.
+ * Client filter: name or company contains query (case-insensitive), or phone
+ * contains query. For digit-heavy input, compares after removing spaces and
+ * non-digits so "55727254" matches "+20 557 272 654" style values.
+ *
+ * Company matching mirrors the backend `query` behaviour so company-only matches
+ * returned by the API are not hidden by the client-side re-filter.
  */
 export function leadMatchesSearchQuery(user, rawQuery) {
   const q = String(rawQuery ?? "").trim();
   if (!q) return true;
 
+  const qLower = q.toLowerCase();
+
   const name = (user?.name || user?.user_name || "").toLowerCase();
-  if (name.includes(q.toLowerCase())) return true;
+  if (name.includes(qLower)) return true;
+
+  const company = String(user?.company_name ?? "").toLowerCase();
+  if (company && company.includes(qLower)) return true;
 
   const phone = String(user?.phone_number ?? "");
   const phoneCanonical = phoneToE164(phone, "EG") || phone;

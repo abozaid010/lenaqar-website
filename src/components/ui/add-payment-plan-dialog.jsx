@@ -371,7 +371,7 @@ export default function AddPaymentPlanDialog({
           isNaN(parseFloat(formData.cache_discount))
             ? 0.4
             : parseFloat(formData.cache_discount) / 100,
-        installments_increasing_percentage:
+        installment_increasing_percentage:
           formData.installments_increasing_percentage === "" ||
           isNaN(parseFloat(formData.installments_increasing_percentage))
             ? 0

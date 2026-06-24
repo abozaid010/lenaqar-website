@@ -1582,12 +1582,51 @@ export async function fetchNews() {
 }
 
 // Payment Plans API //
+
+function getPaymentPlanApiError(error) {
+  const data = error?.response?.data;
+  if (data?.error_message) return data.error_message;
+  if (Array.isArray(data?.detail)) {
+    return data.detail
+      .map((item) => item?.msg || item?.message || JSON.stringify(item))
+      .join("; ");
+  }
+  if (typeof data?.detail === "string") return data.detail;
+  return error?.message || "Request failed";
+}
+
+/** Map UI payload to backend PaymentPlan schema (api.lenaai.net/docs). */
+function normalizePaymentPlanPayload(data, { id } = {}) {
+  const payload = {
+    name: data.name,
+    description: data.description ?? "",
+    is_default: data.is_default ?? false,
+    downpayment_percentage: data.downpayment_percentage,
+    installment_years: data.installment_years,
+    delivery_in_years: data.delivery_in_years ?? 0,
+    maintenance_fee: data.maintenance_fee,
+    cache_discount: data.cache_discount ?? 0,
+    delivery_payment_percentage: data.delivery_payment_percentage ?? 0,
+    installment_increasing_percentage:
+      data.installment_increasing_percentage ??
+      data.installments_increasing_percentage ??
+      0,
+    extra_payments: Array.isArray(data.extra_payments) ? data.extra_payments : [],
+  };
+
+  if (data.is_common !== undefined) payload.is_common = data.is_common;
+  if (id) payload.id = id;
+  if (data.updated_at) payload.updated_at = data.updated_at;
+
+  return payload;
+}
+
 export async function fetchPaymentPlans({ limit = 100, is_common } = {}) {
   try {
-    const params = new URLSearchParams({ limit: String(limit) });
-    if (is_common === true) params.set("is_common", "true");
-    const response = await axiosInstance.get(`/payment-plans/?${params.toString()}`);
-    
+    const params = { limit: String(limit) };
+    if (is_common === true) params.is_common = "true";
+    const response = await axiosInstance.get("/payment-plans", { params });
+
     if (!response.data || !response.data.data) {
       throw new Error("Invalid response format from server");
     }
@@ -1601,31 +1640,32 @@ export async function fetchPaymentPlans({ limit = 100, is_common } = {}) {
 
 export async function createPaymentPlan(paymentPlanData) {
   try {
-    const response = await axiosInstance.post('/payment-plans/', paymentPlanData);
+    const response = await axiosInstance.post(
+      "/payment-plans",
+      normalizePaymentPlanPayload(paymentPlanData)
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to create payment plan:", error.message);
-    return { 
-      error: error.response?.data?.error_message || error.message,
-      status: false
+    return {
+      error: getPaymentPlanApiError(error),
+      status: false,
     };
   }
 }
 
 export async function updatePaymentPlan(id, paymentPlanData) {
   try {
-    // Include ID in the request body as required by the API
-    const requestBody = {
-      ...paymentPlanData,
-      id: id
-    };
-    const response = await axiosInstance.put(`/payment-plans/${id}`, requestBody);
+    const response = await axiosInstance.put(
+      `/payment-plans/${id}`,
+      normalizePaymentPlanPayload(paymentPlanData, { id })
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to update payment plan:", error.message);
-    return { 
-      error: error.response?.data?.error_message || error.message,
-      status: false
+    return {
+      error: getPaymentPlanApiError(error),
+      status: false,
     };
   }
 }
@@ -2074,8 +2114,13 @@ export async function sendWhatsappMessages({
 }
 
 /**
- * Update user profile fields via POST /action/user/update
- * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string }} payload
+ * Update lead profile fields via POST /action/user/update.
+ *
+ * Send only the fields being changed (plus required `user_id`). Omitted fields
+ * are left untouched server-side. `notes` is append-only (deduplicated) on the
+ * backend — it does not replace existing notes.
+ *
+ * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string, owner_type?: "owner" | "broker" | "developer", notes?: string }} payload
  */
 export async function updateUserInfo(payload) {
   if (!payload?.user_id) {
@@ -2087,6 +2132,8 @@ export async function updateUserInfo(payload) {
       ...(payload.phone_number !== undefined && { phone_number: payload.phone_number }),
       ...(payload.name !== undefined && { name: typeof payload.name === "string" ? payload.name.trim() : payload.name }),
       ...(payload.company_name !== undefined && { company_name: payload.company_name }),
+      ...(payload.owner_type !== undefined && { owner_type: payload.owner_type }),
+      ...(payload.notes !== undefined && { notes: typeof payload.notes === "string" ? payload.notes.trim() : payload.notes }),
     };
     const response = await axiosInstance.post("/action/user/update", body);
     return response.data;

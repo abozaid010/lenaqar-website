@@ -3,16 +3,19 @@
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
+import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
+import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
 import { normalizeViewTypeValue } from "@/data/constants";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import ProjectsNamesManager from "@/utils/projects_names_manager";
+import CityManager from "@/utils/city_manager";
 import {
   convertArabicToEnglishNumbers,
 } from "@/utils/formatters";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /** Display value for numeric fields – 0 is valid; empty shows "". */
 function numericValue(v) {
@@ -28,10 +31,14 @@ export default function BasicDetailsStep({
   setInvalidFields = () => { },
   developers = [],
   developersLoading = false,
+  isEdit = false,
 }) {
   const { t, locale, translate } = useI18n();
   const { getViewTypes } = useLocaleConstants();
+  const cityManager = CityManager.getInstance();
 
+  const [locationFromProject, setLocationFromProject] = useState(false);
+  const didNormalizeLocation = useRef(false);
 
   const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
 
@@ -42,6 +49,42 @@ export default function BasicDetailsStep({
   }, [projectsData]);
 
   const allProjects = useMemo(() => Array.isArray(projectsData) ? projectsData : [], [projectsData]);
+
+  // Normalize existing city/district to canonical API values once (edit / pre-filled units)
+  useEffect(() => {
+    if (didNormalizeLocation.current) return;
+    if (!formData.city && !formData.district) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const nextCity = await cityManager.normalizeCityValueAsync(formData.city);
+        const nextDistrict = formData.district
+          ? await cityManager.normalizeDistrictValueAsync(
+              formData.district,
+              formData.city || nextCity
+            )
+          : "";
+
+        const patch = {};
+        if (nextCity && nextCity !== formData.city) patch.city = nextCity;
+        if (nextDistrict && nextDistrict !== formData.district) {
+          patch.district = nextDistrict;
+        }
+        if (!cancelled && Object.keys(patch).length) {
+          updateFormData(patch);
+        }
+      } catch (error) {
+        console.error("Failed to normalize location:", error);
+      } finally {
+        if (!cancelled) didNormalizeLocation.current = true;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [formData.city, formData.district, cityManager, updateFormData]);
 
   useEffect(() => {
     const selected = allProjects.find(
@@ -81,27 +124,76 @@ export default function BasicDetailsStep({
     }
   };
 
-  const handleProjectChange = (e) => {
+  const applyLocationFromProject = useCallback(
+    async (proj) => {
+      if (!proj) return;
+      const rawCity = proj.city ?? "";
+      const rawDistrict = proj.district ?? "";
+      if (!rawCity && !rawDistrict) return;
+
+      const nextCity = rawCity
+        ? await cityManager.normalizeCityValueAsync(rawCity)
+        : "";
+      const nextDistrict =
+        rawDistrict && (nextCity || rawCity)
+          ? await cityManager.normalizeDistrictValueAsync(
+              rawDistrict,
+              nextCity || rawCity
+            )
+          : "";
+
+      updateFormData({
+        city: nextCity,
+        district: nextDistrict,
+      });
+      setLocationFromProject(Boolean(nextCity || nextDistrict));
+    },
+    [cityManager, updateFormData]
+  );
+
+  const handleProjectChange = async (e) => {
     const value = e?.target?.value ?? "";
     const proj = allProjects.find((p) => p.en_name === value || p.name === value);
     updateFormData({
       project: value,
       project_ar: proj?.ar_name ?? "",
       project_id: proj?.id ?? "",
-      // Always derive location + developer from project
-      city: proj?.city ?? "",
-      district: proj?.district ?? "",
       phase: "",
       developer_id: "",
       developer: "",
     });
+    await applyLocationFromProject(proj);
     if (invalidFields.includes("project") && value) {
       setInvalidFields((prev) => prev.filter((field) => field !== "project"));
     }
   };
 
+  const handleCityChange = (e) => {
+    const { value } = e.target;
+    setLocationFromProject(false);
+    updateFormData({
+      city: value,
+      district: "",
+    });
+    if (invalidFields.includes("city") && value) {
+      setInvalidFields((prev) => prev.filter((field) => field !== "city"));
+    }
+    if (invalidFields.includes("district")) {
+      setInvalidFields((prev) => prev.filter((field) => field !== "district"));
+    }
+  };
+
+  const handleDistrictChange = (e) => {
+    const { value } = e.target;
+    setLocationFromProject(false);
+    updateFormData({ district: value });
+    if (invalidFields.includes("district") && value) {
+      setInvalidFields((prev) => prev.filter((field) => field !== "district"));
+    }
+  };
+
   const applyDeveloperFromProject = useCallback(
-    (fullProject) => {
+    async (fullProject) => {
       if (!fullProject || typeof fullProject !== "object") return;
       const devId =
         fullProject.developer_id ??
@@ -123,14 +215,17 @@ export default function BasicDetailsStep({
             fullProject?.developer?.ar_name ??
             "";
 
+      const patch = {};
       if (devId) {
-        updateFormData({
-          developer_id: String(devId),
-          developer: devName || "",
-        });
+        patch.developer_id = String(devId);
+        patch.developer = devName || "";
       }
+      if (Object.keys(patch).length) {
+        updateFormData(patch);
+      }
+      await applyLocationFromProject(fullProject);
     },
-    [locale, updateFormData]
+    [locale, updateFormData, applyLocationFromProject]
   );
 
   const selectedProjectFromList = useMemo(
@@ -138,16 +233,18 @@ export default function BasicDetailsStep({
     [allProjects, formData.project]
   );
 
-  // When editing an existing unit, keep city/district synced with the selected project
+  // On edit: if project is set but city/district empty, fill from project once
   useEffect(() => {
-    if (!selectedProjectFromList) return;
-    const nextCity = selectedProjectFromList.city ?? "";
-    const nextDistrict = selectedProjectFromList.district ?? "";
-    const patch = {};
-    if ((formData.city || "") !== nextCity) patch.city = nextCity;
-    if ((formData.district || "") !== nextDistrict) patch.district = nextDistrict;
-    if (Object.keys(patch).length) updateFormData(patch);
-  }, [selectedProjectFromList, formData.city, formData.district, updateFormData]);
+    if (!isEdit || !selectedProjectFromList) return;
+    if (formData.city && formData.district) return;
+    applyLocationFromProject(selectedProjectFromList);
+  }, [
+    isEdit,
+    selectedProjectFromList,
+    formData.city,
+    formData.district,
+    applyLocationFromProject,
+  ]);
 
   const buildingTypeOptions = useMemo(() => getBuildingTypeOptions(translate), [translate]);
 
@@ -182,7 +279,7 @@ export default function BasicDetailsStep({
           placeholder={translate("basicDetails.buildingType", t.basicDetails.buildingType)}
         />
 
-        {/* Project (all projects; city & district are set from selected project and sent to API) */}
+        {/* Project (city & district auto-fill from project; editable below) */}
         <SearchableProjectSelect
           name="project"
           value={formData.project || ""}
@@ -194,6 +291,40 @@ export default function BasicDetailsStep({
           error={invalidFields.includes("project")}
           placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
         />
+
+        {/* City */}
+        <SearchableCitySelect
+          name="city"
+          label={translate("basicDetails.city", t.basicDetails.city)}
+          value={formData.city || ""}
+          onChange={handleCityChange}
+          placeholder={translate("basicDetails.selectCity", t.basicDetails.selectCity)}
+        />
+
+        {/* District */}
+        <div>
+          <SearchableDistrictSelect
+            name="district"
+            label={translate("basicDetails.district", t.basicDetails.district)}
+            value={formData.district || ""}
+            onChange={handleDistrictChange}
+            city={formData.city || ""}
+            disabled={!formData.city}
+            placeholder={
+              !formData.city
+                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
+                : translate("basicDetails.selectDistrict", t.basicDetails.selectDistrict)
+            }
+          />
+          {locationFromProject && (formData.city || formData.district) ? (
+            <p className="mt-1 text-xs text-gray-500">
+              {translate(
+                "basicDetails.locationFromProject",
+                t.basicDetails.locationFromProject
+              )}
+            </p>
+          ) : null}
+        </div>
 
         {/* Purpose */}
         <SearchableDropdownSelect
