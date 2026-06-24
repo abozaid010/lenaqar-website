@@ -2282,6 +2282,23 @@ export async function fetchFollowUpSummaryRange(clientId, start, end) {
   }
 }
 
+export async function runDailyEngagement(clientId, dryRun = false) {
+  if (!clientId) {
+    throw new Error("clientId is required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/admin/daily-engagement/run", {
+      client_id: clientId,
+      dry_run: dryRun,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Failed to run daily engagement:", error.message);
+    throw error;
+  }
+}
+
 /**
  * Update a requirement (PUT /requirements/:requirementId).
  *

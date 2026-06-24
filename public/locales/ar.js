@@ -2353,6 +2353,17 @@ export default {
     saveChanges: "حفظ التغييرات",
     saving: "جاري الحفظ...",
     profileUpdated: "تم تحديث الملف الشخصي بنجاح",
+    followUpNow: "متابعة الآن",
+    followUpNowDescription:
+      "تشغيل متابعات واتساب للعملاء المؤهلين فوراً بدلاً من انتظار الموعد المجدول.",
+    followUpNowRunning: "جاري تشغيل المتابعات...",
+    followUpNowSuccess: "تم تشغيل المتابعات بنجاح",
+    followUpNowFailed: "فشل تشغيل المتابعات",
+    followUpNowConfirmTitle: "تشغيل المتابعات الآن؟",
+    followUpNowConfirmMessage:
+      "سيتم إرسال رسائل المتابعة للعملاء المؤهلين فوراً. هل تريد المتابعة؟",
+    followUpNowConfirm: "تشغيل الآن",
+    followUpNowCancel: "إلغاء",
     accuracyLevels: {
       exactMatch: {
         title: "مطابقة تامة",

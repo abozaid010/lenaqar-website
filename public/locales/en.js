@@ -2289,6 +2289,17 @@ export default {
     saveChanges: "Save Changes",
     saving: "Saving...",
     profileUpdated: "Profile updated successfully",
+    followUpNow: "Follow up now",
+    followUpNowDescription:
+      "Trigger WhatsApp follow-ups for eligible leads right away instead of waiting for the scheduled run.",
+    followUpNowRunning: "Running follow-ups...",
+    followUpNowSuccess: "Follow-ups triggered successfully",
+    followUpNowFailed: "Failed to trigger follow-ups",
+    followUpNowConfirmTitle: "Run follow-ups now?",
+    followUpNowConfirmMessage:
+      "This will send follow-up messages to eligible leads immediately. Continue?",
+    followUpNowConfirm: "Run now",
+    followUpNowCancel: "Cancel",
     accuracyLevels: {
       exactMatch: {
         title: "Exact Match",
