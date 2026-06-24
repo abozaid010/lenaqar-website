@@ -19,6 +19,20 @@ import { rateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rateLim
 const BFF_RATE_LIMIT = 300; // requests
 const BFF_WINDOW_MS = 60_000; // 60 seconds
 
+/**
+ * FastAPI collection roots that require a trailing slash (Next.js strips it from /api/crm/*).
+ * Only exact paths listed here — item routes like /payment-plans/{id} are unchanged.
+ */
+const BACKEND_COLLECTION_PATHS = new Set(["/payment-plans"]);
+
+function buildBackendUrl(backendPath, searchParams) {
+  const path = BACKEND_COLLECTION_PATHS.has(backendPath)
+    ? `${backendPath}/`
+    : backendPath;
+  const qs = searchParams.toString();
+  return `${path}${qs ? `?${qs}` : ""}`;
+}
+
 async function parseProxyBody(request) {
   const contentType = request.headers.get("content-type") || "";
   if (contentType.includes("application/json")) {
@@ -72,8 +86,7 @@ async function handleRequest(request, context) {
   }
 
   const method = request.method.toLowerCase();
-  const qs = searchParams.toString();
-  const url = `${backendPath}${qs ? `?${qs}` : ""}`;
+  const url = buildBackendUrl(backendPath, searchParams);
 
   // Check if this is the import units endpoint that needs longer timeout
   const isImportUnitsEndpoint = backendPath === "/units/v2/import_units_by_developer";
