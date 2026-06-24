@@ -14,6 +14,12 @@ import {
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
 } from "@/utils/actions";
+import {
+  OWNER_TYPES,
+  getOwnerTypeLabel,
+  parseOwnerTypeFilter,
+  serializeOwnerTypeFilter,
+} from "@/constants/owner-type";
 import { ArrowDownUp, ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -67,6 +73,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [filters, setFilters] = useState(() => {
     return {
       actions: parseDashboardActionFilter(appliedFilters.action),
+      owner_type: parseOwnerTypeFilter(appliedFilters.owner_type),
       start_date: appliedFilters.start_date || formatDate(twoMonthsAgo),
       end_date: appliedFilters.end_date || formatDate(tomorrow),
       campaign_ids: appliedFilters.campaign_ids
@@ -74,6 +81,28 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         : [],
     };
   });
+
+  const ownerTypeOptions = useMemo(
+    () =>
+      OWNER_TYPES.map((value) => ({
+        value,
+        label: getOwnerTypeLabel(value, translate),
+      })),
+    [translate],
+  );
+
+  const ownerTypeFilterLabel = useMemo(() => {
+    if (filters.owner_type.length === 0) {
+      return translate("dashboardFilter.ownerType.allTypes", "All Types");
+    }
+    if (filters.owner_type.length === 1) {
+      return getOwnerTypeLabel(filters.owner_type[0], translate);
+    }
+    return translate("dashboardFilter.ownerType.selected", "{count} selected").replace(
+      "{count}",
+      filters.owner_type.length,
+    );
+  }, [filters.owner_type, translate]);
 
   const actionFilterLabel = useMemo(() => {
     if (filters.actions.length === 0) {
@@ -90,6 +119,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
   const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
   const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
+  const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isImportLeadsOpen, setIsImportLeadsOpen] = useState(false);
@@ -98,9 +128,13 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
   const [isMounted, setIsMounted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
   const isFilterMenuOpen =
-    isActionDropdownOpen || isCampaignDropdownOpen || isDatePickerOpen;
+    isActionDropdownOpen ||
+    isOwnerTypeDropdownOpen ||
+    isCampaignDropdownOpen ||
+    isDatePickerOpen;
   const clientId = LenaCookiesManager.getClientId();
   const actionDropdownRef = useRef(null);
+  const ownerTypeDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
 
   useEffect(() => {
@@ -173,6 +207,12 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         setIsActionDropdownOpen(false);
       }
       if (
+        ownerTypeDropdownRef.current &&
+        !ownerTypeDropdownRef.current.contains(event.target)
+      ) {
+        setIsOwnerTypeDropdownOpen(false);
+      }
+      if (
         campaignDropdownRef.current &&
         !campaignDropdownRef.current.contains(event.target)
       ) {
@@ -180,13 +220,13 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       }
     };
 
-    if (isActionDropdownOpen || isCampaignDropdownOpen) {
+    if (isActionDropdownOpen || isOwnerTypeDropdownOpen || isCampaignDropdownOpen) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isActionDropdownOpen, isCampaignDropdownOpen]);
+  }, [isActionDropdownOpen, isOwnerTypeDropdownOpen, isCampaignDropdownOpen]);
 
   const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
 
@@ -228,6 +268,11 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
         if (serializedAction != null) {
           params.append("action", serializedAction);
         }
+      } else if (k === "owner_type" && Array.isArray(v)) {
+        const serializedOwnerType = serializeOwnerTypeFilter(v);
+        if (serializedOwnerType != null) {
+          params.append("owner_type", serializedOwnerType);
+        }
       } else if (k === "campaign_ids" && Array.isArray(v)) {
         if (v.length > 0) {
           params.append(k, v.join(","));
@@ -266,6 +311,26 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       actions: [],
     }));
     onFilterChange("actions", []);
+  };
+
+  const toggleOwnerTypeSelection = (ownerTypeValue) => {
+    const newOwnerTypes = filters.owner_type.includes(ownerTypeValue)
+      ? filters.owner_type.filter((value) => value !== ownerTypeValue)
+      : [...filters.owner_type, ownerTypeValue];
+
+    setFilters((prev) => ({
+      ...prev,
+      owner_type: newOwnerTypes,
+    }));
+    onFilterChange("owner_type", newOwnerTypes);
+  };
+
+  const clearOwnerTypeFilters = () => {
+    setFilters((prev) => ({
+      ...prev,
+      owner_type: [],
+    }));
+    onFilterChange("owner_type", []);
   };
 
   const toggleCampaignSelection = (campaignId) => {
@@ -367,6 +432,61 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                       className="cursor-pointer"
                     />
                     <span className="text-sm text-gray-700">{action.label}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Owner Type (lead identity) Filter Dropdown */}
+          <div
+            className={`relative z-[60] ${FILTER_ACTION_MIN_WIDTH} shrink-0`}
+            ref={ownerTypeDropdownRef}
+          >
+            <div
+              id="owner_type"
+              role="button"
+              tabIndex={0}
+              aria-haspopup="listbox"
+              aria-expanded={isOwnerTypeDropdownOpen}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ")
+                  setIsOwnerTypeDropdownOpen((open) => !open);
+              }}
+              onClick={() => setIsOwnerTypeDropdownOpen(!isOwnerTypeDropdownOpen)}
+              className={`${DASHBOARD_TRIGGER} !w-auto ${
+                compact ? "h-9 min-h-[36px]" : "h-10"
+              }`}
+            >
+              <span className="whitespace-nowrap">{ownerTypeFilterLabel}</span>
+              <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
+            </div>
+
+            {isOwnerTypeDropdownOpen && (
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+                {filters.owner_type.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={clearOwnerTypeFilters}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 mb-1"
+                  >
+                    <X size={16} />
+                    {translate("dashboardFilter.actions.clearAll", "Clear All")}
+                  </button>
+                )}
+
+                {ownerTypeOptions.map((option) => (
+                  <label
+                    key={option.value}
+                    className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={filters.owner_type.includes(option.value)}
+                      onChange={() => toggleOwnerTypeSelection(option.value)}
+                      className="cursor-pointer"
+                    />
+                    <span className="text-sm text-gray-700">{option.label}</span>
                   </label>
                 ))}
               </div>

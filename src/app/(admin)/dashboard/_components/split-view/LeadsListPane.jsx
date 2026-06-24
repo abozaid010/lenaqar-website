@@ -218,7 +218,7 @@ export default function LeadsListPane({
                   handleSearchSubmit();
                 }
               }}
-              placeholder={translate("searchPlaceholder")}
+              placeholder={translate("leadsSearchPlaceholder", "Search by name, phone, or company")}
               className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-2 text-sm"
               autoComplete="off"
             />

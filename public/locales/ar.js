@@ -102,6 +102,7 @@ export default {
     failedToRenameContact: "فشل إعادة تسمية جهة الاتصال",
     contactUpdated: "تم تحديث جهة الاتصال بنجاح",
     failedToUpdateContact: "فشل تحديث جهة الاتصال",
+    updateFailed: "فشل التحديث",
     requirementsSaved: "تم حفظ المتطلبات بنجاح",
     failedToSaveRequirements: "فشل حفظ المتطلبات",
     clientCreated: "تم إنشاء العميل بنجاح!",
@@ -636,6 +637,10 @@ export default {
       clearAll: "مسح الكل",
     },
 
+    ownerType: {
+      allTypes: "كل الأنواع",
+      selected: "{count} محدد",
+    },
     datePicker: {
       startDate: "تاريخ البداية",
       endDate: "تاريخ النهاية",
@@ -1931,6 +1936,22 @@ export default {
       developer: "المطور",
       client: "العميل",
     },
+  },
+  leadsSearchPlaceholder: "ابحث بالاسم أو الهاتف أو الشركة",
+  ownerType: {
+    owner: "مالك",
+    broker: "وسيط",
+    developer: "مطوّر",
+  },
+  editContact: {
+    title: "تعديل جهة الاتصال",
+    name: "الاسم",
+    company: "الشركة / الوكالة",
+    ownerType: "نوع العميل",
+    ownerTypePlaceholder: "غير محدد",
+    notes: "ملاحظات",
+    notesPlaceholder: "أضف ملاحظة...",
+    notesHint: "تتم إضافة الملاحظة الجديدة دون استبدال السابقة.",
   },
   leadDetail: {
     requirementSummary: {

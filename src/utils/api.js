@@ -2114,8 +2114,13 @@ export async function sendWhatsappMessages({
 }
 
 /**
- * Update user profile fields via POST /action/user/update
- * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string }} payload
+ * Update lead profile fields via POST /action/user/update.
+ *
+ * Send only the fields being changed (plus required `user_id`). Omitted fields
+ * are left untouched server-side. `notes` is append-only (deduplicated) on the
+ * backend — it does not replace existing notes.
+ *
+ * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string, owner_type?: "owner" | "broker" | "developer", notes?: string }} payload
  */
 export async function updateUserInfo(payload) {
   if (!payload?.user_id) {
@@ -2127,6 +2132,8 @@ export async function updateUserInfo(payload) {
       ...(payload.phone_number !== undefined && { phone_number: payload.phone_number }),
       ...(payload.name !== undefined && { name: typeof payload.name === "string" ? payload.name.trim() : payload.name }),
       ...(payload.company_name !== undefined && { company_name: payload.company_name }),
+      ...(payload.owner_type !== undefined && { owner_type: payload.owner_type }),
+      ...(payload.notes !== undefined && { notes: typeof payload.notes === "string" ? payload.notes.trim() : payload.notes }),
     };
     const response = await axiosInstance.post("/action/user/update", body);
     return response.data;

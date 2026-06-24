@@ -1,10 +1,14 @@
 "use client";
 
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import { Phone } from "lucide-react";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
+import {
+  getOwnerTypeLabel,
+  normalizeOwnerType,
+} from "@/constants/owner-type";
 
 export default function LeadRow({
   user,
@@ -14,11 +18,13 @@ export default function LeadRow({
   onToggleBulkSelection,
   showBulkCheckbox = false,
 }) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const rawPhone = user.phone_number;
   const phoneE164 = phoneToE164(rawPhone, "EG") || rawPhone;
   const phoneDisplay =
     (rawPhone && (formatPhoneForDisplay(rawPhone, "EG") || rawPhone)) || "—";
+  const ownerType = normalizeOwnerType(user.owner_type);
+  const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
 
   return (
     <div
@@ -55,6 +61,21 @@ export default function LeadRow({
       <span className="font-semibold text-sm leading-snug text-chat-text truncate min-w-0 flex-1">
         {user.name || t.clientsTable?.newLead || "Lead"}
       </span>
+
+      {/* Owner type (lead identity) badge — hidden when null */}
+      {ownerTypeLabel ? (
+        <span
+          className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none ${
+            ownerType === "broker"
+              ? "bg-amber-50 text-amber-700"
+              : ownerType === "developer"
+                ? "bg-purple-50 text-purple-700"
+                : "bg-sky-50 text-sky-700"
+          }`}
+        >
+          {ownerTypeLabel}
+        </span>
+      ) : null}
 
       {/* Phone */}
       <span className="text-sm leading-snug text-chat-text-muted font-mono tabular-nums truncate min-w-0 shrink-0">
