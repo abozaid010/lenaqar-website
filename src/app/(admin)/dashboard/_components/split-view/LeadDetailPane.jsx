@@ -953,8 +953,8 @@ export default function LeadDetailPane({
           className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white"
         >
           {activeTab === "conversations" && (
-            <div className="flex-1 min-h-0 flex flex-col bg-gray-100 overflow-hidden">
-              <div className="flex-1 min-h-0 overflow-y-auto px-3 pt-3">
+            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="flex-1 min-h-0 overflow-y-auto py-3 px-2 chat-messages-canvas">
                 <ChatHistory data={chatHistory} />
               </div>
               <SendNewMessageForm

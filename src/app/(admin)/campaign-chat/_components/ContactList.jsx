@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, User, MessageCircle, Star, Pencil, Check, X, Copy } from "lucide-react";
 import toast from "react-hot-toast";
-import { SELECTION_COLORS } from "@/constants/colors";
 import { ContactListSkeleton } from "@/components/ui/loading-states";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
@@ -108,17 +107,17 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto chat-list-panel">
       {/* Template Filter Pills */}
       {allTemplates.length > 0 && (
-        <div className="p-3 border-b border-gray-100 bg-gray-50">
+        <div className="p-3 border-b border-chat-border bg-chat-panel-alt">
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setSelectedTemplate("all")}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 selectedTemplate === "all"
-                  ? "bg-primary text-white"
-                  : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
+                  ? "bg-[#25d366] text-white"
+                  : "bg-chat-panel-bg border border-chat-border text-chat-text-muted hover:bg-chat-hover"
               }`}
             >
               All
@@ -129,8 +128,8 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                 onClick={() => setSelectedTemplate(template)}
                 className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                   selectedTemplate === template
-                    ? "bg-primary text-white"
-                    : "bg-white border border-gray-300 text-gray-600 hover:bg-gray-100"
+                    ? "bg-[#25d366] text-white"
+                    : "bg-chat-panel-bg border border-chat-border text-chat-text-muted hover:bg-chat-hover"
                 }`}
               >
                 {template}
@@ -148,14 +147,14 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
           <div
             key={session.phone_number}
             onClick={() => !isEditing && onContactSelect(session)}
-            className={`group p-4 border-b border-gray-100 cursor-pointer transition-colors ${
-              isSelected ? SELECTION_COLORS.SELECTED : "hover:bg-gray-50"
+            className={`group p-3 chat-list-row cursor-pointer ${
+              isSelected ? "chat-list-row--selected" : ""
             }`}
           >
             <div className="flex items-start gap-3">
               {/* Avatar */}
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                isSelected ? "bg-primary text-white" : "bg-gray-200 text-gray-600"
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                isSelected ? "bg-[#dfe5e7] text-chat-text-muted" : "bg-[#dfe5e7] text-chat-text-muted"
               }`}>
                 {session.user_name ? (
                   <span className="text-sm font-medium">
@@ -198,14 +197,14 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                   ) : (
                     <div className="flex items-center gap-1 min-w-0">
                       {session.user_name ? (
-                        <h3 className={`font-medium truncate text-sm ${isSelected ? "text-primary" : "text-gray-900"}`}>
+                        <h3 className={`font-medium truncate text-sm ${isSelected ? "text-chat-text" : "text-chat-text"}`}>
                           {session.user_name}
                         </h3>
                       ) : (
                         <button
                           type="button"
                           onClick={e => handleCopyPhone(e, session.phone_number)}
-                          className={`font-medium truncate text-sm text-left hover:underline decoration-dotted underline-offset-2 ${isSelected ? "text-primary" : "text-gray-900"}`}
+                          className="font-medium truncate text-sm text-left text-chat-text hover:underline decoration-dotted underline-offset-2"
                           title="Click to copy phone number"
                         >
                           {formatPhoneNumber(session.phone_number)}
@@ -250,7 +249,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                       <button
                         type="button"
                         onClick={e => handleCopyPhone(e, session.phone_number)}
-                        className="inline-flex items-center gap-1 text-gray-500 hover:text-primary transition-colors group/phone"
+                        className="inline-flex items-center gap-1 text-chat-text-muted hover:text-[#25d366] transition-colors group/phone"
                         title="Click to copy phone number"
                       >
                         <span>{formatPhoneNumber(session.phone_number)}</span>
@@ -261,7 +260,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                       <span className="text-gray-300">|</span>
                     )}
                     {session.last_template_sent && (
-                      <span className="text-blue-600 truncate">
+                      <span className="text-[#25d366] truncate">
                         {session.last_template_sent}
                       </span>
                     )}
@@ -270,14 +269,14 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
 
                 {/* Notes preview */}
                 {session.notes && (
-                  <p className="text-xs text-gray-400 italic truncate mb-1">
+                  <p className="text-xs text-chat-text-faint italic truncate mb-1">
                     {session.notes.length > 50 ? session.notes.slice(0, 50) + "…" : session.notes}
                   </p>
                 )}
 
                 {/* Message Count and Time */}
                 <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                  <div className="flex items-center gap-1.5 text-xs text-chat-text-muted">
                     {session.ai_reply_enabled && <Bot className="h-3 w-3" title="AI Auto-Reply Enabled" />}
                     <span>{session.total_messages_received} messages</span>
                   </div>
@@ -292,7 +291,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
                       size="sm"
                       className="hover:text-green-600"
                     />
-                    <span className="text-xs text-gray-400 ml-1">{formatRelativeTime(session.last_user_message_at)}</span>
+                    <span className="text-xs text-chat-text-faint ms-1">{formatRelativeTime(session.last_user_message_at)}</span>
                   </div>
                 </div>
               </div>
@@ -305,7 +304,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
       {hasMore && (
         <div 
           ref={loadMoreRef}
-          className="p-4 border-b border-gray-100"
+          className="p-4 border-b border-chat-border"
         >
           {sessionsError ? (
             <div className="text-center">
@@ -323,7 +322,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
               ref={loadMoreButtonRef}
               onClick={onLoadMore}
               disabled={isFetchingMore}
-              className="w-full py-2 px-4 bg-gray-50 hover:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed border border-gray-200 rounded-lg text-sm font-medium text-gray-600 transition-colors flex items-center justify-center gap-2"
+              className="w-full py-2 px-4 bg-chat-panel-alt hover:bg-chat-hover disabled:bg-chat-hover disabled:cursor-not-allowed border border-chat-border rounded-lg text-sm font-medium text-chat-text-muted transition-colors flex items-center justify-center gap-2"
             >
               {isFetchingMore ? (
                 <>
@@ -345,7 +344,7 @@ const ContactList = ({ sessions, selectedContact, onContactSelect, loading, onRe
       
       {/* End of data indicator */}
       {!hasMore && filteredSessions.length > 0 && (
-        <div className="p-4 text-center text-xs text-gray-400 border-b border-gray-100">
+        <div className="p-4 text-center text-xs text-chat-text-faint border-b border-chat-border">
           {sessionsError ? "Failed to load all conversations" : "No more conversations to load"}
         </div>
       )}

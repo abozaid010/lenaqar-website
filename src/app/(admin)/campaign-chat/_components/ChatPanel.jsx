@@ -11,7 +11,7 @@ import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
-import MessageBubble from "./MessageBubble";
+import MessageBubbleList from "./MessageBubble";
 import { useI18n } from "@/hooks/useI18n";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 
@@ -312,9 +312,9 @@ const ChatPanel = ({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
+    <div className="flex-1 flex flex-col bg-chat-panel-bg min-h-0">
       {/* Chat Header */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="border-b border-chat-border bg-chat-panel-bg shrink-0">
         <div className="p-4 flex items-center justify-between gap-3">
           {/* Avatar + Name */}
           <div className="flex items-center gap-3 min-w-0">
@@ -356,7 +356,7 @@ const ChatPanel = ({
                 <div className="flex items-center gap-1">
                   <h2
                     onClick={startEditName}
-                    className="font-semibold text-gray-900 truncate cursor-pointer hover:text-primary transition-colors"
+                    className="font-semibold text-chat-text truncate cursor-pointer hover:text-[#25d366] transition-colors"
                     title="Click to rename"
                   >
                     {displayName || formatPhoneNumber(contact.phone_number)}
@@ -375,7 +375,7 @@ const ChatPanel = ({
                 <button
                   type="button"
                   onClick={handleCopyPhone}
-                  className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary transition-colors group/phone"
+                  className="inline-flex items-center gap-1 text-sm text-chat-text-muted hover:text-[#25d366] transition-colors group/phone"
                   title="Click to copy phone number"
                 >
                   <span>{formatPhoneNumber(contact.phone_number)}</span>
@@ -460,7 +460,7 @@ const ChatPanel = ({
 
         {/* Notes panel */}
         {notesOpen && (
-          <div className="px-4 pb-3 border-t border-gray-100 bg-gray-50">
+          <div className="px-4 pb-3 border-t border-chat-border bg-chat-panel-alt">
             <div className="pt-3">
               {/* Header row */}
               <div className="flex items-center justify-between mb-2">
@@ -552,22 +552,20 @@ const ChatPanel = ({
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+      <div className="flex-1 overflow-y-auto py-3 px-4 chat-messages-canvas min-h-0">
         {history.length > 0 ? (
           <>
-            {history.map((msg, index) => (
-              <MessageBubble key={`${msg.timestamp || "t"}-${index}`} message={msg} />
-            ))}
+            <MessageBubbleList messages={history} />
             <div ref={messagesEndRef} />
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
-              <Bot className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <p className="text-gray-500">
+              <Bot className="h-12 w-12 text-chat-text-faint mx-auto mb-3" />
+              <p className="text-chat-text-muted">
                 {translate("campaignChat.noMessages")}
               </p>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-chat-text-faint mt-1">
                 {currentAIStatus
                   ? translate("campaignChat.noMessagesAiOn")
                   : translate("campaignChat.noMessagesStart")}
@@ -578,7 +576,7 @@ const ChatPanel = ({
       </div>
 
       {/* Message Input */}
-      <div className="p-4 border-t border-gray-200 bg-white relative space-y-3">
+      <div className="chat-composer p-3 relative space-y-2 shrink-0">
         <LoadingOverlay isVisible={isSending} message="Sending message..." />
         {hasMultipleMessagingAccounts ? (
           <WhatsappPlatformSelect
@@ -594,27 +592,27 @@ const ChatPanel = ({
             id="campaign_chat_whatsapp_platform"
           />
         ) : null}
-        <div className="flex gap-3">
+        <div className="flex gap-2 items-end">
           <textarea
             ref={textareaRef}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Type your message..."
+            placeholder={translate("typeYourMessage", "Type your message...")}
             disabled={isSending}
-            className="flex-1 resize-none border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="chat-input-field flex-1 resize-none px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
             rows={1}
-            style={{ minHeight: "40px", maxHeight: "120px" }}
+            style={{ minHeight: "42px", maxHeight: "120px" }}
           />
           <LoadingButton
             onClick={handleSendReply}
             isLoading={isSending}
             loadingText="Sending..."
             disabled={!message.trim() || isSending}
-            className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+            className={`shrink-0 px-4 py-2.5 rounded-full transition-colors flex items-center gap-2 ${
               message.trim() && !isSending
-                ? "bg-primary text-white hover:bg-primary/90"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                ? "bg-[#25d366] text-white hover:opacity-90"
+                : "bg-chat-panel-alt text-chat-text-faint cursor-not-allowed"
             }`}
           >
             {isSending ? (

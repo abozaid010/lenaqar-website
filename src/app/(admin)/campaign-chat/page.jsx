@@ -516,7 +516,7 @@ const CampaignChat = () => {
   return (
     <div className="h-full flex">
       {/* Left Panel - Contact List */}
-      <div className="w-80 border-r border-gray-200 flex flex-col bg-white">
+      <div className="w-80 border-r border-chat-border flex flex-col chat-list-panel">
         {/* Header Container */}
       <div className="p-4 bg-white rounded-lg shadow-md">
         <div className="flex items-center flex-wrap md:flex-nowrap gap-2 md:justify-between">
@@ -637,11 +637,11 @@ const CampaignChat = () => {
                 hasMultipleMessagingAccounts={messagingConfig?.hasMultipleAccounts ?? false}
               />
             ) : (
-              <div className="flex-1 flex items-center justify-center bg-gray-50">
+              <div className="flex-1 flex items-center justify-center chat-messages-canvas">
                 <div className="text-center">
-                  <MessageCircle className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-600 mb-2">{translate('campaignChat.selectConversation')}</h3>
-                  <p className="text-gray-500">{translate('campaignChat.chooseContact')}</p>
+                  <MessageCircle className="h-16 w-16 text-chat-text-faint mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-chat-text-muted mb-2">{translate('campaignChat.selectConversation')}</h3>
+                  <p className="text-chat-text-faint">{translate('campaignChat.chooseContact')}</p>
                 </div>
               </div>
             )}

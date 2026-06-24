@@ -1268,6 +1268,9 @@ export default {
     selectCompound: "اختر كمبوند",
     selectPurpose: "اختر الغرض",
     selectCity: "اختر المدينة",
+    selectDistrict: "اختر المنطقة",
+    selectCityFirst: "اختر المدينة أولاً",
+    locationFromProject: "تم تعبئة الموقع من المشروع — يمكنك تعديله",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",

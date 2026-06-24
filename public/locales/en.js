@@ -1415,6 +1415,9 @@ export default {
     selectCompound: "Select project",
     selectPurpose: "Select purpose",
     selectCity: "Select city",
+    selectDistrict: "Select district",
+    selectCityFirst: "Select a city first",
+    locationFromProject: "Location filled from project — you can change it",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",

@@ -26,6 +26,7 @@ import { MAX_UNIT_IMAGES } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { normalizeViewTypeValue } from "@/data/constants";
+import CityManager from "@/utils/city_manager";
 import {
   PROPERTY_VISIBILITY,
 } from "@/constants/property-visibility";
@@ -926,6 +927,18 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       if (!showOwnerFields) {
         delete payload.owner_name;
         delete payload.owner_mobile;
+      }
+
+      // Send city/district as lowercase en_name (canonical backend format)
+      const cityManager = CityManager.getInstance();
+      if (payload.city) {
+        payload.city = await cityManager.normalizeCityValueAsync(payload.city);
+      }
+      if (payload.district && payload.city) {
+        payload.district = await cityManager.normalizeDistrictValueAsync(
+          payload.district,
+          payload.city
+        );
       }
 
       if (!isEdit) {
