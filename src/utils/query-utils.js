@@ -38,6 +38,32 @@ export function removeUserFromInfiniteUsersCache(queryClient, filterKey, userId)
   });
 }
 
+/**
+ * Merge profile fields onto a lead in every active infinite-users cache.
+ * @param {import("@tanstack/react-query").QueryClient} queryClient
+ * @param {string} userId
+ * @param {Record<string, unknown>} patch
+ */
+export function patchUserInInfiniteUsersCaches(queryClient, userId, patch) {
+  if (!userId || !patch || Object.keys(patch).length === 0) return;
+
+  queryClient.setQueriesData(
+    { queryKey: [...userKeys.all, "infinite"] },
+    (old) => {
+      if (!old?.pages) return old;
+      return {
+        ...old,
+        pages: old.pages.map((page) => ({
+          ...page,
+          users: (page.users || []).map((user) =>
+            user?.user_id === userId ? { ...user, ...patch } : user,
+          ),
+        })),
+      };
+    },
+  );
+}
+
 // Query key factory for units
 export const unitKeys = {
   all: ["units"],

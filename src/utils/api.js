@@ -2136,11 +2136,33 @@ export async function updateUserInfo(payload) {
       ...(payload.notes !== undefined && { notes: typeof payload.notes === "string" ? payload.notes.trim() : payload.notes }),
     };
     const response = await axiosInstance.post("/action/user/update", body);
-    return response.data;
+    const data = response.data;
+
+    if (
+      data &&
+      (data.status === false || data.error_message) &&
+      data.status !== true &&
+      data.code !== 200 &&
+      data.code !== 201
+    ) {
+      throw new Error(
+        data.error_message || data.message || "Failed to update user info",
+      );
+    }
+
+    return data;
   } catch (error) {
     console.error("Failed to update user info:", error.message);
     throw error;
   }
+}
+
+/** Extract the updated lead record from POST /action/user/update response. */
+export function extractUpdatedLeadFromUserInfoResponse(response) {
+  if (!response || typeof response !== "object") return null;
+  if (response.user_id) return response;
+  if (response.data?.user_id) return response.data;
+  return null;
 }
 
 /**
@@ -2195,6 +2217,67 @@ export async function fetchLegacyMonthData(searchParams = {}) {
     return response.data?.data?.monthly ?? [];
   } catch (error) {
     console.error("Failed to fetch legacy month analytics:", error.message);
+    throw error;
+  }
+}
+
+const EMPTY_FOLLOW_UP_TOTALS = {
+  leads_scanned: 0,
+  followups_sent: 0,
+  units_shared: 0,
+  meeting_followups: 0,
+  first_followups: 0,
+  second_followups: 0,
+  ignored_prior: 0,
+  capped: 0,
+  tickets_created: 0,
+  skipped_offer: 0,
+  skipped_already_engaged: 0,
+  excluded_fulfilled: 0,
+  errors: 0,
+};
+
+export function emptyFollowUpTotals() {
+  return { ...EMPTY_FOLLOW_UP_TOTALS };
+}
+
+export async function fetchFollowUpSummary(clientId, date) {
+  try {
+    const response = await axiosInstance.get(
+      `/daily-engagement/summary/${encodeURIComponent(clientId)}`,
+      {
+        params: date ? { date } : undefined,
+        validateStatus: (status) => status === 200 || status === 404,
+      }
+    );
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    return response.data?.data ?? null;
+  } catch (error) {
+    console.error("Failed to fetch follow-up summary:", error.message);
+    throw error;
+  }
+}
+
+export async function fetchFollowUpSummaryRange(clientId, start, end) {
+  try {
+    const response = await axiosInstance.get(
+      `/daily-engagement/summary/${encodeURIComponent(clientId)}/range`,
+      {
+        params: { start, end },
+      }
+    );
+
+    const data = response.data?.data;
+    return {
+      summaries: Array.isArray(data?.summaries) ? data.summaries : [],
+      count: data?.count ?? 0,
+    };
+  } catch (error) {
+    console.error("Failed to fetch follow-up summary range:", error.message);
     throw error;
   }
 }

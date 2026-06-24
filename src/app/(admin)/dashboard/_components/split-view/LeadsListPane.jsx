@@ -1,7 +1,7 @@
 "use client";
 
 import EmptyStateVideo from "@/components/ui/empty-state-video";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -169,7 +169,7 @@ export default function LeadsListPane({
     appliedSearchQuery;
 
   return (
-    <div className="flex flex-col min-h-0 h-full min-h-[320px] border-r border-chat-border chat-list-panel">
+    <div className="flex flex-col min-h-0 h-full min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
       <div className="p-2 border-b border-chat-border shrink-0 space-y-2 bg-chat-panel-bg">
         {showBulkCheckbox && users.length > 0 && (
           <label className="flex items-center gap-2 text-xs text-chat-text-muted cursor-pointer select-none">
@@ -226,9 +226,11 @@ export default function LeadsListPane({
           <button
             type="button"
             onClick={handleSearchSubmit}
-            className="shrink-0 h-[34px] px-3 text-sm font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors inline-flex items-center justify-center"
+            className="shrink-0 h-[34px] w-[34px] text-primary rounded-md hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
+            title={translate("common.search")}
+            aria-label={translate("common.search")}
           >
-            {translate("common.search")}
+            <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
           </button>
         </div>
       </div>
