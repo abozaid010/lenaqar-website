@@ -16,7 +16,7 @@ import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { buildUnifiedReplyProviderPayload, getEffectiveMessagingAccount } from "@/lib/whatsapp-messaging-provider";
 
 // Components
-import ContactList from "./_components/ContactList";
+import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import ChatPanel from "./_components/ChatPanel";
 import AddNewWhatsappCampaignDialog from "./_components/AddNewWhatsappCampaignDialog";
 import AddLeadDialog from "@/components/ui/add-lead-dialog";
@@ -637,13 +637,13 @@ const CampaignChat = () => {
                 hasMultipleMessagingAccounts={messagingConfig?.hasMultipleAccounts ?? false}
               />
             ) : (
-              <div className="flex-1 flex items-center justify-center chat-messages-canvas">
+              <ChatMessagesArea className="flex-1" contentClassName="flex items-center justify-center">
                 <div className="text-center">
                   <MessageCircle className="h-16 w-16 text-chat-text-faint mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-chat-text-muted mb-2">{translate('campaignChat.selectConversation')}</h3>
                   <p className="text-chat-text-faint">{translate('campaignChat.chooseContact')}</p>
                 </div>
-              </div>
+              </ChatMessagesArea>
             )}
           </ErrorBoundary>
         </div>

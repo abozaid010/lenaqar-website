@@ -22,9 +22,11 @@ import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-uti
 import { getActionLabel, normalizeLastAction } from "@/utils/actions";
 import { formatDateTimeAmPmShort, formatDateForDisplay } from "@/utils/formateDate";
 import { formatCurrency } from "@/utils/formatters";
-import { userKeys } from "@/utils/query-utils";
+import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
+import { userKeys, patchUserInInfiniteUsersCaches } from "@/utils/query-utils";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  ChevronLeft,
   AlertTriangle,
   Bath,
   Bed,
@@ -58,7 +60,7 @@ import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
 import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
-import { appendRequirementPriceChips } from "@/lib/match/requirement-to-units-filter";
+import ChatMessagesArea from "@/components/ui/chat-messages-area";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
 const DEFAULT_TAB = "conversations";
@@ -108,6 +110,8 @@ export default function LeadDetailPane({
   leadSummary,
   onInvalidateList,
   onLeadRemoved,
+  showBackButton = false,
+  onBack,
 }) {
   const { translate, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
@@ -224,6 +228,7 @@ export default function LeadDetailPane({
   const ownerTypeLabel = ownerType ? getOwnerTypeLabel(ownerType, translate) : "";
   const companyName =
     leadSummary?.company_name ?? data?.data?.company_name ?? "";
+  const leadNotes = leadSummary?.notes ?? data?.data?.notes ?? "";
 
   const clearSelection = useCallback(() => {
     const usp = new URLSearchParams(searchParams.toString());
@@ -276,6 +281,60 @@ export default function LeadDetailPane({
     queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
     queryClient.invalidateQueries({ queryKey: ["requirements", userId] });
   };
+
+  const handleContactUpdated = useCallback(
+    (updatedLead, _response, submittedPayload) => {
+      const patch = {};
+
+      if (updatedLead && typeof updatedLead === "object") {
+        if (updatedLead.name !== undefined) patch.name = updatedLead.name;
+        if (updatedLead.phone_number !== undefined) {
+          patch.phone_number = updatedLead.phone_number;
+        }
+        if (updatedLead.company_name !== undefined) {
+          patch.company_name = updatedLead.company_name;
+        }
+        if (updatedLead.owner_type !== undefined) {
+          patch.owner_type = updatedLead.owner_type;
+        }
+        if (updatedLead.notes !== undefined) patch.notes = updatedLead.notes;
+      } else if (submittedPayload) {
+        if (submittedPayload.name !== undefined) patch.name = submittedPayload.name;
+        if (submittedPayload.phone_number !== undefined) {
+          patch.phone_number = submittedPayload.phone_number;
+        }
+        if (submittedPayload.company_name !== undefined) {
+          patch.company_name = submittedPayload.company_name;
+        }
+        if (submittedPayload.owner_type !== undefined) {
+          patch.owner_type = submittedPayload.owner_type;
+        }
+        if (submittedPayload.notes) {
+          const prior = String(leadNotes || "").trim();
+          patch.notes = prior
+            ? `${prior}\n${submittedPayload.notes}`
+            : submittedPayload.notes;
+        }
+      }
+
+      if (Object.keys(patch).length > 0) {
+        patchUserInInfiniteUsersCaches(queryClient, userId, patch);
+        queryClient.setQueryData(["chatHistory", userId], (old) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              ...patch,
+            },
+          };
+        });
+      }
+
+      afterMutation();
+    },
+    [leadNotes, onInvalidateList, queryClient, userId],
+  );
 
   const handleOpenMatch = async () => {
     if (!userId || creatingMatch) return;
@@ -884,8 +943,22 @@ export default function LeadDetailPane({
 
   return (
     <>
-      <div className="flex flex-col min-h-0 flex-1 bg-white border-l border-gray-100">
-        <div className="shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white">
+      <div className="flex flex-col min-h-0 flex-1 bg-white lg:border-l border-gray-100">
+        <div
+          className={`shrink-0 flex items-center gap-2 px-3 py-1.5 border-b border-gray-200 bg-white ${
+            !showBackButton ? "lg:pe-28" : ""
+          }`}
+        >
+          {showBackButton ? (
+            <button
+              type="button"
+              onClick={onBack}
+              className="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+              aria-label={translate("common.back", common.back || "Back")}
+            >
+              <ChevronLeft className="w-5 h-5 rtl:rotate-180" aria-hidden />
+            </button>
+          ) : null}
           <div className="flex-1 min-w-0 flex items-center gap-2">
             <ChatWith
               key={userId}
@@ -988,9 +1061,9 @@ export default function LeadDetailPane({
         >
           {activeTab === "conversations" && (
             <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-              <div className="flex-1 min-h-0 overflow-y-auto py-3 px-2 chat-messages-canvas">
+              <ChatMessagesArea className="flex-1" contentClassName="py-3 px-2">
                 <ChatHistory data={chatHistory} />
-              </div>
+              </ChatMessagesArea>
               <SendNewMessageForm
                 userId={userId}
                 phoneNumber={phoneNumber}
@@ -1138,7 +1211,8 @@ export default function LeadDetailPane({
         initialPhone={phoneNumber || ""}
         initialCompany={companyName}
         initialOwnerType={ownerType}
-        onSuccess={afterMutation}
+        initialNotes={leadNotes}
+        onSuccess={handleContactUpdated}
       />
 
       {showDeleteConfirm && (

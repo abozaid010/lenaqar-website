@@ -47,7 +47,7 @@ const FILTER_MENU_WIDTH = "w-[12.6rem]";
 const FILTER_ACTION_MIN_WIDTH = "min-w-[6rem]";
 const FILTER_CAMPAIGN_MIN_WIDTH = "min-w-[6.25rem]";
 
-export default function DashbordFilter({ appliedFilters, compact = false }) {
+export default function DashbordFilter({ appliedFilters, compact = false, panel = false }) {
   const { locale, translate } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -371,18 +371,26 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
     });
   };
 
+  const menuWidthClass = panel ? "w-full" : FILTER_MENU_WIDTH;
+  const triggerWidthClass = panel ? "!w-full" : "!w-auto";
+  const fieldShellClass = panel ? "w-full" : `${FILTER_ACTION_MIN_WIDTH} shrink-0`;
+  const campaignShellClass = panel ? "w-full" : `${FILTER_CAMPAIGN_MIN_WIDTH} shrink-0`;
+  const dateShellClass = panel ? "w-full" : `${FILTER_MENU_WIDTH} shrink-0`;
+
   return (
     <div
-      className={`flex flex-col gap-2 no-print ${compact ? "mb-1" : "mb-2"}`}
+      className={`flex flex-col gap-2 no-print ${compact && !panel ? "mb-1" : panel ? "" : "mb-2"}`}
     >
-      {/* Row 1: filters stay on one line — keep above row 2 so open menus receive clicks */}
+      {/* Row 1: filters — vertical stack in side panel */}
       <div
-        className={`relative flex flex-wrap sm:flex-nowrap items-center justify-start gap-2 min-w-0 ${
+        className={`relative flex ${
+          panel ? "flex-col items-stretch" : "flex-wrap sm:flex-nowrap items-center"
+        } justify-start gap-2 min-w-0 ${
           isFilterMenuOpen ? "z-50" : "z-30"
         }`}
       >
           <div
-            className={`relative z-[60] ${FILTER_ACTION_MIN_WIDTH} shrink-0`}
+            className={`relative z-[60] ${fieldShellClass}`}
             ref={actionDropdownRef}
           >
             <div
@@ -396,7 +404,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                   setIsActionDropdownOpen((open) => !open);
               }}
               onClick={() => setIsActionDropdownOpen(!isActionDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} !w-auto ${
+              className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
@@ -405,7 +413,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isActionDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.actions.length > 0 && (
                   <button
                     type="button"
@@ -440,7 +448,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
           {/* Owner Type (lead identity) Filter Dropdown */}
           <div
-            className={`relative z-[60] ${FILTER_ACTION_MIN_WIDTH} shrink-0`}
+            className={`relative z-[60] ${fieldShellClass}`}
             ref={ownerTypeDropdownRef}
           >
             <div
@@ -454,7 +462,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                   setIsOwnerTypeDropdownOpen((open) => !open);
               }}
               onClick={() => setIsOwnerTypeDropdownOpen(!isOwnerTypeDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} !w-auto ${
+              className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
@@ -463,7 +471,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isOwnerTypeDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.owner_type.length > 0 && (
                   <button
                     type="button"
@@ -495,7 +503,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
 
           {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
-            className={`relative z-[60] ${FILTER_CAMPAIGN_MIN_WIDTH} shrink-0`}
+            className={`relative z-[60] ${campaignShellClass}`}
             ref={campaignDropdownRef}
           >
             <div
@@ -508,7 +516,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
                   setIsCampaignDropdownOpen((o) => !o);
               }}
               onClick={() => setIsCampaignDropdownOpen(!isCampaignDropdownOpen)}
-              className={`${DASHBOARD_TRIGGER} !w-auto ${
+              className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
                 compact ? "h-9 min-h-[36px]" : "h-10"
               }`}
             >
@@ -524,7 +532,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isCampaignDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.campaign_ids.length > 0 && (
                   <button
                     onClick={clearCampaignFilters}
@@ -559,7 +567,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             )}
           </div>
 
-          <div className={`relative z-[60] ${FILTER_MENU_WIDTH} shrink-0`}>
+          <div className={`relative z-[60] ${dateShellClass}`}>
             <div
               role="button"
               tabIndex={0}
@@ -587,7 +595,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             </div>
 
             {isDatePickerOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${FILTER_MENU_WIDTH} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
                 <div className="space-y-2">
                   <FormInput
                     type="date"
@@ -643,7 +651,7 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             onClick={handleScoreSortToggle}
             aria-pressed={sortScore === "desc" || sortScore === "asc"}
             title={translate("dashboardFilter.sortByScore.title")}
-            className={`${DASHBOARD_TRIGGER} !w-auto shrink-0 gap-1.5 ${
+            className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} shrink-0 gap-1.5 ${
               compact ? "h-9 min-h-[36px]" : "h-10"
             } ${
               sortScore === "desc" || sortScore === "asc"
@@ -665,33 +673,43 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
       </div>
 
       {/* Row 2: actions */}
-      <div className="relative z-10 flex items-center justify-start gap-2 flex-wrap">
+      <div
+        className={`relative z-10 flex gap-2 ${
+          panel
+            ? "flex-col items-stretch"
+            : "items-center justify-start flex-wrap"
+        }`}
+      >
         <button
           onClick={() => setIsAddLeadOpen(true)}
-          className={`flex items-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
-            compact ? "h-9 px-3" : "h-10 px-4"
-          }`}
+          className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
+            panel ? "w-full" : ""
+          } ${compact ? "h-9 px-3" : "h-10 px-4"}`}
         >
           <UserPlus size={compact ? 16 : 18} />
           <span>{translate("dashboardFilter.ADD")}</span>
         </button>
         <button
           onClick={() => setIsImportLeadsOpen(true)}
-          className={`flex items-center gap-2 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
-            compact ? "h-9 px-3" : "h-10 px-4"
-          }`}
+          className={`flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
+            panel ? "w-full" : ""
+          } ${compact ? "h-9 px-3" : "h-10 px-4"}`}
         >
           <FileSpreadsheet size={compact ? 16 : 18} />
           <span>{translate("dashboardFilter.importLeads.button")}</span>
         </button>
-        {showExportButton && <ExcelExportButton compact={compact} />}
+        {showExportButton && (
+          <div className={panel ? "w-full [&_button]:w-full" : ""}>
+            <ExcelExportButton compact={compact} />
+          </div>
+        )}
         {showWhatsappToolbarButton && (
           <button
             type="button"
             onClick={handleOpenWhatsappBulk}
-            className={`flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
-              compact ? "h-9 min-h-[36px]" : "h-10"
-            }`}
+            className={`flex items-center justify-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
+              panel ? "w-full" : ""
+            } ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
             title={translate("dashboardFilter.bulkWhatsapp.sendButton")}
           >
             <svg
@@ -702,18 +720,22 @@ export default function DashbordFilter({ appliedFilters, compact = false }) {
             >
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
             </svg>
-            <span className="hidden sm:inline">
+            <span className={panel ? "inline" : "hidden sm:inline"}>
               {translate("dashboardFilter.bulkWhatsapp.sendButton")}
             </span>
           </button>
         )}
-        <AverageScore />
-        <VideoInstructionsDialog
-          variant="dashboard"
-          iconSize="md"
-          tooltipText="How to use the Dashboard"
-          className="p-0 shrink-0"
-        />
+        <div className={panel ? "flex items-center justify-between px-1" : ""}>
+          <AverageScore />
+        </div>
+        <div className={panel ? "flex justify-end" : ""}>
+          <VideoInstructionsDialog
+            variant="dashboard"
+            iconSize="md"
+            tooltipText="How to use the Dashboard"
+            className="p-0 shrink-0"
+          />
+        </div>
       </div>
 
       <AddLeadDialog

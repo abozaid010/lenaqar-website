@@ -12,6 +12,7 @@ import CallButton from "@/components/ui/call-button";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubbleList from "./MessageBubble";
+import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import { useI18n } from "@/hooks/useI18n";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 
@@ -552,14 +553,14 @@ const ChatPanel = ({
       </div>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto py-3 px-4 chat-messages-canvas min-h-0">
+      <ChatMessagesArea className="flex-1">
         {history.length > 0 ? (
           <>
             <MessageBubbleList messages={history} />
             <div ref={messagesEndRef} />
           </>
         ) : (
-          <div className="flex items-center justify-center h-full">
+          <div className="flex items-center justify-center h-full min-h-[12rem]">
             <div className="text-center">
               <Bot className="h-12 w-12 text-chat-text-faint mx-auto mb-3" />
               <p className="text-chat-text-muted">
@@ -573,7 +574,7 @@ const ChatPanel = ({
             </div>
           </div>
         )}
-      </div>
+      </ChatMessagesArea>
 
       {/* Message Input */}
       <div className="chat-composer p-3 relative space-y-2 shrink-0">

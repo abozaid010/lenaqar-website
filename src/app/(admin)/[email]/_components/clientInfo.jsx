@@ -2,9 +2,9 @@
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
-import { getProfileData, updateProfileData } from "@/utils/api";
+import { getProfileData, runDailyEngagement, updateProfileData } from "@/utils/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Loader2, ChevronDown, Copy, Share2, LogOut } from "lucide-react";
+import { AlertTriangle, Loader2, Copy, Share2, LogOut, MessageCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -36,6 +36,8 @@ export default function ClientInfo({ client_email }) {
   const [isChanged, setIsChanged] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [showFollowUpConfirm, setShowFollowUpConfirm] = useState(false);
+  const [followUpLoading, setFollowUpLoading] = useState(false);
 
   // Helper function to count words
   const countWords = (text) => {
@@ -266,6 +268,28 @@ export default function ClientInfo({ client_email }) {
     }
   };
 
+  const handleFollowUpNow = () => setShowFollowUpConfirm(true);
+
+  const cancelFollowUpNow = () => setShowFollowUpConfirm(false);
+
+  const confirmFollowUpNow = async () => {
+    if (!clientId) {
+      toast.error(translate("clientInfo.followUpNowFailed"));
+      return;
+    }
+
+    try {
+      setFollowUpLoading(true);
+      await runDailyEngagement(clientId, false);
+      toast.success(translate("clientInfo.followUpNowSuccess"));
+      setShowFollowUpConfirm(false);
+    } catch (error) {
+      toast.error(translate("clientInfo.followUpNowFailed"));
+    } finally {
+      setFollowUpLoading(false);
+    }
+  };
+
   const handleLogout = () => setShowLogoutConfirm(true);
 
   const cancelLogout = () => setShowLogoutConfirm(false);
@@ -292,6 +316,49 @@ export default function ClientInfo({ client_email }) {
 
   return (
     <>
+      {showFollowUpConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
+            <div className="flex flex-col items-center text-center mb-4">
+              <div className="bg-blue-100 p-3 rounded-full mb-4">
+                <MessageCircle className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                {translate("clientInfo.followUpNowConfirmTitle")}
+              </h3>
+              <p className="text-gray-600 mt-2">
+                {translate("clientInfo.followUpNowConfirmMessage")}
+              </p>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={cancelFollowUpNow}
+                disabled={followUpLoading}
+                className="flex-1 py-2 px-4 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md font-medium transition-colors disabled:opacity-60"
+              >
+                {translate("clientInfo.followUpNowCancel")}
+              </button>
+              <button
+                type="button"
+                onClick={confirmFollowUpNow}
+                disabled={followUpLoading}
+                className="flex-1 py-2 px-4 bg-primary text-white rounded-md font-medium transition-colors disabled:opacity-80"
+              >
+                {followUpLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {translate("clientInfo.followUpNowRunning")}
+                  </span>
+                ) : (
+                  translate("clientInfo.followUpNowConfirm")
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showLogoutConfirm && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
@@ -579,7 +646,38 @@ export default function ClientInfo({ client_email }) {
             </button>
           )}
 
-          <div className="mt-6 pt-6 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-gray-900">
+                    {translate("clientInfo.followUpNow")}
+                  </p>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {translate("clientInfo.followUpNowDescription")}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleFollowUpNow}
+                  disabled={!clientId || followUpLoading}
+                  className="shrink-0 inline-flex items-center justify-center gap-2 py-2 px-4 bg-primary text-white rounded-md font-medium transition-colors hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {followUpLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>{translate("clientInfo.followUpNowRunning")}</span>
+                    </>
+                  ) : (
+                    <>
+                      <MessageCircle className="h-4 w-4" />
+                      <span>{translate("clientInfo.followUpNow")}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={handleLogout}

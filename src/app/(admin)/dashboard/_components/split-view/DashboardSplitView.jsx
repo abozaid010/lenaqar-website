@@ -10,8 +10,10 @@ import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { buildDashboardFilterKey } from "@/utils/dashboard-filter-key";
+import { buildDashboardLeadHref } from "@/utils/dashboard-navigation";
 import { sortDashboardLeadsByScore } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
+import { useLgViewport } from "@/hooks/use-lg-viewport";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -30,6 +32,7 @@ function DashboardSplitViewComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
+  const isLg = useLgViewport();
   const { setAverageScore, setLoading } = useAverageScore();
   const {
     setVisibleLeadsFromList,
@@ -94,13 +97,18 @@ function DashboardSplitViewComponent() {
 
   const onSelectLead = useCallback(
     (user) => {
+      if (!isLg) {
+        router.push(buildDashboardLeadHref(user.user_id, searchParams));
+        return;
+      }
+
       const usp = new URLSearchParams(searchParams.toString());
       usp.set("userId", user.user_id);
       router.replace(`${window.location.pathname}?${usp.toString()}`, {
         scroll: false,
       });
     },
-    [router, searchParams]
+    [isLg, router, searchParams]
   );
 
   const onInvalidateList = useCallback(() => {
@@ -113,6 +121,11 @@ function DashboardSplitViewComponent() {
     },
     [queryClient, filterKey]
   );
+
+  useEffect(() => {
+    if (isLg || !selectedUserId) return;
+    router.replace(buildDashboardLeadHref(selectedUserId, searchParams));
+  }, [isLg, router, searchParams, selectedUserId]);
 
   useEffect(() => {
     if (!selectedUserId || selectedLead) return;
@@ -136,7 +149,7 @@ function DashboardSplitViewComponent() {
 
   return (
     <div className="flex flex-col min-h-0 flex-1 gap-1">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(280px,360px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
         <LeadsListPane
           users={filteredUsers}
           totalLoadedLeads={allUsers.length}
@@ -147,7 +160,7 @@ function DashboardSplitViewComponent() {
           isError={isError}
           error={error}
           refetch={refetch}
-          selectedUserId={selectedUserId}
+          selectedUserId={isLg ? selectedUserId : undefined}
           onSelectLead={onSelectLead}
           data={data}
           isLeadSelected={isLeadSelected}
@@ -155,12 +168,14 @@ function DashboardSplitViewComponent() {
           onToggleSelectAllVisible={toggleSelectAllVisible}
           hasBulkSelection={hasSelection}
         />
-        <LeadDetailPane
-          userId={selectedUserId}
-          leadSummary={selectedLead}
-          onInvalidateList={onInvalidateList}
-          onLeadRemoved={onLeadRemoved}
-        />
+        <div className="hidden lg:flex flex-col min-h-0 min-h-[320px] flex-1">
+          <LeadDetailPane
+            userId={selectedUserId}
+            leadSummary={selectedLead}
+            onInvalidateList={onInvalidateList}
+            onLeadRemoved={onLeadRemoved}
+          />
+        </div>
       </div>
     </div>
   );

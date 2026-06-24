@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import Analytics from "../_component/Analtics";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import FollowUpAgentSection from "./follow-up-agent/FollowUpAgentSection";
 import {
   fetchLegacyMonthData,
   fetchLegacyUserAnalytics,
@@ -60,6 +61,9 @@ export default function AnalyticsPageClient() {
       </div>
       <div className="mt-4">
         <AnalyticsDashboard initialData={data?.managerStats || {}} />
+      </div>
+      <div className="mt-4">
+        <FollowUpAgentSection />
       </div>
     </>
   );

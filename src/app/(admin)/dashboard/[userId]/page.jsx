@@ -1,6 +1,30 @@
-import { redirect } from "next/navigation";
+import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
+import { SITE_URL } from "../../../metadata";
+import LeadDetailPageClient from "./_components/LeadDetailPageClient";
 
-export default async function ChatPage({ params }) {
+export default async function LeadDetailPage({ params }) {
   const { userId } = await params;
-  redirect(`/dashboard?userId=${encodeURIComponent(userId)}`);
+
+  return (
+    <>
+      <BreadcrumbSchema
+        items={[
+          {
+            name: "Dashboard",
+            url: `${SITE_URL}/dashboard`,
+          },
+          {
+            name: "Lead",
+            url: `${SITE_URL}/dashboard/${userId}`,
+          },
+        ]}
+      />
+      <div className="h-full flex flex-col">
+        <SearchParamsWrapper>
+          <LeadDetailPageClient userId={userId} />
+        </SearchParamsWrapper>
+      </div>
+    </>
+  );
 }

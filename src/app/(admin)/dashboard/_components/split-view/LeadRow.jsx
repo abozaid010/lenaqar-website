@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
-import WhatsAppButton from "@/components/ui/whatsapp-button";
 import { Phone } from "lucide-react";
 import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
 import {
@@ -39,7 +38,7 @@ export default function LeadRow({
           onSelect(user);
         }
       }}
-      className={`w-full flex flex-row items-center gap-3 text-start px-4 py-3 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
+      className={`w-full flex flex-row items-center gap-2 text-start px-3 py-2 chat-list-row transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#25d366]/30 ${
         selected ? "chat-list-row--selected" : ""
       }`}
     >
@@ -57,51 +56,45 @@ export default function LeadRow({
         />
       )}
 
-      {/* Name */}
-      <span className="font-semibold text-sm leading-snug text-chat-text truncate min-w-0 flex-1">
-        {user.name || t.clientsTable?.newLead || "Lead"}
-      </span>
-
-      {/* Owner type (lead identity) badge — hidden when null */}
-      {ownerTypeLabel ? (
-        <span
-          className={`shrink-0 inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium leading-none ${
-            ownerType === "broker"
-              ? "bg-amber-50 text-amber-700"
-              : ownerType === "developer"
-                ? "bg-purple-50 text-purple-700"
-                : "bg-sky-50 text-sky-700"
-          }`}
-        >
-          {ownerTypeLabel}
-        </span>
-      ) : null}
-
-      {/* Phone */}
-      <span className="text-sm leading-snug text-chat-text-muted font-mono tabular-nums truncate min-w-0 shrink-0">
-        {phoneDisplay}
-      </span>
-
-      {/* Quick Actions */}
-      {rawPhone ? (
-        <div className="flex items-center gap-0.5 shrink-0">
-          <a
-            href={`tel:${phoneE164 || rawPhone}`}
-            onClick={(e) => e.stopPropagation()}
-            className={`${DASHBOARD_ICON_BUTTON} hover:text-primary`}
-            title="Make a call"
-            aria-label="Call"
-          >
-            <Phone className="w-4 h-4" strokeWidth={2} />
-          </a>
-
-          <WhatsAppButton
-            phoneNumber={phoneE164 || rawPhone}
-            className="hover:text-green-600"
-            title={t.clientsTable?.openWhatsApp || "Open WhatsApp"}
-            ariaLabel="WhatsApp"
-          />
+      <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="font-semibold text-sm leading-tight text-chat-text truncate">
+            {user.name || t.clientsTable?.newLead || "Lead"}
+          </span>
+          {ownerTypeLabel ? (
+            <span
+              className={`shrink-0 inline-flex items-center rounded px-0.5 py-0 font-normal leading-none ${
+                ownerType === "broker"
+                  ? "bg-amber-50 text-amber-700"
+                  : ownerType === "developer"
+                    ? "bg-purple-50 text-purple-700"
+                    : "bg-sky-50 text-sky-700"
+              }`}
+              style={{ fontSize: "8px", lineHeight: "10px" }}
+            >
+              {ownerTypeLabel}
+            </span>
+          ) : null}
         </div>
+
+        <span
+          dir="ltr"
+          className="text-xs leading-tight text-chat-text-muted font-mono tabular-nums truncate text-start"
+        >
+          {phoneDisplay}
+        </span>
+      </div>
+
+      {rawPhone ? (
+        <a
+          href={`tel:${phoneE164 || rawPhone}`}
+          onClick={(e) => e.stopPropagation()}
+          className={`${DASHBOARD_ICON_BUTTON} shrink-0 hover:text-primary`}
+          title="Make a call"
+          aria-label="Call"
+        >
+          <Phone className="w-3.5 h-3.5" strokeWidth={2} />
+        </a>
       ) : null}
     </div>
   );

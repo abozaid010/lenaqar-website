@@ -1,6 +1,6 @@
 "use client";
 
-import { updateUserInfo } from "@/utils/api";
+import { updateUserInfo, extractUpdatedLeadFromUserInfoResponse } from "@/utils/api";
 import { X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +20,7 @@ export default function EditUserInfoDialog({
   initialPhone = "",
   initialCompany = "",
   initialOwnerType = null,
+  initialNotes = "",
   onSuccess,
 }) {
   const { translate, common } = useI18n();
@@ -29,8 +30,13 @@ export default function EditUserInfoDialog({
   const [ownerType, setOwnerType] = useState(
     () => normalizeOwnerType(initialOwnerType) || "",
   );
-  const [notes, setNotes] = useState("");
+  const [newNote, setNewNote] = useState("");
   const [pending, setPending] = useState(false);
+
+  const existingNotes = useMemo(
+    () => (typeof initialNotes === "string" ? initialNotes.trim() : ""),
+    [initialNotes],
+  );
 
   const ownerTypeOptions = useMemo(
     () =>
@@ -47,7 +53,7 @@ export default function EditUserInfoDialog({
       setPhone(initialPhone || "");
       setCompany(initialCompany || "");
       setOwnerType(normalizeOwnerType(initialOwnerType) || "");
-      setNotes("");
+      setNewNote("");
     }
   }, [open, initialName, initialPhone, initialCompany, initialOwnerType]);
 
@@ -57,22 +63,24 @@ export default function EditUserInfoDialog({
     e.preventDefault();
     if (!userId) return;
 
-    // Send only the fields that actually changed (plus required user_id).
     const payload = { user_id: userId };
     const trimmedName = name.trim();
     const trimmedPhone = (phone || "").trim();
     const trimmedCompany = company.trim();
-    const trimmedNotes = notes.trim();
+    const trimmedNewNote = newNote.trim();
     const normalizedInitialOwnerType = normalizeOwnerType(initialOwnerType) || "";
 
     if (trimmedName !== (initialName || "").trim()) payload.name = trimmedName;
-    if (trimmedPhone !== (initialPhone || "").trim())
+    if (trimmedPhone !== (initialPhone || "").trim()) {
       payload.phone_number = trimmedPhone;
-    if (trimmedCompany !== (initialCompany || "").trim())
+    }
+    if (trimmedCompany !== (initialCompany || "").trim()) {
       payload.company_name = trimmedCompany;
-    if (ownerType && ownerType !== normalizedInitialOwnerType)
+    }
+    if (ownerType && ownerType !== normalizedInitialOwnerType) {
       payload.owner_type = ownerType;
-    if (trimmedNotes) payload.notes = trimmedNotes;
+    }
+    if (trimmedNewNote) payload.notes = trimmedNewNote;
 
     if (Object.keys(payload).length === 1) {
       onClose();
@@ -82,6 +90,8 @@ export default function EditUserInfoDialog({
     setPending(true);
     try {
       const res = await updateUserInfo(payload);
+      const updatedLead = extractUpdatedLeadFromUserInfoResponse(res);
+
       if (res?.status === false) {
         toast.error(
           res?.error_message ||
@@ -90,8 +100,9 @@ export default function EditUserInfoDialog({
         );
         return;
       }
+
       toast.success(translate("common.contactUpdated", "Contact updated"));
-      onSuccess?.(res?.data || payload);
+      onSuccess?.(updatedLead, res, payload);
       onClose();
     } catch (err) {
       toast.error(
@@ -169,10 +180,15 @@ export default function EditUserInfoDialog({
             <label className="block text-xs text-gray-600 mb-0.5">
               {translate("editContact.notes", "Notes")}
             </label>
+            {existingNotes ? (
+              <p className="mb-2 rounded border border-gray-100 bg-gray-50 px-2 py-1.5 text-xs text-gray-700 whitespace-pre-wrap">
+                {existingNotes}
+              </p>
+            ) : null}
             <textarea
               className="w-full border border-gray-200 rounded px-2 py-1.5 min-h-[72px] resize-y"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              value={newNote}
+              onChange={(e) => setNewNote(e.target.value)}
               placeholder={translate(
                 "editContact.notesPlaceholder",
                 "Add a note...",

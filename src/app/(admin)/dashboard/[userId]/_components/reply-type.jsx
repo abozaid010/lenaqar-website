@@ -2,14 +2,7 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { toggleAutoReply } from "@/utils/api";
-import {
-  Bot,
-  Check,
-  CircleSlash,
-  Loader2,
-  ToggleLeft,
-  ToggleRight,
-} from "lucide-react";
+import { Ban, Check, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -77,12 +70,12 @@ export default function ToggleReplyType({
       }
       disabled={isLoading}
       onClick={handleToggle}
-      className={`inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
+      className={`inline-flex items-center gap-1.5 shrink-0 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
         isLoading ? "opacity-70 cursor-wait" : "cursor-pointer"
       } ${
         isAiOn
-          ? "bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100"
-          : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
+          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+          : "bg-white text-red-600 border-red-200 hover:bg-red-50"
       }`}
     >
       {isLoading ? (
@@ -92,25 +85,16 @@ export default function ToggleReplyType({
         </>
       ) : (
         <>
-          <Bot
-            className={`h-3.5 w-3.5 shrink-0 ${isAiOn ? "text-emerald-700" : "text-gray-400"}`}
-            aria-hidden
-          />
           {isAiOn ? (
-            <Check className="h-3 w-3 shrink-0 text-emerald-600" aria-hidden />
+            <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" aria-hidden />
           ) : (
-            <CircleSlash className="h-3 w-3 shrink-0 text-gray-500" aria-hidden />
+            <Ban className="h-3.5 w-3.5 shrink-0 text-red-500" aria-hidden />
           )}
           <span className="whitespace-nowrap">
             {isAiOn
               ? translate("leadDetail.aiAutoReply.onLabel")
               : translate("leadDetail.aiAutoReply.offLabel")}
           </span>
-          {isAiOn ? (
-            <ToggleRight className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
-          ) : (
-            <ToggleLeft className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
-          )}
         </>
       )}
     </button>
