@@ -207,7 +207,7 @@ export default function LeadsListPane({
         )}
         <div className="flex gap-2 items-center">
           <div className="relative flex-1 min-w-0">
-            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none" />
+            <Search className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none" aria-hidden />
             <input
               type="search"
               value={searchInput}
@@ -219,7 +219,7 @@ export default function LeadsListPane({
                 }
               }}
               placeholder={translate("leadsSearchPlaceholder", "Search by name, phone, or company")}
-              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-2 text-sm"
+              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-9 text-sm"
               autoComplete="off"
             />
           </div>
