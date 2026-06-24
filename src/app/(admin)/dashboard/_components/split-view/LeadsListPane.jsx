@@ -1,7 +1,7 @@
 "use client";
 
 import EmptyStateVideo from "@/components/ui/empty-state-video";
-import { ArrowRight, Search } from "lucide-react";
+import { ArrowRight, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -89,6 +89,14 @@ export default function LeadsListPane({
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
     applySearch(searchInput);
   }, [applySearch, searchInput]);
+
+  const handleClearSearch = useCallback(() => {
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setSearchInput("");
+    applySearch("");
+  }, [applySearch]);
+
+  const hasSearchText = searchInput.trim().length > 0;
 
   // Sync input only when the URL query changes externally (e.g. back/forward, filters).
   useEffect(() => {
@@ -205,28 +213,46 @@ export default function LeadsListPane({
             </span>
           </label>
         )}
-        <div className="flex gap-2 items-center">
-          <div className="relative flex-1 min-w-0">
-            <Search className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none" aria-hidden />
-            <input
-              type="search"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  handleSearchSubmit();
-                }
-              }}
-              placeholder={translate("leadsSearchPlaceholder", "Search by name, phone, or company")}
-              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-9 text-sm"
-              autoComplete="off"
+        <div className="relative flex-1 min-w-0">
+          {hasSearchText ? (
+            <button
+              type="button"
+              onClick={handleClearSearch}
+              className="absolute start-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-chat-text-muted rounded hover:bg-gray-100 hover:text-gray-700 transition-colors inline-flex items-center justify-center"
+              title={translate("common.clear", "Clear")}
+              aria-label={translate("common.clear", "Clear")}
+            >
+              <X className="w-4 h-4" aria-hidden />
+            </button>
+          ) : (
+            <Search
+              className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none z-[1]"
+              aria-hidden
             />
-          </div>
+          )}
+          <input
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSearchSubmit();
+              }
+            }}
+            placeholder={translate(
+              "leadsSearchPlaceholder",
+              "Search by name, phone, or company",
+            )}
+            className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm"
+            autoComplete="off"
+          />
           <button
             type="button"
             onClick={handleSearchSubmit}
-            className="shrink-0 h-[34px] w-[34px] text-primary rounded-md hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
+            className="absolute end-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-primary rounded hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
             title={translate("common.search")}
             aria-label={translate("common.search")}
           >
