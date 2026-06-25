@@ -1349,6 +1349,33 @@ export async function updateProfileData(formData) {
   }
 }
 
+/**
+ * PATCH only enabled_agents on the client profile.
+ * @param {import("@/constants/client-agents").ClientAgentId[]} enabledAgents
+ */
+export async function updateEnabledAgents(enabledAgents) {
+  try {
+    const response = await axiosInstance.patch("/client/update-profile", {
+      enabled_agents: enabledAgents,
+    });
+    const body = response.data;
+    if (body?.status === false) {
+      throw new Error(body?.message || "Failed to update automation agents");
+    }
+    return body;
+  } catch (error) {
+    const message =
+      error.response?.data?.detail ||
+      error.response?.data?.message ||
+      error.message ||
+      "Failed to update automation agents";
+    console.error("Failed to update enabled agents:", message);
+    throw new Error(
+      typeof message === "string" ? message : "Failed to update automation agents"
+    );
+  }
+}
+
 /** POST multipart client logo (authenticated client). */
 export async function uploadClientLogo(formData) {
   try {

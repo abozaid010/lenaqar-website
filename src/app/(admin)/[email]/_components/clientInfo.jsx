@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { PhoneField } from "@/components/phone/PhoneField";
+import AutomationAgentsSection from "./AutomationAgentsSection";
 
 export default function ClientInfo({ client_email }) {
   const { t, translate } = useI18n();
@@ -647,6 +648,11 @@ export default function ClientInfo({ client_email }) {
           )}
 
           <div className="mt-6 pt-6 border-t border-gray-200 space-y-4">
+            <AutomationAgentsSection
+              enabledAgents={data?.data?.enabled_agents ?? []}
+              isProfileLoading={isLoading}
+            />
+
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="min-w-0">

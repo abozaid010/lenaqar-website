@@ -2300,6 +2300,21 @@ export default {
       "This will send follow-up messages to eligible leads immediately. Continue?",
     followUpNowConfirm: "Run now",
     followUpNowCancel: "Cancel",
+    automationAgents: {
+      title: "Automation Agents",
+      description: "Choose which automated agents run for your account.",
+      save: "Save",
+      saving: "Saving...",
+      saveSuccess: "Automation agents updated successfully",
+      saveFailed: "Failed to update automation agents",
+      dailyEngagement: {
+        label: "Daily Engagement",
+        description:
+          "Runs scheduled daily follow-up for leads where AI reply is enabled.",
+        helperText:
+          "Leads with AI reply turned off in the dashboard are still skipped, even when this agent is enabled.",
+      },
+    },
     accuracyLevels: {
       exactMatch: {
         title: "Exact Match",
