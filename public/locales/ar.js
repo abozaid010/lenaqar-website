@@ -896,6 +896,25 @@ export default {
     rateLimitExceeded:
       "تم تجاوز الحد اليومي للرسائل. يرجى المحاولة مرة أخرى لاحقًا.",
   },
+  openwaConnection: {
+    title: "ربط واتساب",
+    titleConnected: "واتساب متصل",
+    allConnectedDescription: "جميع أرقام واتساب المرتبطة متصلة وجاهزة.",
+    disconnectedDescription:
+      "امسح رمز QR لكل رقم أدناه لاستعادة رسائل واتساب.",
+    connected: "متصل",
+    scanQr: "امسح رمز QR هذا من تطبيق واتساب على هاتفك",
+    waitingForQr: "في انتظار رمز QR…",
+    sessionError: "تعذر تحميل حالة الاتصال لهذا الرقم",
+    unknownNumber: "رقم واتساب",
+    loading: "جاري التحقق من اتصالات واتساب…",
+    loadFailed: "تعذر التحقق من حالة اتصال واتساب. يرجى المحاولة مرة أخرى.",
+    successMessage: "{count} رقم واتساب متصل",
+    pollingHint: "يتم تحديث الحالة تلقائيًا بعد المسح.",
+    refresh: "تحديث",
+    openStatus: "اتصال واتساب",
+    partialLoadFailed: "تعذر تحديث بعض تفاصيل الاتصال. حاول مرة أخرى.",
+  },
   clientsTable: {
     noClients: "لا يوجد عملاء",
     headers: {
