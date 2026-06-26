@@ -5,6 +5,9 @@ import {
   resolveSenderPhoneNumber,
 } from "@/lib/whatsapp-messaging-provider";
 
+/** Production OpenWA service is mounted under /webhook/openwa on api.lenaai.net */
+const OPENWA_API_PREFIX = "/webhook/openwa";
+
 export function normalizePhoneDigits(phone) {
   return String(phone || "").replace(/\D/g, "");
 }
@@ -43,7 +46,7 @@ function extractBulkSessionsList(payload) {
 }
 
 function readBulkSessionId(item) {
-  const id = item?.session_id ?? item?.id;
+  const id = item?.session_id ?? item?.sessionId ?? item?.id;
   return typeof id === "string" ? id.trim() : "";
 }
 
@@ -63,7 +66,7 @@ function phonesMatch(a, b) {
  * @param {string} apiKey
  */
 export async function fetchBulkOpenwaSessionsStatus(apiBaseUrl, apiKey) {
-  const url = `${apiBaseUrl}/openwa/sessions/status`;
+  const url = `${apiBaseUrl}${OPENWA_API_PREFIX}/sessions/status`;
   const response = await bffFetch(url, {
     method: "GET",
     headers: {
@@ -143,7 +146,7 @@ export async function fetchOpenwaSessionStatusFromBackend(
   apiKey
 ) {
   const params = new URLSearchParams({ session_id: sessionId });
-  const url = `${apiBaseUrl}/openwa/session/status?${params.toString()}`;
+  const url = `${apiBaseUrl}${OPENWA_API_PREFIX}/session/status?${params.toString()}`;
 
   const response = await bffFetch(url, {
     method: "GET",
