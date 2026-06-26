@@ -3,19 +3,70 @@
 import { AverageScoreProvider } from "@/context/average-score";
 import { DashboardLeadsBulkProvider } from "@/context/dashboard-leads-bulk-context";
 import { useI18n } from "@/hooks/useI18n";
+import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
+import { useOpenwaSessionsStatus } from "@/hooks/useOpenwaSessionsStatus";
+import {
+  isOpenwaProvider,
+  resolveSenderPhoneNumber,
+} from "@/lib/whatsapp-messaging-provider";
 import DashbordFilter from "./dashbord-filter";
 import DashboardSplitView from "./split-view/DashboardSplitView";
-import { SlidersHorizontal, X } from "lucide-react";
-import { Suspense, useEffect, useState } from "react";
+import OpenwaConnectionDialog from "./OpenwaConnectionDialog";
+import { MessageCircle, SlidersHorizontal, X } from "lucide-react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export default function DashboardPageClient({ appliedFilters }) {
   const { translate } = useI18n();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [showOpenwaDialog, setShowOpenwaDialog] = useState(false);
+  const hasPromptedOpenwaRef = useRef(false);
+  const { data: messagingConfig, isSuccess: isMessagingReady } =
+    useMessagingProviderConfig();
+
+  const openwaProfileAccounts = useMemo(() => {
+    const accounts = messagingConfig?.accounts ?? [];
+    return accounts
+      .filter((account) => isOpenwaProvider(account.platform))
+      .map((account) => {
+        const whatsapp_number = resolveSenderPhoneNumber(account) || "";
+        return {
+          session_id:
+            account.openwa_session_id?.trim() ||
+            (whatsapp_number ? `phone:${whatsapp_number}` : "unknown"),
+          whatsapp_number,
+          connected: false,
+          status: null,
+          qrImage: null,
+          error: null,
+        };
+      });
+  }, [messagingConfig]);
+
+  const hasOpenwaLinkedAccounts = openwaProfileAccounts.length > 0;
+
+  const openwaStatusQuery = useOpenwaSessionsStatus({
+    enabled: hasOpenwaLinkedAccounts,
+    pollWhileDisconnected: showOpenwaDialog,
+  });
+
+  useEffect(() => {
+    if (hasPromptedOpenwaRef.current) return;
+    if (!isMessagingReady) return;
+
+    hasPromptedOpenwaRef.current = true;
+    if (hasOpenwaLinkedAccounts) {
+      setShowOpenwaDialog(true);
+    }
+  }, [hasOpenwaLinkedAccounts, isMessagingReady]);
 
   const filterPanelTitle = translate("dashboardFilter.panel.title");
   const filterPanelOpenLabel = translate("dashboardFilter.panel.open");
   const filterPanelCloseLabel = translate("dashboardFilter.panel.close");
+  const openwaStatusLabel = translate(
+    "openwaConnection.openStatus",
+    "WhatsApp connection"
+  );
 
   useEffect(() => {
     if (!isFiltersOpen) return;
@@ -30,6 +81,18 @@ export default function DashboardPageClient({ appliedFilters }) {
     <AverageScoreProvider>
       <DashboardLeadsBulkProvider>
         <div className="relative flex-1 min-h-0 flex flex-col">
+          {hasOpenwaLinkedAccounts ? (
+            <button
+              type="button"
+              onClick={() => setShowOpenwaDialog(true)}
+              className="no-print absolute start-3 top-3 z-30 inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-3 rounded-md border border-primary/20 bg-white text-sm font-medium text-primary shadow-sm hover:bg-primary/5 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+              aria-label={openwaStatusLabel}
+            >
+              <MessageCircle className="w-4 h-4 shrink-0" aria-hidden />
+              <span>{openwaStatusLabel}</span>
+            </button>
+          ) : null}
+
           {!isFiltersOpen ? (
             <button
               type="button"
@@ -95,6 +158,12 @@ export default function DashboardPageClient({ appliedFilters }) {
             </Suspense>
           </div>
         </div>
+        <OpenwaConnectionDialog
+          isOpen={showOpenwaDialog}
+          onClose={() => setShowOpenwaDialog(false)}
+          statusQuery={openwaStatusQuery}
+          fallbackSessions={openwaProfileAccounts}
+        />
       </DashboardLeadsBulkProvider>
     </AverageScoreProvider>
   );

@@ -1024,6 +1024,28 @@ export default {
     rateLimitExceeded:
       "Daily message limit exceeded. Please try again later.",
   },
+  openwaConnection: {
+    title: "Connect WhatsApp",
+    titleConnected: "WhatsApp is connected",
+    allConnectedDescription:
+      "All linked WhatsApp numbers are connected and ready.",
+    disconnectedDescription:
+      "Scan the QR code for each number below to restore WhatsApp messaging.",
+    connected: "Connected",
+    scanQr: "Scan this QR code with WhatsApp on your phone",
+    waitingForQr: "Waiting for QR code…",
+    sessionError: "Could not load connection status for this number",
+    unknownNumber: "WhatsApp number",
+    loading: "Checking WhatsApp connections…",
+    loadFailed:
+      "Could not check WhatsApp connection status. Please try again.",
+    successMessage: "{count} WhatsApp number(s) connected",
+    pollingHint: "Status updates automatically after you scan.",
+    refresh: "Refresh",
+    openStatus: "WhatsApp connection",
+    partialLoadFailed:
+      "Some connection details could not be refreshed. Try again.",
+  },
   clientsTable: {
     noClients: "No clients found",
     headers: {

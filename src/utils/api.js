@@ -2674,3 +2674,23 @@ export async function submitMatchViewingRequest(token, { unitIds, meetingTime })
   }
   return json.data;
 }
+
+/**
+ * GET /api/openwa/sessions/status — linked OpenWA session connection + QR state.
+ */
+export async function fetchOpenwaLinkedSessionsStatus() {
+  const response = await fetch("/api/openwa/sessions/status", {
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || data?.detail || "Failed to load WhatsApp connection status"
+    );
+  }
+
+  return data;
+}
