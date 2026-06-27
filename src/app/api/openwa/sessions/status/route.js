@@ -4,10 +4,9 @@ import { API_BASE_URL } from "@/lib/apiConfig";
 import { bffFetch } from "@/lib/bffFetch";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import {
-  fetchOpenwaSessionStatusFromBackend,
+  fetchBulkOpenwaSessionsStatus,
   getOpenwaProfileAccounts,
-  mergeOpenwaSessionStatuses,
-  resolveOpenwaSessionIds,
+  resolveOpenwaStatusesFromBulk,
 } from "@/lib/openwa-session-status";
 
 const OPENWA_SESSION_API_KEY = (
@@ -80,47 +79,14 @@ export async function GET() {
       });
     }
 
-    const resolvedAccounts = await resolveOpenwaSessionIds(
-      profileAccounts,
+    const bulkPayload = await fetchBulkOpenwaSessionsStatus(
       API_BASE_URL,
       OPENWA_SESSION_API_KEY
     );
-
-    const statusByKey = {};
-
-    await Promise.all(
-      resolvedAccounts.map(async (account) => {
-        const storeKey = account.session_id || account.lookupKey;
-
-        if (!account.session_id) {
-          statusByKey[storeKey] = {
-            connected: false,
-            status: "error",
-            error: "OpenWA session ID is not available for this number",
-          };
-          return;
-        }
-
-        try {
-          const status = await fetchOpenwaSessionStatusFromBackend(
-            API_BASE_URL,
-            account.session_id,
-            OPENWA_SESSION_API_KEY
-          );
-          statusByKey[account.session_id] = status;
-        } catch (error) {
-          statusByKey[storeKey] = {
-            connected: false,
-            status: "error",
-            error:
-              error?.message || "Failed to fetch OpenWA session status",
-          };
-        }
-      })
+    const { sessions, allConnected } = resolveOpenwaStatusesFromBulk(
+      profileAccounts,
+      bulkPayload
     );
-
-    const sessions = mergeOpenwaSessionStatuses(resolvedAccounts, statusByKey);
-    const allConnected = sessions.every((session) => session.connected);
 
     return NextResponse.json({
       sessions,

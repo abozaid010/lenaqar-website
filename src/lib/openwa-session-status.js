@@ -55,6 +55,86 @@ function readBulkSessionPhone(item) {
   return normalizePhoneDigits(phone);
 }
 
+export function findBulkSessionForAccount(bulkList, account) {
+  if (!Array.isArray(bulkList) || !account) return null;
+
+  const sessionId = account.session_id?.trim() || "";
+  const phoneDigits = normalizePhoneDigits(account.whatsapp_number);
+
+  return (
+    bulkList.find((item) => {
+      const itemId = readBulkSessionId(item);
+      if (sessionId && itemId && itemId === sessionId) return true;
+      return phonesMatch(phoneDigits, readBulkSessionPhone(item));
+    }) ?? null
+  );
+}
+
+export function mapBulkSessionToStatus(raw) {
+  if (!raw || typeof raw !== "object") {
+    return {
+      connected: false,
+      status: "error",
+      error: "Session status not found",
+    };
+  }
+
+  const qrImage =
+    typeof raw.qr?.image === "string" && raw.qr.image.trim()
+      ? raw.qr.image.trim()
+      : typeof raw.qr === "string" && raw.qr.trim()
+        ? raw.qr.trim()
+        : null;
+
+  return {
+    connected: Boolean(raw.connected),
+    status: typeof raw.status === "string" ? raw.status : null,
+    phone: typeof raw.phone === "string" ? raw.phone : null,
+    qr: qrImage ? { image: qrImage } : null,
+    error: null,
+  };
+}
+
+/**
+ * Resolve profile accounts + statuses from one bulk /sessions/status response.
+ * @param {Array<{ session_id: string, whatsapp_number: string, lookupKey: string }>} accounts
+ * @param {unknown} bulkPayload
+ */
+export function resolveOpenwaStatusesFromBulk(accounts, bulkPayload) {
+  const bulkList = extractBulkSessionsList(bulkPayload);
+
+  const resolvedAccounts = accounts.map((account) => {
+    if (account.session_id) return account;
+
+    const match = findBulkSessionForAccount(bulkList, account);
+    const session_id = match ? readBulkSessionId(match) : "";
+
+    return {
+      ...account,
+      session_id,
+      lookupKey: session_id || account.lookupKey,
+    };
+  });
+
+  const statusByKey = {};
+  for (const account of resolvedAccounts) {
+    const key = account.session_id || account.lookupKey;
+    const match = findBulkSessionForAccount(bulkList, account);
+    statusByKey[key] = match
+      ? mapBulkSessionToStatus(match)
+      : {
+          connected: false,
+          status: "error",
+          error: "OpenWA session status not found for this number",
+        };
+  }
+
+  const sessions = mergeOpenwaSessionStatuses(resolvedAccounts, statusByKey);
+  const allConnected = sessions.every((session) => session.connected);
+
+  return { resolvedAccounts, sessions, allConnected };
+}
+
 function phonesMatch(a, b) {
   if (!a || !b) return false;
   if (a === b) return true;
