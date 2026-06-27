@@ -85,6 +85,7 @@ export default function OpenwaConnectionDialog({
   onClose,
   statusQuery,
   fallbackSessions = [],
+  autoCloseWhenConnected = false,
 }) {
   const { translate } = useI18n();
   const { data, isLoading, isFetching, isError, refetch } = statusQuery;
@@ -99,6 +100,7 @@ export default function OpenwaConnectionDialog({
   );
 
   const shouldAutoClose =
+    autoCloseWhenConnected &&
     isOpen &&
     !isLoading &&
     Boolean(data?.sessions?.length) &&
@@ -185,12 +187,14 @@ export default function OpenwaConnectionDialog({
                   "{count} WhatsApp number(s) connected"
                 ).replace("{count}", String(sessions.length))}
               </p>
-              <p className="text-xs text-gray-500 text-center">
-                {translate(
-                  "openwaConnection.autoCloseHint",
-                  "This dialog will close in 3 seconds."
-                )}
-              </p>
+              {autoCloseWhenConnected ? (
+                <p className="text-xs text-gray-500 text-center">
+                  {translate(
+                    "openwaConnection.autoCloseHint",
+                    "This dialog will close in 3 seconds."
+                  )}
+                </p>
+              ) : null}
             </div>
           ) : null}
 

@@ -6,9 +6,10 @@ import {
   isOpenwaProvider,
   resolveSenderPhoneNumber,
 } from "@/lib/whatsapp-messaging-provider";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export function useOpenwaConnection({
+  /** Leads: check on mount and open dialog only when not fully connected */
   autoOpenOnMount = false,
 } = {}) {
   const [showOpenwaDialog, setShowOpenwaDialog] = useState(false);
@@ -36,26 +37,41 @@ export function useOpenwaConnection({
   }, [messagingConfig]);
 
   const hasOpenwaLinkedAccounts = openwaProfileAccounts.length > 0;
+  const openwaStatusQuery = useOpenwaSessionsStatus();
+  const { refetch } = openwaStatusQuery;
 
-  const openwaStatusQuery = useOpenwaSessionsStatus({
-    enabled: hasOpenwaLinkedAccounts,
-    pollWhileDisconnected: showOpenwaDialog,
-  });
+  const fetchStatus = useCallback(() => {
+    if (!hasOpenwaLinkedAccounts) {
+      return Promise.resolve({ data: undefined });
+    }
+    return refetch();
+  }, [hasOpenwaLinkedAccounts, refetch]);
+
+  const openStatusDialog = useCallback(() => {
+    setShowOpenwaDialog(true);
+    void fetchStatus();
+  }, [fetchStatus]);
 
   useEffect(() => {
     if (!autoOpenOnMount) return;
     if (hasPromptedOpenwaRef.current) return;
-    if (!isMessagingReady) return;
+    if (!isMessagingReady || !hasOpenwaLinkedAccounts) return;
 
     hasPromptedOpenwaRef.current = true;
-    if (hasOpenwaLinkedAccounts) {
+
+    void (async () => {
+      const result = await fetchStatus();
+      const status = result?.data;
+      if (status?.allConnected) return;
       setShowOpenwaDialog(true);
-    }
-  }, [autoOpenOnMount, hasOpenwaLinkedAccounts, isMessagingReady]);
+    })();
+  }, [autoOpenOnMount, fetchStatus, hasOpenwaLinkedAccounts, isMessagingReady]);
 
   return {
     showOpenwaDialog,
     setShowOpenwaDialog,
+    openStatusDialog,
+    fetchStatus,
     openwaStatusQuery,
     openwaProfileAccounts,
     hasOpenwaLinkedAccounts,

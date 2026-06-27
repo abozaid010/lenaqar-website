@@ -10,17 +10,20 @@ import { MessageCircle } from "lucide-react";
  *   autoOpenOnMount?: boolean;
  *   showButton?: boolean;
  *   buttonVariant?: "card" | "inline";
+ *   autoCloseWhenConnected?: boolean;
  * }} props
  */
 export default function OpenwaConnectionAccess({
   autoOpenOnMount = false,
   showButton = false,
   buttonVariant = "card",
+  autoCloseWhenConnected = false,
 }) {
   const { translate } = useI18n();
   const {
     showOpenwaDialog,
     setShowOpenwaDialog,
+    openStatusDialog,
     openwaStatusQuery,
     openwaProfileAccounts,
     hasOpenwaLinkedAccounts,
@@ -54,7 +57,7 @@ export default function OpenwaConnectionAccess({
             </div>
             <button
               type="button"
-              onClick={() => setShowOpenwaDialog(true)}
+              onClick={openStatusDialog}
               className="shrink-0 inline-flex items-center justify-center gap-2 py-2 px-4 border border-primary/30 text-primary rounded-md text-sm font-medium transition-colors hover:bg-primary/5"
               aria-label={openwaStatusLabel}
             >
@@ -68,7 +71,7 @@ export default function OpenwaConnectionAccess({
       {showButton && buttonVariant === "inline" ? (
         <button
           type="button"
-          onClick={() => setShowOpenwaDialog(true)}
+          onClick={openStatusDialog}
           className="no-print inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-3 rounded-md border border-primary/20 bg-white text-sm font-medium text-primary shadow-sm hover:bg-primary/5 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
           aria-label={openwaStatusLabel}
         >
@@ -82,6 +85,7 @@ export default function OpenwaConnectionAccess({
         onClose={() => setShowOpenwaDialog(false)}
         statusQuery={openwaStatusQuery}
         fallbackSessions={openwaProfileAccounts}
+        autoCloseWhenConnected={autoCloseWhenConnected}
       />
     </>
   );
