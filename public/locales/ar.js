@@ -914,6 +914,9 @@ export default {
     refresh: "تحديث",
     openStatus: "اتصال واتساب",
     partialLoadFailed: "تعذر تحديث بعض تفاصيل الاتصال. حاول مرة أخرى.",
+    autoCloseHint: "سيُغلق هذا الحوار خلال 3 ثوانٍ.",
+    settingsDescription:
+      "تحقق من اتصال أرقام واتساب المرتبطة أو امسح رمز QR لإعادة الاتصال.",
   },
   clientsTable: {
     noClients: "لا يوجد عملاء",

@@ -1045,6 +1045,9 @@ export default {
     openStatus: "WhatsApp connection",
     partialLoadFailed:
       "Some connection details could not be refreshed. Try again.",
+    autoCloseHint: "This dialog will close in 3 seconds.",
+    settingsDescription:
+      "Check whether your linked WhatsApp numbers are connected or scan a QR code to reconnect.",
   },
   clientsTable: {
     noClients: "No clients found",

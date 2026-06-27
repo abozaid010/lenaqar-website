@@ -4,7 +4,9 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
 import { CheckCircle2, RefreshCw } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+
+const AUTO_CLOSE_CONNECTED_MS = 3000;
 
 function formatDisplayPhone(phone) {
   if (!phone) return "";
@@ -96,6 +98,26 @@ export default function OpenwaConnectionDialog({
     [sessions]
   );
 
+  const shouldAutoClose =
+    isOpen &&
+    !isLoading &&
+    Boolean(data?.sessions?.length) &&
+    Boolean(data?.allConnected) &&
+    data.sessions.every((session) => session.connected);
+
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
+  useEffect(() => {
+    if (!shouldAutoClose) return;
+
+    const timer = window.setTimeout(() => {
+      onCloseRef.current();
+    }, AUTO_CLOSE_CONNECTED_MS);
+
+    return () => window.clearTimeout(timer);
+  }, [shouldAutoClose]);
+
   const title = allConnected
     ? translate("openwaConnection.titleConnected", "WhatsApp is connected")
     : translate("openwaConnection.title", "Connect WhatsApp");
@@ -162,6 +184,12 @@ export default function OpenwaConnectionDialog({
                   "openwaConnection.successMessage",
                   "{count} WhatsApp number(s) connected"
                 ).replace("{count}", String(sessions.length))}
+              </p>
+              <p className="text-xs text-gray-500 text-center">
+                {translate(
+                  "openwaConnection.autoCloseHint",
+                  "This dialog will close in 3 seconds."
+                )}
               </p>
             </div>
           ) : null}
