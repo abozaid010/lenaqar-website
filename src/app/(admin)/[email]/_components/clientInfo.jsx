@@ -12,6 +12,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { PhoneField } from "@/components/phone/PhoneField";
 import AutomationAgentsSection from "./AutomationAgentsSection";
+import OpenwaConnectionAccess from "@/components/whatsapp/OpenwaConnectionAccess";
 
 export default function ClientInfo({ client_email }) {
   const { t, translate } = useI18n();
@@ -652,6 +653,8 @@ export default function ClientInfo({ client_email }) {
               enabledAgents={data?.data?.enabled_agents ?? []}
               isProfileLoading={isLoading}
             />
+
+            <OpenwaConnectionAccess showButton buttonVariant="card" />
 
             <div className="rounded-lg border border-gray-200 p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
