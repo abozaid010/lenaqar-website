@@ -2066,7 +2066,9 @@ export default {
   schaduall: {
     assignError: "فشل في تعيين مندوب المبيعات",
     salesAssigned: "تم تعيين مندوب المبيعات بنجاح",
-    ChooseSalesperson: "اختر السيلز الخاص لهذه المهمه",
+    ChooseSalesperson: "تعيين مبيعات",
+    withName: "مع",
+    onPhone: "على",
     Available: "متاح",
     noappointments: "لا توجد مواعيد هذا الأسبوع",
     noSale: "لا توجد مبيعات متاحة",

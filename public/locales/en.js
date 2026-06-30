@@ -707,7 +707,9 @@ export default {
   schaduall: {
     assignError: "Failed to assign salesperson",
     salesAssigned: "Salesperson assigned successfully",
-    ChooseSalesperson: "    select your sales for this task",
+    ChooseSalesperson: "Assign sales",
+    withName: "with",
+    onPhone: "on",
     Available: "Available",
     NoSalesAvailable: "no Sales Avaliabel",
     noappointments: "لا توجد مواعيد هذا الأسبوع",
