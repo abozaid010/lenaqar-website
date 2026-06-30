@@ -85,13 +85,13 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
   try {
     const merged =
       typeof searchParams === "string"
-        ? safeMergeParams(searchParams, { limit: 50 })
-        : { limit: 50, ...(searchParams || {}) };
+        ? safeMergeParams(searchParams, { limit: 100 })
+        : { limit: 100, ...(searchParams || {}) };
     const { action, clientId, tab, userId, cursor, direction, ...restMerged } =
       merged;
     const params = {
       ...restMerged,
-      limit: merged.limit ?? 50,
+      limit: merged.limit ?? 100,
       ...(action && action !== "all" ? { action } : {}),
       ...(pageParam?.cursor
         ? { cursor: pageParam.cursor, direction: pageParam.direction ?? "forward" }

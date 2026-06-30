@@ -20,7 +20,7 @@ import {
   parseOwnerTypeFilter,
   serializeOwnerTypeFilter,
 } from "@/constants/owner-type";
-import { ArrowDownUp, ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
+import { ArrowDown, ArrowDownUp, ArrowUp, ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDayMonthShort } from "@/utils/formateDate";
@@ -52,6 +52,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
   const router = useRouter();
   const searchParams = useSearchParams();
   const sortScore = searchParams.get("sort_score");
+  const isScoreSortActive = sortScore === "desc" || sortScore === "asc";
 
   const ACTIONS = useMemo(
     () => getDashboardFilterOptions(locale),
@@ -390,7 +391,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
         }`}
       >
           <div
-            className={`relative z-[60] ${fieldShellClass}`}
+            className={`relative ${isActionDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
             ref={actionDropdownRef}
           >
             <div
@@ -413,7 +414,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             </div>
 
             {isActionDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.actions.length > 0 && (
                   <button
                     type="button"
@@ -448,7 +449,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
 
           {/* Owner Type (lead identity) Filter Dropdown */}
           <div
-            className={`relative z-[60] ${fieldShellClass}`}
+            className={`relative ${isOwnerTypeDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
             ref={ownerTypeDropdownRef}
           >
             <div
@@ -471,7 +472,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             </div>
 
             {isOwnerTypeDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.owner_type.length > 0 && (
                   <button
                     type="button"
@@ -503,7 +504,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
 
           {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
-            className={`relative z-[60] ${campaignShellClass}`}
+            className={`relative ${isCampaignDropdownOpen ? "z-[90]" : "z-[60]"} ${campaignShellClass}`}
             ref={campaignDropdownRef}
           >
             <div
@@ -532,7 +533,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             </div>
 
             {isCampaignDropdownOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
                 {filters.campaign_ids.length > 0 && (
                   <button
                     onClick={clearCampaignFilters}
@@ -567,7 +568,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             )}
           </div>
 
-          <div className={`relative z-[60] ${dateShellClass}`}>
+          <div className={`relative ${isDatePickerOpen ? "z-[90]" : "z-[60]"} ${dateShellClass}`}>
             <div
               role="button"
               tabIndex={0}
@@ -595,7 +596,7 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             </div>
 
             {isDatePickerOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[70] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
+              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
                 <div className="space-y-2">
                   <FormInput
                     type="date"
@@ -646,30 +647,44 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleScoreSortToggle}
-            aria-pressed={sortScore === "desc" || sortScore === "asc"}
-            title={translate("dashboardFilter.sortByScore.title")}
-            className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} shrink-0 gap-1.5 ${
-              compact ? "h-9 min-h-[36px]" : "h-10"
-            } ${
-              sortScore === "desc" || sortScore === "asc"
-                ? SELECTION_COLORS.SELECTED
-                : ""
-            }`}
-          >
-            <ArrowDownUp className="w-4 h-4 text-gray-500 shrink-0" aria-hidden />
-            <span className="whitespace-nowrap">
-              {translate("dashboardFilter.sortByScore.label")}
+          <div className={`group relative shrink-0 ${triggerWidthClass}`}>
+            <button
+              type="button"
+              onClick={handleScoreSortToggle}
+              aria-pressed={isScoreSortActive}
+              aria-describedby="dashboard-score-sort-hint"
+              className={`${DASHBOARD_TRIGGER} !w-full gap-1.5 ${
+                compact ? "h-9 min-h-[36px]" : "h-10"
+              } ${
+                isScoreSortActive ? SELECTION_COLORS.SELECTED : ""
+              }`}
+            >
+              {sortScore === "desc" ? (
+                <ArrowDown className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+              ) : sortScore === "asc" ? (
+                <ArrowUp className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+              ) : (
+                <ArrowDownUp className="w-4 h-4 text-gray-500 shrink-0" aria-hidden />
+              )}
+              <span className="min-w-0 text-start">
+                <span className="block whitespace-nowrap text-sm leading-tight">
+                  {translate("dashboardFilter.sortByScore.label")}
+                </span>
+              </span>
+              {isScoreSortActive && (
+                <span className="ms-auto text-[10px] font-semibold uppercase tracking-wide text-primary shrink-0">
+                  {translate("dashboardFilter.sortByScore.active")}
+                </span>
+              )}
+            </button>
+            <span
+              id="dashboard-score-sort-hint"
+              role="tooltip"
+              className="pointer-events-none absolute bottom-full start-0 z-[100] mb-1.5 max-w-[14rem] rounded-md bg-gray-900 px-2.5 py-1.5 text-[11px] leading-snug text-white shadow-lg opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+            >
+              {translate("dashboardFilter.sortByScore.hint")}
             </span>
-            {sortScore === "desc" && (
-              <span aria-hidden="true">↓</span>
-            )}
-            {sortScore === "asc" && (
-              <span aria-hidden="true">↑</span>
-            )}
-          </button>
+          </div>
       </div>
 
       {/* Row 2: actions */}

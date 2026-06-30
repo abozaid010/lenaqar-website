@@ -782,8 +782,10 @@ export default {
       },
     },
     sortByScore: {
-      label: "Score",
-      title: "Sort visible leads by score",
+      label: "Sort by score",
+      title: "Sort on-screen leads by score — highest first",
+      hint: "On-screen leads only · highest score at top",
+      active: "On",
     },
     panel: {
       title: "Filters",
