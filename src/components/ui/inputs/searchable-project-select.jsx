@@ -54,7 +54,7 @@ export default function SearchableProjectSelect({
   district = "",
   ...rest
 }) {
-  const { t, locale } = useI18n();
+  const { locale, translate } = useI18n();
   const [fetchingId, setFetchingId] = useState(null);
 
   // Fetch lightweight projects if not provided as prop (all project names for search)
@@ -192,9 +192,9 @@ export default function SearchableProjectSelect({
       required={required}
       error={error}
       errorMessage={errorMessage}
-      placeholder={placeholder || t.unitsFilter?.allCompounds || "All Projects"}
+      placeholder={placeholder || translate("unitsFilter.allCompounds", "All Projects")}
       showAllOption={showAllOption}
-      allOptionLabel={allOptionLabel || t.unitsFilter?.allCompounds || "All Projects"}
+      allOptionLabel={allOptionLabel || translate("unitsFilter.allCompounds", "All Projects")}
       getValue={(project) => project.en_name}
       getLabel={(project, locale) => locale === "ar" ? project.ar_name : project.en_name}
       getKey={(project) => {

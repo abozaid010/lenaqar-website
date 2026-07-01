@@ -192,6 +192,9 @@ export default {
     allCompounds: "جميع المشاريع",
     allPurposes: "جميع الأغراض",
     allPropertyTypes: "جميع أنواع العقارات",
+    allSubDistricts: "جميع الأحياء",
+    allDistricts: "جميع المناطق",
+    purpose: "الغرض",
     min: "الحد الأدنى",
     max: "الحد الأقصى",
     purposes: {
@@ -1045,6 +1048,8 @@ export default {
     clearall: "مسح جميع الفلاتر",
     allCities: "جميع المدن",
     allDistricts: "جميع المناطق",
+    allSubDistricts: "جميع الأحياء",
+    purpose: "الغرض",
     from: "من",
     upTo: "إلى",
     myInventory: "مخزوني",

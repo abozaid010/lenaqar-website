@@ -22,7 +22,7 @@ export default function SearchablePropertyTypeSelect({
   disabled = false,
   ...rest
 }) {
-  const { t, locale, translate } = useI18n();
+  const { locale, translate } = useI18n();
 
   const buildingTypes = useMemo(
     () =>
@@ -76,14 +76,12 @@ export default function SearchablePropertyTypeSelect({
       name={name}
       placeholder={
         placeholder ||
-        t.unitsFilter?.allPropertyTypes ||
-        "All Property Types"
+        translate("unitsFilter.allPropertyTypes", "All Property Types")
       }
       showAllOption={showAllOption}
       allOptionLabel={
         allOptionLabel ||
-        t.unitsFilter?.allPropertyTypes ||
-        "All Property Types"
+        translate("unitsFilter.allPropertyTypes", "All Property Types")
       }
       getValue={(type) => type.value}
       getLabel={getTypeLabel}

@@ -769,8 +769,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           }}
           name="city"
           showAllOption={true}
-          allOptionLabel={t.unitsFilter.allCities || "All Cities"}
-          placeholder={t.unitsFilter.allCities || "All Cities"}
+          allOptionLabel={translate("unitsFilter.allCities", "All Cities")}
+          placeholder={translate("unitsFilter.allCities", "All Cities")}
           buttonClassName={filterButtonClassName}
         />
       </div>
@@ -831,8 +831,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           isPublic={isPublic}
           isLoading={projectsLoading}
           showAllOption={true}
-          allOptionLabel={t.unitsFilter.allCompounds || "All Projects"}
-          placeholder={t.unitsFilter.allCompounds || "All Projects"}
+          allOptionLabel={translate("unitsFilter.allCompounds", "All Projects")}
+          placeholder={translate("unitsFilter.allCompounds", "All Projects")}
           buttonClassName={filterButtonClassName}
         />
       </div>
@@ -847,8 +847,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           }}
           name="property_type"
           showAllOption={true}
-          allOptionLabel={t.unitsFilter.allPropertyTypes || "All Property Types"}
-          placeholder={t.unitsFilter.allPropertyTypes || "All Property Types"}
+          allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+          placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
           buttonClassName={filterButtonClassName}
         />
       </div>

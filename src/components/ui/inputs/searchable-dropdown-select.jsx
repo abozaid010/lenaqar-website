@@ -198,7 +198,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   resolveSelectedLabel,
   ...rest
 }, ref) {
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -517,7 +517,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                       }`}
                       onMouseEnter={() => setHighlightedIndex(-1)}
                     >
-                      {allOptionLabel || "All"}
+                      {allOptionLabel || translate("common.all", "All")}
                     </button>
                   )}
                   {sortedOptions.map((option, index) => {

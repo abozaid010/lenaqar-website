@@ -185,6 +185,9 @@ export default {
       allCompounds: "All Projects",
       allPurposes: "All Purposes",
       allPropertyTypes: "All Property Types",
+      allSubDistricts: "All Sub-districts",
+      allDistricts: "All Districts",
+      purpose: "Purpose",
       max: "Max",
       purposes: {
         residential: "Residential",
@@ -1167,6 +1170,8 @@ export default {
     max: "Max Price",
     allCities: "All Cities",
     allDistricts: "All Districts",
+    allSubDistricts: "All Sub-districts",
+    purpose: "Purpose",
     activeFilter: " Active Filters:",
     clearall: " Clear All",
     from: "From",

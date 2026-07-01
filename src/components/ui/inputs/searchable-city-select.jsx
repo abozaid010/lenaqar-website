@@ -37,7 +37,7 @@ export default function SearchableCitySelect({
   disabled = false,
   ...rest
 }) {
-  const { t, locale } = useI18n();
+  const { locale, translate } = useI18n();
   const { getAllCitiesWithLabels } = useCitiesDistricts();
   const [citiesWithLabels, setCitiesWithLabels] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
@@ -110,9 +110,9 @@ export default function SearchableCitySelect({
       required={required}
       error={error}
       errorMessage={errorMessage}
-      placeholder={placeholder || t.basicDetails?.selectCity || "Select City"}
+      placeholder={placeholder || translate("unitsFilter.allCities", "All Cities")}
       showAllOption={showAllOption}
-      allOptionLabel={allOptionLabel || t.unitsFilter?.allCities || "All Cities"}
+      allOptionLabel={allOptionLabel || translate("unitsFilter.allCities", "All Cities")}
       getValue={(city) => city.value}
       getLabel={(city) => city.label}
       searchFields={["label", "value"]}
