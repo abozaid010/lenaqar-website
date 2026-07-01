@@ -3,7 +3,7 @@
 import { useI18n } from "@/hooks/useI18n";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * SearchableCitySelect - A reusable city selection component with search functionality
@@ -41,6 +41,7 @@ export default function SearchableCitySelect({
   const { getAllCitiesWithLabels } = useCitiesDistricts();
   const [citiesWithLabels, setCitiesWithLabels] = useState([]);
   const [citiesLoading, setCitiesLoading] = useState(true);
+  const [resolvedLabel, setResolvedLabel] = useState("");
 
   useEffect(() => {
     const loadCities = async () => {
@@ -58,6 +59,46 @@ export default function SearchableCitySelect({
 
     loadCities();
   }, [getAllCitiesWithLabels]);
+
+  useEffect(() => {
+    let active = true;
+    const loadLabel = async () => {
+      if (!value) {
+        if (active) setResolvedLabel("");
+        return;
+      }
+      try {
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const cityObj = await manager.getCityByValue(value);
+        if (!cityObj) {
+          if (active) setResolvedLabel("");
+          return;
+        }
+        const label = await manager.getCityLabel(cityObj.id, locale);
+        if (active) setResolvedLabel(label || "");
+      } catch (error) {
+        console.error("Failed to resolve city label:", error);
+        if (active) setResolvedLabel("");
+      }
+    };
+    loadLabel();
+    return () => {
+      active = false;
+    };
+  }, [value, locale]);
+
+  const resolveSelectedLabel = useCallback(
+    (selectedValue, currentLocale) => {
+      const match = citiesWithLabels.find(
+        (city) =>
+          String(city.value).toLowerCase().trim() ===
+          String(selectedValue).toLowerCase().trim()
+      );
+      if (match) return match.label;
+      return currentLocale === locale ? resolvedLabel : "";
+    },
+    [citiesWithLabels, resolvedLabel, locale]
+  );
 
   return (
     <SearchableDropdownSelect
@@ -81,6 +122,7 @@ export default function SearchableCitySelect({
       searchPlaceholder={locale === "ar" ? "ابحث عن المدينة..." : "Search cities..."}
       className={className}
       disabled={disabled}
+      resolveSelectedLabel={resolveSelectedLabel}
       {...rest}
     />
   );

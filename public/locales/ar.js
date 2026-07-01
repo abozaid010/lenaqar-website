@@ -1032,7 +1032,7 @@ export default {
   },
   unitsFilter: {
     allDevelopers: "جميع المطورين",
-    allCompounds: "جميع المجمعات",
+    allCompounds: " المشاريع",
     allPurposes: "جميع الأغراض",
     allPropertyTypes: "جميع أنواع العقارات",
     pendingApproval: "بانتظار الموافقة",

@@ -3,7 +3,7 @@
 import { useI18n } from "@/hooks/useI18n";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * SearchableSubDistrictSelect - Sub-district selection component with search functionality
@@ -35,6 +35,7 @@ export default function SearchableSubDistrictSelect({
   const { getSubDistrictsWithLabels } = useCitiesDistricts();
   const [subsWithLabels, setSubsWithLabels] = useState([]);
   const [subsLoading, setSubsLoading] = useState(true);
+  const [resolvedLabel, setResolvedLabel] = useState("");
 
   useEffect(() => {
     const loadSubs = async () => {
@@ -55,7 +56,42 @@ export default function SearchableSubDistrictSelect({
     };
 
     loadSubs();
-  }, [city, district, getSubDistrictsWithLabels]);
+  }, [city, district, locale, getSubDistrictsWithLabels]);
+
+  useEffect(() => {
+    let active = true;
+    const loadLabel = async () => {
+      if (!value || !city || !district) {
+        if (active) setResolvedLabel("");
+        return;
+      }
+      try {
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const label = await manager.getSubDistrictLabel(value, city, district, locale);
+        if (active) setResolvedLabel(label || "");
+      } catch (error) {
+        console.error("Failed to resolve sub-district label:", error);
+        if (active) setResolvedLabel("");
+      }
+    };
+    loadLabel();
+    return () => {
+      active = false;
+    };
+  }, [value, city, district, locale]);
+
+  const resolveSelectedLabel = useCallback(
+    (selectedValue, currentLocale) => {
+      const match = subsWithLabels.find(
+        (sd) =>
+          String(sd.value).toLowerCase().trim() ===
+          String(selectedValue).toLowerCase().trim()
+      );
+      if (match) return match.label;
+      return currentLocale === locale ? resolvedLabel : "";
+    },
+    [subsWithLabels, resolvedLabel, locale]
+  );
 
   return (
     <SearchableDropdownSelect
@@ -86,6 +122,7 @@ export default function SearchableSubDistrictSelect({
       }
       className={className}
       disabled={disabled}
+      resolveSelectedLabel={resolveSelectedLabel}
       {...rest}
     />
   );

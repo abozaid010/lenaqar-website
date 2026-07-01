@@ -241,6 +241,44 @@ class CityManager {
   }
 
   /**
+   * Resolve a sub-district from API/form raw value (value, en/ar name, or alias).
+   */
+  resolveSubDistrict(subRaw, cityRaw, districtRaw) {
+    if (!subRaw || !cityRaw || !districtRaw) return null;
+
+    const city =
+      this.cities.find(
+        (c) =>
+          c.id === cityRaw ||
+          c.value === String(cityRaw).toLowerCase().trim() ||
+          c.id.toLowerCase() === String(cityRaw).toLowerCase().trim()
+      ) || null;
+    if (!city) return null;
+
+    const district = this.resolveDistrict(districtRaw, city.id);
+    if (!district) return null;
+
+    const normalized = String(subRaw).toLowerCase().trim();
+    return (
+      this.subDistricts.find((sub) => {
+        if (sub.city_id !== city.id || sub.district_value !== district.value) {
+          return false;
+        }
+        return (
+          sub.value === normalized ||
+          sub.id === subRaw ||
+          sub.id.toLowerCase() === normalized ||
+          sub.en_name.toLowerCase() === normalized ||
+          sub.ar_name === subRaw ||
+          (sub.aliases || []).some(
+            (alias) => alias.toLowerCase() === normalized
+          )
+        );
+      }) || null
+    );
+  }
+
+  /**
    * Normalize district raw value to canonical backend value (lowercase en_name).
    */
   normalizeDistrictValue(districtRaw, cityRaw) {
@@ -248,6 +286,16 @@ class CityManager {
     const district = this.resolveDistrict(districtRaw, cityRaw);
     if (!district) return String(districtRaw).trim().toLowerCase();
     return district.value;
+  }
+
+  /**
+   * Normalize sub-district raw value to canonical backend value (lowercase en_name).
+   */
+  normalizeSubDistrictValue(subRaw, cityRaw, districtRaw) {
+    if (!subRaw || !cityRaw || !districtRaw) return "";
+    const sub = this.resolveSubDistrict(subRaw, cityRaw, districtRaw);
+    if (!sub) return String(subRaw).trim().toLowerCase();
+    return sub.value;
   }
 
   /**
@@ -261,6 +309,11 @@ class CityManager {
   async normalizeDistrictValueAsync(districtRaw, cityRaw) {
     await this.initializeData();
     return this.normalizeDistrictValue(districtRaw, cityRaw);
+  }
+
+  async normalizeSubDistrictValueAsync(subRaw, cityRaw, districtRaw) {
+    await this.initializeData();
+    return this.normalizeSubDistrictValue(subRaw, cityRaw, districtRaw);
   }
 
   /**
@@ -321,6 +374,16 @@ class CityManager {
     const district = await this.getDistrictByName(districtName, cityId);
     if (!district) return "";
     return locale === "ar" ? district.label_ar : district.label_en;
+  }
+
+  /**
+   * Get sub-district label with translation
+   */
+  async getSubDistrictLabel(subRaw, cityRaw, districtRaw, locale = "en") {
+    await this.initializeData();
+    const sub = this.resolveSubDistrict(subRaw, cityRaw, districtRaw);
+    if (!sub) return "";
+    return locale === "ar" ? sub.label_ar : sub.label_en;
   }
 
   /**

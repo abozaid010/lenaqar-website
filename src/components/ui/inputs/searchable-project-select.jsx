@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { fetchProjectById } from "@/utils/api";
@@ -90,6 +90,60 @@ export default function SearchableProjectSelect({
     });
   }, [allProjects, city, district]);
 
+  const [resolvedLabel, setResolvedLabel] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const loadLabel = async () => {
+      if (!value) {
+        if (active) setResolvedLabel("");
+        return;
+      }
+      const normalized = String(value).toLowerCase().trim();
+      const match =
+        allProjects.find(
+          (p) => String(p.en_name || "").toLowerCase().trim() === normalized
+        ) ||
+        allProjects.find((p) => p.ar_name === value || p.ar_name === value.trim());
+
+      if (match) {
+        const label =
+          locale === "ar"
+            ? match.ar_name || match.en_name || ""
+            : match.en_name || match.ar_name || "";
+        if (active) setResolvedLabel(label);
+        return;
+      }
+
+      if (active) setResolvedLabel("");
+    };
+    loadLabel();
+    return () => {
+      active = false;
+    };
+  }, [value, locale, allProjects]);
+
+  const resolveSelectedLabel = useCallback(
+    (selectedValue, currentLocale) => {
+      const normalized = String(selectedValue).toLowerCase().trim();
+      const pool = projects.length ? projects : allProjects;
+      const match =
+        pool.find(
+          (p) => String(p.en_name || "").toLowerCase().trim() === normalized
+        ) ||
+        allProjects.find(
+          (p) => p.ar_name === selectedValue || p.ar_name === String(selectedValue).trim()
+        );
+      if (match) {
+        return currentLocale === "ar"
+          ? match.ar_name || match.en_name || ""
+          : match.en_name || match.ar_name || "";
+      }
+      return currentLocale === locale ? resolvedLabel : "";
+    },
+    [projects, allProjects, resolvedLabel, locale]
+  );
+
   const handleChange = useCallback(
     (e) => {
       onChange?.(e);
@@ -165,6 +219,7 @@ export default function SearchableProjectSelect({
       className={className}
       disabled={isDisabled}
       isLoading={isLoading || !!fetchingId}
+      resolveSelectedLabel={resolveSelectedLabel}
       {...rest}
     />
   );
