@@ -93,6 +93,66 @@ function localizeDigits(value, locale = "en") {
  * EN: "15 May" · AR: "15 مايو"
  * Returns "" if the value is missing/invalid.
  */
+/**
+ * Schedule row datetime: "Tuesday, 20 Nov, 2:00 pm" (EN) / localized AR equivalent.
+ */
+export function formatScheduleRowDateTime(value, locale = "en") {
+  if (!value) return "";
+
+  let dateObj;
+  try {
+    dateObj = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateObj.getTime())) return "";
+  } catch {
+    return "";
+  }
+
+  const loc = locale === "ar" ? "ar-EG" : "en-GB";
+  const weekday = dateObj.toLocaleDateString(loc, { weekday: "long" });
+  const month = dateObj.toLocaleDateString(loc, { month: "short" });
+  const day = localizeDigits(dateObj.getDate(), locale);
+
+  let hours = dateObj.getHours();
+  const minutesRaw = String(dateObj.getMinutes()).padStart(2, "0");
+  const ampm =
+    hours >= 12
+      ? locale === "ar"
+        ? "م"
+        : "pm"
+      : locale === "ar"
+        ? "ص"
+        : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const hoursDisplay = localizeDigits(hours, locale);
+  const minutesDisplay = localizeDigits(minutesRaw, locale);
+  const separator = locale === "ar" ? "،" : ",";
+
+  return `${weekday}${separator} ${day} ${month}${separator} ${hoursDisplay}:${minutesDisplay} ${ampm}`;
+}
+
+/**
+ * Week range day label: "Saturday 20 June" (EN) / localized AR equivalent.
+ */
+export function formatScheduleWeekDayDate(value, locale = "en") {
+  if (!value) return "";
+
+  let dateObj;
+  try {
+    dateObj = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateObj.getTime())) return "";
+  } catch {
+    return "";
+  }
+
+  const loc = locale === "ar" ? "ar-EG" : "en-GB";
+  const weekday = dateObj.toLocaleDateString(loc, { weekday: "long" });
+  const month = dateObj.toLocaleDateString(loc, { month: "long" });
+  const day = localizeDigits(dateObj.getDate(), locale);
+
+  return `${weekday} ${day} ${month}`;
+}
+
 export function formatDayMonthShort(value, locale = "en") {
   if (!value) return "";
 

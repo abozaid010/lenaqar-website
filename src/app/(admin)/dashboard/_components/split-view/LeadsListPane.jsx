@@ -55,8 +55,11 @@ export default function LeadsListPane({
   const debounceTimer = useRef(null);
   const lastPushedQueryRef = useRef(searchParams.get("query") || "");
   const observerRef = useRef(null);
+  const visibleRowsObserverRef = useRef(null);
+  const visibleRowIdsRef = useRef(new Set());
   const sentinelRef = useRef(null);
   const scrollRootRef = useRef(null);
+  const [visibleOnScreenCount, setVisibleOnScreenCount] = useState(0);
   const fetchNextPageRef = useRef(fetchNextPage);
   const hasNextPageRef = useRef(hasNextPage);
   const isFetchingNextPageRef = useRef(isFetchingNextPage);
@@ -153,6 +156,72 @@ export default function LeadsListPane({
     };
   }, [clientFilteredEmpty, hasNextPage, initialListPaint]);
 
+  useEffect(() => {
+    visibleRowsObserverRef.current?.disconnect();
+    visibleRowsObserverRef.current = null;
+    visibleRowIdsRef.current = new Set();
+
+    if (!initialListPaint || users.length === 0) {
+      setVisibleOnScreenCount(0);
+      return;
+    }
+
+    const root = scrollRootRef.current;
+    if (!root) {
+      setVisibleOnScreenCount(0);
+      return;
+    }
+
+    const syncVisibleCount = () => {
+      setVisibleOnScreenCount(visibleRowIdsRef.current.size);
+    };
+
+    const rows = root.querySelectorAll("[data-user-id]");
+    if (!rows.length) {
+      setVisibleOnScreenCount(0);
+      return;
+    }
+
+    visibleRowsObserverRef.current = new IntersectionObserver(
+      (entries) => {
+        let changed = false;
+        for (const entry of entries) {
+          const id = entry.target.getAttribute("data-user-id");
+          if (!id) continue;
+          if (entry.isIntersecting) {
+            if (!visibleRowIdsRef.current.has(id)) {
+              visibleRowIdsRef.current.add(id);
+              changed = true;
+            }
+          } else if (visibleRowIdsRef.current.delete(id)) {
+            changed = true;
+          }
+        }
+        if (changed) syncVisibleCount();
+      },
+      { root, threshold: 0.15 }
+    );
+
+    rows.forEach((row) => visibleRowsObserverRef.current.observe(row));
+    syncVisibleCount();
+
+    return () => {
+      visibleRowsObserverRef.current?.disconnect();
+      visibleRowsObserverRef.current = null;
+      visibleRowIdsRef.current = new Set();
+    };
+  }, [users, initialListPaint]);
+
+  const visibleCountLabel =
+    users.length > 0
+      ? translate(
+          "dashboardFilter.bulkWhatsapp.visibleOnScreenTotal",
+          "{visible} on screen · {total} loaded"
+        )
+          .replace("{visible}", localeUtils.formatNumber(visibleOnScreenCount))
+          .replace("{total}", localeUtils.formatNumber(users.length))
+      : "";
+
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center p-4 text-center text-sm text-red-600">
@@ -179,40 +248,54 @@ export default function LeadsListPane({
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
       <div className="p-2 border-b border-chat-border shrink-0 space-y-2 bg-chat-panel-bg">
-        {showBulkCheckbox && users.length > 0 && (
-          <label className="flex items-center gap-2 text-xs text-chat-text-muted cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={
-                users.length > 0 &&
-                users.every((u) => isLeadSelected?.(u.user_id))
-              }
-              ref={(el) => {
-                if (!el) return;
-                const someSelected = users.some((u) =>
-                  isLeadSelected?.(u.user_id)
-                );
-                const allSelected =
-                  users.length > 0 &&
-                  users.every((u) => isLeadSelected?.(u.user_id));
-                el.indeterminate = someSelected && !allSelected;
-              }}
-              onChange={() => onToggleSelectAllVisible?.()}
-              className="h-4 w-4 accent-primary cursor-pointer"
-            />
-            <span>
-              {hasBulkSelection
-                ? translate(
-                    "dashboardFilter.bulkWhatsapp.selectedLeads",
-                    "Selected leads"
-                  )
-                : translate(
-                    "dashboardFilter.bulkWhatsapp.selectAllVisible",
-                    "Select all visible"
-                  )}
-            </span>
-          </label>
-        )}
+        {(showBulkCheckbox && users.length > 0) || visibleCountLabel ? (
+          <div className="flex items-center justify-between gap-2 min-h-[20px]">
+            {showBulkCheckbox && users.length > 0 ? (
+              <label className="flex items-center gap-2 text-xs text-chat-text-muted cursor-pointer select-none min-w-0">
+                <input
+                  type="checkbox"
+                  checked={
+                    users.length > 0 &&
+                    users.every((u) => isLeadSelected?.(u.user_id))
+                  }
+                  ref={(el) => {
+                    if (!el) return;
+                    const someSelected = users.some((u) =>
+                      isLeadSelected?.(u.user_id)
+                    );
+                    const allSelected =
+                      users.length > 0 &&
+                      users.every((u) => isLeadSelected?.(u.user_id));
+                    el.indeterminate = someSelected && !allSelected;
+                  }}
+                  onChange={() => onToggleSelectAllVisible?.()}
+                  className="h-4 w-4 accent-primary cursor-pointer shrink-0"
+                />
+                <span className="truncate">
+                  {hasBulkSelection
+                    ? translate(
+                        "dashboardFilter.bulkWhatsapp.selectedLeads",
+                        "Selected leads"
+                      )
+                    : translate(
+                        "dashboardFilter.bulkWhatsapp.selectAllVisible",
+                        "Select all visible"
+                      )}
+                </span>
+              </label>
+            ) : (
+              <span aria-hidden className="shrink-0" />
+            )}
+            {visibleCountLabel ? (
+              <span
+                className="text-[10px] leading-tight text-chat-text-faint shrink-0 tabular-nums"
+                aria-live="polite"
+              >
+                {visibleCountLabel}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
         <div className="relative flex-1 min-w-0">
           {hasSearchText ? (
             <button

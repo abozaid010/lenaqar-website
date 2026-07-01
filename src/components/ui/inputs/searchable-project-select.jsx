@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useCallback, useState } from "react";
+import { useMemo, useCallback, useState, useEffect } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 import { fetchProjectById } from "@/utils/api";
@@ -29,6 +29,8 @@ import SearchableDropdownSelect from "./searchable-dropdown-select";
  * @param {Array} projects - Array of project objects (optional, will fetch if not provided)
  * @param {boolean} isPublic - Whether to fetch public projects (used if projects not provided)
  * @param {boolean} isLoading - Loading state (used if projects not provided)
+ * @param {string} city - Optional city value to scope projects
+ * @param {string} district - Optional district value to scope projects
  */
 export default function SearchableProjectSelect({
   value = "",
@@ -48,9 +50,11 @@ export default function SearchableProjectSelect({
   projects: projectsProp,
   isPublic = false,
   isLoading: isLoadingProp,
+  city = "",
+  district = "",
   ...rest
 }) {
-  const { t, locale } = useI18n();
+  const { locale, translate } = useI18n();
   const [fetchingId, setFetchingId] = useState(null);
 
   // Fetch lightweight projects if not provided as prop (all project names for search)
@@ -58,8 +62,87 @@ export default function SearchableProjectSelect({
     isPublic
   );
 
-  const projects = projectsProp || fetchedProjects || [];
+  const allProjects = projectsProp || fetchedProjects || [];
   const isLoading = isLoadingProp !== undefined ? isLoadingProp : fetchedLoading;
+
+  const projects = useMemo(() => {
+    const normalizedCity = city && city !== "all" ? String(city).toLowerCase().trim() : "";
+    const normalizedDistrict =
+      district && district !== "all" ? String(district).toLowerCase().trim() : "";
+
+    if (!normalizedCity && !normalizedDistrict) {
+      return allProjects;
+    }
+
+    return allProjects.filter((project) => {
+      const projectCity = project.city ? String(project.city).toLowerCase().trim() : "";
+      const projectDistrict = project.district
+        ? String(project.district).toLowerCase().trim()
+        : "";
+
+      if (normalizedCity && projectCity !== normalizedCity) {
+        return false;
+      }
+      if (normalizedDistrict && projectDistrict !== normalizedDistrict) {
+        return false;
+      }
+      return true;
+    });
+  }, [allProjects, city, district]);
+
+  const [resolvedLabel, setResolvedLabel] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    const loadLabel = async () => {
+      if (!value) {
+        if (active) setResolvedLabel("");
+        return;
+      }
+      const normalized = String(value).toLowerCase().trim();
+      const match =
+        allProjects.find(
+          (p) => String(p.en_name || "").toLowerCase().trim() === normalized
+        ) ||
+        allProjects.find((p) => p.ar_name === value || p.ar_name === value.trim());
+
+      if (match) {
+        const label =
+          locale === "ar"
+            ? match.ar_name || match.en_name || ""
+            : match.en_name || match.ar_name || "";
+        if (active) setResolvedLabel(label);
+        return;
+      }
+
+      if (active) setResolvedLabel("");
+    };
+    loadLabel();
+    return () => {
+      active = false;
+    };
+  }, [value, locale, allProjects]);
+
+  const resolveSelectedLabel = useCallback(
+    (selectedValue, currentLocale) => {
+      const normalized = String(selectedValue).toLowerCase().trim();
+      const pool = projects.length ? projects : allProjects;
+      const match =
+        pool.find(
+          (p) => String(p.en_name || "").toLowerCase().trim() === normalized
+        ) ||
+        allProjects.find(
+          (p) => p.ar_name === selectedValue || p.ar_name === String(selectedValue).trim()
+        );
+      if (match) {
+        return currentLocale === "ar"
+          ? match.ar_name || match.en_name || ""
+          : match.en_name || match.ar_name || "";
+      }
+      return currentLocale === locale ? resolvedLabel : "";
+    },
+    [projects, allProjects, resolvedLabel, locale]
+  );
 
   const handleChange = useCallback(
     (e) => {
@@ -109,9 +192,9 @@ export default function SearchableProjectSelect({
       required={required}
       error={error}
       errorMessage={errorMessage}
-      placeholder={placeholder || t.unitsFilter?.allCompounds || "All Projects"}
+      placeholder={placeholder || translate("unitsFilter.allCompounds", "All Projects")}
       showAllOption={showAllOption}
-      allOptionLabel={allOptionLabel || t.unitsFilter?.allCompounds || "All Projects"}
+      allOptionLabel={allOptionLabel || translate("unitsFilter.allCompounds", "All Projects")}
       getValue={(project) => project.en_name}
       getLabel={(project, locale) => locale === "ar" ? project.ar_name : project.en_name}
       getKey={(project) => {
@@ -130,13 +213,13 @@ export default function SearchableProjectSelect({
       }}
       searchFields={["ar_name", "en_name"]}
       sortOptions={sortProjects}
-      isLoading={isLoading}
       loadingText={locale === "ar" ? "جاري التحميل..." : "Loading projects..."}
       noResultsText={locale === "ar" ? "لا توجد نتائج" : "No projects found"}
       searchPlaceholder={locale === "ar" ? "ابحث عن المشروع..." : "Search projects..."}
       className={className}
       disabled={isDisabled}
       isLoading={isLoading || !!fetchingId}
+      resolveSelectedLabel={resolveSelectedLabel}
       {...rest}
     />
   );

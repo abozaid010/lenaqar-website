@@ -3,7 +3,7 @@
 import { useI18n } from "@/hooks/useI18n";
 import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * SearchableDistrictSelect - A reusable district selection component with search functionality
@@ -43,6 +43,7 @@ export default function SearchableDistrictSelect({
   const { getDistrictsWithLabels, getAllDistrictsWithLabels } = useCitiesDistricts();
   const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
   const [districtsLoading, setDistrictsLoading] = useState(true);
+  const [resolvedLabel, setResolvedLabel] = useState("");
 
   useEffect(() => {
     const loadDistricts = async () => {
@@ -61,7 +62,47 @@ export default function SearchableDistrictSelect({
     };
 
     loadDistricts();
-  }, [city, getDistrictsWithLabels, getAllDistrictsWithLabels]);
+  }, [city, locale, getDistrictsWithLabels, getAllDistrictsWithLabels]);
+
+  useEffect(() => {
+    let active = true;
+    const loadLabel = async () => {
+      if (!value) {
+        if (active) setResolvedLabel("");
+        return;
+      }
+      try {
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const cityObj = city ? await manager.getCityByValue(city) : null;
+        if (!cityObj) {
+          if (active) setResolvedLabel("");
+          return;
+        }
+        const label = await manager.getDistrictLabel(value, cityObj.id, locale);
+        if (active) setResolvedLabel(label || "");
+      } catch (error) {
+        console.error("Failed to resolve district label:", error);
+        if (active) setResolvedLabel("");
+      }
+    };
+    loadLabel();
+    return () => {
+      active = false;
+    };
+  }, [value, city, locale]);
+
+  const resolveSelectedLabel = useCallback(
+    (selectedValue, currentLocale) => {
+      const match = districtsWithLabels.find(
+        (district) =>
+          String(district.value).toLowerCase().trim() ===
+          String(selectedValue).toLowerCase().trim()
+      );
+      if (match) return match.label;
+      return currentLocale === locale ? resolvedLabel : "";
+    },
+    [districtsWithLabels, resolvedLabel, locale]
+  );
 
   return (
     <SearchableDropdownSelect
@@ -102,6 +143,7 @@ export default function SearchableDistrictSelect({
       }
       className={className}
       disabled={disabled}
+      resolveSelectedLabel={resolveSelectedLabel}
       {...rest}
     />
   );

@@ -134,6 +134,11 @@ const defaultSort = (options, locale, getLabel) => {
   });
 };
 
+const valuesMatch = (a, b) => {
+  if (a == null || b == null) return a === b;
+  return String(a).toLowerCase().trim() === String(b).toLowerCase().trim();
+};
+
 /**
  * SearchableDropdownSelect - A universal, configurable searchable dropdown component
  *
@@ -162,6 +167,7 @@ const defaultSort = (options, locale, getLabel) => {
  * @param {string} className - Additional CSS classes
  * @param {string} buttonClassName - Additional CSS classes for the button element
  * @param {boolean} disabled - Whether the select is disabled
+ * @param {Function} resolveSelectedLabel - Optional fallback label resolver: (value, locale) => string
  */
 const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   options = [],
@@ -189,9 +195,10 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   className = "",
   buttonClassName = "",
   disabled = false,
+  resolveSelectedLabel,
   ...rest
 }, ref) {
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -246,11 +253,14 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     }
     // Ensure options is an array before using find
     if (!options || !Array.isArray(options)) {
-      return value;
+      const resolved = resolveSelectedLabel?.(value, locale);
+      return resolved || value;
     }
-    const option = options.find((opt) => getValue(opt) === value);
-    if (!option) return value;
-    return getLabel(option, locale);
+    const option = options.find((opt) => valuesMatch(getValue(opt), value));
+    if (option) return getLabel(option, locale);
+    const resolved = resolveSelectedLabel?.(value, locale);
+    if (resolved) return resolved;
+    return value;
   }, [
     value,
     options,
@@ -261,6 +271,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     locale,
     getValue,
     getLabel,
+    resolveSelectedLabel,
   ]);
 
   // Close dropdown when clicking outside
@@ -506,7 +517,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                       }`}
                       onMouseEnter={() => setHighlightedIndex(-1)}
                     >
-                      {allOptionLabel || "All"}
+                      {allOptionLabel || translate("common.all", "All")}
                     </button>
                   )}
                   {sortedOptions.map((option, index) => {

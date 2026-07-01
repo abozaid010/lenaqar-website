@@ -1,6 +1,6 @@
 "use client";
 import { assignSalsePerson } from "@/components/services/serviceFetching";
-import { useI18n } from "@/context/translate-api";
+import { useI18n } from "@/hooks/useI18n";
 import { SELECTION_COLORS } from "@/constants/colors";
 import {
   formatPhoneForDisplay,
@@ -9,7 +9,9 @@ import {
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import { getActionLabel, SCHEDULE_VISIBLE_ACTIONS } from "@/utils/actions";
 import { fetchScheduledActionsByDate } from "@/utils/api";
+import { formatScheduleRowDateTime, formatScheduleWeekDayDate } from "@/utils/formateDate";
 import {
+  Building2,
   Calendar,
   ChevronDown,
   ChevronLeft,
@@ -20,7 +22,6 @@ import {
   Phone,
   User,
   UserPlus,
-  Users,
   Eye,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -107,27 +108,11 @@ const Schedule = ({ data, dataSales }) => {
   const [isWeekLoading, setIsWeekLoading] = useState(false);
   const [editAppointment, setEditAppointment] = useState(null);
   const [detailsAppointment, setDetailsAppointment] = useState(null);
-  const { t, locale } = useI18n();
-  const isRTL = t.direction === "rtl";
+  const { t, translate, locale } = useI18n();
+  const isRTL = locale === "ar";
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  };
-
-  const formatTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+  const getAppointmentDateTime = (appointment) =>
+    appointment?.meeting_time || appointment?.created_at;
 
   const getNext7DaysValues = () => {
     const dates = [];
@@ -137,6 +122,13 @@ const Schedule = ({ data, dataSales }) => {
       dates.push(date.toISOString().split("T")[0]);
     }
     return dates;
+  };
+
+  const getWeekRangeDisplay = () => {
+    const dates = getNext7DaysValues();
+    const firstDate = new Date(dates[0]);
+    const lastDate = new Date(dates[dates.length - 1]);
+    return `${formatScheduleWeekDayDate(firstDate, locale)} - ${formatScheduleWeekDayDate(lastDate, locale)}`;
   };
 
   const filteredData = appointments?.filter((item) => {
@@ -183,23 +175,6 @@ const Schedule = ({ data, dataSales }) => {
     await loadWeekData(newDate);
   };
 
-  const getWeekRangeDisplay = () => {
-    const dates = getNext7DaysValues();
-    const firstDate = new Date(dates[0]);
-    const lastDate = new Date(dates[dates.length - 1]);
-
-    const formatDate = (date) => {
-      return date.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
-    };
-
-    return `${formatDate(firstDate)} - ${formatDate(lastDate)}`;
-  };
-
-  // Check if we can navigate to previous/next week (only one week each way).
   // Bounds are anchored to the current week's Saturday so navigation works
   // consistently regardless of which weekday "today" is.
   const canNavigatePrev = () => {
@@ -332,8 +307,8 @@ const Schedule = ({ data, dataSales }) => {
           </div>
 
           {/* Appointments List */}
-          <div className="grid grid-cols-3 gap-4">
-            <div className="col-span-2 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,3.3fr)_minmax(0,1fr)] gap-4">
+            <div className="space-y-2 min-w-0">
               {isWeekLoading ? (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
                   <Loader2 className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
@@ -351,101 +326,79 @@ const Schedule = ({ data, dataSales }) => {
                   <p className="text-gray-400"> {t.scheduleweek}</p>
                 </div>
               ) : (
-                filteredData?.map((appointment, index) => (
-                  <div
-                    key={getScheduledActionKey(appointment, index)}
-                    className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200"
-                  >
-                    <div className="p-6">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1 min-w-0 pe-3">
-                          <div className="flex flex-col gap-1.5">
-                            <h3 className="text-xl font-semibold text-gray-800">
-                              {getActionLabel(appointment.action, locale) ||
-                                appointment.action ||
-                                t.dashboardFilter?.actions?.noAction}
-                            </h3>
+                filteredData?.map((appointment, index) => {
+                  const actionLabel =
+                    getActionLabel(appointment.action, locale) ||
+                    appointment.action ||
+                    t.dashboardFilter?.actions?.noAction;
+                  const dateTimeRaw = getAppointmentDateTime(appointment);
+                  const formattedDateTime = formatScheduleRowDateTime(
+                    dateTimeRaw,
+                    locale
+                  );
+                  const phoneE164 =
+                    phoneToE164(appointment.phone_number, "EG") ||
+                    appointment.phone_number;
+                  const phoneDisplay =
+                    formatPhoneForDisplay(appointment.phone_number, "EG") ||
+                    appointment.phone_number;
+                  const companyName = appointment.company_name?.trim();
+
+                  return (
+                    <div
+                      key={getScheduledActionKey(appointment, index)}
+                      className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 hover:shadow-sm transition-all duration-150"
+                    >
+                      <div className="px-3 py-2.5">
+                        {/* Row 1: action + note (main) · name · company · phone */}
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="flex-1 min-w-0 flex items-baseline gap-1">
+                            <span className="font-semibold text-sm text-gray-900 shrink-0">
+                              {actionLabel}
+                            </span>
                             {appointment.comment?.trim() ? (
-                              <p className="text-sm text-gray-600 leading-relaxed">
-                                {appointment.comment.trim()}
-                              </p>
+                              <span
+                                className="text-[10px] leading-snug text-gray-500 truncate min-w-0"
+                                title={appointment.comment.trim()}
+                              >
+                                · {appointment.comment.trim()}
+                              </span>
                             ) : null}
                           </div>
-                        </div>
-                        <div className="text-end shrink-0 flex flex-col items-end gap-2">
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenUserDetails(appointment);
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                          >
-                            <Eye className="w-4 h-4" />
-                            {t.schaduall?.viewDetails || "View details"}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenEditAppointment(appointment);
-                            }}
-                            className="flex flex-col items-end gap-1 rounded-lg p-2 -m-2 text-gray-600 hover:bg-primary/5 hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-                            aria-label={
-                              t.schaduall?.clickToEditDateTime ||
-                              "Edit date and time"
-                            }
-                          >
-                            <div className="flex items-center gap-2 justify-end">
-                              <Calendar className="w-4 h-4 flex-shrink-0" />
-                              <span className="font-medium">
-                                {formatDate(
-                                  appointment.meeting_time ||
-                                    appointment.created_at
-                                )}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 justify-end">
-                              <Clock className="w-4 h-4 flex-shrink-0" />
-                              <span className="font-medium">
-                                {formatTime(
-                                  appointment.meeting_time ||
-                                    appointment.created_at
-                                )}
-                              </span>
-                            </div>
-                          </button>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <div className="space-y-4">
-                          <div className="flex items-center gap-3 text-gray-600">
-                            {appointment.phone_number ? (
+                          <div className="flex items-center gap-1.5 shrink-0 text-sm text-gray-800">
+                            <User className="w-3.5 h-3.5 text-primary shrink-0" />
+                            <span className="font-medium truncate max-w-[100px] sm:max-w-[140px]">
+                              {appointment.name || "—"}
+                            </span>
+                            {companyName ? (
                               <>
+                                <Building2 className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                                <span
+                                  className="text-xs text-gray-600 truncate max-w-[80px] sm:max-w-[120px]"
+                                  title={companyName}
+                                >
+                                  {companyName}
+                                </span>
+                              </>
+                            ) : null}
+                            {appointment.phone_number ? (
+                              <span className="inline-flex items-center gap-1 min-w-0">
                                 <a
-                                  href={`tel:${
-                                    phoneToE164(
-                                      appointment.phone_number,
-                                      "EG"
-                                    ) || appointment.phone_number
-                                  }`}
+                                  href={`tel:${phoneE164}`}
                                   onClick={(e) => e.stopPropagation()}
                                   aria-label={t.buttons?.call || "Call"}
                                   title={t.buttons?.call || "Call"}
-                                  className="flex items-center justify-center w-9 h-9 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors flex-shrink-0"
+                                  className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors shrink-0"
                                 >
-                                  <Phone className="w-4 h-4" />
+                                  <Phone className="w-3 h-3" />
                                 </a>
                                 <button
                                   type="button"
                                   onClick={(e) =>
                                     handleCopyFullPhoneNumber(
                                       e,
-                                      phoneToE164(
-                                        appointment.phone_number,
-                                        "EG"
-                                      ) || appointment.phone_number,
+                                      phoneE164,
                                       () =>
                                         toast.success(
                                           t.clientsTable?.phoneCopied ||
@@ -466,160 +419,172 @@ const Schedule = ({ data, dataSales }) => {
                                     t.clientsTable?.clickToCopy ||
                                     "Click to copy"
                                   }
-                                  className="font-medium hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-1.5 group"
+                                  className="font-medium text-gray-700 hover:text-primary transition-colors cursor-pointer inline-flex items-center gap-1 group min-w-0"
                                 >
-                                  <span dir="ltr">
-                                    {formatPhoneForDisplay(
-                                      appointment.phone_number,
-                                      "EG"
-                                    ) || appointment.phone_number}
+                                  <span dir="ltr" className="truncate max-w-[90px] sm:max-w-[120px]">
+                                    {phoneDisplay}
                                   </span>
-                                  <Copy className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 transition-opacity" />
+                                  <Copy className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
                                 </button>
-                              </>
+                              </span>
                             ) : (
-                              <>
-                                <Phone className="w-5 h-5 text-gray-300" />
-                                <span className="font-medium text-gray-400">
-                                  —
-                                </span>
-                              </>
+                              <span className="text-gray-400">—</span>
                             )}
-                          </div>
-                          <div className="flex items-center gap-3 text-gray-600">
-                            <Users className="w-5 h-5 text-primary" />
-                            <span className="font-medium">
-                              {appointment.name}
-                            </span>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          <User className="w-5 h-5 text-primary" />
-                          <span
-                            className={`font-medium ${appointment.assigned_sales ? "text-primary" : "text-gray-500"}`}
+
+                        {/* Row 2: datetime · assign sales · details */}
+                        <div className="flex items-center justify-between gap-2 mt-1.5 min-h-[28px]">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditAppointment(appointment);
+                            }}
+                            className="inline-flex items-center gap-1.5 text-xs sm:text-sm text-gray-600 hover:text-primary transition-colors min-w-0"
+                            aria-label={
+                              translate(
+                                "schaduall.clickToEditDateTime",
+                                "Edit date and time"
+                              )
+                            }
                           >
-                            {appointment.assigned_sales ? (
-                              <div className="flex items-center gap-2">
-                                {appointment?.assigned_sales.map((e, i) => (
-                                  <span key={e.id || i}>{e.name}</span>
-                                ))}
-                              </div>
+                            <Clock className="w-3.5 h-3.5 shrink-0 text-gray-400" />
+                            <span className="truncate">
+                              {formattedDateTime || "—"}
+                            </span>
+                          </button>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {appointment.assigned_sales?.length > 0 ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-primary font-medium max-w-[100px] sm:max-w-[140px]">
+                                <User className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate">
+                                  {appointment.assigned_sales
+                                    .map((e) => e.name)
+                                    .join(", ")}
+                                </span>
+                              </span>
                             ) : (
-                              t.Unassigned
+                              <div className="relative">
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDropdown(index)}
+                                  disabled={!dataSales?.length}
+                                  className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-primary border border-primary/20 rounded-md hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                  <UserPlus className="w-3.5 h-3.5" />
+                                  <span className="hidden sm:inline">
+                                    {dataSales?.length
+                                      ? translate("schaduall.ChooseSalesperson")
+                                      : translate("schaduall.noSale")}
+                                  </span>
+                                  {dataSales?.length > 0 && (
+                                    <ChevronDown
+                                      className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                                        openDropdown === index
+                                          ? "rotate-180"
+                                          : ""
+                                      }`}
+                                    />
+                                  )}
+                                </button>
+
+                                {openDropdown === index &&
+                                  dataSales?.length > 0 && (
+                                    <div className="absolute top-full end-0 mt-1 w-52 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                      <div className="max-h-48 overflow-y-auto py-1">
+                                        {dataSales.map((salesperson, si) => (
+                                          <button
+                                            key={salesperson.id ?? si}
+                                            type="button"
+                                            onClick={() =>
+                                              assignSalesPerson(
+                                                salesperson.id,
+                                                appointment,
+                                                index
+                                              )
+                                            }
+                                            disabled={loading === index}
+                                            className={`flex items-center gap-2 w-full px-3 py-2 text-sm text-start hover:bg-primary/5 transition-colors ${
+                                              loading === index
+                                                ? "opacity-50 cursor-not-allowed"
+                                                : ""
+                                            }`}
+                                          >
+                                            {loading === index ? (
+                                              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                                            ) : (
+                                              <span className="w-6 h-6 bg-primary rounded-full flex items-center justify-center text-white text-[10px] font-semibold shrink-0">
+                                                {salesperson.name
+                                                  .split(" ")
+                                                  .map((n) => n[0])
+                                                  .join("")}
+                                              </span>
+                                            )}
+                                            <span className="truncate font-medium text-gray-800">
+                                              {salesperson.name}
+                                            </span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+                              </div>
                             )}
-                          </span>
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenUserDetails(appointment);
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-white bg-primary rounded-md hover:bg-primary/90 transition-colors"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span className="hidden sm:inline">
+                                {translate("schaduall.viewDetails")}
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-
-                      {!appointment.assigned_sales && (
-                        <div className="pt-4 border-t border-gray-100">
-                          <div className="relative">
-                            <button
-                              onClick={() => toggleDropdown(index)}
-                              className="flex items-center justify-between w-full px-4 py-3 border border-gray-200 rounded-lg transition-all duration-200 group"
-                              disabled={!dataSales?.length}
-                            >
-                              <div className="flex items-center gap-3">
-                                <UserPlus className="w-5 h-5 text-primary" />
-                                <span className="font-medium text-primary">
-                                  {dataSales?.length
-                                    ? t.schaduall.ChooseSalesperson
-                                    : t.schaduall.noSale}
-                                </span>
-                              </div>
-                              {dataSales?.length > 0 && (
-                                <ChevronDown
-                                  className={`w-5 h-5 text-primary transition-transform duration-200 ${
-                                    openDropdown === index ? "rotate-180" : ""
-                                  }`}
-                                />
-                              )}
-                            </button>
-
-                            {openDropdown === index &&
-                              dataSales?.length > 0 && (
-                                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                                  <div className="max-h-60 overflow-y-auto">
-                                    {dataSales.map((salesperson, index) => (
-                                      <button
-                                        key={index}
-                                        onClick={() =>
-                                          assignSalesPerson(
-                                            salesperson.id,
-                                            appointment,
-                                            index
-                                          )
-                                        }
-                                        disabled={loading === index}
-                                        className={`flex items-center gap-3 w-full p-4 text-left hover:bg-gradient-to-r hover:from-violet-50 hover:to-blue-50 transition-all duration-200 group ${
-                                          index !== dataSales.length - 1
-                                            ? "border-b border-gray-100"
-                                            : ""
-                                        } ${loading === index ? "opacity-50 cursor-not-allowed" : ""}`}
-                                      >
-                                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm group-hover:scale-110 transition-transform duration-200 shadow-md">
-                                          {loading === index ? (
-                                            <Loader2 className="w-5 h-5 animate-spin" />
-                                          ) : (
-                                            salesperson.name
-                                              .split(" ")
-                                              .map((n) => n[0])
-                                              .join("")
-                                          )}
-                                        </div>
-                                        <div className="flex-1">
-                                          <div className="font-medium text-gray-800 group-hover:text-primary transition-colors">
-                                            {salesperson.name}
-                                          </div>
-                                          <div className="text-xs text-gray-500 group-hover:text-primary transition-colors">
-                                            {salesperson.role}
-                                          </div>
-                                        </div>
-                                        <div className="w-2 h-2 bg-green-400 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
             </div>
 
-            {/* All Sales Section */}
-            <div className="col-span-1">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <UserPlus className="w-5 h-5 text-primary" />
-                  {t.sidebar?.team ?? "Team"}
+            {/* Team sidebar — ~30% narrower than previous 1/3 column */}
+            <div className="min-w-0">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <h3 className="text-base font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-primary shrink-0" />
+                  <span className="truncate">{t.sidebar?.team ?? "Team"}</span>
                 </h3>
                 {dataSales?.length > 0 ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     {dataSales.map((salesperson, index) => (
                       <div
                         key={index}
-                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200"
+                        className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 transition-all duration-200"
                       >
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-semibold text-xs shrink-0">
                           {salesperson.name
                             .split(" ")
                             .map((n) => n[0])
                             .join("")}
                         </div>
-                        <div className="flex-1">
-                          <div className="font-medium text-gray-800">
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm text-gray-800 truncate">
                             {salesperson.name}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-[10px] text-gray-500 truncate">
                             {salesperson.role}
                           </div>
-                          <div className="mt-1 flex items-center gap-1">
+                          <div className="mt-0.5 flex items-center gap-1">
                             <div
-                              className={`px-2 py-0.5 rounded-full text-xs font-medium  ${
+                              className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
                                 salesperson.tasks?.length > 0
                                   ? "bg-primary/10 text-primary"
                                   : "bg-gray-100 text-gray-500"
@@ -628,7 +593,7 @@ const Schedule = ({ data, dataSales }) => {
                               {salesperson.tasks?.length || 0} {t.Tasks}
                             </div>
                             {salesperson.tasks?.length === 0 && (
-                              <span className="text-xs text-gray-400">
+                              <span className="text-[10px] text-gray-400 truncate">
                                 ({t.schaduall.Available})
                               </span>
                             )}
@@ -638,11 +603,11 @@ const Schedule = ({ data, dataSales }) => {
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <UserPlus className="w-8 h-8 text-gray-400" />
+                  <div className="text-center py-6">
+                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <UserPlus className="w-6 h-6 text-gray-400" />
                     </div>
-                    <h4 className="text-lg font-medium text-gray-600 mb-2  ">
+                    <h4 className="text-sm font-medium text-gray-600">
                       {t.schaduall.NoSalesAvailable || "nosales"}
                     </h4>
                   </div>
