@@ -8,6 +8,7 @@ class CityManager {
   constructor() {
     this.cities = [];
     this.districts = [];
+    this.subDistricts = [];
     this.isInitialized = false;
     this.isLoading = false;
     this.loadPromise = null;
@@ -51,9 +52,11 @@ class CityManager {
 
       // Extract all districts from all cities
       this.districts = [];
+      this.subDistricts = [];
       citiesListData.forEach(city => {
         if (city.districts && Array.isArray(city.districts)) {
           city.districts.forEach(district => {
+            const districtValue = district.en_name.toLowerCase(); // canonical backend value
             this.districts.push({
               id: city.id + '_' + district.en_name.toLowerCase().replace(/\s+/g, '_'),
               en_name: district.en_name,
@@ -61,11 +64,35 @@ class CityManager {
               city_id: city.id,
               city_en_name: city.en_name,
               city_ar_name: city.ar_name,
-              value: district.en_name.toLowerCase(), // lowercase for API compatibility
+              value: districtValue, // lowercase for API compatibility
               label_en: district.en_name,
               label_ar: district.ar_name,
               aliases: district.aliases || []
             });
+
+            if (district.sub_districts && Array.isArray(district.sub_districts)) {
+              district.sub_districts.forEach((sub) => {
+                if (!sub?.en_name) return;
+                this.subDistricts.push({
+                  id:
+                    city.id +
+                    '_' +
+                    district.en_name.toLowerCase().replace(/\s+/g, '_') +
+                    '_' +
+                    sub.en_name.toLowerCase().replace(/\s+/g, '_'),
+                  en_name: sub.en_name,
+                  ar_name: sub.ar_name,
+                  city_id: city.id,
+                  district_value: districtValue,
+                  city_en_name: city.en_name,
+                  city_ar_name: city.ar_name,
+                  value: sub.en_name.toLowerCase(),
+                  label_en: sub.en_name,
+                  label_ar: sub.ar_name,
+                  aliases: sub.aliases || [],
+                });
+              });
+            }
           });
         }
       });
@@ -77,6 +104,7 @@ class CityManager {
       console.error("Failed to initialize CityManager data:", error);
       this.cities = [];
       this.districts = [];
+      this.subDistricts = [];
       this.isLoading = false;
       throw error;
     }
@@ -99,11 +127,31 @@ class CityManager {
   }
 
   /**
+   * Get all sub-districts (async - ensures data is loaded)
+   */
+  async getSubDistricts() {
+    await this.initializeData();
+    return this.subDistricts;
+  }
+
+  /**
    * Get districts for a specific city (async - ensures data is loaded)
    */
   async getDistrictsForCity(cityId) {
     await this.initializeData();
     return this.districts.filter(district => district.city_id === cityId);
+  }
+
+  /**
+   * Get sub-districts for a given city + district value (lowercase)
+   */
+  async getSubDistrictsForCityDistrict(cityId, districtValue) {
+    await this.initializeData();
+    if (!cityId || !districtValue) return [];
+    const normalizedDistrict = String(districtValue).toLowerCase().trim();
+    return this.subDistricts.filter(
+      (sd) => sd.city_id === cityId && sd.district_value === normalizedDistrict
+    );
   }
 
   /**
@@ -238,6 +286,22 @@ class CityManager {
       city_id: district.city_id,
       city_name: locale === "ar" ? district.city_ar_name : district.city_en_name,
       id: district.id
+    }));
+  }
+
+  /**
+   * Get formatted sub-districts list for UI (with translations)
+   */
+  async getSubDistrictsWithLabels(cityId, districtValue, locale = "en") {
+    if (!cityId || !districtValue) return [];
+    const subs = await this.getSubDistrictsForCityDistrict(cityId, districtValue);
+    return subs.map((sd) => ({
+      value: sd.value,
+      label: locale === "ar" ? sd.label_ar : sd.label_en,
+      city_id: sd.city_id,
+      district_value: sd.district_value,
+      city_name: locale === "ar" ? sd.city_ar_name : sd.city_en_name,
+      id: sd.id,
     }));
   }
 

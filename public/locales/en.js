@@ -865,6 +865,8 @@ export default {
       tabAutomation: "Automation",
       selectAllVisible: "Select all visible",
       selectedLeads: "Selected leads",
+      visibleOnScreen: "{count} on screen",
+      visibleOnScreenTotal: "{visible} on screen · {total} loaded",
       recipientCount: "{count} recipient(s)",
       messageLabel: "Message",
       messagePlaceholder: "Type your WhatsApp message...",

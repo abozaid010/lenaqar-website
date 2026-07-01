@@ -462,71 +462,6 @@
           "بولاق الدكرور"
         ],
         "sub_districts": []
-      },
-      {
-        "en_name": "Hadayek October",
-        "ar_name": "حدائق أكتوبر",
-        "aliases": [
-          "حدايق اكتوبر",
-          "Hadayek October",
-          "October Gardens"
-        ],
-        "sub_districts": [
-          {
-            "en_name": "Ibny Beitak",
-            "ar_name": "ابني بيتك",
-            "aliases": [
-              "ابنى بيتك"
-            ]
-          },
-          {
-            "en_name": "Karma",
-            "ar_name": "الكرمة",
-            "aliases": [
-              "الكرمه"
-            ]
-          },
-          {
-            "en_name": "Dreamland",
-            "ar_name": "دريم لاند",
-            "aliases": [
-              "دريم لاند"
-            ]
-          }
-        ]
-      },
-      {
-        "en_name": "6 October City",
-        "ar_name": "مدينة 6 أكتوبر",
-        "aliases": [
-          "6 October",
-          "مدينة السادس من اكتوبر",
-          "٦ اكتوبر"
-        ],
-        "sub_districts": [
-          {
-            "en_name": "The First District",
-            "ar_name": "الحى الاول",
-            "aliases": [
-              "الحي الاول"
-            ]
-          },
-          {
-            "en_name": "The Second District",
-            "ar_name": "الحى الثاني",
-            "aliases": [
-              "الحي الثاني"
-            ]
-          }
-        ]
-      },
-      {
-        "en_name": "Sheikh Zayed City",
-        "ar_name": "مدينة الشيخ زايد",
-        "aliases": [
-          "الشيخ زايد"
-        ],
-        "sub_districts": []
       }
     ],
     "ar_name": "الجيزة",
@@ -905,6 +840,14 @@
         ],
         "sub_districts": [
           {
+            "en_name": "Madinaty",
+            "ar_name": "مدينتي",
+            "aliases": [
+              "مدينتى",
+              "Madinaty"
+            ]
+          },
+          {
             "en_name": "First Settlement",
             "ar_name": "التجمع الأول",
             "aliases": [
@@ -963,6 +906,14 @@
                 "aliases": [
                   "النرجس",
                   "Al Nargis"
+                ]
+              },
+              {
+                "en_name": "Golden Square",
+                "ar_name": "جولدن سكوير",
+                "aliases": [
+                  "جولدن سكوير",
+                  "Golden Square"
                 ]
               },
               {
@@ -1068,11 +1019,6 @@
                 ]
               },
               {
-                "en_name": "Madinaty",
-                "ar_name": "مدينتي",
-                "aliases": []
-              },
-              {
                 "en_name": "New Heliopolis",
                 "ar_name": "هيليوبوليس الجديدة",
                 "aliases": [
@@ -1111,9 +1057,7 @@
       {
         "en_name": "Downtown",
         "ar_name": "وسط البلد",
-        "aliases": [
-          "الداون تاون"
-        ],
+        "aliases": [],
         "sub_districts": []
       }
     ],
@@ -3194,24 +3138,5 @@
     "ar_name": "البحر الأحمر",
     "id": "Red Sea",
     "en_name": "Red Sea"
-  },
-  {
-    "alias": [
-      "الصعيد",
-      "اسيوط",
-      "Asyut"
-    ],
-    "districts": [
-      {
-        "en_name": "Asyut",
-        "ar_name": "اسيوط",
-        "aliases": [
-          "assuit city"
-        ]
-      }
-    ],
-    "ar_name": "اسيوط",
-    "id": "Asyut",
-    "en_name": "Asyut"
   }
 ]

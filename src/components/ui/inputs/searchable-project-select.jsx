@@ -29,6 +29,8 @@ import SearchableDropdownSelect from "./searchable-dropdown-select";
  * @param {Array} projects - Array of project objects (optional, will fetch if not provided)
  * @param {boolean} isPublic - Whether to fetch public projects (used if projects not provided)
  * @param {boolean} isLoading - Loading state (used if projects not provided)
+ * @param {string} city - Optional city value to scope projects
+ * @param {string} district - Optional district value to scope projects
  */
 export default function SearchableProjectSelect({
   value = "",
@@ -48,6 +50,8 @@ export default function SearchableProjectSelect({
   projects: projectsProp,
   isPublic = false,
   isLoading: isLoadingProp,
+  city = "",
+  district = "",
   ...rest
 }) {
   const { t, locale } = useI18n();
@@ -58,8 +62,33 @@ export default function SearchableProjectSelect({
     isPublic
   );
 
-  const projects = projectsProp || fetchedProjects || [];
+  const allProjects = projectsProp || fetchedProjects || [];
   const isLoading = isLoadingProp !== undefined ? isLoadingProp : fetchedLoading;
+
+  const projects = useMemo(() => {
+    const normalizedCity = city && city !== "all" ? String(city).toLowerCase().trim() : "";
+    const normalizedDistrict =
+      district && district !== "all" ? String(district).toLowerCase().trim() : "";
+
+    if (!normalizedCity && !normalizedDistrict) {
+      return allProjects;
+    }
+
+    return allProjects.filter((project) => {
+      const projectCity = project.city ? String(project.city).toLowerCase().trim() : "";
+      const projectDistrict = project.district
+        ? String(project.district).toLowerCase().trim()
+        : "";
+
+      if (normalizedCity && projectCity !== normalizedCity) {
+        return false;
+      }
+      if (normalizedDistrict && projectDistrict !== normalizedDistrict) {
+        return false;
+      }
+      return true;
+    });
+  }, [allProjects, city, district]);
 
   const handleChange = useCallback(
     (e) => {
@@ -130,7 +159,6 @@ export default function SearchableProjectSelect({
       }}
       searchFields={["ar_name", "en_name"]}
       sortOptions={sortProjects}
-      isLoading={isLoading}
       loadingText={locale === "ar" ? "جاري التحميل..." : "Loading projects..."}
       noResultsText={locale === "ar" ? "لا توجد نتائج" : "No projects found"}
       searchPlaceholder={locale === "ar" ? "ابحث عن المشروع..." : "Search projects..."}

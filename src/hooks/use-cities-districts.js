@@ -77,6 +77,23 @@ export function useCitiesDistricts() {
     return await manager.getDistrictsWithLabels(null, locale);
   }, [locale]);
 
+  const getSubDistrictsWithLabels = useCallback(
+    async (city, district) => {
+      if (!city || !district) return [];
+      const cityObj = await manager.getCityByValue(city);
+      if (!cityObj) {
+        console.warn(`City not found for sub-districts: "${city}"`);
+        return [];
+      }
+      return await manager.getSubDistrictsWithLabels(
+        cityObj.id,
+        String(district).toLowerCase().trim(),
+        locale
+      );
+    },
+    [locale]
+  );
+
   return {
     getCities,
     getDistricts,
@@ -85,5 +102,6 @@ export function useCitiesDistricts() {
     getAllCitiesWithLabels,
     getDistrictsWithLabels,
     getAllDistrictsWithLabels,
+    getSubDistrictsWithLabels,
   };
 }

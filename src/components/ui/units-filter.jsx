@@ -11,6 +11,7 @@ import { useOnClickOutside } from "@/hooks/use-click-outside";
 import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
+import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
@@ -25,7 +26,6 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
-const EnumPropertyIntent = ["rent", "sell"];
 
 // Helper functions defined outside component to avoid hoisting/initialization issues
 const getDeveloperValue = (dev) => {
@@ -94,6 +94,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const filters = useMemo(() => ({
     city: searchParams.get("city") || "",
     district: searchParams.get("district") || "",
+    sub_district: searchParams.get("sub_district") || "",
     developer_name: searchParams.get("developer_name") || "",
     project_name: searchParams.get("project_name") || "",
     purpose: searchParams.get("purpose") || "",
@@ -186,6 +187,45 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   }, [locale]);
 
   useEffect(() => {
+    const loadSubDistrictLabels = async () => {
+      try {
+        if (
+          !filters.city ||
+          filters.city === "all" ||
+          !filters.district ||
+          filters.district === "all"
+        ) {
+          setSubDistrictLabels({});
+          return;
+        }
+
+        const manager = (await import("@/utils/city_manager")).default.getInstance();
+        const cityObj = await manager.getCityByValue(filters.city);
+        if (!cityObj) {
+          setSubDistrictLabels({});
+          return;
+        }
+
+        const subs = await manager.getSubDistrictsWithLabels(
+          cityObj.id,
+          String(filters.district).toLowerCase().trim(),
+          locale
+        );
+
+        const labels = {};
+        for (const sd of subs) {
+          labels[sd.value] = sd.label;
+        }
+        setSubDistrictLabels(labels);
+      } catch (error) {
+        console.error("Failed to load sub-district labels:", error);
+      }
+    };
+
+    loadSubDistrictLabels();
+  }, [locale, filters.city, filters.district]);
+
+  useEffect(() => {
     return () => {
       if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
     };
@@ -197,6 +237,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [cityLabels, setCityLabels] = useState({});
   const [districtLabels, setDistrictLabels] = useState({});
+  const [subDistrictLabels, setSubDistrictLabels] = useState({});
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
 
@@ -271,8 +312,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.district) {
       list.push({ key: "district", value: getSelectedDistrict() });
     }
+    if (nextFilters.sub_district) {
+      list.push({ key: "sub_district", value: getSelectedSubDistrict() });
+    }
     return list;
-  }, [locale, t, compounds, developers, cityLabels, districtLabels]);
+  }, [locale, t, compounds, developers, cityLabels, districtLabels, subDistrictLabels, filters.city, filters.district]);
 
   // Only show active developer filter if developer exists in loaded list
   // This prevents showing stale filter chips when data reloads
@@ -374,6 +418,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
     if (key === "city") {
       newParams.delete("district");
+      newParams.delete("sub_district");
+      newParams.delete("project_name");
+    }
+    if (key === "district") {
+      newParams.delete("sub_district");
+      newParams.delete("project_name");
     }
 
     const qs = newParams.toString();
@@ -517,6 +567,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return districtLabels[filters.district] || filters.district;
   }
 
+  function getSelectedSubDistrict() {
+    if (
+      !filters.sub_district ||
+      filters.sub_district === "all" ||
+      filters.sub_district === ""
+    ) {
+      return translate("unitsFilter.allSubDistricts", "All Sub-districts");
+    }
+    return subDistrictLabels[filters.sub_district] || filters.sub_district;
+  }
+
   function getFilterDisplayText(key, value) {
     switch (key) {
       case "my_inventory":
@@ -545,6 +606,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedCity();
       case "district":
         return getSelectedDistrict();
+      case "sub_district":
+        return getSelectedSubDistrict();
       case "price_range":
         return getPriceDisplayText();
       default:
@@ -585,6 +648,30 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             showAllOption={true}
             allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
             placeholder={translate("unitsFilter.allDistricts", "All Districts")}
+            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
+          />
+        </div>
+
+        {/* Sub-district Dropdown */}
+        <div className="flex-1 min-w-[140px] max-w-[220px]">
+          <SearchableSubDistrictSelect
+            value={filters.sub_district === "all" ? "" : filters.sub_district}
+            onChange={(e) => {
+              const subValue = e.target.value || "all";
+              handleFilterChange("sub_district", subValue);
+            }}
+            name="sub_district"
+            city={filters.city && filters.city !== "all" ? filters.city : ""}
+            district={filters.district && filters.district !== "all" ? filters.district : ""}
+            disabled={
+              !filters.city ||
+              filters.city === "all" ||
+              !filters.district ||
+              filters.district === "all"
+            }
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
+            placeholder={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
             buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
@@ -633,32 +720,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             }}
             name="project_name"
             projects={compounds}
+            city={filters.city && filters.city !== "all" ? filters.city : ""}
+            district={filters.district && filters.district !== "all" ? filters.district : ""}
             isPublic={isPublic}
             isLoading={projectsLoading}
             showAllOption={true}
             allOptionLabel={t.unitsFilter.allCompounds || "All Projects"}
             placeholder={t.unitsFilter.allCompounds || "All Projects"}
-            buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
-          />
-        </div>
-
-        {/* Purpose Dropdown */}
-        <div className="flex-1 min-w-[120px] max-w-[160px]">
-          <SearchableDropdownSelect
-            options={EnumPropertyIntent.map((purpose) => ({
-              value: purpose,
-              label: t.unitsFilter.purposes[purpose],
-            }))}
-            value={filters.purpose === "all" ? "" : filters.purpose}
-            onChange={(e) => {
-              const purposeValue = e.target.value || "all";
-              handleFilterChange("purpose", purposeValue);
-            }}
-            name="purpose"
-            showAllOption={true}
-            allOptionLabel={t.unitsFilter.allPurposes || "All Purposes"}
-            placeholder={t.unitsFilter.allPurposes || "All Purposes"}
-            searchPlaceholder={locale === "ar" ? "ابحث عن الغرض..." : "Search purposes..."}
             buttonClassName="bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full"
           />
         </div>
@@ -711,6 +779,58 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
       {/* Line 2: Secondary Filters */}
       <div className="flex flex-wrap items-center gap-2">
+        {/* Purpose — none selected = all; rent/sell sent to API when chosen */}
+        <div className="flex-shrink-0">
+          <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+            {translate("unitsFilter.purpose", "Purpose")}
+          </p>
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={translate("unitsFilter.purpose", "Purpose")}
+          >
+            {[
+              {
+                value: "rent",
+                label: translate("unitsFilter.purposes.rent", "Rent"),
+              },
+              {
+                value: "sell",
+                label: translate("unitsFilter.purposes.sell", "Sell"),
+              },
+            ].map((option) => {
+              const isSelected = filters.purpose === option.value;
+
+              return (
+                <label
+                  key={option.value}
+                  onClick={(e) => {
+                    if (isSelected) {
+                      e.preventDefault();
+                      handleFilterChange("purpose", "all");
+                    }
+                  }}
+                  className={`flex items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                    isSelected
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="purpose"
+                    value={option.value}
+                    checked={isSelected}
+                    onChange={() => handleFilterChange("purpose", option.value)}
+                    className="h-4 w-4 accent-primary shrink-0"
+                  />
+                  <span className="whitespace-nowrap">{option.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
         {/* My Inventory Toggle */}
         <div className="flex-shrink-0">
           <label
