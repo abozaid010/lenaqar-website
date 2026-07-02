@@ -555,7 +555,7 @@ export default {
     kpi_new_users_count: "عملاء جدد",
     kpi_updated_users_count: "عملاء تمت متابعتهم",
     kpi_units_shared_count: "وحدات تمت مشاركتها",
-    kpi_units_shared_hidden_count: "مشاركات بانتظار الموافقة",
+    kpi_pending_approval_units_count: "وحدات بانتظار الموافقة",
     kpi_units_added_count: "وحدات مضافة",
     kpi_units_sold_count: "وحدات مباعة",
     kpi_units_rented_count: "وحدات مؤجرة",

@@ -549,7 +549,7 @@ export default {
     kpi_new_users_count: "New leads",
     kpi_updated_users_count: "Followed-up leads",
     kpi_units_shared_count: "Units shared",
-    kpi_units_shared_hidden_count: "Pending approval shares",
+    kpi_pending_approval_units_count: "Pending approval units",
     kpi_units_added_count: "Units added",
     kpi_units_sold_count: "Units sold",
     kpi_units_rented_count: "Units rented",

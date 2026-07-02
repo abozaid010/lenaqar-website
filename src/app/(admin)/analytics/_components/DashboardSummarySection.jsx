@@ -61,7 +61,7 @@ const KPI_CONFIG = [
     iconColor: "text-emerald-700",
   },
   {
-    key: "units_shared_hidden_count",
+    key: "pending_approval_units_count",
     icon: EyeOff,
     iconBg: "bg-amber-100",
     iconColor: "text-amber-700",
