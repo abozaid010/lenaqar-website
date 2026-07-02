@@ -186,6 +186,11 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
         : null,
     clientId: (rawUnit as any).clientId || (rawUnit as any).client_id || null,
     locationLabel,
+    city: isNonEmptyString(rawUnit.city) ? rawUnit.city : null,
+    district: isNonEmptyString(rawUnit.district) ? rawUnit.district : null,
+    subDistrict: isNonEmptyString((rawUnit as any).sub_district)
+      ? (rawUnit as any).sub_district
+      : null,
     heroImages,
     badges,
     totalPrice,

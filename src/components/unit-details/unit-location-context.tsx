@@ -2,10 +2,12 @@ import Link from 'next/link';
 import { MapPin, Building, User, Globe } from 'lucide-react';
 import type { UnitLocationContextProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
+import LocalizedLocationText from '@/components/ui/localized-location-text';
 
 export default function UnitLocationContext({ unit }: UnitLocationContextProps) {
   const { t, translate } = useI18n();
-  const hasLocation = unit.locationLabel || unit.projectName || unit.developerName;
+  const hasLocation =
+    unit.city || unit.district || unit.subDistrict || unit.projectName || unit.developerName;
 
   if (!hasLocation) {
     return null;
@@ -19,12 +21,17 @@ export default function UnitLocationContext({ unit }: UnitLocationContextProps) 
       </div>
 
       {/* Location Summary */}
-      {unit.locationLabel && (
+      {(unit.city || unit.district || unit.subDistrict) && (
         <div className="flex items-start gap-3">
           <Globe className="w-5 h-5 text-gray-600 mt-0.5" />
           <div>
             <div className="text-sm text-gray-600 mb-1">{t?.unitLocation?.locatedIn}</div>
-            <div className="text-lg font-medium text-gray-900">{unit.locationLabel}</div>
+            <LocalizedLocationText
+              city={unit.city || ''}
+              district={unit.district || ''}
+              subDistrict={unit.subDistrict || ''}
+              className="text-lg font-medium text-gray-900"
+            />
           </div>
         </div>
       )}
@@ -73,11 +80,15 @@ export default function UnitLocationContext({ unit }: UnitLocationContextProps) 
       )}
 
       {/* Combined Context Summary */}
-      {unit.projectName && unit.developerName && unit.locationLabel && (
+      {unit.projectName && unit.developerName && (unit.city || unit.district || unit.subDistrict) && (
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="text-sm text-gray-600 mb-2">{t?.unitLocation?.propertyOverview}</div>
           <p className="text-gray-900">
-            {unit.locationLabel}
+            <LocalizedLocationText
+              city={unit.city || ''}
+              district={unit.district || ''}
+              subDistrict={unit.subDistrict || ''}
+            />
             {unit.projectName && <> — {unit.projectName}</>}
             {unit.developerName && (
               <>

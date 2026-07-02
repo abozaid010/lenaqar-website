@@ -15,9 +15,9 @@ import {
 } from "@/utils/api";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
+import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import { useProjectsNames } from "@/hooks/use-admin-shared-data";
 
 // The PUT /requirements/{requirement_id} endpoint is keyed by the
@@ -147,13 +147,10 @@ export default function EditRequirementDialog({
   onSuccess,
 }) {
   const { locale, translate, t } = useI18n();
-  const { getDistrictsWithLabels } = useCitiesDistricts();
   const { data: projectsData, isLoading: projectsLoading } = useProjectsNames(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [requirementId, setRequirementId] = useState(null);
-  const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
-  const [districtsLoading, setDistrictsLoading] = useState(false);
   const [form, setForm] = useState(() => ({
     client_id: "",
     user_id: "",
@@ -255,29 +252,6 @@ export default function EditRequirementDialog({
       cancelled = true;
     };
   }, [open, userId]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const loadDistricts = async () => {
-      if (!form.city) {
-        setDistrictsWithLabels([]);
-        return;
-      }
-      try {
-        setDistrictsLoading(true);
-        const districts = await getDistrictsWithLabels(form.city);
-        if (!cancelled) setDistrictsWithLabels(districts || []);
-      } catch {
-        if (!cancelled) setDistrictsWithLabels([]);
-      } finally {
-        if (!cancelled) setDistrictsLoading(false);
-      }
-    };
-    loadDistricts();
-    return () => {
-      cancelled = true;
-    };
-  }, [form.city, getDistrictsWithLabels]);
 
   const tr = (key, fallback) => translate(key, fallback);
   const set = (k, v) => setForm((prev) => ({ ...prev, [k]: v }));
@@ -472,7 +446,7 @@ export default function EditRequirementDialog({
                   />
                 </div>
                 <div>
-                  <SearchableDropdownSelect
+                  <SearchableDistrictSelect
                     name="district"
                     label={tr(
                       "dashboard.requirementsDialog.fields.district",
@@ -481,8 +455,7 @@ export default function EditRequirementDialog({
                     value={form.district}
                     onChange={handleFieldChange}
                     disabled={!form.city}
-                    isLoading={districtsLoading}
-                    options={districtsWithLabels}
+                    city={form.city || ""}
                     placeholder={
                       !form.city
                         ? locale === "ar"
@@ -491,22 +464,6 @@ export default function EditRequirementDialog({
                         : locale === "ar"
                           ? "اختر المنطقة"
                           : "Select district"
-                    }
-                    getValue={(option) => option.value}
-                    getLabel={(option) => option.label}
-                    getKey={(option) => option.value}
-                    searchFields={["label", "value"]}
-                    searchPlaceholder={
-                      locale === "ar" ? "ابحث عن المنطقة..." : "Search districts..."
-                    }
-                    noResultsText={
-                      districtsWithLabels.length === 0 && form.city
-                        ? locale === "ar"
-                          ? "لا توجد مناطق"
-                          : "No districts found"
-                        : locale === "ar"
-                          ? "لا توجد نتائج"
-                          : "No results"
                     }
                     className={dropdownClassName}
                   />

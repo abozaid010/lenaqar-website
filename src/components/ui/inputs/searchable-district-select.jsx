@@ -78,7 +78,7 @@ export default function SearchableDistrictSelect({
           if (active) setResolvedLabel("");
           return;
         }
-        const label = await manager.getDistrictLabel(value, cityObj.id, locale);
+        const label = await manager.getDistrictLabel(value, cityObj.value, locale);
         if (active) setResolvedLabel(label || "");
       } catch (error) {
         console.error("Failed to resolve district label:", error);
@@ -93,13 +93,14 @@ export default function SearchableDistrictSelect({
 
   const resolveSelectedLabel = useCallback(
     (selectedValue, currentLocale) => {
+      if (currentLocale === locale && resolvedLabel) return resolvedLabel;
       const match = districtsWithLabels.find(
         (district) =>
           String(district.value).toLowerCase().trim() ===
           String(selectedValue).toLowerCase().trim()
       );
-      if (match) return match.label;
-      return currentLocale === locale ? resolvedLabel : "";
+      if (match?.label) return match.label;
+      return "";
     },
     [districtsWithLabels, resolvedLabel, locale]
   );

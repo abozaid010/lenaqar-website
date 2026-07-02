@@ -13,6 +13,7 @@ import {
   Download,
 } from "lucide-react";
 import { useRef, useState, useEffect, useMemo, useCallback, Fragment } from "react";
+import { createPortal } from "react-dom";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { useRouter } from "next/navigation";
 import { downloadExcelFile } from "@/utils/excel-utils";
@@ -40,6 +41,11 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { debounce } from "@/utils/debounce";
 import { MIN_LAND_AREA } from "@/data/constants";
+
+const INDEX_COLUMN_WIDTH = 50;
+const DATA_COLUMN_WIDTH = 110;
+const EXCEL_TABLE_MIN_WIDTH =
+  INDEX_COLUMN_WIDTH + excelTemplateColumns.length * DATA_COLUMN_WIDTH;
 
 const MIN_TOTAL_PRICE = 200000;
 
@@ -78,6 +84,20 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
   const [selectedProjectsForDeletion, setSelectedProjectsForDeletion] = useState([]);
   const [isProjectsNotUpdatedDialogOpen, setIsProjectsNotUpdatedDialogOpen] = useState(false);
   const [isDeletingProjects, setIsDeletingProjects] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow || "auto";
+    };
+  }, [isOpen]);
   const fileInputRef = useRef(null);
   const developerDropdownRef = useRef(null);
   const tableScrollRef = useRef(null);
@@ -400,7 +420,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     return errors;
   }, [parsedData, templateColumnStatuses, getTemplateColumnStatus]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   // Parse Excel file only (doesn't do mapping/transformation)
   // Wrapper around the processor function to handle state updates
@@ -862,9 +882,9 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
     return String(rawValue);
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg shadow-xl w-[95vw] h-[95vh] mx-4 overflow-hidden flex flex-col">
+  return createPortal(
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-3 sm:p-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-[96vw] h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between py-4 px-6 border-b flex-wrap gap-3">
           <div className="flex items-center gap-3 flex-wrap">
@@ -990,8 +1010,15 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
               {!selectedFile ? (
                 <div className="space-y-6">
                   {/* Example Table */}
-                  <div ref={exampleTableScrollRef} className="overflow-x-auto" dir="ltr">
-                    <table className="w-full text-sm border-collapse">
+                  <div ref={exampleTableScrollRef} className="overflow-x-auto max-w-full" dir="ltr">
+                    <table
+                      className="text-sm border-collapse"
+                      style={{
+                        tableLayout: "fixed",
+                        minWidth: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                        width: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                      }}
+                    >
                       <thead>
                         {/* Required Fields Header */}
                         <tr>
@@ -1222,16 +1249,27 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                     )}
                   </div>
 
-                  <div className="border rounded-lg overflow-hidden flex-1 flex flex-col relative" dir="ltr">
-                    <div ref={tableScrollRef} className="overflow-x-auto overflow-y-auto flex-1" dir="ltr" style={{ position: 'relative' }}>
+                  <div className="border rounded-lg flex-1 flex flex-col relative min-h-0" dir="ltr">
+                    <div
+                      ref={tableScrollRef}
+                      className="overflow-x-auto overflow-y-auto flex-1 min-h-0 overscroll-x-contain"
+                      dir="ltr"
+                    >
                       {/* Skeleton loading overlay on table when uploading */}
                       {isUploading && (
                         <div className="absolute inset-0 z-20 overflow-auto rounded-lg bg-gray-50/95">
-                          <table className="w-full text-sm border-collapse" style={{ tableLayout: "fixed" }}>
+                          <table
+                            className="text-sm border-collapse"
+                            style={{
+                              tableLayout: "fixed",
+                              minWidth: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                              width: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                            }}
+                          >
                             <colgroup>
-                              <col style={{ width: "50px" }} />
+                              <col style={{ width: `${INDEX_COLUMN_WIDTH}px` }} />
                               {excelTemplateColumns.map((_, idx) => (
-                                <col key={idx} style={{ width: "110px" }} />
+                                <col key={idx} style={{ width: `${DATA_COLUMN_WIDTH}px` }} />
                               ))}
                             </colgroup>
                             <thead className="bg-gray-100 sticky top-0">
@@ -1266,16 +1304,34 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           </div>
                         </div>
                       )}
-                      <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+                      <table
+                        className="text-sm border-collapse"
+                        style={{
+                          tableLayout: "fixed",
+                          minWidth: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                          width: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                        }}
+                      >
                         <colgroup>
-                          <col style={{ width: "50px" }} />
+                          <col style={{ width: `${INDEX_COLUMN_WIDTH}px` }} />
                           {excelTemplateColumns.map((_, idx) => (
-                            <col key={idx} style={{ width: "110px" }} />
+                            <col key={idx} style={{ width: `${DATA_COLUMN_WIDTH}px` }} />
                           ))}
                         </colgroup>
-                        <thead className="bg-gray-100 sticky top-0 z-10">
+                        <thead className="sticky top-0 z-20 bg-gray-100 shadow-sm">
                           {/* Required/Optional Headers */}
                           <tr>
+                            <th
+                              rowSpan={2}
+                              className="sticky left-0 z-40 px-2 py-1 text-center font-semibold text-gray-700 border-b border-r border-gray-200 bg-gray-100"
+                              style={{
+                                width: `${INDEX_COLUMN_WIDTH}px`,
+                                minWidth: `${INDEX_COLUMN_WIDTH}px`,
+                                maxWidth: `${INDEX_COLUMN_WIDTH}px`,
+                              }}
+                            >
+                              #
+                            </th>
                             {(() => {
                               const requiredCols = excelTemplateColumns.filter((col) => col.is_required);
                               const optionalCols = excelTemplateColumns.filter((col) => !col.is_required);
@@ -1304,9 +1360,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                           </tr>
                           {/* Column Headers */}
                           <tr>
-                            <th className="px-2 py-1 text-center font-semibold text-gray-700 border-b" style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
-                              #
-                            </th>
                             {excelTemplateColumns.map((templateCol, idx) => {
                               const status = templateColumnStatuses[templateCol.key] || getTemplateColumnStatus(templateCol.key);
                               const isResolved = status.isResolved;
@@ -1335,7 +1388,12 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                 <th
                                   key={idx}
                                   className={`px-2 py-2 text-center font-semibold border-b ${bgColorClass}`}
-                                  style={{ width: "110px", minWidth: "110px", maxWidth: "110px", height: "100px" }}
+                                  style={{
+                                    width: `${DATA_COLUMN_WIDTH}px`,
+                                    minWidth: `${DATA_COLUMN_WIDTH}px`,
+                                    maxWidth: `${DATA_COLUMN_WIDTH}px`,
+                                    height: "100px",
+                                  }}
                                 >
                                   <div className="flex flex-col h-full justify-between gap-1">
                                     <div className="flex flex-col gap-1">
@@ -1424,12 +1482,13 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         position: 'absolute',
                                         top: 0,
                                         left: 0,
-                                        width: '100%',
+                                        width: `${EXCEL_TABLE_MIN_WIDTH}px`,
+                                        minWidth: `${EXCEL_TABLE_MIN_WIDTH}px`,
                                         height: `${virtualRow.size}px`,
                                         transform: `translateY(${virtualRow.start}px)`,
                                       }}
                                     >
-                                    <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px", height: `${virtualRow.size}px` }}>
+                                    <td className={`sticky left-0 z-[5] px-2 py-3 text-gray-600 border-b border-r font-medium text-center align-top ${rowBg} ${isSuccess ? "border-emerald-200" : isFailed ? "border-red-200" : "border-gray-200"}`} style={{ width: `${INDEX_COLUMN_WIDTH}px`, minWidth: `${INDEX_COLUMN_WIDTH}px`, maxWidth: `${INDEX_COLUMN_WIDTH}px`, height: `${virtualRow.size}px` }}>
                                       <div className="flex flex-col h-full justify-center items-center gap-1">
                                         {isSuccess ? (
                                           <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
@@ -1441,7 +1500,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                       <td
                                         colSpan={excelTemplateColumns.length}
                                         className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
-                                        style={{ height: `${virtualRow.size}px`, minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                        style={{ height: `${virtualRow.size}px`, minWidth: `${excelTemplateColumns.length * DATA_COLUMN_WIDTH}px` }}
                                       >
                                         <div className="flex items-center h-full">
                                           <span className="text-sm text-red-700 break-words" title={itemStatus.error}>
@@ -1466,7 +1525,11 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                         <td
                                           key={colIndex}
                                           className={`px-2 py-3 text-gray-700 border-b overflow-hidden text-center ${isSuccess ? "border-r border-b border-emerald-200" : isFailed ? "border-b border-r border-red-200" : "border-b border-gray-200"} ${colIndex === excelTemplateColumns.length - 1 && (isSuccess || isFailed) ? "border-r-0" : ""}`}
-                                          style={{ width: "110px", minWidth: "110px", maxWidth: "110px" }}
+                                          style={{
+                                            width: `${DATA_COLUMN_WIDTH}px`,
+                                            minWidth: `${DATA_COLUMN_WIDTH}px`,
+                                            maxWidth: `${DATA_COLUMN_WIDTH}px`,
+                                          }}
                                         >
                                           <div className="truncate text-center" title={cellValue}>
                                             {cellValue}
@@ -1496,7 +1559,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     key={rowIndex}
                                     className={rowBgF}
                                   >
-                                  <td className={`px-2 py-3 text-gray-600 border-b font-medium text-center align-top ${isSuccessF ? "border-r border-b border-emerald-200" : isFailedF ? "border-b border-r border-red-200" : "border-b border-gray-200"}`} style={{ width: "50px", minWidth: "50px", maxWidth: "50px" }}>
+                                  <td className={`sticky left-0 z-[5] px-2 py-3 text-gray-600 border-b border-r font-medium text-center align-top ${rowBgF} ${isSuccessF ? "border-emerald-200" : isFailedF ? "border-red-200" : "border-gray-200"}`} style={{ width: `${INDEX_COLUMN_WIDTH}px`, minWidth: `${INDEX_COLUMN_WIDTH}px`, maxWidth: `${INDEX_COLUMN_WIDTH}px` }}>
                                     <div className="flex flex-col min-h-[52px] justify-center items-center gap-1">
                                       {isSuccessF ? (
                                         <CheckCircle className="text-emerald-600 flex-shrink-0" size={18} title={t.uploadExcel?.success || "Success"} />
@@ -1508,7 +1571,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
                                     <td
                                       colSpan={excelTemplateColumns.length}
                                       className="px-3 py-2 border-b border-r border-red-200 bg-red-50"
-                                      style={{ minWidth: `${excelTemplateColumns.length * 110}px` }}
+                                      style={{ minWidth: `${excelTemplateColumns.length * DATA_COLUMN_WIDTH}px` }}
                                     >
                                       <div className="flex items-center min-h-[52px]">
                                         <span className="text-sm text-red-700 break-words" title={itemStatusF.error}>
@@ -1733,6 +1796,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
           }
         }}
       />
-    </div>
+    </div>,
+    document.body
   );
 }

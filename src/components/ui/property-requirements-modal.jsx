@@ -18,6 +18,7 @@ import {
   User,
   X,
 } from "lucide-react";
+import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 
 const PropertyDetailsModal = ({ onClose, property }) => {
   const { t } = useI18n();
@@ -40,6 +41,10 @@ const PropertyDetailsModal = ({ onClose, property }) => {
   };
 
   const formattedProperty = reformatPropertyData();
+  const { city: cityLabel, district: districtLabel } = useLocalizedLocationLabels({
+    city: formattedProperty.city,
+    district: formattedProperty.district,
+  });
 
   // Modified DetailItem to only render when value exists
   const DetailItem = ({ icon, label, value }) => {
@@ -102,12 +107,12 @@ const PropertyDetailsModal = ({ onClose, property }) => {
                   <DetailItem
                     icon={<MapPin size={18} className="text-primary" />}
                     label={t.propertyDetails.fields.city || "City"}
-                    value={formattedProperty.city}
+                    value={cityLabel || formattedProperty.city}
                   />
                   <DetailItem
                     icon={<MapPin size={18} className="text-primary" />}
                     label={t.propertyDetails.fields.district || "District"}
-                    value={formattedProperty.district}
+                    value={districtLabel || formattedProperty.district}
                   />
                   <DetailItem
                     icon={<Tag size={18} className="text-primary" />}

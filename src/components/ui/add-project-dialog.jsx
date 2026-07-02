@@ -12,13 +12,14 @@ import PhasesList from "@/components/ui/inputs/phases-list";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import SingleImageUploader from "@/components/ui/inputs/single-image-uploader";
 import CitySelect from "@/components/ui/inputs/sorted-city-select";
+import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
+import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
 import AmenitiesSelector from "@/components/ui/inputs/amenities-selector";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes, getFinishingTypes } from "@/data/constants";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useDeveloperNames } from "@/hooks/use-admin-shared-data";
-import { useCitiesDistricts } from "@/hooks/use-cities-districts";
 import {
   addCompound as addProject,
   updatecompound as updateProject,
@@ -38,6 +39,7 @@ import { useEffect, useState, useMemo, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
+import CityManager from "@/utils/city_manager";
 
 const PROJECT_SECTION_IDS = {
   basics: "add-project-basics",
@@ -64,6 +66,7 @@ const FIELD_TO_SECTION_KEY = {
   finishing_type: "basics",
   city: "location",
   district: "location",
+  sub_district: "location",
   delivery_date: "location",
   area: "location",
   latitude: "location",
@@ -141,11 +144,7 @@ export default function AddCompoundDialog({
   const { isLoading: delveloperLoading, data: developersData } =
     useDeveloperNames(clientId);
 
-  const { getDistrictsWithLabels } = useCitiesDistricts();
-
   const [developers, setDevelopers] = useState(developersData || []);
-  const [districtsWithLabels, setDistrictsWithLabels] = useState([]);
-  const [isLoadingDistricts, setIsLoadingDistricts] = useState(false);
 
   useEffect(() => {
     if (developersData) {
@@ -153,7 +152,7 @@ export default function AddCompoundDialog({
     }
   }, [delveloperLoading]);
 
-  const { t, locale } = useI18n();
+  const { t, locale, translate } = useI18n();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -188,6 +187,7 @@ export default function AddCompoundDialog({
   // Ref to track submission state and prevent duplicate submissions
   const isSubmittingRef = useRef(false);
   const lastSubmitTimeRef = useRef(0);
+  const didNormalizeLocation = useRef(false);
 
   const [errors, setErrors] = useState({});
   const [missingLang, setMissingLang] = useState(null);
@@ -218,6 +218,7 @@ export default function AddCompoundDialog({
     description: null,
     city: null,
     district: null,
+    sub_district: null,
     delivery_date: null,
     area: null,
     latitude: null,
@@ -251,6 +252,8 @@ export default function AddCompoundDialog({
       projectData?.project?.district ||
       defaultDistrict ||
       "",
+    sub_district:
+      projectData?.sub_district || projectData?.project?.sub_district || "",
     area: projectData?.area || projectData?.project?.area || "",
     gated:
       projectData?.gated !== undefined && projectData?.gated !== null
@@ -343,6 +346,10 @@ export default function AddCompoundDialog({
             projectData?.project?.district ||
             defaultDistrict ||
             "",
+          sub_district:
+            projectData.sub_district ||
+            projectData?.project?.sub_district ||
+            "",
           area: projectData.area || projectData?.project?.area || "",
           gated:
             projectData.gated !== undefined && projectData.gated !== null
@@ -431,6 +438,7 @@ export default function AddCompoundDialog({
           city: defaultCity || "",
           country: "Egypt",
           district: defaultDistrict || "",
+          sub_district: "",
           area: "",
           gated: true,
           primary_units_sold_out: true,
@@ -467,6 +475,7 @@ export default function AddCompoundDialog({
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
+        sub_district: "",
         area: "",
         gated: true,
         primary_units_sold_out: true,
@@ -541,6 +550,11 @@ export default function AddCompoundDialog({
           projectData?.project?.district ||
           prev.district ||
           defaultDistrict ||
+          "",
+        sub_district:
+          projectData?.sub_district ||
+          projectData?.project?.sub_district ||
+          prev.sub_district ||
           "",
         area:
           projectData?.area || projectData?.project?.area || prev.area || "",
@@ -641,28 +655,71 @@ export default function AddCompoundDialog({
     }
   }, [projectData, isOpen, editMode, defaultCity, defaultDistrict, clientId]);
 
-  // Load districts when city changes
   useEffect(() => {
-    const loadDistricts = async () => {
-      if (!formData.city) {
-        setDistrictsWithLabels([]);
-        return;
-      }
+    if (isOpen) {
+      didNormalizeLocation.current = false;
+    }
+  }, [isOpen, projectData?.id]);
 
+  // Normalize city/district/sub_district to canonical values for label resolution
+  useEffect(() => {
+    if (!isOpen) {
+      didNormalizeLocation.current = false;
+      return;
+    }
+    if (didNormalizeLocation.current) return;
+    if (!formData.city && !formData.district && !formData.sub_district) return;
+
+    let cancelled = false;
+    (async () => {
       try {
-        setIsLoadingDistricts(true);
-        const districts = await getDistrictsWithLabels(formData.city);
-        setDistrictsWithLabels(districts || []);
-      } catch (error) {
-        console.error("Failed to load districts:", error);
-        setDistrictsWithLabels([]);
-      } finally {
-        setIsLoadingDistricts(false);
-      }
-    };
+        const manager = CityManager.getInstance();
+        const nextCity = formData.city
+          ? await manager.normalizeCityValueAsync(formData.city)
+          : "";
+        const nextDistrict = formData.district
+          ? await manager.normalizeDistrictValueAsync(
+              formData.district,
+              formData.city || nextCity
+            )
+          : "";
+        const nextSubDistrict = formData.sub_district
+          ? await manager.normalizeSubDistrictValueAsync(
+              formData.sub_district,
+              nextCity || formData.city,
+              nextDistrict || formData.district
+            )
+          : "";
 
-    loadDistricts();
-  }, [formData.city, getDistrictsWithLabels]);
+        const patch = {};
+        if (nextCity && nextCity !== formData.city) patch.city = nextCity;
+        if (nextDistrict && nextDistrict !== formData.district) {
+          patch.district = nextDistrict;
+        }
+        if (nextSubDistrict && nextSubDistrict !== formData.sub_district) {
+          patch.sub_district = nextSubDistrict;
+        }
+
+        if (!cancelled && Object.keys(patch).length) {
+          setFormData((prev) => ({ ...prev, ...patch }));
+        }
+      } catch (error) {
+        console.error("Failed to normalize project location:", error);
+      } finally {
+        if (!cancelled) didNormalizeLocation.current = true;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isOpen,
+    formData.city,
+    formData.district,
+    formData.sub_district,
+    projectData?.id,
+  ]);
 
   const handleChange = (e) => {
     setIsDirty(true);
@@ -704,14 +761,20 @@ export default function AddCompoundDialog({
     }
 
     if (name === "city") {
-      // Reset district when city changes
+      // Reset district and sub-district when city changes
       setFormData({
         ...formData,
         city: value,
-        district: "", // Reset district when city changes
+        district: "",
+        sub_district: "",
       });
-    }
-    if (name === "developer_id") {
+    } else if (name === "district") {
+      setFormData({
+        ...formData,
+        district: value,
+        sub_district: "",
+      });
+    } else if (name === "developer_id") {
       // When developer changes, set both developer_id and developer_name for API
       const selectedDeveloper = developers?.find((dev) => dev.id === value);
       const developerName = selectedDeveloper?.en_name || "";
@@ -1382,6 +1445,7 @@ export default function AddCompoundDialog({
         city: defaultCity || "",
         country: "Egypt",
         district: defaultDistrict || "",
+        sub_district: "",
         area: "",
         gated: true,
         primary_units_sold_out: true,
@@ -1905,7 +1969,7 @@ export default function AddCompoundDialog({
             >
               <input type="hidden" name="country" value="Egypt" />
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                 <div ref={(el) => (fieldRefs.current.city = el)}>
                   <CitySelect
                     value={formData.city}
@@ -1916,36 +1980,42 @@ export default function AddCompoundDialog({
                 </div>
 
                 <div ref={(el) => (fieldRefs.current.district = el)}>
-                  <SearchableDropdownSelect
+                  <SearchableDistrictSelect
                     name="district"
-                    label={t.formLabels?.district || "District"}
+                    label={translate("formLabels.district", t.formLabels?.district)}
                     value={formData.district}
                     onChange={handleChange}
                     required
                     error={!!errors.district}
                     errorMessage={errors.district}
+                    city={formData.city || ""}
                     disabled={!formData.city}
-                    isLoading={isLoadingDistricts}
-                    options={districtsWithLabels}
                     placeholder={
                       !formData.city
-                        ? locale === "ar"
-                          ? "الرجاء اختيار المدينة أولاً"
-                          : "Please select a city first"
-                        : locale === "ar"
-                          ? t.formLabels?.district || "اختر المنطقة"
-                          : "Select district"
+                        ? translate("formLabels.cityFirst", t.formLabels?.cityFirst)
+                        : translate("formLabels.selectDistrict", t.formLabels?.selectDistrict)
                     }
-                    getValue={(option) => option.value}
-                    getLabel={(option) => option.label}
-                    getKey={(option) => option.value}
-                    searchFields={["label"]}
-                    noResultsText={
-                      districtsWithLabels.length === 0 && formData.city
-                        ? locale === "ar"
-                          ? `لا توجد مناطق لـ ${formData.city}`
-                          : `No districts found for ${formData.city}`
-                        : undefined
+                  />
+                </div>
+
+                <div ref={(el) => (fieldRefs.current.sub_district = el)}>
+                  <SearchableSubDistrictSelect
+                    name="sub_district"
+                    label={translate("formLabels.subDistrict", t.formLabels?.subDistrict)}
+                    value={formData.sub_district || ""}
+                    onChange={handleChange}
+                    city={formData.city || ""}
+                    district={formData.district || ""}
+                    disabled={!formData.city || !formData.district}
+                    placeholder={
+                      !formData.city
+                        ? translate("formLabels.cityFirst", t.formLabels?.cityFirst)
+                        : !formData.district
+                          ? translate("formLabels.districtFirst", t.formLabels?.districtFirst)
+                          : translate(
+                              "formLabels.selectSubDistrict",
+                              t.formLabels?.selectSubDistrict
+                            )
                     }
                   />
                 </div>

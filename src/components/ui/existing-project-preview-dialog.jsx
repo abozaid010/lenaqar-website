@@ -8,6 +8,10 @@ import { CreditCard, Home, Tag, Edit } from "lucide-react";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { useMemo, useEffect } from "react";
+import LocalizedLocationText, {
+  LocalizedCityText,
+  LocalizedDistrictText,
+} from "@/components/ui/localized-location-text";
 
 const capitalize = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
@@ -139,7 +143,7 @@ export default function ExistingProjectPreviewDialog({
                     {t?.formLabels?.city}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
-                    {capitalize(projectData.city)}
+                    <LocalizedCityText city={projectData.city} fallback={capitalize(projectData.city)} />
                   </p>
                 </div>
               )}
@@ -149,7 +153,11 @@ export default function ExistingProjectPreviewDialog({
                     {t?.formLabels?.district}
                   </span>
                   <p className="text-base font-semibold text-gray-900">
-                    {capitalize(projectData.district)}
+                    <LocalizedDistrictText
+                      city={projectData.city}
+                      district={projectData.district}
+                      fallback={capitalize(projectData.district)}
+                    />
                   </p>
                 </div>
               )}

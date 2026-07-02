@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { MapPin, Building, User, Tag, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
+import LocalizedLocationText from '@/components/ui/localized-location-text';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
   const { t, translate } = useI18n();
@@ -62,10 +63,15 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
       </div>
 
       {/* Location */}
-      {unit.locationLabel && (
+      {(unit.city || unit.district || unit.subDistrict) && (
         <div className="flex items-center gap-2 text-gray-600">
           <MapPin className="w-5 h-5" />
-          <span className="text-lg">{unit.locationLabel}</span>
+          <LocalizedLocationText
+            city={unit.city || ''}
+            district={unit.district || ''}
+            subDistrict={unit.subDistrict || ''}
+            className="text-lg"
+          />
         </div>
       )}
 
