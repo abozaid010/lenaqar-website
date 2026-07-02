@@ -15,6 +15,8 @@ import UnitSelectorDialog from "./UnitSelectorDialog";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { PhoneField } from "@/components/phone/PhoneField";
 import { digitsOnlyNormalized } from "@/utils/lead-list-search";
+import CityManager from "@/utils/city_manager";
+import LocalizedLocationText from "@/components/ui/localized-location-text";
 
 function normalizeSuggestedAnswers(raw) {
   const arr = Array.isArray(raw) ? raw : [];
@@ -78,6 +80,7 @@ export default function CampaignDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImages, setIsUploadingImages] = useState(false);
   const [isUnitSelectorOpen, setIsUnitSelectorOpen] = useState(false);
+  const [projectLocationLabels, setProjectLocationLabels] = useState({});
 
   // Fetch projects for dropdown
   const {
@@ -89,6 +92,40 @@ export default function CampaignDialog({
     queryFn: () => fetchProjectsNames(false),
     staleTime: 1000 * 60 * 10, // 10 minutes
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadProjectLocationLabels = async () => {
+      if (!projectsData?.length) {
+        if (!cancelled) setProjectLocationLabels({});
+        return;
+      }
+
+      try {
+        const manager = CityManager.getInstance();
+        const labels = {};
+        await Promise.all(
+          projectsData.map(async (project) => {
+            if (!project?.id) return;
+            labels[project.id] = await manager.formatLocationDisplay(
+              { city: project.city || "", district: project.district || "" },
+              locale
+            );
+          })
+        );
+        if (!cancelled) setProjectLocationLabels(labels);
+      } catch (error) {
+        console.error("Failed to load project location labels:", error);
+        if (!cancelled) setProjectLocationLabels({});
+      }
+    };
+
+    void loadProjectLocationLabels();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectsData, locale]);
 
   const title = useMemo(() => {
     return editMode
@@ -399,12 +436,19 @@ export default function CampaignDialog({
                 }}
                 options={[
                   { value: "", label: translate("campaigns.noProject", "No project (general campaign)") },
-                  ...(projectsData || []).map(project => ({
-                    value: project.id,
-                    label: locale === "ar" 
-                      ? `${project.ar_name || project.en_name} — ${project.city || ""} ${project.district || ""}`
-                      : `${project.en_name} — ${project.city || ""} ${project.district || ""}`
-                  }))
+                  ...(projectsData || []).map(project => {
+                    const projectName =
+                      locale === "ar"
+                        ? project.ar_name || project.en_name
+                        : project.en_name;
+                    const locationText = projectLocationLabels[project.id] || "";
+                    return {
+                      value: project.id,
+                      label: locationText
+                        ? `${projectName} — ${locationText}`
+                        : projectName,
+                    };
+                  })
                 ]}
                 placeholder={translate("campaigns.selectProject", "Select a project")}
                 dir={locale === "ar" ? "rtl" : "ltr"}
@@ -486,9 +530,17 @@ export default function CampaignDialog({
                       {selectedUnit.project
                         ? `${t.campaigns.project}: ${selectedUnit.project}`
                         : null}
-                      {selectedUnit.city
-                        ? ` • ${t.campaigns.city}: ${selectedUnit.city}`
-                        : null}
+                      {selectedUnit.city ? (
+                        <>
+                          {" "}
+                          • {t.campaigns.city}:{" "}
+                          <LocalizedLocationText
+                            city={selectedUnit.city || ""}
+                            district={selectedUnit.district || ""}
+                            subDistrict={selectedUnit.sub_district || selectedUnit.subDistrict || ""}
+                          />
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 ) : (

@@ -33,6 +33,7 @@ export interface RawUnit {
   totalPrice: number;
   gardenSize: number;
   district: string;
+  sub_district?: string;
   roomsCount: number;
   unitId: string;
   country: string;
@@ -102,6 +103,9 @@ export interface UnitViewModel {
   clientId: string | null;
   isPrimary: boolean;
   locationLabel: string | null;
+  city: string | null;
+  district: string | null;
+  subDistrict: string | null;
   heroImages: HeroImage[];
   badges: string[];
   totalPrice: string | null;

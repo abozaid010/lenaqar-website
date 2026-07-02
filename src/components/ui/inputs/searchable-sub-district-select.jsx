@@ -61,13 +61,32 @@ export default function SearchableSubDistrictSelect({
   useEffect(() => {
     let active = true;
     const loadLabel = async () => {
-      if (!value || !city || !district) {
+      if (!value || !city) {
         if (active) setResolvedLabel("");
         return;
       }
       try {
         const manager = (await import("@/utils/city_manager")).default.getInstance();
-        const label = await manager.getSubDistrictLabel(value, city, district, locale);
+        await manager.initializeData();
+        const cityObj = await manager.getCityByValue(city);
+        if (!cityObj) {
+          if (active) setResolvedLabel("");
+          return;
+        }
+        const normalizedDistrict = district
+          ? await manager.normalizeDistrictValueAsync(district, cityObj.id)
+          : "";
+        const normalizedSub = await manager.normalizeSubDistrictValueAsync(
+          value,
+          cityObj.value,
+          normalizedDistrict || district
+        );
+        const label = await manager.getSubDistrictLabel(
+          normalizedSub || value,
+          cityObj.value,
+          normalizedDistrict,
+          locale
+        );
         if (active) setResolvedLabel(label || "");
       } catch (error) {
         console.error("Failed to resolve sub-district label:", error);
@@ -82,13 +101,14 @@ export default function SearchableSubDistrictSelect({
 
   const resolveSelectedLabel = useCallback(
     (selectedValue, currentLocale) => {
+      if (currentLocale === locale && resolvedLabel) return resolvedLabel;
       const match = subsWithLabels.find(
         (sd) =>
           String(sd.value).toLowerCase().trim() ===
           String(selectedValue).toLowerCase().trim()
       );
-      if (match) return match.label;
-      return currentLocale === locale ? resolvedLabel : "";
+      if (match?.label) return match.label;
+      return "";
     },
     [subsWithLabels, resolvedLabel, locale]
   );
@@ -127,4 +147,3 @@ export default function SearchableSubDistrictSelect({
     />
   );
 }
-

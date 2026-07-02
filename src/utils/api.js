@@ -2216,6 +2216,30 @@ export async function fetchManagerAnalytics(params = {}) {
   }
 }
 
+export async function fetchDashboardSummary(clientId, options = {}) {
+  if (!clientId) {
+    throw new Error("clientId is required");
+  }
+
+  const { refresh = false, period = "day" } = options;
+  const validPeriods = new Set(["day", "week", "month"]);
+  const safePeriod = validPeriods.has(period) ? period : "day";
+
+  try {
+    const params = { period: safePeriod };
+    if (refresh) params.refresh = true;
+
+    const response = await axiosInstance.get(
+      `/analysis/dashboard-summary/${encodeURIComponent(clientId)}`,
+      { params }
+    );
+    return response.data?.data ?? null;
+  } catch (error) {
+    console.error("Failed to fetch dashboard summary:", error.message);
+    throw error;
+  }
+}
+
 export async function fetchLegacyUserAnalytics(days = 10) {
   const clientId = getClientid();
   try {

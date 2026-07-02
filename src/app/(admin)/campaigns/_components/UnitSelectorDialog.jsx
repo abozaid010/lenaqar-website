@@ -12,6 +12,7 @@ import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-da
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { fetchUnitsFilter } from "@/utils/api";
 import { formatPrice } from "@/utils/formatters";
+import LocalizedLocationText from "@/components/ui/localized-location-text";
 import en from "../../../../../public/locales/en";
 import ar from "../../../../../public/locales/ar";
 import { useQuery } from "@tanstack/react-query";
@@ -303,7 +304,17 @@ export default function UnitSelectorDialog({ isOpen, onClose, onSelect }) {
                     </div>
                     <div className="text-xs text-gray-600 mt-1 line-clamp-2">
                       {u?.project ? `${translate("campaigns.project")}: ${u.project}` : null}
-                      {u?.city ? ` • ${translate("campaigns.city")}: ${u.city}` : null}
+                      {u?.city ? (
+                        <>
+                          {" "}
+                          • {translate("campaigns.city")}:{" "}
+                          <LocalizedLocationText
+                            city={u.city || ""}
+                            district={u.district || ""}
+                            subDistrict={u.sub_district || u.subDistrict || ""}
+                          />
+                        </>
+                      ) : null}
                     </div>
 
                     <div className="mt-2 text-xs text-gray-700 flex flex-wrap gap-2">

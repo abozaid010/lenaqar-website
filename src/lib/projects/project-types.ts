@@ -13,6 +13,7 @@ export interface RawProject {
   master_plan?: ProjectImage;
   city: string;
   district: string;
+  sub_district?: string;
   country?: string;
   developer_id?: string;
   developer?: string;
@@ -118,6 +119,9 @@ export interface ProjectViewModel {
   developerId?: string;
   developerHref?: string;
   locationLabel: string;
+  city?: string;
+  district?: string;
+  subDistrict?: string;
   heroImages: HeroImage[];
   galleryImages: HeroImage[];
   badges: string[];

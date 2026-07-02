@@ -14,10 +14,10 @@ export async function generateMetadata() {
 
   return {
     title: clientName
-      ? `Analytics - ${clientName} | LENAAI AI Sales Agent`
-      : "Analytics - LENAAI AI Sales Agent",
+      ? `Dashboard - ${clientName} | LENAAI AI Sales Agent`
+      : "Dashboard - LENAAI AI Sales Agent",
     description:
-      "View comprehensive analytics and insights for your real estate business. Track sales performance, marketing campaigns, and client engagement metrics.",
+      "View your daily business summary, team performance, trends, and client engagement metrics.",
     keywords: [
       "real estate analytics",
       "sales analytics",
@@ -27,9 +27,9 @@ export async function generateMetadata() {
       "business insights",
     ],
     openGraph: {
-      title: "Analytics - LENAAI AI Sales Agent",
+      title: "Dashboard - LENAAI AI Sales Agent",
       description:
-        "View comprehensive analytics and insights for your real estate business powered by AI.",
+        "View your daily business summary and insights powered by AI.",
       url: `${SITE_URL}/analytics`,
       type: "website",
     },
@@ -50,7 +50,7 @@ const page = async ({ searchParams: rawSearchParams }) => {
       <BreadcrumbSchema
         items={[
           {
-            name: "Analytics",
+            name: "Dashboard",
             url: `${SITE_URL}/analytics`,
           },
         ]}

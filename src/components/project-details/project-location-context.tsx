@@ -1,9 +1,79 @@
 import { MapPin, Navigation, ExternalLink, Video, Car, Crosshair, FileVideo } from 'lucide-react';
 import type { ProjectLocationContextProps } from '@/lib/projects/project-types';
 import { useI18n } from '@/hooks/useI18n';
+import { useEffect, useState } from 'react';
+import {
+  formatCityLabel,
+  formatDistrictLabel,
+  formatSubDistrictLabel,
+} from '@/utils/formatters';
+import LocalizedLocationText from '@/components/ui/localized-location-text';
 
 export default function ProjectLocationContext({ project }: ProjectLocationContextProps) {
-  const { t, translate } = useI18n();
+  const { t, translate, locale } = useI18n();
+  const [locationFields, setLocationFields] = useState({
+    city: project.city || '',
+    district: project.district || '',
+    subDistrict: project.subDistrict || '',
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadLabels = async () => {
+      try {
+        const city = project.city ? await formatCityLabel(project.city, locale) : '';
+        const district =
+          project.city && project.district
+            ? await formatDistrictLabel(project.district, project.city, locale)
+            : project.district || '';
+        const subDistrict =
+          project.city && project.district && project.subDistrict
+            ? await formatSubDistrictLabel(
+                project.subDistrict,
+                project.city,
+                project.district,
+                locale
+              )
+            : project.subDistrict || '';
+
+        if (!cancelled) {
+          setLocationFields({ city, district, subDistrict });
+        }
+      } catch {
+        if (!cancelled) {
+          setLocationFields({
+            city: project.city || '',
+            district: project.district || '',
+            subDistrict: project.subDistrict || '',
+          });
+        }
+      }
+    };
+
+    void loadLabels();
+    return () => {
+      cancelled = true;
+    };
+  }, [project.city, project.district, project.subDistrict, locale]);
+
+  const structuredLocationRows = [
+    {
+      key: 'city',
+      label: translate('basicDetails.city', t.basicDetails?.city),
+      value: locationFields.city,
+    },
+    {
+      key: 'district',
+      label: translate('basicDetails.district', t.basicDetails?.district),
+      value: locationFields.district,
+    },
+    {
+      key: 'subDistrict',
+      label: translate('basicDetails.subDistrict', t.basicDetails?.subDistrict),
+      value: locationFields.subDistrict,
+    },
+  ].filter((row) => row.value);
   
   return (
     <div className="bg-white rounded-lg border p-6">
@@ -11,6 +81,17 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
       
       {/* Location Information */}
       <div className="space-y-6">
+        {structuredLocationRows.length > 0 && (
+          <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {structuredLocationRows.map((row) => (
+              <div key={row.key}>
+                <dt className="text-sm text-gray-600">{row.label}</dt>
+                <dd className="text-sm font-medium text-gray-900 mt-1">{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        )}
+
         {/* Primary Location */}
         <div className="flex items-start gap-4">
           <div className="flex-shrink-0">
@@ -20,7 +101,13 @@ export default function ProjectLocationContext({ project }: ProjectLocationConte
           </div>
           <div>
             <h3 className="font-semibold text-gray-900 mb-2">{t?.projectLocation?.projectLocation}</h3>
-            <p className="text-gray-700">{project.locationLabel}</p>
+            <p className="text-gray-700">
+              <LocalizedLocationText
+                city={project.city || ''}
+                district={project.district || ''}
+                subDistrict={project.subDistrict || ''}
+              />
+            </p>
           </div>
         </div>
 

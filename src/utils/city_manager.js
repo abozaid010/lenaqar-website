@@ -241,6 +241,39 @@ class CityManager {
   }
 
   /**
+   * Resolve a sub-district within a city when district is unknown or mismatched.
+   */
+  resolveSubDistrictInCity(subRaw, cityRaw) {
+    if (!subRaw || !cityRaw) return null;
+
+    const city =
+      this.cities.find(
+        (c) =>
+          c.id === cityRaw ||
+          c.value === String(cityRaw).toLowerCase().trim() ||
+          c.id.toLowerCase() === String(cityRaw).toLowerCase().trim()
+      ) || null;
+    if (!city) return null;
+
+    const normalized = String(subRaw).toLowerCase().trim();
+    return (
+      this.subDistricts.find((sub) => {
+        if (sub.city_id !== city.id) return false;
+        return (
+          sub.value === normalized ||
+          sub.id === subRaw ||
+          sub.id.toLowerCase() === normalized ||
+          sub.en_name.toLowerCase() === normalized ||
+          sub.ar_name === subRaw ||
+          (sub.aliases || []).some(
+            (alias) => alias.toLowerCase() === normalized
+          )
+        );
+      }) || null
+    );
+  }
+
+  /**
    * Resolve a sub-district from API/form raw value (value, en/ar name, or alias).
    */
   resolveSubDistrict(subRaw, cityRaw, districtRaw) {
@@ -292,8 +325,11 @@ class CityManager {
    * Normalize sub-district raw value to canonical backend value (lowercase en_name).
    */
   normalizeSubDistrictValue(subRaw, cityRaw, districtRaw) {
-    if (!subRaw || !cityRaw || !districtRaw) return "";
-    const sub = this.resolveSubDistrict(subRaw, cityRaw, districtRaw);
+    if (!subRaw || !cityRaw) return "";
+    let sub = districtRaw
+      ? this.resolveSubDistrict(subRaw, cityRaw, districtRaw)
+      : null;
+    if (!sub) sub = this.resolveSubDistrictInCity(subRaw, cityRaw);
     if (!sub) return String(subRaw).trim().toLowerCase();
     return sub.value;
   }
@@ -359,19 +395,24 @@ class CityManager {
   }
 
   /**
-   * Get city label with translation
+   * Get city label with translation (accepts city id or canonical lowercase value).
    */
-  async getCityLabel(cityId, locale = "en") {
-    const city = await this.getCityById(cityId);
+  async getCityLabel(cityRaw, locale = "en") {
+    await this.initializeData();
+    if (!cityRaw) return "";
+    const city =
+      (await this.getCityByValue(cityRaw)) || (await this.getCityById(cityRaw));
     if (!city) return "";
     return locale === "ar" ? city.label_ar : city.label_en;
   }
 
   /**
-   * Get district label with translation
+   * Get district label with translation (city accepts id or canonical value).
    */
-  async getDistrictLabel(districtName, cityId, locale = "en") {
-    const district = await this.getDistrictByName(districtName, cityId);
+  async getDistrictLabel(districtName, cityRaw, locale = "en") {
+    await this.initializeData();
+    if (!districtName || !cityRaw) return "";
+    const district = await this.getDistrictByName(districtName, cityRaw);
     if (!district) return "";
     return locale === "ar" ? district.label_ar : district.label_en;
   }
@@ -381,9 +422,50 @@ class CityManager {
    */
   async getSubDistrictLabel(subRaw, cityRaw, districtRaw, locale = "en") {
     await this.initializeData();
-    const sub = this.resolveSubDistrict(subRaw, cityRaw, districtRaw);
+    let sub = districtRaw
+      ? this.resolveSubDistrict(subRaw, cityRaw, districtRaw)
+      : null;
+    if (!sub) sub = this.resolveSubDistrictInCity(subRaw, cityRaw);
     if (!sub) return "";
     return locale === "ar" ? sub.label_ar : sub.label_en;
+  }
+
+  /**
+   * Resolve localized display labels for city, district, and sub-district.
+   */
+  async getLocationDisplayLabels(
+    { city = "", district = "", sub_district = "" } = {},
+    locale = "en"
+  ) {
+    await this.initializeData();
+    const cityLabel = city ? await this.getCityLabel(city, locale) : "";
+    const districtLabel =
+      district && city ? await this.getDistrictLabel(district, city, locale) : "";
+    const subDistrictLabel =
+      sub_district && city
+        ? await this.getSubDistrictLabel(sub_district, city, district, locale)
+        : "";
+    return {
+      city: cityLabel,
+      district: districtLabel,
+      subDistrict: subDistrictLabel,
+    };
+  }
+
+  /**
+   * Build a comma-separated localized location string.
+   */
+  async formatLocationDisplay(
+    { city = "", district = "", sub_district = "" } = {},
+    locale = "en"
+  ) {
+    const labels = await this.getLocationDisplayLabels(
+      { city, district, sub_district },
+      locale
+    );
+    return [labels.city, labels.district, labels.subDistrict]
+      .filter(Boolean)
+      .join(", ");
   }
 
   /**

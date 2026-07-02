@@ -296,7 +296,16 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
     developerName: rawProject.developer_name || rawProject.developer,
     developerId: rawProject.developer_id,
     developerHref: rawProject.developer_id ? `/developers/${rawProject.developer_id}` : null,
-    locationLabel: `${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`,
+    locationLabel: [
+      rawProject.city,
+      rawProject.district,
+      rawProject.sub_district,
+    ]
+      .filter(Boolean)
+      .join(", "),
+    city: rawProject.city || undefined,
+    district: rawProject.district || undefined,
+    subDistrict: rawProject.sub_district || undefined,
     heroImages: galleryImages.length > 0 ? galleryImages : heroImages,
     galleryImages,
     badges,

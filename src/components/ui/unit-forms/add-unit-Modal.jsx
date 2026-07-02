@@ -242,6 +242,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     phase: unitData?.phase || "",
     city: unitData?.city || "",
     district: unitData?.district || "",
+    sub_district: unitData?.sub_district || "",
     developer: unitData?.developer || "",
     developer_id: unitData?.developer_id || unitData?.developerId || "",
     unitId: unitData?.unitId || uuidv4(),
@@ -463,6 +464,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       ...(apiUnit.country != null && { country: String(apiUnit.country) }),
       ...(apiUnit.city != null && { city: String(apiUnit.city) }),
       ...(apiUnit.district != null && { district: String(apiUnit.district) }),
+      ...(apiUnit.sub_district != null && { sub_district: String(apiUnit.sub_district) }),
       ...(apiUnit.project != null && { project: String(apiUnit.project) }),
       ...(apiUnit.project_id != null && { project_id: String(apiUnit.project_id) }),
       ...(apiUnit.projectId != null && { project_id: String(apiUnit.projectId) }),
@@ -938,6 +940,13 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         payload.district = await cityManager.normalizeDistrictValueAsync(
           payload.district,
           payload.city
+        );
+      }
+      if (payload.sub_district && payload.city && payload.district) {
+        payload.sub_district = await cityManager.normalizeSubDistrictValueAsync(
+          payload.sub_district,
+          payload.city,
+          payload.district
         );
       }
 

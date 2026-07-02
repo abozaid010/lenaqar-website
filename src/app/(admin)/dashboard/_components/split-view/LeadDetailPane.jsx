@@ -60,7 +60,7 @@ import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
 import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
-import ChatMessagesArea from "@/components/ui/chat-messages-area";
+import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
 const DEFAULT_TAB = "conversations";
@@ -185,6 +185,13 @@ export default function LeadDetailPane({
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
+  });
+
+  const requirementLocation = requirements && !requirements.error ? requirements : null;
+  const { text: localizedRequirementLocation } = useLocalizedLocationLabels({
+    city: pickLast(requirementLocation?.city) || "",
+    district: pickLast(requirementLocation?.district) || "",
+    sub_district: pickLast(requirementLocation?.sub_district) || "",
   });
 
   const onNewMessage = useCallback((newMessage) => {
@@ -414,7 +421,7 @@ export default function LeadDetailPane({
     }
 
     // Location — collapse country/city/district/project into one chip when present.
-    const locationParts = [r.country, r.city, r.district, r.project]
+    const locationParts = [r.country, localizedRequirementLocation, r.project]
       .filter(isMeaningfulString)
       .map((p) => String(p).trim());
     if (locationParts.length > 0) {
@@ -623,7 +630,7 @@ export default function LeadDetailPane({
     }
 
     return chips;
-  }, [requirements, translate, translateEnum]);
+  }, [requirements, translate, translateEnum, localizedRequirementLocation]);
 
   // Tag management functions
   const handleAddTag = async (e) => {

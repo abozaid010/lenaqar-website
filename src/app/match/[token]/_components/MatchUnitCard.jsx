@@ -5,6 +5,7 @@ import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import { useI18n } from "@/hooks/useI18n";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 import { formatCurrency } from "@/utils/formatters";
+import LocalizedLocationText from "@/components/ui/localized-location-text";
 import { Bath, Bed, Heart, MapPin, Square } from "lucide-react";
 import { useState } from "react";
 
@@ -43,6 +44,8 @@ export default function MatchUnitCard({
     translate("matchPage.unitFallback", "Property unit");
 
   const city = unit?.city || "";
+  const district = unit?.district || "";
+  const subDistrict = unit?.sub_district || unit?.subDistrict || "";
   const project = unit?.project || unit?.project_name || "";
   const price = unit?.totalPrice ?? unit?.total_price;
   const rooms = unit?.roomsCount ?? unit?.bedrooms;
@@ -88,7 +91,14 @@ export default function MatchUnitCard({
               <p className="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
                 <MapPin className="w-3.5 h-3.5 shrink-0" aria-hidden />
                 <span className="truncate">
-                  {[project, city].filter(Boolean).join(" • ")}
+                  {project ? `${project}${city ? " • " : ""}` : null}
+                  {city ? (
+                    <LocalizedLocationText
+                      city={city}
+                      district={district}
+                      subDistrict={subDistrict}
+                    />
+                  ) : null}
                 </span>
               </p>
             )}

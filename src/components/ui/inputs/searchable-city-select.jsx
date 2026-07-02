@@ -89,13 +89,14 @@ export default function SearchableCitySelect({
 
   const resolveSelectedLabel = useCallback(
     (selectedValue, currentLocale) => {
+      if (currentLocale === locale && resolvedLabel) return resolvedLabel;
       const match = citiesWithLabels.find(
         (city) =>
           String(city.value).toLowerCase().trim() ===
           String(selectedValue).toLowerCase().trim()
       );
-      if (match) return match.label;
-      return currentLocale === locale ? resolvedLabel : "";
+      if (match?.label) return match.label;
+      return "";
     },
     [citiesWithLabels, resolvedLabel, locale]
   );

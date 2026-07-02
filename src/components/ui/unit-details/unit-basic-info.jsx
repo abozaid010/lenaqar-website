@@ -19,6 +19,7 @@ import {
 import toast from "react-hot-toast";
 import UnitAmenities from "./unit-amenities";
 import UnitPricing from "./unit-pricing";
+import LocalizedLocationText from "@/components/ui/localized-location-text";
 
 const MISSING_FIELD_CLASS =
   "ring-2 ring-red-500 rounded-md bg-red-50/70 border border-red-200";
@@ -106,14 +107,19 @@ export default function UnitBasicInfo({
         }`}
       >
         <span className="inline-flex items-center px-2.5 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-          {[
-            u.city,
-            u.district,
-            locale === "ar" ? u.project_ar : u.project,
-            u.phase,
-          ]
+          {u.city || u.district || u.sub_district ? (
+            <>
+              <LocalizedLocationText
+                city={u.city || ""}
+                district={u.district || ""}
+                subDistrict={u.sub_district || u.subDistrict || ""}
+              />
+              {(u.project || u.phase) ? " , " : null}
+            </>
+          ) : null}
+          {[locale === "ar" ? u.project_ar : u.project, u.phase]
             .filter(Boolean)
-            .join(" , ") || "—"}
+            .join(" , ") || (!u.city && !u.district && !u.sub_district ? "—" : "")}
         </span>
       </div>
 

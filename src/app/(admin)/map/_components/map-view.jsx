@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDataProjection } from "@/utils/api";
 import { useI18n } from "@/context/translate-api";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import LocalizedLocationText from "@/components/ui/localized-location-text";
 import { Loader2, Map, List, ExternalLink } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
@@ -346,7 +347,11 @@ const MapView = () => {
                               <strong>{t.map?.developer || "Developer"}:</strong> {getDeveloperDisplayName(developer)}
                             </p>
                             <p className="text-sm text-gray-600 mb-1">
-                              <strong>{t.map?.location || "Location"}:</strong> {project.city}, {project.district}
+                              <strong>{t.map?.location || "Location"}:</strong>{" "}
+                              <LocalizedLocationText
+                                city={project.city || ""}
+                                district={project.district || ""}
+                              />
                             </p>
                             <p className="text-sm text-gray-600 mb-2">
                               <strong>{t.map?.totalUnits || "Total Units"}:</strong> {project.total_units || 0}
@@ -434,7 +439,12 @@ const MapView = () => {
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
                             <div>
                               <span className="text-gray-600">{t.map?.location || "Location"}:</span>
-                              <p className="font-medium">{project.city}, {project.district}</p>
+                              <p className="font-medium">
+                                <LocalizedLocationText
+                                  city={project.city || ""}
+                                  district={project.district || ""}
+                                />
+                              </p>
                             </div>
                             <div>
                               <span className="text-gray-600">{t.map?.totalUnits || "Total Units"}:</span>

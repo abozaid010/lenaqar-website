@@ -202,9 +202,21 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
+  const [documentDir, setDocumentDir] = useState(() => {
+    if (typeof document === "undefined") return "ltr";
+    const htmlDir = document.documentElement.getAttribute("dir");
+    return htmlDir === "ltr" || htmlDir === "rtl" ? htmlDir : "ltr";
+  });
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
+
+  useEffect(() => {
+    const htmlDir = document.documentElement.getAttribute("dir");
+    if (htmlDir === "ltr" || htmlDir === "rtl") {
+      setDocumentDir(htmlDir);
+    }
+  }, [locale]);
 
   useImperativeHandle(ref, () => ({
     open: () => setIsOpen(true),
@@ -251,16 +263,16 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       }
       return placeholder || "Select...";
     }
-    // Ensure options is an array before using find
+
+    const resolved = resolveSelectedLabel?.(value, locale);
+    if (resolved) return resolved;
+
     if (!options || !Array.isArray(options)) {
-      const resolved = resolveSelectedLabel?.(value, locale);
-      return resolved || value;
+      return resolveSelectedLabel ? "" : value;
     }
     const option = options.find((opt) => valuesMatch(getValue(opt), value));
     if (option) return getLabel(option, locale);
-    const resolved = resolveSelectedLabel?.(value, locale);
-    if (resolved) return resolved;
-    return value;
+    return resolveSelectedLabel ? "" : value;
   }, [
     value,
     options,
@@ -395,76 +407,133 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     searchPlaceholder ||
     (locale === "ar" ? "ابحث..." : "Search...");
 
-  return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
-      {label && (
-        <label
-          className={`block text-sm font-medium mb-1 text-start ${
-            error ? "text-red-500" : "text-gray-700"
-          }`}
-          htmlFor={name}
-        >
-          {label} {required && <span className="text-red-500">*</span>}
-        </label>
-      )}
+  const layoutDir = documentDir;
+  const hasError = !!error || !!errorMessage;
+  const displayErrorMessage = typeof error === "string" ? error : errorMessage;
+  const isAllSentinel =
+    showAllOption && typeof value === "string" && value.toLowerCase() === "all";
+  const hasValue = Boolean(
+    value && value !== allOptionValue && !isAllSentinel
+  );
+  const usesFloatingLabel = Boolean(label);
+  const shouldFloatLabel = usesFloatingLabel && (isOpen || hasValue);
 
+  const getBorderColor = () => {
+    if (disabled) return "border-gray-300";
+    if (hasError) return "border-red-500";
+    if (isOpen) return "border-primary";
+    if (hasValue) return "border-gray-700";
+    return "border-gray-300";
+  };
+
+  const getLabelColor = () => {
+    if (disabled) return "text-gray-400";
+    if (hasError) return "text-red-500";
+    if (isOpen) return "text-primary";
+    if (hasValue) return "text-gray-700";
+    return "text-gray-400";
+  };
+
+  const buttonDisplayText = usesFloatingLabel
+    ? hasValue
+      ? selectedLabel
+      : shouldFloatLabel
+        ? placeholder || ""
+        : ""
+    : selectedLabel;
+
+  return (
+    <div className={`relative transition-all duration-200 ${className}`} ref={dropdownRef}>
       <div className="relative">
-        <div className="relative">
+        {usesFloatingLabel && (
+          <label
+            htmlFor={name}
+            className={`absolute transition-all duration-200 pointer-events-none z-[1] ${
+              layoutDir === "rtl" ? "right-3" : "left-3"
+            } ${
+              shouldFloatLabel
+                ? `-top-2.5 text-xs ${getLabelColor()} bg-white px-1.5`
+                : "top-1/2 text-sm text-gray-400 transform -translate-y-1/2"
+            } ${required && shouldFloatLabel ? "after:content-['*'] after:text-red-500 after:ms-0.5" : ""}`}
+          >
+            {label}
+          </label>
+        )}
+
+        <div
+          className={`relative flex items-stretch w-full min-h-[40px] rounded-md border bg-white transition-all duration-200 ${
+            shouldFloatLabel && usesFloatingLabel ? "pt-1" : ""
+          } ${getBorderColor()} ${
+            hasError
+              ? "ring-2 ring-red-500 focus-within:ring-red-500"
+              : isOpen
+                ? "ring-2 ring-primary focus-within:ring-primary"
+                : "focus-within:ring-2 focus-within:ring-primary"
+          } ${
+            disabled ? "bg-gray-50 cursor-not-allowed" : ""
+          } ${buttonClassName}`}
+        >
           <button
             type="button"
             id={name}
             onClick={handleToggle}
             onKeyDown={handleKeyDown}
             disabled={disabled}
-            className={`block w-full min-h-[40px] rounded-md border py-2 px-3 bg-white text-gray-900 focus:outline-none focus:ring-2 text-start ${
-              error
-                ? "border-red-500 ring-2 ring-red-500"
-                : "border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+            className={`flex-1 min-w-0 py-2.5 ps-3 pe-1 text-start bg-transparent border-0 rounded-md focus:outline-none ${
+              shouldFloatLabel && usesFloatingLabel ? "pt-3 pb-2" : ""
             } ${
-              disabled
-                ? "bg-gray-50 cursor-not-allowed opacity-60"
-                : "cursor-pointer"
-            } ${value && value !== allOptionValue && !disabled ? "pr-10" : "pr-10"} ${buttonClassName}`}
+              disabled ? "text-gray-400 cursor-not-allowed" : "cursor-pointer"
+            }`}
             aria-haspopup="listbox"
             aria-expanded={isOpen}
             {...rest}
           >
             <span
-              className={`truncate block w-full text-sm font-medium text-start ${
-                value && value !== allOptionValue && !disabled ? "pr-10" : "pr-6"
-              } ${
-                !value || value === allOptionValue || disabled
-                  ? "text-gray-400"
-                  : "text-primary"
-              }`}
-            >
-              {selectedLabel}
-            </span>
-            {(!value || value === allOptionValue || disabled) && (
-              <ChevronDown
-                size={16}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 transition-transform pointer-events-none ${
-                  disabled
+              className={`truncate block w-full text-sm text-start ${
+                hasValue
+                  ? usePrimaryStyle
+                    ? "text-primary font-medium"
+                    : "text-gray-900"
+                  : shouldFloatLabel && placeholder
                     ? "text-gray-400"
-                    : usePrimaryStyle
-                    ? "text-primary"
-                    : "text-gray-400"
-                } ${isOpen ? "rotate-180" : ""}`}
-              />
-            )}
-          </button>
-          {value && value !== allOptionValue && !disabled && (
-            <button
-              type="button"
-              onClick={handleClear}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 p-0.5 hover:bg-gray-100 rounded transition-colors z-10 ${
-                usePrimaryStyle ? "" : ""
+                    : "text-transparent"
               }`}
-              aria-label={locale === "ar" ? "مسح" : "Clear"}
             >
-              <X size={16} className={usePrimaryStyle ? "text-primary" : "text-gray-400"} />
-            </button>
-          )}
+              {buttonDisplayText}
+            </span>
+          </button>
+
+          <div className="flex items-center shrink-0 gap-0.5 pe-2 self-center">
+            {hasValue && !disabled ? (
+              <button
+                type="button"
+                onClick={handleClear}
+                className="inline-flex items-center justify-center p-1 hover:bg-gray-100 rounded transition-colors"
+                aria-label={locale === "ar" ? "مسح" : "Clear"}
+              >
+                <X
+                  size={16}
+                  className={usePrimaryStyle ? "text-primary" : "text-gray-400"}
+                />
+              </button>
+            ) : (
+              !disabled && (
+                <span
+                  className={`inline-flex items-center justify-center p-0.5 pointer-events-none transition-transform ${
+                    isOpen ? "rotate-180" : ""
+                  }`}
+                  aria-hidden
+                >
+                  <ChevronDown
+                    size={16}
+                    className={
+                      usePrimaryStyle ? "text-primary" : "text-gray-400"
+                    }
+                  />
+                </span>
+              )
+            )}
+          </div>
         </div>
 
         {isOpen && (
@@ -590,8 +659,10 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
         )}
       </div>
 
-      {error && errorMessage && (
-        <div className="text-xs text-red-500 mt-1">{errorMessage}</div>
+      {hasError && displayErrorMessage && (
+        <div className="text-xs text-red-500 mt-1 px-1 animate-fade-in">
+          {displayErrorMessage}
+        </div>
       )}
     </div>
   );

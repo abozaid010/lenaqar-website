@@ -3,13 +3,48 @@ import CityManager from "./city_manager";
 export async function formatCityLabel(cityValue, locale = "en") {
   if (!cityValue) return "";
   const manager = CityManager.getInstance();
+  await manager.initializeData();
   return manager.getCityLabel(cityValue, locale);
 }
 
 export async function formatDistrictLabel(districtValue, cityValue, locale = "en") {
   if (!districtValue) return "";
   const manager = CityManager.getInstance();
+  await manager.initializeData();
   return manager.getDistrictLabel(districtValue, cityValue, locale);
+}
+
+export async function formatSubDistrictLabel(
+  subDistrictValue,
+  cityValue,
+  districtValue,
+  locale = "en"
+) {
+  if (!subDistrictValue) return "";
+  const manager = CityManager.getInstance();
+  await manager.initializeData();
+  return manager.getSubDistrictLabel(
+    subDistrictValue,
+    cityValue,
+    districtValue,
+    locale
+  );
+}
+
+export async function formatLocationDisplay(
+  { city = "", district = "", sub_district = "" } = {},
+  locale = "en"
+) {
+  const manager = CityManager.getInstance();
+  return manager.formatLocationDisplay({ city, district, sub_district }, locale);
+}
+
+export async function getLocationDisplayLabels(
+  { city = "", district = "", sub_district = "" } = {},
+  locale = "en"
+) {
+  const manager = CityManager.getInstance();
+  return manager.getLocationDisplayLabels({ city, district, sub_district }, locale);
 }
 
 /**

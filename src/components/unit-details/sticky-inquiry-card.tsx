@@ -14,6 +14,9 @@ import UnitApproveButton, { isUnitPendingApproval } from './unit-approve-button'
 import toast from 'react-hot-toast';
 import type { UseMutationResult } from '@tanstack/react-query';
 
+/** TEMP: set to true to restore the pending-approval approve action on unit detail. */
+const SHOW_UNIT_APPROVE_BUTTON = false;
+
 export default function StickyInquiryCard({
   unit,
   rawUnit,
@@ -26,7 +29,7 @@ export default function StickyInquiryCard({
   const { myClientId: currentClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
   const isOwnUnit = isOwnUnitProp ?? isOwnUnitFromHook;
   const unitsSection = useUnitsSectionSource();
-  const showApproveButton = Boolean(
+  const showApproveButton = SHOW_UNIT_APPROVE_BUTTON && Boolean(
     rawUnit && isUnitPendingApproval(rawUnit, unitsSection === 'pending_approval')
   );
   const deleteUnitMutation = useDeleteUnit() as unknown as UseMutationResult<string, Error, string, unknown>;

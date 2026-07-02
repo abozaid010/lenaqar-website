@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import Analytics from "../_component/Analtics";
 import AnalyticsDashboard from "./AnalyticsDashboard";
+import DashboardSummarySection from "./DashboardSummarySection";
 import FollowUpAgentSection from "./follow-up-agent/FollowUpAgentSection";
 import {
   fetchLegacyMonthData,
@@ -44,6 +45,7 @@ export default function AnalyticsPageClient() {
   if (isLoading && !data) {
     return (
       <div className="space-y-4">
+        <DashboardSummarySection />
         <SectionSkeleton height="h-[520px]" />
         <SectionSkeleton height="h-[520px]" />
       </div>
@@ -52,6 +54,7 @@ export default function AnalyticsPageClient() {
 
   return (
     <>
+      <DashboardSummarySection />
       <div>
         <Analytics
           data={data?.legacyUsers || {}}

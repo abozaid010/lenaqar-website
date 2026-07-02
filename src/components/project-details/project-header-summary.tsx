@@ -4,35 +4,37 @@ import Link from 'next/link';
 import { MapPin, Building, User, Tag, Calendar } from 'lucide-react';
 import { useI18n } from '@/hooks/useI18n';
 import type { ProjectHeaderSummaryProps } from '@/lib/projects/project-types';
-import { useEffect, useMemo, useState } from 'react';
-import { formatCityLabel, formatDistrictLabel } from '@/utils/formatters';
+import { useEffect, useState } from 'react';
+import { formatCityLabel, formatDistrictLabel, formatSubDistrictLabel } from '@/utils/formatters';
 
 export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryProps) {
   const { t, locale } = useI18n();
 
   const [locationText, setLocationText] = useState<string>(project.locationLabel);
 
-  const { cityRaw, districtRaw } = useMemo(() => {
-    const parts = String(project.locationLabel || '')
-      .split(',')
-      .map((p) => p.trim())
-      .filter(Boolean);
-    return { cityRaw: parts[0] || '', districtRaw: parts[1] || '' };
-  }, [project.locationLabel]);
-
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
+        const cityRaw = project.city || '';
         if (!cityRaw) {
           if (!cancelled) setLocationText(project.locationLabel);
           return;
         }
         const city = await formatCityLabel(cityRaw, locale);
-        const district = districtRaw
-          ? await formatDistrictLabel(districtRaw, cityRaw, locale)
+        const district = project.district
+          ? await formatDistrictLabel(project.district, cityRaw, locale)
           : '';
-        const merged = district ? `${city}, ${district}` : city;
+        const subDistrict =
+          project.subDistrict && project.district
+            ? await formatSubDistrictLabel(
+                project.subDistrict,
+                cityRaw,
+                project.district,
+                locale
+              )
+            : '';
+        const merged = [city, district, subDistrict].filter(Boolean).join(', ');
         if (!cancelled) setLocationText(merged || project.locationLabel);
       } catch {
         if (!cancelled) setLocationText(project.locationLabel);
@@ -42,7 +44,7 @@ export default function ProjectHeaderSummary({ project }: ProjectHeaderSummaryPr
     return () => {
       cancelled = true;
     };
-  }, [cityRaw, districtRaw, locale, project.locationLabel]);
+  }, [project.city, project.district, project.subDistrict, locale, project.locationLabel]);
 
   const developerName =
     locale === 'ar'

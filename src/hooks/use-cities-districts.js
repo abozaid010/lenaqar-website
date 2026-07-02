@@ -43,10 +43,18 @@ export function useCitiesDistricts() {
 
   const getDistrictLabel = useCallback(
     async (district, city) => {
-      // city might be lowercase value or city ID
       const cityObj = await manager.getCityByValue(city);
-      const cityId = cityObj ? cityObj.id : city;
-      return await manager.getDistrictLabel(district, cityId, locale);
+      const cityRef = cityObj ? cityObj.value : city;
+      return await manager.getDistrictLabel(district, cityRef, locale);
+    },
+    [locale]
+  );
+
+  const getSubDistrictLabel = useCallback(
+    async (subDistrict, city, district) => {
+      const cityObj = await manager.getCityByValue(city);
+      const cityRef = cityObj ? cityObj.value : city;
+      return await manager.getSubDistrictLabel(subDistrict, cityRef, district, locale);
     },
     [locale]
   );
@@ -99,6 +107,7 @@ export function useCitiesDistricts() {
     getDistricts,
     getCityLabel,
     getDistrictLabel,
+    getSubDistrictLabel,
     getAllCitiesWithLabels,
     getDistrictsWithLabels,
     getAllDistrictsWithLabels,

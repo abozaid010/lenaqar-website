@@ -5,6 +5,7 @@ import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
+import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
@@ -53,7 +54,7 @@ export default function BasicDetailsStep({
   // Normalize existing city/district to canonical API values once (edit / pre-filled units)
   useEffect(() => {
     if (didNormalizeLocation.current) return;
-    if (!formData.city && !formData.district) return;
+    if (!formData.city && !formData.district && !formData.sub_district) return;
 
     let cancelled = false;
     (async () => {
@@ -65,11 +66,22 @@ export default function BasicDetailsStep({
               formData.city || nextCity
             )
           : "";
+        const nextSubDistrict =
+          formData.sub_district && (nextDistrict || formData.district)
+            ? await cityManager.normalizeSubDistrictValueAsync(
+                formData.sub_district,
+                formData.city || nextCity,
+                formData.district || nextDistrict
+              )
+            : "";
 
         const patch = {};
         if (nextCity && nextCity !== formData.city) patch.city = nextCity;
         if (nextDistrict && nextDistrict !== formData.district) {
           patch.district = nextDistrict;
+        }
+        if (nextSubDistrict && nextSubDistrict !== formData.sub_district) {
+          patch.sub_district = nextSubDistrict;
         }
         if (!cancelled && Object.keys(patch).length) {
           updateFormData(patch);
@@ -84,7 +96,7 @@ export default function BasicDetailsStep({
     return () => {
       cancelled = true;
     };
-  }, [formData.city, formData.district, cityManager, updateFormData]);
+  }, [formData.city, formData.district, formData.sub_district, cityManager, updateFormData]);
 
   useEffect(() => {
     const selected = allProjects.find(
@@ -129,7 +141,8 @@ export default function BasicDetailsStep({
       if (!proj) return;
       const rawCity = proj.city ?? "";
       const rawDistrict = proj.district ?? "";
-      if (!rawCity && !rawDistrict) return;
+      const rawSubDistrict = proj.sub_district ?? "";
+      if (!rawCity && !rawDistrict && !rawSubDistrict) return;
 
       const nextCity = rawCity
         ? await cityManager.normalizeCityValueAsync(rawCity)
@@ -141,12 +154,27 @@ export default function BasicDetailsStep({
               nextCity || rawCity
             )
           : "";
+      const nextSubDistrict =
+        rawSubDistrict && (nextDistrict || rawDistrict) && (nextCity || rawCity)
+          ? await cityManager.normalizeSubDistrictValueAsync(
+              rawSubDistrict,
+              nextCity || rawCity,
+              nextDistrict || rawDistrict
+            )
+          : "";
 
-      updateFormData({
-        city: nextCity,
-        district: nextDistrict,
-      });
-      setLocationFromProject(Boolean(nextCity || nextDistrict));
+      const resolvedSubDistrict = nextSubDistrict || rawSubDistrict || "";
+      const patch = {};
+      if (nextCity) patch.city = nextCity;
+      if (nextDistrict) patch.district = nextDistrict;
+      if (resolvedSubDistrict) patch.sub_district = resolvedSubDistrict;
+
+      if (Object.keys(patch).length === 0) return;
+
+      updateFormData(patch);
+      setLocationFromProject(
+        Boolean(patch.city || patch.district || patch.sub_district)
+      );
     },
     [cityManager, updateFormData]
   );
@@ -174,6 +202,7 @@ export default function BasicDetailsStep({
     updateFormData({
       city: value,
       district: "",
+      sub_district: "",
     });
     if (invalidFields.includes("city") && value) {
       setInvalidFields((prev) => prev.filter((field) => field !== "city"));
@@ -186,10 +215,16 @@ export default function BasicDetailsStep({
   const handleDistrictChange = (e) => {
     const { value } = e.target;
     setLocationFromProject(false);
-    updateFormData({ district: value });
+    updateFormData({ district: value, sub_district: "" });
     if (invalidFields.includes("district") && value) {
       setInvalidFields((prev) => prev.filter((field) => field !== "district"));
     }
+  };
+
+  const handleSubDistrictChange = (e) => {
+    const { value } = e.target;
+    setLocationFromProject(false);
+    updateFormData({ sub_district: value });
   };
 
   const applyDeveloperFromProject = useCallback(
@@ -243,6 +278,7 @@ export default function BasicDetailsStep({
     selectedProjectFromList,
     formData.city,
     formData.district,
+    formData.sub_district,
     applyLocationFromProject,
   ]);
 
@@ -278,53 +314,6 @@ export default function BasicDetailsStep({
           getLabel={(opt) => opt.label}
           placeholder={translate("basicDetails.buildingType", t.basicDetails.buildingType)}
         />
-
-        {/* Project (city & district auto-fill from project; editable below) */}
-        <SearchableProjectSelect
-          name="project"
-          value={formData.project || ""}
-          onChange={handleProjectChange}
-          onProjectSelect={applyDeveloperFromProject}
-          projects={allProjects}
-          isLoading={isLoadingProjectsFromApi}
-          required
-          error={invalidFields.includes("project")}
-          placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
-        />
-
-        {/* City */}
-        <SearchableCitySelect
-          name="city"
-          label={translate("basicDetails.city", t.basicDetails.city)}
-          value={formData.city || ""}
-          onChange={handleCityChange}
-          placeholder={translate("basicDetails.selectCity", t.basicDetails.selectCity)}
-        />
-
-        {/* District */}
-        <div>
-          <SearchableDistrictSelect
-            name="district"
-            label={translate("basicDetails.district", t.basicDetails.district)}
-            value={formData.district || ""}
-            onChange={handleDistrictChange}
-            city={formData.city || ""}
-            disabled={!formData.city}
-            placeholder={
-              !formData.city
-                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
-                : translate("basicDetails.selectDistrict", t.basicDetails.selectDistrict)
-            }
-          />
-          {locationFromProject && (formData.city || formData.district) ? (
-            <p className="mt-1 text-xs text-gray-500">
-              {translate(
-                "basicDetails.locationFromProject",
-                t.basicDetails.locationFromProject
-              )}
-            </p>
-          ) : null}
-        </div>
 
         {/* Purpose */}
         <SearchableDropdownSelect
@@ -386,6 +375,81 @@ export default function BasicDetailsStep({
           value={formData.model}
           onChange={handleChange}
         />
+      </div>
+
+      <h3 className="text-xl font-semibold mb-3 mt-8 text-slate-800">
+        {translate("unitDetails.location", t.unitDetails?.location)}
+      </h3>
+
+      <div className="rounded-lg border border-gray-200 p-4 sm:p-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
+          <SearchableCitySelect
+            name="city"
+            label={translate("basicDetails.city", t.basicDetails.city)}
+            value={formData.city || ""}
+            onChange={handleCityChange}
+            placeholder={translate("basicDetails.selectCity", t.basicDetails.selectCity)}
+          />
+
+          <SearchableDistrictSelect
+            name="district"
+            label={translate("basicDetails.district", t.basicDetails.district)}
+            value={formData.district || ""}
+            onChange={handleDistrictChange}
+            city={formData.city || ""}
+            disabled={!formData.city}
+            placeholder={
+              !formData.city
+                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
+                : translate("basicDetails.selectDistrict", t.basicDetails.selectDistrict)
+            }
+          />
+
+          <SearchableSubDistrictSelect
+            name="sub_district"
+            label={translate("basicDetails.subDistrict", t.basicDetails?.subDistrict)}
+            value={formData.sub_district || ""}
+            onChange={handleSubDistrictChange}
+            city={formData.city || ""}
+            district={formData.district || ""}
+            disabled={!formData.city || !formData.district}
+            placeholder={
+              !formData.city
+                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
+                : !formData.district
+                  ? translate(
+                      "basicDetails.selectDistrictFirst",
+                      t.basicDetails?.selectDistrictFirst
+                    )
+                  : translate(
+                      "basicDetails.selectSubDistrict",
+                      t.basicDetails?.selectSubDistrict
+                    )
+            }
+          />
+
+          <SearchableProjectSelect
+            name="project"
+            label={translate("basicDetails.compound", t.basicDetails.compound)}
+            value={formData.project || ""}
+            onChange={handleProjectChange}
+            onProjectSelect={applyDeveloperFromProject}
+            projects={allProjects}
+            isLoading={isLoadingProjectsFromApi}
+            required
+            error={invalidFields.includes("project")}
+            placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
+          />
+        </div>
+
+        {locationFromProject && (formData.city || formData.district || formData.sub_district) ? (
+          <p className="mt-3 text-xs text-gray-500">
+            {translate(
+              "basicDetails.locationFromProject",
+              t.basicDetails.locationFromProject
+            )}
+          </p>
+        ) : null}
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-8 text-slate-800">

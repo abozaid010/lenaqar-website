@@ -157,9 +157,11 @@ export const capitalizeWords = (text: string): string => {
  */
 export const buildLocationLabel = (unit: any): string | null => {
   const parts: string[] = [];
-  if (isNonEmptyString(unit.district)) parts.push(capitalizeWords(unit.district));
   if (isNonEmptyString(unit.city)) parts.push(capitalizeWords(unit.city));
-  if (isNonEmptyString(unit.country)) parts.push(capitalizeWords(unit.country));
+  if (isNonEmptyString(unit.district)) parts.push(capitalizeWords(unit.district));
+  if (isNonEmptyString(unit.sub_district)) {
+    parts.push(capitalizeWords(unit.sub_district));
+  }
   return parts.length > 0 ? parts.join(', ') : null;
 };
 
