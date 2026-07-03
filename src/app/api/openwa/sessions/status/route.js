@@ -49,9 +49,8 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-    const refreshToken = cookieStore.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
 
-    if (!accessToken && !refreshToken) {
+    if (!accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

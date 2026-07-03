@@ -510,7 +510,7 @@ const SidebarComponent = ({
           {isMounted && isCurrentUserKingAdmin() && (
             <Link
               href={navHref("/clients")}
-              prefetch={true}
+              prefetch={false}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
                 isLinkActive("/clients")
                   ? SELECTION_COLORS.SELECTED
@@ -585,7 +585,7 @@ const SidebarComponent = ({
           {isMounted && currentClientId ? (
             <Link
               href={navHref("")}
-              prefetch={true}
+              prefetch={false}
               className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
                 isSettingsLinkActive()
                   ? SELECTION_COLORS.SELECTED

@@ -22,7 +22,7 @@ import { useAddUnit, useUpdateUnit } from "@/hooks/use-unit-mutations";
 import { extractUnitsFromText, getClientid } from "@/utils/api";
 import { UnitTextExtractor } from "@/utils/unit-text-extractor";
 import FillFromTextDialog from "@/components/ui/unit-forms/FillFromTextDialog";
-import { MAX_UNIT_IMAGES } from "./unit-form-constants";
+import { MAX_UNIT_IMAGES, normalizeRentDurationType } from "./unit-form-constants";
 import { getValidatedClientId } from "@/utils/clientId-validator";
 import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { normalizeViewTypeValue } from "@/data/constants";
@@ -39,6 +39,14 @@ function normalizeToEnglishDigits(value) {
     .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
     .replace(/٫/g, ".")
     .replace(/٬/g, ",");
+}
+
+/** Safely format a date value to a YYYY-MM-DD input string; empty string when invalid. */
+function toDateInputValue(value) {
+  if (value === "" || value === null || value === undefined) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().split("T")[0];
 }
 
 function toAmount(value) {
@@ -274,9 +282,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const [SellFormData, setSellFormData] = useState(() => ({
     totalPrice: unitData?.totalPrice || "",
     downPayment: unitData?.downPayment || "",
-    deliveryDate: unitData?.deliveryDate
-      ? new Date(unitData.deliveryDate).toISOString().split("T")[0]
-      : "",
+    deliveryDate: toDateInputValue(unitData?.deliveryDate),
     paid_amount: unitData?.paid_amount || "",
     remaining_amount: unitData?.remaining_amount || "",
     installment_years: unitData?.installment_years || "",
@@ -285,32 +291,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
   // specific rent form data
   const [rentFormData, setRentFormData] = useState(() => ({
-    availabilityDate: unitData?.availabilityDate
-      ? new Date(unitData.availabilityDate).toISOString().split("T")[0]
-      : new Date().toISOString().split("T")[0],
-    rentDurationType: unitData?.rentDurationType || {
-      daily: {
-        price: "",
-        securityDeposit: "",
-        cleaningFee: "",
-        serviceFee: "",
-        currency: "EGP",
-      },
-      weekly: {
-        price: "",
-        securityDeposit: "",
-        cleaningFee: "",
-        serviceFee: "",
-        currency: "EGP",
-      },
-      monthly: {
-        price: "",
-        securityDeposit: "",
-        cleaningFee: "",
-        serviceFee: "",
-        currency: "EGP",
-      },
-    },
+    availabilityDate:
+      toDateInputValue(unitData?.availabilityDate) ||
+      new Date().toISOString().split("T")[0],
+    rentDurationType: normalizeRentDurationType(unitData?.rentDurationType),
     amenities: unitData?.amenities || [],
   }));
 
@@ -689,7 +673,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
-          (duration) => duration.price > 0
+          (duration) => duration?.price > 0
         );
 
         if (!hasValidPrice) {
@@ -700,7 +684,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
         const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
         Object.keys(sanitizedRentDurationType).forEach((duration) => {
-          Object.keys(sanitizedRentDurationType[duration]).forEach((field) => {
+          Object.keys(sanitizedRentDurationType[duration] ?? {}).forEach((field) => {
             if (sanitizedRentDurationType[duration][field] === "") {
               sanitizedRentDurationType[duration][field] = 0;
             }
@@ -815,7 +799,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
         // Check if at least one rentDurationType has a price > 0
         const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
-          (duration) => duration.price > 0
+          (duration) => duration?.price > 0
         );
 
         if (!hasValidPrice) {
@@ -826,7 +810,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
         // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
         const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
         Object.keys(sanitizedRentDurationType).forEach((duration) => {
-          Object.keys(sanitizedRentDurationType[duration]).forEach((field) => {
+          Object.keys(sanitizedRentDurationType[duration] ?? {}).forEach((field) => {
             if (sanitizedRentDurationType[duration][field] === "") {
               sanitizedRentDurationType[duration][field] = 0;
             }

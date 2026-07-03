@@ -71,10 +71,8 @@ async function handleRequest(request, context) {
 
   if (!isPublicPath) {
     const cookieStore = await cookies();
-    const hasSession =
-      cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value ||
-      cookieStore.get(COOKIE_KEYS.REFRESH_TOKEN)?.value;
-    if (!hasSession) {
+    const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+    if (!accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
   }

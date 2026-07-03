@@ -43,6 +43,86 @@ export function buildAdminPendingApprovalListPath(clientId) {
   return clientId ? `/${clientId}/units/pending-approval` : "/units/pending-approval";
 }
 
+/** Admin units list path: /{clientId}/units or /units */
+export function buildAdminUnitsListPath(clientId) {
+  return clientId ? `/${clientId}/units` : "/units";
+}
+
+/**
+ * Safe fallback list path for the given section (used when the exact origin is unknown).
+ * @param {'units'|'pending_approval'} section
+ */
+export function buildUnitsListPathForSection(section, clientId) {
+  return section === "pending_approval"
+    ? buildAdminPendingApprovalListPath(clientId)
+    : buildAdminUnitsListPath(clientId);
+}
+
+/**
+ * Guard against open-redirects / external URLs: only allow same-origin relative
+ * paths (e.g. "/units?query=..."), never protocol-relative ("//evil.com") or absolute URLs.
+ * @param {unknown} path
+ * @returns {boolean}
+ */
+export function isSafeInternalPath(path) {
+  return (
+    typeof path === "string" &&
+    path.startsWith("/") &&
+    !path.startsWith("//") &&
+    !path.includes("://")
+  );
+}
+
+/** sessionStorage key holding the list URL + section the user last opened a unit from. */
+export const UNITS_LIST_ORIGIN_STORAGE_KEY = "lenaai.unitsListOrigin";
+
+/**
+ * Remember which list (URL + section) the user opened a unit from, so the edit flow
+ * can return there with its state preserved (filters/search/pagination live in the URL).
+ * Safe no-op on the server or for unsafe/external URLs.
+ *
+ * @param {{ url: string, section: 'units'|'pending_approval'|null }} origin
+ */
+export function rememberUnitsListOrigin({ url, section } = {}) {
+  if (typeof window === "undefined") return;
+  if (!isSafeInternalPath(url) || !section) return;
+  try {
+    window.sessionStorage.setItem(
+      UNITS_LIST_ORIGIN_STORAGE_KEY,
+      JSON.stringify({ url, section })
+    );
+  } catch {
+    // sessionStorage may be unavailable (private mode / quota) — degrade to fallback nav.
+  }
+}
+
+/**
+ * Read and clear the remembered list origin, but only when it matches the section we
+ * are returning to (prevents a hidden-unit edit from landing on the normal units list).
+ * Returns the exact origin URL to navigate back to, or null to use a fallback.
+ *
+ * @param {'units'|'pending_approval'} expectedSection
+ * @returns {string|null}
+ */
+export function consumeUnitsListOrigin(expectedSection) {
+  if (typeof window === "undefined") return null;
+  let raw = null;
+  try {
+    raw = window.sessionStorage.getItem(UNITS_LIST_ORIGIN_STORAGE_KEY);
+    window.sessionStorage.removeItem(UNITS_LIST_ORIGIN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed?.section !== expectedSection) return null;
+    return isSafeInternalPath(parsed?.url) ? parsed.url : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Append ?pending=1 when linking from the hidden-units section. */
 export function appendUnitsSourcePendingQuery(path, fromPendingApproval) {
   if (!fromPendingApproval) return path;

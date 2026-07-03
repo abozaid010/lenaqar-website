@@ -8,7 +8,8 @@ import {
   isRentVisibilityAvailable,
   resolveRentVisibilityForCheckbox,
 } from "@/constants/property-visibility";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { normalizeRentDurationBlock } from "./unit-form-constants";
 
 const availableAmenities = [
   "wifi",
@@ -41,6 +42,14 @@ export default function RentalDetailsStep({
 }) {
   const [activeDuration, setActiveDuration] = useState("monthly");
   const { t, translate, translateStrict } = useI18n();
+
+  // Defense-in-depth: even if a duration is missing from the incoming data,
+  // always render a complete block so the fields never read `undefined`.
+  // Memoized so we don't allocate a new object on unrelated re-renders.
+  const activeDurationValues = useMemo(
+    () => normalizeRentDurationBlock(formData.rentDurationType?.[activeDuration]),
+    [formData.rentDurationType, activeDuration]
+  );
   const unitVisibility = commonFormData?.visibility ?? commonFormData?.status;
   const isRentAvailable = isRentVisibilityAvailable(unitVisibility);
 
@@ -96,11 +105,14 @@ export default function RentalDetailsStep({
   const handlePriceChange = (durationType, field, value) => {
     const englishValue = convertArabicToEnglishNumbers(value);
     const rawValue = englishValue.replace(/\D/g, "");
+    const currentBlock = normalizeRentDurationBlock(
+      formData.rentDurationType?.[durationType]
+    );
     updateFormData({
       rentDurationType: {
         ...formData.rentDurationType,
         [durationType]: {
-          ...formData.rentDurationType[durationType],
+          ...currentBlock,
           [field]: rawValue === "" ? "" : Number(rawValue),
         },
       },
@@ -200,7 +212,7 @@ export default function RentalDetailsStep({
         <LenaTextField
           label={t.rentalDetails.price}
           required
-          value={formData.rentDurationType[activeDuration].price}
+          value={activeDurationValues.price}
           onChange={(e) =>
             handlePriceChange(activeDuration, "price", e.target.value)
           }
@@ -212,7 +224,7 @@ export default function RentalDetailsStep({
         {/* Security Deposit */}
         <LenaTextField
           label={t.rentalDetails.securityDeposit}
-          value={formData.rentDurationType[activeDuration].securityDeposit}
+          value={activeDurationValues.securityDeposit}
           onChange={(e) =>
             handlePriceChange(activeDuration, "securityDeposit", e.target.value)
           }
@@ -224,7 +236,7 @@ export default function RentalDetailsStep({
         {/* Cleaning Fee */}
         <LenaTextField
           label={t.rentalDetails.cleaningFee}
-          value={formData.rentDurationType[activeDuration].cleaningFee}
+          value={activeDurationValues.cleaningFee}
           onChange={(e) =>
             handlePriceChange(activeDuration, "cleaningFee", e.target.value)
           }
@@ -236,7 +248,7 @@ export default function RentalDetailsStep({
         {/* Service Fee */}
         <LenaTextField
           label={t.rentalDetails.serviceFee}
-          value={formData.rentDurationType[activeDuration].serviceFee}
+          value={activeDurationValues.serviceFee}
           onChange={(e) =>
             handlePriceChange(activeDuration, "serviceFee", e.target.value)
           }
