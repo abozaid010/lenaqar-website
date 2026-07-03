@@ -462,6 +462,35 @@
           "بولاق الدكرور"
         ],
         "sub_districts": []
+      },
+      {
+        "en_name": "North Giza",
+        "ar_name": "حي شمال الجيزة",
+        "aliases": [
+          "Shamal Giza",
+          "North Giza District"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Talbiya",
+        "ar_name": "حي الطالبية",
+        "aliases": [
+          "Talbiya",
+          "El Talbiya",
+          "الطالبية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Warraq",
+        "ar_name": "حي الوراق",
+        "aliases": [
+          "El Warraq",
+          "Al Warraq",
+          "الوراق"
+        ],
+        "sub_districts": []
       }
     ],
     "ar_name": "الجيزة",
@@ -768,7 +797,16 @@
           "Moqattam",
           "Muqattam"
         ],
-        "sub_districts": []
+        "sub_districts": [
+          {
+            "en_name": "Hadaba El Mokattam",
+            "ar_name": "حدائق المقطم",
+            "aliases": [
+              "Mokattam Hadaba",
+              "Hadabet El Mokattam"
+            ]
+          }
+        ]
       },
       {
         "en_name": "Maadi",
@@ -796,6 +834,23 @@
             "ar_name": "المعادي الجديدة",
             "aliases": [
               "المعادي الجديدة"
+            ]
+          },
+          {
+            "en_name": "Corniche Maadi",
+            "ar_name": "كورنيش نيل المعادي",
+            "aliases": [
+              "Maadi Corniche",
+              "Corniche El Maadi",
+              "كورنيش المعادي"
+            ]
+          },
+          {
+            "en_name": "Zahraa Maadi",
+            "ar_name": "زهراء المعادي",
+            "aliases": [
+              "Zahraa El Maadi",
+              "زهراء المعادى"
             ]
           }
         ]
@@ -827,6 +882,23 @@
             "ar_name": "النزهة",
             "aliases": [
               "النزهه"
+            ]
+          },
+          {
+            "en_name": "Almazah",
+            "ar_name": "الماظة",
+            "aliases": [
+              "Al Mazah",
+              "El Almazah",
+              "الماظه"
+            ]
+          },
+          {
+            "en_name": "Roxy",
+            "ar_name": "روكسي",
+            "aliases": [
+              "Roxy Square",
+              "ميدان روكسي"
             ]
           }
         ]
@@ -1024,6 +1096,80 @@
                 "aliases": [
                   "هليوبوليس الجديدة"
                 ]
+              },
+              {
+                "en_name": "Al Qarnful",
+                "ar_name": "القرنفل",
+                "aliases": [
+                  "El Koronfel",
+                  "Al Qarnful District"
+                ]
+              },
+              {
+                "en_name": "Beit El Watan",
+                "ar_name": "بيت الوطن",
+                "aliases": [
+                  "Beit Al Watan",
+                  "Bait El Watan"
+                ]
+              },
+              {
+                "en_name": "Diplomatic District",
+                "ar_name": "الحي الدبلوماسي",
+                "aliases": [
+                  "Diplomats District",
+                  "Diplomatic Area",
+                  "الحي الدبلوماسى"
+                ]
+              },
+              {
+                "en_name": "West Arabella",
+                "ar_name": "أرابيلا الغربية",
+                "aliases": [
+                  "West Arabella District",
+                  "Arabella West"
+                ]
+              },
+              {
+                "en_name": "Al Karnak",
+                "ar_name": "الكرنك",
+                "aliases": [
+                  "El Karnak",
+                  "Karnak District"
+                ]
+              },
+              {
+                "en_name": "New Al Narges",
+                "ar_name": "النرجس الجديدة",
+                "aliases": [
+                  "New Narges",
+                  "New Nargis",
+                  "النرجس الجديده"
+                ]
+              },
+              {
+                "en_name": "Abu El Hool",
+                "ar_name": "أبو الهول",
+                "aliases": [
+                  "Abu Al Hool",
+                  "Abu El Hul"
+                ]
+              },
+              {
+                "en_name": "North Rehab",
+                "ar_name": "شمال الرحاب",
+                "aliases": [
+                  "North of Rehab",
+                  "North Rehab District"
+                ]
+              },
+              {
+                "en_name": "Al Zohour",
+                "ar_name": "الزهور",
+                "aliases": [
+                  "El Zohour",
+                  "Zohour District"
+                ]
               }
             ]
           },
@@ -1033,6 +1179,54 @@
             "aliases": [
               "التجمع 6",
               "الحي 6"
+            ]
+          },
+          {
+            "en_name": "Seventh Settlement",
+            "ar_name": "التجمع السابع",
+            "aliases": [
+              "التجمع 7",
+              "الحي 7",
+              "Seventh Settlement New Cairo"
+            ]
+          },
+          {
+            "en_name": "El Shorouk City",
+            "ar_name": "مدينة الشروق",
+            "aliases": [
+              "El Shorouk",
+              "Shorouk City",
+              "الشروق",
+              "El-Shorouk"
+            ]
+          },
+          {
+            "en_name": "Badr City",
+            "ar_name": "مدينة بدر",
+            "aliases": [
+              "Badr",
+              "بدر",
+              "Madinet Badr"
+            ]
+          },
+          {
+            "en_name": "Mostaqbal City",
+            "ar_name": "مدينة المستقبل",
+            "aliases": [
+              "Mostaqbal",
+              "Future City",
+              "المستقبل سيتي",
+              "المستقبل",
+              "Madinet El Mostaqbal"
+            ]
+          },
+          {
+            "en_name": "Katameya",
+            "ar_name": "القطامية",
+            "aliases": [
+              "El Katameya",
+              "Al Katameya",
+              "Katameya District"
             ]
           }
         ]
@@ -1058,6 +1252,314 @@
         "en_name": "Downtown",
         "ar_name": "وسط البلد",
         "aliases": [],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Salam First",
+        "ar_name": "حي السلام أول",
+        "aliases": [
+          "Al Salam Awal",
+          "Hay Al Salam Awal"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Salam Second",
+        "ar_name": "حي السلام ثان",
+        "aliases": [
+          "Al Salam Thani",
+          "Hay Al Salam Second"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Marg",
+        "ar_name": "حي المرج",
+        "aliases": [
+          "Hay El Marg",
+          "Al Marg"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Matareya",
+        "ar_name": "حي المطرية",
+        "aliases": [
+          "Hay Al Matareya",
+          "Al Matareya",
+          "المطرية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Nozha",
+        "ar_name": "حي النزهة",
+        "aliases": [
+          "Hay Al Nozha",
+          "Al Nozha District"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Ain Shams",
+        "ar_name": "حي عين شمس",
+        "aliases": [
+          "Hay Ain Shams",
+          "Ein Shams",
+          "عين شمس"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "East Nasr City",
+        "ar_name": "حي مدينة نصر شرق",
+        "aliases": [
+          "Hay East Nasr City",
+          "Nasr City East",
+          "شرق مدينة نصر",
+          "مدينة نصر شرق"
+        ],
+        "sub_districts": [
+          {
+            "en_name": "Rabaa",
+            "ar_name": "رابا",
+            "aliases": [
+              "Raba",
+              "Rabaa Adawiya",
+              "ميدان رابا"
+            ]
+          },
+          {
+            "en_name": "Abbas El Akkad",
+            "ar_name": "عباس العقاد",
+            "aliases": [
+              "Abbas Al Akkad",
+              "Abbas El Akkad Street"
+            ]
+          }
+        ]
+      },
+      {
+        "en_name": "West Nasr City",
+        "ar_name": "حي مدينة نصر غرب",
+        "aliases": [
+          "Hay West Nasr City",
+          "Nasr City West",
+          "غرب مدينة نصر",
+          "مدينة نصر غرب"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Azbakeya",
+        "ar_name": "حي الأزبكية",
+        "aliases": [
+          "Hay Al Azbakeya",
+          "Azbakeya",
+          "الأزبكية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Mousky",
+        "ar_name": "حي الموسكي",
+        "aliases": [
+          "Hay El Mousky",
+          "El Muski",
+          "الموسكي"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Waily",
+        "ar_name": "حي الوايلي",
+        "aliases": [
+          "Hay El Waily",
+          "El Waili",
+          "الوايلي"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Bab El Shaareya",
+        "ar_name": "حي باب الشعرية",
+        "aliases": [
+          "Bab El Shaaria",
+          "باب الشعرية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Boulak",
+        "ar_name": "حي بولاق",
+        "aliases": [
+          "Bulaq",
+          "Bolak",
+          "بولاق"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Abdeen",
+        "ar_name": "حي عابدين",
+        "aliases": [
+          "Abdin",
+          "عابدين"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Manshaet Nasser",
+        "ar_name": "حي منشأة ناصر",
+        "aliases": [
+          "Manshiyet Nasser",
+          "منشأة ناصر"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "West",
+        "ar_name": "حي غرب",
+        "aliases": [
+          "Hay West",
+          "Gharb",
+          "حي غرب القاهرة"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Central",
+        "ar_name": "حي وسط",
+        "aliases": [
+          "Hay Wast",
+          "Wasat",
+          "Central Cairo"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Basatine",
+        "ar_name": "حي البساتين",
+        "aliases": [
+          "Hay Al Basatine",
+          "Basatin",
+          "البساتين"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Khalifa",
+        "ar_name": "حي الخليفة",
+        "aliases": [
+          "Hay Al Khalifa",
+          "Khalifa",
+          "الخليفة"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Sayeda Zeinab",
+        "ar_name": "حي السيدة زينب",
+        "aliases": [
+          "Sayeda Zeinab",
+          "Sayyida Zeinab",
+          "السيدة زينب"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Dar Al Salaam",
+        "ar_name": "حي دار السلام",
+        "aliases": [
+          "Dar El Salam",
+          "دار السلام"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Tora",
+        "ar_name": "حي طرة",
+        "aliases": [
+          "Hay Tora",
+          "Tura",
+          "طرة"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Amiriya",
+        "ar_name": "حي الأميرية",
+        "aliases": [
+          "Hay Amiriya",
+          "Amreya",
+          "الأميرية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Zawia El Hamra",
+        "ar_name": "حي الزاوية الحمراء",
+        "aliases": [
+          "Zawya El Hamra",
+          "الزاوية الحمراء"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Zaitoun",
+        "ar_name": "حي الزيتون",
+        "aliases": [
+          "Hay El Zaitoun",
+          "Zaytoun",
+          "الزيتون"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Al Sahel",
+        "ar_name": "حي الساحل",
+        "aliases": [
+          "Hay Al Sahel",
+          "El Sahel"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "El Sharabiya",
+        "ar_name": "حي الشرابية",
+        "aliases": [
+          "Hay Al Sharabiya",
+          "Sharabiya",
+          "الشرابية"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Hadayek El Kobba",
+        "ar_name": "حي حدائق القبة",
+        "aliases": [
+          "Hadayek El Qobba",
+          "حدائق القبة"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Rawd Al Faraj",
+        "ar_name": "حي روض الفرج",
+        "aliases": [
+          "Rod El Farag",
+          "روض الفرج"
+        ],
+        "sub_districts": []
+      },
+      {
+        "en_name": "Shoubra",
+        "ar_name": "حي شبرا",
+        "aliases": [
+          "Shubra",
+          "Shobra",
+          "شبرا"
+        ],
         "sub_districts": []
       }
     ],
@@ -1160,9 +1662,9 @@
   {
     "alias": [
       "الساحل",
-      "الساحل الطيب",
-      "الساحل الشرير",
-      "شمالي الساحل"
+      "شمالي الساحل",
+      "الساحل الشمالي",
+      "الساحل الشمالى"
     ],
     "districts": [
       {

@@ -26,54 +26,55 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
           </div>
         )}
 
-        {/* Project and Developer Links */}
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          {unit.projectHref && unit.projectName && (
-            <Link 
-              href={unit.projectHref}
-              className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <Building className="w-4 h-4" />
-              {unit.projectName}
-            </Link>
-          )}
-          {unit.projectName && !unit.projectHref && (
-            <span className="flex items-center gap-1 text-gray-600">
-              <Building className="w-4 h-4" />
-              {unit.projectName}
-            </span>
-          )}
+        {/* Project, Developer, and Location */}
+      <div className="flex flex-wrap items-center gap-4 text-sm">
+        {/* Project */}
+        {unit.projectHref && unit.projectName && (
+          <Link 
+            href={unit.projectHref}
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            <Building className="w-4 h-4" />
+            {unit.projectName}
+          </Link>
+        )}
+        {unit.projectName && !unit.projectHref && (
+          <span className="flex items-center gap-1 text-gray-600">
+            <Building className="w-4 h-4" />
+            {unit.projectName}
+          </span>
+        )}
 
-          {unit.developerHref && unit.developerName && (
-            <Link 
-              href={unit.developerHref}
-              className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              <User className="w-4 h-4" />
-              {unit.developerName}
-            </Link>
-          )}
-          {unit.developerName && !unit.developerHref && (
-            <span className="flex items-center gap-1 text-gray-600">
-              <User className="w-4 h-4" />
-              {unit.developerName}
-            </span>
-          )}
-        </div>
+        {/* Location */}
+        {(unit.city || unit.district || unit.subDistrict) && (
+          <span className="flex items-center gap-1 text-gray-600">
+            <MapPin className="w-4 h-4" />
+            <LocalizedLocationText
+              city={unit.city || ''}
+              district={unit.district || ''}
+              subDistrict={unit.subDistrict || ''}
+            />
+          </span>
+        )}
+
+        {/* Developer */}
+        {unit.developerHref && unit.developerName && (
+          <Link 
+            href={unit.developerHref}
+            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            <User className="w-4 h-4" />
+            {unit.developerName}
+          </Link>
+        )}
+        {unit.developerName && !unit.developerHref && (
+          <span className="flex items-center gap-1 text-gray-600">
+            <User className="w-4 h-4" />
+            {unit.developerName}
+          </span>
+        )}
       </div>
-
-      {/* Location */}
-      {(unit.city || unit.district || unit.subDistrict) && (
-        <div className="flex items-center gap-2 text-gray-600">
-          <MapPin className="w-5 h-5" />
-          <LocalizedLocationText
-            city={unit.city || ''}
-            district={unit.district || ''}
-            subDistrict={unit.subDistrict || ''}
-            className="text-lg"
-          />
-        </div>
-      )}
+    </div>
 
       {/* Key Information Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -166,7 +166,7 @@ export function transformProjectToViewModel(rawProject: RawProject, t?: T, local
   if (rawProject.city) {
     quickFacts.push({
       label: getT(t, 'propertyDetails', 'location') || 'Location',
-      value: String(`${rawProject.city}${rawProject.district ? ', ' + rawProject.district : ''}`),
+      value: String([rawProject.city, rawProject.district, rawProject.sub_district].filter(Boolean).join(', ')),
       icon: 'map-pin'
     });
   }
