@@ -3,10 +3,11 @@ import { NextResponse } from "next/server";
 import { API_BASE_URL } from "@/lib/apiConfig";
 import { isRequestFromKingAdmin } from "@/lib/kingAdmin";
 import { bffFetch } from "@/lib/bffFetch";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 
 export async function GET(request) {
   try {
-    if (!isRequestFromKingAdmin(request)) {
+    if (!(await isRequestFromKingAdmin(request))) {
       return NextResponse.json(
         { error: "Unauthorized. King admin access required." },
         { status: 403 }
@@ -14,7 +15,7 @@ export async function GET(request) {
     }
 
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get("access_token")?.value;
+    const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
 
     const { searchParams } = new URL(request.url);
     const page = searchParams.get("page") || "1";

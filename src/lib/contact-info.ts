@@ -19,7 +19,9 @@ interface ContactInfoResult {
   type: 'Owner' | 'Developer' | 'Client' | null;
 }
 
-import { API_BASE_URL, PUBLIC_X_API_KEY } from '@/lib/apiConfig';
+// Contact data is fetched through the same-origin BFF (/api/crm/*), which injects
+// the X-API-Key / auth token server-side. Never import the server-only apiConfig here —
+// it would leak into the client bundle and log a false "X_API_KEY is not set" error.
 
 class ContactInfo {
   private developerContacts: Map<string, DeveloperContact> = new Map();
@@ -71,11 +73,10 @@ class ContactInfo {
 
   // Fetch developer contacts from public API
   private async fetchDeveloperContacts(): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/developers/get_contact`, {
+    const response = await fetch('/api/crm/developers/get_contact', {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'X-API-Key': PUBLIC_X_API_KEY
       },
       cache: 'no-store' // Ensure fresh data
     });
@@ -98,11 +99,10 @@ class ContactInfo {
 
   // Fetch client contacts from public API
   private async fetchClientContacts(): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/client/public/contact_data`, {
+    const response = await fetch('/api/crm/client/public/contact_data', {
       method: 'GET',
       headers: {
         'accept': 'application/json',
-        'X-API-Key': PUBLIC_X_API_KEY
       },
       cache: 'no-store' // Ensure fresh data
     });

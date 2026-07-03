@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Share2 } from "lucide-react";
 
 import ImageWithLoader from "@/components/ui/image-with-loader";
@@ -12,6 +13,10 @@ import {
   resolveUnitCodeFromListItem,
 } from "@/lib/units/unit-share-links";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  getUnitsSectionFromUrl,
+  rememberUnitsListOrigin,
+} from "@/utils/units-navigation-source";
 import { useEffect, useState } from "react";
 import {
   handleImageError,
@@ -38,6 +43,8 @@ export default function UnitsGrid({
   const [shareUnitCode, setShareUnitCode] = useState(null);
   const [isMounted, setIsMounted] = useState(false);
   const { t, locale, translate, localeUtils } = useI18n();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const clientId = LenaCookiesManager.getClientId();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const bulkSelection = useUnitsBulkSelectionOptional();
@@ -97,6 +104,22 @@ export default function UnitsGrid({
       clientId,
       queryParams: linkQueryParams || "",
     });
+
+  /**
+   * Remember which list (with its current filters/search/pagination in the URL) the user
+   * opened a unit from, so the edit flow can return here after a successful save.
+   * Skipped for readonly/public grids, which have no edit flow.
+   */
+  const handleOpenUnit = () => {
+    if (readonly) return;
+    rememberUnitsListOrigin({
+      url:
+        typeof window !== "undefined"
+          ? `${window.location.pathname}${window.location.search}`
+          : pathname,
+      section: getUnitsSectionFromUrl(pathname, searchParams),
+    });
+  };
 
   const handleShareClick = (code, e) => {
     e.preventDefault();
@@ -267,7 +290,11 @@ export default function UnitsGrid({
                 className={`relative ${isSelected ? "ring-2 ring-primary rounded-md" : ""}`}
               >
                 {unitHref ? (
-                  <Link href={unitHref} className="relative block">
+                  <Link
+                    href={unitHref}
+                    className="relative block"
+                    onClick={handleOpenUnit}
+                  >
                     {cardBody}
                   </Link>
                 ) : (

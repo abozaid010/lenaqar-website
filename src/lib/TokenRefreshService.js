@@ -10,27 +10,44 @@ const LOGIN_PATH = "/login";
  * Ensures client-side cookies are synced after server-side refresh
  */
 export class TokenRefreshService {
+  /** @type {Promise<boolean> | null} */
+  static _refreshPromise = null;
+
   /**
-   * Refreshes the access token and syncs client-side cookie
-   * @returns {Promise<string>} The new access token
+   * Refreshes the access token (single-flight: concurrent callers share one request).
+   * @returns {Promise<boolean>}
    * @throws {Error} If refresh fails
    */
   static async refreshToken() {
+    if (TokenRefreshService._refreshPromise) {
+      return TokenRefreshService._refreshPromise;
+    }
+
+    TokenRefreshService._refreshPromise = TokenRefreshService._doRefresh().finally(
+      () => {
+        TokenRefreshService._refreshPromise = null;
+      }
+    );
+
+    return TokenRefreshService._refreshPromise;
+  }
+
+  /**
+   * @returns {Promise<boolean>}
+   */
+  static async _doRefresh() {
     try {
-      // Only log in development to avoid exposing auth flow in production
       if (process.env.NODE_ENV === "development") {
         console.log("[TokenRefreshService] Attempting to refresh token...");
       }
 
-      // Call the refresh token API route
       const refreshResponse = await fetch("/api/refresh-token", {
         method: "POST",
-        credentials: "include", // Include cookies for server-side access
+        credentials: "include",
       });
 
       if (!refreshResponse.ok) {
         const errorData = await refreshResponse.json().catch(() => ({}));
-        // Don't expose detailed error information in production
         const errorMessage =
           process.env.NODE_ENV === "development"
             ? errorData.error || "Failed to refresh token: " + refreshResponse.status
@@ -38,14 +55,11 @@ export class TokenRefreshService {
         throw new Error(errorMessage);
       }
 
-      // Server sets the httpOnly ACCESS_TOKEN and non-httpOnly ACCESS_TOKEN_EXP
-      // cookies in the response — no client-side cookie update needed.
       if (process.env.NODE_ENV === "development") {
         console.log("[TokenRefreshService] Token refreshed successfully");
       }
       return true;
     } catch (error) {
-      // Log error details only in development
       if (process.env.NODE_ENV === "development") {
         console.error("[TokenRefreshService] Token refresh failed:", error);
       }

@@ -3,9 +3,9 @@
 import { useRouter } from "next/navigation";
 import EditUnitForm from "@/components/ui/unit-forms/add-unit-Modal";
 import {
-  buildAdminUnitDetailPath,
-} from "@/lib/units/unit-share-links";
-import { buildAdminPendingApprovalListPath } from "@/utils/units-navigation-source";
+  buildUnitsListPathForSection,
+  consumeUnitsListOrigin,
+} from "@/utils/units-navigation-source";
 
 export default function EditUnitClient({
   rawUnit,
@@ -14,12 +14,17 @@ export default function EditUnitClient({
   fromPendingApproval = false,
 }) {
   const router = useRouter();
-  const detailPath = buildAdminUnitDetailPath(unitCode, clientId);
-  const returnPath = fromPendingApproval
-    ? buildAdminPendingApprovalListPath(clientId)
-    : detailPath;
+  const section = fromPendingApproval ? "pending_approval" : "units";
 
+  /**
+   * Return the user to the list they came from. Called by the form only AFTER a
+   * successful save (or when cancelling). Priority:
+   *  1. The exact originating list URL (filters/search/pagination preserved).
+   *  2. A safe fallback list for the section (Units, or Hidden Units when pending).
+   */
   const handleClose = () => {
+    const origin = consumeUnitsListOrigin(section);
+    const returnPath = origin ?? buildUnitsListPathForSection(section, clientId);
     router.push(returnPath);
   };
 

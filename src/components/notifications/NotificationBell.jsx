@@ -19,7 +19,7 @@ export default function NotificationBell({
   return (
     <Link
       href={href}
-      prefetch={true}
+      prefetch={false}
       className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
         active ? SELECTION_COLORS.SELECTED : "text-gray-700 hover:bg-gray-100"
       }`}
