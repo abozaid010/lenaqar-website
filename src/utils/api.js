@@ -24,6 +24,7 @@ import {
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/constants/whatsapp-messaging";
 import { normalizeLastAction } from "@/utils/actions";
+import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -2216,17 +2217,31 @@ export async function fetchManagerAnalytics(params = {}) {
   }
 }
 
+/**
+ * @typedef {import("@/types/dashboardSummary").DashboardSummaryData} DashboardSummaryData
+ * @typedef {import("@/types/dashboardSummary").FetchDashboardSummaryOptions} FetchDashboardSummaryOptions
+ */
+
+/**
+ * @param {string} clientId
+ * @param {FetchDashboardSummaryOptions} [options]
+ * @returns {Promise<DashboardSummaryData | null>}
+ */
 export async function fetchDashboardSummary(clientId, options = {}) {
   if (!clientId) {
     throw new Error("clientId is required");
   }
 
-  const { refresh = false, period = "day" } = options;
-  const validPeriods = new Set(["day", "week", "month"]);
-  const safePeriod = validPeriods.has(period) ? period : "day";
+  const { refresh = false, startDate, endDate } = options;
+  if (!startDate || !endDate) {
+    throw new Error("startDate and endDate are required");
+  }
 
   try {
-    const params = { period: safePeriod };
+    const params = {
+      start_date: toApiStartDate(startDate),
+      end_date: toApiEndDate(endDate),
+    };
     if (refresh) params.refresh = true;
 
     const response = await axiosInstance.get(
