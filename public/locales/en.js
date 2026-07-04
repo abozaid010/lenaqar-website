@@ -1211,7 +1211,7 @@ export default {
       lease: "Lease",
     },
     bulkAvailability: {
-      checkButton: "Check Availability",
+      checkButton: "Send Message",
       selectAll: "Select all on page",
       selectUnit: "Select unit",
       selectedUnits: "{count} selected",

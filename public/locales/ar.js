@@ -1087,7 +1087,7 @@ export default {
       lease: "تأجير",
     },
     bulkAvailability: {
-      checkButton: "التحقق من التوفر",
+      checkButton: "إرسال رسالة",
       selectAll: "تحديد الكل في الصفحة",
       selectUnit: "تحديد الوحدة",
       selectedUnits: "تم تحديد {count}",

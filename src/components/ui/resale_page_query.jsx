@@ -299,7 +299,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                 className="flex items-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 h-9 min-h-[36px]"
                 title={translate(
                   "unitsFilter.bulkAvailability.checkButton",
-                  "Check Availability"
+                  "Send Message"
                 )}
               >
                 <svg
@@ -313,7 +313,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                 <span className="hidden sm:inline">
                   {translate(
                     "unitsFilter.bulkAvailability.checkButton",
-                    "Check Availability"
+                    "Send Message"
                   )}
                 </span>
               </button>
