@@ -1087,12 +1087,14 @@ export default {
       lease: "تأجير",
     },
     bulkAvailability: {
-      checkButton: "التحقق من التوفر",
+      checkButton: "إرسال رسالة",
       selectAll: "تحديد الكل في الصفحة",
       selectUnit: "تحديد الوحدة",
       selectedUnits: "تم تحديد {count}",
       noOwnerPhone: "لا يوجد هاتف للمالك",
       noRecipients: "الوحدات المحددة لا تحتوي على أرقام هواتف مالك صالحة.",
+      unitLinkHint:
+        "سيتلقى كل مالك رسالتك مع رابط وحدته مُضافاً تلقائياً.",
       defaultMessage:
         "السلام عليكم . حضرتك عندنا عميل عايز الشقه بتاعتك.. هل متاح مواعيد للمعاينة؟",
     },
@@ -2498,6 +2500,19 @@ export default {
     loadingContact: "جاري تحميل بيانات التواصل...",
     contactPrefix: "جهة التواصل",
     deletePropertyConfirm: "هل أنت متأكد أنك تريد حذف هذا العقار؟",
+  },
+  sendMessageToOwner: {
+    title: "مراسلة المالك",
+    titleGeneric: "إرسال رسالة",
+    toLabel: "إلى",
+    messageLabel: "الرسالة",
+    placeholder: "اكتب رسالتك…",
+    sendButton: "إرسال عبر واتساب",
+    defaultGreeting: "مرحباً،",
+    defaultGreetingNamed: "مرحباً {{name}}،",
+    defaultBody: "أردت مشاركة هذا العقار معك.",
+    messageReady: "الرسالة جاهزة للإرسال.",
+    sentSuccess: "تم إرسال الرسالة بنجاح.",
   },
   unitShare: {
     title: "مشاركة العقار",

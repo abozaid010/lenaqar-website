@@ -1211,12 +1211,14 @@ export default {
       lease: "Lease",
     },
     bulkAvailability: {
-      checkButton: "Check Availability",
+      checkButton: "Send Message",
       selectAll: "Select all on page",
       selectUnit: "Select unit",
       selectedUnits: "{count} selected",
       noOwnerPhone: "No owner phone",
       noRecipients: "Selected units have no valid owner phone numbers.",
+      unitLinkHint:
+        "Each owner will receive your message with their unit link appended automatically.",
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
     },
@@ -2438,6 +2440,19 @@ export default {
     contactPrefix: "Contact",
     deletePropertyConfirm:
       "Are you sure you want to delete this property?",
+  },
+  sendMessageToOwner: {
+    title: "Message Owner",
+    titleGeneric: "Send Message",
+    toLabel: "To",
+    messageLabel: "Message",
+    placeholder: "Type your message…",
+    sendButton: "Send via WhatsApp",
+    defaultGreeting: "Hello,",
+    defaultGreetingNamed: "Hello {{name}},",
+    defaultBody: "I wanted to share this property with you.",
+    messageReady: "Message ready to send.",
+    sentSuccess: "Message sent successfully.",
   },
   unitShare: {
     title: "Share Property",

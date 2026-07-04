@@ -1,4 +1,4 @@
-import { isPossiblePhoneNumber } from "libphonenumber-js/min";
+import { isPossiblePhoneNumber, parsePhoneNumberFromString } from "libphonenumber-js/min";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 
 const WHATSAPP_CHAT_ID_PATTERN = /@(lid|c\.us|s\.whatsapp\.net|g\.us)$/i;
@@ -20,16 +20,23 @@ export function toWhatsappApiPhoneDigits(raw, defaultCountry = "EG") {
   if (!trimmed || isWhatsappChatId(trimmed)) return null;
 
   const e164 = phoneToE164(trimmed, defaultCountry);
-  if (!e164 || !isPossiblePhoneNumber(e164, defaultCountry)) {
-    return null;
+  if (!e164) return null;
+
+  const parsed = parsePhoneNumberFromString(e164);
+  if (parsed?.isPossible()) {
+    return e164.replace(/^\+/, "");
   }
 
-  return e164.replace(/^\+/, "");
+  if (isPossiblePhoneNumber(trimmed, defaultCountry)) {
+    return e164.replace(/^\+/, "");
+  }
+
+  return null;
 }
 
 /**
  * Resolve recipient fields for POST /whatsapp/send_messages.
- * Prefers phone_number when present; uses chat_id only when phone_number is missing.
+ * Prefers phone_number when present; uses chat_id only for WhatsApp chat ids.
  *
  * @returns {{ phone_number: string } | { chat_id: string } | null}
  */
@@ -48,7 +55,7 @@ export function resolveWhatsappRecipientFields(
       return { phone_number: apiPhone };
     }
 
-    return { chat_id: rawPhone };
+    return null;
   }
 
   const explicitChatId = String(chat_id ?? "").trim();

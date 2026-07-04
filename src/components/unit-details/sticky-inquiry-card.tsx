@@ -1,10 +1,13 @@
 import { MessageCircle, Edit, Trash2, PhoneCall, Share2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
-import { buildAdminUnitEditPath } from '@/lib/units/unit-share-links';
+import { buildAdminUnitEditPath, buildAdminUnitShareUrl } from '@/lib/units/unit-share-links';
+import SendMessageToOwner from '@/components/whatsapp/send-message-to-owner';
+import { phoneToE164 } from '@/components/phone/phone-utils';
+import { handleOpenWhatsApp } from '@/utils/phone-utils';
 import { appendUnitsSourcePendingQuery, buildAdminPendingApprovalListPath } from '@/utils/units-navigation-source';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import { useDeleteUnit } from '@/hooks/use-unit-mutations';
@@ -36,6 +39,31 @@ export default function StickyInquiryCard({
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [unitUrl, setUnitUrl] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setUnitUrl(window.location.href);
+      return;
+    }
+    if (unit.referenceCode?.trim()) {
+      setUnitUrl(buildAdminUnitShareUrl(unit.referenceCode, currentClientId));
+    }
+  }, [unit.referenceCode, currentClientId]);
+
+  const receiverPhone = useMemo(
+    () =>
+      contactData?.whatsapp?.trim() ||
+      contactData?.phone?.trim() ||
+      unit.ownerMobile?.trim() ||
+      '',
+    [contactData, unit.ownerMobile]
+  );
+
+  const receiverName = useMemo(
+    () => contactData?.name?.trim() || unit.ownerName?.trim() || '',
+    [contactData, unit.ownerName]
+  );
 
   const showOwnerContact = Boolean(
     isOwnUnit && (unit.ownerName?.trim() || unit.ownerMobile?.trim())
@@ -103,14 +131,13 @@ export default function StickyInquiryCard({
     }
   };
 
-  const handleWhatsApp = () => {
-    if (contactData?.whatsapp) {
-      // Remove any non-digit characters for WhatsApp
-      const cleanNumber = contactData.whatsapp.replace(/[^\d]/g, '');
-      window.open(`https://wa.me/${cleanNumber}`, '_blank');
-    } else {
-      console.log('No WhatsApp number available');
-    }
+  const handleWhatsApp = (event: MouseEvent) => {
+    const phone = contactData?.whatsapp || contactData?.phone;
+    if (!phone) return;
+    handleOpenWhatsApp(
+      event as unknown as Event,
+      phoneToE164(phone, 'EG') || phone
+    );
   };
 
   
@@ -180,6 +207,16 @@ export default function StickyInquiryCard({
             <div className="text-xs text-gray-500">{contactData.phone}</div>
           )}
         </div>
+      ) : null}
+
+      {!loading && receiverPhone ? (
+        <SendMessageToOwner
+          receiverName={receiverName}
+          receiverPhone={receiverPhone}
+          unitUrl={unitUrl}
+          clientId={currentClientId}
+          title={translate("sendMessageToOwner.title", "Message Owner")}
+        />
       ) : null}
 
       {/* Primary CTAs */}

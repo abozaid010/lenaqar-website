@@ -59,6 +59,7 @@ import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
+import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 
