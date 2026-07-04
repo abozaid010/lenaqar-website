@@ -1,4 +1,4 @@
-import { MessageCircle, Edit, Trash2, PhoneCall, Share2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { useState, useEffect, useMemo, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
@@ -27,8 +27,6 @@ export default function StickyInquiryCard({
   unit,
   rawUnit,
   isOwnUnit: isOwnUnitProp,
-  canShare = false,
-  onShare,
 }: StickyInquiryCardProps) {
   const { locale, translate } = useI18n();
   const router = useRouter();
@@ -179,6 +177,14 @@ export default function StickyInquiryCard({
           <UnitInquiryContactHeader
             name={contactData?.name?.trim() || unit.ownerName?.trim()}
             phone={receiverPhone}
+            actions={{
+              onCall: handleCall,
+              onWhatsApp: handleWhatsApp,
+              callDisabled: !contactData?.phone || loading,
+              whatsappDisabled: !(contactData?.whatsapp || contactData?.phone) || loading,
+              callLabel,
+              whatsappLabel,
+            }}
           />
           <ChatConversation
             phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
@@ -206,38 +212,6 @@ export default function StickyInquiryCard({
           ) : null}
         </div>
       ) : null}
-
-      {/* Primary CTAs */}
-      <div className="grid grid-cols-2 gap-3 shrink-0">
-        <button
-          onClick={handleCall}
-          disabled={!contactData?.phone || loading}
-          className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          <PhoneCall className="w-4 h-4" />
-          {callLabel}
-        </button>
-        
-        <button
-          onClick={handleWhatsApp}
-          disabled={!contactData?.whatsapp || loading}
-          className="bg-green-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
-        >
-          <MessageCircle className="w-4 h-4" />
-          {whatsappLabel}
-        </button>
-      </div>
-
-      {canShare && onShare && (
-        <button
-          type="button"
-          onClick={onShare}
-          className="w-full shrink-0 border border-primary/30 text-primary rounded-lg py-2 px-3 font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 text-sm"
-        >
-          <Share2 className="w-4 h-4" />
-          {translate("unitShare.title", "Share Property")}
-        </button>
-      )}
 
       {/* Admin Actions — not shown for primary units when the viewer is another client */}
       {showUnitAdminActions ? (

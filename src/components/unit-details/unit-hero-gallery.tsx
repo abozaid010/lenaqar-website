@@ -2,20 +2,36 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, PlayCircle, Share2 } from 'lucide-react';
 import type { UnitHeroGalleryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
 
 export default function UnitHeroGallery({
   images,
   isPrimary,
+  canShare = false,
+  onShare,
 }: UnitHeroGalleryProps) {
-  const { t } = useI18n();
+  const { t, translate } = useI18n();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const shareLabel = translate('unitShare.title', 'Share Property');
+
+  const shareButton =
+    canShare && onShare ? (
+      <button
+        type="button"
+        onClick={onShare}
+        aria-label={shareLabel}
+        className="absolute top-4 end-4 z-30 p-2.5 rounded-full bg-white/90 text-primary shadow-md hover:bg-white transition-colors"
+      >
+        <Share2 className="w-4 h-4" />
+      </button>
+    ) : null;
 
   if (images.length === 0) {
     return (
       <div className="relative w-full h-96 bg-gray-100 rounded-lg overflow-hidden">
+        {shareButton}
         <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
           <ImageIcon className="w-16 h-16 mb-4" />
           <p className="text-lg font-medium">{t?.unitLabels?.noImages || 'No images available'}</p>
@@ -58,6 +74,7 @@ export default function UnitHeroGallery({
 
       {/* Main Image */}
       <div className="relative w-full h-96 lg:h-[500px] bg-gray-100 rounded-lg overflow-hidden group">
+        {shareButton}
         {isCurrentVideo ? (
           currentImage.provider === 'file' ? (
             <video

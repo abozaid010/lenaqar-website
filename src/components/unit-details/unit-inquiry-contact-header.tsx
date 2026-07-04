@@ -1,16 +1,29 @@
 "use client";
 
+import { MessageCircle, PhoneCall } from "lucide-react";
+import type { MouseEvent } from "react";
 import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
+
+export interface UnitInquiryContactHeaderActions {
+  onCall?: () => void;
+  onWhatsApp?: (event: MouseEvent<HTMLButtonElement>) => void;
+  callDisabled?: boolean;
+  whatsappDisabled?: boolean;
+  callLabel?: string;
+  whatsappLabel?: string;
+}
 
 export interface UnitInquiryContactHeaderProps {
   name?: string | null;
   phone?: string | null;
+  actions?: UnitInquiryContactHeaderActions;
   className?: string;
 }
 
 export default function UnitInquiryContactHeader({
   name,
   phone,
+  actions,
   className = "",
 }: UnitInquiryContactHeaderProps) {
   const displayName = name?.trim() || null;
@@ -22,19 +35,50 @@ export default function UnitInquiryContactHeader({
     return null;
   }
 
+  const showActions = Boolean(actions?.onCall || actions?.onWhatsApp);
+
   return (
     <div
-      className={`shrink-0 space-y-0.5 border-b border-gray-100 pb-3 ${className}`.trim()}
+      className={`shrink-0 flex items-start justify-between gap-2 border-b border-gray-100 pb-3 ${className}`.trim()}
     >
-      {displayName ? (
-        <p className="text-sm font-semibold text-gray-900 truncate">
-          {displayName}
-        </p>
-      ) : null}
-      {displayPhone ? (
-        <p className="text-xs text-gray-600" dir="ltr">
-          {displayPhone}
-        </p>
+      <div className="min-w-0 flex-1 space-y-0.5">
+        {displayName ? (
+          <p className="text-sm font-semibold text-gray-900 truncate">
+            {displayName}
+          </p>
+        ) : null}
+        {displayPhone ? (
+          <p className="text-xs text-gray-600" dir="ltr">
+            {displayPhone}
+          </p>
+        ) : null}
+      </div>
+
+      {showActions ? (
+        <div className="flex items-center gap-1.5 shrink-0">
+          {actions?.onCall ? (
+            <button
+              type="button"
+              onClick={actions.onCall}
+              disabled={actions.callDisabled}
+              aria-label={actions.callLabel}
+              className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              <PhoneCall className="w-4 h-4" />
+            </button>
+          ) : null}
+          {actions?.onWhatsApp ? (
+            <button
+              type="button"
+              onClick={actions.onWhatsApp}
+              disabled={actions.whatsappDisabled}
+              aria-label={actions.whatsappLabel}
+              className="p-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </button>
+          ) : null}
+        </div>
       ) : null}
     </div>
   );

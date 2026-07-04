@@ -140,6 +140,8 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
             <UnitHeroGallery
               images={unit.heroImages}
               isPrimary={unit.isPrimary}
+              canShare={canShare}
+              onShare={() => setShowShareDialog(true)}
             />
 
             {/* Header Summary */}
@@ -173,8 +175,6 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
                   unit={unit}
                   rawUnit={rawUnit}
                   isOwnUnit={isOwnUnit}
-                  canShare={canShare}
-                  onShare={() => setShowShareDialog(true)}
                 />
               </div>
 

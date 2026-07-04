@@ -131,6 +131,8 @@ export interface UnitViewModel {
 export interface UnitHeroGalleryProps {
   images: HeroImage[];
   isPrimary: boolean;
+  canShare?: boolean;
+  onShare?: () => void;
 }
 
 export interface UnitHeaderSummaryProps {
@@ -165,8 +167,6 @@ export interface StickyInquiryCardProps {
   unit: UnitViewModel;
   rawUnit?: RawUnit;
   isOwnUnit?: boolean;
-  canShare?: boolean;
-  onShare?: () => void;
 }
 
 export interface MobileStickyActionBarProps {
