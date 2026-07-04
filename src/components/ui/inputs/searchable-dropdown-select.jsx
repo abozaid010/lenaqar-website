@@ -412,6 +412,8 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   const displayErrorMessage = typeof error === "string" ? error : errorMessage;
   const isAllSentinel =
     showAllOption && typeof value === "string" && value.toLowerCase() === "all";
+  const isAllSelected =
+    showAllOption && (!value || value === allOptionValue || isAllSentinel);
   const hasValue = Boolean(
     value && value !== allOptionValue && !isAllSentinel
   );
@@ -494,6 +496,8 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                   ? usePrimaryStyle
                     ? "text-primary font-medium"
                     : "text-gray-900"
+                  : isAllSelected
+                    ? "text-inherit"
                   : shouldFloatLabel && placeholder
                     ? "text-gray-400"
                     : "text-transparent"

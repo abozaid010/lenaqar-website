@@ -4,7 +4,7 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { getProfileData, runDailyEngagement, updateProfileData } from "@/utils/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Loader2, Copy, Share2, LogOut, MessageCircle } from "lucide-react";
+import { AlertTriangle, Loader2, Copy, Share2, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -322,8 +322,8 @@ export default function ClientInfo({ client_email }) {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center">
           <div className="bg-white rounded-lg shadow-lg p-6 w-80 m-4 animate-fade-in">
             <div className="flex flex-col items-center text-center mb-4">
-              <div className="bg-blue-100 p-3 rounded-full mb-4">
-                <MessageCircle className="h-6 w-6 text-primary" />
+              <div className="bg-red-100 p-3 rounded-full mb-4">
+                <AlertTriangle className="h-6 w-6 text-red-600" />
               </div>
               <h3 className="text-lg font-semibold text-gray-800">
                 {translate("clientInfo.followUpNowConfirmTitle")}
@@ -670,16 +670,16 @@ export default function ClientInfo({ client_email }) {
                   type="button"
                   onClick={handleFollowUpNow}
                   disabled={!clientId || followUpLoading}
-                  className="shrink-0 inline-flex items-center justify-center gap-2 py-2 px-4 bg-primary text-white rounded-md font-medium transition-colors hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="shrink-0 inline-flex items-center justify-center gap-2 py-2 px-4 border border-red-200 bg-red-50 text-red-700 rounded-md font-medium transition-colors hover:bg-red-100 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {followUpLoading ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="h-4 w-4 animate-spin text-red-600" />
                       <span>{translate("clientInfo.followUpNowRunning")}</span>
                     </>
                   ) : (
                     <>
-                      <MessageCircle className="h-4 w-4" />
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
                       <span>{translate("clientInfo.followUpNow")}</span>
                     </>
                   )}

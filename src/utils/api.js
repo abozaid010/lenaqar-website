@@ -25,6 +25,8 @@ import {
 } from "@/constants/whatsapp-messaging";
 import { normalizeLastAction } from "@/utils/actions";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
+import { phoneToE164 } from "@/components/phone/phone-utils";
+import { parsePhoneNumberFromString } from "libphonenumber-js/min";
 
 // Auth API
 export async function loginUser(credentials) {
@@ -1443,11 +1445,70 @@ export async function resetUnreadMessagesCount(userId) {
   }
 }
 
+/**
+ * Normalize a phone for GET /messages/conversation?phone_number=…
+ * Preserves international E.164 (+212…, +1…); falls back to EG parsing.
+ */
+export function normalizeConversationPhone(phoneNumber, defaultCountry = "EG") {
+  const trimmed = String(phoneNumber ?? "").trim();
+  if (!trimmed) return null;
+
+  if (trimmed.startsWith("+")) {
+    const parsed = parsePhoneNumberFromString(trimmed);
+    if (parsed?.isPossible()) return parsed.number;
+    return trimmed;
+  }
+
+  return (
+    phoneToE164(trimmed, defaultCountry) ||
+    trimmed
+  );
+}
+
 export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
   const response = await axiosInstance.get(`/messages/conversation/${userId}`, {
     params: { limit, offset },
   });
   return response.data;
+}
+
+/**
+ * Load conversation history by phone number.
+ * Uses GET /messages/conversation?phone_number={e164}
+ */
+export async function getConversationByPhone(
+  phoneNumber,
+  { client_id = null, limit = 30, offset = 0 } = {},
+) {
+  const normalized = normalizeConversationPhone(phoneNumber);
+  if (!normalized) {
+    throw new Error("phone_number is required");
+  }
+
+  const params = { phone_number: normalized, limit, offset };
+  if (client_id) params.client_id = client_id;
+
+  const emptyConversation = {
+    data: {
+      messages: [],
+      phone_number: normalized,
+      phoneNumber: normalized,
+    },
+  };
+
+  try {
+    const response = await axiosInstance.get("/messages/conversation", {
+      params,
+    });
+    return response.data;
+  } catch (error) {
+    const status = error?.response?.status;
+    if (status === 404) {
+      return emptyConversation;
+    }
+    console.error("Failed to fetch conversation by phone:", error.message);
+    throw error;
+  }
 }
 
 export async function sendClientMessage({
