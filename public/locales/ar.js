@@ -989,6 +989,7 @@ export default {
     title: "المحادثة",
     emptyState: "لا توجد محادثة بعد. ابدأ بإرسال رسالة.",
     loadFailed: "تعذر تحميل المحادثة. يرجى المحاولة مرة أخرى.",
+    refreshMessages: "تحديث المحادثة",
     messageInput: "الرسالة",
   },
   actionForm: {

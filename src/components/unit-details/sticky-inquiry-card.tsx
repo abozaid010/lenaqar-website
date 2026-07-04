@@ -1,5 +1,5 @@
 import { Edit, Trash2 } from 'lucide-react';
-import { useState, useEffect, useMemo, type MouseEvent } from 'react';
+import { useState, useEffect, useMemo, useCallback, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
@@ -41,6 +41,17 @@ export default function StickyInquiryCard({
   const [loading, setLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [unitUrl, setUnitUrl] = useState('');
+  const [conversationControls, setConversationControls] = useState<{
+    refetch: () => Promise<unknown>;
+    isFetching: boolean;
+  } | null>(null);
+
+  const handleConversationControls = useCallback(
+    (controls: { refetch: () => Promise<unknown>; isFetching: boolean }) => {
+      setConversationControls(controls);
+    },
+    []
+  );
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -73,6 +84,10 @@ export default function StickyInquiryCard({
   const whatsappLabel = translate(
     "buttons.whatsapp",
     locale === "ar" ? "واتساب" : "WhatsApp"
+  );
+  const refreshLabel = translate(
+    "chatConversation.refreshMessages",
+    locale === "ar" ? "تحديث المحادثة" : "Refresh messages"
   );
 
   useEffect(() => {
@@ -180,10 +195,17 @@ export default function StickyInquiryCard({
             actions={{
               onCall: handleCall,
               onWhatsApp: handleWhatsApp,
+              onRefresh: () => {
+                void conversationControls?.refetch();
+              },
               callDisabled: !contactData?.phone || loading,
               whatsappDisabled: !(contactData?.whatsapp || contactData?.phone) || loading,
+              refreshDisabled:
+                !conversationControls || conversationControls.isFetching || loading,
+              refreshLoading: conversationControls?.isFetching ?? false,
               callLabel,
               whatsappLabel,
+              refreshLabel,
             }}
           />
           <ChatConversation
@@ -194,6 +216,7 @@ export default function StickyInquiryCard({
             compact
             fillHeight
             className="flex-1 min-h-0"
+            onConversationControls={handleConversationControls}
           />
         </>
       ) : !loading && !receiverPhone && (contactData?.name || contactData?.phone) ? (

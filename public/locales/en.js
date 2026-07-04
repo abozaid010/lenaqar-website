@@ -1122,6 +1122,7 @@ export default {
     title: "Conversation",
     emptyState: "No conversation yet. Start by sending a message.",
     loadFailed: "Could not load conversation. Please try again.",
+    refreshMessages: "Refresh messages",
     messageInput: "Message",
   },
   actionForm: {

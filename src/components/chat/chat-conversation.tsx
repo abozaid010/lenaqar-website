@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import ChatHistory from "@/components/chat/chat-history";
 import ChatInput from "@/components/chat/chat-input";
@@ -23,6 +24,11 @@ export interface ChatConversationProps {
   /** Max messages to load. Defaults: leads 49, phone-only (unit) 30. */
   messageLimit?: number;
   className?: string;
+  /** Exposes refetch/isFetching for external refresh controls (e.g. unit inquiry header). */
+  onConversationControls?: (controls: {
+    refetch: () => Promise<unknown>;
+    isFetching: boolean;
+  }) => void;
 }
 
 export default function ChatConversation({
@@ -35,6 +41,7 @@ export default function ChatConversation({
   fillHeight = false,
   messageLimit,
   className = "",
+  onConversationControls,
 }: ChatConversationProps) {
   const { translate } = useI18n();
 
@@ -45,6 +52,8 @@ export default function ChatConversation({
     isError,
     onNewMessage,
     queryKey,
+    refetch,
+    isFetching,
   } = useConversation({
     userId,
     phoneNumber,
@@ -53,6 +62,10 @@ export default function ChatConversation({
       messageLimit ??
       (userId ? LEAD_CONVERSATION_MESSAGE_LIMIT : UNIT_CONVERSATION_MESSAGE_LIMIT),
   });
+
+  useEffect(() => {
+    onConversationControls?.({ refetch, isFetching });
+  }, [onConversationControls, refetch, isFetching]);
 
   const resolvedUserId = meta.userId ?? userId ?? null;
   const resolvedChatId = meta.chatId ?? chatId ?? null;

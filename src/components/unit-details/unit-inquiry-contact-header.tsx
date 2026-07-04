@@ -1,16 +1,20 @@
 "use client";
 
-import { MessageCircle, PhoneCall } from "lucide-react";
+import { MessageCircle, PhoneCall, RefreshCw } from "lucide-react";
 import type { MouseEvent } from "react";
 import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
 
 export interface UnitInquiryContactHeaderActions {
   onCall?: () => void;
   onWhatsApp?: (event: MouseEvent<HTMLButtonElement>) => void;
+  onRefresh?: () => void;
   callDisabled?: boolean;
   whatsappDisabled?: boolean;
+  refreshDisabled?: boolean;
+  refreshLoading?: boolean;
   callLabel?: string;
   whatsappLabel?: string;
+  refreshLabel?: string;
 }
 
 export interface UnitInquiryContactHeaderProps {
@@ -35,7 +39,9 @@ export default function UnitInquiryContactHeader({
     return null;
   }
 
-  const showActions = Boolean(actions?.onCall || actions?.onWhatsApp);
+  const showActions = Boolean(
+    actions?.onCall || actions?.onWhatsApp || actions?.onRefresh
+  );
 
   return (
     <div
@@ -76,6 +82,19 @@ export default function UnitInquiryContactHeader({
               className="p-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               <MessageCircle className="w-4 h-4" />
+            </button>
+          ) : null}
+          {actions?.onRefresh ? (
+            <button
+              type="button"
+              onClick={actions.onRefresh}
+              disabled={actions.refreshDisabled}
+              aria-label={actions.refreshLabel}
+              className="p-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              <RefreshCw
+                className={`w-4 h-4 ${actions.refreshLoading ? "animate-spin" : ""}`}
+              />
             </button>
           ) : null}
         </div>
