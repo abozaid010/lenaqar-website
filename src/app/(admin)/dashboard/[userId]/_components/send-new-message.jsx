@@ -1,54 +1,13 @@
 "use client";
 
-import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { useI18n } from "@/hooks/useI18n";
-import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
-import {
-  logWhatsappMessaging,
-  resolveWhatsappSendContext,
-  sendWhatsappWithClientConfig,
-  WHATSAPP_MESSAGING_NOT_LOADED_CODE,
-  WHATSAPP_NOT_CONFIGURED_CODE,
-  WHATSAPP_PLATFORM_REQUIRED_CODE,
-  WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
-  WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
-  WHATSAPP_MESSAGE_SOURCES,
-} from "@/lib/whatsapp-messaging-provider";
-import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
-import { sendClientMessage } from "@/utils/api";
-import { useQueryClient } from "@tanstack/react-query";
+import { useSendWhatsappMessage } from "@/hooks/useSendWhatsappMessage";
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const MAX_LINES = 3;
-
-function getSendContextErrorMessage(code, translate) {
-  if (code === WHATSAPP_MESSAGING_NOT_LOADED_CODE) {
-    return translate(
-      "whatsappSend.configLoading",
-      "WhatsApp settings are still loading. Please wait and try again.",
-    );
-  }
-  if (code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
-    return translate(
-      "whatsappSend.platformRequired",
-      "Please choose which WhatsApp account to send from.",
-    );
-  }
-  if (code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE) {
-    return translate(
-      "whatsappSend.senderPhoneRequired",
-      "Sender phone number is missing for the selected WhatsApp account.",
-    );
-  }
-  return translate(
-    "editClient.whatsapp.notConfigured",
-    "WhatsApp messaging is not configured for this client.",
-  );
-}
 
 export default function SendNewMessageForm({
   userId,
@@ -58,71 +17,38 @@ export default function SendNewMessageForm({
   onNewMessage,
 }) {
   const [message, setMessage] = useState("");
-  const [pending, setPending] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState("");
-  const [platformError, setPlatformError] = useState("");
   const textareaRef = useRef(null);
   const { translate, common } = useI18n();
   const queryClient = useQueryClient();
 
-  const resolvedClientId =
-    clientId || LenaCookiesManager.getClientId() || CAMPAIGN_CHAT_CLIENT_ID;
-
-  const {
-    data: messagingData,
-    isLoading: isMessagingLoading,
-    isFetching: isMessagingFetching,
-    isError: isMessagingError,
-    refetch: refetchMessagingConfig,
-  } = useMessagingProviderConfig(resolvedClientId);
-
-  const accounts = messagingData?.accounts ?? [];
   const resolvedChatId = chatId ? String(chatId).trim() : "";
   const resolvedPhone = phoneNumber ? String(phoneNumber).trim() : "";
-  const whatsappRecipient = resolveWhatsappRecipientFields({
-    chat_id: resolvedChatId,
-    phone_number: resolvedPhone,
-  });
-  const usesWhatsappApi = Boolean(whatsappRecipient);
-  const sendContext = usesWhatsappApi
-    ? resolveWhatsappSendContext(messagingData, selectedPlatform)
-    : null;
 
-  const canSend = Boolean(message.trim() && (usesWhatsappApi || userId));
-  const messagingReady =
-    !usesWhatsappApi || (!isMessagingLoading && !isMessagingFetching);
-  const canSendWhatsapp =
-    !usesWhatsappApi ||
-    sendContext?.ok === true ||
-    (isMessagingError && messagingReady);
-
-  useEffect(() => {
-    logWhatsappMessaging("send_form_messaging_state", {
-      clientId: resolvedClientId,
-      usesWhatsappApi,
-      isLoading: isMessagingLoading,
-      isFetching: isMessagingFetching,
-      isError: isMessagingError,
-      hasData: Boolean(messagingData),
-      canSendWhatsapp: messagingData?.canSendWhatsapp ?? null,
-      defaultSenderPhone: messagingData?.defaultSenderPhone ?? null,
-      selectedPlatform: selectedPlatform || null,
-      sendContextOk: sendContext?.ok ?? null,
-      sendContextCode: sendContext?.code ?? null,
-      senderPhoneNumber: sendContext?.senderPhoneNumber ?? null,
-    });
-  }, [
-    resolvedClientId,
-    usesWhatsappApi,
+  const {
+    sendMessage,
+    pending,
+    selectedPlatform,
+    setSelectedPlatform,
+    platformError,
+    setPlatformError,
+    messagingData,
+    accounts,
     isMessagingLoading,
     isMessagingFetching,
     isMessagingError,
-    messagingData,
-    selectedPlatform,
-    sendContext?.ok,
-    sendContext?.code,
-    sendContext?.senderPhoneNumber,
-  ]);
+    usesWhatsappApi,
+    messagingReady,
+    canSendWhatsapp,
+    sendContext,
+  } = useSendWhatsappMessage({
+    clientId,
+    phoneNumber: resolvedPhone,
+    chatId: resolvedChatId,
+    userId,
+  });
+
+  const canSend = Boolean(message.trim() && (usesWhatsappApi || userId));
+  const canType = Boolean(usesWhatsappApi || userId);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -146,157 +72,19 @@ export default function SendNewMessageForm({
     if (!canSend || pending) return;
 
     const text = message.trim();
+    const result = await sendMessage(text);
+    if (!result) return;
 
-    setPlatformError("");
-    setPending(true);
-
-    try {
-      if (usesWhatsappApi) {
-        if (isMessagingLoading || isMessagingFetching) {
-          const err = getSendContextErrorMessage(
-            WHATSAPP_MESSAGING_NOT_LOADED_CODE,
-            translate,
-          );
-          toast.error(err);
-          return;
-        }
-
-        if (isMessagingError || !messagingData) {
-          logWhatsappMessaging("send_form_refetch_messaging", {
-            clientId: resolvedClientId,
-          });
-          const { data: refreshed } = await refetchMessagingConfig();
-          const refreshedContext = resolveWhatsappSendContext(
-            refreshed,
-            selectedPlatform,
-          );
-          if (!refreshedContext.ok) {
-            const err = getSendContextErrorMessage(
-              refreshedContext.code,
-              translate,
-            );
-            if (refreshedContext.code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
-              setPlatformError(err);
-            }
-            toast.error(err);
-            return;
-          }
-
-          logWhatsappMessaging("send_form_dispatch", {
-            clientId: resolvedClientId,
-            platform: refreshedContext.transportPlatform,
-            senderPhoneNumber: refreshedContext.senderPhoneNumber,
-            recipient: whatsappRecipient,
-          });
-
-          await sendWhatsappWithClientConfig({
-            config: refreshedContext.account,
-            messages: [
-              {
-                ...whatsappRecipient,
-                message: text,
-                platform: refreshedContext.transportPlatform,
-                sender_phone_number: refreshedContext.senderPhoneNumber,
-                source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
-              },
-            ],
-          });
-        } else {
-          const context = resolveWhatsappSendContext(
-            messagingData,
-            selectedPlatform,
-          );
-
-          if (!context.ok) {
-            const err = getSendContextErrorMessage(context.code, translate);
-            if (context.code === WHATSAPP_PLATFORM_REQUIRED_CODE) {
-              setPlatformError(err);
-            }
-            logWhatsappMessaging("send_form_blocked", {
-              clientId: resolvedClientId,
-              code: context.code,
-              selectedPlatform: selectedPlatform || null,
-              defaultSenderPhone: messagingData?.defaultSenderPhone ?? null,
-            });
-            toast.error(err);
-            return;
-          }
-
-          logWhatsappMessaging("send_form_dispatch", {
-            clientId: resolvedClientId,
-            platform: context.transportPlatform,
-            senderPhoneNumber: context.senderPhoneNumber,
-            recipient: whatsappRecipient,
-          });
-
-          await sendWhatsappWithClientConfig({
-            config: context.account,
-            messages: [
-              {
-                ...whatsappRecipient,
-                message: text,
-                platform: context.transportPlatform,
-                sender_phone_number: context.senderPhoneNumber,
-                source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
-              },
-            ],
-          });
-        }
-      } else if (userId && resolvedClientId) {
-        await sendClientMessage({
-          user_id: userId,
-          client_id: resolvedClientId,
-          client_message: text,
-        });
-      } else {
-        toast.error(
-          translate(
-            "editClient.whatsapp.notConfigured",
-            "WhatsApp messaging is not configured for this client.",
-          ),
-        );
-        return;
-      }
-
-      setMessage("");
-      onNewMessage?.({
-        user_message: text,
-        timestamp: Date.now(),
-        source: "human",
-      });
-      if (userId) {
-        queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
-      }
-    } catch (error) {
-      console.error("Failed to send reply:", error);
-      const code = error?.code;
-      if (
-        code === WHATSAPP_NOT_CONFIGURED_CODE ||
-        code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE
-      ) {
-        toast.error(getSendContextErrorMessage(code, translate));
-        return;
-      }
-      if (code === WHATSAPP_RATE_LIMIT_EXCEEDED_CODE || error?.status === 429) {
-        toast.error(
-          error?.message ||
-            translate(
-              "whatsappSend.rateLimitExceeded",
-              "Daily message limit exceeded. Please try again later.",
-            ),
-        );
-        return;
-      }
-      toast.error(
-        translate("dashboardFilter.bulkWhatsapp.sendFailed") ||
-          common.operationFailed,
-      );
-    } finally {
-      setPending(false);
+    setMessage("");
+    onNewMessage?.({
+      user_message: text,
+      timestamp: Date.now(),
+      source: "human",
+    });
+    if (userId) {
+      queryClient.invalidateQueries({ queryKey: ["chatHistory", userId] });
     }
   };
-
-  const canType = Boolean(usesWhatsappApi || userId);
 
   return (
     <form

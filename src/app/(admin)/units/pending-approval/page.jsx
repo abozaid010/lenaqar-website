@@ -1,5 +1,5 @@
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import ResalePageQuery from "@/components/ui/resale_page_query";
+import PendingApprovalPageClient from "./pending-approval-page-client";
 import { Suspense } from "react";
 import { cookies } from "next/headers";
 
@@ -49,8 +49,9 @@ export default async function PendingApprovalUnitsPage({
       />
       <div className="h-full flex flex-col">
         <Suspense fallback={<LoadingSpinner />}>
-          <ResalePageQuery
+          <PendingApprovalPageClient
             searchParams={searchParams}
+            clientId={clientId}
             initialUnitsData={initialUnitsData}
           />
         </Suspense>

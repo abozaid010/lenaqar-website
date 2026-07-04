@@ -2439,6 +2439,19 @@ export default {
     deletePropertyConfirm:
       "Are you sure you want to delete this property?",
   },
+  sendMessageToOwner: {
+    title: "Message Owner",
+    titleGeneric: "Send Message",
+    toLabel: "To",
+    messageLabel: "Message",
+    placeholder: "Type your message…",
+    sendButton: "Send via WhatsApp",
+    defaultGreeting: "Hello,",
+    defaultGreetingNamed: "Hello {{name}},",
+    defaultBody: "I wanted to share this property with you.",
+    messageReady: "Message ready to send.",
+    sentSuccess: "Message sent successfully.",
+  },
   unitShare: {
     title: "Share Property",
     subtitle: "Copy a link and share it with your clients.",
