@@ -6,6 +6,7 @@ import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath, buildAdminUnitShareUrl } from '@/lib/units/unit-share-links';
 import ChatConversation from '@/components/chat/chat-conversation';
+import UnitInquiryContactHeader from '@/components/unit-details/unit-inquiry-contact-header';
 import { UNIT_CONVERSATION_MESSAGE_LIMIT } from '@/constants/conversation-limits';
 import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
 import { normalizeConversationPhone } from '@/utils/api';
@@ -174,23 +175,21 @@ export default function StickyInquiryCard({
       ) : null}
 
       {!loading && receiverPhone ? (
-        <ChatConversation
-          phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
-          clientId={currentClientId}
-          unitUrl={unitUrl}
-          messageLimit={UNIT_CONVERSATION_MESSAGE_LIMIT}
-          compact
-          fillHeight
-          className="flex-1 min-h-0"
-          headerName={
-            contactData?.name?.trim() ||
-            unit.ownerName?.trim() ||
-            undefined
-          }
-          headerPhone={
-            formatPhoneForDisplay(receiverPhone, 'EG') || receiverPhone
-          }
-        />
+        <>
+          <UnitInquiryContactHeader
+            name={contactData?.name?.trim() || unit.ownerName?.trim()}
+            phone={receiverPhone}
+          />
+          <ChatConversation
+            phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
+            clientId={currentClientId}
+            unitUrl={unitUrl}
+            messageLimit={UNIT_CONVERSATION_MESSAGE_LIMIT}
+            compact
+            fillHeight
+            className="flex-1 min-h-0"
+          />
+        </>
       ) : !loading && !receiverPhone && (contactData?.name || contactData?.phone) ? (
         <div className="bg-gray-50 rounded-lg p-3 text-center space-y-1 shrink-0">
           <div className="text-xs text-gray-600">

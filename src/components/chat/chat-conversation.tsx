@@ -6,7 +6,6 @@ import ChatInput from "@/components/chat/chat-input";
 import ChatConversationSkeleton from "@/components/chat/chat-conversation-skeleton";
 import { useConversation } from "@/hooks/useConversation";
 import { useI18n } from "@/hooks/useI18n";
-import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
 import {
   LEAD_CONVERSATION_MESSAGE_LIMIT,
   UNIT_CONVERSATION_MESSAGE_LIMIT,
@@ -24,10 +23,6 @@ export interface ChatConversationProps {
   /** Max messages to load. Defaults: leads 49, phone-only (unit) 30. */
   messageLimit?: number;
   className?: string;
-  /** @deprecated Use headerName instead */
-  conversationLabel?: string | null;
-  headerName?: string | null;
-  headerPhone?: string | null;
 }
 
 export default function ChatConversation({
@@ -40,9 +35,6 @@ export default function ChatConversation({
   fillHeight = false,
   messageLimit,
   className = "",
-  conversationLabel,
-  headerName,
-  headerPhone,
 }: ChatConversationProps) {
   const { translate } = useI18n();
 
@@ -67,13 +59,6 @@ export default function ChatConversation({
   const resolvedPhone = meta.phoneNumber ?? phoneNumber ?? null;
   const resolvedClientId = meta.clientId ?? clientId ?? null;
 
-  const displayHeaderName =
-    headerName?.trim() || meta.name?.trim() || null;
-  const displayHeaderPhone =
-    headerPhone?.trim() ||
-    formatPhoneForDisplay(resolvedPhone ?? "", "EG") ||
-    resolvedPhone;
-
   const shellClass = compact
     ? `flex flex-col min-h-0 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden ${className}`
     : `flex flex-col flex-1 min-h-0 overflow-hidden ${className}`;
@@ -87,27 +72,6 @@ export default function ChatConversation({
 
   return (
     <div className={shellClass}>
-      {displayHeaderName || displayHeaderPhone ? (
-        <div className="px-3 py-2.5 border-b border-gray-100 bg-white space-y-0.5">
-          {displayHeaderName ? (
-            <p className="text-sm font-semibold text-gray-900 truncate">
-              {displayHeaderName}
-            </p>
-          ) : null}
-          {displayHeaderPhone ? (
-            <p className="text-xs text-gray-600" dir="ltr">
-              {displayHeaderPhone}
-            </p>
-          ) : null}
-        </div>
-      ) : conversationLabel ? (
-        <div className="px-3 py-2 border-b border-gray-100 bg-white">
-          <p className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-            {conversationLabel}
-          </p>
-        </div>
-      ) : null}
-
       <ChatMessagesArea
         className={historyHeightClass}
         contentClassName={compact ? "py-2 px-1.5 overflow-y-auto" : "py-3 px-2 overflow-y-auto"}
