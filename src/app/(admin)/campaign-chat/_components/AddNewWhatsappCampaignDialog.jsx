@@ -22,6 +22,7 @@ import {
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
+import { ensureUrlInMessage } from "@/lib/whatsapp-message-compose";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 const DEFAULT_CONTACTS_JSON =
   '[\n  {\n    "phone": "+20 101 6080323",\n    "name": "Nada"\n  }\n]';
@@ -105,7 +106,7 @@ const AddNewWhatsappCampaignDialog = ({
 
   useEffect(() => {
     if (!isOpen) return;
-    if (appendUnitLinkPerRecipient && hasAutomationModule) {
+    if (appendUnitLinkPerRecipient) {
       setSendMode(SEND_MODE.AUTOMATION);
       return;
     }
@@ -393,7 +394,7 @@ const AddNewWhatsappCampaignDialog = ({
   const buildAutomationMessageForRecipient = (recipient) => {
     const base = automationMessage.trim();
     if (appendUnitLinkPerRecipient && recipient?.unitLink) {
-      return `${base}\n\n${recipient.unitLink}`.trim();
+      return ensureUrlInMessage(base, recipient.unitLink);
     }
     return base;
   };
@@ -429,7 +430,7 @@ const AddNewWhatsappCampaignDialog = ({
     setError("");
 
     try {
-      if (sendMode === SEND_MODE.AUTOMATION) {
+      if (sendMode === SEND_MODE.AUTOMATION || appendUnitLinkPerRecipient) {
         const result = await submitAutomationMessages();
         const sent = result?.data?.sent ?? 0;
         const failed = result?.data?.failed ?? 0;
@@ -531,7 +532,7 @@ const AddNewWhatsappCampaignDialog = ({
   ).replace("{count}", String(recipientsProp.length));
 
   const renderModeTabs = () => {
-    if (!hasBothModules) return null;
+    if (!hasBothModules || appendUnitLinkPerRecipient) return null;
 
     return (
       <div className="flex gap-2 mb-4 p-1 bg-gray-100 rounded-lg">
@@ -576,6 +577,14 @@ const AddNewWhatsappCampaignDialog = ({
       {hasPrefilledRecipients && (
         <p className="mb-3 text-sm text-gray-600">{recipientSummary}</p>
       )}
+      {appendUnitLinkPerRecipient ? (
+        <p className="mb-3 text-xs text-gray-500">
+          {translate(
+            "unitsFilter.bulkAvailability.unitLinkHint",
+            "Each owner will receive your message with their unit link appended automatically."
+          )}
+        </p>
+      ) : null}
       <LenaTextarea
         label={translate(
           "dashboardFilter.bulkWhatsapp.messageLabel",
@@ -703,8 +712,12 @@ const AddNewWhatsappCampaignDialog = ({
   );
 
   const showAutomation =
-    sendMode === SEND_MODE.AUTOMATION && hasAutomationModule;
-  const showApi = sendMode === SEND_MODE.API && hasApiModule;
+    appendUnitLinkPerRecipient ||
+    (sendMode === SEND_MODE.AUTOMATION && hasAutomationModule);
+  const showApi =
+    !appendUnitLinkPerRecipient &&
+    sendMode === SEND_MODE.API &&
+    hasApiModule;
 
   return (
     <Dialog

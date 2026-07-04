@@ -1217,6 +1217,8 @@ export default {
       selectedUnits: "{count} selected",
       noOwnerPhone: "No owner phone",
       noRecipients: "Selected units have no valid owner phone numbers.",
+      unitLinkHint:
+        "Each owner will receive your message with their unit link appended automatically.",
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
     },
