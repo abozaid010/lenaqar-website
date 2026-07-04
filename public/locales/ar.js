@@ -985,6 +985,12 @@ export default {
   chatHistory: {
     noMessages: "لا توجد رسائل بعد.",
   },
+  chatConversation: {
+    title: "المحادثة",
+    emptyState: "لا توجد محادثة بعد. ابدأ بإرسال رسالة.",
+    loadFailed: "تعذر تحميل المحادثة. يرجى المحاولة مرة أخرى.",
+    messageInput: "الرسالة",
+  },
   actionForm: {
     actionLabel: "نوع الإجراء",
     commentLabel: "ملاحظات / تعليقات",

@@ -5,8 +5,10 @@ import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath, buildAdminUnitShareUrl } from '@/lib/units/unit-share-links';
-import SendMessageToOwner from '@/components/whatsapp/send-message-to-owner';
-import { phoneToE164 } from '@/components/phone/phone-utils';
+import ChatConversation from '@/components/chat/chat-conversation';
+import { UNIT_CONVERSATION_MESSAGE_LIMIT } from '@/constants/conversation-limits';
+import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
+import { normalizeConversationPhone } from '@/utils/api';
 import { handleOpenWhatsApp } from '@/utils/phone-utils';
 import { appendUnitsSourcePendingQuery, buildAdminPendingApprovalListPath } from '@/utils/units-navigation-source';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
@@ -58,11 +60,6 @@ export default function StickyInquiryCard({
       unit.ownerMobile?.trim() ||
       '',
     [contactData, unit.ownerMobile]
-  );
-
-  const receiverName = useMemo(
-    () => contactData?.name?.trim() || unit.ownerName?.trim() || '',
-    [contactData, unit.ownerName]
   );
 
   const showOwnerContact = Boolean(
@@ -136,7 +133,7 @@ export default function StickyInquiryCard({
     if (!phone) return;
     handleOpenWhatsApp(
       event as unknown as Event,
-      phoneToE164(phone, 'EG') || phone
+      normalizeConversationPhone(phone) || phone
     );
   };
 
@@ -167,60 +164,52 @@ export default function StickyInquiryCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border shadow-lg p-6 space-y-4">
-      <div className="text-center">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          {translate("unitInquiry.interestedTitle")}
-        </h3>
-        <p className="text-sm text-gray-600">
-          {translate("unitInquiry.interestedSubtitle")}
-        </p>
-      </div>
-
-      {/* Contact Information */}
+    <div className="bg-white rounded-lg border shadow-lg p-4 flex flex-col h-full min-h-0 gap-3">
       {loading ? (
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
+        <div className="bg-gray-50 rounded-lg p-3 text-center shrink-0">
           <div className="text-xs text-gray-600">
             {translate("unitInquiry.loadingContact")}
           </div>
         </div>
-      ) : (contactData?.name || contactData?.phone || contactData?.whatsapp) ? (
-        <div className="bg-gray-50 rounded-lg p-3 text-center space-y-1">
+      ) : null}
+
+      {!loading && receiverPhone ? (
+        <ChatConversation
+          phoneNumber={normalizeConversationPhone(receiverPhone) || receiverPhone}
+          clientId={currentClientId}
+          unitUrl={unitUrl}
+          messageLimit={UNIT_CONVERSATION_MESSAGE_LIMIT}
+          compact
+          fillHeight
+          className="flex-1 min-h-0"
+          headerName={
+            contactData?.name?.trim() ||
+            unit.ownerName?.trim() ||
+            undefined
+          }
+          headerPhone={
+            formatPhoneForDisplay(receiverPhone, 'EG') || receiverPhone
+          }
+        />
+      ) : !loading && !receiverPhone && (contactData?.name || contactData?.phone) ? (
+        <div className="bg-gray-50 rounded-lg p-3 text-center space-y-1 shrink-0">
           <div className="text-xs text-gray-600">
             {translate("unitInquiry.contactPrefix")}
             {contactData?.type ? ` (${contactData.type})` : ""}
           </div>
-          {showOwnerContact && unit.ownerName?.trim() && (
-            <div className="text-sm font-medium text-gray-900">
-              {translate("saleDetails.ownerName", "Owner Name")}: {unit.ownerName}
-            </div>
-          )}
-          {showOwnerContact && unit.ownerMobile?.trim() && (
-            <div className="text-sm text-gray-800">
-              {translate("saleDetails.ownerMobile", "Owner Mobile")}: {unit.ownerMobile}
-            </div>
-          )}
-          {!showOwnerContact && contactData?.name && (
+          {contactData?.name ? (
             <div className="text-sm font-medium text-gray-900">{contactData.name}</div>
-          )}
-          {!showOwnerContact && contactData?.phone && (
-            <div className="text-xs text-gray-500">{contactData.phone}</div>
-          )}
+          ) : null}
+          {contactData?.phone ? (
+            <div className="text-xs text-gray-500" dir="ltr">
+              {formatPhoneForDisplay(contactData.phone, 'EG') || contactData.phone}
+            </div>
+          ) : null}
         </div>
       ) : null}
 
-      {!loading && receiverPhone ? (
-        <SendMessageToOwner
-          receiverName={receiverName}
-          receiverPhone={receiverPhone}
-          unitUrl={unitUrl}
-          clientId={currentClientId}
-          title={translate("sendMessageToOwner.title", "Message Owner")}
-        />
-      ) : null}
-
       {/* Primary CTAs */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 shrink-0">
         <button
           onClick={handleCall}
           disabled={!contactData?.phone || loading}
@@ -244,7 +233,7 @@ export default function StickyInquiryCard({
         <button
           type="button"
           onClick={onShare}
-          className="w-full border border-primary/30 text-primary rounded-lg py-2 px-3 font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 text-sm"
+          className="w-full shrink-0 border border-primary/30 text-primary rounded-lg py-2 px-3 font-medium hover:bg-primary/5 transition-colors flex items-center justify-center gap-2 text-sm"
         >
           <Share2 className="w-4 h-4" />
           {translate("unitShare.title", "Share Property")}
@@ -253,7 +242,7 @@ export default function StickyInquiryCard({
 
       {/* Admin Actions — not shown for primary units when the viewer is another client */}
       {showUnitAdminActions ? (
-        <div className="border-t pt-4 space-y-3">
+        <div className="border-t pt-3 space-y-3 shrink-0">
           {showApproveButton && rawUnit ? (
             <>
               {unit.referenceCode?.trim() ? (

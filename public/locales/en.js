@@ -1118,6 +1118,12 @@ export default {
   chatHistory: {
     noMessages: "No messages yet.",
   },
+  chatConversation: {
+    title: "Conversation",
+    emptyState: "No conversation yet. Start by sending a message.",
+    loadFailed: "Could not load conversation. Please try again.",
+    messageInput: "Message",
+  },
   actionForm: {
     actionLabel: "Action Type",
     commentLabel: "Notes / Comments",

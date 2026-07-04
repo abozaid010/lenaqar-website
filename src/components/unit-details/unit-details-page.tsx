@@ -166,9 +166,9 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
 
           {/* Right Column - Sticky Sidebar */}
           <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-8 space-y-6">
+            <div className="lg:sticky lg:top-8 lg:self-start space-y-6">
               {/* Sticky Inquiry Card - Desktop Only */}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)]">
                 <StickyInquiryCard
                   unit={unit}
                   rawUnit={rawUnit}

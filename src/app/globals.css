@@ -367,6 +367,18 @@ select:disabled {
   border-top: 1px solid var(--chat-border);
 }
 
+.chat-input-shell {
+  background-color: var(--chat-input-bg);
+  border: 1px solid var(--chat-border);
+  border-radius: 1.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chat-input-shell:focus-within {
+  border-color: #25d366;
+  box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.2);
+}
+
 .chat-input-field {
   background-color: var(--chat-input-bg);
   color: var(--chat-input-text);
@@ -374,7 +386,8 @@ select:disabled {
   border-radius: 1.5rem;
 }
 
-.chat-input-field::placeholder {
+.chat-input-field::placeholder,
+.chat-input-shell textarea::placeholder {
   color: var(--chat-input-placeholder);
 }
 
@@ -382,6 +395,14 @@ select:disabled {
   outline: none;
   border-color: #25d366;
   box-shadow: 0 0 0 1px rgba(37, 211, 102, 0.2);
+}
+
+.chat-input-shell textarea {
+  color: var(--chat-input-text);
+}
+
+.chat-input-shell textarea:focus {
+  outline: none;
 }
 
 .chat-date-pill {

@@ -1,10 +1,10 @@
 "use client";
 
 import ActionsModal from "@/app/(admin)/dashboard/_components/actions-modal";
-import ChatHistory from "@/app/(admin)/dashboard/[userId]/_components/chat-history";
-import ChatWith from "@/app/(admin)/dashboard/[userId]/_components/chat-with";
-import SendNewMessageForm from "@/app/(admin)/dashboard/[userId]/_components/send-new-message";
+import ChatWith from "@/components/chat/chat-with";
+import ChatConversation from "@/components/chat/chat-conversation";
 import ToggleReplyType from "@/app/(admin)/dashboard/[userId]/_components/reply-type";
+import { LEAD_CONVERSATION_MESSAGE_LIMIT } from "@/constants/conversation-limits";
 import { useI18n } from "@/hooks/useI18n";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
@@ -14,7 +14,6 @@ import {
   getChatHistory,
   getClientActions,
   getClientRequirements,
-  resetUnreadMessagesCount,
   addLeadTags,
   removeLeadTags,
 } from "@/utils/api";
@@ -59,7 +58,6 @@ import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
-import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
 
@@ -125,7 +123,6 @@ export default function LeadDetailPane({
     isReady: actionsPermissionReady,
   } = useModuleActions("conversation");
   const [bulkActionOpen, setBulkActionOpen] = useState(false);
-  const [chatHistory, setChatHistory] = useState([]);
   const [openActionsModal, setOpenActionsModal] = useState(false);
   const [rowActions, setRowActions] = useState(null);
   const [loadingActions, setLoadingActions] = useState(false);
@@ -173,8 +170,9 @@ export default function LeadDetailPane({
   }, [userId]);
 
   const { data, error, isLoading } = useQuery({
-    queryKey: ["chatHistory", userId],
-    queryFn: () => getChatHistory(userId),
+    queryKey: ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
+    queryFn: () =>
+      getChatHistory(userId, { limit: LEAD_CONVERSATION_MESSAGE_LIMIT }),
     enabled: !!userId,
     staleTime: 1000 * 60 * 5,
     refetchOnWindowFocus: false,
@@ -194,22 +192,6 @@ export default function LeadDetailPane({
     district: pickLast(requirementLocation?.district) || "",
     sub_district: pickLast(requirementLocation?.sub_district) || "",
   });
-
-  const onNewMessage = useCallback((newMessage) => {
-    setChatHistory((prev) => [...prev, newMessage]);
-  }, []);
-
-  useEffect(() => {
-    async function resetUnread(uid) {
-      await resetUnreadMessagesCount(uid);
-    }
-    if (!isLoading && data?.data && userId) {
-      setChatHistory(data.data.messages || []);
-      if (data.data.unread_messages_count !== 0) {
-        resetUnread(userId);
-      }
-    }
-  }, [isLoading, data, userId]);
 
   const phoneNumber =
     leadSummary?.phone_number ||
@@ -327,7 +309,9 @@ export default function LeadDetailPane({
 
       if (Object.keys(patch).length > 0) {
         patchUserInInfiniteUsersCaches(queryClient, userId, patch);
-        queryClient.setQueryData(["chatHistory", userId], (old) => {
+        queryClient.setQueryData(
+          ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
+          (old) => {
           if (!old?.data) return old;
           return {
             ...old,
@@ -662,7 +646,9 @@ export default function LeadDetailPane({
         toast.success("Tag added successfully");
         setNewTagInput("");
         // Update local data optimistically - update both leadSummary and chat history
-        queryClient.setQueryData(["chatHistory", userId], (oldData) => {
+        queryClient.setQueryData(
+          ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
+          (oldData) => {
           if (!oldData?.data) return oldData;
           return {
             ...oldData,
@@ -708,7 +694,9 @@ export default function LeadDetailPane({
       } else {
         toast.success("Tag removed successfully");
         // Update local data optimistically - update both leadSummary and chat history
-        queryClient.setQueryData(["chatHistory", userId], (oldData) => {
+        queryClient.setQueryData(
+          ["chatHistory", userId, LEAD_CONVERSATION_MESSAGE_LIMIT],
+          (oldData) => {
           if (!oldData?.data) return oldData;
           return {
             ...oldData,
@@ -1068,18 +1056,13 @@ export default function LeadDetailPane({
           className="flex-1 min-h-0 flex flex-col overflow-hidden bg-white"
         >
           {activeTab === "conversations" && (
-            <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-              <ChatMessagesArea className="flex-1" contentClassName="py-3 px-2">
-                <ChatHistory data={chatHistory} />
-              </ChatMessagesArea>
-              <SendNewMessageForm
-                userId={userId}
-                phoneNumber={phoneNumber}
-                chatId={chatId}
-                clientId={clientId}
-                onNewMessage={onNewMessage}
-              />
-            </div>
+            <ChatConversation
+              userId={userId}
+              chatId={chatId}
+              clientId={clientId}
+              messageLimit={LEAD_CONVERSATION_MESSAGE_LIMIT}
+              className="flex-1 min-h-0"
+            />
           )}
 
           {activeTab === "requirements" && (
