@@ -11,6 +11,7 @@ import {
   Newspaper,
   MapPin,
   MessageCircle,
+  Share2,
   Menu,
   Settings,
 } from "lucide-react";
@@ -253,6 +254,7 @@ const SidebarComponent = ({
   const developers = useModuleActions("developers");
   const news = useModuleActions("news");
   const map = useModuleActions("map");
+  const socialMedia = useModuleActions("social_media");
 
   // Build prefixed nav href
   const prefix = clientId ? `/${clientId}` : '';
@@ -414,6 +416,21 @@ const SidebarComponent = ({
             >
               <LayoutDashboard className="h-5 w-5 mr-3" />
               <span>{translate("sidebar.dashboard")}</span>
+            </Link>
+          )}
+
+          {isMounted && socialMedia.canView && (
+            <Link
+              href={navHref("/social-media/dashboard")}
+              prefetch={true}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/social-media")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <Share2 className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.socialMedia", "Social media")}</span>
             </Link>
           )}
 

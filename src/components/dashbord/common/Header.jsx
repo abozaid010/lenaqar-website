@@ -1,6 +1,5 @@
 "use client";
 
-import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -55,11 +54,11 @@ const Header = ({ clientName, clientID, clientEmail }) => {
 
   const confirmLogout = async () => {
     try {
-      // Remove cookies
-      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
-      LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
-      LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
-      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
+      await fetch("/api/auth/clear-session", {
+        method: "POST",
+        credentials: "include",
+      });
+      LenaCookiesManager.clearAuthCookies();
 
       // Clear expensive API cache (data projection) - both localStorage and TanStack Query cache
       if (typeof window !== "undefined") {

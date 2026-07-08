@@ -50,12 +50,22 @@ axiosInstance.interceptors.response.use(
         const refreshed = await TokenRefreshService.refreshToken();
 
         if (refreshed) {
-          // Server has set the new httpOnly cookie — retry without any manual header.
           return axiosInstance(originalRequest);
-        } else {
-          throw new Error("Token refresh failed");
         }
+        throw new Error("Token refresh failed");
       } catch (refreshError) {
+        // Another request may have rotated tokens (single-flight race). Retry once.
+        if (!originalRequest._postRefreshRetry) {
+          originalRequest._postRefreshRetry = true;
+          try {
+            return await axiosInstance(originalRequest);
+          } catch (retryError) {
+            if (retryError?.response?.status !== 401) {
+              return Promise.reject(retryError);
+            }
+          }
+        }
+
         if (isDev) {
           console.error("[axiosInstance] Token refresh failed:", refreshError);
         }

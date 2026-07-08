@@ -15,6 +15,7 @@ const FALLBACK_MODULES = [
   "resale",
   "analytics",
   "calendar",
+  "social_media",
 ];
 
 const FALLBACK_ALL_ACTIONS = [
@@ -107,7 +108,23 @@ export function parsePermissionSchemaResponse(response) {
 }
 
 export function getResolvedPermissionSchema(parsed) {
-  return parsed ?? getFallbackPermissionSchema();
+  const fallback = getFallbackPermissionSchema();
+  if (!parsed) return fallback;
+
+  const known = new Set(parsed.modules.map((m) => m.module));
+  const mergedModules = [...parsed.modules];
+
+  for (const entry of fallback.modules) {
+    if (!known.has(entry.module)) {
+      mergedModules.push(entry);
+    }
+  }
+
+  return {
+    modules: mergedModules,
+    allActions:
+      parsed.allActions?.length > 0 ? parsed.allActions : fallback.allActions,
+  };
 }
 
 export function getActionLabel(action, translate) {

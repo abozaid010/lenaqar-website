@@ -23,6 +23,7 @@ export const TEAM_PARENT_MODULE_FALLBACK_KEYS = [
   "team_members",
   "analytics",
   "calendar",
+  "social_media",
 ];
 
 export const TEAM_MEMBER_ACTIONS_VIEWER = ["view"];

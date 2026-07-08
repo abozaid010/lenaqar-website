@@ -83,10 +83,13 @@ const nextConfig = {
     const adminPaths = [
       'dashboard', 'campaigns', 'campaign-chat', 'schedule',
       'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
+      'social-media',
     ];
+    // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
+    const clientIdSegment = "/:clientId((?!api$)[^/]+)";
     return adminPaths.flatMap((path) => [
-      { source: `/:clientId/${path}`, destination: `/${path}` },
-      { source: `/:clientId/${path}/:rest*`, destination: `/${path}/:rest*` },
+      { source: `${clientIdSegment}/${path}`, destination: `/${path}` },
+      { source: `${clientIdSegment}/${path}/:rest*`, destination: `/${path}/:rest*` },
     ]);
   },
 };

@@ -298,10 +298,11 @@ export default function ClientInfo({ client_email }) {
 
   const confirmLogout = async () => {
     try {
-      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_ID);
-      LenaCookiesManager.remove(COOKIE_KEYS.ACCESS_TOKEN);
-      LenaCookiesManager.remove(COOKIE_KEYS.REFRESH_TOKEN);
-      LenaCookiesManager.remove(COOKIE_KEYS.CLIENT_INFO);
+      await fetch("/api/auth/clear-session", {
+        method: "POST",
+        credentials: "include",
+      });
+      LenaCookiesManager.clearAuthCookies();
 
       if (typeof window !== "undefined") {
         queryClient.removeQueries({ queryKey: ["data-projection"] });

@@ -23,6 +23,7 @@ export const DEFAULT_BROKER_MODULE_ACTIONS = {
   team_members: ["view", "create", "update_own", "delete_own"],
   analytics: ["view", "create", "update_own", "delete_own"],
   calendar: ["view", "create", "update_own", "delete_own"],
+  social_media: ["view"],
 };
 
 export const DEFAULT_DEVELOPER_MODULE_ACTIONS = {
@@ -34,6 +35,7 @@ export const DEFAULT_DEVELOPER_MODULE_ACTIONS = {
   team_members: ["view", "create", "update_own", "delete_own"],
   analytics: ["view", "create", "update_own", "delete_own"],
   calendar: ["view", "create", "update_own", "delete_own"],
+  social_media: ["view"],
 };
 
 const ModuleActionsSelector = ({
