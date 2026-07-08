@@ -1069,13 +1069,22 @@ export default {
     connected: "Connected",
     scanQr: "Scan this QR code with WhatsApp on your phone",
     waitingForQr: "Waiting for QR code…",
+    loadingQr: "Loading QR…",
+    qrPendingFromBackend:
+      " reports {status} but has not returned a QR image yet. We will keep checking automatically.",
+    reconnect: "Reconnect",
+    reconnectHint:
+      "Connection failed. Try again to request a new QR code.",
+    networkError:
+      "Could not refresh connection status. Retrying automatically…",
     sessionError: "Could not load connection status for this number",
     unknownNumber: "WhatsApp number",
     loading: "Checking WhatsApp connections…",
     loadFailed:
       "Could not check WhatsApp connection status. Please try again.",
     successMessage: "{count} WhatsApp number(s) connected",
-    pollingHint: "Status updates automatically after you scan.",
+    pollingHint:
+      "Status updates automatically every 15 seconds while this dialog is open.",
     refresh: "Refresh",
     openStatus: "WhatsApp connection",
     partialLoadFailed:

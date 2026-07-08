@@ -2777,11 +2777,13 @@ export async function submitMatchViewingRequest(token, { unitIds, meetingTime })
 
 /**
  * GET /api/openwa/sessions/status — linked OpenWA session connection + QR state.
+ * @param {{ signal?: AbortSignal }} [options]
  */
-export async function fetchOpenwaLinkedSessionsStatus() {
+export async function fetchOpenwaLinkedSessionsStatus({ signal } = {}) {
   const response = await fetch("/api/openwa/sessions/status", {
     method: "GET",
     headers: { Accept: "application/json" },
+    signal,
   });
 
   const data = await response.json().catch(() => ({}));
@@ -2790,6 +2792,22 @@ export async function fetchOpenwaLinkedSessionsStatus() {
     throw new Error(
       data?.error || data?.detail || "Failed to load WhatsApp connection status"
     );
+  }
+
+  if (process.env.NODE_ENV === "development") {
+    console.info("[openwa-connection] client.status", {
+      allConnected: data?.allConnected,
+      sessions: (data?.sessions ?? []).map((session) => ({
+        session_id: session.session_id,
+        whatsapp_number: session.whatsapp_number,
+        connected: session.connected,
+        status: session.status,
+        has_qr: Boolean(session.qrImage),
+        qrPendingFromBackend: session.qrPendingFromBackend,
+        error: session.error,
+      })),
+      trace: data?._trace ?? null,
+    });
   }
 
   return data;
