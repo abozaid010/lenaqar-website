@@ -1,5 +1,5 @@
 import {
-  buildAdminUnitShareUrl,
+  buildPublicUnitShareUrl,
   resolveUnitCodeFromListItem,
   resolveUnitIdFromListItem,
 } from "@/lib/units/unit-share-links";
@@ -53,9 +53,7 @@ export function unitToWhatsappRecipient(unit, clientId = null) {
   const unitCode = resolveUnitCodeFromListItem(unit);
   const linkSegment = unitCode ?? unitId;
   const fallback = resolved.chat_id || resolved.phone_number || "";
-  const unitLink = linkSegment
-    ? buildAdminUnitShareUrl(linkSegment, clientId)
-    : null;
+  const unitLink = linkSegment ? buildPublicUnitShareUrl(linkSegment) : null;
 
   return {
     ...resolved,
