@@ -34,3 +34,12 @@ Server components fetch data · Client components handle interactions only · Pr
 No new patterns, dependencies, or layout changes without a clear need — stability over experimentation
 
 yes please use (translate('…')). everywhere.   for lcoalzaiton
+
+
+- Think before you write code. Define the assumptions, ask questions if anything is unclear, and don't guess.
+
+- Write the minimum code that solves the problem, without any unnecessary complexityor abstractions.
+
+- Only modify what needs modifying. Don't touch any code that isn't relevant to the requirements. Every modification must have a clear reason in the specifications.
+-  wiret production ready code and dont use fake/dump solutions to skip issue,  better to look for issues root cause .
+- Before you begin, define the goal.%    

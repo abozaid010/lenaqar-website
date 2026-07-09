@@ -14,6 +14,8 @@ import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district
 import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
+import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
+import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
@@ -26,6 +28,8 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
+import { filtersToSearchParams } from "@/lib/units/favorite-searches";
+import UnitsFavoriteSearches from "@/components/ui/units-favorite-searches";
 
 // Helper functions defined outside component to avoid hoisting/initialization issues
 const getDeveloperValue = (dev) => {
@@ -102,6 +106,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     });
   }, []);
 
+  const FURNISHING_TYPES = useMemo(() => {
+    return getFurnishingTypes({
+      en: { unitDetails: { furnishingTypes: en.unitDetails?.furnishingTypes || {} } },
+      ar: { unitDetails: { furnishingTypes: ar.unitDetails?.furnishingTypes || {} } },
+    });
+  }, []);
+
   // URL is the single source of truth for all filter values.
   // Derived from searchParams so they always reflect the actual URL.
   const filters = useMemo(() => ({
@@ -112,6 +123,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     project_name: searchParams.get("project_name") || "",
     purpose: searchParams.get("purpose") || "",
     property_type: searchParams.get("property_type") || "",
+    furnished_type: searchParams.get("furnished_type") || "",
     min_price: searchParams.get("min_price") || "",
     max_price: searchParams.get("max_price") || "",
     min_area: searchParams.get("min_area") || "",
@@ -145,8 +157,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       const subDistrict = searchParams.get("sub_district");
       const projectName = searchParams.get("project_name");
       const propertyType = searchParams.get("property_type");
+      const furnishedType = searchParams.get("furnished_type");
 
-      if (!city && !district && !subDistrict && !projectName && !propertyType) {
+      if (!city && !district && !subDistrict && !projectName && !propertyType && !furnishedType) {
         return;
       }
 
@@ -209,6 +222,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           }
         }
 
+        if (furnishedType) {
+          const match =
+            FURNISHING_TYPES.find((type) => valuesMatch(type.value, furnishedType)) ||
+            FURNISHING_TYPES.find(
+              (type) => type.ar_label === furnishedType || type.en_label === furnishedType
+            );
+          if (match && match.value !== furnishedType) {
+            newParams.set("furnished_type", match.value);
+            changed = true;
+          }
+        }
+
         if (!cancelled && changed) {
           const qs = newParams.toString();
           router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -222,7 +247,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return () => {
       cancelled = true;
     };
-  }, [searchParams, pathname, router, compounds, BUILDING_TYPES]);
+  }, [searchParams, pathname, router, compounds, BUILDING_TYPES, FURNISHING_TYPES]);
 
   const [priceRangeError, setPriceRangeError] = useState("");
   const [areaRangeError, setAreaRangeError] = useState("");
@@ -399,6 +424,9 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     if (nextFilters.property_type) {
       list.push({ key: "property_type", value: nextFilters.property_type });
     }
+    if (nextFilters.furnished_type) {
+      list.push({ key: "furnished_type", value: nextFilters.furnished_type });
+    }
     if (nextFilters.min_price || nextFilters.max_price) {
       const min = nextFilters.min_price ? formatPriceInput(nextFilters.min_price) : "";
       const max = nextFilters.max_price ? formatPriceInput(nextFilters.max_price) : "";
@@ -523,6 +551,13 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
               (t) => t.ar_label === value || t.en_label === value
             );
           normalizedValue = type?.value || String(value).trim();
+        } else if (key === "furnished_type") {
+          const type =
+            FURNISHING_TYPES.find((t) => valuesMatch(t.value, value)) ||
+            FURNISHING_TYPES.find(
+              (t) => t.ar_label === value || t.en_label === value
+            );
+          normalizedValue = type?.value || String(value).trim();
         }
 
         newParams.set(key, normalizedValue);
@@ -641,6 +676,31 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     );
   }
 
+  function getSelectedFurnishingType() {
+    if (!filters.furnished_type || filters.furnished_type === "all") {
+      return translate("unitsFilter.allFurnishingTypes", "All Furnishing Types");
+    }
+    const type = FURNISHING_TYPES.find((ft) =>
+      valuesMatch(ft.value, filters.furnished_type)
+    );
+    if (!type) return filters.furnished_type;
+    const key = String(type.value).toLowerCase();
+    const translationKeys = {
+      furnished: "property.furnishing.furnished",
+      unfurnished: "property.furnishing.unfurnished",
+      hotel_furnished: "property.furnishing.hotelFurnished",
+      "partially furnished": "property.furnishing.partiallyFurnished",
+      "semi furnished": "property.furnishing.semiFurnished",
+      flixy: "property.furnishing.flixy",
+      turnkey: "property.furnishing.turnkey",
+    };
+    return (
+      translate(translationKeys[key]) ||
+      (locale === "ar" ? type.ar_label : type.en_label) ||
+      type.value
+    );
+  }
+
   function getSelectedProjectName() {
     if (!filters.project_name || filters.project_name === "all") {
       return t.unitsFilter.allCompounds || "All Projects";
@@ -721,6 +781,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedPurpose();
       case "property_type":
         return getSelectedPropertyType();
+      case "furnished_type":
+        return getSelectedFurnishingType();
       case "city":
         return getSelectedCity();
       case "district":
@@ -736,6 +798,144 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const filterButtonClassName =
     "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] text-sm h-10 hover:border-primary/40 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-colors w-full";
+
+  const buildSummaryLabelsFromFilters = useCallback(
+    (filterValues) => {
+      const labels = [];
+
+      if (filterValues.my_inventory) labels.push(t.unitsFilter.myInventory);
+      if (filterValues.resale) labels.push(t.unitsFilter.resale);
+
+      if (filterValues.min_area || filterValues.max_area) {
+        const min = filterValues.min_area || "";
+        const max = filterValues.max_area || "";
+        if (min && max) labels.push(`${min} - ${max} m²`);
+        else if (min) labels.push(`${t.unitsFilter.minArea}: ${min} m²`);
+        else if (max) labels.push(`${t.unitsFilter.maxArea}: ${max} m²`);
+      }
+
+      if (filterValues.developer_name) {
+        const developer = developers.find(
+          (item) => getDeveloperValue(item) === filterValues.developer_name
+        );
+        labels.push(
+          developer
+            ? getDeveloperLabel(developer, locale)
+            : filterValues.developer_name
+        );
+      }
+
+      if (filterValues.project_name) {
+        const project = compounds.find((item) =>
+          valuesMatch(item.en_name, filterValues.project_name)
+        );
+        labels.push(
+          project
+            ? locale === "ar"
+              ? project.ar_name
+              : project.en_name || filterValues.project_name
+            : filterValues.project_name
+        );
+      }
+
+      if (filterValues.purpose) {
+        labels.push(t.unitsFilter.purposes[filterValues.purpose] || filterValues.purpose);
+      }
+
+      if (filterValues.property_type) {
+        const type = BUILDING_TYPES.find((item) =>
+          valuesMatch(item.value, filterValues.property_type)
+        );
+        if (type) {
+          const key = String(type.value).toLowerCase();
+          labels.push(
+            translate(`buildingTypes.${key}`) ||
+              (locale === "ar" ? type.ar_label : type.en_label) ||
+              type.value
+          );
+        } else {
+          labels.push(filterValues.property_type);
+        }
+      }
+
+      if (filterValues.furnished_type) {
+        const type = FURNISHING_TYPES.find((item) =>
+          valuesMatch(item.value, filterValues.furnished_type)
+        );
+        if (type) {
+          const key = String(type.value).toLowerCase();
+          const translationKeys = {
+            furnished: "property.furnishing.furnished",
+            unfurnished: "property.furnishing.unfurnished",
+            hotel_furnished: "property.furnishing.hotelFurnished",
+            "partially furnished": "property.furnishing.partiallyFurnished",
+            "semi furnished": "property.furnishing.semiFurnished",
+            flixy: "property.furnishing.flixy",
+            turnkey: "property.furnishing.turnkey",
+          };
+          labels.push(
+            translate(translationKeys[key]) ||
+              (locale === "ar" ? type.ar_label : type.en_label) ||
+              type.value
+          );
+        } else {
+          labels.push(filterValues.furnished_type);
+        }
+      }
+
+      if (filterValues.min_price || filterValues.max_price) {
+        const min = filterValues.min_price ? formatPriceInput(filterValues.min_price) : "";
+        const max = filterValues.max_price ? formatPriceInput(filterValues.max_price) : "";
+        if (min && max) labels.push(`${min} - ${max} EGP`);
+        else if (min) labels.push(`${t.unitsFilter.from || "From"} ${min} EGP`);
+        else if (max) labels.push(`${t.unitsFilter.upTo || "Up to"} ${max} EGP`);
+      }
+
+      if (filterValues.city) {
+        labels.push(cityLabels[filterValues.city] || filterValues.city);
+      }
+      if (filterValues.district) {
+        labels.push(districtLabels[filterValues.district] || filterValues.district);
+      }
+      if (filterValues.sub_district) {
+        labels.push(
+          subDistrictLabels[filterValues.sub_district] || filterValues.sub_district
+        );
+      }
+
+      return labels;
+    },
+    [
+      BUILDING_TYPES,
+      FURNISHING_TYPES,
+      cityLabels,
+      compounds,
+      developers,
+      districtLabels,
+      locale,
+      subDistrictLabels,
+      t,
+      translate,
+    ]
+  );
+
+  const applyFavoriteSearch = useCallback(
+    (savedFilters) => {
+      if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
+
+      setLocalMinPrice(savedFilters.min_price || "");
+      setLocalMaxPrice(savedFilters.max_price || "");
+      setLocalMinArea(savedFilters.min_area || "");
+      setLocalMaxArea(savedFilters.max_area || "");
+      setPriceRangeError("");
+      setAreaRangeError("");
+
+      const newParams = filtersToSearchParams(savedFilters, searchParams);
+      const qs = newParams.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    },
+    [router, searchParams, pathname]
+  );
 
   return (
     <div className="p-4 space-y-3 bg-white rounded-lg shadow-md">
@@ -758,6 +958,14 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </div>
         </>
       )}
+
+      <UnitsFavoriteSearches
+        filters={filters}
+        activeFilterLabels={activeFilters.map((item) => item.value)}
+        getSummaryLabels={buildSummaryLabelsFromFilters}
+        onApply={applyFavoriteSearch}
+        isPublic={isPublic}
+      />
 
       {/* City */}
       <div className="w-full min-w-0">
@@ -849,6 +1057,22 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           showAllOption={true}
           allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
           placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+          buttonClassName={filterButtonClassName}
+        />
+      </div>
+
+      {/* Furnishing Type */}
+      <div className="w-full min-w-0">
+        <SearchableFurnishingTypeSelect
+          value={filters.furnished_type === "all" ? "" : filters.furnished_type}
+          onChange={(e) => {
+            const furnishedTypeValue = e.target.value || "all";
+            handleFilterChange("furnished_type", furnishedTypeValue);
+          }}
+          name="furnished_type"
+          showAllOption={true}
+          allOptionLabel={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
+          placeholder={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
           buttonClassName={filterButtonClassName}
         />
       </div>

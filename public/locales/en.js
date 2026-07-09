@@ -187,6 +187,7 @@ export default {
       allCompounds: "All Projects",
       allPurposes: "All Purposes",
       allPropertyTypes: "All Property Types",
+      allFurnishingTypes: "All Furnishing Types",
       allSubDistricts: "All Sub-districts",
       allDistricts: "All Districts",
       purpose: "Purpose",
@@ -1204,6 +1205,7 @@ export default {
     allCompounds: "All Projects",
     allPurposes: "All Purposes",
     allPropertyTypes: "All Property Types",
+    allFurnishingTypes: "All Furnishing Types",
     pendingApproval: "Pending Approval",
     hidden: "Hidden",
     price: "price",
@@ -1239,6 +1241,26 @@ export default {
         "Each owner will receive your message with their unit link appended automatically.",
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
+    },
+    favoriteSearches: {
+      title: "Favorite Searches",
+      save: "Save",
+      saveCurrent: "Save current filters",
+      saveSuccess: "Favorite search saved.",
+      renameSuccess: "Favorite renamed.",
+      deleteSuccess: "Favorite deleted.",
+      empty: "No favorite searches yet. Set your filters and tap Save.",
+      loading: "Loading favorites…",
+      namePlaceholder: "Name this search…",
+      emptyNameError: "Please enter a name for this search.",
+      duplicateNameError:
+        "A favorite with this name already exists. Choose a different name.",
+      noFiltersSummary: "No filters",
+      savingPreview: "Saving:",
+      noActiveFiltersHint: "No filters are currently selected.",
+      savedOn: "Saved {date}",
+      rename: "Rename",
+      deleteConfirm: "Delete this favorite?",
     },
   },
   shareModel: {
@@ -1815,6 +1837,7 @@ export default {
       "partially furnished": "Partially Furnished",
       flixy: "Flixy",
       "semi furnished": "Semi Furnished",
+      turnkey: "Turnkey",
     },
     amenitiesTypes: {
       wifi: "WiFi",
@@ -2543,6 +2566,7 @@ export default {
     furnishing: {
       furnished: "Furnished", unfurnished: "Unfurnished", partiallyFurnished: "Partially Furnished",
       semiFurnished: "Semi Furnished", hotelFurnished: "Hotel Furnished", flixy: "Flixy",
+      turnkey: "Turnkey",
     },
     view: {
       garden: "Garden", pool: "Pool", sea: "Sea", landmark: "Landmark", street: "Street",

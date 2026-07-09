@@ -22,10 +22,20 @@ async function fetchUnitData(rawCode) {
   }
 }
 
+// Same-origin fallback so social crawlers always receive a fetchable image
+// (unit has no photos, only a video, or the metadata fetch returned nothing).
+const FALLBACK_OG_IMAGE = `${SITE_URL}/images/property_placeholder.jpg`;
+
+// Pick the first *image* hero item — heroImages[0] can be a video embed
+// (youtube/facebook/mp4), which is not a valid og:image.
 function getFirstImageUrl(unit) {
-  const firstImg = unit?.heroImages?.[0] ?? unit?.images?.[0];
-  if (!firstImg) return null;
-  return typeof firstImg === "string" ? firstImg : firstImg?.url;
+  const media = unit?.heroImages ?? unit?.images;
+  if (!Array.isArray(media)) return null;
+  const firstImage = media.find(
+    (item) => typeof item === "string" || (item?.url && item?.type !== "video")
+  );
+  if (!firstImage) return null;
+  return typeof firstImage === "string" ? firstImage : firstImage.url;
 }
 
 export async function generateMetadata({ params }) {
@@ -33,6 +43,7 @@ export async function generateMetadata({ params }) {
   const normalizedCode = normalizeUnitCodeParam(rawCode);
   const unit = await fetchUnitData(rawCode);
   const firstImageUrl = getDisplayImageUrl(getFirstImageUrl(unit));
+  const ogImageUrl = firstImageUrl || FALLBACK_OG_IMAGE;
   const canonicalPath = normalizedCode
     ? `/allProberties/${encodeUnitCodeForPath(normalizedCode)}`
     : "/allProberties";
@@ -60,24 +71,20 @@ export async function generateMetadata({ params }) {
       description,
       url: `${SITE_URL}${canonicalPath}`,
       type: "website",
-      ...(firstImageUrl && {
-        images: [
-          {
-            url: firstImageUrl,
-            width: 1200,
-            height: 630,
-            alt: unit?.title || "Property Image",
-          },
-        ],
-      }),
+      images: [
+        {
+          url: ogImageUrl,
+          width: 1200,
+          height: 630,
+          alt: unit?.title || "Property Image",
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      ...(firstImageUrl && {
-        images: [firstImageUrl],
-      }),
+      images: [ogImageUrl],
     },
     alternates: {
       canonical: `${SITE_URL}${canonicalPath}`,

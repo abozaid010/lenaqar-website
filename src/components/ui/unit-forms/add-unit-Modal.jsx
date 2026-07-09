@@ -30,6 +30,10 @@ import CityManager from "@/utils/city_manager";
 import {
   PROPERTY_VISIBILITY,
 } from "@/constants/property-visibility";
+import {
+  getPhoneValidationError,
+  phoneToE164,
+} from "@/components/phone/phone-utils";
 
 /** Parse value to number for API (strip commas/formatting). */
 function normalizeToEnglishDigits(value) {
@@ -135,8 +139,26 @@ function normalizeNumbersInPayload(value) {
   return value;
 }
 
-function isOwnerMobileMissing(formData) {
-  return !formData?.owner_mobile || String(formData.owner_mobile).trim() === "";
+function getOwnerMobileValidationError(formData, required) {
+  if (!required) return null;
+  const value = formData?.owner_mobile
+    ? String(formData.owner_mobile)
+    : undefined;
+  return getPhoneValidationError(value, { defaultCountry: "EG", required: true }) ?? null;
+}
+
+function isOwnerMobileInvalid(formData, required) {
+  return getOwnerMobileValidationError(formData, required) != null;
+}
+
+function toastOwnerMobileValidationError(formData, translate) {
+  const isRequired = !String(formData?.owner_mobile ?? "").trim();
+  toast.error(
+    translate(
+      isRequired ? "phoneField.required" : "phoneField.invalid",
+      isRequired ? "Phone number is required" : "Invalid phone number"
+    )
+  );
 }
 
 export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtracted, isPageMode = false }) {
@@ -629,7 +651,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           (field) => SellFormData[field] !== 0 && !SellFormData[field]
         );
 
-        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           missingFields.push("owner_mobile");
         }
 
@@ -654,6 +676,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
 
         if (missingFields.length > 0) {
           setInvalidFields(missingFields);
+          if (missingFields.includes("owner_mobile")) {
+            toastOwnerMobileValidationError(formData, translate);
+          }
           return false;
         }
 
@@ -666,8 +691,9 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           }
         });
       } else if (formData.purpose === "rent") {
-        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
+        if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
           setInvalidFields(["owner_mobile"]);
+          toastOwnerMobileValidationError(formData, translate);
           return false;
         }
 
@@ -702,127 +728,24 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     return true;
   };
 
-  const handleNext = (e) => {
+  const handleStepClick = async (stepNumber) => {
+    if (stepNumber <= currentStep) {
+      setCurrentStep(stepNumber);
+      return;
+    }
+
+    for (let step = currentStep; step < stepNumber; step += 1) {
+      const isValid = await validateStep(step);
+      if (!isValid) return;
+    }
+
+    setCurrentStep(stepNumber);
+  };
+
+  const handleNext = async (e) => {
     e.preventDefault();
-    // Validate required fields for step 1
-    if (currentStep === 1) {
-      const requiredFields = [
-        "project",
-        "buildingType",
-        "purpose",
-        "landArea", // area
-      ];
-      // Add rooms and bathroom count only if building type is not office
-      if (formData.buildingType !== "office") {
-        requiredFields.push("roomsCount", "bathroomCount");
-      }
-      const zeroFields = [
-        "floor",
-        "landArea",
-        "gardenSize",
-        "outdoor_area",
-        "roomsCount",
-        "bathroomCount",
-      ];
-      const sanitizedData = { ...formData };
-
-      // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-      zeroFields.forEach((field) => {
-        if (!sanitizedData[field] || sanitizedData[field] === "") {
-          sanitizedData[field] = 0;
-        }
-      });
-
-      setFormData(sanitizedData);
-
-      // 0 is valid for numeric fields (landArea, roomsCount, bathroomCount)
-      const missingFields = requiredFields.filter(
-        (field) => formData[field] !== 0 && !formData[field]
-      );
-
-      if (missingFields.length > 0) {
-        setInvalidFields(missingFields);
-        return;
-      }
-    }
-
-    // Validate required fields for step 2
-    if (currentStep === 2) {
-      if (formData.purpose === "sell") {
-        const requiredFields = ["deliveryDate", "totalPrice"]; // price
-        // 0 is valid for totalPrice (edge case; downPayment etc. can be 0)
-        const missingFields = requiredFields.filter(
-          (field) => SellFormData[field] !== 0 && !SellFormData[field]
-        );
-
-        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
-          missingFields.push("owner_mobile");
-        }
-
-        if (
-          SellFormData.deliveryDate &&
-          !validateDeliveryDate(SellFormData.deliveryDate)
-        ) {
-          missingFields.push("deliveryDate");
-          toast.error(
-            t.saleDetails.deleveryError ||
-            "Delivery date must be between 30 years ago and 10 years from now",
-            {
-              duration: 5000,
-            }
-          );
-        }
-
-        // Validate payment plan fields
-        if (SellFormData.installment_years && SellFormData.installment_years <= 0) {
-          missingFields.push("installment_years");
-        }
-
-        if (missingFields.length > 0) {
-          setInvalidFields(missingFields);
-          return;
-        }
-
-        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const zeroFields = ["totalPrice", "downPayment", "paid_amount", "remaining_amount", "installment_years", "over_price"];
-        const sanitizedData = { ...SellFormData };
-        zeroFields.forEach((field) => {
-          if (!sanitizedData[field] || sanitizedData[field] === "") {
-            sanitizedData[field] = 0;
-          }
-        });
-      } else if (formData.purpose === "rent") {
-        if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
-          setInvalidFields(["owner_mobile"]);
-          return;
-        }
-
-        // Check if at least one rentDurationType has a price > 0
-        const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
-          (duration) => duration?.price > 0
-        );
-
-        if (!hasValidPrice) {
-          toast.error(t.toasts.enterValidPrice);
-          return;
-        }
-
-        // INFO: This is a workaround to ensure that the zero fields are set to 0 if they are empty or undefined
-        const sanitizedRentDurationType = { ...rentFormData.rentDurationType };
-        Object.keys(sanitizedRentDurationType).forEach((duration) => {
-          Object.keys(sanitizedRentDurationType[duration] ?? {}).forEach((field) => {
-            if (sanitizedRentDurationType[duration][field] === "") {
-              sanitizedRentDurationType[duration][field] = 0;
-            }
-          });
-        });
-
-        setRentFormData((prev) => ({
-          ...prev,
-          rentDurationType: sanitizedRentDurationType,
-        }));
-      }
-    }
+    const isValid = await validateStep(currentStep);
+    if (!isValid) return;
 
     setInvalidFields([]);
     if (currentStep < 3) {
@@ -839,10 +762,10 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
 
-    if (ownerMobileRequired && isOwnerMobileMissing(formData)) {
+    if (ownerMobileRequired && isOwnerMobileInvalid(formData, ownerMobileRequired)) {
       setInvalidFields(["owner_mobile"]);
       setCurrentStep(2);
-      toast.error(translate("phoneField.required", "Phone number is required"));
+      toastOwnerMobileValidationError(formData, translate);
       return;
     }
 
@@ -913,6 +836,11 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       if (!showOwnerFields) {
         delete payload.owner_name;
         delete payload.owner_mobile;
+      } else if (payload.owner_mobile) {
+        const normalizedOwnerMobile = phoneToE164(payload.owner_mobile);
+        if (normalizedOwnerMobile) {
+          payload.owner_mobile = normalizedOwnerMobile;
+        }
       }
 
       // Send city/district as lowercase en_name (canonical backend format)
@@ -1128,7 +1056,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     <div className="px-3 py-2 md:px-4 md:py-2 border-b border-gray-100">
       <StepIndicator
         currentStep={currentStep}
-        onStepClick={(stepNumber) => setCurrentStep(stepNumber)}
+        onStepClick={handleStepClick}
         steps={[
           { number: 1, label: t.steps.basicDetails },
           {

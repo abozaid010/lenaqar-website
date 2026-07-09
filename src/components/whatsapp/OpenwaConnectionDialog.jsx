@@ -7,8 +7,6 @@ import { isOpenwaSessionTerminalFailure } from "@/lib/openwa-session-status";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
-const AUTO_CLOSE_CONNECTED_MS = 3000;
-
 function formatDisplayPhone(phone) {
   if (!phone) return "";
   const raw = String(phone).trim();
@@ -162,8 +160,9 @@ export default function OpenwaConnectionDialog({
     [sessions]
   );
 
-  const shouldAutoClose =
-    autoCloseWhenConnected &&
+  // UX: Only show this dialog when something isn't working.
+  // If everything is connected, auto-hide immediately (no success modal).
+  const shouldSuppressDialog =
     isOpen &&
     !isLoading &&
     hasStatusData &&
@@ -174,14 +173,14 @@ export default function OpenwaConnectionDialog({
   onCloseRef.current = onClose;
 
   useEffect(() => {
-    if (!shouldAutoClose) return;
-
+    if (!shouldSuppressDialog) return;
+    // Defer to next tick so parent state updates safely.
     const timer = window.setTimeout(() => {
       onCloseRef.current();
-    }, AUTO_CLOSE_CONNECTED_MS);
+    }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [shouldAutoClose]);
+  }, [shouldSuppressDialog]);
 
   const title = allConnected
     ? translate("openwaConnection.titleConnected", "WhatsApp is connected")
@@ -204,6 +203,8 @@ export default function OpenwaConnectionDialog({
           "openwaConnection.networkError",
           "Could not refresh connection status. Retrying automatically…"
         );
+
+  if (shouldSuppressDialog) return null;
 
   return (
     <UnifiedDialog
@@ -255,29 +256,6 @@ export default function OpenwaConnectionDialog({
       ) : (
         <>
           <p className="text-sm text-gray-600">{description}</p>
-
-          {allConnected && sessions.length > 0 ? (
-            <div className="flex flex-col items-center gap-3 py-2">
-              <CheckCircle2
-                className="w-14 h-14 text-green-600"
-                aria-hidden
-              />
-              <p className="text-sm font-medium text-green-700 text-center">
-                {translate(
-                  "openwaConnection.successMessage",
-                  "{count} WhatsApp number(s) connected"
-                ).replace("{count}", String(sessions.length))}
-              </p>
-              {autoCloseWhenConnected ? (
-                <p className="text-xs text-gray-500 text-center">
-                  {translate(
-                    "openwaConnection.autoCloseHint",
-                    "This dialog will close in 3 seconds."
-                  )}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
 
           <div className="space-y-3">
             {sessions.map((session) => (

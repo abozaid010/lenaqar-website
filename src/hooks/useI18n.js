@@ -200,6 +200,7 @@ export function useI18n() {
       'semi furnished': 'property.furnishing.semiFurnished',
       hotel_furnished: 'property.furnishing.hotelFurnished',
       flixy: 'property.furnishing.flixy',
+      turnkey: 'property.furnishing.turnkey',
     }),
     
     // View types

@@ -194,6 +194,7 @@ export default {
     allCompounds: "جميع المشاريع",
     allPurposes: "جميع الأغراض",
     allPropertyTypes: "جميع أنواع العقارات",
+    allFurnishingTypes: "جميع أنواع الفرش",
     allSubDistricts: "جميع الأحياء",
     allDistricts: "جميع المناطق",
     purpose: "الغرض",
@@ -1080,6 +1081,7 @@ export default {
     allCompounds: " المشاريع",
     allPurposes: "جميع الأغراض",
     allPropertyTypes: "جميع أنواع العقارات",
+    allFurnishingTypes: "جميع أنواع الفرش",
     pendingApproval: "بانتظار الموافقة",
     hidden: "مخفي",
     price: "السعر",
@@ -1115,6 +1117,25 @@ export default {
         "سيتلقى كل مالك رسالتك مع رابط وحدته مُضافاً تلقائياً.",
       defaultMessage:
         "السلام عليكم . حضرتك عندنا عميل عايز الشقه بتاعتك.. هل متاح مواعيد للمعاينة؟",
+    },
+    favoriteSearches: {
+      title: "عمليات البحث المفضلة",
+      save: "حفظ",
+      saveCurrent: "حفظ الفلاتر الحالية",
+      saveSuccess: "تم حفظ البحث المفضل.",
+      renameSuccess: "تمت إعادة تسمية المفضلة.",
+      deleteSuccess: "تم حذف المفضلة.",
+      empty: "لا توجد عمليات بحث مفضلة بعد. اختر الفلاتر ثم اضغط حفظ.",
+      loading: "جاري تحميل المفضلة…",
+      namePlaceholder: "سمِّ هذا البحث…",
+      emptyNameError: "يرجى إدخال اسم لهذا البحث.",
+      duplicateNameError: "يوجد مفضل بهذا الاسم بالفعل. اختر اسماً مختلفاً.",
+      noFiltersSummary: "بدون فلاتر",
+      savingPreview: "جاري الحفظ:",
+      noActiveFiltersHint: "لا توجد فلاتر محددة حالياً.",
+      savedOn: "تم الحفظ {date}",
+      rename: "إعادة تسمية",
+      deleteConfirm: "حذف هذا المفضل؟",
     },
   },
   unitsSearch: {
@@ -1680,6 +1701,7 @@ export default {
       "partially furnished": "مفروش جزئياً",
       flixy: "فليكسي",
       "semi furnished": "نصف مفروش",
+      turnkey: "تسليم مفتاح",
     },
     amenitiesTypes: {
       wifi: "واي فاي",
@@ -2603,6 +2625,7 @@ export default {
     furnishing: {
       furnished: "مفروش", unfurnished: "غير مفروش", partiallyFurnished: "مفروش جزئياً",
       semiFurnished: "نصف مفروش", hotelFurnished: "مفروش فندقي", flixy: "فليكسي",
+      turnkey: "تسليم مفتاح",
     },
     view: {
       garden: "حديقة", pool: "مسبح", sea: "بحر", landmark: "معلم", street: "شارع",
