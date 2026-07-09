@@ -23,10 +23,6 @@ export function resolveMessageUnitUrl(
   const fallback = fallbackUrl?.trim();
   if (fallback) return fallback;
 
-  if (typeof window !== "undefined" && window.location?.href) {
-    return window.location.href;
-  }
-
   return "";
 }
 

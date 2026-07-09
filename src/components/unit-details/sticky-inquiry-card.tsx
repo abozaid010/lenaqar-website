@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
-import { buildAdminUnitEditPath, buildAdminUnitShareUrl } from '@/lib/units/unit-share-links';
+import { buildAdminUnitEditPath, buildPublicUnitShareUrl } from '@/lib/units/unit-share-links';
 import ChatConversation from '@/components/chat/chat-conversation';
 import UnitInquiryContactHeader from '@/components/unit-details/unit-inquiry-contact-header';
 import { UNIT_CONVERSATION_MESSAGE_LIMIT } from '@/constants/conversation-limits';
@@ -54,14 +54,9 @@ export default function StickyInquiryCard({
   );
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUnitUrl(window.location.href);
-      return;
-    }
-    if (unit.referenceCode?.trim()) {
-      setUnitUrl(buildAdminUnitShareUrl(unit.referenceCode, currentClientId));
-    }
-  }, [unit.referenceCode, currentClientId]);
+    const code = unit.referenceCode?.trim();
+    setUnitUrl(code ? buildPublicUnitShareUrl(code) : '');
+  }, [unit.referenceCode]);
 
   const receiverPhone = useMemo(
     () =>
