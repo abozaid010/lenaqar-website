@@ -7,7 +7,7 @@ import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 
 /** Default WhatsApp body for bulk availability checks — always Arabic. */
 export const BULK_AVAILABILITY_DEFAULT_MESSAGE_AR =
-  "مرحباً، أود الاستفسار عن توفر هذه الوحدة للإيجار ومتى يمكننا ترتيب معاينة للعقار.";
+  "السلام عليكم .. معانا عميل مهتم بشقة حضرتك.. امتى متاح ميعاد للمعاينة؟";
 
 function getUnitSelectionId(unit) {
   return (

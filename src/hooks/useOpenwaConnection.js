@@ -37,7 +37,9 @@ export function useOpenwaConnection({
   }, [messagingConfig]);
 
   const hasOpenwaLinkedAccounts = openwaProfileAccounts.length > 0;
-  const openwaStatusQuery = useOpenwaSessionsStatus();
+
+  const pollWhileOpen = showOpenwaDialog && hasOpenwaLinkedAccounts;
+  const openwaStatusQuery = useOpenwaSessionsStatus({ pollWhileOpen });
   const { refetch } = openwaStatusQuery;
 
   const fetchStatus = useCallback(() => {
@@ -47,10 +49,14 @@ export function useOpenwaConnection({
     return refetch();
   }, [hasOpenwaLinkedAccounts, refetch]);
 
+  useEffect(() => {
+    if (!showOpenwaDialog || !hasOpenwaLinkedAccounts) return;
+    void refetch();
+  }, [showOpenwaDialog, hasOpenwaLinkedAccounts, refetch]);
+
   const openStatusDialog = useCallback(() => {
     setShowOpenwaDialog(true);
-    void fetchStatus();
-  }, [fetchStatus]);
+  }, []);
 
   useEffect(() => {
     if (!autoOpenOnMount) return;

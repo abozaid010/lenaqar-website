@@ -21,6 +21,7 @@ export default {
     confirm: "Confirm",
     close: "Close",
     retry: "Retry",
+    refresh: "Refresh",
     back: "Back",
     next: "Next",
     previous: "Previous",
@@ -186,6 +187,7 @@ export default {
       allCompounds: "All Projects",
       allPurposes: "All Purposes",
       allPropertyTypes: "All Property Types",
+      allFurnishingTypes: "All Furnishing Types",
       allSubDistricts: "All Sub-districts",
       allDistricts: "All Districts",
       purpose: "Purpose",
@@ -531,6 +533,7 @@ export default {
     news: "News",
     map: "Map",
     openMenu: "Open menu",
+    socialMedia: "Social media",
   },
   dashboardSummary: {
     title: "Dashboard",
@@ -1067,13 +1070,22 @@ export default {
     connected: "Connected",
     scanQr: "Scan this QR code with WhatsApp on your phone",
     waitingForQr: "Waiting for QR code…",
+    loadingQr: "Loading QR…",
+    qrPendingFromBackend:
+      " reports {status} but has not returned a QR image yet. We will keep checking automatically.",
+    reconnect: "Reconnect",
+    reconnectHint:
+      "Connection failed. Try again to request a new QR code.",
+    networkError:
+      "Could not refresh connection status. Retrying automatically…",
     sessionError: "Could not load connection status for this number",
     unknownNumber: "WhatsApp number",
     loading: "Checking WhatsApp connections…",
     loadFailed:
       "Could not check WhatsApp connection status. Please try again.",
     successMessage: "{count} WhatsApp number(s) connected",
-    pollingHint: "Status updates automatically after you scan.",
+    pollingHint:
+      "Status updates automatically every 15 seconds while this dialog is open.",
     refresh: "Refresh",
     openStatus: "WhatsApp connection",
     partialLoadFailed:
@@ -1193,6 +1205,7 @@ export default {
     allCompounds: "All Projects",
     allPurposes: "All Purposes",
     allPropertyTypes: "All Property Types",
+    allFurnishingTypes: "All Furnishing Types",
     pendingApproval: "Pending Approval",
     hidden: "Hidden",
     price: "price",
@@ -1228,6 +1241,26 @@ export default {
         "Each owner will receive your message with their unit link appended automatically.",
       defaultMessage:
         "Hello, I would like to check if this unit is available for rent and when we can arrange a property viewing.",
+    },
+    favoriteSearches: {
+      title: "Favorite Searches",
+      save: "Save",
+      saveCurrent: "Save current filters",
+      saveSuccess: "Favorite search saved.",
+      renameSuccess: "Favorite renamed.",
+      deleteSuccess: "Favorite deleted.",
+      empty: "No favorite searches yet. Set your filters and tap Save.",
+      loading: "Loading favorites…",
+      namePlaceholder: "Name this search…",
+      emptyNameError: "Please enter a name for this search.",
+      duplicateNameError:
+        "A favorite with this name already exists. Choose a different name.",
+      noFiltersSummary: "No filters",
+      savingPreview: "Saving:",
+      noActiveFiltersHint: "No filters are currently selected.",
+      savedOn: "Saved {date}",
+      rename: "Rename",
+      deleteConfirm: "Delete this favorite?",
     },
   },
   shareModel: {
@@ -1804,6 +1837,7 @@ export default {
       "partially furnished": "Partially Furnished",
       flixy: "Flixy",
       "semi furnished": "Semi Furnished",
+      turnkey: "Turnkey",
     },
     amenitiesTypes: {
       wifi: "WiFi",
@@ -2532,6 +2566,7 @@ export default {
     furnishing: {
       furnished: "Furnished", unfurnished: "Unfurnished", partiallyFurnished: "Partially Furnished",
       semiFurnished: "Semi Furnished", hotelFurnished: "Hotel Furnished", flixy: "Flixy",
+      turnkey: "Turnkey",
     },
     view: {
       garden: "Garden", pool: "Pool", sea: "Sea", landmark: "Landmark", street: "Street",
@@ -2755,6 +2790,94 @@ export default {
         preview_excluded_fulfilled: "Preview: fulfilled",
         preview_excluded_withdrawn: "Preview: withdrawn",
       },
+    },
+  },
+  socialMedia: {
+    subtitle: "Monitor automated posting & commenting",
+    themeToggle: "Toggle theme",
+    search: {
+      placeholder: "Search…",
+    },
+    nav: {
+      label: "Social media navigation",
+      dashboard: "Dashboard",
+      posts: "Posts",
+      comments: "Comments",
+    },
+    dashboard: {
+      title: "Social monitoring",
+      loadError: "Failed to load dashboard summary",
+    },
+    posts: {
+      title: "Posts",
+      loadError: "Failed to load posts",
+      detailsTitle: "Post details",
+      content: "Content",
+      commentsCount: "Comments count",
+    },
+    comments: {
+      title: "Comments",
+      loadError: "Failed to load comments",
+      detailsTitle: "Comment details",
+      text: "Comment",
+    },
+    kpi: {
+      totalPosts: "Total posts",
+      publishedPosts: "Published posts",
+      failedPosts: "Failed posts",
+      totalComments: "Total comments",
+      publishedComments: "Published comments",
+      failedComments: "Failed comments",
+      accounts: "Accounts",
+      groups: "Groups",
+      todayPosts: "Today's posts",
+      todayComments: "Today's comments",
+    },
+    filters: {
+      status: "Status",
+      allStatuses: "All statuses",
+      account: "Account",
+      accountPlaceholder: "Account ID",
+      post: "Post",
+      postPlaceholder: "Post ID",
+      dateFrom: "Date from",
+      dateTo: "Date to",
+    },
+    status: {
+      published: "Published",
+      pending: "Pending",
+      publishing: "Publishing",
+      failed: "Failed",
+      deleted: "Deleted",
+    },
+    table: {
+      status: "Status",
+      account: "Account",
+      groupName: "Group",
+      postContent: "Post content",
+      commentText: "Comment",
+      postUrl: "Post URL",
+      groupUrl: "Group URL",
+      createdAt: "Created",
+      publishedAt: "Published",
+    },
+    pagination: {
+      total: "Total",
+      page: "Page",
+      showing: "Showing",
+      of: "of",
+    },
+    actions: {
+      copyUrl: "Copy URL",
+      openUrl: "Open URL",
+      openGroup: "Open group",
+    },
+    empty: {
+      title: "No posts found",
+      subtitle: "Try changing filters or clearing your search.",
+    },
+    emptyComments: {
+      title: "No comments found",
     },
   },
 };

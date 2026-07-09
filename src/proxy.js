@@ -1,4 +1,5 @@
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { isJwtExpired } from "@/lib/jwtCookieUtils";
 import { NextResponse } from "next/server";
 
 const SITE_HOME_PAGE =
@@ -110,8 +111,9 @@ export function proxy(request) {
       response.cookies.delete(COOKIE_KEYS.CLIENT_ID);
       return withProxyDebug(response, request);
     }
-    // Access token missing but refresh token present: refresh then continue
-    if (!accessToken) {
+    // Access token missing or JWT expired — refresh then continue
+    const accessMissingOrExpired = !accessToken || isJwtExpired(accessToken);
+    if (accessMissingOrExpired) {
       const redirectParam = encodeURIComponent(
         request.nextUrl.pathname + request.nextUrl.search
       );

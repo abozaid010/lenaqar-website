@@ -44,7 +44,7 @@ export function TokenRefreshProvider({
     }
 
     // Check if token is expiring soon
-    if (TokenExpirationManager.isTokenExpiringSoon(refreshThreshold)) {
+    if (TokenExpirationManager.needsProactiveRefresh(refreshThreshold)) {
       // Only log in development
       if (process.env.NODE_ENV === "development") {
         const now = new Date().toLocaleTimeString();
@@ -114,7 +114,7 @@ export function TokenRefreshProvider({
   const handleVisibilityChange = useCallback(() => {
     if (document.visibilityState === "visible") {
       // Tab became visible, check if refresh is needed
-      if (TokenExpirationManager.isTokenExpiringSoon(refreshThreshold)) {
+      if (TokenExpirationManager.needsProactiveRefresh(refreshThreshold)) {
         checkAndRefreshToken();
       }
       // Reschedule next refresh

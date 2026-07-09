@@ -109,6 +109,7 @@ export async function fetchUnitsFilterServer(
     // Mirror the client-side logic in units-page-query-optimized.jsx
     delete base.client_id;
     delete base.clientId;
+    delete base.visibility;
 
     const params: Record<string, unknown> = {
       ...base,

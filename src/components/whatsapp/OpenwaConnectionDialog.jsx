@@ -3,10 +3,9 @@
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
+import { isOpenwaSessionTerminalFailure } from "@/lib/openwa-session-status";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
-
-const AUTO_CLOSE_CONNECTED_MS = 3000;
 
 function formatDisplayPhone(phone) {
   if (!phone) return "";
@@ -15,7 +14,13 @@ function formatDisplayPhone(phone) {
   return raw.startsWith("+") ? raw : `+${raw}`;
 }
 
-function SessionStatusCard({ session, translate }) {
+function SessionStatusCard({
+  session,
+  translate,
+  isRefreshing,
+  hasStatusData,
+  onReconnect,
+}) {
   const phone = formatDisplayPhone(session.whatsapp_number);
   const connectedLabel = translate(
     "openwaConnection.connected",
@@ -29,6 +34,36 @@ function SessionStatusCard({ session, translate }) {
     "openwaConnection.sessionError",
     "Could not load connection status for this number"
   );
+  const loadingQrLabel = translate(
+    "openwaConnection.loadingQr",
+    "Loading QR…"
+  );
+  const waitingQrLabel = translate(
+    "openwaConnection.waitingForQr",
+    "Waiting for QR code…"
+  );
+  const reconnectLabel = translate(
+    "openwaConnection.reconnect",
+    "Reconnect"
+  );
+  const reconnectHint = translate(
+    "openwaConnection.reconnectHint",
+    "Connection failed. Try again to request a new QR code."
+  );
+
+  const isTerminalFailure = isOpenwaSessionTerminalFailure(session);
+  const isInitializing =
+    !session.connected &&
+    !session.qrImage &&
+    !session.error &&
+    !isTerminalFailure &&
+    isRefreshing &&
+    !hasStatusData;
+  const qrPendingFromBackend = Boolean(session.qrPendingFromBackend);
+  const qrPendingHint = translate(
+    "openwaConnection.qrPendingFromBackend",
+    "OpenWA reports {status} but has not returned a QR image yet. We will keep checking automatically."
+  ).replace("{status}", session.status || "pending");
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 space-y-3">
@@ -51,8 +86,25 @@ function SessionStatusCard({ session, translate }) {
         ) : null}
       </div>
 
-      {session.error ? (
+      {session.error && !isTerminalFailure ? (
         <p className="text-sm text-red-600">{session.error || errorLabel}</p>
+      ) : null}
+
+      {isTerminalFailure ? (
+        <div className="space-y-2">
+          <p className="text-sm text-red-600">
+            {session.error || errorLabel}
+          </p>
+          <p className="text-xs text-gray-600">{reconnectHint}</p>
+          <button
+            type="button"
+            onClick={onReconnect}
+            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/30 text-primary text-sm font-medium hover:bg-primary/5 transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" aria-hidden />
+            {reconnectLabel}
+          </button>
+        </div>
       ) : null}
 
       {!session.connected && session.qrImage ? (
@@ -68,13 +120,23 @@ function SessionStatusCard({ session, translate }) {
         </div>
       ) : null}
 
-      {!session.connected && !session.qrImage && !session.error ? (
-        <p className="text-sm text-gray-600">
-          {translate(
-            "openwaConnection.waitingForQr",
-            "Waiting for QR code…"
-          )}
-        </p>
+      {!session.connected &&
+      !session.qrImage &&
+      !session.error &&
+      !isTerminalFailure ? (
+        isInitializing ? (
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <RefreshCw className="w-4 h-4 animate-spin shrink-0" aria-hidden />
+            <span>{loadingQrLabel}</span>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600">{waitingQrLabel}</p>
+            {qrPendingFromBackend ? (
+              <p className="text-xs text-amber-700">{qrPendingHint}</p>
+            ) : null}
+          </div>
+        )
       ) : null}
     </div>
   );
@@ -88,22 +150,22 @@ export default function OpenwaConnectionDialog({
   autoCloseWhenConnected = false,
 }) {
   const { translate } = useI18n();
-  const { data, isLoading, isFetching, isError, refetch } = statusQuery;
+  const { data, isLoading, isFetching, isError, refetch, error } = statusQuery;
 
-  const sessions = data?.sessions?.length ? data.sessions : fallbackSessions;
-  const allConnected = data?.sessions?.length
-    ? Boolean(data?.allConnected)
-    : false;
+  const hasStatusData = Boolean(data?.sessions?.length);
+  const sessions = hasStatusData ? data.sessions : fallbackSessions;
+  const allConnected = hasStatusData ? Boolean(data?.allConnected) : false;
   const disconnectedCount = useMemo(
     () => sessions.filter((session) => !session.connected).length,
     [sessions]
   );
 
-  const shouldAutoClose =
-    autoCloseWhenConnected &&
+  // UX: Only show this dialog when something isn't working.
+  // If everything is connected, auto-hide immediately (no success modal).
+  const shouldSuppressDialog =
     isOpen &&
     !isLoading &&
-    Boolean(data?.sessions?.length) &&
+    hasStatusData &&
     Boolean(data?.allConnected) &&
     data.sessions.every((session) => session.connected);
 
@@ -111,14 +173,14 @@ export default function OpenwaConnectionDialog({
   onCloseRef.current = onClose;
 
   useEffect(() => {
-    if (!shouldAutoClose) return;
-
+    if (!shouldSuppressDialog) return;
+    // Defer to next tick so parent state updates safely.
     const timer = window.setTimeout(() => {
       onCloseRef.current();
-    }, AUTO_CLOSE_CONNECTED_MS);
+    }, 0);
 
     return () => window.clearTimeout(timer);
-  }, [shouldAutoClose]);
+  }, [shouldSuppressDialog]);
 
   const title = allConnected
     ? translate("openwaConnection.titleConnected", "WhatsApp is connected")
@@ -133,6 +195,16 @@ export default function OpenwaConnectionDialog({
         "openwaConnection.disconnectedDescription",
         "Scan the QR code for each number below to restore WhatsApp messaging."
       );
+
+  const networkErrorMessage =
+    error instanceof Error
+      ? error.message
+      : translate(
+          "openwaConnection.networkError",
+          "Could not refresh connection status. Retrying automatically…"
+        );
+
+  if (shouldSuppressDialog) return null;
 
   return (
     <UnifiedDialog
@@ -165,38 +237,25 @@ export default function OpenwaConnectionDialog({
           containerClassName="flex items-center justify-center min-h-[160px]"
         />
       ) : isError && sessions.length === 0 ? (
-        <p className="text-sm text-red-600">
-          {translate(
-            "openwaConnection.loadFailed",
-            "Could not check WhatsApp connection status. Please try again."
-          )}
-        </p>
+        <div className="space-y-3">
+          <p className="text-sm text-red-600">
+            {translate(
+              "openwaConnection.loadFailed",
+              "Could not check WhatsApp connection status. Please try again."
+            )}
+          </p>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/30 text-primary text-sm font-medium hover:bg-primary/5"
+          >
+            <RefreshCw className="w-4 h-4" aria-hidden />
+            {translate("openwaConnection.reconnect", "Reconnect")}
+          </button>
+        </div>
       ) : (
         <>
           <p className="text-sm text-gray-600">{description}</p>
-
-          {allConnected && sessions.length > 0 ? (
-            <div className="flex flex-col items-center gap-3 py-2">
-              <CheckCircle2
-                className="w-14 h-14 text-green-600"
-                aria-hidden
-              />
-              <p className="text-sm font-medium text-green-700 text-center">
-                {translate(
-                  "openwaConnection.successMessage",
-                  "{count} WhatsApp number(s) connected"
-                ).replace("{count}", String(sessions.length))}
-              </p>
-              {autoCloseWhenConnected ? (
-                <p className="text-xs text-gray-500 text-center">
-                  {translate(
-                    "openwaConnection.autoCloseHint",
-                    "This dialog will close in 3 seconds."
-                  )}
-                </p>
-              ) : null}
-            </div>
-          ) : null}
 
           <div className="space-y-3">
             {sessions.map((session) => (
@@ -204,24 +263,28 @@ export default function OpenwaConnectionDialog({
                 key={session.session_id}
                 session={session}
                 translate={translate}
+                isRefreshing={isFetching}
+                hasStatusData={hasStatusData}
+                onReconnect={() => refetch()}
               />
             ))}
           </div>
 
           {isError && sessions.length > 0 ? (
             <p className="text-sm text-amber-700">
-              {translate(
-                "openwaConnection.partialLoadFailed",
-                "Some connection details could not be refreshed. Try again."
-              )}
+              {networkErrorMessage ||
+                translate(
+                  "openwaConnection.partialLoadFailed",
+                  "Some connection details could not be refreshed. Try again."
+                )}
             </p>
           ) : null}
 
-          {!allConnected && disconnectedCount > 0 ? (
+          {!allConnected && disconnectedCount > 0 && isOpen ? (
             <p className="text-xs text-gray-500">
               {translate(
                 "openwaConnection.pollingHint",
-                "Status updates automatically after you scan."
+                "Status updates automatically every 15 seconds while this dialog is open."
               )}
             </p>
           ) : null}

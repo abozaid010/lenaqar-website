@@ -18,6 +18,14 @@ export class TokenExpirationManager {
     return timeUntilExpiration > 0 && timeUntilExpiration <= thresholdMs;
   }
 
+  /** True when token is expired or within the proactive refresh window. */
+  static needsProactiveRefresh(thresholdMs = this.DEFAULT_REFRESH_THRESHOLD) {
+    if (!this.shouldRunProactiveRefresh()) return false;
+    const expirationTime = this.getTokenExpirationTime();
+    if (!expirationTime) return true;
+    return expirationTime - Date.now() <= thresholdMs;
+  }
+
   static getTokenExpirationTime() {
     try {
       const exp = LenaCookiesManager.getAccessTokenExp();
