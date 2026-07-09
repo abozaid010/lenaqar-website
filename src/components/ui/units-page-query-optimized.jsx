@@ -21,6 +21,7 @@ export default function UnitsPageQueryOptimized({
     // CRITICAL: never allow accidental leakage from URL/searchParams
     delete base.client_id;
     delete base.clientId;
+    delete base.visibility;
 
     const params = {
       ...base,
@@ -48,11 +49,8 @@ export default function UnitsPageQueryOptimized({
   };
 
   const searchParamsWithClient = useMemo(() => {
-    if (publicUnits) return { ...(searchParams || {}) };
-    // Client object is stored locally (cookie); clientId is always sent for identity,
-    // while client_id is ONLY sent when My Inventory is ON.
     return buildUnitsListParams(searchParams);
-  }, [searchParams, publicUnits, currentClientId]);
+  }, [searchParams, currentClientId]);
 
   // Stringify searchParams for query key - this changes when filters change
   const searchParamsKey = useMemo(

@@ -142,6 +142,8 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
 const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
     const params = safeMergeParams(searchParams, { page_size: 16 });
+    // Slim-list is the visible-inventory grid; always scope to published units.
+    params.visibility = "visible";
     const url = usePublicEndpoint ? "/public/v1/slim-list" : "/units/v1/slim-list";
     const qs = new URLSearchParams(params).toString();
 
