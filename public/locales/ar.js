@@ -2540,6 +2540,17 @@ export default {
     loadingContact: "جاري تحميل بيانات التواصل...",
     contactPrefix: "جهة التواصل",
     deletePropertyConfirm: "هل أنت متأكد أنك تريد حذف هذا العقار؟",
+    chatImages: {
+      addOne: "إضافة صورة إلى الوحدة",
+      addMany: "إضافة {{count}} صور إلى الوحدة",
+      alreadyAttached: "مرفقة",
+      adding: "جارٍ الإضافة...",
+      success: "تمت إضافة الصور إلى الوحدة بنجاح",
+      maxImagesReached: "تم الوصول إلى الحد الأقصى لصور الوحدة",
+      duplicateOnly: "الصور المحددة مرتبطة بالوحدة بالفعل",
+      select: "تحديد الصورة",
+      deselect: "إلغاء تحديد الصورة",
+    },
   },
   sendMessageToOwner: {
     title: "مراسلة المالك",

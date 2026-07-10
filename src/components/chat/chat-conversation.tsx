@@ -6,6 +6,7 @@ import ChatHistory from "@/components/chat/chat-history";
 import ChatInput from "@/components/chat/chat-input";
 import ChatConversationSkeleton from "@/components/chat/chat-conversation-skeleton";
 import { useConversation } from "@/hooks/useConversation";
+import type { ChatTurn } from "@/hooks/useConversation";
 import { useI18n } from "@/hooks/useI18n";
 import {
   LEAD_CONVERSATION_MESSAGE_LIMIT,
@@ -29,6 +30,8 @@ export interface ChatConversationProps {
     refetch: () => Promise<unknown>;
     isFetching: boolean;
   }) => void;
+  /** Notifies parent when conversation messages change (e.g. attach chat images to unit). */
+  onMessagesChange?: (messages: ChatTurn[]) => void;
 }
 
 export default function ChatConversation({
@@ -42,6 +45,7 @@ export default function ChatConversation({
   messageLimit,
   className = "",
   onConversationControls,
+  onMessagesChange,
 }: ChatConversationProps) {
   const { translate } = useI18n();
 
@@ -66,6 +70,11 @@ export default function ChatConversation({
   useEffect(() => {
     onConversationControls?.({ refetch, isFetching });
   }, [onConversationControls, refetch, isFetching]);
+
+  useEffect(() => {
+    if (isLoading || isError) return;
+    onMessagesChange?.(messages);
+  }, [messages, isLoading, isError, onMessagesChange]);
 
   const resolvedUserId = meta.userId ?? userId ?? null;
   const resolvedChatId = meta.chatId ?? chatId ?? null;

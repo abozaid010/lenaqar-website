@@ -2481,6 +2481,17 @@ export default {
     contactPrefix: "Contact",
     deletePropertyConfirm:
       "Are you sure you want to delete this property?",
+    chatImages: {
+      addOne: "Add 1 Image to Unit",
+      addMany: "Add {{count}} Images to Unit",
+      alreadyAttached: "Attached",
+      adding: "Adding...",
+      success: "Images added to unit successfully",
+      maxImagesReached: "Maximum number of unit images reached",
+      duplicateOnly: "Selected images are already attached to this unit",
+      select: "Select image",
+      deselect: "Deselect image",
+    },
   },
   sendMessageToOwner: {
     title: "Message Owner",

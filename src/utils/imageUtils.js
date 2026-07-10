@@ -5,6 +5,17 @@
 import { IMAGE_BASE_URL } from "@/lib/imageConfig";
 import { getAllowedImageHostnames } from "@/config/imageHosts";
 
+/** Resolve GCS file id from API fields or URL path (/gcs/… or /images/…). */
+export function resolveImageFileId(img) {
+  if (!img || typeof img !== "object") return "";
+  const direct = img.fileId ?? img.file_id ?? img.id;
+  if (direct) return String(direct);
+  const url = img.url || img.image_url || "";
+  if (!url) return "";
+  const match = String(url).match(/\/(gcs|images)\/([^/?#]+)/);
+  return match ? match[2] : "";
+}
+
 /** Auto-generated caption when a user sends unit images via WhatsApp. */
 export const USER_MESSAGE_IMAGE_PLACEHOLDER =
   "i have unit wanna offer, here is the images of it";
