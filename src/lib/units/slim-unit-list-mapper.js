@@ -34,12 +34,7 @@ export function mapSlimUnitToListItem(slim) {
 
   const buildingType = slim.buildingType ?? slim.property_type ?? null;
   const project = slim.project ?? null;
-  const ownerMobile =
-    slim.owner_mobile ??
-    slim.ownerMobile ??
-    slim.phone_number ??
-    slim.phoneNumber ??
-    null;
+  const ownerMobile = slim.owner_mobile ?? slim.ownerMobile ?? null;
 
   return {
     ...slim,

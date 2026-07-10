@@ -84,7 +84,7 @@ export default function SearchableSubDistrictSelect({
         const label = await manager.getSubDistrictLabel(
           normalizedSub || value,
           cityObj.value,
-          normalizedDistrict,
+          normalizedDistrict || district,
           locale
         );
         if (active) setResolvedLabel(label || "");

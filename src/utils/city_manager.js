@@ -25,89 +25,97 @@ class CityManager {
   }
 
   /**
-   * Initialize data by fetching from public folder
+   * Initialize data by fetching from public folder.
+   * Concurrent callers share one in-flight promise so nobody reads empty data mid-load.
    */
   async initializeData() {
-    if (this.isInitialized || this.isLoading) return;
+    if (this.isInitialized) return this;
     if (this.loadPromise) return this.loadPromise;
 
     this.isLoading = true;
-
-    try {
-      const response = await fetch('/cities_list.json');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cities data: ${response.status}`);
-      }
-      const citiesListData = await response.json();
-
-      // Extract cities from the JSON array
-      this.cities = citiesListData.map(city => ({
-        id: city.id,
-        en_name: city.en_name,
-        ar_name: city.ar_name,
-        value: city.en_name.toLowerCase(), // lowercase en_name sent to backend
-        label_en: city.en_name,
-        label_ar: city.ar_name
-      }));
-
-      // Extract all districts from all cities
-      this.districts = [];
-      this.subDistricts = [];
-      citiesListData.forEach(city => {
-        if (city.districts && Array.isArray(city.districts)) {
-          city.districts.forEach(district => {
-            const districtValue = district.en_name.toLowerCase(); // canonical backend value
-            this.districts.push({
-              id: city.id + '_' + district.en_name.toLowerCase().replace(/\s+/g, '_'),
-              en_name: district.en_name,
-              ar_name: district.ar_name,
-              city_id: city.id,
-              city_en_name: city.en_name,
-              city_ar_name: city.ar_name,
-              value: districtValue, // lowercase for API compatibility
-              label_en: district.en_name,
-              label_ar: district.ar_name,
-              aliases: district.aliases || []
-            });
-
-            if (district.sub_districts && Array.isArray(district.sub_districts)) {
-              district.sub_districts.forEach((sub) => {
-                if (!sub?.en_name) return;
-                this.subDistricts.push({
-                  id:
-                    city.id +
-                    '_' +
-                    district.en_name.toLowerCase().replace(/\s+/g, '_') +
-                    '_' +
-                    sub.en_name.toLowerCase().replace(/\s+/g, '_'),
-                  en_name: sub.en_name,
-                  ar_name: sub.ar_name,
-                  city_id: city.id,
-                  district_value: districtValue,
-                  city_en_name: city.en_name,
-                  city_ar_name: city.ar_name,
-                  value: sub.en_name.toLowerCase(),
-                  label_en: sub.en_name,
-                  label_ar: sub.ar_name,
-                  aliases: sub.aliases || [],
-                });
-              });
-            }
-          });
+    this.loadPromise = (async () => {
+      try {
+        const response = await fetch("/cities_list.json");
+        if (!response.ok) {
+          throw new Error(`Failed to fetch cities data: ${response.status}`);
         }
-      });
+        const citiesListData = await response.json();
 
-      this.isInitialized = true;
-      this.isLoading = false;
-      return this;
-    } catch (error) {
-      console.error("Failed to initialize CityManager data:", error);
-      this.cities = [];
-      this.districts = [];
-      this.subDistricts = [];
-      this.isLoading = false;
-      throw error;
-    }
+        // Extract cities from the JSON array
+        this.cities = citiesListData.map((city) => ({
+          id: city.id,
+          en_name: city.en_name,
+          ar_name: city.ar_name,
+          value: city.en_name.toLowerCase(), // lowercase en_name sent to backend
+          label_en: city.en_name,
+          label_ar: city.ar_name,
+        }));
+
+        // Extract all districts from all cities
+        this.districts = [];
+        this.subDistricts = [];
+        citiesListData.forEach((city) => {
+          if (city.districts && Array.isArray(city.districts)) {
+            city.districts.forEach((district) => {
+              const districtValue = district.en_name.toLowerCase(); // canonical backend value
+              this.districts.push({
+                id:
+                  city.id +
+                  "_" +
+                  district.en_name.toLowerCase().replace(/\s+/g, "_"),
+                en_name: district.en_name,
+                ar_name: district.ar_name,
+                city_id: city.id,
+                city_en_name: city.en_name,
+                city_ar_name: city.ar_name,
+                value: districtValue, // lowercase for API compatibility
+                label_en: district.en_name,
+                label_ar: district.ar_name,
+                aliases: district.aliases || [],
+              });
+
+              if (district.sub_districts && Array.isArray(district.sub_districts)) {
+                district.sub_districts.forEach((sub) => {
+                  if (!sub?.en_name) return;
+                  this.subDistricts.push({
+                    id:
+                      city.id +
+                      "_" +
+                      district.en_name.toLowerCase().replace(/\s+/g, "_") +
+                      "_" +
+                      sub.en_name.toLowerCase().replace(/\s+/g, "_"),
+                    en_name: sub.en_name,
+                    ar_name: sub.ar_name,
+                    city_id: city.id,
+                    district_value: districtValue,
+                    city_en_name: city.en_name,
+                    city_ar_name: city.ar_name,
+                    value: sub.en_name.toLowerCase(),
+                    label_en: sub.en_name,
+                    label_ar: sub.ar_name,
+                    aliases: sub.aliases || [],
+                  });
+                });
+              }
+            });
+          }
+        });
+
+        this.isInitialized = true;
+        return this;
+      } catch (error) {
+        console.error("Failed to initialize CityManager data:", error);
+        this.cities = [];
+        this.districts = [];
+        this.subDistricts = [];
+        throw error;
+      } finally {
+        this.isLoading = false;
+        this.loadPromise = null;
+      }
+    })();
+
+    return this.loadPromise;
   }
 
   /**

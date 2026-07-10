@@ -369,21 +369,31 @@ const AddNewWhatsappCampaignDialog = ({
 
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
-    const messages = contactList.map((contact) => ({
-      ...resolveWhatsappRecipientFields({
-        chat_id: contact.chat_id,
-        phone_number: contact.phone_number || contact.phone,
-      }),
-      message: "",
-      user_name: contact.user_name || contact.name || "",
-      template_name: templateName,
-      language_code: languageCode,
-      platform: transportPlatform,
-      ...(senderPhoneNumber
-        ? { sender_phone_number: senderPhoneNumber }
-        : {}),
-      source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
-    }));
+    const messages = contactList
+      .map((contact) => {
+        const recipient = resolveWhatsappRecipientFields({
+          chat_id: contact.chat_id,
+          phone_number: contact.phone_number || contact.phone,
+        });
+        if (!recipient) return null;
+        return {
+          ...recipient,
+          message: "",
+          user_name: contact.user_name || contact.name || "",
+          template_name: templateName,
+          language_code: languageCode,
+          platform: transportPlatform,
+          ...(senderPhoneNumber
+            ? { sender_phone_number: senderPhoneNumber }
+            : {}),
+          source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
+        };
+      })
+      .filter(Boolean);
+
+    if (messages.length === 0) {
+      throw new Error("No valid recipients to send");
+    }
 
     return sendWhatsappWithClientConfig({
       config: selectedAccount,
@@ -404,16 +414,26 @@ const AddNewWhatsappCampaignDialog = ({
 
     const transportPlatform = toTransportPlatform(selectedAccount.platform);
     const senderPhoneNumber = resolveSenderPhoneNumber(selectedAccount);
-    const messages = recipientsProp.map((recipient) => ({
-      ...resolveWhatsappRecipientFields(recipient),
-      message: buildAutomationMessageForRecipient(recipient),
-      user_name: recipient.user_name || "",
-      platform: transportPlatform,
-      ...(senderPhoneNumber
-        ? { sender_phone_number: senderPhoneNumber }
-        : {}),
-      source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
-    }));
+    const messages = recipientsProp
+      .map((recipient) => {
+        const fields = resolveWhatsappRecipientFields(recipient);
+        if (!fields) return null;
+        return {
+          ...fields,
+          message: buildAutomationMessageForRecipient(recipient),
+          user_name: recipient.user_name || "",
+          platform: transportPlatform,
+          ...(senderPhoneNumber
+            ? { sender_phone_number: senderPhoneNumber }
+            : {}),
+          source: WHATSAPP_MESSAGE_SOURCES.HUMAN,
+        };
+      })
+      .filter(Boolean);
+
+    if (messages.length === 0) {
+      throw new Error("No valid recipients to send");
+    }
 
     return sendWhatsappWithClientConfig({
       config: selectedAccount,

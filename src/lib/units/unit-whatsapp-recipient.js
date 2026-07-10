@@ -17,19 +17,14 @@ function getUnitSelectionId(unit) {
   );
 }
 
+/** Owner WhatsApp phone from unit.owner_mobile only — no other field fallbacks. */
 function extractOwnerPhone(unit) {
-  return String(
-    unit.owner_mobile ??
-      unit.ownerMobile ??
-      unit.phone_number ??
-      unit.phoneNumber ??
-      ""
-  ).trim();
+  return String(unit.owner_mobile ?? unit.ownerMobile ?? "").trim();
 }
 
 /**
  * Build a units list row into a WhatsApp recipient for bulk availability checks.
- * Selection does not require a phone; send still skips rows without a valid number.
+ * Skips units with missing or invalid owner_mobile (backend 422 on bad phones).
  *
  * @param {object} unit
  * @param {string|null|undefined} clientId

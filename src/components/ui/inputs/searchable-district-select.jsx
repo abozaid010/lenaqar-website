@@ -73,13 +73,25 @@ export default function SearchableDistrictSelect({
       }
       try {
         const manager = (await import("@/utils/city_manager")).default.getInstance();
-        const cityObj = city ? await manager.getCityByValue(city) : null;
-        if (!cityObj) {
-          if (active) setResolvedLabel("");
+        await manager.initializeData();
+        if (city) {
+          const cityObj = await manager.getCityByValue(city);
+          if (!cityObj) {
+            if (active) setResolvedLabel("");
+            return;
+          }
+          const label = await manager.getDistrictLabel(value, cityObj.value, locale);
+          if (active) setResolvedLabel(label || "");
           return;
         }
-        const label = await manager.getDistrictLabel(value, cityObj.value, locale);
-        if (active) setResolvedLabel(label || "");
+        // No city scope: resolve from the full district list so reload still shows a label.
+        const districts = await manager.getDistrictsWithLabels(null, locale);
+        const match = (districts || []).find(
+          (d) =>
+            String(d.value).toLowerCase().trim() ===
+            String(value).toLowerCase().trim()
+        );
+        if (active) setResolvedLabel(match?.label || "");
       } catch (error) {
         console.error("Failed to resolve district label:", error);
         if (active) setResolvedLabel("");
