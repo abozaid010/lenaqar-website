@@ -2,10 +2,12 @@ import { Edit, Trash2 } from 'lucide-react';
 import { useState, useEffect, useMemo, useCallback, type MouseEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useI18n } from '@/hooks/useI18n';
+import type { ChatTurn } from '@/hooks/useConversation';
 import type { StickyInquiryCardProps } from '@/lib/units/unit-types';
 import { contactInfo } from '@/lib/contact-info';
 import { buildAdminUnitEditPath, buildPublicUnitShareUrl } from '@/lib/units/unit-share-links';
 import ChatConversation from '@/components/chat/chat-conversation';
+import ChatImagesToUnit from '@/components/unit-details/chat-images-to-unit';
 import UnitInquiryContactHeader from '@/components/unit-details/unit-inquiry-contact-header';
 import { UNIT_CONVERSATION_MESSAGE_LIMIT } from '@/constants/conversation-limits';
 import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
@@ -45,6 +47,7 @@ export default function StickyInquiryCard({
     refetch: () => Promise<unknown>;
     isFetching: boolean;
   } | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<ChatTurn[]>([]);
 
   const handleConversationControls = useCallback(
     (controls: { refetch: () => Promise<unknown>; isFetching: boolean }) => {
@@ -52,6 +55,10 @@ export default function StickyInquiryCard({
     },
     []
   );
+
+  const handleConversationMessages = useCallback((messages: ChatTurn[]) => {
+    setConversationMessages(messages);
+  }, []);
 
   useEffect(() => {
     const code = unit.referenceCode?.trim();
@@ -212,7 +219,11 @@ export default function StickyInquiryCard({
             fillHeight
             className="flex-1 min-h-0"
             onConversationControls={handleConversationControls}
+            onMessagesChange={handleConversationMessages}
           />
+          {showUnitAdminActions && rawUnit ? (
+            <ChatImagesToUnit messages={conversationMessages} rawUnit={rawUnit} />
+          ) : null}
         </>
       ) : !loading && !receiverPhone && (contactData?.name || contactData?.phone) ? (
         <div className="bg-gray-50 rounded-lg p-3 text-center space-y-1 shrink-0">
