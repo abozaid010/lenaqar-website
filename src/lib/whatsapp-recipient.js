@@ -1,4 +1,6 @@
-import { isPossiblePhoneNumber, parsePhoneNumberFromString } from "libphonenumber-js/min";
+// Use /max metadata so isValid matches backend (Python phonenumbers).
+// /min incorrectly treats some incomplete EG numbers (e.g. 20100861138) as valid.
+import { isValidPhoneNumber } from "libphonenumber-js/max";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 
 const WHATSAPP_CHAT_ID_PATTERN = /@(lid|c\.us|s\.whatsapp\.net|g\.us)$/i;
@@ -14,6 +16,7 @@ export function isWhatsappChatId(value) {
 
 /**
  * Normalize a valid phone for POST /whatsapp/send_messages (digits only, no "+").
+ * Returns null when the number is missing or invalid for the WhatsApp API.
  */
 export function toWhatsappApiPhoneDigits(raw, defaultCountry = "EG") {
   const trimmed = String(raw ?? "").trim();
@@ -22,16 +25,10 @@ export function toWhatsappApiPhoneDigits(raw, defaultCountry = "EG") {
   const e164 = phoneToE164(trimmed, defaultCountry);
   if (!e164) return null;
 
-  const parsed = parsePhoneNumberFromString(e164);
-  if (parsed?.isPossible()) {
-    return e164.replace(/^\+/, "");
-  }
+  // Backend rejects numbers that fail phonenumbers.is_valid_number — require the same.
+  if (!isValidPhoneNumber(e164)) return null;
 
-  if (isPossiblePhoneNumber(trimmed, defaultCountry)) {
-    return e164.replace(/^\+/, "");
-  }
-
-  return null;
+  return e164.replace(/^\+/, "");
 }
 
 /**

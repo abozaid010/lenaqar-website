@@ -268,11 +268,13 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     if (resolved) return resolved;
 
     if (!options || !Array.isArray(options)) {
-      return resolveSelectedLabel ? "" : value;
+      // Keep the selected value visible while options/labels are still loading.
+      return value;
     }
     const option = options.find((opt) => valuesMatch(getValue(opt), value));
     if (option) return getLabel(option, locale);
-    return resolveSelectedLabel ? "" : value;
+    // Prefer showing the raw value over a blank button when the label is not ready yet.
+    return value;
   }, [
     value,
     options,
