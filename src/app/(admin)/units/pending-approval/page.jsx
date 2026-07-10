@@ -12,7 +12,7 @@ export async function generateMetadata() {
   return {
     title: "Hidden units - Units | LENAAI AI Sales Agent",
     description:
-      "View and manage hidden property units. Same layout as Units with data from the pending approval API.",
+      "View and manage hidden property units. Same layout as Units with data from the slim-list API.",
     robots: {
       index: false,
       follow: false,
