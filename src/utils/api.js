@@ -6,6 +6,10 @@ import { safeMergeParams } from "./safeJsonParser";
 import {
   mapSlimUnitsListResponse,
 } from "@/lib/units/slim-unit-list-mapper";
+import {
+  buildPendingApprovalSlimListParams,
+  buildPendingApprovalSlimListUrl,
+} from "@/lib/units/pending-approval-list-params";
 import { parseExistingProjectData, parseValidationErrors } from "./error-parser";
 import CityManager from "./city_manager";
 import { CAMPAIGN_CHAT_CLIENT_ID, CAMPAIGN_CHAT_ENDPOINTS, CAMPAIGN_CHAT_PAGINATION } from "@/constants/campaign-chat";
@@ -175,94 +179,34 @@ const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } 
 export const fetchUnitsFilter = with2SecondRetry(fetchUnitsFilterBase);
 
 /**
- * Fetches units from /units/all for the Hidden Units page.
+ * Fetches hidden / pending-approval units from `/units/v1/slim-list`.
  * Sends client_id from the CLIENT_ID cookie (active tenant workspace, e.g. homey)
  * and visibility ("pending_approval" by default, or "hidden" when selected).
- * Does not send is_primary — pending/hidden units may be primary or resale.
+ * Full unit documents load on detail pages via /units/details or /units/by-code.
  */
 export async function fetchPendingApprovalUnits(searchParams = {}) {
   try {
-    const parsed =
-      typeof searchParams === "string"
-        ? (() => {
-            try {
-              return JSON.parse(searchParams);
-            } catch {
-              return {};
-            }
-          })()
-        : { ...(searchParams || {}) };
+    const parsed = safeMergeParams(searchParams, {});
 
-    const params = {
-      page_size: Number(parsed.page_size) || 16,
-      direction: parsed.direction || "forward",
-      ...(parsed.cursor != null && parsed.cursor !== ""
-        ? { cursor: parsed.cursor }
-        : {}),
-    };
-
-    params.visibility =
-      parsed.visibility != null && parsed.visibility !== ""
-        ? parsed.visibility
-        : "pending_approval";
-
-    // Filter by updated_at (ISO 8601, e.g. '2024-01-01T00:00:00Z')
-    if (parsed.updated_at) {
-      params.updated_at = parsed.updated_at;
-    }
-
-    if (parsed.property_type) {
-      params.property_type = parsed.property_type;
-    }
-    if (parsed.min_price != null && parsed.min_price !== "") {
-      params.min_price = parsed.min_price;
-    }
-    if (parsed.max_price != null && parsed.max_price !== "") {
-      params.max_price = parsed.max_price;
-    }
-
-    // Tenant scope: cookie CLIENT_ID (e.g. homey), not JWT client_id (often "public").
     const clientId = createSafeClientId(LenaCookiesManager.getClientId());
-    if (clientId) {
-      params.client_id = clientId;
-    }
+    const params = buildPendingApprovalSlimListParams(parsed, clientId);
+    const url = buildPendingApprovalSlimListUrl(params);
 
-    const response = await axiosInstance.get("/units/all", { params });
+    const response = await axiosInstance.get(url);
 
     if (!response.data || !response.data.data) {
-      return {
-        status: true,
-        code: 200,
-        data: {
-          units: [],
-          count: 0,
-          pagination: {
-            next_cursor: null,
-            prev_cursor: null,
-            has_more_next: false,
-            has_more_prev: false,
-          },
-        },
-      };
+      throw new Error("Invalid response format from server");
     }
 
-    const data = response.data.data;
-    const units = Array.isArray(data.units) ? data.units : [];
-    const pagination = data.pagination || {
-      next_cursor: null,
-      prev_cursor: null,
-      has_more_next: false,
-      has_more_prev: false,
-    };
+    if (!response.data.data.units || !Array.isArray(response.data.data.units)) {
+      throw new Error("Expected units array but received invalid data format");
+    }
 
-    return {
-      ...response.data,
-      data: {
-        units,
-        count: data.count ?? units.length,
-        pagination,
-      },
-    };
+    if (response.data.data.pagination === undefined) {
+      console.warn("Pagination data missing in response");
+    }
+
+    return mapSlimUnitsListResponse(response.data);
   } catch (error) {
     console.error("Failed to fetch pending approval units:", error.message);
     throw error;

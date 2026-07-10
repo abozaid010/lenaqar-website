@@ -3,7 +3,7 @@
  * Full unit documents are still loaded on detail pages via /units/details or /units/by-code.
  *
  * Slim API shape:
- * { id, code, price, purpose, district, project, property_type, city, area, bedrooms, image }
+ * { id, code, price, purpose, district, project, property_type, city, area, bedrooms, image, owner_mobile? }
  */
 
 export function normalizeSlimPurpose(purpose) {
