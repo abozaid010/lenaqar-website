@@ -1224,6 +1224,7 @@ export default {
     resale: "Resale",
     minArea: "Min Area",
     maxArea: "Max Area",
+    applyFilters: "Apply Filters",
     purposes: {
       buy: "Buy",
       rent: "Rent",
