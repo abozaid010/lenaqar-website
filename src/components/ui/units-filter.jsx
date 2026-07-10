@@ -7,8 +7,7 @@ import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-da
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { useOnClickOutside } from "@/hooks/use-click-outside";
-import { ChevronDown, FileSpreadsheet, Trash2, X } from "lucide-react";
+import { FileSpreadsheet, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
@@ -18,17 +17,15 @@ import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-fu
 import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-import { unitKeys } from "@/utils/query-utils";
-import LoadingSpinner from "./loading-spinner";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 import toast from "react-hot-toast";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
-import { filtersToSearchParams } from "@/lib/units/favorite-searches";
+import { createEmptyFilters } from "@/lib/units/favorite-searches";
+import { useUnitsFilterDraft } from "@/hooks/use-units-filter-draft";
 import UnitsFavoriteSearches from "@/components/ui/units-favorite-searches";
 
 // Helper functions defined outside component to avoid hoisting/initialization issues
@@ -60,14 +57,6 @@ function formatPriceInput(value) {
   return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
-const parseNumeric = (v) => {
-  if (v === undefined || v === null) return null;
-  const cleaned = String(v).replace(/[^0-9.]/g, "");
-  if (!cleaned) return null;
-  const n = Number(cleaned);
-  return Number.isFinite(n) ? n : null;
-};
-
 const valuesMatch = (a, b) => {
   if (a == null || b == null) return a === b;
   return String(a).toLowerCase().trim() === String(b).toLowerCase().trim();
@@ -96,7 +85,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const queryClient = useQueryClient();
 
   // Get building types with translations
   const BUILDING_TYPES = useMemo(() => {
@@ -113,39 +101,25 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     });
   }, []);
 
-  // URL is the single source of truth for all filter values.
-  // Derived from searchParams so they always reflect the actual URL.
-  const filters = useMemo(() => ({
-    city: searchParams.get("city") || "",
-    district: searchParams.get("district") || "",
-    sub_district: searchParams.get("sub_district") || "",
-    developer_name: searchParams.get("developer_name") || "",
-    project_name: searchParams.get("project_name") || "",
-    purpose: searchParams.get("purpose") || "",
-    property_type: searchParams.get("property_type") || "",
-    furnished_type: searchParams.get("furnished_type") || "",
-    min_price: searchParams.get("min_price") || "",
-    max_price: searchParams.get("max_price") || "",
-    min_area: searchParams.get("min_area") || "",
-    max_area: searchParams.get("max_area") || "",
-    my_inventory: searchParams.get("my_inventory") === "true",
-    resale: searchParams.get("resale") === "true",
-  }), [searchParams]);
-
-  // Local state only for debounced numeric inputs so the user can type freely
-  // without every keystroke hitting the URL. Synced from URL on external changes.
-  const [localMinPrice, setLocalMinPrice] = useState(filters.min_price);
-  const [localMaxPrice, setLocalMaxPrice] = useState(filters.max_price);
-  const [localMinArea, setLocalMinArea] = useState(filters.min_area);
-  const [localMaxArea, setLocalMaxArea] = useState(filters.max_area);
-
-  // Sync local numeric inputs when URL changes externally (browser back/forward)
-  useEffect(() => {
-    setLocalMinPrice(searchParams.get("min_price") || "");
-    setLocalMaxPrice(searchParams.get("max_price") || "");
-    setLocalMinArea(searchParams.get("min_area") || "");
-    setLocalMaxArea(searchParams.get("max_area") || "");
-  }, [searchParams]);
+  // URL = applied filters (API). Draft = form state until Apply / Enter / 5s debounce.
+  const {
+    appliedFilters: filters,
+    draftFilters,
+    hasPendingChanges,
+    priceRangeError,
+    areaRangeError,
+    updateDraftFilters,
+    applyDraftFilters,
+    applyExternalFilters,
+    clearAllFilters,
+    removeFilterKey,
+  } = useUnitsFilterDraft({
+    searchParams,
+    pathname,
+    router,
+    isPublic,
+    locale,
+  });
 
   // Normalize filter params in URL to canonical English values for the API.
   useEffect(() => {
@@ -249,12 +223,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     };
   }, [searchParams, pathname, router, compounds, BUILDING_TYPES, FURNISHING_TYPES]);
 
-  const [priceRangeError, setPriceRangeError] = useState("");
-  const [areaRangeError, setAreaRangeError] = useState("");
-
-  // Debounced numeric search (price/area) to avoid spamming backend
-  const numericDebounceRef = useRef(null);
-
   // Get client ID from token for My Inventory filter.
   // IMPORTANT: compute on mount only to avoid SSR hydration mismatch.
   const [hasClientId, setHasClientId] = useState(false);
@@ -317,17 +285,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     const loadSubDistrictLabels = async () => {
       try {
         if (
-          !filters.city ||
-          filters.city === "all" ||
-          !filters.district ||
-          filters.district === "all"
+          !draftFilters.city ||
+          draftFilters.city === "all" ||
+          !draftFilters.district ||
+          draftFilters.district === "all"
         ) {
           setSubDistrictLabels({});
           return;
         }
 
         const manager = (await import("@/utils/city_manager")).default.getInstance();
-        const cityObj = await manager.getCityByValue(filters.city);
+        const cityObj = await manager.getCityByValue(draftFilters.city);
         if (!cityObj) {
           setSubDistrictLabels({});
           return;
@@ -335,7 +303,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
         const subs = await manager.getSubDistrictsWithLabels(
           cityObj.id,
-          String(filters.district).toLowerCase().trim(),
+          String(draftFilters.district).toLowerCase().trim(),
           locale
         );
 
@@ -350,15 +318,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     };
 
     loadSubDistrictLabels();
-  }, [locale, filters.city, filters.district]);
+  }, [locale, draftFilters.city, draftFilters.district]);
 
-  useEffect(() => {
-    return () => {
-      if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
-    };
-  }, []);
-
-  const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
@@ -389,11 +350,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     }
     setIsWhatsappBulkOpen(true);
   };
-
-  const priceDropdownRef = useRef(null);
-
-  // Close dropdown when clicking outside
-  useOnClickOutside(priceDropdownRef, () => setIsPriceDropdownOpen(false));
 
   const buildActiveFilters = useCallback((nextFilters) => {
     const list = [];
@@ -455,9 +411,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return developers.some((d) => getDeveloperValue(d) === filters.developer_name);
   }, [filters.developer_name, developers]);
 
-  // Derived from URL — automatically stays in sync with searchParams
+  // Derived from URL — chips reflect applied filters only
   const activeFilters = useMemo(() => {
-    // Temporarily override developer_name validity for buildActiveFilters
     const safeFilters = {
       ...filters,
       developer_name: hasValidDeveloper ? filters.developer_name : "",
@@ -465,79 +420,20 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return buildActiveFilters(safeFilters);
   }, [filters, buildActiveFilters, hasValidDeveloper]);
 
-  const applyNumericFiltersToUrl = useCallback((nextFilters) => {
-    const minPriceN = parseNumeric(nextFilters.min_price);
-    const maxPriceN = parseNumeric(nextFilters.max_price);
-    if (minPriceN != null && maxPriceN != null && maxPriceN < minPriceN) {
-      setPriceRangeError(
-        locale === "ar"
-          ? "يجب أن يكون الحد الأقصى للسعر أكبر من أو يساوي الحد الأدنى"
-          : "Max price must be greater than or equal to min price"
-      );
-      return;
-    }
-    setPriceRangeError("");
-
-    const minAreaN = parseNumeric(nextFilters.min_area);
-    const maxAreaN = parseNumeric(nextFilters.max_area);
-    if (minAreaN != null && maxAreaN != null && maxAreaN < minAreaN) {
-      setAreaRangeError(
-        locale === "ar"
-          ? "يجب أن يكون الحد الأقصى للمساحة أكبر من أو يساوي الحد الأدنى"
-          : "Max area must be greater than or equal to min area"
-      );
-      return;
-    }
-    setAreaRangeError("");
-
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    const setOrDelete = (key, v) => {
-      if (v && String(v).trim() !== "") newParams.set(key, String(v));
-      else newParams.delete(key);
-    };
-
-    setOrDelete("min_price", nextFilters.min_price);
-    setOrDelete("max_price", nextFilters.max_price);
-    setOrDelete("min_area", nextFilters.min_area);
-    setOrDelete("max_area", nextFilters.max_area);
-
-    const qs = newParams.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [router, searchParams, pathname, locale]);
-
-  const scheduleNumericSearch = useCallback((nextFilters) => {
-    if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
-    numericDebounceRef.current = setTimeout(() => {
-      applyNumericFiltersToUrl(nextFilters);
-    }, 1000);
-  }, [applyNumericFiltersToUrl]);
-
-  const flushNumericSearch = useCallback((nextFilters) => {
-    if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
-    applyNumericFiltersToUrl(nextFilters);
-  }, [applyNumericFiltersToUrl]);
-
   const handleFilterChange = (key, value) => {
-    // Update URL parameters — URL is the single source of truth
-    const newParams = new URLSearchParams(searchParams.toString());
+    updateDraftFilters((prev) => {
+      const next = { ...prev };
 
-    // Handle different filter types
-    if (key === "my_inventory" || key === "resale") {
-      // Boolean toggles
-      if (value) {
-        newParams.set(key, "true");
-      } else {
-        newParams.delete(key);
-      }
-    } else if (key === "min_area" || key === "max_area" || key === "min_price" || key === "max_price") {
-      // Numeric filters are applied via debounce/onBlur, not here.
-      // Keep URL changes centralized in applyNumericFiltersToUrl().
-      scheduleNumericSearch({ ...filters, [key]: value });
-      return;
-    } else {
-      // Existing filters — canonical English values sent to API; UI shows localized labels
-      if (value && value !== "" && value !== "all") {
+      if (key === "my_inventory" || key === "resale") {
+        next[key] = Boolean(value);
+      } else if (
+        key === "min_area" ||
+        key === "max_area" ||
+        key === "min_price" ||
+        key === "max_price"
+      ) {
+        next[key] = value == null ? "" : String(value);
+      } else if (value && value !== "" && value !== "all") {
         let normalizedValue = value;
 
         if (key === "city" || key === "district" || key === "sub_district") {
@@ -560,45 +456,23 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           normalizedValue = type?.value || String(value).trim();
         }
 
-        newParams.set(key, normalizedValue);
+        next[key] = normalizedValue;
       } else {
-        newParams.delete(key);
+        next[key] = "";
       }
-    }
 
-    if (key === "city") {
-      newParams.delete("district");
-      newParams.delete("sub_district");
-      newParams.delete("project_name");
-    }
-    if (key === "district") {
-      newParams.delete("sub_district");
-      newParams.delete("project_name");
-    }
+      if (key === "city") {
+        next.district = "";
+        next.sub_district = "";
+        next.project_name = "";
+      }
+      if (key === "district") {
+        next.sub_district = "";
+        next.project_name = "";
+      }
 
-    const qs = newParams.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-
-    if (key === "project_name") {
-      queryClient.invalidateQueries({
-        queryKey: unitKeys.lists(),
-        refetchType: "active",
-      });
-    }
-  };
-
-  const handlePriceApply = () => {
-    const newParams = new URLSearchParams(searchParams.toString());
-
-    if (localMinPrice) newParams.set("min_price", localMinPrice);
-    else newParams.delete("min_price");
-
-    if (localMaxPrice) newParams.set("max_price", localMaxPrice);
-    else newParams.delete("max_price");
-
-    const qs = newParams.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    setIsPriceDropdownOpen(false);
+      return next;
+    });
   };
 
   function getPriceDisplayText() {
@@ -617,47 +491,24 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return t.unitsFilter.price;
   }
 
-  // Function to remove all filters
   const handleRemoveAllFilters = () => {
-    setLocalMinPrice("");
-    setLocalMaxPrice("");
-    setLocalMinArea("");
-    setLocalMaxArea("");
-    router.replace(pathname, { scroll: false });
+    clearAllFilters();
   };
 
-  // Function to remove a specific filter
   const handleRemoveFilter = (key) => {
-    const newParams = new URLSearchParams(searchParams.toString());
+    removeFilterKey(key);
+  };
 
-    if (key === "price_range") {
-      newParams.delete("min_price");
-      newParams.delete("max_price");
-      setLocalMinPrice("");
-      setLocalMaxPrice("");
-    } else if (key === "area_range") {
-      newParams.delete("min_area");
-      newParams.delete("max_area");
-      setLocalMinArea("");
-      setLocalMaxArea("");
-    } else if (key === "min_area") {
-      newParams.delete("min_area");
-      setLocalMinArea("");
-    } else if (key === "max_area") {
-      newParams.delete("max_area");
-      setLocalMaxArea("");
-    } else if (key === "min_price") {
-      newParams.delete("min_price");
-      setLocalMinPrice("");
-    } else if (key === "max_price") {
-      newParams.delete("max_price");
-      setLocalMaxPrice("");
-    } else {
-      newParams.delete(key);
-    }
+  const applyFavoriteSearch = useCallback(
+    (savedFilters) => {
+      applyExternalFilters({ ...createEmptyFilters(), ...savedFilters });
+    },
+    [applyExternalFilters]
+  );
 
-    const qs = newParams.toString();
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  const handleApplyFiltersSubmit = (event) => {
+    event.preventDefault();
+    applyDraftFilters();
   };
 
   function getSelectedPropertyType() {
@@ -919,323 +770,321 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     ]
   );
 
-  const applyFavoriteSearch = useCallback(
-    (savedFilters) => {
-      if (numericDebounceRef.current) clearTimeout(numericDebounceRef.current);
 
-      setLocalMinPrice(savedFilters.min_price || "");
-      setLocalMaxPrice(savedFilters.max_price || "");
-      setLocalMinArea(savedFilters.min_area || "");
-      setLocalMaxArea(savedFilters.max_area || "");
-      setPriceRangeError("");
-      setAreaRangeError("");
-
-      const newParams = filtersToSearchParams(savedFilters, searchParams);
-      const qs = newParams.toString();
-      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    },
-    [router, searchParams, pathname]
+  const draftFilterLabels = useMemo(
+    () => buildSummaryLabelsFromFilters(draftFilters),
+    [buildSummaryLabelsFromFilters, draftFilters]
   );
 
   return (
     <div className="p-4 space-y-3 bg-white rounded-lg shadow-md">
       {/* Actions */}
       {!isPublic && (
-        <>
-          <div className="w-full flex justify-end pb-2 border-b border-[#E6E6E6]">
-            <AddUnitButton className="px-3 py-2 h-10 text-xs font-medium bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-1 transition-colors shadow-sm hover:shadow-md" />
-          </div>
-          <div className="w-full flex justify-end">
-            <button
-              onClick={() => setIsUploadDialogOpen(true)}
-              className="w-full px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-            >
-              <FileSpreadsheet size={16} className="shrink-0" />
-              <span className="whitespace-nowrap text-xs">
-                {t.uploadExcel?.button || "Upload"}
-              </span>
-            </button>
-          </div>
-        </>
+        <div className="w-full flex items-center gap-2 pb-2 border-b border-[#E6E6E6]">
+          <button
+            type="button"
+            onClick={() => setIsUploadDialogOpen(true)}
+            className="min-w-0 flex-1 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+          >
+            <FileSpreadsheet size={16} className="shrink-0" />
+            <span className="whitespace-nowrap text-xs truncate">
+              {t.uploadExcel?.button || "Upload"}
+            </span>
+          </button>
+          <AddUnitButton />
+        </div>
       )}
 
       <UnitsFavoriteSearches
-        filters={filters}
-        activeFilterLabels={activeFilters.map((item) => item.value)}
+        filters={draftFilters}
+        activeFilterLabels={draftFilterLabels}
         getSummaryLabels={buildSummaryLabelsFromFilters}
         onApply={applyFavoriteSearch}
         isPublic={isPublic}
       />
 
-      {/* City */}
-      <div className="w-full min-w-0">
-        <SearchableCitySelect
-          value={filters.city === "all" ? "" : filters.city}
-          onChange={(e) => {
-            const cityValue = e.target.value || "all";
-            handleFilterChange("city", cityValue);
-          }}
-          name="city"
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allCities", "All Cities")}
-          placeholder={translate("unitsFilter.allCities", "All Cities")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* District */}
-      <div className="w-full min-w-0">
-        <SearchableDistrictSelect
-          value={filters.district === "all" ? "" : filters.district}
-          onChange={(e) => {
-            const districtValue = e.target.value || "all";
-            handleFilterChange("district", districtValue);
-          }}
-          name="district"
-          city={filters.city && filters.city !== "all" ? filters.city : ""}
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
-          placeholder={translate("unitsFilter.allDistricts", "All Districts")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* Sub-district */}
-      <div className="w-full min-w-0">
-        <SearchableSubDistrictSelect
-          value={filters.sub_district === "all" ? "" : filters.sub_district}
-          onChange={(e) => {
-            const subValue = e.target.value || "all";
-            handleFilterChange("sub_district", subValue);
-          }}
-          name="sub_district"
-          city={filters.city && filters.city !== "all" ? filters.city : ""}
-          district={filters.district && filters.district !== "all" ? filters.district : ""}
-          disabled={
-            !filters.city ||
-            filters.city === "all" ||
-            !filters.district ||
-            filters.district === "all"
-          }
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
-          placeholder={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* Project */}
-      <div className="w-full min-w-0">
-        <SearchableProjectSelect
-          value={filters.project_name === "all" ? "" : filters.project_name}
-          onChange={(e) => {
-            const projectValue = e.target.value || "all";
-            handleFilterChange("project_name", projectValue);
-          }}
-          name="project_name"
-          projects={compounds}
-          city={filters.city && filters.city !== "all" ? filters.city : ""}
-          district={filters.district && filters.district !== "all" ? filters.district : ""}
-          isPublic={isPublic}
-          isLoading={projectsLoading}
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allCompounds", "All Projects")}
-          placeholder={translate("unitsFilter.allCompounds", "All Projects")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* Property Type */}
-      <div className="w-full min-w-0">
-        <SearchablePropertyTypeSelect
-          value={filters.property_type === "all" ? "" : filters.property_type}
-          onChange={(e) => {
-            const propertyTypeValue = e.target.value || "all";
-            handleFilterChange("property_type", propertyTypeValue);
-          }}
-          name="property_type"
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
-          placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* Furnishing Type */}
-      <div className="w-full min-w-0">
-        <SearchableFurnishingTypeSelect
-          value={filters.furnished_type === "all" ? "" : filters.furnished_type}
-          onChange={(e) => {
-            const furnishedTypeValue = e.target.value || "all";
-            handleFilterChange("furnished_type", furnishedTypeValue);
-          }}
-          name="furnished_type"
-          showAllOption={true}
-          allOptionLabel={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
-          placeholder={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
-          buttonClassName={filterButtonClassName}
-        />
-      </div>
-
-      {/* Purpose */}
-      <div className="w-full min-w-0">
-        <p className="text-xs font-medium text-[#494A4B] mb-1.5">
-          {translate("unitsFilter.purpose", "Purpose")}
-        </p>
-        <div
-          className="flex flex-wrap items-center gap-2"
-          role="group"
-          aria-label={translate("unitsFilter.purpose", "Purpose")}
-        >
-          {[
-            {
-              value: "rent",
-              label: translate("unitsFilter.purposes.rent", "Rent"),
-            },
-            {
-              value: "sell",
-              label: translate("unitsFilter.purposes.sell", "Sell"),
-            },
-          ].map((option) => {
-            const isSelected = filters.purpose === option.value;
-
-            return (
-              <label
-                key={option.value}
-                onClick={(e) => {
-                  if (isSelected) {
-                    e.preventDefault();
-                    handleFilterChange("purpose", "all");
-                  }
-                }}
-                className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
-                  isSelected
-                    ? "bg-primary/10 border-primary/40 text-primary"
-                    : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name="purpose"
-                  value={option.value}
-                  checked={isSelected}
-                  onChange={() => handleFilterChange("purpose", option.value)}
-                  className="h-4 w-4 accent-primary shrink-0"
-                />
-                <span className="truncate">{option.label}</span>
-              </label>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* My Inventory */}
-      <div className="w-full min-w-0">
-        <label
-          className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium select-none ${
-            filters.my_inventory
-              ? "bg-primary/10 border-primary/40 text-primary"
-              : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
-          } ${!hasClientId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
-          title={!hasClientId ? (locale === "ar" ? "يتطلب تسجيل الدخول" : "Requires login") : ""}
-        >
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-primary shrink-0"
-            checked={filters.my_inventory}
-            disabled={!hasClientId}
-            onChange={(e) => handleFilterChange("my_inventory", e.target.checked)}
+      <form onSubmit={handleApplyFiltersSubmit} className="space-y-3">
+        {/* City */}
+        <div className="w-full min-w-0">
+          <SearchableCitySelect
+            value={draftFilters.city === "all" ? "" : draftFilters.city}
+            onChange={(e) => {
+              const cityValue = e.target.value || "all";
+              handleFilterChange("city", cityValue);
+            }}
+            name="city"
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allCities", "All Cities")}
+            placeholder={translate("unitsFilter.allCities", "All Cities")}
+            buttonClassName={filterButtonClassName}
           />
-          <span className="truncate text-xs">{t.unitsFilter.myInventory}</span>
-        </label>
-      </div>
+        </div>
 
-      {/* Resale */}
-      <div className="w-full min-w-0">
-        <label
-          className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
-            filters.resale
-              ? "bg-orange-50 border-orange-300 text-orange-700"
-              : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+        {/* District */}
+        <div className="w-full min-w-0">
+          <SearchableDistrictSelect
+            value={draftFilters.district === "all" ? "" : draftFilters.district}
+            onChange={(e) => {
+              const districtValue = e.target.value || "all";
+              handleFilterChange("district", districtValue);
+            }}
+            name="district"
+            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
+            placeholder={translate("unitsFilter.allDistricts", "All Districts")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        {/* Sub-district */}
+        <div className="w-full min-w-0">
+          <SearchableSubDistrictSelect
+            value={draftFilters.sub_district === "all" ? "" : draftFilters.sub_district}
+            onChange={(e) => {
+              const subValue = e.target.value || "all";
+              handleFilterChange("sub_district", subValue);
+            }}
+            name="sub_district"
+            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
+            district={
+              draftFilters.district && draftFilters.district !== "all"
+                ? draftFilters.district
+                : ""
+            }
+            disabled={
+              !draftFilters.city ||
+              draftFilters.city === "all" ||
+              !draftFilters.district ||
+              draftFilters.district === "all"
+            }
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
+            placeholder={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        {/* Project */}
+        <div className="w-full min-w-0">
+          <SearchableProjectSelect
+            value={draftFilters.project_name === "all" ? "" : draftFilters.project_name}
+            onChange={(e) => {
+              const projectValue = e.target.value || "all";
+              handleFilterChange("project_name", projectValue);
+            }}
+            name="project_name"
+            projects={compounds}
+            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
+            district={
+              draftFilters.district && draftFilters.district !== "all"
+                ? draftFilters.district
+                : ""
+            }
+            isPublic={isPublic}
+            isLoading={projectsLoading}
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allCompounds", "All Projects")}
+            placeholder={translate("unitsFilter.allCompounds", "All Projects")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        {/* Property Type */}
+        <div className="w-full min-w-0">
+          <SearchablePropertyTypeSelect
+            value={draftFilters.property_type === "all" ? "" : draftFilters.property_type}
+            onChange={(e) => {
+              const propertyTypeValue = e.target.value || "all";
+              handleFilterChange("property_type", propertyTypeValue);
+            }}
+            name="property_type"
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+            placeholder={translate("unitsFilter.allPropertyTypes", "All Property Types")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        {/* Furnishing Type */}
+        <div className="w-full min-w-0">
+          <SearchableFurnishingTypeSelect
+            value={draftFilters.furnished_type === "all" ? "" : draftFilters.furnished_type}
+            onChange={(e) => {
+              const furnishedTypeValue = e.target.value || "all";
+              handleFilterChange("furnished_type", furnishedTypeValue);
+            }}
+            name="furnished_type"
+            showAllOption={true}
+            allOptionLabel={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
+            placeholder={translate("unitsFilter.allFurnishingTypes", "All Furnishing Types")}
+            buttonClassName={filterButtonClassName}
+          />
+        </div>
+
+        {/* Purpose */}
+        <div className="w-full min-w-0">
+          <p className="text-xs font-medium text-[#494A4B] mb-1.5">
+            {translate("unitsFilter.purpose", "Purpose")}
+          </p>
+          <div
+            className="flex flex-wrap items-center gap-2"
+            role="group"
+            aria-label={translate("unitsFilter.purpose", "Purpose")}
+          >
+            {[
+              {
+                value: "rent",
+                label: translate("unitsFilter.purposes.rent", "Rent"),
+              },
+              {
+                value: "sell",
+                label: translate("unitsFilter.purposes.sell", "Sell"),
+              },
+            ].map((option) => {
+              const isSelected = draftFilters.purpose === option.value;
+
+              return (
+                <label
+                  key={option.value}
+                  onClick={(e) => {
+                    if (isSelected) {
+                      e.preventDefault();
+                      handleFilterChange("purpose", "all");
+                    }
+                  }}
+                  className={`flex flex-1 min-w-0 items-center gap-2 h-10 px-3 rounded-md border text-xs font-medium cursor-pointer select-none transition-colors ${
+                    isSelected
+                      ? "bg-primary/10 border-primary/40 text-primary"
+                      : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="purpose"
+                    value={option.value}
+                    checked={isSelected}
+                    onChange={() => handleFilterChange("purpose", option.value)}
+                    className="h-4 w-4 accent-primary shrink-0"
+                  />
+                  <span className="truncate">{option.label}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* My Inventory */}
+        <div className="w-full min-w-0">
+          <label
+            className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium select-none ${
+              draftFilters.my_inventory
+                ? "bg-primary/10 border-primary/40 text-primary"
+                : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+            } ${!hasClientId ? "opacity-60 cursor-not-allowed" : "cursor-pointer"}`}
+            title={!hasClientId ? (locale === "ar" ? "يتطلب تسجيل الدخول" : "Requires login") : ""}
+          >
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-primary shrink-0"
+              checked={draftFilters.my_inventory}
+              disabled={!hasClientId}
+              onChange={(e) => handleFilterChange("my_inventory", e.target.checked)}
+            />
+            <span className="truncate text-xs">{t.unitsFilter.myInventory}</span>
+          </label>
+        </div>
+
+        {/* Resale */}
+        <div className="w-full min-w-0">
+          <label
+            className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
+              draftFilters.resale
+                ? "bg-orange-50 border-orange-300 text-orange-700"
+                : "bg-[#F6F7FB] border-[#E6E6E6] text-[#494A4B] hover:border-primary/40"
+            }`}
+          >
+            <input
+              type="checkbox"
+              className="h-4 w-4 accent-orange-600 shrink-0"
+              checked={draftFilters.resale}
+              onChange={(e) => handleFilterChange("resale", e.target.checked)}
+            />
+            <span className="truncate text-xs">{t.unitsFilter.resale}</span>
+          </label>
+        </div>
+
+        {/* Price Range */}
+        <div className="w-full min-w-0 grid grid-cols-2 gap-2">
+          <LenaTextField
+            name="min_price"
+            type="money"
+            label={locale === "ar" ? "الحد الأدنى للسعر" : "Min Price"}
+            value={draftFilters.min_price}
+            error={priceRangeError}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              handleFilterChange("min_price", value);
+            }}
+            className="w-full min-w-0"
+            adornment="EGP"
+          />
+          <LenaTextField
+            name="max_price"
+            type="money"
+            label={locale === "ar" ? "الحد الأقصى للسعر" : "Max Price"}
+            value={draftFilters.max_price}
+            error={priceRangeError}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              handleFilterChange("max_price", value);
+            }}
+            className="w-full min-w-0"
+            adornment="EGP"
+          />
+        </div>
+
+        {/* Area Range */}
+        <div className="w-full min-w-0 grid grid-cols-2 gap-2">
+          <LenaTextField
+            name="min_area"
+            type="number"
+            label={t.unitsFilter.minArea}
+            value={draftFilters.min_area}
+            error={areaRangeError}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              handleFilterChange("min_area", value);
+            }}
+            className="w-full min-w-0"
+            adornment="m²"
+          />
+          <LenaTextField
+            name="max_area"
+            type="number"
+            label={translate("unitsFilter.maxArea", "Max Area")}
+            value={draftFilters.max_area}
+            error={areaRangeError}
+            onChange={(e) => {
+              const value = e.target.value.replace(/[^0-9]/g, "");
+              handleFilterChange("max_area", value);
+            }}
+            className="w-full min-w-0"
+            adornment="m²"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className={`w-full h-11 rounded-md text-sm font-semibold transition-colors shadow-sm ${
+            hasPendingChanges
+              ? "bg-primary text-white hover:bg-primary/90"
+              : "bg-primary/80 text-white hover:bg-primary"
           }`}
         >
-          <input
-            type="checkbox"
-            className="h-4 w-4 accent-orange-600 shrink-0"
-            checked={filters.resale}
-            onChange={(e) => handleFilterChange("resale", e.target.checked)}
-          />
-          <span className="truncate text-xs">{t.unitsFilter.resale}</span>
-        </label>
-      </div>
-
-      {/* Price Range */}
-      <div className="w-full min-w-0 grid grid-cols-2 gap-2">
-        <LenaTextField
-          name="min_price"
-          type="money"
-          label={locale === "ar" ? "الحد الأدنى للسعر" : "Min Price"}
-          value={localMinPrice}
-          error={priceRangeError}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "");
-            setLocalMinPrice(value);
-            scheduleNumericSearch({ ...filters, min_price: value });
-          }}
-          onBlur={() => flushNumericSearch({ ...filters, min_price: localMinPrice })}
-          className="w-full min-w-0"
-          adornment="EGP"
-        />
-        <LenaTextField
-          name="max_price"
-          type="money"
-          label={locale === "ar" ? "الحد الأقصى للسعر" : "Max Price"}
-          value={localMaxPrice}
-          error={priceRangeError}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "");
-            setLocalMaxPrice(value);
-            scheduleNumericSearch({ ...filters, max_price: value });
-          }}
-          onBlur={() => flushNumericSearch({ ...filters, max_price: localMaxPrice })}
-          className="w-full min-w-0"
-          adornment="EGP"
-        />
-      </div>
-
-      {/* Area Range */}
-      <div className="w-full min-w-0 grid grid-cols-2 gap-2">
-        <LenaTextField
-          name="min_area"
-          type="number"
-          label={t.unitsFilter.minArea}
-          value={localMinArea}
-          error={areaRangeError}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "");
-            setLocalMinArea(value);
-            scheduleNumericSearch({ ...filters, min_area: value });
-          }}
-          onBlur={() => flushNumericSearch({ ...filters, min_area: localMinArea })}
-          className="w-full min-w-0"
-          adornment="m²"
-        />
-        <LenaTextField
-          name="max_area"
-          type="number"
-          label={translate("unitsFilter.maxArea", "Max Area")}
-          value={localMaxArea}
-          error={areaRangeError}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "");
-            setLocalMaxArea(value);
-            scheduleNumericSearch({ ...filters, max_area: value });
-          }}
-          onBlur={() => flushNumericSearch({ ...filters, max_area: localMaxArea })}
-          className="w-full min-w-0"
-          adornment="m²"
-        />
-      </div>
+          {translate("unitsFilter.applyFilters", "Apply Filters")}
+        </button>
+      </form>
 
       {showBulkToolbar && (
         <div className="flex flex-wrap items-center gap-2">
@@ -1293,7 +1142,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
       )}
 
-      {/* Line 3: Active Filters - Keep as is */}
+      {/* Active Filters — applied (URL) only */}
       {activeFilters.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-gray-600">
@@ -1338,7 +1187,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
       )}
 
-      {/* Upload Excel Dialog */}
       <UploadUnitsExcelDialog
         isOpen={isUploadDialogOpen}
         onClose={() => setIsUploadDialogOpen(false)}

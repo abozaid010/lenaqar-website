@@ -88,6 +88,36 @@ export function hasActiveFilters(filters) {
   });
 }
 
+export function normalizeFilterFieldValue(key, value) {
+  if (key === "my_inventory" || key === "resale") {
+    return Boolean(value);
+  }
+  if (value == null || value === "all") return "";
+  return String(value).trim();
+}
+
+export function areFiltersEqual(a, b) {
+  if (!a || !b) return false;
+  return UNITS_FILTER_PARAM_KEYS.every((key) => {
+    if (key === "my_inventory" || key === "resale") {
+      return Boolean(a[key]) === Boolean(b[key]);
+    }
+    return normalizeFilterFieldValue(key, a[key]) === normalizeFilterFieldValue(key, b[key]);
+  });
+}
+
+/** Pagination params that must reset when filters are applied. */
+export const UNITS_PAGINATION_PARAM_KEYS = ["cursor", "direction"];
+
+export function filtersToSearchParamsResettingPagination(
+  filters,
+  baseParams = new URLSearchParams()
+) {
+  const params = filtersToSearchParams(filters, baseParams);
+  UNITS_PAGINATION_PARAM_KEYS.forEach((key) => params.delete(key));
+  return params;
+}
+
 export function normalizeFavoriteName(name) {
   return String(name || "").trim();
 }

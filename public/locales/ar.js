@@ -1100,6 +1100,7 @@ export default {
     resale: "إعادة بيع",
     minArea: "الحد الأدنى للمساحة",
     maxArea: "الحد الأقصى للمساحة",
+    applyFilters: "تطبيق الفلاتر",
     purposes: {
       buy: "شراء",
       rent: "إيجار",
