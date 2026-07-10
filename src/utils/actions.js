@@ -51,8 +51,8 @@ export const USER_ACTIONS = [
   },
   {
     value: "Missing requirement",
-    en_label: "Missing",
-    ar_label: "متطلب مفقود",
+    en_label: "Open Request",
+    ar_label: "طلب مفتوح",
   },
   {
     value: "Blocked",
