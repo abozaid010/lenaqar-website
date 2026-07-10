@@ -9,6 +9,7 @@ import UnitHeroGallery from './unit-hero-gallery';
 import UnitHeaderSummary from './unit-header-summary';
 import UnitQuickFacts from './unit-quick-facts';
 import StickyInquiryCard from './sticky-inquiry-card';
+import UnitDetailsAdminActions from './unit-details-admin-actions';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
 import UnitShareLinksDialog from './unit-share-links-dialog';
 import {
@@ -126,8 +127,9 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
     <div className="bg-gray-50 flex-1">
       {/* Back */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between gap-3">
           <BackButton fallbackRoute="/units" />
+          <UnitDetailsAdminActions unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
         </div>
       </div>
 
