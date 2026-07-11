@@ -247,10 +247,20 @@ export default function DashbordFilter({
   }, [isAdminUser, loggedInEmail, teamMembers, filters.author]);
 
   const getAuthorOptionLabel = (option) => {
-    const email = option?.email || "";
-    const name = option?.name || "";
-    if (name && email) return `${name} (${email})`;
-    return name || email;
+    const name = typeof option?.name === "string" ? option.name.trim() : "";
+    if (name) return name;
+    return typeof option?.email === "string" ? option.email.trim() : "";
+  };
+
+  const resolveAuthorSelectedLabel = (value) => {
+    const email = typeof value === "string" ? value.trim() : "";
+    if (!email) return "";
+    const match = authorOptions.find(
+      (option) =>
+        option.email.toLowerCase() === email.toLowerCase(),
+    );
+    if (match) return getAuthorOptionLabel(match);
+    return email;
   };
 
   const ownerTypeOptions = useMemo(
@@ -936,6 +946,7 @@ export default function DashbordFilter({
               menuPlacement="top"
               getValue={(option) => option.email}
               getLabel={getAuthorOptionLabel}
+              resolveSelectedLabel={resolveAuthorSelectedLabel}
               searchFields={["name", "email"]}
               placeholder={translate("dashboardFilter.author.placeholder", "Author")}
               showAllOption
