@@ -820,6 +820,7 @@ export default {
       hint: "On-screen leads only · highest score at top",
       active: "On",
     },
+    onlyMyLeads: "Only my leads",
     panel: {
       title: "Filters",
       open: "Open filters",

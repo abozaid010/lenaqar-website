@@ -71,7 +71,16 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
     return date;
   }, [tomorrow]);
 
+  const loggedInEmail = useMemo(() => {
+    const email = LenaCookiesManager.getClientInfo()?.email;
+    return typeof email === "string" ? email.trim() : "";
+  }, []);
+
   const [filters, setFilters] = useState(() => {
+    const authorFromUrl =
+      typeof appliedFilters.author === "string"
+        ? appliedFilters.author.trim()
+        : "";
     return {
       actions: parseDashboardActionFilter(appliedFilters.action),
       owner_type: parseOwnerTypeFilter(appliedFilters.owner_type),
@@ -80,8 +89,15 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
       campaign_ids: appliedFilters.campaign_ids
         ? appliedFilters.campaign_ids.split(",")
         : [],
+      author: authorFromUrl,
     };
   });
+
+  const isOnlyMyLeads = Boolean(
+    loggedInEmail &&
+      filters.author &&
+      filters.author.trim().toLowerCase() === loggedInEmail.toLowerCase(),
+  );
 
   const ownerTypeOptions = useMemo(
     () =>
@@ -286,12 +302,26 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
     const prev = new URLSearchParams(window.location.search);
     const preserveQuery = prev.get("query");
     const preserveUserId = prev.get("userId");
+    const preserveSortScore = prev.get("sort_score");
     if (preserveQuery) params.set("query", preserveQuery);
     if (preserveUserId) params.set("userId", preserveUserId);
+    if (preserveSortScore === "asc" || preserveSortScore === "desc") {
+      params.set("sort_score", preserveSortScore);
+    }
 
     router.push(`${window.location.pathname}?${params.toString()}`, {
       replace: true,
     });
+  };
+
+  const toggleOnlyMyLeads = () => {
+    if (!loggedInEmail) return;
+    const nextAuthor = isOnlyMyLeads ? "" : loggedInEmail;
+    setFilters((prev) => ({
+      ...prev,
+      author: nextAuthor,
+    }));
+    onFilterChange("author", nextAuthor);
   };
 
   const toggleActionSelection = (actionValue) => {
@@ -646,6 +676,28 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
               </div>
             )}
           </div>
+
+          {loggedInEmail ? (
+            <label
+              className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 cursor-pointer hover:bg-gray-50 ${
+                panel ? "w-full" : "shrink-0"
+              } ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
+            >
+              <input
+                type="checkbox"
+                checked={isOnlyMyLeads}
+                onChange={toggleOnlyMyLeads}
+                className="cursor-pointer shrink-0"
+                aria-label={translate(
+                  "dashboardFilter.onlyMyLeads",
+                  "Only my leads",
+                )}
+              />
+              <span className="text-sm text-gray-700 whitespace-nowrap">
+                {translate("dashboardFilter.onlyMyLeads", "Only my leads")}
+              </span>
+            </label>
+          ) : null}
 
           <div className={`group relative shrink-0 ${triggerWidthClass}`}>
             <button

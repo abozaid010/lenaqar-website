@@ -692,6 +692,7 @@ export default {
       hint: "العملاء الظاهرين فقط · الأعلى جديةً في الأعلى",
       active: "مفعل",
     },
+    onlyMyLeads: "عملائي فقط",
     panel: {
       title: "الفلاتر",
       open: "فتح الفلاتر",
