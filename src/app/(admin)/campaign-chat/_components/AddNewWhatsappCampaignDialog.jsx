@@ -8,6 +8,7 @@ import { Send, CheckCircle, Clock, Users, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
@@ -67,11 +68,14 @@ const AddNewWhatsappCampaignDialog = ({
   const [error, setError] = useState("");
   const [jobResult, setJobResult] = useState(null);
   const [isFormValid, setIsFormValid] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [platformError, setPlatformError] = useState("");
 
   const clientId = LenaCookiesManager.getClientId() || "public";
   const { data: messagingData } = useMessagingProviderConfig(clientId);
+  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
+    messagingData,
+    clientId,
+  );
   const accounts = messagingData?.accounts ?? [];
   const selectedAccount = getEffectiveMessagingAccount(
     messagingData,

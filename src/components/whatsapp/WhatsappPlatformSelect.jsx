@@ -1,11 +1,7 @@
 "use client";
 
 import { useI18n } from "@/hooks/useI18n";
-import {
-  formatWhatsappAccountSubtitle,
-  getPlatformLabelKey,
-  getWhatsappAccountKey,
-} from "@/lib/whatsapp-messaging-provider";
+import { getWhatsappAccountKey } from "@/lib/whatsapp-messaging-provider";
 
 const agentSelectCls =
   "w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white";
@@ -33,12 +29,6 @@ export default function WhatsappPlatformSelect({
     return null;
   }
 
-  const platformDefaults = {
-    openwa: "OpenWA",
-    whatsapp: "WhatsApp Cloud API",
-    ultramessage: "UltraMessage",
-  };
-
   return (
     <div className={`flex flex-col gap-1 ${className}`}>
       <label htmlFor={id} className="text-xs font-medium text-gray-600">
@@ -59,21 +49,11 @@ export default function WhatsappPlatformSelect({
         </option>
         {accounts.map((account) => {
           const accountKey = getWhatsappAccountKey(account);
-          const labelKey = getPlatformLabelKey(account.platform);
-          const platformName = translate(
-            labelKey,
-            platformDefaults[account.platform] ?? account.platform
-          );
-          const subtitle = formatWhatsappAccountSubtitle(account);
-          const phone = account.whatsapp_number ? ` · ${account.whatsapp_number}` : "";
-          const detail = subtitle && subtitle !== account.whatsapp_number
-            ? ` · ${subtitle}`
-            : "";
+          const phone = account.whatsapp_number?.trim() || "";
           return (
             <option key={accountKey} value={accountKey}>
-              {platformName}
-              {detail}
-              {phone}
+              {phone ||
+                translate("whatsappSend.unknownAccount", "Unknown account")}
             </option>
           );
         })}

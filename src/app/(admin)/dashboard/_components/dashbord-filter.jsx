@@ -30,6 +30,7 @@ import AddLeadDialog from "@/components/ui/add-lead-dialog";
 import ImportLeadsDialog from "@/components/ui/import-leads-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
+import { hasPersistableDashboardFilters } from "@/lib/dashboard-filters-storage";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
@@ -47,7 +48,12 @@ const FILTER_MENU_WIDTH = "w-[12.6rem]";
 const FILTER_ACTION_MIN_WIDTH = "min-w-[6rem]";
 const FILTER_CAMPAIGN_MIN_WIDTH = "min-w-[6.25rem]";
 
-export default function DashbordFilter({ appliedFilters, compact = false, panel = false }) {
+export default function DashbordFilter({
+  appliedFilters,
+  compact = false,
+  panel = false,
+  onResetFilters,
+}) {
   const { locale, translate } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -391,17 +397,41 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
   };
 
   const handleScoreSortToggle = () => {
-    const params = new URLSearchParams(window.location.search);
-    if (!sortScore) {
+    const params = hasPersistableDashboardFilters(searchParams)
+      ? new URLSearchParams(searchParams.toString())
+      : new URLSearchParams(window.location.search);
+    const currentSort = params.get("sort_score") || sortScore;
+    if (!currentSort) {
       params.set("sort_score", "desc");
-    } else if (sortScore === "desc") {
+    } else if (currentSort === "desc") {
       params.set("sort_score", "asc");
     } else {
       params.delete("sort_score");
     }
-    router.push(`${window.location.pathname}?${params.toString()}`, {
+    const qs = params.toString();
+    router.push(qs ? `${window.location.pathname}?${qs}` : window.location.pathname, {
       replace: true,
     });
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      actions: [],
+      owner_type: [],
+      start_date: formatDate(twoMonthsAgo),
+      end_date: formatDate(tomorrow),
+      campaign_ids: [],
+      author: "",
+    });
+    setIsActionDropdownOpen(false);
+    setIsOwnerTypeDropdownOpen(false);
+    setIsCampaignDropdownOpen(false);
+    setIsDatePickerOpen(false);
+    if (typeof onResetFilters === "function") {
+      onResetFilters();
+      return;
+    }
+    router.push(window.location.pathname, { replace: true });
   };
 
   const menuWidthClass = panel ? "w-full" : FILTER_MENU_WIDTH;
@@ -700,6 +730,16 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
               </span>
             </label>
           ) : null}
+
+          <button
+            type="button"
+            onClick={handleResetFilters}
+            className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
+              compact ? "h-9 min-h-[36px]" : "h-10"
+            } text-gray-600`}
+          >
+            {translate("dashboardFilter.resetFilters", "Reset Filters")}
+          </button>
 
           <div className={`group relative shrink-0 ${triggerWidthClass}`}>
             <button

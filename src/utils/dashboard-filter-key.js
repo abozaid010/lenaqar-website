@@ -49,5 +49,13 @@ export function buildDashboardFilterKey(searchParams) {
     }
   }
 
-  return JSON.stringify(o);
+  // Stable key order so URLSearchParams vs plain-object sources don't refetch.
+  const sorted = Object.keys(o)
+    .sort()
+    .reduce((acc, key) => {
+      acc[key] = o[key];
+      return acc;
+    }, {});
+
+  return JSON.stringify(sorted);
 }

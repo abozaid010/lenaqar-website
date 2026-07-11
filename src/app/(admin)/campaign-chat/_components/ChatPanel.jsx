@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Bot, User, Send, ToggleLeft, ToggleRight,
   Star, Pencil, Check, X, StickyNote, Trash2, Save, Copy
@@ -14,6 +14,8 @@ import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubbleList from "./MessageBubble";
 import ChatMessagesArea from "@/components/ui/chat-messages-area";
 import { useI18n } from "@/hooks/useI18n";
+import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
 
 const NOTES_MAX_LENGTH = 500;
@@ -47,10 +49,22 @@ const ChatPanel = ({
 }) => {
   const { t, translate } = useI18n();
   const [message, setMessage] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [platformError, setPlatformError] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
+
+  const clientId = LenaCookiesManager.getClientId();
+  const messagingSnapshot = useMemo(
+    () => ({
+      accounts: messagingAccounts,
+      hasMultipleAccounts: hasMultipleMessagingAccounts,
+    }),
+    [messagingAccounts, hasMultipleMessagingAccounts],
+  );
+  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
+    messagingSnapshot,
+    clientId,
+  );
 
   // Inline rename state
   const [isEditingName, setIsEditingName] = useState(false);
