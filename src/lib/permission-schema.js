@@ -24,8 +24,7 @@ const FALLBACK_MODULES = [
 const EXCLUDED_CLIENT_ACTIONS = new Set(["update_any", "delete_any"]);
 
 /**
- * Legacy `whatsapp` kept so existing client matrices still display a label;
- * new defaults use `whatsapp_api` (matches bulk WhatsApp runtime checks).
+ * API action is `whatsapp`; `whatsapp_api` is a legacy UI alias only (never send to API).
  */
 const FALLBACK_ALL_ACTIONS = [
   ...MODULE_BASE_ACTIONS,
@@ -56,7 +55,7 @@ function getFallbackAvailableActionsForModule(moduleKey) {
     actions.push("import");
   }
   if (key === "conversation") {
-    actions.push("import", "whatsapp_api", "whatsapp_automation", "whatsapp");
+    actions.push("import", "whatsapp", "whatsapp_automation", "whatsapp_api");
   }
 
   return actions;

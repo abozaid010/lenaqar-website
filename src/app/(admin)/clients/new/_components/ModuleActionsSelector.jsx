@@ -88,6 +88,7 @@ const ModuleActionsSelector = ({
 
   const hasWhatsappActions = (actions) =>
     actions?.includes("whatsapp") ||
+    actions?.includes("whatsapp") ||
     actions?.includes("whatsapp_api") ||
     actions?.includes("whatsapp_automation");
 

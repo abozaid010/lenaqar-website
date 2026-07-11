@@ -53,41 +53,46 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
     }
     return initialFormData;
   });
-  const [state, formAction, pending, resetActionState] = useActionState(
+  // useActionState returns [state, dispatch, isPending] only — there is no reset helper.
+  const [state, formAction, pending] = useActionState(
     isEdit ? editEmployee : addNewSales,
     initialState
   );
   const [passwordError, setPasswordError] = useState(null);
   const lastHandledStateRef = useRef(null);
 
-  // Reset action state when dialog opens to clear any stale success/error
+  // Handle each action result once. Do NOT depend on formData — typing would
+  // re-run this effect; combined with a cleared lastHandled ref + stale
+  // state.success from a prior submit, that auto-closes the dialog.
   useEffect(() => {
-    if (isOpen) {
-      resetActionState?.();
-      lastHandledStateRef.current = null;
-    }
-  }, [isOpen, resetActionState]);
+    if (!state || state === lastHandledStateRef.current) return;
+    if (!state.success && !state.error) return;
 
-  useEffect(() => {
-    if (state === lastHandledStateRef.current) return;
+    lastHandledStateRef.current = state;
 
     if (state.success) {
-      lastHandledStateRef.current = state;
-      setFormData(isEdit ? formData : initialFormData);
+      if (!isEdit) setFormData(initialFormData);
+      setPasswordError(null);
       setIsOpen(false);
       onSuccess?.(state.data);
-    } else if (state.error) {
-      lastHandledStateRef.current = state;
-      toast.error(resolveTeamApiError(state.error, t));
+      return;
     }
-  }, [state, onSuccess, isEdit, formData, t]);
+
+    toast.error(resolveTeamApiError(state.error, t));
+  }, [state, onSuccess, isEdit, t]);
+
+  const openDialog = () => {
+    if (!isEdit) setFormData(initialFormData);
+    setPasswordError(null);
+    setIsOpen(true);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
     if (name === "password") setPasswordError(null);
   };
 
@@ -123,13 +128,14 @@ export default function AddNewMember({ isEdit = false, data, canManageTeam = tru
     <>
       {canManageTeam &&
         (isEdit === true ? (
-          <button onClick={() => setIsOpen(true)}>
+          <button type="button" onClick={openDialog}>
             <Edit2 className="w-4 h-4 text-blue-500 hover:text-blue-700" />
           </button>
         ) : (
           <button
+            type="button"
             className="flex-1 md:flex-initial px-4 py-2 h-10 bg-primary hover:bg-primary/90 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
-            onClick={() => setIsOpen(true)}
+            onClick={openDialog}
           >
             <PlusIcon size={18} className="shrink-0" />
             <span className="hidden sm:inline whitespace-nowrap">{t.team.addNew}</span>
