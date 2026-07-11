@@ -5,6 +5,291 @@ import { getClientid } from "@/components/services/clientCookies";
 import { normalizeApiDetail } from "@/constants/permissionsAuth";
 import { revalidatePath } from "next/cache";
 import { NEW_LEAD_ACTION } from "@/utils/actions";
+import { API_BASE_URL } from "@/lib/apiConfig";
+
+const DEBUG_BULK_IMPORT = "[DEBUG BulkLeadImport]";
+
+/** Temporary debug helper — estimate JSON byte size of a value. */
+const estimateJsonBytes = (value) => {
+  try {
+    return JSON.stringify(value)?.length ?? 0;
+  } catch {
+    return 0;
+  }
+};
+
+const formatBytes = (bytes) => {
+  const kb = bytes / 1024;
+  const mb = bytes / (1024 * 1024);
+  return {
+    bytes,
+    kb: Number(kb.toFixed(2)),
+    mb: Number(mb.toFixed(4)),
+    label: mb >= 1 ? `${mb.toFixed(3)} MB` : `${kb.toFixed(2)} KB`,
+  };
+};
+
+const redactSensitiveHeaders = (headers = {}) => {
+  const out = {};
+  const source =
+    typeof headers?.toJSON === "function" ? headers.toJSON() : { ...headers };
+  for (const [key, value] of Object.entries(source)) {
+    const lower = String(key).toLowerCase();
+    if (
+      lower === "authorization" ||
+      lower === "cookie" ||
+      lower === "x-bff-secret" ||
+      lower === "x-api-key"
+    ) {
+      out[key] = value ? "[REDACTED]" : value;
+      continue;
+    }
+    out[key] = value;
+  }
+  return out;
+};
+
+const sanitizeLeadForLog = (lead = {}) => ({
+  user_id: lead.user_id,
+  user_name: lead.user_name,
+  client_id: lead.client_id,
+  platform: lead.platform,
+  campaign_id: lead.campaign_id,
+  last_action: lead.last_action,
+  phone_number: lead.phone_number
+    ? `${String(lead.phone_number).slice(0, 6)}…`
+    : lead.phone_number,
+  query_length: String(lead.query ?? "").length,
+  notes_length: String(lead.notes ?? "").length,
+  has_attachments: Boolean(
+    lead.attachments || lead.files || lead.images || lead.file || lead.image,
+  ),
+  author: lead.author,
+});
+
+/**
+ * Temporary debug logging before POST /api/leads/bulk.
+ * Does not mutate payload or change request behavior.
+ */
+const logBulkImportRequestDebug = (leads, { attempt } = {}) => {
+  const requestBody = { leads };
+  const totalBytes = estimateJsonBytes(requestBody);
+  const size = formatBytes(totalBytes);
+
+  const notesLengths = leads.map((lead, index) => ({
+    index,
+    user_id: lead?.user_id,
+    query_length: String(lead?.query ?? "").length,
+    notes_length: String(lead?.notes ?? "").length,
+  }));
+
+  const leadsWithNotes = notesLengths.filter(
+    (row) => row.query_length > 0 || row.notes_length > 0,
+  ).length;
+
+  const leadSizes = leads.map((lead, index) => ({
+    index,
+    user_id: lead?.user_id,
+    campaign_id: lead?.campaign_id,
+    bytes: estimateJsonBytes(lead),
+  }));
+  leadSizes.sort((a, b) => b.bytes - a.bytes);
+  const largest = leadSizes[0] || null;
+
+  const hasAttachments = leads.some(
+    (lead) =>
+      lead?.attachments ||
+      lead?.files ||
+      lead?.images ||
+      lead?.file ||
+      lead?.image,
+  );
+
+  const campaignIds = [
+    ...new Set(leads.map((lead) => lead?.campaign_id).filter(Boolean)),
+  ];
+
+  console.log(`${DEBUG_BULK_IMPORT} ========== PRE-REQUEST ==========`);
+  console.log(`${DEBUG_BULK_IMPORT} attempt:`, attempt);
+  console.log(`${DEBUG_BULK_IMPORT} leadCount:`, leads.length);
+  console.log(`${DEBUG_BULK_IMPORT} payloadSize:`, size);
+  console.log(`${DEBUG_BULK_IMPORT} notesCount (leads with query/notes):`, leadsWithNotes);
+  console.log(`${DEBUG_BULK_IMPORT} notesLengths:`, notesLengths);
+  console.log(`${DEBUG_BULK_IMPORT} hasAttachments/files/images:`, hasAttachments);
+  console.log(`${DEBUG_BULK_IMPORT} largestLead:`, largest
+    ? { ...largest, size: formatBytes(largest.bytes) }
+    : null);
+  console.log(`${DEBUG_BULK_IMPORT} campaignIds:`, campaignIds);
+  console.log(`${DEBUG_BULK_IMPORT} API_BASE_URL:`, API_BASE_URL);
+  console.log(
+    `${DEBUG_BULK_IMPORT} resolvedURL:`,
+    `${String(API_BASE_URL || "").replace(/\/$/, "")}/api/leads/bulk`,
+  );
+
+  if (totalBytes <= 50_000) {
+    console.log(`${DEBUG_BULK_IMPORT} fullRequestPayload:`, requestBody);
+  } else {
+    console.log(`${DEBUG_BULK_IMPORT} payload too large to dump fully; firstLead + stats:`);
+    console.log(`${DEBUG_BULK_IMPORT} firstLead:`, sanitizeLeadForLog(leads[0]));
+    console.log(`${DEBUG_BULK_IMPORT} top5LargestLeads:`, leadSizes.slice(0, 5).map((row) => ({
+      ...row,
+      size: formatBytes(row.bytes),
+      lead: sanitizeLeadForLog(leads[row.index]),
+    })));
+  }
+
+  return { requestBody, totalBytes, size, largest, leadSizes, hasAttachments };
+};
+
+const infer413Source = (error) => {
+  const status = error?.response?.status;
+  const headers = error?.response?.headers || {};
+  const normalized = Object.fromEntries(
+    Object.entries(
+      typeof headers?.toJSON === "function" ? headers.toJSON() : headers,
+    ).map(([k, v]) => [String(k).toLowerCase(), v]),
+  );
+
+  const server = String(normalized.server || "");
+  const via = String(normalized.via || "");
+  const cfRay = normalized["cf-ray"];
+  const nginx = /nginx/i.test(server) || /nginx/i.test(via);
+  const cloudflare = Boolean(cfRay) || /cloudflare/i.test(server) || /cloudflare/i.test(via);
+  const fastapi =
+    /uvicorn|gunicorn|fastapi|starlette/i.test(server) ||
+    typeof error?.response?.data?.detail !== "undefined";
+  const reachedServer = Boolean(error?.response);
+
+  let likelySource = "unknown";
+  if (!reachedServer) {
+    likelySource = "client_or_network_before_response (no error.response)";
+  } else if (cloudflare) {
+    likelySource = "Cloudflare (or CDN in front of origin)";
+  } else if (nginx) {
+    likelySource = "Nginx (or reverse proxy identifying as nginx)";
+  } else if (fastapi) {
+    likelySource = "FastAPI/backend application";
+  } else if (server) {
+    likelySource = `HTTP server header: ${server}`;
+  } else {
+    likelySource =
+      "HTTP response received (proxy/backend) but Server header missing — check body/via";
+  }
+
+  // This path is axios from a Next.js server action → API_BASE_URL.
+  // It does NOT go through a Next.js Route Handler for /api/leads/bulk.
+  const nextJsApiRouteInvolved = false;
+
+  return {
+    status,
+    reachedServer,
+    likelySource,
+    nextJsApiRouteInvolved,
+    serverHeader: normalized.server || null,
+    viaHeader: normalized.via || null,
+    cfRay: cfRay || null,
+    contentType: normalized["content-type"] || null,
+  };
+};
+
+/**
+ * Temporary debug logging for bulk import Axios failures.
+ */
+const logBulkImportErrorDebug = (error, { requestBody, totalBytes, size, largest, leadSizes, attempt }) => {
+  const status = error?.response?.status;
+  const reachedServer = Boolean(error?.response);
+  const reqHeaders = redactSensitiveHeaders(error?.config?.headers || {});
+  const resHeaders = error?.response?.headers
+    ? redactSensitiveHeaders(error.response.headers)
+    : null;
+
+  console.error(`${DEBUG_BULK_IMPORT} ========== ERROR ==========`);
+  console.error(`${DEBUG_BULK_IMPORT} attempt:`, attempt);
+  console.error(`${DEBUG_BULK_IMPORT} message:`, error?.message);
+  console.error(`${DEBUG_BULK_IMPORT} code:`, error?.code);
+  console.error(`${DEBUG_BULK_IMPORT} reachedServer:`, reachedServer);
+  console.error(
+    `${DEBUG_BULK_IMPORT} failurePoint:`,
+    reachedServer
+      ? "Server (or intermediary) returned an HTTP error response"
+      : "Failure before a response (network, DNS, TLS, client abort, or local limit)",
+  );
+  console.error(`${DEBUG_BULK_IMPORT} status:`, status ?? "(none)");
+  console.error(`${DEBUG_BULK_IMPORT} responseBody:`, error?.response?.data);
+  console.error(`${DEBUG_BULK_IMPORT} responseHeaders:`, resHeaders);
+  console.error(`${DEBUG_BULK_IMPORT} requestHeaders:`, reqHeaders);
+  console.error(`${DEBUG_BULK_IMPORT} requestPayloadSize:`, size || formatBytes(totalBytes || 0));
+  console.error(`${DEBUG_BULK_IMPORT} axiosConfig:`, {
+    url: error?.config?.url,
+    baseURL: error?.config?.baseURL,
+    method: error?.config?.method,
+    contentType:
+      reqHeaders["Content-Type"] ||
+      reqHeaders["content-type"] ||
+      error?.config?.headers?.["Content-Type"],
+    contentLength:
+      reqHeaders["Content-Length"] ||
+      reqHeaders["content-length"] ||
+      error?.config?.headers?.["Content-Length"] ||
+      "(axios usually omits Content-Length until send; estimated below)",
+    estimatedContentLengthBytes: totalBytes,
+    timeout: error?.config?.timeout,
+  });
+
+  const sourceInfo = infer413Source(error);
+  console.error(`${DEBUG_BULK_IMPORT} 413/sourceInvestigation:`, sourceInfo);
+
+  if (status === 413) {
+    console.error(`${DEBUG_BULK_IMPORT} Payload Too Large received from server.`);
+    console.error(`${DEBUG_BULK_IMPORT} estimatedPayloadSize:`, size || formatBytes(totalBytes || 0));
+    console.error(
+      `${DEBUG_BULK_IMPORT} leadMostLikelyInflatingPayload:`,
+      largest
+        ? {
+            ...largest,
+            size: formatBytes(largest.bytes),
+            lead: sanitizeLeadForLog(
+              requestBody?.leads?.[largest.index] || {},
+            ),
+          }
+        : null,
+    );
+    console.error(
+      `${DEBUG_BULK_IMPORT} top5LargestLeads:`,
+      (leadSizes || []).slice(0, 5).map((row) => ({
+        ...row,
+        size: formatBytes(row.bytes),
+        lead: sanitizeLeadForLog(requestBody?.leads?.[row.index] || {}),
+      })),
+    );
+  }
+
+  // Per-row validation / failure hints when present
+  const detail = error?.response?.data?.detail;
+  const validationErrors = Array.isArray(error?.response?.data?.errors)
+    ? error.response.data.errors
+    : Array.isArray(detail)
+      ? detail
+      : [];
+  if (validationErrors.length > 0) {
+    validationErrors.forEach((item) => {
+      const location = Array.isArray(item?.loc) ? item.loc : [];
+      const leadIndex = location[2];
+      const lead =
+        Number.isInteger(leadIndex) && requestBody?.leads
+          ? requestBody.leads[leadIndex]
+          : null;
+      console.error(`${DEBUG_BULK_IMPORT} rowError:`, {
+        rowNumber: Number.isInteger(leadIndex) ? leadIndex + 2 : "—",
+        leadIndex,
+        field: location[3] || null,
+        reason: item?.ctx?.error || item?.msg || item,
+        lead: lead ? sanitizeLeadForLog(lead) : null,
+        leadSerializedSize: lead ? formatBytes(estimateJsonBytes(lead)) : null,
+      });
+    });
+  }
+};
 
 const parseBulkImportValidationErrors = (error) => {
   const responseData = error?.response?.data;
@@ -131,99 +416,183 @@ export async function addManyLeadsAction(payloads = []) {
   let successCount = 0;
   let lastValidationMessage = null;
 
-  // The bulk endpoint validates the whole request: one invalid lead makes the
-  // backend reject the entire batch with 422. To avoid a few bad rows blocking
-  // every valid lead, isolate the offending rows from the 422 response, drop
-  // them, and retry with the rest. Track each lead's original index so failures
-  // still map back to the correct spreadsheet row.
-  let remaining = normalizedPayloads.map((lead, originalIndex) => ({
+  const entries = normalizedPayloads.map((lead, originalIndex) => ({
     lead,
     originalIndex,
   }));
-  const maxAttempts = normalizedPayloads.length + 1;
 
-  for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt += 1) {
-    try {
-      const response = await axiosInstance.post("/api/leads/bulk", {
-        leads: remaining.map((entry) => entry.lead),
-      });
+  // The origin API (behind Cloudflare) rejects any request body larger than
+  // 100 KiB with 413 — verified against the backend. A large import would be
+  // rejected wholesale, so split leads into batches whose serialized body stays
+  // safely under that limit. Byte-based (not count-based) sizing keeps UTF-8
+  // content (e.g. Arabic names/notes) and merged-notes text accounted for, and
+  // leaves headroom for the {"leads":[...]} envelope.
+  const MAX_REQUEST_BYTES = 90 * 1024;
+  const ENVELOPE_BYTES = 16; // {"leads":[]} plus slack
+  const leadByteSize = (lead) => Buffer.byteLength(JSON.stringify(lead)) + 1; // + comma
 
-      const body = response.data?.data || response.data || {};
-      const results = Array.isArray(body.results) ? body.results : [];
-      successCount += Number(body.succeeded ?? 0);
-
-      const userIdToEntry = new Map(
-        remaining.map((entry) => [String(entry.lead.user_id), entry]),
-      );
-
-      results.forEach((item) => {
-        if (item?.success) return;
-        const entry = userIdToEntry.get(String(item?.user_id));
-        failed.push({
-          index: entry ? entry.originalIndex : -1,
-          user_id: item?.user_id || entry?.lead?.user_id || null,
-          reason: item?.error || "Failed to add lead",
-        });
-      });
-
-      if (results.length === 0 && Number(body.failed ?? 0) > 0) {
-        // Fallback when the API doesn't return per-row results.
-        remaining.forEach((entry) => {
-          failed.push({
-            index: entry.originalIndex,
-            user_id: entry.lead.user_id,
-            reason: "Failed to add lead",
-          });
-        });
-      }
-
-      remaining = []; // request accepted (no 422) — nothing left to retry
-    } catch (error) {
-      const parsedValidation = parseBulkImportValidationErrors(error);
-      lastValidationMessage = parsedValidation.message;
-      console.error(
-        "Server Action Error (addManyLeadsAction):",
-        error.response?.data || error.message,
-        parsedValidation,
-      );
-
-      // Indices in the 422 are relative to the array we just sent (`remaining`).
-      const badLocalIndices = new Set(
-        parsedValidation.failed
-          .map((item) => item.index)
-          .filter((i) => Number.isInteger(i) && i >= 0 && i < remaining.length),
-      );
-
-      if (badLocalIndices.size === 0) {
-        // Couldn't isolate offending rows — fail everything still pending.
-        remaining.forEach((entry) => {
-          failed.push({
-            index: entry.originalIndex,
-            user_id: entry.lead.user_id,
-            reason: parsedValidation.message,
-          });
-        });
-        remaining = [];
-        break;
-      }
-
-      const nextRemaining = [];
-      remaining.forEach((entry, localIndex) => {
-        if (!badLocalIndices.has(localIndex)) {
-          nextRemaining.push(entry);
-          return;
-        }
-        const detail = parsedValidation.failed.find(
-          (item) => item.index === localIndex,
-        );
-        failed.push({
-          index: entry.originalIndex,
-          user_id: entry.lead.user_id,
-          reason: detail?.reason || parsedValidation.message,
-        });
-      });
-      remaining = nextRemaining; // retry with the offending rows removed
+  const batches = [];
+  let currentBatch = [];
+  let currentBytes = ENVELOPE_BYTES;
+  for (const entry of entries) {
+    const size = leadByteSize(entry.lead);
+    if (currentBatch.length > 0 && currentBytes + size > MAX_REQUEST_BYTES) {
+      batches.push(currentBatch);
+      currentBatch = [];
+      currentBytes = ENVELOPE_BYTES;
     }
+    currentBatch.push(entry);
+    currentBytes += size;
+  }
+  if (currentBatch.length > 0) batches.push(currentBatch);
+
+  console.log(
+    `${DEBUG_BULK_IMPORT} split ${entries.length} lead(s) into ${batches.length} batch(es) (<= ${MAX_REQUEST_BYTES}B each)`,
+  );
+
+  // Send one batch. The bulk endpoint validates the whole request, so one
+  // invalid lead makes the backend reject the batch with 422. Isolate the
+  // offending rows from the 422 response, drop them, and retry with the rest so
+  // a few bad rows don't fail the whole batch. originalIndex maps failures back
+  // to the correct spreadsheet row.
+  const processBatch = async (batchEntries) => {
+    let remaining = batchEntries;
+    const maxAttempts = batchEntries.length + 1;
+
+    for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt += 1) {
+      const leadsForRequest = remaining.map((entry) => entry.lead);
+      const debugSnapshot = logBulkImportRequestDebug(leadsForRequest, {
+        attempt,
+      });
+
+      console.log(`${DEBUG_BULK_IMPORT} axios request about to send:`, {
+        method: "POST",
+        url: "/api/leads/bulk",
+        baseURL: API_BASE_URL,
+        contentType: "application/json",
+        estimatedContentLength: debugSnapshot.size,
+        leadCount: leadsForRequest.length,
+      });
+
+      try {
+        const response = await axiosInstance.post("/api/leads/bulk", {
+          leads: leadsForRequest,
+        });
+
+        console.log(`${DEBUG_BULK_IMPORT} ========== SUCCESS RESPONSE ==========`);
+        console.log(`${DEBUG_BULK_IMPORT} attempt:`, attempt);
+        console.log(`${DEBUG_BULK_IMPORT} status:`, response?.status);
+        console.log(
+          `${DEBUG_BULK_IMPORT} responseHeaders:`,
+          redactSensitiveHeaders(response?.headers || {}),
+        );
+        console.log(`${DEBUG_BULK_IMPORT} responseDataSummary:`, {
+          succeeded: response?.data?.data?.succeeded ?? response?.data?.succeeded,
+          failed: response?.data?.data?.failed ?? response?.data?.failed,
+          total: response?.data?.data?.total ?? response?.data?.total,
+        });
+
+        const body = response.data?.data || response.data || {};
+        const results = Array.isArray(body.results) ? body.results : [];
+        successCount += Number(body.succeeded ?? 0);
+
+        const userIdToEntry = new Map(
+          remaining.map((entry) => [String(entry.lead.user_id), entry]),
+        );
+
+        results.forEach((item) => {
+          if (item?.success) return;
+          const entry = userIdToEntry.get(String(item?.user_id));
+          const failedLead = entry?.lead;
+          console.error(`${DEBUG_BULK_IMPORT} perRowFailure:`, {
+            rowNumber:
+              entry && Number.isInteger(entry.originalIndex)
+                ? entry.originalIndex + 2
+                : "—",
+            lead: failedLead ? sanitizeLeadForLog(failedLead) : null,
+            leadSerializedSize: failedLead
+              ? formatBytes(estimateJsonBytes(failedLead))
+              : null,
+            reason: item?.error || "Failed to add lead",
+          });
+          failed.push({
+            index: entry ? entry.originalIndex : -1,
+            user_id: item?.user_id || entry?.lead?.user_id || null,
+            reason: item?.error || "Failed to add lead",
+          });
+        });
+
+        if (results.length === 0 && Number(body.failed ?? 0) > 0) {
+          // Fallback when the API doesn't return per-row results.
+          remaining.forEach((entry) => {
+            failed.push({
+              index: entry.originalIndex,
+              user_id: entry.lead.user_id,
+              reason: "Failed to add lead",
+            });
+          });
+        }
+
+        remaining = []; // request accepted (no 422) — nothing left to retry
+      } catch (error) {
+        logBulkImportErrorDebug(error, {
+          ...debugSnapshot,
+          attempt,
+        });
+
+        const parsedValidation = parseBulkImportValidationErrors(error);
+        lastValidationMessage = parsedValidation.message;
+        console.error(
+          "Server Action Error (addManyLeadsAction):",
+          error.response?.data || error.message,
+          parsedValidation,
+        );
+
+        // Indices in the 422 are relative to the array we just sent (`remaining`).
+        const badLocalIndices = new Set(
+          parsedValidation.failed
+            .map((item) => item.index)
+            .filter((i) => Number.isInteger(i) && i >= 0 && i < remaining.length),
+        );
+
+        if (badLocalIndices.size === 0) {
+          // Couldn't isolate offending rows (e.g. 413, network error, or a
+          // non-per-row 422) — fail everything still pending in this batch.
+          remaining.forEach((entry) => {
+            failed.push({
+              index: entry.originalIndex,
+              user_id: entry.lead.user_id,
+              reason: parsedValidation.message,
+            });
+          });
+          remaining = [];
+          break;
+        }
+
+        const nextRemaining = [];
+        remaining.forEach((entry, localIndex) => {
+          if (!badLocalIndices.has(localIndex)) {
+            nextRemaining.push(entry);
+            return;
+          }
+          const detail = parsedValidation.failed.find(
+            (item) => item.index === localIndex,
+          );
+          failed.push({
+            index: entry.originalIndex,
+            user_id: entry.lead.user_id,
+            reason: detail?.reason || parsedValidation.message,
+          });
+        });
+        remaining = nextRemaining; // retry with the offending rows removed
+      }
+    }
+  };
+
+  // Batches run sequentially to avoid hammering the backend; a 413/422 in one
+  // batch never blocks the others.
+  for (const batch of batches) {
+    await processBatch(batch);
   }
 
   if (successCount > 0) {

@@ -727,6 +727,7 @@ export default {
         notes: "notes",
         campaignId: "campaign_id",
         platform: "platform",
+        author: "author",
       },
       preview: {
         title: "معاينة ربط الأعمدة",

@@ -144,6 +144,20 @@ test("apiField preserves backend contract", () => {
   assert.equal(byField.notes, "query");
 });
 
+test("author column is recognized (case/spacing variants), not merged into notes", () => {
+  for (const header of ["Author", "author", "AUTHOR", "Author Email", "author_email", "author email"]) {
+    const { byField, unknownColumns } = buildColumnMapping(["Phone", header]);
+    assert.equal(byField.author, 1, `author not detected for "${header}"`);
+    assert.equal(unknownColumns.length, 0, `"${header}" leaked into notes`);
+  }
+});
+
+test("author maps to top-level api field 'author'", () => {
+  const col = buildColumnMapping(["Author"]).mappedColumns[0];
+  assert.equal(col.field, "author");
+  assert.equal(col.apiField, "author");
+});
+
 test("getRowUnknownPairs skips empty values", () => {
   const unknownColumns = [
     { index: 2, header: "Budget" },

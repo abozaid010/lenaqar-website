@@ -13,6 +13,7 @@ import {
   normalizeLeadPlatform,
 } from "@/constants/lead-import";
 import { parseExcelFile } from "@/utils/excel-utils";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   LEAD_FIELD_ALIASES,
   buildColumnMapping,
@@ -148,7 +149,14 @@ const buildInvalidPlatformReason = (value, translate) =>
     .replace("{allowed}", formatAllowedPlatformsList())
     .replace("{default}", DEFAULT_LEAD_PLATFORM);
 
-const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) => {
+const buildLeadsFromSheet = ({
+  headers,
+  rows,
+  clientId,
+  mapping,
+  translate,
+  defaultAuthor = "",
+}) => {
   const resolvedMapping = mapping ?? buildColumnMapping(headers);
   const { byField, unknownColumns } = resolvedMapping;
   const nameIndex = byField.name ?? -1;
@@ -156,6 +164,8 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
   const queryIndex = byField.notes ?? -1;
   const campaignIndex = byField.campaign_id ?? -1;
   const platformIndex = byField.platform ?? -1;
+  const authorIndex = byField.author ?? -1;
+  const safeDefaultAuthor = String(defaultAuthor ?? "").trim();
 
   const safeClientId = String(clientId ?? "").trim();
   if (!safeClientId) {
@@ -223,6 +233,12 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
       ? normalizeLeadPlatform(platformRaw)
       : DEFAULT_LEAD_PLATFORM;
 
+    // author: from the sheet's author column when present, otherwise default to
+    // the currently logged-in user's email. Sent as a top-level field, never
+    // merged into notes.
+    const authorRaw = authorIndex >= 0 ? String(row[authorIndex] ?? "").trim() : "";
+    const author = authorRaw || safeDefaultAuthor;
+
     validLeadRows.push({
       rowNumber,
       payload: {
@@ -233,6 +249,7 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
         client_id: safeClientId,
         platform,
         campaign_id: campaignRaw || DEFAULT_LEAD_CAMPAIGN_ID,
+        author,
       },
     });
   });
@@ -391,12 +408,20 @@ export function useImportLeads({ clientId } = {}) {
         return { success: false, error: primaryError, validationErrors: validation.errors };
       }
 
+      // Default author = currently logged-in user's email (same source as the
+      // bulk-action dialog and dashboard filter). Applied per-row when the sheet
+      // has no author value, before the API payload is built.
+      const loggedInEmail = String(
+        LenaCookiesManager.getClientInfo()?.email ?? "",
+      ).trim();
+
       const { validLeadRows, skippedRows } = buildLeadsFromSheet({
         headers: sheetData.headers || [],
         rows: sheetData.rows || [],
         clientId: safeClientId,
         mapping: validation.mapping,
         translate,
+        defaultAuthor: loggedInEmail,
       });
       const validLeads = validLeadRows.map((item) => item.payload);
       const rowNumberByUserId = new Map(
@@ -408,6 +433,10 @@ export function useImportLeads({ clientId } = {}) {
         validLeads: validLeads.length,
         skippedRows: skippedRows.length,
         skippedSample: skippedRows.slice(0, 3),
+        // TEMP author trace: confirm author is a top-level field, not in query.
+        defaultAuthor: loggedInEmail || "(none)",
+        sampleAuthor: validLeads[0]?.author ?? "(undefined)",
+        sampleQueryHasAuthor: /author\s*:/i.test(validLeads[0]?.query || ""),
       });
 
       if (validLeads.length === 0) {

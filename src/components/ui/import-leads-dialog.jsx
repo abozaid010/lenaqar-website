@@ -33,6 +33,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
     notes: "dashboardFilter.importLeads.columns.notes",
     campaign_id: "dashboardFilter.importLeads.columns.campaignId",
     platform: "dashboardFilter.importLeads.columns.platform",
+    author: "dashboardFilter.importLeads.columns.author",
   };
 
   const requiredColumns = useMemo(
