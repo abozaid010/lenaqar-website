@@ -7,6 +7,7 @@ const DASHBOARD_NON_API_PARAMS = new Set([
   "direction",
   "tab",
   "clientId",
+  "sort",
   "sort_score",
 ]);
 

@@ -1,4 +1,9 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import {
+  DASHBOARD_SORT_PARAM,
+  LEGACY_SORT_SCORE_PARAM,
+  normalizeDashboardSort,
+} from "@/utils/dashboard-lead-sort";
 
 /** Bump when the persisted filter shape becomes incompatible. */
 export const DASHBOARD_FILTERS_STORAGE_VERSION = 1;
@@ -26,12 +31,35 @@ export function isHomeyClientId(clientId) {
 }
 
 /**
+ * Migrate legacy `sort_score` into `sort` when present.
+ * @param {Record<string, string>} filters
+ * @returns {Record<string, string>}
+ */
+function normalizePersistedSortParams(filters) {
+  const next = { ...filters };
+  const normalized = normalizeDashboardSort(
+    next[DASHBOARD_SORT_PARAM],
+    next[LEGACY_SORT_SCORE_PARAM],
+  );
+  delete next[LEGACY_SORT_SCORE_PARAM];
+  if (normalized) {
+    next[DASHBOARD_SORT_PARAM] = normalized;
+  } else {
+    delete next[DASHBOARD_SORT_PARAM];
+  }
+  return next;
+}
+
+/**
  * For Homey, default "Only my leads" (author = logged-in email) when author is unset.
  * @param {Record<string, string> | null | undefined} filters
  * @returns {Record<string, string>}
  */
 export function withHomeyOnlyMyLeadsDefault(filters) {
-  const next = filters && typeof filters === "object" ? { ...filters } : {};
+  const next =
+    filters && typeof filters === "object"
+      ? normalizePersistedSortParams({ ...filters })
+      : {};
   if (typeof window === "undefined") return next;
   if (!isHomeyClientId(LenaCookiesManager.getClientId())) return next;
 
@@ -97,7 +125,7 @@ export function extractPersistableDashboardFilters(searchParams) {
     if (value == null || value === "") continue;
     filters[key] = String(value);
   }
-  return filters;
+  return normalizePersistedSortParams(filters);
 }
 
 /**
@@ -150,7 +178,8 @@ export function readDashboardFilters(storageKey) {
       if (value == null || value === "") continue;
       filters[key] = String(value);
     }
-    return Object.keys(filters).length > 0 ? filters : null;
+    const normalized = normalizePersistedSortParams(filters);
+    return Object.keys(normalized).length > 0 ? normalized : null;
   } catch {
     try {
       localStorage.removeItem(storageKey);

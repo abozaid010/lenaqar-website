@@ -2,9 +2,7 @@
 
 import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
-import { SELECTION_COLORS } from "@/constants/colors";
 import {
-  DASHBOARD_BUTTON,
   DASHBOARD_TRIGGER,
 } from "@/constants/ui-classes";
 import { useI18n } from "@/hooks/useI18n";
@@ -20,7 +18,7 @@ import {
   parseOwnerTypeFilter,
   serializeOwnerTypeFilter,
 } from "@/constants/owner-type";
-import { ArrowDown, ArrowDownUp, ArrowUp, ChevronDown, FileSpreadsheet, Printer, X, UserPlus } from "lucide-react";
+import { ChevronDown, FileSpreadsheet, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatDayMonthShort } from "@/utils/formateDate";
@@ -34,6 +32,12 @@ import {
   hasPersistableDashboardFilters,
   isHomeyClientId,
 } from "@/lib/dashboard-filters-storage";
+import {
+  DASHBOARD_SORT,
+  DASHBOARD_SORT_PARAM,
+  LEGACY_SORT_SCORE_PARAM,
+  resolveDashboardSort,
+} from "@/utils/dashboard-lead-sort";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
@@ -74,13 +78,47 @@ export default function DashbordFilter({
   const { locale, translate } = useI18n();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const sortScore = searchParams.get("sort_score");
-  const isScoreSortActive = sortScore === "desc" || sortScore === "asc";
+  const clientId = LenaCookiesManager.getClientId();
+  const selectedSort = useMemo(
+    () =>
+      resolveDashboardSort(
+        searchParams.get(DASHBOARD_SORT_PARAM),
+        clientId,
+        searchParams.get(LEGACY_SORT_SCORE_PARAM),
+      ),
+    [searchParams, clientId],
+  );
 
   const ACTIONS = useMemo(
     () => getDashboardFilterOptions(locale),
     [locale],
   );
+
+  const sortOptions = useMemo(
+    () => [
+      {
+        value: DASHBOARD_SORT.RECENT,
+        label: translate("dashboardFilter.sort.recent", "Most Recent"),
+      },
+      {
+        value: DASHBOARD_SORT.OLDEST,
+        label: translate("dashboardFilter.sort.oldest", "Oldest First"),
+      },
+      {
+        value: DASHBOARD_SORT.SCORE,
+        label: translate("dashboardFilter.sort.score", "Highest Score"),
+      },
+    ],
+    [translate],
+  );
+
+  const sortFilterLabel = useMemo(() => {
+    const selected = sortOptions.find((option) => option.value === selectedSort);
+    return (
+      selected?.label ||
+      translate("dashboardFilter.sort.recent", "Most Recent")
+    );
+  }, [selectedSort, sortOptions, translate]);
 
   const tomorrow = useMemo(() => {
     const date = new Date();
@@ -163,6 +201,7 @@ export default function DashbordFilter({
   const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
   const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isImportLeadsOpen, setIsImportLeadsOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
@@ -173,11 +212,12 @@ export default function DashbordFilter({
     isActionDropdownOpen ||
     isOwnerTypeDropdownOpen ||
     isCampaignDropdownOpen ||
+    isSortDropdownOpen ||
     isDatePickerOpen;
-  const clientId = LenaCookiesManager.getClientId();
   const actionDropdownRef = useRef(null);
   const ownerTypeDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
+  const sortDropdownRef = useRef(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -263,15 +303,31 @@ export default function DashbordFilter({
       ) {
         setIsCampaignDropdownOpen(false);
       }
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target)
+      ) {
+        setIsSortDropdownOpen(false);
+      }
     };
 
-    if (isActionDropdownOpen || isOwnerTypeDropdownOpen || isCampaignDropdownOpen) {
+    if (
+      isActionDropdownOpen ||
+      isOwnerTypeDropdownOpen ||
+      isCampaignDropdownOpen ||
+      isSortDropdownOpen
+    ) {
       document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isActionDropdownOpen, isOwnerTypeDropdownOpen, isCampaignDropdownOpen]);
+  }, [
+    isActionDropdownOpen,
+    isOwnerTypeDropdownOpen,
+    isCampaignDropdownOpen,
+    isSortDropdownOpen,
+  ]);
 
   const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
 
@@ -330,11 +386,20 @@ export default function DashbordFilter({
     const prev = new URLSearchParams(window.location.search);
     const preserveQuery = prev.get("query");
     const preserveUserId = prev.get("userId");
-    const preserveSortScore = prev.get("sort_score");
+    const preserveSort =
+      prev.get(DASHBOARD_SORT_PARAM) ||
+      (prev.get(LEGACY_SORT_SCORE_PARAM) === "desc" ||
+      prev.get(LEGACY_SORT_SCORE_PARAM) === "asc"
+        ? DASHBOARD_SORT.SCORE
+        : null);
     if (preserveQuery) params.set("query", preserveQuery);
     if (preserveUserId) params.set("userId", preserveUserId);
-    if (preserveSortScore === "asc" || preserveSortScore === "desc") {
-      params.set("sort_score", preserveSortScore);
+    if (
+      preserveSort === DASHBOARD_SORT.RECENT ||
+      preserveSort === DASHBOARD_SORT.OLDEST ||
+      preserveSort === DASHBOARD_SORT.SCORE
+    ) {
+      params.set(DASHBOARD_SORT_PARAM, preserveSort);
     }
 
     router.push(`${window.location.pathname}?${params.toString()}`, {
@@ -416,22 +481,26 @@ export default function DashbordFilter({
     window.print();
   };
 
-  const handleScoreSortToggle = () => {
+  const handleSortChange = (nextSort) => {
+    if (
+      nextSort !== DASHBOARD_SORT.RECENT &&
+      nextSort !== DASHBOARD_SORT.OLDEST &&
+      nextSort !== DASHBOARD_SORT.SCORE
+    ) {
+      return;
+    }
+
     const params = hasPersistableDashboardFilters(searchParams)
       ? new URLSearchParams(searchParams.toString())
       : new URLSearchParams(window.location.search);
-    const currentSort = params.get("sort_score") || sortScore;
-    if (!currentSort) {
-      params.set("sort_score", "desc");
-    } else if (currentSort === "desc") {
-      params.set("sort_score", "asc");
-    } else {
-      params.delete("sort_score");
-    }
+    params.set(DASHBOARD_SORT_PARAM, nextSort);
+    params.delete(LEGACY_SORT_SCORE_PARAM);
+    setIsSortDropdownOpen(false);
     const qs = params.toString();
-    router.push(qs ? `${window.location.pathname}?${qs}` : window.location.pathname, {
-      replace: true,
-    });
+    router.push(
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
+      { replace: true },
+    );
   };
 
   const handleResetFilters = () => {
@@ -448,6 +517,7 @@ export default function DashbordFilter({
     setIsActionDropdownOpen(false);
     setIsOwnerTypeDropdownOpen(false);
     setIsCampaignDropdownOpen(false);
+    setIsSortDropdownOpen(false);
     setIsDatePickerOpen(false);
     if (typeof onResetFilters === "function") {
       onResetFilters();
@@ -761,44 +831,58 @@ export default function DashbordFilter({
   );
 
   const sortControl = (
-          <div className={`group relative shrink-0 ${triggerWidthClass}`}>
-            <button
-              type="button"
-              onClick={handleScoreSortToggle}
-              aria-pressed={isScoreSortActive}
-              aria-describedby="dashboard-score-sort-hint"
-              className={`${DASHBOARD_TRIGGER} !w-full gap-1.5 ${
-                compact ? "h-9 min-h-[36px]" : "h-10"
-              } ${
-                isScoreSortActive ? SELECTION_COLORS.SELECTED : ""
-              }`}
-            >
-              {sortScore === "desc" ? (
-                <ArrowDown className="w-4 h-4 shrink-0 text-primary" aria-hidden />
-              ) : sortScore === "asc" ? (
-                <ArrowUp className="w-4 h-4 shrink-0 text-primary" aria-hidden />
-              ) : (
-                <ArrowDownUp className="w-4 h-4 text-gray-500 shrink-0" aria-hidden />
-              )}
-              <span className="min-w-0 text-start">
-                <span className="block whitespace-nowrap text-sm leading-tight">
-                  {translate("dashboardFilter.sortByScore.label")}
-                </span>
-              </span>
-              {isScoreSortActive && (
-                <span className="ms-auto text-[10px] font-semibold uppercase tracking-wide text-primary shrink-0">
-                  {translate("dashboardFilter.sortByScore.active")}
-                </span>
-              )}
-            </button>
-            <span
-              id="dashboard-score-sort-hint"
-              role="tooltip"
-              className="pointer-events-none absolute bottom-full start-0 z-[100] mb-1.5 max-w-[14rem] rounded-md bg-gray-900 px-2.5 py-1.5 text-[11px] leading-snug text-white shadow-lg opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-            >
-              {translate("dashboardFilter.sortByScore.hint")}
-            </span>
-          </div>
+    <div
+      className={`relative ${isSortDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
+      ref={sortDropdownRef}
+    >
+      <div
+        id="dashboard_sort"
+        role="button"
+        tabIndex={0}
+        aria-haspopup="listbox"
+        aria-expanded={isSortDropdownOpen}
+        aria-label={translate("dashboardFilter.sort.label", "Sort")}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ")
+            setIsSortDropdownOpen((open) => !open);
+        }}
+        onClick={() => setIsSortDropdownOpen((open) => !open)}
+        className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
+          compact ? "h-9 min-h-[36px]" : "h-10"
+        }`}
+      >
+        <span className="whitespace-nowrap">{sortFilterLabel}</span>
+        <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
+      </div>
+
+      {isSortDropdownOpen && (
+        <div
+          role="listbox"
+          aria-label={translate("dashboardFilter.sort.label", "Sort")}
+          className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}
+        >
+          {sortOptions.map((option) => {
+            const isSelected = option.value === selectedSort;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                role="option"
+                aria-selected={isSelected}
+                onClick={() => handleSortChange(option.value)}
+                className={`w-full text-start px-3 py-2 text-sm rounded ${
+                  isSelected
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
   );
 
   const toolControls = (

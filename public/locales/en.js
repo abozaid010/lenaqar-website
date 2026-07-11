@@ -820,6 +820,12 @@ export default {
       hint: "On-screen leads only · highest score at top",
       active: "On",
     },
+    sort: {
+      label: "Sort",
+      recent: "Most Recent",
+      oldest: "Oldest First",
+      score: "Highest Score",
+    },
     onlyMyLeads: "Only my leads",
     resetFilters: "Reset Filters",
     panel: {

@@ -692,6 +692,12 @@ export default {
       hint: "العملاء الظاهرين فقط · الأعلى جديةً في الأعلى",
       active: "مفعل",
     },
+    sort: {
+      label: "الترتيب",
+      recent: "الأحدث",
+      oldest: "الأقدم أولاً",
+      score: "أعلى جدية",
+    },
     onlyMyLeads: "عملائي فقط",
     resetFilters: "إعادة تعيين الفلاتر",
     panel: {
