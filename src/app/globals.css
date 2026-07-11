@@ -102,7 +102,7 @@ button {
 }
 
 /* Full-size action buttons (Save, Next, etc.) */
-button:not(.icon-btn) {
+button:not(.icon-btn):not(.compact-btn) {
   min-height: 2.5rem;
 }
 
@@ -114,6 +114,13 @@ button.icon-btn {
   line-height: 0;
   aspect-ratio: 1 / 1;
   flex-shrink: 0;
+}
+
+/* Compact full-width row buttons (sidebar WA links, etc.) */
+button.compact-btn {
+  min-height: 0;
+  padding: 0;
+  line-height: 1;
 }
 
 .timeline {

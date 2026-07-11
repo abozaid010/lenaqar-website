@@ -15,13 +15,17 @@ export const VALID_LEAD_PLATFORMS = [
 export const DEFAULT_LEAD_PLATFORM = "website";
 export const DEFAULT_LEAD_CAMPAIGN_ID = "added_manually";
 
-/** Column order used by the downloadable template and import parser. */
+/**
+ * Recommended columns for the downloadable template. Display labels are used as
+ * the header row; the importer matches them case-insensitively via aliases, so
+ * "Name", "name", "Full Name", etc. all map to the same field.
+ */
 export const LEAD_IMPORT_TEMPLATE_COLUMNS = [
-  "name",
-  "phone",
-  "notes",
-  "campaign_id",
-  "platform",
+  "Name",
+  "Phone",
+  "Notes",
+  "Campaign ID",
+  "Platform",
 ];
 
 export const LEAD_IMPORT_TEMPLATE_EXAMPLE_ROW = [

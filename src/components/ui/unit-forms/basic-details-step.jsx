@@ -440,6 +440,20 @@ export default function BasicDetailsStep({
             error={invalidFields.includes("project")}
             placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
           />
+
+          <LenaTextField
+            label={translate(
+              "basicDetails.phase",
+              locale === "ar" ? "المرحلة / المبنى" : "Phase / Building"
+            )}
+            name="phase"
+            value={formData.phase || ""}
+            onChange={handleChange}
+            placeholder={translate(
+              "basicDetails.placeholders.phase",
+              locale === "ar" ? "اختياري" : "Optional"
+            )}
+          />
         </div>
 
         {locationFromProject && (formData.city || formData.district || formData.sub_district) ? (
