@@ -71,9 +71,11 @@ export default function DashbordFilter({ appliedFilters, compact = false, panel 
     return date;
   }, [tomorrow]);
 
-  const loggedInEmail = useMemo(() => {
+  // Cookie-backed; empty on SSR/first paint to avoid hydration mismatch.
+  const [loggedInEmail, setLoggedInEmail] = useState("");
+  useEffect(() => {
     const email = LenaCookiesManager.getClientInfo()?.email;
-    return typeof email === "string" ? email.trim() : "";
+    setLoggedInEmail(typeof email === "string" ? email.trim() : "");
   }, []);
 
   const [filters, setFilters] = useState(() => {
