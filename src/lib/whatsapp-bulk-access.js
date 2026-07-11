@@ -2,11 +2,8 @@ function normalizeActions(actions) {
   return Array.isArray(actions) ? actions.filter(Boolean) : [];
 }
 
-export const WHATSAPP_ACTION_API = "whatsapp";
+export const WHATSAPP_ACTION_API = "whatsapp_api";
 export const WHATSAPP_ACTION_AUTOMATION = "whatsapp_automation";
-
-/** Modules that may list WhatsApp send actions on the leads dashboard. */
-export const WHATSAPP_ACTION_MODULE_KEYS = ["conversation", "chat_campaign"];
 
 /**
  * Extract module_actions from profile API envelopes (shape varies).
@@ -72,8 +69,8 @@ export function moduleActionListIncludes(actions, actionName) {
 }
 
 /**
- * Resolve bulk WhatsApp UI flags from `module_actions` object.
- * Actions `whatsapp` and `whatsapp_automation` live on modules like `conversation`.
+ * Resolve bulk WhatsApp UI flags from `module_actions.conversation` only.
+ * Checks for `whatsapp_api` or `whatsapp_automation` actions.
  */
 export function resolveWhatsappBulkAccess(moduleActions) {
   const empty = {
@@ -92,43 +89,21 @@ export function resolveWhatsappBulkAccess(moduleActions) {
     return empty;
   }
 
+  // Only check the "conversation" module
+  const conversationActions = moduleActions.conversation;
+  if (!conversationActions) {
+    return empty;
+  }
+
+  const actions = extractModuleActionList(conversationActions);
   let canUseApiTemplate = false;
   let canUseAutomation = false;
 
-  const scanKeys = new Set([
-    ...WHATSAPP_ACTION_MODULE_KEYS,
-    ...Object.keys(moduleActions),
-  ]);
-
-  for (const moduleKey of scanKeys) {
-    if (!Object.prototype.hasOwnProperty.call(moduleActions, moduleKey)) {
-      continue;
-    }
-    const actions = extractModuleActionList(moduleActions[moduleKey]);
-    if (moduleActionListIncludes(actions, WHATSAPP_ACTION_API)) {
-      canUseApiTemplate = true;
-    }
-    if (moduleActionListIncludes(actions, WHATSAPP_ACTION_AUTOMATION)) {
-      canUseAutomation = true;
-    }
+  if (moduleActionListIncludes(actions, WHATSAPP_ACTION_API)) {
+    canUseApiTemplate = true;
   }
-
-  // Backend may expose WhatsApp as separate module keys (not only as conversation actions).
-  if (Object.prototype.hasOwnProperty.call(moduleActions, WHATSAPP_ACTION_API)) {
-    const featureActions = extractModuleActionList(moduleActions[WHATSAPP_ACTION_API]);
-    if (featureActions.length > 0) {
-      canUseApiTemplate = true;
-    }
-  }
-  if (
-    Object.prototype.hasOwnProperty.call(moduleActions, WHATSAPP_ACTION_AUTOMATION)
-  ) {
-    const featureActions = extractModuleActionList(
-      moduleActions[WHATSAPP_ACTION_AUTOMATION]
-    );
-    if (featureActions.length > 0) {
-      canUseAutomation = true;
-    }
+  if (moduleActionListIncludes(actions, WHATSAPP_ACTION_AUTOMATION)) {
+    canUseAutomation = true;
   }
 
   return {
