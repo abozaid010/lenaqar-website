@@ -63,6 +63,17 @@ function DashboardSplitViewComponent() {
 
   const allUsers = useMemo(() => flattenUsers(data), [data]);
 
+  /** Unique leads fetched client-side for the current filter key (deduped). */
+  const loadedCount = allUsers.length;
+  const pageCount = data?.pages?.length ?? 0;
+  /**
+   * messages/v2/all returns `count` = page size only, not total matching.
+   * When every page is loaded (!hasNextPage), loadedCount is the true total.
+   * null while loading or while more pages remain — never invent a total.
+   */
+  const totalMatchingLeads =
+    !pageCount || hasNextPage ? null : loadedCount;
+
   const searchQueryTrimmed = (searchParams.get("query") || "").trim();
   const sortScore = searchParams.get("sort_score");
   const filteredUsers = useMemo(() => {
@@ -152,7 +163,9 @@ function DashboardSplitViewComponent() {
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
         <LeadsListPane
           users={filteredUsers}
-          totalLoadedLeads={allUsers.length}
+          totalLoadedLeads={loadedCount}
+          totalMatchingLeads={totalMatchingLeads}
+          pageCount={pageCount}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}

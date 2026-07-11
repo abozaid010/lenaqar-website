@@ -91,7 +91,7 @@ export default function SingleImageUploader({
         onChange("");
       }
     } catch (error) {
-      console.error("Error compressing image:", error);
+      console.error("Error compressing image:", error?.message ?? error);
       toast.error(t?.failedToUploadImage || "Failed to upload image. Please try again.");
     } finally {
       setIsUploadingLocal(false);
@@ -108,7 +108,7 @@ export default function SingleImageUploader({
       setDeleteLoading(true);
       await deleteImage(selectedImage.imageId);
     } catch (error) {
-      console.error("Error deleting image:", error);
+      console.error("Error deleting image:", error?.message ?? error);
     } finally {
       setDeleteLoading(false);
     }

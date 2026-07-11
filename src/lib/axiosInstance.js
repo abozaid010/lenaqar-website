@@ -14,22 +14,8 @@ export const axiosInstance = axios.create({
   },
 });
 
-const isDev = process.env.NODE_ENV === "development";
-
-axiosInstance.interceptors.request.use((config) => {
-  if (isDev) {
-    console.log(`🚀 BFF Request: ${config.method?.toUpperCase()} ${config.url}`);
-  }
-  return config;
-});
-
 axiosInstance.interceptors.response.use(
-  (response) => {
-    if (isDev) {
-      console.log(`📥 BFF Response: ${response.status} ${response.config.method?.toUpperCase()} ${response.config.url}`);
-    }
-    return response;
-  },
+  (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
@@ -66,9 +52,6 @@ axiosInstance.interceptors.response.use(
           }
         }
 
-        if (isDev) {
-          console.error("[axiosInstance] Token refresh failed:", refreshError);
-        }
         await TokenRefreshService.handleRefreshFailure();
         return Promise.reject(refreshError);
       }

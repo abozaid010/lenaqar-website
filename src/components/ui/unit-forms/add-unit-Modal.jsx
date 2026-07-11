@@ -190,7 +190,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           });
         }
       } catch (error) {
-        console.error('Failed to load client ID:', error);
+        console.error('Failed to load client ID:', error?.message ?? error);
         if (isMounted) {
           setClientIdState({
             clientId: null,
@@ -574,7 +574,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
       }
       return true;
     } catch (err) {
-      console.error("[ExtractFromText] extraction failed:", err);
+      console.error("[ExtractFromText] extraction failed:", err?.message ?? err);
       toast.error("Exception: Failed to extract");
       return false;
     } finally {

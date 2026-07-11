@@ -102,7 +102,7 @@ export default function StickyInquiryCard({
 
         setContactData(contact);
       } catch (error) {
-        console.error('Error loading contact info:', error);
+        console.error('Error loading contact info:', error instanceof Error ? error.message : String(error));
         setContactData({
           name: null,
           phone: null,
@@ -121,7 +121,6 @@ export default function StickyInquiryCard({
     if (contactData?.phone) {
       window.open(`tel:${contactData.phone}`, '_blank');
     } else {
-      console.log('No phone number available');
     }
   };
 

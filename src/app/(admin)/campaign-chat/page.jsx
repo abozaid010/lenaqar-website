@@ -149,20 +149,7 @@ const CampaignChat = () => {
       // Handle case where API returns data but sessions array is missing
       const sessions = sessionsData.sessions || sessionsData.data || [];
       
-      // Debug logging
-      console.log("[Infinite Scroll] Received sessions data:", {
-        page,
-        sessionsCount: sessions.length,
-        rawSessionsData: sessionsData,
-        currentPage: sessionsData.current_page || sessionsData.page,
-        totalPages: sessionsData.total_pages || sessionsData.totalPages,
-        total: sessionsData.total,
-        hasMoreData: sessionsData.has_more,
-        allKeys: Object.keys(sessionsData)
-      });
-      
       if (sessions.length === 0) {
-        console.log("[Infinite Scroll] No sessions in response, setting hasMore to false");
         setHasMore(false);
         setIsFetchingMore(false);
         return;
@@ -194,15 +181,6 @@ const CampaignChat = () => {
         const receivedFullPage = sessions.length >= CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE;
         hasMorePages = receivedFullPage;
       }
-      
-      console.log("[Infinite Scroll] Pagination status:", {
-        currentPage,
-        totalPages,
-        receivedSessions: sessions.length,
-        pageSize: CAMPAIGN_CHAT_PAGINATION.DEFAULT_PAGE_SIZE,
-        hasMorePages,
-        nextPage: hasMorePages ? page + 1 : null
-      });
       
       setHasMore(hasMorePages);
       setIsFetchingMore(false);
@@ -285,7 +263,7 @@ const CampaignChat = () => {
         refetchType: 'active' // Only refetch active queries to prevent memory leaks
       });
     } catch (error) {
-      console.error("Failed to toggle AI:", error);
+      console.error("Failed to toggle AI:", error?.message);
       // Revert the state on error
       if (selectedContact && selectedContact.phone_number === phoneNumber) {
         setSelectedContact(prev => ({
@@ -336,7 +314,7 @@ const CampaignChat = () => {
       });
       await refetchSession();
     } catch (error) {
-      console.error("Failed to send reply:", error);
+      console.error("Failed to send reply:", error?.message);
       toast.error(
         getErrorMessage(
           error,
@@ -374,7 +352,7 @@ const CampaignChat = () => {
           : session
       ));
     } catch (error) {
-      console.error("Failed to rename session:", error);
+      console.error("Failed to rename session:", error?.message);
       toast.error("Failed to rename conversation");
     }
   };
@@ -407,7 +385,7 @@ const CampaignChat = () => {
           : session
       ));
     } catch (error) {
-      console.error("Failed to toggle favorite:", error);
+      console.error("Failed to toggle favorite:", error?.message);
       toast.error("Failed to update favorite status");
     }
   };
@@ -424,15 +402,14 @@ const CampaignChat = () => {
       }
       queryClient.invalidateQueries({ queryKey: ["campaignSessions"], refetchType: "active" });
     } catch (error) {
-      console.error("Failed to update notes:", error);
+      console.error("Failed to update notes:", error?.message);
       toast.error(getErrorMessage(error, "Failed to save notes"));
       throw error;
     }
   };
 
   const sortedSessions = useMemo(() => {
-    const sessions = [...allSessions];
-    const sorted = sessions.sort((a, b) => {
+    return sessions.sort((a, b) => {
       if (sortBy === "last_user_message_at") {
         const aTime = a.last_user_message_at ? new Date(a.last_user_message_at).getTime() : 0;
         const bTime = b.last_user_message_at ? new Date(b.last_user_message_at).getTime() : 0;
@@ -443,15 +420,7 @@ const CampaignChat = () => {
       const bCount = b.total_messages_received || 0;
       return sortOrder === "desc" ? bCount - aCount : aCount - bCount;
     });
-    
-    console.log("[ContactList] Sorted sessions:", {
-      totalSessions: sorted.length,
-      hasMore,
-      page
-    });
-    
-    return sorted;
-  }, [allSessions, sortBy, sortOrder, hasMore, page]);
+  }, [allSessions, sortBy, sortOrder]);
 
   const handleSortChange = (field) => {
     if (sortBy === field) {

@@ -692,6 +692,7 @@ export default {
       hint: "العملاء الظاهرين فقط · الأعلى جديةً في الأعلى",
       active: "مفعل",
     },
+    onlyMyLeads: "عملائي فقط",
     panel: {
       title: "الفلاتر",
       open: "فتح الفلاتر",
@@ -726,6 +727,7 @@ export default {
         notes: "notes",
         campaignId: "campaign_id",
         platform: "platform",
+        author: "author",
       },
       preview: {
         title: "معاينة ربط الأعمدة",
@@ -775,8 +777,11 @@ export default {
       tabAutomation: "أتمتة",
       selectAllVisible: "تحديد كل الظاهر",
       selectedLeads: "العملاء المحددون",
-      visibleOnScreen: "{count} ظاهر على الشاشة",
-      visibleOnScreenTotal: "{visible} ظاهر · {total} محمّل",
+      visibleOnScreen: "{count} ظاهر",
+      visibleOnScreenLoaded: "{visible} ظاهر · {loaded} محمّل",
+      visibleOnScreenTotal: "{visible} ظاهر · {total} إجمالي",
+      visibleOnScreenLoadedTotal:
+        "{visible} ظاهر · {loaded} محمّل · {total} إجمالي",
       recipientCount: "{count} مستلم",
       messageLabel: "الرسالة",
       messagePlaceholder: "اكتب رسالة واتساب...",

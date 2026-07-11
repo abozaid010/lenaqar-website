@@ -73,7 +73,7 @@ export async function getValidatedClientId() {
         }
       }
     } catch (error) {
-      console.warn(`Failed to get client ID from ${source.name}:`, error);
+      console.warn(`Failed to get client ID from ${source.name}:`, error?.message ?? error);
       continue;
     }
   }

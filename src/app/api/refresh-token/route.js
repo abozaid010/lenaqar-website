@@ -97,9 +97,7 @@ export async function POST() {
 
     return responseObj;
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[refresh-token] Token refresh failed:", error);
-    }
+    console.error("[refresh-token] Token refresh failed:", error?.message ?? error);
     return NextResponse.json({ error: "Token refresh failed" }, { status: 401 });
   }
 }
@@ -128,9 +126,7 @@ export async function GET(request) {
 
     return responseObj;
   } catch (error) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("[refresh-token] GET token refresh failed:", error);
-    }
+    console.error("[refresh-token] GET token refresh failed:", error?.message ?? error);
     return NextResponse.redirect(new URL("/login", SITE_HOME_PAGE));
   }
 }

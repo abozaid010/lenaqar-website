@@ -32,7 +32,7 @@ class ErrorBoundary extends Component {
         componentStack: errorInfo.componentStack
       });
     } else {
-      console.error("ErrorBoundary caught an error:", error, errorInfo);
+      console.error("ErrorBoundary caught an error:", error?.message ?? error, errorInfo);
     }
   }
 

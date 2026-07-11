@@ -25,7 +25,7 @@ export async function loadDashboardCampaignIdsOnce() {
       .catch((err) => {
         console.error(
           "[dashboard] campaign names_only failed; filter will use localStorage fallback",
-          err?.message || err
+          err?.message ?? err
         );
         cacheKind = "error";
         cachedIds = null;

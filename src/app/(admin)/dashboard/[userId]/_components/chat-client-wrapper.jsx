@@ -42,7 +42,7 @@ export default function ChatClientWrapper({ userId }) {
       // Redirect to dashboard after successful deletion
       window.location.href = "/dashboard";
     } catch (error) {
-      console.error("Failed to delete user:", error);
+      console.error("Failed to delete user:", error?.message ?? error);
       toast.error(error?.message || t?.common?.failedToDeleteUser);
     } finally {
       setIsDeleting(false);

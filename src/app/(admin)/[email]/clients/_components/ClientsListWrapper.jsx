@@ -163,7 +163,7 @@ export default function ClientsListWrapper() {
       );
       await refetch();
     } catch (error) {
-      console.error("Error deleting client:", error);
+      console.error("Error deleting client:", error?.message ?? error);
 
       if (error.code === "PERMISSION_DENIED" || error.status === 403) {
         toast.error(

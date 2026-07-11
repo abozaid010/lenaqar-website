@@ -29,7 +29,7 @@ export function useCampaignChatAccess() {
         setClientId(currentClientId);
         setCanAccessCampaignChat(canAccess);
       } catch (error) {
-        console.error("Error checking campaign chat access:", error);
+        console.error("Error checking campaign chat access:", error?.message ?? error);
         setIsAdmin(false);
         setClientId(null);
         setCanAccessCampaignChat(false);

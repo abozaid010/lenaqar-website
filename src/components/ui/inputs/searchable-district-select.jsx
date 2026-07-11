@@ -54,7 +54,7 @@ export default function SearchableDistrictSelect({
           : await getAllDistrictsWithLabels();
         setDistrictsWithLabels(districts || []);
       } catch (error) {
-        console.error("Failed to load districts:", error);
+        console.error("Failed to load districts:", error?.message ?? error);
         setDistrictsWithLabels([]);
       } finally {
         setDistrictsLoading(false);
@@ -93,7 +93,7 @@ export default function SearchableDistrictSelect({
         );
         if (active) setResolvedLabel(match?.label || "");
       } catch (error) {
-        console.error("Failed to resolve district label:", error);
+        console.error("Failed to resolve district label:", error?.message ?? error);
         if (active) setResolvedLabel("");
       }
     };

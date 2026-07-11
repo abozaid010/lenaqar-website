@@ -65,27 +65,13 @@ export function useDeveloperNames(_client_id, _isPublic = false) {
 
 // Hook for fetching individual developer details
 export function useDeveloperDetails(developerId) {
-  console.log(`🔧 useDeveloperDetails called with: developerId=${developerId}`);
-  
-  const query = useQuery({
+  return useQuery({
     queryKey: [...developerKeys.all, "detail", developerId],
-    queryFn: () => {
-      console.log(`🚀 Executing fetchDeveloperDetails queryFn (developerId: ${developerId})`);
-      return fetchDeveloperDetails(developerId);
-    },
+    queryFn: () => fetchDeveloperDetails(developerId),
     staleTime: 1000 * 60 * 30, // 30 minutes - developer details don't change often
     refetchOnWindowFocus: false,
     enabled: !!developerId, // Only run if developerId is provided
   });
-  
-  console.log(`📊 useDeveloperDetails query state:`, {
-    isLoading: query.isLoading,
-    isFetching: query.isFetching,
-    data: query.data ? `Developer: ${query.data.en_name || query.data.ar_name || 'Unknown'}` : 'null',
-    error: query.error?.message || 'none'
-  });
-  
-  return query;
 }
 
 /**

@@ -16,7 +16,7 @@ export async function getProjectById(projectId: string): Promise<ProjectApiRespo
 
     throw new Error('No project data found');
   } catch (error) {
-    console.error('Error fetching project by ID:', error);
+    console.error('Error fetching project by ID:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
@@ -35,12 +35,12 @@ export async function getProjectByEnName(enName: string): Promise<ProjectApiResp
       response = await axiosInstance.get('/projects/all');
     } catch (apiError) {
       // If /projects/all fails due to ClientsCache error, try alternative endpoints
-      console.warn('Primary projects endpoint failed, trying fallback:', apiError);
+      console.warn('Primary projects endpoint failed, trying fallback:', apiError instanceof Error ? apiError.message : String(apiError));
       
       try {
         response = await axiosInstance.get('/projectsv2/all_projects_names');
       } catch (fallbackError) {
-        console.error('All project endpoints failed:', fallbackError);
+        console.error('All project endpoints failed:', fallbackError instanceof Error ? fallbackError.message : String(fallbackError));
         throw new Error('Unable to fetch projects data');
       }
     }
@@ -93,25 +93,9 @@ export async function getProjectByEnName(enName: string): Promise<ProjectApiResp
       }
     }
     
-    // Log available projects for debugging
-    console.log('Available projects en_name values:');
-    if (response.data) {
-      let projects = [];
-      if (Array.isArray(response.data)) {
-        projects = response.data;
-      } else if (response.data.data && Array.isArray(response.data.data)) {
-        projects = response.data.data;
-      } else if (response.data.projects && Array.isArray(response.data.projects)) {
-        projects = response.data.projects;
-      }
-      projects.forEach((p: RawProject) => {
-        console.log(`- "${p.en_name}" (ID: ${p.id})`);
-      });
-    }
-    
     throw new Error(`Project with en_name "${enName}" (decoded: "${decodedEnName}") not found`);
   } catch (error) {
-    console.error('Error fetching project by en_name:', error);
+    console.error('Error fetching project by en_name:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
@@ -383,7 +367,7 @@ export async function getProjectUnits(projectId: string): Promise<ProjectUnit[]>
     // For now, return empty array
     return [];
   } catch (error) {
-    console.error('Error fetching project units:', error);
+    console.error('Error fetching project units:', error instanceof Error ? error.message : String(error));
     return [];
   }
 }

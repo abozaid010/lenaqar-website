@@ -28,7 +28,7 @@ export default function ShowRequirementBtn({ id, name, phone }) {
       setHasFetched(true);
       setIsOpen(true);
     } catch (error) {
-      console.error("Error fetching requirements:", error);
+      console.error("Error fetching requirements:", error?.message ?? error);
     } finally {
       setIsLoading(false);
     }

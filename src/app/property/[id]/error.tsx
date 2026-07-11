@@ -13,7 +13,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error('Property details page error:', error);
+    console.error('Property details page error:', error?.message ?? error);
   }, [error]);
 
   return (

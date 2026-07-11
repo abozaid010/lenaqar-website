@@ -212,7 +212,7 @@ const ClientSignupForm = () => {
         toast.error(data.error || t?.common?.failedToCreateClient);
       }
     } catch (error) {
-      console.error("Error creating client:", error);
+      console.error("Error creating client:", error?.message ?? error);
       toast.error("An unexpected error occurred");
     } finally {
       setIsLoading(false);

@@ -402,7 +402,7 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
           isLoading: false,
         });
       } catch (err) {
-        console.error("Failed to load translations:", err);
+        console.error("Failed to load translations:", err?.message ?? err);
         setTranslations({
           cities: [],
           cityLabels: {},
@@ -614,7 +614,7 @@ export default function ProjectsList({ clientId, initialProjectsData }) {
       );
       setSearchQuery("");
     } catch (err) {
-      console.error("Error refetching projects after import:", err);
+      console.error("Error refetching projects after import:", err?.message ?? err);
       toast.error(
         t.projectPage?.importRefetchError || "Failed to refresh projects list."
       );

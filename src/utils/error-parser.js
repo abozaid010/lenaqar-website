@@ -54,7 +54,7 @@ export function parseValidationErrors(errorMessage) {
       }
     }
   } catch (error) {
-    console.warn('[parseValidationErrors] Failed to parse error message:', errorMessage, error);
+    console.warn('[parseValidationErrors] Failed to parse error message:', error?.message);
   }
   
   return errors;
@@ -138,7 +138,7 @@ export function parseExistingProjectData(errorMessage) {
     // Match from the first { to the last } to capture nested structures
     const dictMatch = errorMessage.match(/:\s*(\{.*\})/s);
     if (!dictMatch || !dictMatch[1]) {
-      console.warn('[parseExistingProjectData] No dict found in error message');
+      
       return null;
     }
 
@@ -179,9 +179,6 @@ export function parseExistingProjectData(errorMessage) {
       // Extract just the existing_project_data value
       let dataString = existingDataMatch[1].trim();
       
-      console.log('[parseExistingProjectData] Extracted data string length:', dataString.length);
-      console.log('[parseExistingProjectData] First 200 chars:', dataString.substring(0, 200));
-      
       // Convert Python dict to JSON
       // Replace Python-specific values
       // Handle DatetimeWithNanoseconds and other Python objects
@@ -217,30 +214,23 @@ export function parseExistingProjectData(errorMessage) {
       
       try {
         const parsed = JSON.parse(dataString);
-        console.log('[parseExistingProjectData] Successfully parsed existing_project_data, keys:', Object.keys(parsed));
         return parsed;
       } catch (parseError) {
-        console.warn('[parseExistingProjectData] Failed to parse extracted data:', {
-          error: parseError.message,
-          position: parseError.message.match(/position (\d+)/)?.[1],
-          dataPreview: dataString.substring(0, 500),
-          dataLength: dataString.length,
-        });
+        console.warn('[parseExistingProjectData] Failed to parse extracted data:', parseError?.message);
         // Fallback: try parsing the whole dict
         const fallbackResult = parseFullDict(dictString);
         if (fallbackResult) {
-          console.log('[parseExistingProjectData] Fallback parsing succeeded');
         }
         return fallbackResult;
       }
     } else {
-      console.warn('[parseExistingProjectData] Could not find existing_project_data in dict string');
+      
     }
     
     // Fallback: try parsing the whole dict
     return parseFullDict(dictString);
   } catch (error) {
-    console.warn('[parseExistingProjectData] Failed to parse error message:', errorMessage, error);
+    console.warn('[parseExistingProjectData] Failed to parse error message:', error?.message);
     return null;
   }
 }
@@ -273,7 +263,7 @@ function parseFullDict(dictString) {
     
     return null;
   } catch (error) {
-    console.warn('[parseFullDict] Failed to parse dict:', error);
+    console.warn('[parseFullDict] Failed to parse dict:', error?.message);
     return null;
   }
 }

@@ -79,7 +79,6 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
     // Check if user has scrolled to near the bottom (within 100px)
     if (scrollHeight - scrollTop - clientHeight < 100) {
       if (hasNextPage && !isFetchingNextPage && !isFetching) {
-        console.log("🔄 Loading next page of developers...");
         fetchNextPage();
       }
     }
@@ -171,7 +170,7 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
     
     // Refetch data to get updated list
     refetch().catch(error => {
-      console.error("Failed to refetch developers after edit:", error);
+      console.error("Failed to refetch developers after edit:", error?.message);
       toast.error("Failed to refresh developers list");
     });
   };
@@ -183,7 +182,7 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
     
     // Refetch data to get updated list
     refetch().catch(error => {
-      console.error("Failed to refetch developers after add:", error);
+      console.error("Failed to refetch developers after add:", error?.message);
       toast.error("Failed to refresh developers list");
     });
   };
@@ -202,7 +201,7 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
       setSelectedDeveloper(null);
       setShowDeleteDialog(false);
     } catch (error) {
-      console.error("Error deleting developer:", error);
+      console.error("Error deleting developer:", error?.message);
       toast.error(t?.common?.failedToDelete);
     }
   };
@@ -216,7 +215,7 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
       );
       setSearchQuery("");
     } catch (error) {
-      console.error("Error refetching developers after import:", error);
+      console.error("Error refetching developers after import:", error?.message);
       toast.error(
         t.developerPage?.importRefetchError ||
           "Imported, but failed to refresh developers list. Please reload the page."

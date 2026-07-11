@@ -49,7 +49,7 @@ axiosInstance.interceptors.response.use(
     // Handle 503 errors with retry logic
     if (error.response?.status === 503 && !originalRequest._retry) {
       originalRequest._retry = true;
-      console.log("503 error detected, retrying request...");
+      console.warn("503 error detected, retrying request");
 
       // Wait before retry (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -57,7 +57,7 @@ axiosInstance.interceptors.response.use(
       try {
         return axiosInstance(originalRequest);
       } catch (retryError) {
-        console.error("Retry failed:", retryError);
+        console.error("Retry failed:", retryError?.message);
         throw retryError;
       }
     }

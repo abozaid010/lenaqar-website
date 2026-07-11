@@ -50,7 +50,7 @@ export default function SearchableCitySelect({
         const cities = await getAllCitiesWithLabels();
         setCitiesWithLabels(cities || []);
       } catch (error) {
-        console.error("Failed to load cities:", error);
+        console.error("Failed to load cities:", error?.message ?? error);
         setCitiesWithLabels([]);
       } finally {
         setCitiesLoading(false);
@@ -77,7 +77,7 @@ export default function SearchableCitySelect({
         const label = await manager.getCityLabel(cityObj.id, locale);
         if (active) setResolvedLabel(label || "");
       } catch (error) {
-        console.error("Failed to resolve city label:", error);
+        console.error("Failed to resolve city label:", error?.message ?? error);
         if (active) setResolvedLabel("");
       }
     };

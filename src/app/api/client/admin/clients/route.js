@@ -54,7 +54,7 @@ export async function GET(request) {
     return NextResponse.json(data);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[admin-clients] GET error:", error);
+      console.error("[admin-clients] GET error:", error?.message ?? error);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

@@ -71,7 +71,7 @@ export function useGoogleAnalytics() {
         });
       }
     } catch (error) {
-      console.warn('Failed to track analytics event:', error);
+      console.warn('Failed to track analytics event:', error?.message ?? error);
     }
   }, [initializeGA]);
 
@@ -85,7 +85,7 @@ export function useGoogleAnalytics() {
         });
       }
     } catch (error) {
-      console.warn('Failed to track page view:', error);
+      console.warn('Failed to track page view:', error?.message ?? error);
     }
   }, [initializeGA]);
 

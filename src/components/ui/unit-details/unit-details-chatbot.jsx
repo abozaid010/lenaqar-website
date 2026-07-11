@@ -17,7 +17,6 @@ const UnitDetailsChatBot = ({
         ? `https://chat.lenaai.net?unit_id=${encodeURIComponent(unitId)}`
         : "https://chat.lenaai.net";
 
-  console.log(chatUrl);
   const toggleChat = () => {
     setIsChatOpen(!isChatOpen);
   };

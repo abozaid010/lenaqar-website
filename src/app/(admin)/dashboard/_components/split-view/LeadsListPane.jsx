@@ -1,20 +1,41 @@
 "use client";
 
 import EmptyStateVideo from "@/components/ui/empty-state-video";
+import { useI18n } from "@/hooks/useI18n";
+import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import LeadRow from "./LeadRow";
 
 const SEARCH_DEBOUNCE_MS = 3000;
+/** Fraction of row height that must intersect the scroll root to count as visible. */
+const VISIBLE_ROW_THRESHOLD = 0.15;
 
 function useClientMounted() {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
   return isMounted;
 }
-import LeadRow from "./LeadRow";
-import { useI18n } from "@/hooks/useI18n";
-import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+
+/**
+ * Synchronously count rows intersecting the scroll root (avoids IO flash to 0 on reattach).
+ * @param {Element} root
+ * @param {NodeListOf<Element> | Element[]} rows
+ */
+function countIntersectingRows(root, rows) {
+  const rootRect = root.getBoundingClientRect();
+  if (rootRect.height <= 0) return 0;
+  let n = 0;
+  for (const row of rows) {
+    const rect = row.getBoundingClientRect();
+    if (rect.height <= 0) continue;
+    const overlap =
+      Math.min(rect.bottom, rootRect.bottom) - Math.max(rect.top, rootRect.top);
+    if (overlap > rect.height * VISIBLE_ROW_THRESHOLD) n += 1;
+  }
+  return n;
+}
 
 function ListSkeleton({ rows = 8 }) {
   return (
@@ -29,6 +50,9 @@ function ListSkeleton({ rows = 8 }) {
 export default function LeadsListPane({
   users,
   totalLoadedLeads = 0,
+  /** Total matching leads when fully known (all pages loaded); null while more pages remain. */
+  totalMatchingLeads = null,
+  pageCount = 0,
   fetchNextPage,
   hasNextPage,
   isFetchingNextPage,
@@ -44,7 +68,7 @@ export default function LeadsListPane({
   onToggleSelectAllVisible,
   hasBulkSelection = false,
 }) {
-  const { translate, common, property, localeUtils } = useI18n();
+  const { translate, common, localeUtils } = useI18n();
   const isMounted = useClientMounted();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const showBulkCheckbox = isMounted && canShowBulkButton;
@@ -172,15 +196,30 @@ export default function LeadsListPane({
       return;
     }
 
-    const syncVisibleCount = () => {
-      setVisibleOnScreenCount(visibleRowIdsRef.current.size);
-    };
-
     const rows = root.querySelectorAll("[data-user-id]");
     if (!rows.length) {
       setVisibleOnScreenCount(0);
       return;
     }
+
+    const syncVisibleCount = () => {
+      setVisibleOnScreenCount(visibleRowIdsRef.current.size);
+    };
+
+    // Seed from geometry so the label never flashes 0 when the observer reattaches
+    // after infinite-scroll / filter updates (IO callbacks are async).
+    const rootRect = root.getBoundingClientRect();
+    for (const row of rows) {
+      const id = row.getAttribute("data-user-id");
+      if (!id) continue;
+      const rect = row.getBoundingClientRect();
+      const overlap =
+        Math.min(rect.bottom, rootRect.bottom) - Math.max(rect.top, rootRect.top);
+      if (rect.height > 0 && overlap > rect.height * VISIBLE_ROW_THRESHOLD) {
+        visibleRowIdsRef.current.add(id);
+      }
+    }
+    setVisibleOnScreenCount(countIntersectingRows(root, rows));
 
     visibleRowsObserverRef.current = new IntersectionObserver(
       (entries) => {
@@ -199,11 +238,10 @@ export default function LeadsListPane({
         }
         if (changed) syncVisibleCount();
       },
-      { root, threshold: 0.15 }
+      { root, threshold: VISIBLE_ROW_THRESHOLD }
     );
 
     rows.forEach((row) => visibleRowsObserverRef.current.observe(row));
-    syncVisibleCount();
 
     return () => {
       visibleRowsObserverRef.current?.disconnect();
@@ -212,15 +250,34 @@ export default function LeadsListPane({
     };
   }, [users, initialListPaint]);
 
-  const visibleCountLabel =
-    users.length > 0
-      ? translate(
-          "dashboardFilter.bulkWhatsapp.visibleOnScreenTotal",
-          "{visible} on screen · {total} loaded"
-        )
-          .replace("{visible}", localeUtils.formatNumber(visibleOnScreenCount))
-          .replace("{total}", localeUtils.formatNumber(users.length))
-      : "";
+  const loadedCount = totalLoadedLeads;
+  const renderedCount = users.length;
+  const visibleCount = visibleOnScreenCount;
+  const totalFromAPI = totalMatchingLeads;
+
+  const visibleCountLabel = (() => {
+    if (renderedCount === 0) return "";
+
+    const fmt = (n) => localeUtils.formatNumber(n);
+
+    // messages/v2/all has no grand-total field. Once every page is loaded,
+    // unique fetched leads === total matching for the current filters.
+    if (totalFromAPI != null && !hasNextPage) {
+      return translate(
+        "dashboardFilter.bulkWhatsapp.visibleOnScreenTotal",
+        "{visible} visible · {total} total"
+      )
+        .replace("{visible}", fmt(visibleCount))
+        .replace("{total}", fmt(totalFromAPI));
+    }
+
+    return translate(
+      "dashboardFilter.bulkWhatsapp.visibleOnScreenLoaded",
+      "{visible} visible · {loaded} loaded"
+    )
+      .replace("{visible}", fmt(visibleCount))
+      .replace("{loaded}", fmt(loadedCount));
+  })();
 
   if (isError) {
     return (

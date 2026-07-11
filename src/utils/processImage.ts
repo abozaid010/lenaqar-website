@@ -54,17 +54,11 @@ export async function processImage(
   };
 
   try {
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[processImage] Processing ${file.name}, original size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-    }
     
     let compressedFile = await imageCompression(file, compressionOptions);
     
     // If WebP conversion failed, fall back to original format
     if (outputType !== originalType && compressedFile.type !== outputType) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[processImage] WebP conversion failed for ${file.name}, falling back to ${originalType}`);
-      }
       const fallbackOptions = { ...compressionOptions, fileType: originalType };
       compressedFile = await imageCompression(file, fallbackOptions);
     }
@@ -73,9 +67,6 @@ export async function processImage(
     let quality = 0.9;
     while (compressedFile.size > targetMaxSize * 1024 * 1024 && quality > 0.1) {
       quality -= 0.1;
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[processImage] Reducing quality to ${quality.toFixed(1)} for ${file.name}`);
-      }
       
       const retryOptions = {
         ...compressionOptions,
@@ -93,9 +84,6 @@ export async function processImage(
     
     // FINAL STRICT CHECK: If still too large, retry with stronger compression
     if (compressedFile.size > targetMaxSize * 1024 * 1024) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[processImage] Final size check failed for ${file.name}, retrying with stronger compression`);
-      }
       const strongCompressionOptions = {
         ...compressionOptions,
         initialQuality: 0.5, // Lower quality for final attempt
@@ -111,16 +99,10 @@ export async function processImage(
       }
     }
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[processImage] Processed ${file.name}, final size: ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB, format: ${compressedFile.type}`);
-    }
-    
     return compressedFile;
     
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error(`[processImage] Compression failed for ${file.name}:`, error);
-    }
+    console.error(`[processImage] Compression failed for ${file.name}:`, getErrorMessage(error));
     
     // Fallback: try with original format and lower quality
     try {
@@ -144,24 +126,15 @@ export async function processImage(
         const strongFallbackFile = await imageCompression(file, strongFallbackOptions);
         
         if (strongFallbackFile.size <= targetMaxSize * 1024 * 1024) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[processImage] Fallback compression with stronger quality succeeded for ${file.name}`);
-          }
           return strongFallbackFile;
         } else {
           throw new Error(`Unable to compress ${file.name} to required size even in fallback. Final size: ${(strongFallbackFile.size / 1024 / 1024).toFixed(2)}MB, target: ${targetMaxSize}MB`);
         }
       }
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[processImage] Fallback compression succeeded for ${file.name}`);
-      }
       return fallbackFile;
       
     } catch (fallbackError) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error(`[processImage] Fallback compression also failed for ${file.name}:`, fallbackError);
-      }
+      console.error(`[processImage] Fallback compression also failed for ${file.name}:`, getErrorMessage(fallbackError));
       
       // Last resort: byte limit already satisfied — try a dimension-only pass before returning raw file
       if (file.size <= targetMaxSize * 1024 * 1024) {
@@ -189,9 +162,6 @@ export async function processImage(
           }
         } catch {
           // fall through to original file
-        }
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`[processImage] Using original file for ${file.name} (within size limit)`);
         }
         return file;
       }

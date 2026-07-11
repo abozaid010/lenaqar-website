@@ -72,6 +72,14 @@ export const LEAD_FIELD_ALIASES = {
     "source_campaign",
   ],
   platform: ["platform", "source", "lead source", "channel", "origin"],
+  author: [
+    "author",
+    "author email",
+    "author_email",
+    "authoremail",
+    "created by",
+    "created_by",
+  ],
 };
 
 /**
@@ -79,7 +87,14 @@ export const LEAD_FIELD_ALIASES = {
  * fields whose aliases are single generic tokens (platform's "source") so a
  * "source campaign" header is claimed by campaign, not platform.
  */
-export const LEAD_FIELD_ORDER = ["phone", "name", "campaign_id", "notes", "platform"];
+export const LEAD_FIELD_ORDER = [
+  "phone",
+  "name",
+  "campaign_id",
+  "author",
+  "notes",
+  "platform",
+];
 
 /** Logical field -> API payload key. Preserves the existing backend contract. */
 export const FIELD_TO_API = {
@@ -88,6 +103,7 @@ export const FIELD_TO_API = {
   notes: "query",
   campaign_id: "campaign_id",
   platform: "platform",
+  author: "author",
 };
 
 /**

@@ -27,14 +27,10 @@ export const WHATSAPP_SENDER_PHONE_REQUIRED_CODE = "WHATSAPP_SENDER_PHONE_REQUIR
 
 export const WHATSAPP_MESSAGING_LOG_PREFIX = "[whatsapp-messaging]";
 
-/** Structured logs for production debugging (filter console by prefix). */
-export function logWhatsappMessaging(event, payload = {}) {
-  const entry = {
-    event,
-    ts: new Date().toISOString(),
-    ...payload,
-  };
-  console.info(`${WHATSAPP_MESSAGING_LOG_PREFIX} ${event}`, entry);
+/** Dev-only event breadcrumb (no PII payloads). No-op in production. */
+export function logWhatsappMessaging(event, _payload = {}) {
+  if (process.env.NODE_ENV !== "development") return;
+  console.info(`${WHATSAPP_MESSAGING_LOG_PREFIX} ${event}`, { event });
 }
 
 export function normalizeWhatsappPhone(raw) {
@@ -578,9 +574,7 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
 
   const sender_phone_number = resolveSenderPhoneNumber(config);
   if (!sender_phone_number) {
-    logWhatsappMessaging("send_blocked_missing_sender", {
-      platform: config?.platform ?? null,
-    });
+    logWhatsappMessaging("send_blocked_missing_sender");
     const err = new Error(WHATSAPP_SENDER_PHONE_REQUIRED_CODE);
     err.code = WHATSAPP_SENDER_PHONE_REQUIRED_CODE;
     throw err;
@@ -592,12 +586,7 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
     source: resolveWhatsappMessageSource(msg.source ?? DEFAULT_WHATSAPP_MESSAGE_SOURCE),
   }));
 
-  logWhatsappMessaging("send_request", {
-    default_platform,
-    sender_phone_number,
-    messageCount: enrichedMessages.length,
-    platforms: [...new Set(enrichedMessages.map((m) => m.platform).filter(Boolean))],
-  });
+  logWhatsappMessaging("send_request");
 
   const result = await sendWhatsappMessages({
     messages: enrichedMessages,
@@ -605,13 +594,7 @@ export async function sendWhatsappWithClientConfig({ messages, config }) {
     sender_phone_number,
   });
 
-  logWhatsappMessaging("send_response", {
-    default_platform,
-    sender_phone_number,
-    status: result?.status ?? null,
-    sent: result?.data?.sent ?? null,
-    failed: result?.data?.failed ?? null,
-  });
+  logWhatsappMessaging("send_response");
 
   return result;
 }

@@ -34,21 +34,10 @@ import { parsePhoneNumberFromString } from "libphonenumber-js/min";
 
 // Auth API
 export async function loginUser(credentials) {
-  const isDev = process.env.NODE_ENV === "development";
   const params = new URLSearchParams();
   params.append('grant_type', 'password');
   params.append('username', credentials.email);
   params.append('password', credentials.password);
-
-  const startedAt = Date.now();
-  if (isDev) {
-    console.log("[auth][login][request]", {
-      method: "POST",
-      url: `${axiosInstance.defaults.baseURL || ""}/client/login`,
-      username: credentials?.email ? String(credentials.email) : null,
-      contentType: "application/x-www-form-urlencoded",
-    });
-  }
 
   const response = await axiosInstance.post("client/login", params, {
     headers: {
@@ -60,25 +49,6 @@ export async function loginUser(credentials) {
 
   if (!response.data) {
     throw new Error("No data received from server");
-  }
-
-  if (isDev) {
-    const ms = Date.now() - startedAt;
-    const body = response?.data;
-    const data = body?.data;
-    const dataKeys =
-      data && typeof data === "object" && !Array.isArray(data)
-        ? Object.keys(data).filter((k) => !String(k).includes("token"))
-        : null;
-    console.log("[auth][login][response]", {
-      method: "POST",
-      url: `${axiosInstance.defaults.baseURL || ""}/client/login`,
-      status: response?.status ?? null,
-      durationMs: ms,
-      ok: Boolean(body?.status),
-      message: body?.message ?? null,
-      dataKeys,
-    });
   }
 
   return response.data;
@@ -476,7 +446,7 @@ const fetchDeveloperDetailsBase = async (developerId) => {
 
     return normalized;
   } catch (error) {
-    console.error("Failed to fetch developer details:", error?.message || error);
+    console.error("Failed to fetch developer details:", error?.message ?? error);
     throw error;
   }
 };
@@ -928,19 +898,11 @@ export async function addCompound(compoundData) {
     const statusCode = error.response?.status;
     const errorMessage = error.response?.data?.error_message || error.message;
 
-    console.log("[addCompound] Error caught:", {
-      statusCode,
-      errorMessage: errorMessage?.substring(0, 200),
-      fullErrorResponse: error.response?.data,
-    });
+    console.error("Failed to add compound:", errorMessage);
 
     // Check for 400 status code and try to extract existing_project_data
     if (statusCode === 400 && errorMessage) {
       const existingProjectData = parseExistingProjectData(errorMessage);
-      console.log("[addCompound] Parsed existing_project_data:", {
-        found: !!existingProjectData,
-        keys: existingProjectData ? Object.keys(existingProjectData) : null,
-      });
       if (existingProjectData) {
         return {
           error: errorMessage,
@@ -952,7 +914,6 @@ export async function addCompound(compoundData) {
       // Check for validation errors
       const validationErrors = parseValidationErrors(errorMessage);
       if (Object.keys(validationErrors).length > 0) {
-        console.log("[addCompound] Parsed validation errors:", validationErrors);
         return {
           error: errorMessage,
           validation_errors: validationErrors,
@@ -966,37 +927,14 @@ export async function addCompound(compoundData) {
 }
 export async function updatecompound(compoundData, projectId) {
   try {
-    console.log("[updatecompound] Starting update request:", {
-      projectId,
-      compoundData: {
-        ...compoundData,
-        images: compoundData.images?.length || 0,
-        payment_plans: compoundData.payment_plans?.length || 0,
-        properties_types: compoundData.properties_types?.length || 0,
-      },
-    });
-
     const response = await axiosInstance.patch(
       `/projects/${projectId}/update-fields`,
       compoundData
     );
 
-    console.log("[updatecompound] API Response:", {
-      status: response.status,
-      statusText: response.statusText,
-      data: response.data,
-      dataKeys: response.data ? Object.keys(response.data) : [],
-    });
-
     return response.data;
   } catch (error) {
-    console.error("[updatecompound] Error occurred:", {
-      message: error.message,
-      response: error.response?.data,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      fullError: error,
-    });
+    console.error("Failed to update compound:", error.message);
 
     const statusCode = error.response?.status;
     const errorMessage = error.response?.data?.error_message || error.message;
@@ -1015,7 +953,6 @@ export async function updatecompound(compoundData, projectId) {
       // Check for validation errors
       const validationErrors = parseValidationErrors(errorMessage);
       if (Object.keys(validationErrors).length > 0) {
-        console.log("[updatecompound] Parsed validation errors:", validationErrors);
         return {
           error: errorMessage,
           validation_errors: validationErrors,
@@ -1376,7 +1313,7 @@ export async function getShareUnitData(unit_id) {
     const response = await axiosInstance.get("/shared-links/share", { params });
     return response.data.data;
   } catch (error) {
-    console.error("API Error:", error);
+    console.error("API Error:", error?.message ?? error);
     return { error: error.message };
   }
 }
@@ -1815,17 +1752,6 @@ export async function fetchCampaignSession({
     }
 
     const normalized = normalizeCampaignSessionData(body.data);
-
-    if (
-      process.env.NODE_ENV === "development" &&
-      normalized.history.length === 0 &&
-      Object.keys(body.data || {}).length > 0
-    ) {
-      console.warn("[campaign-chat] Session loaded but no messages parsed.", {
-        dataKeys: Object.keys(body.data || {}),
-        phone_number: normalized.phone_number,
-      });
-    }
 
     return normalized;
   } catch (error) {
@@ -2738,22 +2664,6 @@ export async function fetchOpenwaLinkedSessionsStatus({ signal } = {}) {
     throw new Error(
       data?.error || data?.detail || "Failed to load WhatsApp connection status"
     );
-  }
-
-  if (process.env.NODE_ENV === "development") {
-    console.info("[openwa-connection] client.status", {
-      allConnected: data?.allConnected,
-      sessions: (data?.sessions ?? []).map((session) => ({
-        session_id: session.session_id,
-        whatsapp_number: session.whatsapp_number,
-        connected: session.connected,
-        status: session.status,
-        has_qr: Boolean(session.qrImage),
-        qrPendingFromBackend: session.qrPendingFromBackend,
-        error: session.error,
-      })),
-      trace: data?._trace ?? null,
-    });
   }
 
   return data;

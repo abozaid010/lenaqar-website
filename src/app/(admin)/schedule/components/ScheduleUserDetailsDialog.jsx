@@ -188,7 +188,7 @@ export default function ScheduleUserDetailsDialog({
       setRowActions(actions);
       setOpenActionsModal(true);
     } catch (e) {
-      console.error(e);
+      console.error(e?.message ?? e);
       toast.error(common.operationFailed);
     } finally {
       setLoadingActions(false);

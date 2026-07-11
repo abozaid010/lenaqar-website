@@ -94,7 +94,6 @@ export default function AddPhseDilog({
 
       // If no projectId (creating new project), just return phase data locally
       if (!projectId) {
-        console.log("[AddPhaseDialog] No projectId, returning phase data locally");
         const phaseData = {
           id: formData.id,
           name: formData.name,
@@ -114,8 +113,6 @@ export default function AddPhseDilog({
         onClose();
         return;
       }
-
-      console.log("[AddPhaseDialog] Calling API with projectId:", projectId);
 
       if (editMode) {
         const formDataToUpdate = {

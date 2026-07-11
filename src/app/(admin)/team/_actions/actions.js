@@ -47,7 +47,7 @@ export async function addNewSales(prevState, formData) {
       data: newSales,
     };
   } catch (error) {
-    console.error("[addNewSales] Error:", error);
+    console.error("[addNewSales] Error:", error?.message ?? error);
     return {
       success: false,
       error: error.message || "Failed to add new sales.",
@@ -91,7 +91,7 @@ export async function editEmployee(prevState, formData) {
       data: newSales,
     };
   } catch (error) {
-    console.error("[editEmployee] Error:", error);
+    console.error("[editEmployee] Error:", error?.message ?? error);
     return {
       success: false,
       error: error.message || "Failed to edit team member.",

@@ -36,35 +36,21 @@ export class TokenRefreshService {
    * @returns {Promise<boolean>}
    */
   static async _doRefresh() {
-    try {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[TokenRefreshService] Attempting to refresh token...");
-      }
+    const refreshResponse = await fetch("/api/refresh-token", {
+      method: "POST",
+      credentials: "include",
+    });
 
-      const refreshResponse = await fetch("/api/refresh-token", {
-        method: "POST",
-        credentials: "include",
-      });
-
-      if (!refreshResponse.ok) {
-        const errorData = await refreshResponse.json().catch(() => ({}));
-        const errorMessage =
-          process.env.NODE_ENV === "development"
-            ? errorData.error || "Failed to refresh token: " + refreshResponse.status
-            : "Token refresh failed";
-        throw new Error(errorMessage);
-      }
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("[TokenRefreshService] Token refreshed successfully");
-      }
-      return true;
-    } catch (error) {
-      if (process.env.NODE_ENV === "development") {
-        console.error("[TokenRefreshService] Token refresh failed:", error);
-      }
-      throw error;
+    if (!refreshResponse.ok) {
+      const errorData = await refreshResponse.json().catch(() => ({}));
+      const errorMessage =
+        process.env.NODE_ENV === "development"
+          ? errorData.error || "Failed to refresh token: " + refreshResponse.status
+          : "Token refresh failed";
+      throw new Error(errorMessage);
     }
+
+    return true;
   }
 
   /**
@@ -101,9 +87,6 @@ export class TokenRefreshService {
    * Handles token refresh failure by clearing cookies and redirecting to login
    */
   static async handleRefreshFailure() {
-    if (process.env.NODE_ENV === "development") {
-      console.log("[TokenRefreshService] Handling refresh failure - clearing session");
-    }
     await this.clearSessionAndRedirectToLogin();
   }
 }

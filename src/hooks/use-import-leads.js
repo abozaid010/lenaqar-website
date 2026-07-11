@@ -13,6 +13,7 @@ import {
   normalizeLeadPlatform,
 } from "@/constants/lead-import";
 import { parseExcelFile } from "@/utils/excel-utils";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   LEAD_FIELD_ALIASES,
   buildColumnMapping,
@@ -148,7 +149,14 @@ const buildInvalidPlatformReason = (value, translate) =>
     .replace("{allowed}", formatAllowedPlatformsList())
     .replace("{default}", DEFAULT_LEAD_PLATFORM);
 
-const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) => {
+const buildLeadsFromSheet = ({
+  headers,
+  rows,
+  clientId,
+  mapping,
+  translate,
+  defaultAuthor = "",
+}) => {
   const resolvedMapping = mapping ?? buildColumnMapping(headers);
   const { byField, unknownColumns } = resolvedMapping;
   const nameIndex = byField.name ?? -1;
@@ -156,6 +164,8 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
   const queryIndex = byField.notes ?? -1;
   const campaignIndex = byField.campaign_id ?? -1;
   const platformIndex = byField.platform ?? -1;
+  const authorIndex = byField.author ?? -1;
+  const safeDefaultAuthor = String(defaultAuthor ?? "").trim();
 
   const safeClientId = String(clientId ?? "").trim();
   if (!safeClientId) {
@@ -223,6 +233,12 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
       ? normalizeLeadPlatform(platformRaw)
       : DEFAULT_LEAD_PLATFORM;
 
+    // author: from the sheet's author column when present, otherwise default to
+    // the currently logged-in user's email. Sent as a top-level field, never
+    // merged into notes.
+    const authorRaw = authorIndex >= 0 ? String(row[authorIndex] ?? "").trim() : "";
+    const author = authorRaw || safeDefaultAuthor;
+
     validLeadRows.push({
       rowNumber,
       payload: {
@@ -233,6 +249,7 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) =>
         client_id: safeClientId,
         platform,
         campaign_id: campaignRaw || DEFAULT_LEAD_CAMPAIGN_ID,
+        author,
       },
     });
   });
@@ -301,9 +318,8 @@ export function useImportLeads({ clientId } = {}) {
       };
       setImportPreview(preview);
       return preview;
-    } catch (error) {
+    } catch {
       // Preview is best-effort; surface parsing issues at import time instead.
-      console.warn("[ImportLeads] preview failed", error?.message);
       setImportPreview(null);
       return null;
     }
@@ -315,19 +331,12 @@ export function useImportLeads({ clientId } = {}) {
     setImportError(null);
 
     const safeClientId = String(clientId ?? "").trim();
-    console.log("[ImportLeads] importLeadsFromFile started", {
-      fileName: file?.name,
-      fileType: file?.type,
-      fileSize: file?.size,
-      clientId: safeClientId || "(missing)",
-    });
 
     if (!safeClientId) {
       const message = translate(
         "dashboardFilter.importLeads.errors.missingClientId",
         "Missing client ID. Please log out and log in again, then retry import.",
       );
-      console.error("[ImportLeads] aborted: missing clientId");
       setImportError(message);
       toast.error(message);
       return { success: false, error: message };
@@ -338,7 +347,6 @@ export function useImportLeads({ clientId } = {}) {
         "dashboardFilter.importLeads.errors.fileRequired",
         "Please choose a file first.",
       );
-      console.error("[ImportLeads] aborted: no file selected");
       setImportError(message);
       toast.error(message);
       return { success: false, error: message };
@@ -350,20 +358,11 @@ export function useImportLeads({ clientId } = {}) {
       const fileName = String(file.name || "").toLowerCase();
       const isCsv = file.type === "text/csv" || fileName.endsWith(".csv");
 
-      console.log("[ImportLeads] parsing file", { fileName, isCsv });
-
       if (isCsv) {
         sheetData = await parseCsvFile(file);
       } else {
         sheetData = await parseExcelFile(file);
       }
-
-      console.log("[ImportLeads] file parsed", {
-        headers: sheetData?.headers,
-        rowCount: sheetData?.rows?.length,
-        sheetName: sheetData?.sheetName,
-        sampleRow: sheetData?.rows?.[0],
-      });
 
       const validation = validateSheetStructure({
         headers: sheetData.headers || [],
@@ -373,11 +372,6 @@ export function useImportLeads({ clientId } = {}) {
 
       if (!validation.valid) {
         const primaryError = validation.errors[0]?.message;
-        console.error("[ImportLeads] sheet validation failed — API will NOT be called", {
-          errors: validation.errors,
-          headers: sheetData.headers,
-          rowCount: sheetData.rows?.length,
-        });
         setImportError(primaryError);
         toast.error(primaryError);
         setLastSummary({
@@ -391,24 +385,25 @@ export function useImportLeads({ clientId } = {}) {
         return { success: false, error: primaryError, validationErrors: validation.errors };
       }
 
+      // Default author = currently logged-in user's email (same source as the
+      // bulk-action dialog and dashboard filter). Applied per-row when the sheet
+      // has no author value, before the API payload is built.
+      const loggedInEmail = String(
+        LenaCookiesManager.getClientInfo()?.email ?? "",
+      ).trim();
+
       const { validLeadRows, skippedRows } = buildLeadsFromSheet({
         headers: sheetData.headers || [],
         rows: sheetData.rows || [],
         clientId: safeClientId,
         mapping: validation.mapping,
         translate,
+        defaultAuthor: loggedInEmail,
       });
       const validLeads = validLeadRows.map((item) => item.payload);
       const rowNumberByUserId = new Map(
         validLeadRows.map((item) => [String(item.payload.user_id), item.rowNumber]),
       );
-
-      console.log("[ImportLeads] rows processed", {
-        totalRows: sheetData.rows?.length || 0,
-        validLeads: validLeads.length,
-        skippedRows: skippedRows.length,
-        skippedSample: skippedRows.slice(0, 3),
-      });
 
       if (validLeads.length === 0) {
         const hasInvalidPlatform = skippedRows.some(
@@ -425,11 +420,6 @@ export function useImportLeads({ clientId } = {}) {
               "dashboardFilter.importLeads.errors.noValidRows",
               "No valid leads were found in the file.",
             );
-        console.error("[ImportLeads] no valid leads — API will NOT be called", {
-          totalRows: sheetData.rows?.length,
-          skippedRows,
-          hasInvalidPlatform,
-        });
         setImportError(message);
         toast.error(message);
         setLastSummary({
@@ -442,22 +432,7 @@ export function useImportLeads({ clientId } = {}) {
         return { success: false, error: message, skippedRows };
       }
 
-      console.log("[ImportLeads] calling addManyLeadsAction", {
-        leadCount: validLeads.length,
-        sampleLead: {
-          ...validLeads[0],
-          phone_number: validLeads[0]?.phone_number?.slice(0, 6) + "…",
-        },
-      });
-
       const result = await addManyLeadsAction(validLeads);
-      console.log("[ImportLeads] API response", {
-        success: result?.success,
-        message: result?.message,
-        successCount: result?.data?.successCount,
-        failedCount: result?.data?.failed?.length,
-        failedSample: result?.data?.failed?.slice(0, 3),
-      });
 
       const failedRowsFromApi = (result?.data?.failed || []).map((item) => ({
         rowNumber:
@@ -492,10 +467,6 @@ export function useImportLeads({ clientId } = {}) {
           translate,
           failedRows: failedRowsFromApi,
         });
-        console.error("[ImportLeads] API import failed with zero created rows", {
-          failureMessage,
-          failedRowsFromApi,
-        });
         setImportError(failureMessage);
         toast.error(failureMessage);
         return { success: false, error: failureMessage, summary };
@@ -516,11 +487,7 @@ export function useImportLeads({ clientId } = {}) {
           "dashboardFilter.importLeads.errors.importFailed",
           "Failed to import leads. Please check your file and try again.",
         );
-      console.error("[ImportLeads] import failed", {
-        message: error?.message,
-        stack: error?.stack,
-        error,
-      });
+      console.error("[ImportLeads] import failed:", error?.message);
       setImportError(message);
       toast.error(message);
       return { success: false, error: message };

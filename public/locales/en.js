@@ -820,6 +820,7 @@ export default {
       hint: "On-screen leads only · highest score at top",
       active: "On",
     },
+    onlyMyLeads: "Only my leads",
     panel: {
       title: "Filters",
       open: "Open filters",
@@ -854,6 +855,7 @@ export default {
         notes: "notes",
         campaignId: "campaign_id",
         platform: "platform",
+        author: "author",
       },
       preview: {
         title: "Column mapping preview",
@@ -903,8 +905,11 @@ export default {
       tabAutomation: "Automation",
       selectAllVisible: "Select all visible",
       selectedLeads: "Selected leads",
-      visibleOnScreen: "{count} on screen",
-      visibleOnScreenTotal: "{visible} on screen · {total} loaded",
+      visibleOnScreen: "{count} visible",
+      visibleOnScreenLoaded: "{visible} visible · {loaded} loaded",
+      visibleOnScreenTotal: "{visible} visible · {total} total",
+      visibleOnScreenLoadedTotal:
+        "{visible} visible · {loaded} loaded · {total} total",
       recipientCount: "{count} recipient(s)",
       messageLabel: "Message",
       messagePlaceholder: "Type your WhatsApp message...",

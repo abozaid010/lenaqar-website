@@ -511,28 +511,14 @@ export function handleImageError(error, originalSrc, context = 'default') {
   // Safely extract error message
   const errorMessage = error?.message || error?.toString() || 'Unknown error';
   
-  console.warn(`Image loading failed for ${originalSrc} (attempt ${retryCount}):`, errorMessage);
-  
-  // Log the error for debugging
-  if (process.env.NODE_ENV === 'development') {
-    console.error('Image error details:', {
-      src: originalSrc,
-      error: errorMessage,
-      context,
-      retryAttempt: retryCount,
-      timestamp: new Date().toISOString(),
-      errorObject: error || {} // Include full error object for debugging
-    });
-  }
+  console.warn(`Image loading failed (attempt ${retryCount}):`, errorMessage);
   
   // If we haven't exceeded max retries, return the original src to retry
   if (shouldRetryImage(originalSrc)) {
-    console.log(`Retrying image ${originalSrc} (attempt ${retryCount + 1})`);
     return originalSrc;
   }
   
   // After max retries, mark as broken and return fallback
   markImageAsBroken(originalSrc);
-  console.log(`Image ${originalSrc} marked as broken after ${retryCount} attempts`);
   return getFallbackImage(context);
 }

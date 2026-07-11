@@ -96,7 +96,7 @@ const page = async () => {
       </>
     );
   } catch (error) {
-    console.error("Error loading schedule page:", error);
+    console.error("Error loading schedule page:", error?.message ?? error);
     // Return component with empty data instead of crashing
     return (
       <>

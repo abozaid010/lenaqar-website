@@ -22,7 +22,7 @@ export default function AnalyticsErrorBoundary({ children }) {
         });
       } catch (e) {
         // Avoid infinite loops if gtag itself is broken
-        console.warn('Failed to report analytics error:', e);
+        console.warn('Failed to report analytics error:', e?.message ?? e);
       }
     }
   };

@@ -212,7 +212,7 @@ export default function DashboardSummarySection() {
       );
       toast.success(translate("dashboardSummary.refresh_success"));
     } catch (error) {
-      console.error("Failed to refresh dashboard summary:", error);
+      console.error("Failed to refresh dashboard summary:", error?.message ?? error);
       toast.error(translate("dashboardSummary.refresh_failed"));
     } finally {
       setIsRefreshing(false);

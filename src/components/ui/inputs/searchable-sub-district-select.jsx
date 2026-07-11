@@ -48,7 +48,7 @@ export default function SearchableSubDistrictSelect({
         const subs = await getSubDistrictsWithLabels(city, district);
         setSubsWithLabels(subs || []);
       } catch (error) {
-        console.error("Failed to load sub-districts:", error);
+        console.error("Failed to load sub-districts:", error?.message ?? error);
         setSubsWithLabels([]);
       } finally {
         setSubsLoading(false);
@@ -89,7 +89,7 @@ export default function SearchableSubDistrictSelect({
         );
         if (active) setResolvedLabel(label || "");
       } catch (error) {
-        console.error("Failed to resolve sub-district label:", error);
+        console.error("Failed to resolve sub-district label:", error?.message ?? error);
         if (active) setResolvedLabel("");
       }
     };

@@ -80,7 +80,7 @@ export function useDeepLink(type, id) {
     const validation = validateDeepLinkParams({ type, id }, VALID_TYPES);
     
     if (!validation.isValid) {
-      console.warn('Invalid deep link parameters:', validation.errors);
+      console.warn('Invalid deep link parameters');
       window.location.href = FALLBACK_URL;
       return;
     }
@@ -95,8 +95,6 @@ export function useDeepLink(type, id) {
         if (!deepLinkUrl) {
           throw new Error('Failed to create safe deep link URL');
         }
-
-        console.log('Attempting to open deep link:', deepLinkUrl);
         
         // Attempt to open the app
         window.location.href = deepLinkUrl;
@@ -105,13 +103,10 @@ export function useDeepLink(type, id) {
         const appOpened = await detectAppOpen();
         
         if (!appOpened) {
-          console.log('App not detected, redirecting to download');
           window.location.href = FALLBACK_URL;
-        } else {
-          console.log('App opened successfully');
         }
       } catch (error) {
-        console.error('Deep link error:', error);
+        console.error('Deep link error:', error instanceof Error ? error.message : String(error));
         window.location.href = FALLBACK_URL;
       } finally {
         isProcessingRef.current = false;

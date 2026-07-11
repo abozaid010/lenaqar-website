@@ -160,7 +160,7 @@ export function createSafeTranslator(translateFunction) {
     try {
       return translateFunction(validation.safeKey, fallback);
     } catch (error) {
-      console.error('Translation function error:', error);
+      console.error('Translation function error:', error?.message ?? error);
       return fallback || validation.safeKey;
     }
   };

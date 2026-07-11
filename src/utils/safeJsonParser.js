@@ -22,7 +22,7 @@ export function safeJsonParse(data, defaultValue = {}) {
       // Ensure we return an object
       return typeof parsed === 'object' && parsed !== null ? parsed : defaultValue;
     } catch (error) {
-      console.warn('Failed to parse JSON:', data, error.message);
+      console.warn('Failed to parse JSON:', error.message);
       return defaultValue;
     }
   }

@@ -11,15 +11,12 @@ import {
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
 } from "@/lib/whatsapp-send-outbound";
-import {
-  logWhatsappMessaging,
-  resolveWhatsappSendContext,
-} from "@/lib/whatsapp-messaging-provider";
+import { resolveWhatsappSendContext } from "@/lib/whatsapp-messaging-provider";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import { sendClientMessage } from "@/utils/api";
 import { copyToClipboard, openWhatsApp } from "@/utils/phone-utils";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
 export type WhatsappSendResult = {
@@ -90,38 +87,6 @@ export function useSendWhatsappMessage({
     sendContext?.ok === true ||
     (isMessagingError && messagingReady) ||
     (fallbackToDeepLink && Boolean(resolvedPhone));
-
-  useEffect(() => {
-    logWhatsappMessaging("send_hook_messaging_state", {
-      clientId: resolvedClientId,
-      usesWhatsappApi,
-      isLoading: isMessagingLoading,
-      isFetching: isMessagingFetching,
-      isError: isMessagingError,
-      hasData: Boolean(messagingData),
-      canSendWhatsapp: messagingData?.canSendWhatsapp ?? null,
-      defaultSenderPhone: messagingData?.defaultSenderPhone ?? null,
-      selectedPlatform: selectedPlatform || null,
-      sendContextOk: sendContext?.ok ?? null,
-      sendContextCode: sendContext?.code ?? null,
-      senderPhoneNumber: sendContext?.senderPhoneNumber ?? null,
-      fallbackToDeepLink,
-      preferDeepLink,
-    });
-  }, [
-    resolvedClientId,
-    usesWhatsappApi,
-    isMessagingLoading,
-    isMessagingFetching,
-    isMessagingError,
-    messagingData,
-    selectedPlatform,
-    sendContext?.ok,
-    sendContext?.code,
-    sendContext?.senderPhoneNumber,
-    fallbackToDeepLink,
-    preferDeepLink,
-  ]);
 
   const sendMessage = useCallback(
     async (rawText: string): Promise<WhatsappSendResult | null> => {
@@ -206,7 +171,10 @@ export function useSendWhatsappMessage({
         );
         return null;
       } catch (error: unknown) {
-        console.error("Failed to send WhatsApp message:", error);
+        console.error(
+          "Failed to send WhatsApp message:",
+          error instanceof Error ? error.message : String(error),
+        );
         const err = error as {
           code?: string;
           status?: number;

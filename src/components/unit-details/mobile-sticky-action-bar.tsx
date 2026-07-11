@@ -4,17 +4,14 @@ import type { MobileStickyActionBarProps } from '@/lib/units/unit-types';
 export default function MobileStickyActionBar({ unit }: MobileStickyActionBarProps) {
   const handlePrimaryAction = () => {
     // TODO: Implement primary contact action
-    console.log('Primary contact action triggered');
   };
 
   const handleWhatsApp = () => {
     // TODO: Implement WhatsApp integration
-    console.log('WhatsApp action triggered');
   };
 
   const handleCall = () => {
     // TODO: Implement phone call
-    console.log('Call action triggered');
   };
 
   return (

@@ -131,7 +131,7 @@ export default function ImportDialog({
       await onImport(selectedIds);
       onClose && onClose();
     } catch (err) {
-      console.error("Failed to import:", err);
+      console.error("Failed to import:", err?.message ?? err);
       toast.error(err?.message || finalConfig.importError);
     } finally {
       setIsSubmitting(false);
