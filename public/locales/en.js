@@ -1033,6 +1033,8 @@ export default {
       linkFailed: "Failed to link WhatsApp instance",
       unlinkSuccess: "WhatsApp instance unlinked",
       unlinkFailed: "Failed to unlink WhatsApp instance",
+      unlinkMissingIdentity:
+        "Cannot unlink this account: missing session id or phone number.",
       unlinkConfirmTitle: "Remove WhatsApp integration?",
       unlinkConfirmMessage: "Remove WhatsApp integration for this client?",
       unlinkConfirmButton: "Remove",

@@ -905,6 +905,8 @@ export default {
       linkFailed: "فشل ربط حساب واتساب",
       unlinkSuccess: "تم إلغاء ربط حساب واتساب",
       unlinkFailed: "فشل إلغاء ربط حساب واتساب",
+      unlinkMissingIdentity:
+        "تعذر إلغاء ربط هذا الحساب: معرّف الجلسة أو رقم الهاتف مفقود.",
       unlinkConfirmTitle: "إزالة تكامل واتساب؟",
       unlinkConfirmMessage: "هل تريد إزالة تكامل واتساب لهذا العميل؟",
       unlinkConfirmButton: "إزالة",
