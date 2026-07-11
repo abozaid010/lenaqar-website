@@ -72,7 +72,7 @@ export default function SidebarWhatsappLinks({ profileData }) {
   };
 
   return (
-    <div className="mt-1 w-full" dir="ltr">
+    <div className="mt-0.5 w-full flex flex-col gap-0" dir="ltr">
       {links.map(({ digits, display, copyValue }) => (
         <button
           key={digits}
@@ -80,14 +80,14 @@ export default function SidebarWhatsappLinks({ profileData }) {
           onClick={() => handleCopy(copyValue)}
           title={translate("common.clickToCopy")}
           aria-label={`${translate("sidebar.copyWhatsappLink")}: ${display}`}
-          className="w-full flex items-center gap-0.5 rounded-md px-0 py-0 text-start hover:bg-gray-50 transition-colors group"
+          className="compact-btn w-full h-5 flex items-center gap-0.5 rounded-sm text-start hover:bg-gray-50 transition-colors group overflow-hidden"
         >
-          <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 text-[#25D366]" />
-          <span className="min-w-0 flex-1 truncate text-[10px] leading-tight text-gray-600 font-mono">
+          <WhatsAppIcon className="h-2.5 w-2.5 shrink-0 text-[#25D366]" />
+          <span className="min-w-0 flex-1 truncate whitespace-nowrap text-[9px] leading-none text-gray-600 font-mono">
             {display}
           </span>
           <Copy
-            className="h-3 w-3 shrink-0 text-gray-400 group-hover:text-gray-600 transition-colors"
+            className="h-2.5 w-2.5 shrink-0 text-gray-400 group-hover:text-gray-600 transition-colors"
             aria-hidden
           />
         </button>

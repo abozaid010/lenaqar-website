@@ -334,14 +334,14 @@ const SidebarComponent = ({
         className={`w-[12.0rem] h-full bg-white text-gray-700 flex flex-col fixed lg:static z-50 transition-transform duration-300 shadow-md transform ${drawerSideClass} ${drawerTransformClass}`}
       >
         {/* Logo/Brand */}
-        <div className="p-4 mt-1">
+        <div className="px-3 py-2.5">
           <Link href="/" className="block w-full">
             <div className="w-full flex flex-col items-center">
               {showClientLogo ? (
                 <img
                   src={getClientLogoDisplayUrl(clientLogoUrl)}
                   alt=""
-                  className="w-20 h-20 rounded-full object-cover ring-1 ring-gray-200 bg-white"
+                  className="w-14 h-14 rounded-full object-cover ring-1 ring-gray-200 bg-white"
                   onLoad={(e) => {
                     if (process.env.NODE_ENV === "development") {
                       console.log("[SidebarLogo] image loaded", {
@@ -363,15 +363,15 @@ const SidebarComponent = ({
                 <Image
                   src="/images/logo.png"
                   alt="logo_image"
-                  width={160}
-                  height={60}
-                  className="w-20 h-20 rounded-full object-cover ring-1 ring-gray-200 bg-white"
+                  width={112}
+                  height={112}
+                  className="w-14 h-14 rounded-full object-cover ring-1 ring-gray-200 bg-white"
                 />
               )}
 
               {resolvedClientName ? (
-                <div className="mt-2 w-full text-center">
-                  <p className="text-xs font-semibold text-gray-700 leading-snug break-words">
+                <div className="mt-1 w-full text-center">
+                  <p className="text-[10px] font-semibold text-gray-700 leading-tight break-words">
                     {resolvedClientName}
                   </p>
                 </div>
