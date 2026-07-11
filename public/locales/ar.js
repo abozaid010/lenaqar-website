@@ -832,6 +832,7 @@ export default {
       deleteOwn: "حذف الخاصة",
       deleteAny: "حذف أي",
       whatsapp: "قالب واتساب API",
+      whatsappApi: "قالب واتساب API",
       whatsappAutomation: "أتمتة واتساب",
     },
   },

@@ -40,7 +40,7 @@ function matchesSearch(item: SocialComment, q: string) {
 
 export default function CommentsPageClient() {
   const { translate, localeUtils } = useI18n();
-  const { canView, isReady } = useModuleActions("social-media");
+  const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();

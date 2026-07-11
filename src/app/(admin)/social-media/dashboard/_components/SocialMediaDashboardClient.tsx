@@ -20,7 +20,7 @@ import { KpiGridSkeleton } from "@/components/social-media/Skeletons";
 
 export default function SocialMediaDashboardClient() {
   const { translate, localeUtils } = useI18n();
-  const { canView, isReady } = useModuleActions("social-media");
+  const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error, refetch, isFetching } =

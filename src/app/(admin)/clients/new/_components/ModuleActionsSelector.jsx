@@ -11,31 +11,18 @@ import {
   getResolvedPermissionSchema,
   sanitizeModuleActions,
 } from "@/lib/permission-schema";
+import { DEFAULT_CLIENT_MODULE_ACTIONS } from "@/lib/default-module-actions";
 
 const FALLBACK_SCHEMA = getFallbackPermissionSchema();
 
+/** New broker clients — standardized base actions + module extras. */
 export const DEFAULT_BROKER_MODULE_ACTIONS = {
-  projects: ["view", "import"],
-  developers: ["view", "import", "update_developer_contacts"],
-  units: ["view", "import", "create", "update_own", "delete_own"],
-  campaign: ["view", "create", "update_own", "delete_own"],
-  conversation: ["view", "create", "update_own", "delete_own"],
-  team_members: ["view", "create", "update_own", "delete_own"],
-  analytics: ["view", "create", "update_own", "delete_own"],
-  calendar: ["view", "create", "update_own", "delete_own"],
-  social_media: ["view"],
+  ...DEFAULT_CLIENT_MODULE_ACTIONS,
 };
 
+/** New developer clients — same standardized matrix as broker. */
 export const DEFAULT_DEVELOPER_MODULE_ACTIONS = {
-  projects: ["view", "update_own", "create"],
-  developers: ["view", "update_own"],
-  units: ["view", "import", "create", "update_own", "delete_own"],
-  campaign: ["view", "create", "update_own", "delete_own"],
-  conversation: ["view", "create", "update_own", "delete_own"],
-  team_members: ["view", "create", "update_own", "delete_own"],
-  analytics: ["view", "create", "update_own", "delete_own"],
-  calendar: ["view", "create", "update_own", "delete_own"],
-  social_media: ["view"],
+  ...DEFAULT_CLIENT_MODULE_ACTIONS,
 };
 
 const ModuleActionsSelector = ({
@@ -100,7 +87,9 @@ const ModuleActionsSelector = ({
   };
 
   const hasWhatsappActions = (actions) =>
-    actions?.includes("whatsapp") || actions?.includes("whatsapp_automation");
+    actions?.includes("whatsapp") ||
+    actions?.includes("whatsapp_api") ||
+    actions?.includes("whatsapp_automation");
 
   if (isSchemaLoading) {
     return (

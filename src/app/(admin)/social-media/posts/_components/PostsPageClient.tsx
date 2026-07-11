@@ -40,7 +40,7 @@ function matchesSearch(post: SocialPost, q: string) {
 
 export default function PostsPageClient() {
   const { translate, localeUtils } = useI18n();
-  const { canView, isReady } = useModuleActions("social-media");
+  const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();

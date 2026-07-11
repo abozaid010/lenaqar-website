@@ -960,6 +960,7 @@ export default {
       deleteOwn: "Delete Own",
       deleteAny: "Delete Any",
       whatsapp: "WhatsApp API Template",
+      whatsappApi: "WhatsApp API Template",
       whatsappAutomation: "WhatsApp Automation",
     },
   },

@@ -19,8 +19,8 @@ export function getModulePermissionFlags(actions) {
 
   const canView = has("view");
   const canCreate = has("create");
-  const canEdit = has("update_any") || has("update_own");
-  const canDelete = has("delete_any") || has("delete_own");
+  const canEdit = has("update_own");
+  const canDelete = has("delete_own");
   // Backend may send update_contacts or UPDATE_CONTACTS
   const canEditDeveloperContactInfo = hasCi("update_developer_contacts");
 
