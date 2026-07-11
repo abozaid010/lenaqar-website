@@ -27,6 +27,25 @@ export function decodeJwtExp(token) {
 }
 
 /**
+ * Read `client_id` from a JWT payload (edge + Node safe).
+ * @param {string | undefined | null} token
+ * @returns {string | null}
+ */
+export function decodeJwtClientId(token) {
+  if (!token || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const payload = JSON.parse(decodeBase64UrlToString(parts[1]));
+    return typeof payload.client_id === "string" && payload.client_id
+      ? payload.client_id
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * @param {string | undefined | null} token
  * @param {number} [skewSeconds=30] Clock skew tolerance
  * @returns {boolean}

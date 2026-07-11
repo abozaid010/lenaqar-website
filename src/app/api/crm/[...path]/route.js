@@ -14,6 +14,7 @@ import { cookies } from "next/headers";
 import axiosInstance from "@/utils/axiosInstance";
 import { PUBLIC_X_API_KEY } from "@/lib/apiConfig";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
+import { decodeJwtClientId } from "@/lib/jwtCookieUtils";
 import { rateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rateLimit";
 
 const BFF_RATE_LIMIT = 300; // requests
@@ -69,18 +70,30 @@ async function handleRequest(request, context) {
     backendPath.startsWith("/campaign/") ||
     backendPath.startsWith("/whatsapp/");
 
-  if (!isPublicPath) {
-    const cookieStore = await cookies();
-    const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
-    if (!accessToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
+
+  if (!isPublicPath && !accessToken) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   // ── Extra headers ──────────────────────────────────────────────────────────
   const extraHeaders = {};
   if (PUBLIC_X_API_KEY && isPublicPath) {
     extraHeaders["X-API-Key"] = PUBLIC_X_API_KEY;
+  }
+
+  // Scope the request to the active client exactly like the server-RSC profile
+  // fetch (fetchClientProfile.server.js). Without this, client-originated calls
+  // (e.g. GET /client/v1/profile via the browser) can resolve a different
+  // client context than server-rendered calls — which made linked WhatsApp
+  // accounts disappear and forced the wa.me deep-link fallback on mobile.
+  const clientId =
+    decodeJwtClientId(accessToken) ||
+    cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value ||
+    null;
+  if (clientId) {
+    extraHeaders["x-client-id"] = clientId;
   }
 
   const method = request.method.toLowerCase();
