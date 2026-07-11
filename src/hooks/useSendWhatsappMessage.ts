@@ -119,6 +119,12 @@ export function useSendWhatsappMessage({
         }
 
         if (usesWhatsappApi) {
+          // When the client has linked WhatsApp accounts, a config/selection
+          // failure must surface as an actionable error — never a silent wa.me
+          // redirect. Only deep-link as a fallback for clients with no linked
+          // accounts at all.
+          const apiFallbackToDeepLink =
+            fallbackToDeepLink && !messagingData?.hasLinkedAccounts;
           const result = await sendWhatsappOutboundMessage({
             text,
             whatsappRecipient,
@@ -133,7 +139,7 @@ export function useSendWhatsappMessage({
             refetchMessagingConfig,
             translate,
             onPlatformError: setPlatformError,
-            fallbackToDeepLink,
+            fallbackToDeepLink: apiFallbackToDeepLink,
           });
 
           if (result.method === "deeplink" && result.message) {
