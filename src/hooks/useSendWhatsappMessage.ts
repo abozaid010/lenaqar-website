@@ -4,6 +4,7 @@ import { CAMPAIGN_CHAT_CLIENT_ID } from "@/constants/campaign-chat";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
+import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
 import {
   getWhatsappSendContextErrorMessage,
   sendWhatsappOutboundMessage,
@@ -49,7 +50,6 @@ export function useSendWhatsappMessage({
   fallbackToDeepLink = false,
 }: UseSendWhatsappMessageOptions = {}) {
   const [pending, setPending] = useState(false);
-  const [selectedPlatform, setSelectedPlatform] = useState("");
   const [platformError, setPlatformError] = useState("");
   const { translate, common } = useI18n();
 
@@ -63,6 +63,11 @@ export function useSendWhatsappMessage({
     isError: isMessagingError,
     refetch: refetchMessagingConfig,
   } = useMessagingProviderConfig(resolvedClientId);
+
+  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
+    messagingData,
+    resolvedClientId,
+  );
 
   const accounts = messagingData?.accounts ?? [];
   const resolvedChatId = chatId ? String(chatId).trim() : "";

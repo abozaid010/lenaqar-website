@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { clearDashboardFiltersForCurrentUser } from "@/lib/dashboard-filters-storage";
 import { PhoneField } from "@/components/phone/PhoneField";
 import AutomationAgentsSection from "./AutomationAgentsSection";
 import OpenwaConnectionAccess from "@/components/whatsapp/OpenwaConnectionAccess";
@@ -302,6 +303,7 @@ export default function ClientInfo({ client_email }) {
         method: "POST",
         credentials: "include",
       });
+      clearDashboardFiltersForCurrentUser();
       LenaCookiesManager.clearAuthCookies();
 
       if (typeof window !== "undefined") {

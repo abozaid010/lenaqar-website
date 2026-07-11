@@ -693,6 +693,7 @@ export default {
       active: "مفعل",
     },
     onlyMyLeads: "عملائي فقط",
+    resetFilters: "إعادة تعيين الفلاتر",
     panel: {
       title: "الفلاتر",
       open: "فتح الفلاتر",

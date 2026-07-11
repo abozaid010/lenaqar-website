@@ -3,6 +3,7 @@
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { useI18n } from "@/hooks/useI18n";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { clearDashboardFiltersForCurrentUser } from "@/lib/dashboard-filters-storage";
 import { Bell, LogOut, Menu, Settings, User } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -57,12 +58,11 @@ const Header = ({ clientName, clientID, clientEmail }) => {
         method: "POST",
         credentials: "include",
       });
+      clearDashboardFiltersForCurrentUser();
       LenaCookiesManager.clearAuthCookies();
 
       // Clear expensive API cache (data projection) - both localStorage and TanStack Query cache
       if (typeof window !== "undefined") {
-
-
         // Also clear TanStack Query cache for data-projection
         queryClient.removeQueries({ queryKey: ["data-projection"] });
       }

@@ -821,6 +821,7 @@ export default {
       active: "On",
     },
     onlyMyLeads: "Only my leads",
+    resetFilters: "Reset Filters",
     panel: {
       title: "Filters",
       open: "Open filters",

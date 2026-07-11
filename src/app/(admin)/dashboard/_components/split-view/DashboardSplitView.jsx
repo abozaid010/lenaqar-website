@@ -10,10 +10,14 @@ import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { buildDashboardFilterKey } from "@/utils/dashboard-filter-key";
-import { buildDashboardLeadHref } from "@/utils/dashboard-navigation";
+import {
+  buildDashboardLeadHref,
+  buildDashboardListHref,
+} from "@/utils/dashboard-navigation";
 import { sortDashboardLeadsByScore } from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
+import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -28,12 +32,20 @@ function flattenUsers(data) {
   return Array.from(map.values());
 }
 
+function readParam(params, key) {
+  if (!params) return null;
+  if (typeof params.get === "function") return params.get(key);
+  const value = params[key];
+  return value == null || value === "" ? null : String(value);
+}
+
 function DashboardSplitViewComponent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const isLg = useLgViewport();
   const { setAverageScore, setLoading } = useAverageScore();
+  const { effectiveFilterParams } = useDashboardFilterPersistence();
   const {
     setVisibleLeadsFromList,
     toggleLeadSelection,
@@ -43,8 +55,8 @@ function DashboardSplitViewComponent() {
   } = useDashboardLeadsBulk();
 
   const filterKey = useMemo(
-    () => buildDashboardFilterKey(searchParams),
-    [searchParams],
+    () => buildDashboardFilterKey(effectiveFilterParams),
+    [effectiveFilterParams],
   );
 
   const selectedUserId = searchParams.get("userId") || undefined;
@@ -74,8 +86,8 @@ function DashboardSplitViewComponent() {
   const totalMatchingLeads =
     !pageCount || hasNextPage ? null : loadedCount;
 
-  const searchQueryTrimmed = (searchParams.get("query") || "").trim();
-  const sortScore = searchParams.get("sort_score");
+  const searchQueryTrimmed = (readParam(effectiveFilterParams, "query") || "").trim();
+  const sortScore = readParam(effectiveFilterParams, "sort_score");
   const filteredUsers = useMemo(() => {
     const searchFiltered = searchQueryTrimmed
       ? allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed))
@@ -158,35 +170,51 @@ function DashboardSplitViewComponent() {
     el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedUserId, selectedLead]);
 
+  const showMobileDetail = !isLg && Boolean(selectedUserId);
+
+  const onMobileBack = useCallback(() => {
+    router.push(buildDashboardListHref(searchParams));
+  }, [router, searchParams]);
+
   return (
     <div className="flex flex-col min-h-0 flex-1 gap-1">
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
-        <LeadsListPane
-          users={filteredUsers}
-          totalLoadedLeads={loadedCount}
-          totalMatchingLeads={totalMatchingLeads}
-          pageCount={pageCount}
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          isLoading={isLoading}
-          isError={isError}
-          error={error}
-          refetch={refetch}
-          selectedUserId={isLg ? selectedUserId : undefined}
-          onSelectLead={onSelectLead}
-          data={data}
-          isLeadSelected={isLeadSelected}
-          onToggleLeadSelection={toggleLeadSelection}
-          onToggleSelectAllVisible={toggleSelectAllVisible}
-          hasBulkSelection={hasSelection}
-        />
-        <div className="hidden lg:flex flex-col min-h-0 min-h-[320px] flex-1">
+        {showMobileDetail ? null : (
+          <LeadsListPane
+            users={filteredUsers}
+            totalLoadedLeads={loadedCount}
+            totalMatchingLeads={totalMatchingLeads}
+            pageCount={pageCount}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            isLoading={isLoading}
+            isError={isError}
+            error={error}
+            refetch={refetch}
+            selectedUserId={isLg ? selectedUserId : undefined}
+            onSelectLead={onSelectLead}
+            data={data}
+            isLeadSelected={isLeadSelected}
+            onToggleLeadSelection={toggleLeadSelection}
+            onToggleSelectAllVisible={toggleSelectAllVisible}
+            hasBulkSelection={hasSelection}
+          />
+        )}
+        <div
+          className={
+            showMobileDetail
+              ? "flex flex-col min-h-0 flex-1"
+              : "hidden lg:flex flex-col min-h-0 min-h-[320px] flex-1"
+          }
+        >
           <LeadDetailPane
             userId={selectedUserId}
             leadSummary={selectedLead}
             onInvalidateList={onInvalidateList}
             onLeadRemoved={onLeadRemoved}
+            showBackButton={showMobileDetail}
+            onBack={showMobileDetail ? onMobileBack : undefined}
           />
         </div>
       </div>

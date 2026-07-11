@@ -3,6 +3,12 @@
 import EmptyStateVideo from "@/components/ui/empty-state-video";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
+import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
+import {
+  dashboardFiltersToQueryString,
+  extractPersistableDashboardFilters,
+  hasPersistableDashboardFilters,
+} from "@/lib/dashboard-filters-storage";
 import { ArrowRight, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -16,6 +22,13 @@ function useClientMounted() {
   const [isMounted, setIsMounted] = useState(false);
   useEffect(() => setIsMounted(true), []);
   return isMounted;
+}
+
+function readFilterParam(params, key) {
+  if (!params) return "";
+  if (typeof params.get === "function") return params.get(key) || "";
+  const value = params[key];
+  return value == null || value === "" ? "" : String(value);
 }
 
 /**
@@ -75,9 +88,14 @@ export default function LeadsListPane({
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState(() => searchParams.get("query") || "");
+  const { effectiveFilterParams } = useDashboardFilterPersistence();
+  const initialQuery =
+    searchParams.get("query") ||
+    readFilterParam(effectiveFilterParams, "query") ||
+    "";
+  const [searchInput, setSearchInput] = useState(() => initialQuery);
   const debounceTimer = useRef(null);
-  const lastPushedQueryRef = useRef(searchParams.get("query") || "");
+  const lastPushedQueryRef = useRef(initialQuery);
   const observerRef = useRef(null);
   const visibleRowsObserverRef = useRef(null);
   const visibleRowIdsRef = useRef(new Set());
@@ -98,18 +116,35 @@ export default function LeadsListPane({
   const applySearch = useCallback(
     (raw) => {
       const next = (raw ?? "").trim();
-      const current = searchParams.get("query") || "";
-      if (current === next && lastPushedQueryRef.current === next) return;
+      const currentFromUrl = searchParams.get("query") || "";
+      const currentEffective = readFilterParam(effectiveFilterParams, "query").trim();
+      const current = currentFromUrl || currentEffective;
+      if (next === current && lastPushedQueryRef.current === next) return;
 
       lastPushedQueryRef.current = next;
-      const usp = new URLSearchParams(searchParams.toString());
+
+      // Prefer live URL params; while restored filters hydrate, seed from effective filters
+      // so we don't clobber action/author/dates with a query-only URL.
+      const usp = hasPersistableDashboardFilters(searchParams)
+        ? new URLSearchParams(searchParams.toString())
+        : new URLSearchParams(
+            dashboardFiltersToQueryString(
+              extractPersistableDashboardFilters(effectiveFilterParams),
+            ),
+          );
+
       if (next) usp.set("query", next);
       else usp.delete("query");
-      router.replace(`${window.location.pathname}?${usp.toString()}`, {
+
+      const userId = searchParams.get("userId");
+      if (userId) usp.set("userId", userId);
+
+      const qs = usp.toString();
+      router.replace(qs ? `${window.location.pathname}?${qs}` : window.location.pathname, {
         scroll: false,
       });
     },
-    [router, searchParams]
+    [router, searchParams, effectiveFilterParams]
   );
 
   const handleSearchSubmit = useCallback(() => {
@@ -125,14 +160,17 @@ export default function LeadsListPane({
 
   const hasSearchText = searchInput.trim().length > 0;
 
-  // Sync input only when the URL query changes externally (e.g. back/forward, filters).
+  // Sync input when the URL query changes externally (e.g. back/forward, filters),
+  // or when restored filters are applied before searchParams catch up.
   useEffect(() => {
     const urlQuery = searchParams.get("query") || "";
-    if (urlQuery !== lastPushedQueryRef.current) {
-      lastPushedQueryRef.current = urlQuery;
-      setSearchInput(urlQuery);
+    const restoredQuery = readFilterParam(effectiveFilterParams, "query");
+    const nextQuery = urlQuery || restoredQuery;
+    if (nextQuery !== lastPushedQueryRef.current) {
+      lastPushedQueryRef.current = nextQuery;
+      setSearchInput(nextQuery);
     }
-  }, [searchParams]);
+  }, [searchParams, effectiveFilterParams]);
 
   useEffect(() => {
     if (debounceTimer.current) clearTimeout(debounceTimer.current);
@@ -144,7 +182,11 @@ export default function LeadsListPane({
     };
   }, [searchInput, applySearch]);
 
-  const appliedSearchQuery = (searchParams.get("query") || "").trim();
+  const appliedSearchQuery = (
+    searchParams.get("query") ||
+    readFilterParam(effectiveFilterParams, "query") ||
+    ""
+  ).trim();
   const clientFilteredEmpty =
     Boolean(appliedSearchQuery) && users.length === 0 && totalLoadedLeads > 0;
   /** When false, list area still shows skeleton — no sentinel in DOM yet. */
