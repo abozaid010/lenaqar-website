@@ -129,88 +129,121 @@ export async function addManyLeadsAction(payloads = []) {
 
   const failed = [];
   let successCount = 0;
+  let lastValidationMessage = null;
 
-  try {
-    const response = await axiosInstance.post("/api/leads/bulk", {
-      leads: normalizedPayloads,
-    });
+  // The bulk endpoint validates the whole request: one invalid lead makes the
+  // backend reject the entire batch with 422. To avoid a few bad rows blocking
+  // every valid lead, isolate the offending rows from the 422 response, drop
+  // them, and retry with the rest. Track each lead's original index so failures
+  // still map back to the correct spreadsheet row.
+  let remaining = normalizedPayloads.map((lead, originalIndex) => ({
+    lead,
+    originalIndex,
+  }));
+  const maxAttempts = normalizedPayloads.length + 1;
 
-    const body = response.data?.data || response.data || {};
-    const results = Array.isArray(body.results) ? body.results : [];
-    const succeededCount = Number(body.succeeded ?? 0);
-    const failedCount = Number(body.failed ?? 0);
-
-    successCount = succeededCount;
-
-    const userIdToIndex = new Map(
-      normalizedPayloads.map((lead, index) => [String(lead.user_id), index]),
-    );
-
-    results.forEach((item) => {
-      if (item?.success) return;
-      const rowIndex = userIdToIndex.get(String(item?.user_id));
-      failed.push({
-        index: Number.isInteger(rowIndex) ? rowIndex : -1,
-        user_id: item?.user_id || null,
-        reason: item?.error || "Failed to add lead",
+  for (let attempt = 0; attempt < maxAttempts && remaining.length > 0; attempt += 1) {
+    try {
+      const response = await axiosInstance.post("/api/leads/bulk", {
+        leads: remaining.map((entry) => entry.lead),
       });
-    });
 
-    if (results.length === 0 && failedCount > 0) {
-      // Fallback when API does not return per-row results.
-      for (let i = 0; i < failedCount; i += 1) {
+      const body = response.data?.data || response.data || {};
+      const results = Array.isArray(body.results) ? body.results : [];
+      successCount += Number(body.succeeded ?? 0);
+
+      const userIdToEntry = new Map(
+        remaining.map((entry) => [String(entry.lead.user_id), entry]),
+      );
+
+      results.forEach((item) => {
+        if (item?.success) return;
+        const entry = userIdToEntry.get(String(item?.user_id));
         failed.push({
-          index: -1,
-          user_id: null,
-          reason: "Failed to add lead",
+          index: entry ? entry.originalIndex : -1,
+          user_id: item?.user_id || entry?.lead?.user_id || null,
+          reason: item?.error || "Failed to add lead",
+        });
+      });
+
+      if (results.length === 0 && Number(body.failed ?? 0) > 0) {
+        // Fallback when the API doesn't return per-row results.
+        remaining.forEach((entry) => {
+          failed.push({
+            index: entry.originalIndex,
+            user_id: entry.lead.user_id,
+            reason: "Failed to add lead",
+          });
         });
       }
-    }
 
-    if (successCount > 0) {
-      revalidatePath("/dashboard");
-      revalidatePath("/campaign-chat");
-    }
+      remaining = []; // request accepted (no 422) — nothing left to retry
+    } catch (error) {
+      const parsedValidation = parseBulkImportValidationErrors(error);
+      lastValidationMessage = parsedValidation.message;
+      console.error(
+        "Server Action Error (addManyLeadsAction):",
+        error.response?.data || error.message,
+        parsedValidation,
+      );
 
-    return {
-      success: successCount > 0,
-      message:
-        failed.length > 0
-          ? "Some leads failed to import"
-          : "Leads imported successfully",
-      data: {
-        total: Number(body.total ?? normalizedPayloads.length),
-        successCount,
-        failedCount: Number(body.failed ?? failed.length),
-        failed,
-        results,
-      },
-    };
-  } catch (error) {
-    const parsedValidation = parseBulkImportValidationErrors(error);
-    console.error(
-      "Server Action Error (addManyLeadsAction):",
-      error.response?.data || error.message,
-      parsedValidation,
-    );
-    const failedFromValidation =
-      parsedValidation.failed.length > 0
-        ? parsedValidation.failed
-        : normalizedPayloads.map((lead, index) => ({
-            index,
-            user_id: lead.user_id,
+      // Indices in the 422 are relative to the array we just sent (`remaining`).
+      const badLocalIndices = new Set(
+        parsedValidation.failed
+          .map((item) => item.index)
+          .filter((i) => Number.isInteger(i) && i >= 0 && i < remaining.length),
+      );
+
+      if (badLocalIndices.size === 0) {
+        // Couldn't isolate offending rows — fail everything still pending.
+        remaining.forEach((entry) => {
+          failed.push({
+            index: entry.originalIndex,
+            user_id: entry.lead.user_id,
             reason: parsedValidation.message,
-          }));
+          });
+        });
+        remaining = [];
+        break;
+      }
 
-    return {
-      success: false,
-      message: parsedValidation.message,
-      data: {
-        total: normalizedPayloads.length,
-        successCount: 0,
-        failedCount: failedFromValidation.length,
-        failed: failedFromValidation,
-      },
-    };
+      const nextRemaining = [];
+      remaining.forEach((entry, localIndex) => {
+        if (!badLocalIndices.has(localIndex)) {
+          nextRemaining.push(entry);
+          return;
+        }
+        const detail = parsedValidation.failed.find(
+          (item) => item.index === localIndex,
+        );
+        failed.push({
+          index: entry.originalIndex,
+          user_id: entry.lead.user_id,
+          reason: detail?.reason || parsedValidation.message,
+        });
+      });
+      remaining = nextRemaining; // retry with the offending rows removed
+    }
   }
+
+  if (successCount > 0) {
+    revalidatePath("/dashboard");
+    revalidatePath("/campaign-chat");
+  }
+
+  return {
+    success: successCount > 0,
+    message:
+      successCount > 0
+        ? failed.length > 0
+          ? "Some leads failed to import"
+          : "Leads imported successfully"
+        : lastValidationMessage || "Failed to import leads",
+    data: {
+      total: normalizedPayloads.length,
+      successCount,
+      failedCount: failed.length,
+      failed,
+    },
+  };
 }
