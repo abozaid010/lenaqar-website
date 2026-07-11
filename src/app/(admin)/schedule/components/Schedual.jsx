@@ -658,6 +658,7 @@ const Schedule = ({ data, dataSales }) => {
                 "Update action"
               }
               useUpdateApi
+              fieldPriority="schedule"
               onSuccess={() => {
                 closeEditAppointment();
                 router.refresh();

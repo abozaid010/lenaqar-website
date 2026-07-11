@@ -1073,6 +1073,22 @@ export default function LeadDetailPane({
 
           {activeTab === "actions" && (
             <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4 space-y-3 bg-gray-50/40">
+              {/* Actions log — top priority for rapid entry */}
+              <section className="rounded-lg border border-gray-200 bg-white p-3">
+                <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                  {translate("leadDetail.actionsTab.sections.actionsLog")}
+                </h5>
+                <button
+                  type="button"
+                  onClick={handleOpenActions}
+                  disabled={loadingActions}
+                  className={`${DASHBOARD_BUTTON} h-9 min-h-[36px] text-xs w-full sm:w-auto`}
+                >
+                  <ListPlus className="w-3.5 h-3.5" />
+                  {common.actions} · {lastActionLabel}
+                </button>
+              </section>
+
               {/* Lead summary — read-only AI/lead summary text for context */}
               {renderLeadSummaryCard()}
 
@@ -1122,22 +1138,6 @@ export default function LeadDetailPane({
                     </button>
                   </form>
                 </div>
-              </section>
-
-              {/* Actions log */}
-              <section className="rounded-lg border border-gray-200 bg-white p-3">
-                <h5 className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  {translate("leadDetail.actionsTab.sections.actionsLog")}
-                </h5>
-                <button
-                  type="button"
-                  onClick={handleOpenActions}
-                  disabled={loadingActions}
-                  className={`${DASHBOARD_BUTTON} h-9 min-h-[36px] text-xs w-full sm:w-auto`}
-                >
-                  <ListPlus className="w-3.5 h-3.5" />
-                  {common.actions} · {lastActionLabel}
-                </button>
               </section>
 
               {/* Danger zone */}

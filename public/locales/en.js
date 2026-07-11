@@ -1165,6 +1165,17 @@ export default {
     successMessage: "Action added successfully",
     errorMessage: "Failed to add action",
     aiAction: "AI Actions",
+    title: "Actions",
+    addNewAction: "Add New Action",
+    previousActions: "Recent Actions",
+    viewOlderActions: "View Older Actions",
+    showLessActions: "Show Less",
+    emptyHistory: "No previous actions yet.",
+    expandNotes: "Show more",
+    collapseNotes: "Show less",
+    scheduleOptional: "Date & Time (optional)",
+    partnerLabel: "Partner",
+    aiAuthor: "AI",
   },
 
   propertyDetails: {
