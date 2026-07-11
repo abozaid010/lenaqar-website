@@ -3,7 +3,7 @@
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
-import { isOpenwaSessionTerminalFailure } from "@/lib/openwa-session-status";
+import { useOpenwaReconnect } from "@/hooks/useOpenwaReconnect";
 import { CheckCircle2, RefreshCw } from "lucide-react";
 import { useEffect, useMemo, useRef } from "react";
 
@@ -14,18 +14,14 @@ function formatDisplayPhone(phone) {
   return raw.startsWith("+") ? raw : `+${raw}`;
 }
 
-function SessionStatusCard({
-  session,
-  translate,
-  isRefreshing,
-  hasStatusData,
-  onReconnect,
-}) {
+/**
+ * One linked number's connection card. Owns its own reconnect lifecycle via
+ * `useOpenwaReconnect`: auto-starts once per dialog-open while disconnected,
+ * polls status/QR every 2s, and stops when the dialog closes or unmounts.
+ */
+function SessionStatusCard({ session, translate, isDialogOpen, onConnected }) {
   const phone = formatDisplayPhone(session.whatsapp_number);
-  const connectedLabel = translate(
-    "openwaConnection.connected",
-    "Connected"
-  );
+  const connectedLabel = translate("openwaConnection.connected", "Connected");
   const scanLabel = translate(
     "openwaConnection.scanQr",
     "Scan this QR code with WhatsApp on your phone"
@@ -34,36 +30,64 @@ function SessionStatusCard({
     "openwaConnection.sessionError",
     "Could not load connection status for this number"
   );
-  const loadingQrLabel = translate(
-    "openwaConnection.loadingQr",
-    "Loading QR…"
+  const startingLabel = translate(
+    "openwaConnection.startingReconnect",
+    "Starting reconnect…"
   );
   const waitingQrLabel = translate(
     "openwaConnection.waitingForQr",
     "Waiting for QR code…"
   );
-  const reconnectLabel = translate(
-    "openwaConnection.reconnect",
-    "Reconnect"
-  );
+  const reconnectLabel = translate("openwaConnection.reconnect", "Reconnect");
   const reconnectHint = translate(
     "openwaConnection.reconnectHint",
     "Connection failed. Try again to request a new QR code."
   );
+  const timeoutHint = translate(
+    "openwaConnection.timeoutHint",
+    "This is taking longer than expected. Try again."
+  );
 
-  const isTerminalFailure = isOpenwaSessionTerminalFailure(session);
-  const isInitializing =
-    !session.connected &&
-    !session.qrImage &&
-    !session.error &&
-    !isTerminalFailure &&
-    isRefreshing &&
-    !hasStatusData;
-  const qrPendingFromBackend = Boolean(session.qrPendingFromBackend);
-  const qrPendingHint = translate(
-    "openwaConnection.qrPendingFromBackend",
-    "OpenWA reports {status} but has not returned a QR image yet. We will keep checking automatically."
-  ).replace("{status}", session.status || "pending");
+  const {
+    state: reconnectState,
+    qrImage: reconnectQr,
+    startReconnect,
+    stop: stopReconnect,
+  } = useOpenwaReconnect();
+
+  const whatsappNumber = session.whatsapp_number;
+  const autoStartedRef = useRef(false);
+
+  // Auto-start once per dialog-open while this number is disconnected.
+  useEffect(() => {
+    if (!isDialogOpen) {
+      autoStartedRef.current = false;
+      stopReconnect();
+      return;
+    }
+    if (session.connected || !whatsappNumber || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    void startReconnect(whatsappNumber);
+  }, [isDialogOpen, session.connected, whatsappNumber, startReconnect, stopReconnect]);
+
+  const onConnectedRef = useRef(onConnected);
+  onConnectedRef.current = onConnected;
+  useEffect(() => {
+    if (reconnectState === "connected") onConnectedRef.current?.();
+  }, [reconnectState]);
+
+  const isReconnectActive = reconnectState !== "idle";
+  const connected = isReconnectActive ? reconnectState === "connected" : session.connected;
+  const qrImage = isReconnectActive ? reconnectQr : session.qrImage;
+  const isFailed = isReconnectActive && reconnectState === "failed";
+  const isTimedOut = isReconnectActive && reconnectState === "timeout";
+  const isStarting = isReconnectActive && reconnectState === "loading";
+  const isWaitingForQr =
+    isReconnectActive && (reconnectState === "reconnecting" || reconnectState === "waiting_for_qr");
+
+  const handleManualReconnect = () => {
+    if (whatsappNumber) void startReconnect(whatsappNumber);
+  };
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50/60 p-4 space-y-3">
@@ -72,13 +96,8 @@ function SessionStatusCard({
           <p className="text-sm font-semibold text-gray-900" dir="ltr">
             {phone || translate("openwaConnection.unknownNumber", "WhatsApp number")}
           </p>
-          {session.status ? (
-            <p className="text-xs text-gray-500 mt-0.5 capitalize">
-              {session.status.replace(/_/g, " ")}
-            </p>
-          ) : null}
         </div>
-        {session.connected ? (
+        {connected ? (
           <span className="inline-flex items-center gap-1.5 shrink-0 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-full px-2.5 py-1">
             <CheckCircle2 className="w-4 h-4" aria-hidden />
             {connectedLabel}
@@ -86,19 +105,19 @@ function SessionStatusCard({
         ) : null}
       </div>
 
-      {session.error && !isTerminalFailure ? (
-        <p className="text-sm text-red-600">{session.error || errorLabel}</p>
+      {!connected && !whatsappNumber ? (
+        <p className="text-sm text-red-600">{errorLabel}</p>
       ) : null}
 
-      {isTerminalFailure ? (
+      {isFailed || isTimedOut ? (
         <div className="space-y-2">
           <p className="text-sm text-red-600">
-            {session.error || errorLabel}
+            {isTimedOut ? timeoutHint : errorLabel}
           </p>
-          <p className="text-xs text-gray-600">{reconnectHint}</p>
+          {isFailed ? <p className="text-xs text-gray-600">{reconnectHint}</p> : null}
           <button
             type="button"
-            onClick={onReconnect}
+            onClick={handleManualReconnect}
             className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md border border-primary/30 text-primary text-sm font-medium hover:bg-primary/5 transition-colors"
           >
             <RefreshCw className="w-4 h-4" aria-hidden />
@@ -107,10 +126,10 @@ function SessionStatusCard({
         </div>
       ) : null}
 
-      {!session.connected && session.qrImage ? (
+      {!connected && qrImage ? (
         <div className="flex flex-col items-center gap-2">
           <img
-            src={session.qrImage}
+            src={qrImage}
             alt={scanLabel}
             width={240}
             height={240}
@@ -120,23 +139,11 @@ function SessionStatusCard({
         </div>
       ) : null}
 
-      {!session.connected &&
-      !session.qrImage &&
-      !session.error &&
-      !isTerminalFailure ? (
-        isInitializing ? (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <RefreshCw className="w-4 h-4 animate-spin shrink-0" aria-hidden />
-            <span>{loadingQrLabel}</span>
-          </div>
-        ) : (
-          <div className="space-y-1">
-            <p className="text-sm text-gray-600">{waitingQrLabel}</p>
-            {qrPendingFromBackend ? (
-              <p className="text-xs text-amber-700">{qrPendingHint}</p>
-            ) : null}
-          </div>
-        )
+      {!connected && !qrImage && !isFailed && !isTimedOut && whatsappNumber ? (
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <RefreshCw className="w-4 h-4 animate-spin shrink-0" aria-hidden />
+          <span>{isStarting ? startingLabel : isWaitingForQr ? waitingQrLabel : startingLabel}</span>
+        </div>
       ) : null}
     </div>
   );
@@ -263,9 +270,8 @@ export default function OpenwaConnectionDialog({
                 key={session.session_id}
                 session={session}
                 translate={translate}
-                isRefreshing={isFetching}
-                hasStatusData={hasStatusData}
-                onReconnect={() => refetch()}
+                isDialogOpen={isOpen}
+                onConnected={() => refetch()}
               />
             ))}
           </div>

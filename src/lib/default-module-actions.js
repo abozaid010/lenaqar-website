@@ -5,7 +5,9 @@
  * Extras:
  *   developers   → update_developer_contacts
  *   units        → import
- *   conversation → import, whatsapp_api, whatsapp_automation
+ *   conversation → import, whatsapp, whatsapp_automation
+ *
+ * Note: API accepts `whatsapp` (not `whatsapp_api`) on conversation.
  */
 
 export const MODULE_BASE_ACTIONS = [
@@ -44,7 +46,7 @@ export function getDefaultActionsForModule(moduleKey) {
     actions.push("import");
   }
   if (key === "conversation") {
-    actions.push("import", "whatsapp_api", "whatsapp_automation");
+    actions.push("import", "whatsapp", "whatsapp_automation");
   }
 
   return actions;

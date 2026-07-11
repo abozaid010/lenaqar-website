@@ -2,7 +2,10 @@ function normalizeActions(actions) {
   return Array.isArray(actions) ? actions.filter(Boolean) : [];
 }
 
-export const WHATSAPP_ACTION_API = "whatsapp_api";
+/** Canonical API action for WhatsApp API templates. */
+export const WHATSAPP_ACTION_API = "whatsapp";
+/** Legacy alias — may appear on older matrices; never send to create/update APIs. */
+export const WHATSAPP_ACTION_API_LEGACY = "whatsapp_api";
 export const WHATSAPP_ACTION_AUTOMATION = "whatsapp_automation";
 
 /**
@@ -70,7 +73,7 @@ export function moduleActionListIncludes(actions, actionName) {
 
 /**
  * Resolve bulk WhatsApp UI flags from `module_actions.conversation` only.
- * Checks for `whatsapp_api` or `whatsapp_automation` actions.
+ * Checks for `whatsapp` / legacy `whatsapp_api`, or `whatsapp_automation`.
  */
 export function resolveWhatsappBulkAccess(moduleActions) {
   const empty = {
@@ -99,7 +102,10 @@ export function resolveWhatsappBulkAccess(moduleActions) {
   let canUseApiTemplate = false;
   let canUseAutomation = false;
 
-  if (moduleActionListIncludes(actions, WHATSAPP_ACTION_API)) {
+  if (
+    moduleActionListIncludes(actions, WHATSAPP_ACTION_API) ||
+    moduleActionListIncludes(actions, WHATSAPP_ACTION_API_LEGACY)
+  ) {
     canUseApiTemplate = true;
   }
   if (moduleActionListIncludes(actions, WHATSAPP_ACTION_AUTOMATION)) {

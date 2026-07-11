@@ -2668,3 +2668,49 @@ export async function fetchOpenwaLinkedSessionsStatus({ signal } = {}) {
 
   return data;
 }
+
+/**
+ * POST /api/openwa/reconnect — start (or restart) the caller's own OpenWA
+ * session for `whatsapp_number`. Session id is resolved server-side.
+ * @param {string} whatsappNumber
+ * @param {{ signal?: AbortSignal }} [options]
+ */
+export async function startOpenwaReconnect(whatsappNumber, { signal } = {}) {
+  const response = await fetch("/api/openwa/reconnect", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({ whatsapp_number: whatsappNumber }),
+    signal,
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to start WhatsApp reconnection");
+  }
+
+  return data;
+}
+
+/**
+ * GET /api/openwa/status?whatsapp_number=... — poll the caller's own OpenWA
+ * session status (and QR code, once ready) while reconnecting.
+ * @param {string} whatsappNumber
+ * @param {{ signal?: AbortSignal }} [options]
+ */
+export async function fetchOpenwaReconnectStatus(whatsappNumber, { signal } = {}) {
+  const params = new URLSearchParams({ whatsapp_number: whatsappNumber });
+  const response = await fetch(`/api/openwa/status?${params.toString()}`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    signal,
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.error || "Failed to check WhatsApp connection status");
+  }
+
+  return data;
+}
