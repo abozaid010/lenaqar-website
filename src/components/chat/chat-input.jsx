@@ -7,6 +7,7 @@ import { ensureUrlInMessage } from "@/lib/whatsapp-message-compose";
 import { Loader2, Send } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 const MAX_LINES = 3;
 
@@ -86,6 +87,19 @@ export default function ChatInput({
 
   const handleSend = async () => {
     if (!canSend || pending) return;
+
+    // With multiple linked accounts the user must pick a sender. Block the send
+    // (rather than falling through to the wa.me deep-link) until one is chosen —
+    // mirrors ChatPanel and keeps sending on the backend API path.
+    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
+      const err = translate(
+        "whatsappSend.platformRequired",
+        "Please choose which WhatsApp account to send from.",
+      );
+      setPlatformError(err);
+      toast.error(err);
+      return;
+    }
 
     const baseText = message.trim();
     const text = outgoingUrl

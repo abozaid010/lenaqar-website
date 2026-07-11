@@ -8,6 +8,7 @@ import { createHash } from "node:crypto";
 import { cookies } from "next/headers";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { API_BASE_URL } from "@/lib/apiConfig";
+import { decodeJwtClientId } from "@/lib/jwtCookieUtils";
 
 /** Dedupe concurrent profile fetches (same token + client) across parallel RSC work. */
 const inflightProfileFetches = new Map();
@@ -24,28 +25,6 @@ function inflightKey(token, clientId) {
     .digest("hex");
 }
 
-function decodeBase64UrlToString(base64Url) {
-  const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=");
-
-  if (typeof atob === "function") return atob(padded);
-  // eslint-disable-next-line no-undef
-  return Buffer.from(padded, "base64").toString("utf8");
-}
-
-function decodeJwtPayload(token) {
-  if (!token || typeof token !== "string") return null;
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-  try {
-    const json = decodeBase64UrlToString(parts[1]);
-    const payload = JSON.parse(json);
-    return typeof payload === "object" && payload !== null ? payload : null;
-  } catch {
-    return null;
-  }
-}
-
 const PROFILE_PATH = "/client/v1/profile";
 
 /**
@@ -56,11 +35,7 @@ export async function fetchClientProfileFromCookies() {
   const token = cookieStore.get(COOKIE_KEYS.ACCESS_TOKEN)?.value;
   if (!token) return null;
 
-  const payload = decodeJwtPayload(token);
-  const clientId =
-    payload?.client_id != null && typeof payload.client_id === "string"
-      ? payload.client_id
-      : null;
+  const clientId = decodeJwtClientId(token);
 
   const key = inflightKey(token, clientId);
 
