@@ -706,7 +706,7 @@ export default {
       invalidEmail: "أدخل بريداً إلكترونياً صالحاً",
       ownEmailOnly: "يمكنك التصفية ببريدك فقط",
       useEmail: "استخدم {email}",
-      all: "كل المؤلفين",
+      all: "الكل",
     },
     resetFilters: "إعادة تعيين الفلاتر",
     panel: {

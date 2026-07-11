@@ -481,6 +481,10 @@ export default function DashbordFilter({
         if (v.length > 0) {
           params.append(k, v.join(","));
         }
+      } else if (k === "author") {
+        // "All" → omit author entirely so the API returns all leads.
+        const author = typeof v === "string" ? v.trim() : "";
+        if (author) params.append("author", author);
       } else if (v) {
         params.append(k, v);
       }
@@ -532,9 +536,10 @@ export default function DashbordFilter({
 
   const handleAuthorChange = (event) => {
     const raw = typeof event?.target?.value === "string" ? event.target.value : "";
+    // Empty = "All" → do not send author to the API.
     const nextAuthor = raw.trim();
 
-    if (!isValidEmail(nextAuthor)) {
+    if (nextAuthor && !isValidEmail(nextAuthor)) {
       setAuthorError(
         translate(
           "dashboardFilter.author.invalidEmail",
@@ -950,6 +955,7 @@ export default function DashbordFilter({
               searchFields={["name", "email"]}
               placeholder={translate("dashboardFilter.author.placeholder", "Author")}
               showAllOption
+              allOptionLabel={translate("dashboardFilter.author.all", "All")}
               allOptionValue=""
               allowCreate={isAdminUser}
               isValidCreateValue={(query) => isValidEmail(query)}

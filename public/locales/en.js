@@ -834,7 +834,7 @@ export default {
       invalidEmail: "Enter a valid email address",
       ownEmailOnly: "You can only filter by your own email",
       useEmail: "Use {email}",
-      all: "All authors",
+      all: "All",
     },
     resetFilters: "Reset Filters",
     panel: {
