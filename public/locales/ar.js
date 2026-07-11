@@ -698,6 +698,13 @@ export default {
       title: "الفلاتر",
       open: "فتح الفلاتر",
       close: "إغلاق الفلاتر",
+      sections: {
+        filters: "الفلاتر",
+        sorting: "الترتيب",
+        tools: "الأدوات",
+        metrics: "المقاييس",
+        help: "المساعدة",
+      },
     },
     whatsappButton: " عملاء واتساب",
     premuim: "ميزة مدفوعة",
@@ -773,6 +780,9 @@ export default {
     },
     bulkWhatsapp: {
       sendButton: "إرسال واتساب",
+      sendAllLoaded: "واتساب لكل المحمّل",
+      sendAllLoadedHint: "إرسال واتساب لجميع العملاء المحمّلين",
+      clearSelection: "مسح التحديد",
       dialogTitle: "إرسال واتساب",
       tabApiTemplate: "قالب API",
       tabAutomation: "أتمتة",

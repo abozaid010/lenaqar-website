@@ -51,10 +51,24 @@ const FILTER_MENU_WIDTH = "w-[12.6rem]";
 const FILTER_ACTION_MIN_WIDTH = "min-w-[6rem]";
 const FILTER_CAMPAIGN_MIN_WIDTH = "min-w-[6.25rem]";
 
+function PanelSection({ title, children }) {
+  return (
+    <section className="flex flex-col gap-2">
+      {title ? (
+        <h3 className="text-[11px] font-semibold uppercase tracking-wide text-gray-500 px-0.5">
+          {title}
+        </h3>
+      ) : null}
+      <div className="flex flex-col gap-2">{children}</div>
+    </section>
+  );
+}
+
 export default function DashbordFilter({
   appliedFilters,
   compact = false,
   panel = false,
+  hideAddLead = false,
   onResetFilters,
 }) {
   const { locale, translate } = useI18n();
@@ -173,15 +187,18 @@ export default function DashbordFilter({
 
   const { canShowBulkButton: canSendBulkWhatsapp } = useWhatsappBulkAccess();
 
-  const { resolvedRecipients } = useDashboardLeadsBulk();
+  const { allVisibleRecipients, resolvedRecipients } = useDashboardLeadsBulk();
+  /** Panel WhatsApp always targets all loaded leads; elsewhere prefer selection. */
+  const whatsappRecipients = panel ? allVisibleRecipients : resolvedRecipients;
 
   const showSendWhatsappButton = canSendBulkWhatsapp;
   /** Export uses cookies (client-only). WhatsApp uses server-hydrated module_actions. */
   const showExportButton = isMounted && isOwner;
   const showWhatsappToolbarButton = isMounted && showSendWhatsappButton;
+  const showAddLeadButton = !hideAddLead;
 
   const handleOpenWhatsappBulk = () => {
-    if (resolvedRecipients.length === 0) {
+    if (whatsappRecipients.length === 0) {
       toast.error(
         translate(
           "dashboardFilter.bulkWhatsapp.noRecipients",
@@ -452,18 +469,8 @@ export default function DashbordFilter({
   const campaignShellClass = panel ? "w-full" : `${FILTER_CAMPAIGN_MIN_WIDTH} shrink-0`;
   const dateShellClass = panel ? "w-full" : `${FILTER_MENU_WIDTH} shrink-0`;
 
-  return (
-    <div
-      className={`flex flex-col gap-2 no-print ${compact && !panel ? "mb-1" : panel ? "" : "mb-2"}`}
-    >
-      {/* Row 1: filters — vertical stack in side panel */}
-      <div
-        className={`relative flex ${
-          panel ? "flex-col items-stretch" : "flex-wrap sm:flex-nowrap items-center"
-        } justify-start gap-2 min-w-0 ${
-          isFilterMenuOpen ? "z-50" : "z-30"
-        }`}
-      >
+  const filterControls = (
+    <>
           <div
             className={`relative ${isActionDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
             ref={actionDropdownRef}
@@ -521,7 +528,6 @@ export default function DashbordFilter({
             )}
           </div>
 
-          {/* Owner Type (lead identity) Filter Dropdown */}
           <div
             className={`relative ${isOwnerTypeDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
             ref={ownerTypeDropdownRef}
@@ -576,7 +582,6 @@ export default function DashbordFilter({
             )}
           </div>
 
-          {/* Campaign Filter Dropdown — anchor panel with top-full so it stays under the trigger */}
           <div
             className={`relative ${isCampaignDropdownOpen ? "z-[90]" : "z-[60]"} ${campaignShellClass}`}
             ref={campaignDropdownRef}
@@ -752,7 +757,10 @@ export default function DashbordFilter({
           >
             {translate("dashboardFilter.resetFilters", "Reset Filters")}
           </button>
+    </>
+  );
 
+  const sortControl = (
           <div className={`group relative shrink-0 ${triggerWidthClass}`}>
             <button
               type="button"
@@ -791,16 +799,11 @@ export default function DashbordFilter({
               {translate("dashboardFilter.sortByScore.hint")}
             </span>
           </div>
-      </div>
+  );
 
-      {/* Row 2: actions */}
-      <div
-        className={`relative z-10 flex gap-2 ${
-          panel
-            ? "flex-col items-stretch"
-            : "items-center justify-start flex-wrap"
-        }`}
-      >
+  const toolControls = (
+    <>
+        {showAddLeadButton ? (
         <button
           onClick={() => setIsAddLeadOpen(true)}
           className={`flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-md transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
@@ -810,6 +813,7 @@ export default function DashbordFilter({
           <UserPlus size={compact ? 16 : 18} />
           <span>{translate("dashboardFilter.ADD")}</span>
         </button>
+        ) : null}
         <button
           onClick={() => setIsImportLeadsOpen(true)}
           className={`flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
@@ -831,7 +835,14 @@ export default function DashbordFilter({
             className={`flex items-center justify-center gap-2 px-3 sm:px-4 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0 ${
               panel ? "w-full" : ""
             } ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
-            title={translate("dashboardFilter.bulkWhatsapp.sendButton")}
+            title={
+              panel
+                ? translate(
+                    "dashboardFilter.bulkWhatsapp.sendAllLoadedHint",
+                    "Send WhatsApp to all loaded leads",
+                  )
+                : translate("dashboardFilter.bulkWhatsapp.sendButton")
+            }
           >
             <svg
               className={`${compact ? "w-4 h-4" : "w-[18px] h-[18px]"} text-green-600 shrink-0`}
@@ -842,14 +853,86 @@ export default function DashbordFilter({
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
             </svg>
             <span className={panel ? "inline" : "hidden sm:inline"}>
-              {translate("dashboardFilter.bulkWhatsapp.sendButton")}
+              {panel
+                ? translate(
+                    "dashboardFilter.bulkWhatsapp.sendAllLoaded",
+                    "WhatsApp all loaded",
+                  )
+                : translate("dashboardFilter.bulkWhatsapp.sendButton")}
             </span>
           </button>
         )}
-        <div className={panel ? "flex items-center justify-between px-1" : ""}>
+    </>
+  );
+
+  return (
+    <div
+      className={`flex flex-col gap-2 no-print ${compact && !panel ? "mb-1" : panel ? "" : "mb-2"}`}
+    >
+      {panel ? (
+        <div className="flex flex-col gap-4">
+          <PanelSection
+            title={translate("dashboardFilter.panel.sections.filters", "Filters")}
+          >
+            <div
+              className={`relative flex flex-col items-stretch justify-start gap-2 min-w-0 ${
+                isFilterMenuOpen ? "z-50" : "z-30"
+              }`}
+            >
+              {filterControls}
+            </div>
+          </PanelSection>
+
+          <PanelSection
+            title={translate("dashboardFilter.panel.sections.sorting", "Sorting")}
+          >
+            {sortControl}
+          </PanelSection>
+
+          <PanelSection
+            title={translate("dashboardFilter.panel.sections.tools", "Tools")}
+          >
+            {toolControls}
+          </PanelSection>
+
+          <PanelSection
+            title={translate("dashboardFilter.panel.sections.metrics", "Metrics")}
+          >
+            <div className="flex items-center justify-between px-1">
+              <AverageScore />
+            </div>
+          </PanelSection>
+
+          <PanelSection
+            title={translate("dashboardFilter.panel.sections.help", "Help")}
+          >
+            <div className="flex justify-end">
+              <VideoInstructionsDialog
+                variant="dashboard"
+                iconSize="md"
+                tooltipText="How to use the Dashboard"
+                className="p-0 shrink-0"
+              />
+            </div>
+          </PanelSection>
+        </div>
+      ) : (
+        <>
+      <div
+        className={`relative flex flex-wrap sm:flex-nowrap items-center justify-start gap-2 min-w-0 ${
+          isFilterMenuOpen ? "z-50" : "z-30"
+        }`}
+      >
+        {filterControls}
+        {sortControl}
+      </div>
+
+      <div className="relative z-10 flex gap-2 items-center justify-start flex-wrap">
+        {toolControls}
+        <div>
           <AverageScore />
         </div>
-        <div className={panel ? "flex justify-end" : ""}>
+        <div>
           <VideoInstructionsDialog
             variant="dashboard"
             iconSize="md"
@@ -858,12 +941,16 @@ export default function DashbordFilter({
           />
         </div>
       </div>
+        </>
+      )}
 
+      {showAddLeadButton ? (
       <AddLeadDialog
         isOpen={isAddLeadOpen}
         onClose={() => setIsAddLeadOpen(false)}
         clientId={clientId}
       />
+      ) : null}
 
       <ImportLeadsDialog
         isOpen={isImportLeadsOpen}
@@ -874,7 +961,7 @@ export default function DashbordFilter({
       <AddNewWhatsappCampaignDialog
         isOpen={isWhatsappBulkOpen}
         onClose={() => setIsWhatsappBulkOpen(false)}
-        recipients={resolvedRecipients}
+        recipients={whatsappRecipients}
       />
     </div>
   );

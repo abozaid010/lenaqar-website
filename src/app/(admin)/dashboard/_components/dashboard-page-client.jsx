@@ -10,15 +10,20 @@ import {
 } from "@/hooks/useDashboardFilterPersistence";
 import DashbordFilter from "./dashbord-filter";
 import DashboardSplitView from "./split-view/DashboardSplitView";
-import { SlidersHorizontal, X } from "lucide-react";
+import DashboardSelectionBar from "./chrome/DashboardSelectionBar";
+import AddLeadDialog from "@/components/ui/add-lead-dialog";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { SlidersHorizontal, UserPlus, X } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 
 function DashboardPageContent() {
   const { translate } = useI18n();
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const { isReady, bootAppliedFilters, resetPersistedFilters } =
     useDashboardFilterPersistence();
+  const clientId = LenaCookiesManager.getClientId();
 
   const filterPanelTitle = translate("dashboardFilter.panel.title");
   const filterPanelOpenLabel = translate("dashboardFilter.panel.open");
@@ -43,19 +48,33 @@ function DashboardPageContent() {
   }
 
   return (
-    <div className="relative flex-1 min-h-0 flex flex-col">
-      {!isFiltersOpen ? (
+    <div className="relative flex-1 min-h-0 flex flex-col gap-1">
+      <div className="no-print flex items-center gap-2 shrink-0 min-h-9">
+        <button
+          type="button"
+          onClick={() => setIsAddLeadOpen(true)}
+          aria-label={translate("dashboardFilter.ADD")}
+          className="inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-2.5 sm:px-3 rounded-md bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+        >
+          <UserPlus className="w-4 h-4 shrink-0" aria-hidden />
+          <span className="hidden sm:inline">
+            {translate("dashboardFilter.ADD")}
+          </span>
+        </button>
+
+        <DashboardSelectionBar />
+
         <button
           type="button"
           onClick={() => setIsFiltersOpen(true)}
-          aria-expanded={false}
-          className="no-print absolute end-3 top-3 z-30 inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-3 rounded-md bg-primary text-sm font-medium text-white shadow-sm hover:bg-primary/90 hover:shadow-md active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2"
+          aria-expanded={isFiltersOpen}
+          className="ms-auto inline-flex items-center justify-center gap-1.5 h-9 min-h-9 px-2.5 sm:px-3 rounded-md bg-white border border-gray-300 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50 active:scale-[0.98] transition-all shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           aria-label={filterPanelOpenLabel}
         >
           <SlidersHorizontal className="w-4 h-4 shrink-0" aria-hidden />
-          <span>{filterPanelTitle}</span>
+          <span className="hidden sm:inline">{filterPanelTitle}</span>
         </button>
-      ) : null}
+      </div>
 
       {isFiltersOpen ? (
         <button
@@ -92,6 +111,7 @@ function DashboardPageContent() {
             appliedFilters={bootAppliedFilters}
             compact
             panel
+            hideAddLead
             onResetFilters={resetPersistedFilters}
           />
         </div>
@@ -100,6 +120,12 @@ function DashboardPageContent() {
       <div className="flex-1 min-h-0 flex flex-col">
         <DashboardSplitView />
       </div>
+
+      <AddLeadDialog
+        isOpen={isAddLeadOpen}
+        onClose={() => setIsAddLeadOpen(false)}
+        clientId={clientId}
+      />
       <OpenwaConnectionAccess autoOpenOnMount showButton={false} />
     </div>
   );

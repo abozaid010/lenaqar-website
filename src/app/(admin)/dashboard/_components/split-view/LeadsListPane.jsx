@@ -346,100 +346,110 @@ export default function LeadsListPane({
 
   return (
     <div className="flex flex-col min-h-0 h-full min-h-[320px] lg:border-r border-chat-border chat-list-panel max-w-full lg:max-w-none">
-      <div className="p-2 border-b border-chat-border shrink-0 space-y-2 bg-chat-panel-bg">
-        {(showBulkCheckbox && users.length > 0) || visibleCountLabel ? (
-          <div className="flex items-center justify-between gap-2 min-h-[20px]">
-            {showBulkCheckbox && users.length > 0 ? (
-              <label className="flex items-center gap-2 text-xs text-chat-text-muted cursor-pointer select-none min-w-0">
-                <input
-                  type="checkbox"
-                  checked={
+      <div className="px-2 py-1.5 border-b border-chat-border shrink-0 bg-chat-panel-bg">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {showBulkCheckbox && users.length > 0 ? (
+            <label className="flex items-center shrink-0 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={
+                  users.length > 0 &&
+                  users.every((u) => isLeadSelected?.(u.user_id))
+                }
+                ref={(el) => {
+                  if (!el) return;
+                  const someSelected = users.some((u) =>
+                    isLeadSelected?.(u.user_id)
+                  );
+                  const allSelected =
                     users.length > 0 &&
-                    users.every((u) => isLeadSelected?.(u.user_id))
-                  }
-                  ref={(el) => {
-                    if (!el) return;
-                    const someSelected = users.some((u) =>
-                      isLeadSelected?.(u.user_id)
-                    );
-                    const allSelected =
-                      users.length > 0 &&
-                      users.every((u) => isLeadSelected?.(u.user_id));
-                    el.indeterminate = someSelected && !allSelected;
-                  }}
-                  onChange={() => onToggleSelectAllVisible?.()}
-                  className="h-4 w-4 accent-primary cursor-pointer shrink-0"
-                />
-                <span className="truncate">
-                  {hasBulkSelection
+                    users.every((u) => isLeadSelected?.(u.user_id));
+                  el.indeterminate = someSelected && !allSelected;
+                }}
+                onChange={() => onToggleSelectAllVisible?.()}
+                className="h-4 w-4 accent-primary cursor-pointer shrink-0"
+                aria-label={
+                  hasBulkSelection
                     ? translate(
                         "dashboardFilter.bulkWhatsapp.selectedLeads",
-                        "Selected leads"
+                        "Selected leads",
                       )
                     : translate(
                         "dashboardFilter.bulkWhatsapp.selectAllVisible",
-                        "Select all visible"
-                      )}
-                </span>
-              </label>
-            ) : (
-              <span aria-hidden className="shrink-0" />
-            )}
-            {visibleCountLabel ? (
-              <span
-                className="text-[10px] leading-tight text-chat-text-faint shrink-0 tabular-nums"
-                aria-live="polite"
+                        "Select all visible",
+                      )
+                }
+                title={
+                  hasBulkSelection
+                    ? translate(
+                        "dashboardFilter.bulkWhatsapp.selectedLeads",
+                        "Selected leads",
+                      )
+                    : translate(
+                        "dashboardFilter.bulkWhatsapp.selectAllVisible",
+                        "Select all visible",
+                      )
+                }
+              />
+            </label>
+          ) : null}
+
+          <div className="relative flex-1 min-w-0">
+            {hasSearchText ? (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="absolute start-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-chat-text-muted rounded hover:bg-gray-100 hover:text-gray-700 transition-colors inline-flex items-center justify-center"
+                title={translate("common.clear", "Clear")}
+                aria-label={translate("common.clear", "Clear")}
               >
-                {visibleCountLabel}
-              </span>
-            ) : null}
-          </div>
-        ) : null}
-        <div className="relative flex-1 min-w-0">
-          {hasSearchText ? (
+                <X className="w-4 h-4" aria-hidden />
+              </button>
+            ) : (
+              <Search
+                className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none z-[1]"
+                aria-hidden
+              />
+            )}
+            <input
+              type="text"
+              inputMode="search"
+              enterKeyHint="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSearchSubmit();
+                }
+              }}
+              placeholder={translate(
+                "leadsSearchPlaceholder",
+                "Search by name, phone, or company",
+              )}
+              className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm focus:!border-primary focus:!shadow-[0_0_0_1px] focus:!shadow-primary/25"
+              autoComplete="off"
+            />
             <button
               type="button"
-              onClick={handleClearSearch}
-              className="absolute start-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-chat-text-muted rounded hover:bg-gray-100 hover:text-gray-700 transition-colors inline-flex items-center justify-center"
-              title={translate("common.clear", "Clear")}
-              aria-label={translate("common.clear", "Clear")}
+              onClick={handleSearchSubmit}
+              className="absolute end-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-primary rounded hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
+              title={translate("common.search")}
+              aria-label={translate("common.search")}
             >
-              <X className="w-4 h-4" aria-hidden />
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
             </button>
-          ) : (
-            <Search
-              className="absolute start-2 top-1/2 -translate-y-1/2 w-4 h-4 text-chat-text-faint pointer-events-none z-[1]"
-              aria-hidden
-            />
-          )}
-          <input
-            type="text"
-            inputMode="search"
-            enterKeyHint="search"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                handleSearchSubmit();
-              }
-            }}
-            placeholder={translate(
-              "leadsSearchPlaceholder",
-              "Search by name, phone, or company",
-            )}
-            className="chat-input-field w-full h-[34px] !rounded-md ps-8 pe-8 text-sm focus:!border-primary focus:!shadow-[0_0_0_1px] focus:!shadow-primary/25"
-            autoComplete="off"
-          />
-          <button
-            type="button"
-            onClick={handleSearchSubmit}
-            className="absolute end-1 top-1/2 -translate-y-1/2 z-[1] h-7 w-7 text-primary rounded hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
-            title={translate("common.search")}
-            aria-label={translate("common.search")}
-          >
-            <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
-          </button>
+          </div>
+
+          {visibleCountLabel ? (
+            <span
+              className="text-[10px] leading-tight text-chat-text-faint shrink-0 tabular-nums max-w-[4.5rem] sm:max-w-none text-end"
+              aria-live="polite"
+              title={visibleCountLabel}
+            >
+              {visibleCountLabel}
+            </span>
+          ) : null}
         </div>
       </div>
 

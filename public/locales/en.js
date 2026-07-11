@@ -826,6 +826,13 @@ export default {
       title: "Filters",
       open: "Open filters",
       close: "Close filters",
+      sections: {
+        filters: "Filters",
+        sorting: "Sorting",
+        tools: "Tools",
+        metrics: "Metrics",
+        help: "Help",
+      },
     },
     whatsappButton: "WhatsApp Leads",
     premuim: " Premium Feature",
@@ -901,6 +908,9 @@ export default {
     },
     bulkWhatsapp: {
       sendButton: "Send WhatsApp",
+      sendAllLoaded: "WhatsApp all loaded",
+      sendAllLoadedHint: "Send WhatsApp to all loaded leads",
+      clearSelection: "Clear selection",
       dialogTitle: "Send WhatsApp",
       tabApiTemplate: "API Template",
       tabAutomation: "Automation",
