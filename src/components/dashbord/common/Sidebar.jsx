@@ -35,6 +35,7 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
 import { seedMessagingProviderConfigCache } from "@/hooks/useMessagingProviderConfig";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import SidebarWhatsappLinks from "@/components/dashbord/common/SidebarWhatsappLinks";
 
 const SidebarComponent = ({
   clientId = null,
@@ -377,6 +378,9 @@ const SidebarComponent = ({
               ) : null}
             </div>
           </Link>
+          {isProfileClientMatch ? (
+            <SidebarWhatsappLinks profileData={pd} />
+          ) : null}
         </div>
 
         {/* Navigation Menu */}

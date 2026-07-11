@@ -534,6 +534,7 @@ export default {
     map: "Map",
     openMenu: "Open menu",
     socialMedia: "Social media",
+    copyWhatsappLink: "Copy WhatsApp link",
   },
   dashboardSummary: {
     title: "Dashboard",

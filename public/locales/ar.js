@@ -540,6 +540,7 @@ export default {
     map: "الخريطة",
     openMenu: "فتح القائمة",
     socialMedia: "وسائل التواصل",
+    copyWhatsappLink: "نسخ رابط واتساب",
   },
   dashboardSummary: {
     title: "لوحة التحكم",
