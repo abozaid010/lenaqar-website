@@ -30,7 +30,10 @@ import AddLeadDialog from "@/components/ui/add-lead-dialog";
 import ImportLeadsDialog from "@/components/ui/import-leads-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
-import { hasPersistableDashboardFilters } from "@/lib/dashboard-filters-storage";
+import {
+  hasPersistableDashboardFilters,
+  isHomeyClientId,
+} from "@/lib/dashboard-filters-storage";
 import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
@@ -415,13 +418,15 @@ export default function DashbordFilter({
   };
 
   const handleResetFilters = () => {
+    const defaultAuthor =
+      isHomeyClientId(clientId) && loggedInEmail ? loggedInEmail : "";
     setFilters({
       actions: [],
       owner_type: [],
       start_date: formatDate(twoMonthsAgo),
       end_date: formatDate(tomorrow),
       campaign_ids: [],
-      author: "",
+      author: defaultAuthor,
     });
     setIsActionDropdownOpen(false);
     setIsOwnerTypeDropdownOpen(false);
@@ -429,6 +434,13 @@ export default function DashbordFilter({
     setIsDatePickerOpen(false);
     if (typeof onResetFilters === "function") {
       onResetFilters();
+      return;
+    }
+    if (defaultAuthor) {
+      router.push(
+        `${window.location.pathname}?author=${encodeURIComponent(defaultAuthor)}`,
+        { replace: true },
+      );
       return;
     }
     router.push(window.location.pathname, { replace: true });

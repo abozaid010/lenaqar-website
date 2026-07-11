@@ -5,6 +5,9 @@ export const DASHBOARD_FILTERS_STORAGE_VERSION = 1;
 
 const STORAGE_KEY_PREFIX = "dashboard-filters:";
 
+/** Tenant that defaults dashboard to "Only my leads". */
+export const HOMEY_CLIENT_ID = "homey";
+
 /** URL params that are navigation/UI state, not dashboard filters. */
 export const DASHBOARD_NON_FILTER_PARAMS = new Set([
   "userId",
@@ -13,6 +16,36 @@ export const DASHBOARD_NON_FILTER_PARAMS = new Set([
   "tab",
   "clientId",
 ]);
+
+/**
+ * @param {string | null | undefined} clientId
+ * @returns {boolean}
+ */
+export function isHomeyClientId(clientId) {
+  return String(clientId || "").trim().toLowerCase() === HOMEY_CLIENT_ID;
+}
+
+/**
+ * For Homey, default "Only my leads" (author = logged-in email) when author is unset.
+ * @param {Record<string, string> | null | undefined} filters
+ * @returns {Record<string, string>}
+ */
+export function withHomeyOnlyMyLeadsDefault(filters) {
+  const next = filters && typeof filters === "object" ? { ...filters } : {};
+  if (typeof window === "undefined") return next;
+  if (!isHomeyClientId(LenaCookiesManager.getClientId())) return next;
+
+  const existingAuthor =
+    typeof next.author === "string" ? next.author.trim() : "";
+  if (existingAuthor) return next;
+
+  const email = LenaCookiesManager.getClientInfo()?.email;
+  const trimmed = typeof email === "string" ? email.trim() : "";
+  if (!trimmed) return next;
+
+  next.author = trimmed;
+  return next;
+}
 
 /**
  * @param {string | null | undefined} email
