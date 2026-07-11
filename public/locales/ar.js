@@ -777,8 +777,11 @@ export default {
       tabAutomation: "أتمتة",
       selectAllVisible: "تحديد كل الظاهر",
       selectedLeads: "العملاء المحددون",
-      visibleOnScreen: "{count} ظاهر على الشاشة",
-      visibleOnScreenTotal: "{visible} ظاهر · {total} محمّل",
+      visibleOnScreen: "{count} ظاهر",
+      visibleOnScreenLoaded: "{visible} ظاهر · {loaded} محمّل",
+      visibleOnScreenTotal: "{visible} ظاهر · {total} إجمالي",
+      visibleOnScreenLoadedTotal:
+        "{visible} ظاهر · {loaded} محمّل · {total} إجمالي",
       recipientCount: "{count} مستلم",
       messageLabel: "الرسالة",
       messagePlaceholder: "اكتب رسالة واتساب...",
