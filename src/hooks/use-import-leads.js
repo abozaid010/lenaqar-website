@@ -14,44 +14,17 @@ import {
 } from "@/constants/lead-import";
 import { parseExcelFile } from "@/utils/excel-utils";
 import {
+  LEAD_FIELD_ALIASES,
+  buildColumnMapping,
+  buildMergedNotes,
+  getRowUnknownPairs,
+  isHeaderLikeValue,
+} from "@/utils/lead-import-mapping";
+import {
   normalizeDigits,
   sanitizePhoneInput,
   phoneToE164,
 } from "@/components/phone/phone-utils";
-
-const HEADER_ALIASES = {
-  user_name: [
-    "name",
-    "user name",
-    "username",
-    "lead name",
-    "full name",
-    "client name",
-    "customer name",
-  ],
-  phone_number: [
-    "phone",
-    "phone number",
-    "phone_number",
-    "mobile",
-    "mobile number",
-    "contact",
-    "contact number",
-    "whatsapp",
-    "whatsapp number",
-    "number",
-  ],
-  query: ["query", "note", "notes", "comment", "remarks", "message"],
-  campaign_id: ["campaign", "campaign id", "campaign_id", "campaign name"],
-  platform: ["platform", "source", "lead source", "channel"],
-};
-
-const normalizeHeader = (value) =>
-  String(value ?? "")
-    .toLowerCase()
-    .replace(/[_-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
 
 const parseCsvLine = (line) => {
   const values = [];
@@ -101,25 +74,6 @@ const parseCsvFile = async (file) => {
   return { headers, rows };
 };
 
-const detectColumnIndex = (headers, aliases) => {
-  const normalizedHeaders = headers.map(normalizeHeader);
-
-  for (const alias of aliases) {
-    const index = normalizedHeaders.indexOf(normalizeHeader(alias));
-    if (index !== -1) return index;
-  }
-
-  for (const alias of aliases) {
-    const aliasNormalized = normalizeHeader(alias);
-    const containsIndex = normalizedHeaders.findIndex(
-      (header) => header.includes(aliasNormalized) || aliasNormalized.includes(header),
-    );
-    if (containsIndex !== -1) return containsIndex;
-  }
-
-  return -1;
-};
-
 const normalizeImportedPhone = (value) => {
   const raw = String(value ?? "").trim();
   if (!raw) return null;
@@ -133,14 +87,6 @@ const normalizeImportedPhone = (value) => {
   return null;
 };
 
-const detectColumnIndices = (headers) => ({
-  nameIndex: detectColumnIndex(headers, HEADER_ALIASES.user_name),
-  phoneIndex: detectColumnIndex(headers, HEADER_ALIASES.phone_number),
-  queryIndex: detectColumnIndex(headers, HEADER_ALIASES.query),
-  campaignIndex: detectColumnIndex(headers, HEADER_ALIASES.campaign_id),
-  platformIndex: detectColumnIndex(headers, HEADER_ALIASES.platform),
-});
-
 const validateSheetStructure = ({ headers, rows, translate }) => {
   const errors = [];
   const safeHeaders = Array.isArray(headers) ? headers : [];
@@ -149,13 +95,7 @@ const validateSheetStructure = ({ headers, rows, translate }) => {
     .map((header) => String(header ?? "").trim())
     .filter(Boolean);
 
-  console.log("[ImportLeads] validateSheetStructure", {
-    headerCount: safeHeaders.length,
-    nonEmptyHeaderCount: nonEmptyHeaders.length,
-    headers: safeHeaders,
-    normalizedHeaders: safeHeaders.map(normalizeHeader),
-    rowCount: safeRows.length,
-  });
+  const mapping = buildColumnMapping(safeHeaders);
 
   if (nonEmptyHeaders.length === 0) {
     errors.push({
@@ -177,10 +117,7 @@ const validateSheetStructure = ({ headers, rows, translate }) => {
     });
   }
 
-  const columnIndices = detectColumnIndices(safeHeaders);
-  console.log("[ImportLeads] detected column indices", columnIndices);
-
-  if (columnIndices.phoneIndex === -1) {
+  if (mapping.byField.phone === undefined) {
     const foundHeadersLabel = nonEmptyHeaders.length
       ? nonEmptyHeaders.join(", ")
       : translate("common.none", "none");
@@ -195,32 +132,11 @@ const validateSheetStructure = ({ headers, rows, translate }) => {
     });
   }
 
-  const recognizedColumnCount = Object.values(columnIndices).filter(
-    (index) => index !== -1,
-  ).length;
-
-  if (nonEmptyHeaders.length > 0 && recognizedColumnCount === 0) {
-    errors.push({
-      code: "UNRECOGNIZED_COLUMNS",
-      message: translate(
-        "dashboardFilter.importLeads.errors.unrecognizedColumns",
-        "None of the columns match the expected format. Found: {headers}. Required: phone. Optional: name, notes, campaign_id, platform.",
-      ).replace("{headers}", nonEmptyHeaders.join(", ")),
-      foundHeaders: nonEmptyHeaders,
-    });
-  }
-
   return {
     valid: errors.length === 0,
     errors,
-    columnIndices,
+    mapping,
   };
-};
-
-const isHeaderLikeValue = (value, aliases) => {
-  const normalized = normalizeHeader(value);
-  if (!normalized) return false;
-  return aliases.some((alias) => normalizeHeader(alias) === normalized);
 };
 
 const buildInvalidPlatformReason = (value, translate) =>
@@ -232,14 +148,14 @@ const buildInvalidPlatformReason = (value, translate) =>
     .replace("{allowed}", formatAllowedPlatformsList())
     .replace("{default}", DEFAULT_LEAD_PLATFORM);
 
-const buildLeadsFromSheet = ({ headers, rows, clientId, columnIndices, translate }) => {
-  const {
-    nameIndex,
-    phoneIndex,
-    queryIndex,
-    campaignIndex,
-    platformIndex,
-  } = columnIndices ?? detectColumnIndices(headers);
+const buildLeadsFromSheet = ({ headers, rows, clientId, mapping, translate }) => {
+  const resolvedMapping = mapping ?? buildColumnMapping(headers);
+  const { byField, unknownColumns } = resolvedMapping;
+  const nameIndex = byField.name ?? -1;
+  const phoneIndex = byField.phone ?? -1;
+  const queryIndex = byField.notes ?? -1;
+  const campaignIndex = byField.campaign_id ?? -1;
+  const platformIndex = byField.platform ?? -1;
 
   const safeClientId = String(clientId ?? "").trim();
   if (!safeClientId) {
@@ -257,8 +173,8 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, columnIndices, translate
     const platformRaw = platformIndex >= 0 ? String(row[platformIndex] ?? "").trim() : "";
 
     if (
-      isHeaderLikeValue(rawPhone, HEADER_ALIASES.phone_number) ||
-      (platformRaw && isHeaderLikeValue(platformRaw, HEADER_ALIASES.platform))
+      isHeaderLikeValue(rawPhone, LEAD_FIELD_ALIASES.phone) ||
+      (platformRaw && isHeaderLikeValue(platformRaw, LEAD_FIELD_ALIASES.platform))
     ) {
       skippedRows.push({
         rowNumber,
@@ -286,7 +202,9 @@ const buildLeadsFromSheet = ({ headers, rows, clientId, columnIndices, translate
 
     const rawName = nameIndex >= 0 ? String(row[nameIndex] ?? "").trim() : "";
     const user_name = rawName || phone_number;
-    const query = queryIndex >= 0 ? String(row[queryIndex] ?? "").trim() : "";
+    const baseNotes = queryIndex >= 0 ? String(row[queryIndex] ?? "").trim() : "";
+    const unknownPairs = getRowUnknownPairs(row, unknownColumns);
+    const query = buildMergedNotes(baseNotes, unknownPairs);
     const campaignRaw = campaignIndex >= 0 ? String(row[campaignIndex] ?? "").trim() : "";
 
     if (platformRaw) {
@@ -353,6 +271,45 @@ export function useImportLeads({ clientId } = {}) {
   const [isImporting, setIsImporting] = useState(false);
   const [lastSummary, setLastSummary] = useState(null);
   const [importError, setImportError] = useState(null);
+  const [importPreview, setImportPreview] = useState(null);
+
+  /**
+   * Parse the file headers and compute the column mapping so the dialog can show
+   * the user which spreadsheet columns map to which fields (and which will be
+   * merged into notes) before they commit to importing.
+   */
+  const previewImport = async (file) => {
+    if (!file) {
+      setImportPreview(null);
+      return null;
+    }
+
+    try {
+      const fileName = String(file.name || "").toLowerCase();
+      const isCsv = file.type === "text/csv" || fileName.endsWith(".csv");
+      const sheetData = isCsv
+        ? await parseCsvFile(file)
+        : await parseExcelFile(file);
+
+      const headers = sheetData.headers || [];
+      const mapping = buildColumnMapping(headers);
+      const preview = {
+        rowCount: sheetData.rows?.length || 0,
+        mappedColumns: mapping.mappedColumns,
+        unknownColumns: mapping.unknownColumns,
+        hasPhone: mapping.byField.phone !== undefined,
+      };
+      setImportPreview(preview);
+      return preview;
+    } catch (error) {
+      // Preview is best-effort; surface parsing issues at import time instead.
+      console.warn("[ImportLeads] preview failed", error?.message);
+      setImportPreview(null);
+      return null;
+    }
+  };
+
+  const clearPreview = () => setImportPreview(null);
 
   const importLeadsFromFile = async (file) => {
     setImportError(null);
@@ -438,7 +395,7 @@ export function useImportLeads({ clientId } = {}) {
         headers: sheetData.headers || [],
         rows: sheetData.rows || [],
         clientId: safeClientId,
-        columnIndices: validation.columnIndices,
+        mapping: validation.mapping,
         translate,
       });
       const validLeads = validLeadRows.map((item) => item.payload);
@@ -576,6 +533,9 @@ export function useImportLeads({ clientId } = {}) {
 
   return {
     importLeadsFromFile,
+    previewImport,
+    importPreview,
+    clearPreview,
     isImporting,
     lastSummary,
     importError,

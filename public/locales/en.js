@@ -854,6 +854,13 @@ export default {
         campaignId: "campaign_id",
         platform: "platform",
       },
+      preview: {
+        title: "Column mapping preview",
+        missingPhone: "No phone column detected. A phone column is required.",
+        viaAlias: "alias",
+        mergedNotice: "Unrecognized columns will be added to each lead's notes:",
+        merged: "merged",
+      },
       success: "Imported {count} lead(s)",
       partialResult: "Some rows were skipped or failed. Please review the summary.",
       summary: {

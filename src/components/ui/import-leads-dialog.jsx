@@ -18,11 +18,22 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const {
     importLeadsFromFile,
+    previewImport,
+    importPreview,
+    clearPreview,
     isImporting,
     lastSummary,
     importError,
     clearImportError,
   } = useImportLeads({ clientId });
+
+  const fieldLabelKeys = {
+    name: "dashboardFilter.importLeads.columns.name",
+    phone: "dashboardFilter.importLeads.columns.phone",
+    notes: "dashboardFilter.importLeads.columns.notes",
+    campaign_id: "dashboardFilter.importLeads.columns.campaignId",
+    platform: "dashboardFilter.importLeads.columns.platform",
+  };
 
   const requiredColumns = useMemo(
     () => [
@@ -85,6 +96,7 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
   const resetAndClose = () => {
     setSelectedFile(null);
     clearImportError();
+    clearPreview();
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -95,6 +107,10 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
     const file = event.target.files?.[0];
     setSelectedFile(file || null);
     clearImportError();
+    clearPreview();
+    if (file) {
+      previewImport(file);
+    }
   };
 
   const handleImport = async () => {
@@ -198,6 +214,71 @@ export default function ImportLeadsDialog({ isOpen, onClose, clientId }) {
             <div className="rounded-md bg-gray-100 px-3 py-2 text-sm text-gray-700">
               {translate("dashboardFilter.importLeads.selectedFile")}{" "}
               <span className="font-medium">{selectedFile.name}</span>
+            </div>
+          )}
+
+          {importPreview && (
+            <div className="rounded-lg border border-gray-200 p-3 text-sm space-y-2">
+              <p className="font-medium text-gray-800">
+                {translate("dashboardFilter.importLeads.preview.title")}
+              </p>
+
+              {!importPreview.hasPhone && (
+                <p className="text-xs text-red-600">
+                  {translate("dashboardFilter.importLeads.preview.missingPhone")}
+                </p>
+              )}
+
+              {importPreview.mappedColumns.length > 0 && (
+                <ul className="space-y-1">
+                  {importPreview.mappedColumns.map((column) => (
+                    <li
+                      key={`map-${column.index}`}
+                      className="flex items-center gap-2 text-xs text-gray-700"
+                    >
+                      <span className="font-mono text-gray-800 truncate max-w-[45%]">
+                        {column.header}
+                      </span>
+                      <span className="text-gray-400">→</span>
+                      <span className="font-medium text-primary">
+                        {translate(fieldLabelKeys[column.field] || column.field)}
+                      </span>
+                      {column.viaAlias && (
+                        <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] text-primary">
+                          {translate("dashboardFilter.importLeads.preview.viaAlias")}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {importPreview.unknownColumns.length > 0 && (
+                <div className="pt-1 border-t border-gray-100">
+                  <p className="text-xs text-gray-500">
+                    {translate("dashboardFilter.importLeads.preview.mergedNotice")}
+                  </p>
+                  <ul className="mt-1 space-y-1">
+                    {importPreview.unknownColumns.map((column) => (
+                      <li
+                        key={`unknown-${column.index}`}
+                        className="flex items-center gap-2 text-xs text-gray-700"
+                      >
+                        <span className="font-mono text-gray-800 truncate max-w-[45%]">
+                          {column.header}
+                        </span>
+                        <span className="text-gray-400">→</span>
+                        <span className="font-medium text-amber-700">
+                          {translate("dashboardFilter.importLeads.columns.notes")}
+                        </span>
+                        <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] text-amber-700">
+                          {translate("dashboardFilter.importLeads.preview.merged")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 

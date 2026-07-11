@@ -726,6 +726,13 @@ export default {
         campaignId: "campaign_id",
         platform: "platform",
       },
+      preview: {
+        title: "معاينة ربط الأعمدة",
+        missingPhone: "لم يتم العثور على عمود هاتف. عمود الهاتف مطلوب.",
+        viaAlias: "اسم بديل",
+        mergedNotice: "سيتم إضافة الأعمدة غير المعروفة إلى ملاحظات كل عميل:",
+        merged: "مدمج",
+      },
       success: "تم استيراد {count} عميل",
       partialResult: "تم تخطي أو فشل بعض الصفوف. راجع الملخص.",
       summary: {
