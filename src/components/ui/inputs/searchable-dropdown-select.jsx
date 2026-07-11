@@ -196,6 +196,16 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   buttonClassName = "",
   disabled = false,
   resolveSelectedLabel,
+  /** When true, allow confirming a typed value that is not in options. */
+  allowCreate = false,
+  /** Return true if the typed query can be used as a custom value. */
+  isValidCreateValue,
+  /** Label for the create option. Default: use the query as-is. */
+  formatCreateLabel,
+  /** Open menu above (`top`) or below (`bottom`) the trigger. */
+  menuPlacement = "bottom",
+  /** Called when the open state changes. */
+  onOpenChange,
   ...rest
 }, ref) {
   const { t, locale, translate } = useI18n();
@@ -211,6 +221,13 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   const searchInputRef = useRef(null);
   const listRef = useRef(null);
 
+  const setOpenState = (nextOpen) => {
+    setIsOpen(nextOpen);
+    if (typeof onOpenChange === "function") {
+      onOpenChange(nextOpen);
+    }
+  };
+
   useEffect(() => {
     const htmlDir = document.documentElement.getAttribute("dir");
     if (htmlDir === "ltr" || htmlDir === "rtl") {
@@ -219,7 +236,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   }, [locale]);
 
   useImperativeHandle(ref, () => ({
-    open: () => setIsOpen(true),
+    open: () => setOpenState(true),
   }));
 
   // Check if button should use primary color styling
@@ -241,6 +258,35 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       defaultSearch(option, query, searchFields, getLabel, getValue)
     );
   }, [options, searchQuery, searchFields, getLabel, getValue]);
+
+  const createValue = useMemo(() => {
+    if (!allowCreate) return null;
+    const query = searchQuery.trim();
+    if (!query) return null;
+    if (typeof isValidCreateValue === "function" && !isValidCreateValue(query)) {
+      return null;
+    }
+    if (!isValidCreateValue && !query) return null;
+    const exactMatch = (options || []).some(
+      (opt) => valuesMatch(getValue(opt), query),
+    );
+    if (exactMatch) return null;
+    return query;
+  }, [
+    allowCreate,
+    searchQuery,
+    isValidCreateValue,
+    options,
+    getValue,
+  ]);
+
+  const createOptionLabel = useMemo(() => {
+    if (!createValue) return "";
+    if (typeof formatCreateLabel === "function") {
+      return formatCreateLabel(createValue);
+    }
+    return createValue;
+  }, [createValue, formatCreateLabel]);
 
   // Sort filtered options
   const sortedOptions = useMemo(() => {
@@ -290,7 +336,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
 
   // Close dropdown when clicking outside
   useOnClickOutside(dropdownRef, () => {
-    setIsOpen(false);
+    setOpenState(false);
     setSearchQuery("");
     setHighlightedIndex(-1);
   });
@@ -329,8 +375,9 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
 
   const handleToggle = () => {
     if (disabled) return;
-    setIsOpen(!isOpen);
-    if (!isOpen) {
+    const nextOpen = !isOpen;
+    setOpenState(nextOpen);
+    if (nextOpen) {
       setSearchQuery("");
       setHighlightedIndex(-1);
     }
@@ -344,7 +391,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       },
     };
     onChange(syntheticEvent);
-    setIsOpen(false);
+    setOpenState(false);
     setSearchQuery("");
     setHighlightedIndex(-1);
   };
@@ -364,12 +411,14 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     }
 
     const maxIndex = sortedOptions.length - 1;
+    const createIndex = createValue ? sortedOptions.length : -1;
+    const absoluteMax = createValue ? sortedOptions.length : maxIndex;
 
     switch (e.key) {
       case "ArrowDown":
         e.preventDefault();
         setHighlightedIndex((prev) =>
-          prev < maxIndex ? prev + 1 : prev
+          prev < absoluteMax ? prev + 1 : prev
         );
         break;
       case "ArrowUp":
@@ -378,15 +427,19 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
         break;
       case "Enter":
         e.preventDefault();
-        if (highlightedIndex >= 0 && sortedOptions[highlightedIndex]) {
+        if (createValue && highlightedIndex === createIndex) {
+          handleSelect(createValue);
+        } else if (highlightedIndex >= 0 && sortedOptions[highlightedIndex]) {
           handleSelect(getValue(sortedOptions[highlightedIndex]));
+        } else if (createValue && highlightedIndex < 0 && sortedOptions.length === 0) {
+          handleSelect(createValue);
         } else if (showAllOption && highlightedIndex === -1) {
           handleSelect(allOptionValue);
         }
         break;
       case "Escape":
         e.preventDefault();
-        setIsOpen(false);
+        setOpenState(false);
         setSearchQuery("");
         setHighlightedIndex(-1);
         break;
@@ -447,7 +500,12 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
     : selectedLabel;
 
   return (
-    <div className={`relative transition-all duration-200 ${className}`} ref={dropdownRef}>
+    <div
+      className={`relative transition-all duration-200 ${
+        isOpen ? "z-[90]" : ""
+      } ${className}`}
+      ref={dropdownRef}
+    >
       <div className="relative">
         {usesFloatingLabel && (
           <label
@@ -543,7 +601,13 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
         </div>
 
         {isOpen && (
-          <div className="absolute z-[9999] w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
+          <div
+            className={`absolute z-[9999] w-full bg-white border border-gray-200 rounded-md shadow-lg ${
+              menuPlacement === "top"
+                ? "bottom-full mb-1"
+                : "top-full mt-1"
+            }`}
+          >
             {/* Search Input */}
             <div className="p-2 border-b border-gray-200">
               <div className="relative">
@@ -573,7 +637,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                 <div className="p-4 text-center text-gray-500 text-sm">
                   {defaultLoadingText}
                 </div>
-              ) : sortedOptions.length === 0 ? (
+              ) : sortedOptions.length === 0 && !createValue ? (
                 <div className="p-4 text-center text-gray-500 text-sm">
                   {defaultNoResultsText}
                 </div>
@@ -647,6 +711,24 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                       </button>
                     );
                   })}
+                  {createValue ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(createValue)}
+                      className={`w-full px-4 py-2 text-left hover:bg-gray-100 transition-colors text-primary font-medium ${
+                        highlightedIndex === sortedOptions.length
+                          ? "bg-gray-100"
+                          : ""
+                      }`}
+                      onMouseEnter={() =>
+                        setHighlightedIndex(sortedOptions.length)
+                      }
+                      role="option"
+                      aria-selected={value === createValue}
+                    >
+                      {createOptionLabel}
+                    </button>
+                  ) : null}
                 </>
               )}
             </div>

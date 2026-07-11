@@ -18,6 +18,7 @@ import {
   getCurrentUserDashboardFiltersStorageKey,
   hasPersistableDashboardFilters,
   readDashboardFilters,
+  withHomeyOnlyMyLeadsDefault,
   writeDashboardFilters,
 } from "@/lib/dashboard-filters-storage";
 
@@ -46,6 +47,8 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
     const urlFilters = extractPersistableDashboardFilters(searchParams);
 
     if (Object.keys(urlFilters).length > 0) {
+      // URL is current session state — persist as-is (do not re-apply author
+      // default; user may have cleared the Author filter).
       if (storageKey) writeDashboardFilters(storageKey, urlFilters);
       setBootAppliedFilters(urlFilters);
       setIsReady(true);
@@ -54,11 +57,18 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
 
     const stored = storageKey ? readDashboardFilters(storageKey) : null;
     if (stored) {
-      setRestoredFilters(stored);
-      setBootAppliedFilters(stored);
+      // Restore exactly what the user last had. Fill Homey sort only if never
+      // set; never re-add author the user cleared.
+      const restored = withHomeyOnlyMyLeadsDefault(stored, {
+        applyAuthorDefault: false,
+      });
+      setRestoredFilters(restored);
+      setBootAppliedFilters(restored);
+      if (storageKey) writeDashboardFilters(storageKey, restored);
 
-      const qs = dashboardFiltersToQueryString(stored);
-      const params = new URLSearchParams(qs);
+      const params = new URLSearchParams(
+        dashboardFiltersToQueryString(restored),
+      );
       const userId = searchParams.get("userId");
       if (userId) params.set("userId", userId);
 
@@ -68,15 +78,34 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
       return;
     }
 
+    // First visit (no URL filters, no storage) — role-based author default +
+    // Homey sort default applied here only.
     const fallback =
       serverAppliedFilters && typeof serverAppliedFilters === "object"
         ? extractPersistableDashboardFilters(serverAppliedFilters)
         : {};
-    setBootAppliedFilters(fallback);
+    const withDefault = withHomeyOnlyMyLeadsDefault(fallback, {
+      applyAuthorDefault: true,
+    });
+    setBootAppliedFilters(withDefault);
+
+    if (Object.keys(withDefault).length > 0) {
+      setRestoredFilters(withDefault);
+      if (storageKey) writeDashboardFilters(storageKey, withDefault);
+      const params = new URLSearchParams(
+        dashboardFiltersToQueryString(withDefault),
+      );
+      const userId = searchParams.get("userId");
+      if (userId) params.set("userId", userId);
+      const next = params.toString();
+      router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    }
+
     setIsReady(true);
   }, [pathname, router, searchParams, serverAppliedFilters]);
 
   // Persist whenever URL filter params change (after hydration).
+  // Empty URL must not wipe storage — reload / bare /dashboard reuses it.
   useEffect(() => {
     if (!isReady) return;
     const storageKey = getCurrentUserDashboardFiltersStorageKey();
@@ -94,15 +123,25 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
   const resetPersistedFilters = useCallback(() => {
     const storageKey = getCurrentUserDashboardFiltersStorageKey();
     clearDashboardFilters(storageKey);
-    setRestoredFilters(null);
-    const userId = searchParams.get("userId");
-    if (userId) {
-      router.replace(`${pathname}?userId=${encodeURIComponent(userId)}`, {
-        scroll: false,
-      });
-    } else {
-      router.replace(pathname, { scroll: false });
+
+    const defaults = withHomeyOnlyMyLeadsDefault(
+      {},
+      { applyAuthorDefault: true },
+    );
+    if (storageKey && Object.keys(defaults).length > 0) {
+      writeDashboardFilters(storageKey, defaults);
     }
+    setRestoredFilters(Object.keys(defaults).length > 0 ? defaults : null);
+    setBootAppliedFilters(defaults);
+
+    const params = new URLSearchParams(
+      dashboardFiltersToQueryString(defaults),
+    );
+    const userId = searchParams.get("userId");
+    if (userId) params.set("userId", userId);
+
+    const next = params.toString();
+    router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
   }, [pathname, router, searchParams]);
 
   const effectiveFilterParams = useMemo(() => {

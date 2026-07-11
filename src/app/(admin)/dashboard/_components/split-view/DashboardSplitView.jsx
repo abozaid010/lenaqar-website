@@ -14,10 +14,16 @@ import {
   buildDashboardLeadHref,
   buildDashboardListHref,
 } from "@/utils/dashboard-navigation";
-import { sortDashboardLeadsByScore } from "@/utils/dashboard-lead-sort";
+import {
+  DASHBOARD_SORT_PARAM,
+  LEGACY_SORT_SCORE_PARAM,
+  resolveDashboardSort,
+  sortDashboardLeads,
+} from "@/utils/dashboard-lead-sort";
 import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
+import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -87,13 +93,21 @@ function DashboardSplitViewComponent() {
     !pageCount || hasNextPage ? null : loadedCount;
 
   const searchQueryTrimmed = (readParam(effectiveFilterParams, "query") || "").trim();
-  const sortScore = readParam(effectiveFilterParams, "sort_score");
+  const leadSort = useMemo(
+    () =>
+      resolveDashboardSort(
+        readParam(effectiveFilterParams, DASHBOARD_SORT_PARAM),
+        LenaCookiesManager.getClientId(),
+        readParam(effectiveFilterParams, LEGACY_SORT_SCORE_PARAM),
+      ),
+    [effectiveFilterParams],
+  );
   const filteredUsers = useMemo(() => {
     const searchFiltered = searchQueryTrimmed
       ? allUsers.filter((u) => leadMatchesSearchQuery(u, searchQueryTrimmed))
       : allUsers;
-    return sortDashboardLeadsByScore(searchFiltered, sortScore);
-  }, [allUsers, searchQueryTrimmed, sortScore]);
+    return sortDashboardLeads(searchFiltered, leadSort);
+  }, [allUsers, searchQueryTrimmed, leadSort]);
 
   useEffect(() => {
     setVisibleLeadsFromList(filteredUsers);

@@ -60,12 +60,10 @@ export function DashboardLeadsBulkProvider({ children }) {
     return visibleLeads.filter((l) => l?.user_id && selectedLeadIds.has(l.user_id));
   }, [visibleLeads, selectedLeadIds]);
 
-  const resolvedRecipients = useMemo(() => {
-    const source =
-      selectedLeads.length > 0 ? selectedLeads : visibleLeads;
+  const buildRecipients = useCallback((leads) => {
     const seen = new Set();
     const recipients = [];
-    for (const lead of source) {
+    for (const lead of leads) {
       const recipient = leadToWhatsappRecipient(lead);
       const dedupeKey = getWhatsappRecipientDedupeKey(recipient);
       if (!recipient || !dedupeKey || seen.has(dedupeKey)) continue;
@@ -73,7 +71,26 @@ export function DashboardLeadsBulkProvider({ children }) {
       recipients.push(recipient);
     }
     return recipients;
-  }, [selectedLeads, visibleLeads]);
+  }, []);
+
+  /** Always all currently loaded/visible leads (panel “all loaded” WhatsApp). */
+  const allVisibleRecipients = useMemo(
+    () => buildRecipients(visibleLeads),
+    [buildRecipients, visibleLeads],
+  );
+
+  /** Selected leads only (selection-bar WhatsApp). */
+  const selectedRecipients = useMemo(
+    () => buildRecipients(selectedLeads),
+    [buildRecipients, selectedLeads],
+  );
+
+  /** Prefer selected when any; otherwise all visible (legacy callers). */
+  const resolvedRecipients = useMemo(
+    () =>
+      selectedLeads.length > 0 ? selectedRecipients : allVisibleRecipients,
+    [selectedLeads.length, selectedRecipients, allVisibleRecipients],
+  );
 
   const value = useMemo(
     () => ({
@@ -81,6 +98,8 @@ export function DashboardLeadsBulkProvider({ children }) {
       selectedLeadIds,
       selectedLeads,
       resolvedRecipients,
+      allVisibleRecipients,
+      selectedRecipients,
       setVisibleLeadsFromList,
       toggleLeadSelection,
       toggleSelectAllVisible,
@@ -93,6 +112,8 @@ export function DashboardLeadsBulkProvider({ children }) {
       selectedLeadIds,
       selectedLeads,
       resolvedRecipients,
+      allVisibleRecipients,
+      selectedRecipients,
       setVisibleLeadsFromList,
       toggleLeadSelection,
       toggleSelectAllVisible,
