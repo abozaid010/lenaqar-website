@@ -167,6 +167,24 @@ function isAccountLike(value) {
   );
 }
 
+/** Stable, order-independent fingerprint of an account's identifying fields. */
+function accountFingerprint(account) {
+  const raw = [
+    account.whatsapp_agent,
+    account.whatsapp_instance_id,
+    account.openwa_session_id,
+    account.whatsapp_number,
+    account.sender_phone_number,
+  ]
+    .map((value) => String(value ?? "").trim())
+    .join("|");
+  let hash = 0;
+  for (let i = 0; i < raw.length; i += 1) {
+    hash = (hash * 31 + raw.charCodeAt(i)) | 0;
+  }
+  return (hash >>> 0).toString(36);
+}
+
 /** Stable key for one linked account (supports multiple accounts per platform). */
 export function getWhatsappAccountKey(account) {
   if (!account?.platform) return "";
@@ -176,6 +194,10 @@ export function getWhatsappAccountKey(account) {
   if (isOpenwaProvider(platform)) {
     const session = account.openwa_session_id?.trim();
     if (session) return `${platform}:session:${session}`;
+    // openwa_session_id is stripped from API profile responses. Fall back to the
+    // instance id, then the number, so multiple accounts are never collapsed.
+    const instance = account.whatsapp_instance_id?.trim();
+    if (instance) return `${platform}:instance:${instance}`;
   }
 
   if (isUltramessageProvider(platform)) {
@@ -186,7 +208,9 @@ export function getWhatsappAccountKey(account) {
   const phone = normalizeWhatsappPhone(account.whatsapp_number);
   if (phone) return `${platform}:phone:${phone}`;
 
-  return `${platform}:unknown`;
+  // Last resort when every explicit id is stripped/empty: derive a stable key
+  // from the remaining fields instead of a shared ":unknown" that gets dropped.
+  return `${platform}:acct:${accountFingerprint(account)}`;
 }
 
 /** Build account key from an unsaved form snapshot (add/edit validation). */
@@ -205,7 +229,7 @@ function dedupeAccountsByKey(accounts) {
   const byKey = new Map();
   for (const account of accounts) {
     const key = getWhatsappAccountKey(account);
-    if (!key || key.endsWith(":unknown")) continue;
+    if (!key) continue;
     if (!byKey.has(key)) byKey.set(key, account);
   }
   return Array.from(byKey.values());
