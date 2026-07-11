@@ -699,6 +699,15 @@ export default {
       score: "أعلى جدية",
     },
     onlyMyLeads: "عملائي فقط",
+    author: {
+      placeholder: "المؤلف",
+      search: "ابحث بالاسم أو البريد",
+      noResults: "لا يوجد أعضاء مطابقون",
+      invalidEmail: "أدخل بريداً إلكترونياً صالحاً",
+      ownEmailOnly: "يمكنك التصفية ببريدك فقط",
+      useEmail: "استخدم {email}",
+      all: "كل المؤلفين",
+    },
     resetFilters: "إعادة تعيين الفلاتر",
     panel: {
       title: "الفلاتر",

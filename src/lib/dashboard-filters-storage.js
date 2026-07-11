@@ -1,7 +1,9 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
+  DASHBOARD_SORT,
   DASHBOARD_SORT_PARAM,
   LEGACY_SORT_SCORE_PARAM,
+  getDefaultDashboardSort,
   normalizeDashboardSort,
 } from "@/utils/dashboard-lead-sort";
 
@@ -10,7 +12,7 @@ export const DASHBOARD_FILTERS_STORAGE_VERSION = 1;
 
 const STORAGE_KEY_PREFIX = "dashboard-filters:";
 
-/** Tenant that defaults dashboard to "Only my leads". */
+/** Tenant that defaults dashboard sort to Oldest First. */
 export const HOMEY_CLIENT_ID = "homey";
 
 /** URL params that are navigation/UI state, not dashboard filters. */
@@ -51,27 +53,53 @@ function normalizePersistedSortParams(filters) {
 }
 
 /**
- * For Homey, default "Only my leads" (author = logged-in email) when author is unset.
+ * Fill dashboard filter defaults when unset.
+ * - Author: for non-admin users only, default to logged-in email on first
+ *   visit / Reset (`applyAuthorDefault`). Admins default to empty (all leads).
+ *   Never re-add author on restore — the user may have cleared it.
+ * - Sort: Homey only — Oldest First when sort was never set.
+ *
  * @param {Record<string, string> | null | undefined} filters
+ * @param {{ applyAuthorDefault?: boolean }} [options]
  * @returns {Record<string, string>}
  */
-export function withHomeyOnlyMyLeadsDefault(filters) {
+export function withHomeyOnlyMyLeadsDefault(
+  filters,
+  { applyAuthorDefault = true } = {},
+) {
   const next =
     filters && typeof filters === "object"
       ? normalizePersistedSortParams({ ...filters })
       : {};
   if (typeof window === "undefined") return next;
-  if (!isHomeyClientId(LenaCookiesManager.getClientId())) return next;
 
-  const existingAuthor =
-    typeof next.author === "string" ? next.author.trim() : "";
-  if (existingAuthor) return next;
+  const clientId = LenaCookiesManager.getClientId();
+  const info = LenaCookiesManager.getClientInfo();
+  const role = String(info?.client_type ?? info?.role ?? "")
+    .trim()
+    .toLowerCase();
+  const isAdminUser = role === "admin" || role === "owner";
+  const email = typeof info?.email === "string" ? info.email.trim() : "";
 
-  const email = LenaCookiesManager.getClientInfo()?.email;
-  const trimmed = typeof email === "string" ? email.trim() : "";
-  if (!trimmed) return next;
+  if (applyAuthorDefault && !isAdminUser) {
+    const existingAuthor =
+      typeof next.author === "string" ? next.author.trim() : "";
+    if (!existingAuthor && email) {
+      next.author = email;
+    }
+  }
 
-  next.author = trimmed;
+  if (isHomeyClientId(clientId)) {
+    const existingSort = normalizeDashboardSort(
+      next[DASHBOARD_SORT_PARAM],
+      undefined,
+    );
+    if (!existingSort) {
+      next[DASHBOARD_SORT_PARAM] =
+        getDefaultDashboardSort(clientId) || DASHBOARD_SORT.OLDEST;
+    }
+  }
+
   return next;
 }
 
@@ -198,8 +226,9 @@ export function writeDashboardFilters(storageKey, filters) {
   if (typeof window === "undefined" || !storageKey) return;
   try {
     const persistable = extractPersistableDashboardFilters(filters);
+    // Never wipe storage on empty writes — only clearDashboardFilters /
+    // logout should remove. Keeps reload / bare /dashboard restores intact.
     if (Object.keys(persistable).length === 0) {
-      localStorage.removeItem(storageKey);
       return;
     }
     localStorage.setItem(

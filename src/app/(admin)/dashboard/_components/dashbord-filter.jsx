@@ -2,6 +2,7 @@
 
 import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
+import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import {
   DASHBOARD_TRIGGER,
 } from "@/constants/ui-classes";
@@ -29,6 +30,10 @@ import ImportLeadsDialog from "@/components/ui/import-leads-dialog";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { loadDashboardCampaignIdsOnce } from "@/lib/dashboard-campaign-ids-session";
 import {
+  loadDashboardTeamMembersOnce,
+  readCachedDashboardTeamMembers,
+} from "@/lib/dashboard-team-emails-session";
+import {
   hasPersistableDashboardFilters,
   isHomeyClientId,
 } from "@/lib/dashboard-filters-storage";
@@ -42,6 +47,7 @@ import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
+import { isValidEmail } from "@/utils/email";
 import toast from "react-hot-toast";
 
 const formatDate = (date) => {
@@ -49,6 +55,13 @@ const formatDate = (date) => {
   const formattedDate = isoString.slice(0, 19);
   return formattedDate;
 };
+
+function isAdminRole(role) {
+  const normalized = String(role || "")
+    .trim()
+    .toLowerCase();
+  return normalized === "admin" || normalized === "owner";
+}
 
 /** w-72 (18rem) at 70% — tighter filter triggers and dropdown panels */
 const FILTER_MENU_WIDTH = "w-[12.6rem]";
@@ -134,9 +147,15 @@ export default function DashbordFilter({
 
   // Cookie-backed; empty on SSR/first paint to avoid hydration mismatch.
   const [loggedInEmail, setLoggedInEmail] = useState("");
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isTeamMembersLoading, setIsTeamMembersLoading] = useState(false);
+  const [authorError, setAuthorError] = useState("");
+
   useEffect(() => {
     const email = LenaCookiesManager.getClientInfo()?.email;
     setLoggedInEmail(typeof email === "string" ? email.trim() : "");
+    setIsAdminUser(isAdminRole(getRoleFromToken()));
   }, []);
 
   const [filters, setFilters] = useState(() => {
@@ -156,11 +175,83 @@ export default function DashbordFilter({
     };
   });
 
-  const isOnlyMyLeads = Boolean(
-    loggedInEmail &&
-      filters.author &&
-      filters.author.trim().toLowerCase() === loggedInEmail.toLowerCase(),
-  );
+  useEffect(() => {
+    if (!isAdminUser) {
+      setTeamMembers([]);
+      setIsTeamMembersLoading(false);
+      return;
+    }
+
+    const cached = readCachedDashboardTeamMembers(clientId);
+    if (cached) {
+      setTeamMembers(cached);
+      setIsTeamMembersLoading(false);
+    } else {
+      setIsTeamMembersLoading(true);
+    }
+
+    let cancelled = false;
+    loadDashboardTeamMembersOnce(clientId).then((members) => {
+      if (cancelled) return;
+      if (Array.isArray(members)) {
+        setTeamMembers(members);
+      } else if (!cached) {
+        setTeamMembers([]);
+      }
+      setIsTeamMembersLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAdminUser, clientId]);
+
+  const authorOptions = useMemo(() => {
+    if (!isAdminUser) {
+      return loggedInEmail
+        ? [{ email: loggedInEmail, name: "" }]
+        : [];
+    }
+
+    /** @type {Map<string, { email: string, name: string }>} */
+    const byEmail = new Map();
+    for (const member of teamMembers) {
+      const email =
+        typeof member?.email === "string" ? member.email.trim() : "";
+      if (!email) continue;
+      byEmail.set(email.toLowerCase(), {
+        email,
+        name: typeof member?.name === "string" ? member.name.trim() : "",
+      });
+    }
+    if (loggedInEmail) {
+      const key = loggedInEmail.toLowerCase();
+      if (!byEmail.has(key)) {
+        byEmail.set(key, { email: loggedInEmail, name: "" });
+      }
+    }
+    const selected =
+      typeof filters.author === "string" ? filters.author.trim() : "";
+    if (selected) {
+      const key = selected.toLowerCase();
+      if (!byEmail.has(key)) {
+        byEmail.set(key, { email: selected, name: "" });
+      }
+    }
+
+    return Array.from(byEmail.values()).sort((a, b) => {
+      const labelA = (a.name || a.email).toLowerCase();
+      const labelB = (b.name || b.email).toLowerCase();
+      return labelA.localeCompare(labelB);
+    });
+  }, [isAdminUser, loggedInEmail, teamMembers, filters.author]);
+
+  const getAuthorOptionLabel = (option) => {
+    const email = option?.email || "";
+    const name = option?.name || "";
+    if (name && email) return `${name} (${email})`;
+    return name || email;
+  };
 
   const ownerTypeOptions = useMemo(
     () =>
@@ -202,6 +293,7 @@ export default function DashbordFilter({
   const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+  const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [isImportLeadsOpen, setIsImportLeadsOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
@@ -213,6 +305,7 @@ export default function DashbordFilter({
     isOwnerTypeDropdownOpen ||
     isCampaignDropdownOpen ||
     isSortDropdownOpen ||
+    isAuthorDropdownOpen ||
     isDatePickerOpen;
   const actionDropdownRef = useRef(null);
   const ownerTypeDropdownRef = useRef(null);
@@ -407,16 +500,6 @@ export default function DashbordFilter({
     });
   };
 
-  const toggleOnlyMyLeads = () => {
-    if (!loggedInEmail) return;
-    const nextAuthor = isOnlyMyLeads ? "" : loggedInEmail;
-    setFilters((prev) => ({
-      ...prev,
-      author: nextAuthor,
-    }));
-    onFilterChange("author", nextAuthor);
-  };
-
   const toggleActionSelection = (actionValue) => {
     const newActions = filters.actions.includes(actionValue)
       ? filters.actions.filter((value) => value !== actionValue)
@@ -435,6 +518,43 @@ export default function DashbordFilter({
       actions: [],
     }));
     onFilterChange("actions", []);
+  };
+
+  const handleAuthorChange = (event) => {
+    const raw = typeof event?.target?.value === "string" ? event.target.value : "";
+    const nextAuthor = raw.trim();
+
+    if (!isValidEmail(nextAuthor)) {
+      setAuthorError(
+        translate(
+          "dashboardFilter.author.invalidEmail",
+          "Enter a valid email address",
+        ),
+      );
+      return;
+    }
+
+    if (
+      !isAdminUser &&
+      nextAuthor &&
+      loggedInEmail &&
+      nextAuthor.toLowerCase() !== loggedInEmail.toLowerCase()
+    ) {
+      setAuthorError(
+        translate(
+          "dashboardFilter.author.ownEmailOnly",
+          "You can only filter by your own email",
+        ),
+      );
+      return;
+    }
+
+    setAuthorError("");
+    setFilters((prev) => ({
+      ...prev,
+      author: nextAuthor,
+    }));
+    onFilterChange("author", nextAuthor);
   };
 
   const toggleOwnerTypeSelection = (ownerTypeValue) => {
@@ -505,7 +625,8 @@ export default function DashbordFilter({
 
   const handleResetFilters = () => {
     const defaultAuthor =
-      isHomeyClientId(clientId) && loggedInEmail ? loggedInEmail : "";
+      !isAdminUser && loggedInEmail ? loggedInEmail : "";
+    setAuthorError("");
     setFilters({
       actions: [],
       owner_type: [],
@@ -518,19 +639,24 @@ export default function DashbordFilter({
     setIsOwnerTypeDropdownOpen(false);
     setIsCampaignDropdownOpen(false);
     setIsSortDropdownOpen(false);
+    setIsAuthorDropdownOpen(false);
     setIsDatePickerOpen(false);
     if (typeof onResetFilters === "function") {
       onResetFilters();
       return;
     }
+    const params = new URLSearchParams();
     if (defaultAuthor) {
-      router.push(
-        `${window.location.pathname}?author=${encodeURIComponent(defaultAuthor)}`,
-        { replace: true },
-      );
-      return;
+      params.set("author", defaultAuthor);
     }
-    router.push(window.location.pathname, { replace: true });
+    if (isHomeyClientId(clientId)) {
+      params.set(DASHBOARD_SORT_PARAM, DASHBOARD_SORT.OLDEST);
+    }
+    const qs = params.toString();
+    router.push(
+      qs ? `${window.location.pathname}?${qs}` : window.location.pathname,
+      { replace: true },
+    );
   };
 
   const menuWidthClass = panel ? "w-full" : FILTER_MENU_WIDTH;
@@ -796,27 +922,46 @@ export default function DashbordFilter({
             )}
           </div>
 
-          {loggedInEmail ? (
-            <label
-              className={`flex items-center gap-2 rounded-md border border-gray-200 bg-white px-3 cursor-pointer hover:bg-gray-50 ${
-                panel ? "w-full" : "shrink-0"
-              } ${compact ? "h-9 min-h-[36px]" : "h-10"}`}
-            >
-              <input
-                type="checkbox"
-                checked={isOnlyMyLeads}
-                onChange={toggleOnlyMyLeads}
-                className="cursor-pointer shrink-0"
-                aria-label={translate(
-                  "dashboardFilter.onlyMyLeads",
-                  "Only my leads",
-                )}
-              />
-              <span className="text-sm text-gray-700 whitespace-nowrap">
-                {translate("dashboardFilter.onlyMyLeads", "Only my leads")}
-              </span>
-            </label>
-          ) : null}
+          <div
+            className={`relative flex flex-col items-stretch justify-start gap-1 min-w-0 ${
+              isAuthorDropdownOpen ? "z-[90]" : "z-[60]"
+            } ${panel ? "w-full" : `${FILTER_ACTION_MIN_WIDTH} shrink-0`}`}
+          >
+            <SearchableDropdownSelect
+              name="dashboard_author"
+              options={authorOptions}
+              value={filters.author || ""}
+              onChange={handleAuthorChange}
+              onOpenChange={setIsAuthorDropdownOpen}
+              menuPlacement="top"
+              getValue={(option) => option.email}
+              getLabel={getAuthorOptionLabel}
+              searchFields={["name", "email"]}
+              placeholder={translate("dashboardFilter.author.placeholder", "Author")}
+              showAllOption
+              allOptionValue=""
+              allowCreate={isAdminUser}
+              isValidCreateValue={(query) => isValidEmail(query)}
+              formatCreateLabel={(query) =>
+                translate(
+                  "dashboardFilter.author.useEmail",
+                  "Use {email}",
+                ).replace("{email}", query)
+              }
+              isLoading={isAdminUser && isTeamMembersLoading}
+              error={Boolean(authorError)}
+              errorMessage={authorError}
+              searchPlaceholder={translate(
+                "dashboardFilter.author.search",
+                "Search by name or email",
+              )}
+              noResultsText={translate(
+                "dashboardFilter.author.noResults",
+                "No matching team members",
+              )}
+              className="w-full"
+            />
+          </div>
 
           <button
             type="button"

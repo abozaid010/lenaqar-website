@@ -11,13 +11,17 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 
 /**
- * Get the current user's role (client_type) from the CLIENT_INFO cookie.
+ * Get the current user's authorization role from the CLIENT_INFO cookie.
+ * Prefers explicit `role` (e.g. owner/admin) over `client_type` (e.g. broker),
+ * matching server JWT claim priority in getRoleFromToken.js.
  * @returns {string|null}
  */
 export function getRoleFromToken() {
   const info = LenaCookiesManager.getClientInfo();
   if (!info) return null;
-  const role = info.client_type ?? info.role ?? null;
+  // Prefer authorization role over product client_type.
+  // Homey owners often have client_type="broker" alongside role="owner".
+  const role = info.role ?? info.client_type ?? null;
   return role != null && typeof role === "string" ? role : null;
 }
 

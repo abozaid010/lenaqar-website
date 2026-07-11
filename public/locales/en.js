@@ -827,6 +827,15 @@ export default {
       score: "Highest Score",
     },
     onlyMyLeads: "Only my leads",
+    author: {
+      placeholder: "Author",
+      search: "Search by name or email",
+      noResults: "No matching team members",
+      invalidEmail: "Enter a valid email address",
+      ownEmailOnly: "You can only filter by your own email",
+      useEmail: "Use {email}",
+      all: "All authors",
+    },
     resetFilters: "Reset Filters",
     panel: {
       title: "Filters",
