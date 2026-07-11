@@ -74,7 +74,7 @@ const extractCoordinatesFromLink = async (googleMapLink) => {
     // This will be handled by the geocodeCityDistrict function
     return null;
   } catch (error) {
-    console.error("Error extracting coordinates:", error);
+    console.error("Error extracting coordinates:", error?.message ?? error);
     return null;
   }
 };
@@ -94,7 +94,7 @@ const geocodeCityDistrict = async (city, district) => {
       return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
     }
   } catch (error) {
-    console.error("Geocoding error:", error);
+    console.error("Geocoding error:", error?.message ?? error);
   }
 
   return null;

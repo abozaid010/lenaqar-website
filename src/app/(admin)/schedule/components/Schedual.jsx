@@ -156,7 +156,7 @@ const Schedule = ({ data, dataSales }) => {
       );
       setAppointments(nextWeekData);
     } catch (error) {
-      console.error("Failed to load week schedule:", error);
+      console.error("Failed to load week schedule:", error?.message ?? error);
       toast.error(t.schaduall?.loadError || "Failed to load schedule");
       setAppointments([]);
     } finally {
@@ -223,7 +223,7 @@ const Schedule = ({ data, dataSales }) => {
 
       setOpenDropdown(null);
     } catch (error) {
-      console.error("Error assigning sales person:", error);
+      console.error("Error assigning sales person:", error?.message ?? error);
       toast.error(t.schaduall.assignError || "Failed to assign salesperson");
     } finally {
       setLoading(null);

@@ -177,7 +177,7 @@ export default function ImageUploader({
       } catch (error) {
         setUploadStatus((prev) => ({ ...prev, [image.id]: "error" }));
         failedUploads.push(image.id);
-        console.error(`Failed to upload image ${image.name}:`, error);
+        console.error(`Failed to upload image ${image.name}:`, error?.message ?? error);
       }
     }
     const mergedUploads = [...uploadedImages, ...successfulUploads].map(

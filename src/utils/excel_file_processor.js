@@ -32,23 +32,9 @@ const VALID_VIEW_VALUES = [
  * Performance logger utility
  */
 const perfLog = {
-  start: (label) => {
-    const startTime = performance.now();
-    console.log(`[Excel Processor] ⏱️  ${label} - Started`);
-    return { label, startTime };
-  },
-  end: ({ label, startTime }) => {
-    const duration = performance.now() - startTime;
-    console.log(`[Excel Processor] ✅ ${label} - Completed in ${duration.toFixed(2)}ms`);
-    return duration;
-  },
-  log: (message, data = null) => {
-    if (data) {
-      console.log(`[Excel Processor] 📊 ${message}`, data);
-    } else {
-      console.log(`[Excel Processor] 📊 ${message}`);
-    }
-  }
+  start: (label) => ({ label, startTime: 0 }),
+  end: () => 0,
+  log: () => {},
 };
 
 /**

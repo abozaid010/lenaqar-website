@@ -39,7 +39,7 @@ export class LenaCookiesManager {
         try {
             return info ? JSON.parse(info) : null;
         } catch (error) {
-            console.error("Failed to parse client info cookie:", error);
+            console.error("Failed to parse client info cookie:", error?.message ?? error);
             return null;
         }
     }

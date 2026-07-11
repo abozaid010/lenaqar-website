@@ -17,7 +17,6 @@ const ALLOWED_MIME_TYPES = new Set([
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024;
 const UPLOAD_RATE_LIMIT = 10;   // uploads
 const UPLOAD_WINDOW_MS = 60_000; // per 60 seconds
-const isDev = process.env.NODE_ENV === "development";
 
 export async function POST(req) {
   // ── Rate limiting ──────────────────────────────────────────────────────────
@@ -39,10 +38,6 @@ export async function POST(req) {
     const file = formData.get("file");
     const clientId = formData.get("clientId");
     const shouldGenerateAvif = formData.get("generateAvif") === "true";
-
-    if (isDev) {
-      console.log("[/api/upload] POST", { clientId, fileType: file?.type, fileSize: file?.size });
-    }
 
     if (!file || typeof file.arrayBuffer !== "function") {
       return Response.json({ error: "No image file provided." }, { status: 400 });
@@ -108,7 +103,7 @@ export async function POST(req) {
       })),
     });
   } catch (error) {
-    if (isDev) console.error("[/api/upload] Upload pipeline failed:", error);
+    console.error("[/api/upload] Upload pipeline failed:", error?.message ?? String(error));
     return Response.json({ error: "Unexpected upload error." }, { status: 500 });
   }
 }

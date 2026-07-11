@@ -66,7 +66,7 @@ class ProjectsNamesManager {
 
       return data;
     } catch (error) {
-      console.error("Failed to initialize ProjectsNamesManager data:", error);
+      console.error("Failed to initialize ProjectsNamesManager data:", error?.message ?? error);
       this.projects = [];
       throw error;
     }

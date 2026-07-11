@@ -108,7 +108,7 @@ export function useNotifications({
     try {
       await markAllNotificationsReadBFF();
     } catch (error) {
-      console.error("Failed to mark all notifications as read:", error);
+      console.error("Failed to mark all notifications as read:", error?.message ?? error);
     }
   }, [rawNotifications, updateReadIds]);
 

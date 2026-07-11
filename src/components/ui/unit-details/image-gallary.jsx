@@ -53,7 +53,7 @@ export default function ImageGallary({
       const data = await getShareUnitData(unitId);
       setShareData(data);
     } catch (error) {
-      console.error("Error fetching share data:", error);
+      console.error("Error fetching share data:", error?.message ?? error);
       setShareData(null);
     } finally {
       setLoadingShare(false);

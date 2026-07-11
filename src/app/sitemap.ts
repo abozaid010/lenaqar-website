@@ -27,7 +27,7 @@ async function getPublicUnits() {
     const units = data?.data?.units || data?.units || [];
     return Array.isArray(units) ? units : [];
   } catch (error) {
-    console.error('Error fetching units for sitemap:', error);
+    console.error('Error fetching units for sitemap:', error instanceof Error ? error.message : String(error));
     return [];
   }
 }

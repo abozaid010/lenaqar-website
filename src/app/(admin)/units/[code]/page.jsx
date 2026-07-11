@@ -112,7 +112,7 @@ export default async function PrivateUnitDetailsPage({ params }) {
     );
   } catch (error) {
     if (error?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
-    console.error("Error fetching unit:", error);
+    console.error("Error fetching unit:", error?.message ?? error);
     notFound();
   }
 }

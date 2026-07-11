@@ -137,7 +137,7 @@ export default function PaymentPlansList({
       onChange(newPlans);
       toast.success(isEdit ? "Payment plan updated successfully" : "Payment plan created successfully");
     } catch (error) {
-      console.error("Failed to save payment plan:", error);
+      console.error("Failed to save payment plan:", error?.message ?? error);
       toast.error("Failed to save payment plan");
     }
   };
@@ -249,7 +249,7 @@ export default function PaymentPlansList({
         onChange(newPlans);
       }
     } catch (error) {
-      console.error("Error toggling payment plan:", error);
+      console.error("Error toggling payment plan:", error?.message ?? error);
     } finally {
       setIsProcessingSelection(false);
     }

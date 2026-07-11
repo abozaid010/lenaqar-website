@@ -70,7 +70,7 @@ export default function CalendarSelector({
           toast.error("Failed to fetch available slots");
         }
       } catch (error) {
-        console.error("Error fetching available slots:", error);
+        console.error("Error fetching available slots:", error?.message ?? error);
       } finally {
         setLoading(false);
       }
@@ -179,7 +179,7 @@ export default function CalendarSelector({
       }
     } catch (error) {
       toast.error("Failed to create booking");
-      console.error("Error creating booking:", error);
+      console.error("Error creating booking:", error?.message ?? error);
     } finally {
       setIsLoading(false);
     }

@@ -68,7 +68,7 @@ export function useAddLead({ onSuccess, clientId } = {}) {
       }
       return true;
     } catch (error) {
-      console.error("Error adding lead:", error);
+      console.error("Error adding lead:", error?.message ?? error);
       toast.error(error.message || "Something went wrong");
       return false;
     } finally {

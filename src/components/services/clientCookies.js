@@ -12,7 +12,7 @@ export const getClientid = async () => {
   try {
     return cookie.value;
   } catch (error) {
-    console.error("Failed to parse client_id cookie:", error);
+    console.error("Failed to parse client_id cookie:", error?.message ?? error);
     return {};
   }
 };

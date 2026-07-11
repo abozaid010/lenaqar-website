@@ -48,7 +48,7 @@ class ContactInfo {
         }
       }
     } catch (error) {
-      console.warn('Failed to load contacts from cache:', error);
+      console.warn('Failed to load contacts from cache:', error instanceof Error ? error.message : String(error));
       // Clear corrupted cache
       if (typeof window !== 'undefined') {
         localStorage.removeItem(this.CACHE_KEY);
@@ -67,7 +67,7 @@ class ContactInfo {
       };
       localStorage.setItem(this.CACHE_KEY, JSON.stringify(cacheData));
     } catch (error) {
-      console.warn('Failed to save contacts to cache:', error);
+      console.warn('Failed to save contacts to cache:', error instanceof Error ? error.message : String(error));
     }
   }
 
@@ -229,7 +229,7 @@ class ContactInfo {
       this.lastFetchTime = Date.now();
       this.saveToStorage();
     } catch (error) {
-      console.error('Error refreshing contacts:', error);
+      console.error('Error refreshing contacts:', error instanceof Error ? error.message : String(error));
       // Don't throw - allow graceful degradation with cached data
       if (this.developerContacts.size === 0 && this.clientContacts.size === 0) {
         // Only throw if we have no cached data at all

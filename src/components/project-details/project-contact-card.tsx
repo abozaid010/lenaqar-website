@@ -64,7 +64,7 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
         );
         if (!cancelled) setContactData(contact);
       } catch (e) {
-        console.error('Error loading project contact info:', e);
+        console.error('Error loading project contact info:', e instanceof Error ? e.message : String(e));
         if (!cancelled) {
           setContactData({
             name: null,

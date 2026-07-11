@@ -71,7 +71,7 @@ export default function ChatWith({ name: initialName, userId, onNameUpdate }) {
         );
       }
     } catch (error) {
-      console.error("Failed to update name:", error);
+      console.error("Failed to update name:", error?.message ?? error);
       toast.error(
         error?.message ||
           translate("chatWith.nameUpdateFailed", "Failed to update name"),

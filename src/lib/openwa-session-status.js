@@ -24,17 +24,26 @@ const OPENWA_TERMINAL_FAILURE_STATUSES = new Set([
 
 export const OPENWA_CONNECTION_LOG_PREFIX = "[openwa-connection]";
 
-/** Structured trace logs for Connect WhatsApp debugging (filter server/browser console). */
-export function logOpenwaConnectionTrace(step, payload = {}) {
-  console.info(OPENWA_CONNECTION_LOG_PREFIX, step, {
-    ts: new Date().toISOString(),
-    ...payload,
-  });
+/** Dev-only connection traces (no-op in production). Step name only — never phones/payload. */
+export function logOpenwaConnectionTrace(step, _payload = {}) {
+  if (process.env.NODE_ENV !== "development") return;
+  console.info(OPENWA_CONNECTION_LOG_PREFIX, step);
 }
 
 export function isRealOpenwaSessionId(sessionId) {
   const id = String(sessionId || "").trim();
   return id.length > 0 && !id.startsWith("phone:") && id !== "unknown";
+}
+
+export function normalizePhoneDigits(phone) {
+  return String(phone || "").replace(/\D/g, "");
+}
+
+function maskPhoneForLog(phone) {
+  const digits = normalizePhoneDigits(phone);
+  if (!digits) return null;
+  if (digits.length <= 4) return `****${digits}`;
+  return `****${digits.slice(-4)}`;
 }
 
 export function describeOpenwaAccountMatch(account, bulkList) {
@@ -44,7 +53,7 @@ export function describeOpenwaAccountMatch(account, bulkList) {
 
   if (!match) {
     return {
-      whatsapp_number: account.whatsapp_number || null,
+      whatsapp_number: maskPhoneForLog(account.whatsapp_number),
       profile_session_id: sessionId || null,
       matched: false,
       match_by: null,
@@ -62,20 +71,16 @@ export function describeOpenwaAccountMatch(account, bulkList) {
         : "unknown";
 
   return {
-    whatsapp_number: account.whatsapp_number || null,
+    whatsapp_number: maskPhoneForLog(account.whatsapp_number),
     profile_session_id: sessionId || null,
     matched: true,
     match_by: matchBy,
     bulk_session_id: bulkSessionId || null,
-    bulk_phone: bulkPhone || null,
+    bulk_phone: maskPhoneForLog(bulkPhone),
     bulk_status: typeof match.status === "string" ? match.status : null,
     bulk_connected: Boolean(match.connected),
     bulk_has_qr: Boolean(normalizeQrImageValue(match.qr)),
   };
-}
-
-export function normalizePhoneDigits(phone) {
-  return String(phone || "").replace(/\D/g, "");
 }
 
 /**
@@ -191,7 +196,7 @@ export function mapBulkSessionToStatus(raw) {
   };
 }
 
-/** Dev-only summary of bulk OpenWA payload (never logs full QR/base64). */
+/** Dev-only summary of bulk OpenWA payload (never logs full QR/base64; phones masked). */
 export function summarizeOpenwaBulkPayloadForLog(bulkPayload) {
   const bulkList = extractBulkSessionsList(bulkPayload);
   return bulkList.map((item) => ({
@@ -199,14 +204,14 @@ export function summarizeOpenwaBulkPayloadForLog(bulkPayload) {
     connected: Boolean(item?.connected),
     status: typeof item?.status === "string" ? item.status : null,
     has_qr: Boolean(normalizeQrImageValue(item?.qr)),
-    phone: readBulkSessionPhone(item) || null,
+    phone: maskPhoneForLog(readBulkSessionPhone(item)),
   }));
 }
 
 export function summarizeResolvedSessionsForLog(sessions) {
   return (sessions ?? []).map((session) => ({
     session_id: session.session_id,
-    whatsapp_number: session.whatsapp_number || null,
+    whatsapp_number: maskPhoneForLog(session.whatsapp_number),
     connected: Boolean(session.connected),
     status: session.status ?? null,
     has_qr: Boolean(session.qrImage),

@@ -104,7 +104,7 @@ class CityManager {
         this.isInitialized = true;
         return this;
       } catch (error) {
-        console.error("Failed to initialize CityManager data:", error);
+        console.error("Failed to initialize CityManager data:", error?.message ?? error);
         this.cities = [];
         this.districts = [];
         this.subDistricts = [];

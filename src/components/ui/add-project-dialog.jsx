@@ -420,15 +420,6 @@ export default function AddCompoundDialog({
         // Ensure client_id is extracted from token for new projects
         const tokenClientId = getClientid();
         const initClientId = tokenClientId || clientId || "";
-        console.log(
-          "[useEffect] Initializing new project form with client_id:",
-          {
-            tokenClientId,
-            propClientId: clientId,
-            initClientId,
-          }
-        );
-
         setFormData({
           ar_name: "",
           en_name: "",
@@ -704,7 +695,7 @@ export default function AddCompoundDialog({
           setFormData((prev) => ({ ...prev, ...patch }));
         }
       } catch (error) {
-        console.error("Failed to normalize project location:", error);
+        console.error("Failed to normalize project location:", error?.message);
       } finally {
         if (!cancelled) didNormalizeLocation.current = true;
       }
@@ -1087,25 +1078,18 @@ export default function AddCompoundDialog({
 
     // Prevent duplicate submissions using ref
     if (isSubmittingRef.current || isSubmitting) {
-      console.log("[handleSubmit] Already submitting, ignoring duplicate");
       return;
     }
 
     // Debounce: prevent submissions within 500ms of each other
     const now = Date.now();
     if (now - lastSubmitTimeRef.current < 500) {
-      console.log("[handleSubmit] Debounced: submission too soon after previous");
       return;
     }
-    
-    console.log("[handleSubmit] Form submission started", {
-      editMode,
-      compoundDataId: projectData?.id,
-    });
+
 
     const formErrors = validateForm();
     if (Object.keys(formErrors).length > 0) {
-      console.log("[handleSubmit] Validation errors:", formErrors);
       setErrors((prev) => ({
         ...prev,
         submit:
@@ -1209,96 +1193,22 @@ export default function AddCompoundDialog({
         primary_units_sold_out: formData.primary_units_sold_out,
       };
 
-      console.log("[handleSubmit] Client ID info:", {
-        editMode,
-        tokenClientId,
-        propClientId: clientId,
-        formClientId: formData.client_id,
-        finalClientId,
-        clientIdSource: editMode
-          ? formData.client_id
-            ? "existing_form"
-            : tokenClientId
-              ? "token_fallback"
-              : "prop_fallback"
-          : tokenClientId
-            ? "token"
-            : formData.client_id
-              ? "form"
-              : "prop",
-        submissionDataKeys: Object.keys(submissionData),
-      });
-
-      console.log("[handleSubmit] Submission data prepared:", {
-        editMode,
-        projectId: projectData?.id,
-        submissionDataKeys: Object.keys(submissionData),
-        submissionDataSummary: {
-          ar_name: submissionData.ar_name,
-          en_name: submissionData.en_name,
-          developer_id: submissionData.developer_id,
-          developer_name: submissionData.developer_name,
-          city: submissionData.city,
-          district: submissionData.district,
-          area: submissionData.area,
-          delivery_date: submissionData.delivery_date,
-          gated: submissionData.gated,
-          primary_units_sold_out: submissionData.primary_units_sold_out,
-          client_id: submissionData.client_id,
-          imagesCount: submissionData.images?.length || 0,
-          paymentPlansCount: submissionData.payment_plans?.length || 0,
-          propertiesTypesCount: submissionData.properties_types?.length || 0,
-        },
-      });
-
       let res;
       if (editMode) {
         if (!projectData?.id) {
-          console.error("[handleSubmit] Missing project ID for update:", {
-            projectData: projectData,
-            projectDataId: projectData?.id,
-          });
+          console.error("[handleSubmit] Missing project ID for update");
           toast.error("Project ID is missing. Cannot update project.");
           setIsSubmitting(false);
           return;
         }
-        console.log(
-          "[handleSubmit] Calling updatecompound with ID:",
-          projectData.id
-        );
         res = await updateProject(submissionData, projectData.id);
       } else {
-        console.log("[handleSubmit] Calling addCompound...");
         res = await addProject(submissionData);
       }
-
-      console.log("[handleSubmit] API Response received:", {
-        res,
-        resType: typeof res,
-        resKeys: res ? Object.keys(res) : [],
-        hasStatus: res?.status !== undefined,
-        status: res?.status,
-        statusCode: res?.statusCode,
-        hasData: res?.data !== undefined,
-        hasError: res?.error !== undefined,
-        error: res?.error,
-        hasExistingProjectData: !!res?.existing_project_data,
-        isArray: Array.isArray(res),
-        hasId: res?.id !== undefined,
-      });
 
       // Check for 400 status code with existing_project_data FIRST (before checking other errors)
       // This ensures we show preview dialog instead of toast
       if (res?.statusCode === 400 && res?.existing_project_data) {
-        console.log(
-          "[handleSubmit] Project already exists, showing preview dialog:",
-          {
-            existingProjectData: res.existing_project_data,
-            existingProjectDataKeys: res.existing_project_data
-              ? Object.keys(res.existing_project_data)
-              : null,
-          }
-        );
         setExistingProjectData(res.existing_project_data);
         setPreviewDialogOpen(true);
         setIsSubmitting(false);
@@ -1307,10 +1217,6 @@ export default function AddCompoundDialog({
 
       // Check for validation errors from API
       if (res?.statusCode === 400 && res?.validation_errors) {
-        console.log(
-          "[handleSubmit] Found validation errors in response:",
-          res.validation_errors
-        );
         // Convert translation keys to actual error messages
         const validationErrors = {};
         Object.keys(res.validation_errors).forEach((fieldName) => {
@@ -1335,12 +1241,6 @@ export default function AddCompoundDialog({
 
       // Also check if res itself has existing_project_data (in case statusCode wasn't set)
       if (res?.existing_project_data && (res?.error || res?.error_message)) {
-        console.log(
-          "[handleSubmit] Found existing_project_data in response (without statusCode), showing preview:",
-          {
-            existingProjectData: res.existing_project_data,
-          }
-        );
         setExistingProjectData(res.existing_project_data);
         setPreviewDialogOpen(true);
         setIsSubmitting(false);
@@ -1369,10 +1269,6 @@ export default function AddCompoundDialog({
         // Check for validation errors in the error message
         const validationErrorKeys = parseValidationErrors(errorMessage);
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log(
-            "[handleSubmit] Found validation errors in response:",
-            validationErrorKeys
-          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
           Object.keys(validationErrorKeys).forEach((fieldName) => {
@@ -1395,24 +1291,13 @@ export default function AddCompoundDialog({
           return; // Don't show generic toast
         }
 
-        console.error(
-          "[handleSubmit] Update failed with error (no preview available):",
-          {
-            errorMessage,
-            fullResponse: res,
-            statusCode: res?.statusCode,
-          }
-        );
+        console.error("[handleSubmit] Update failed:", errorMessage);
         toast.error(errorMessage);
         setIsSubmitting(false);
         return;
       } else if (hasSuccessStatus || hasDataObject || hasDirectData) {
         // Success - extract the data
         const projectData = res?.data || res;
-        console.log(
-          "[handleSubmit] Update successful, calling onAdd with:",
-          projectData
-        );
         onAdd(projectData);
 
         // Invalidate projects query cache to refetch from API
@@ -1426,13 +1311,11 @@ export default function AddCompoundDialog({
         );
       } else {
         // Unknown response format
-        console.warn("[handleSubmit] Unknown response format:", res);
         const errorMessage = "An error occurred while processing your request.";
         toast.error(errorMessage);
         return;
       }
 
-      console.log("[handleSubmit] Closing dialog and resetting form");
       onClose();
       // Ensure client_id is set from token when resetting form
       const resetClientId = getClientid() || clientId || "";
@@ -1464,13 +1347,7 @@ export default function AddCompoundDialog({
         amenities: [],
       });
     } catch (error) {
-      console.error("[handleSubmit] Exception caught:", {
-        error,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        errorResponse: error.response,
-        errorResponseData: error.response?.data,
-      });
+      console.error("[handleSubmit] Exception caught:", error?.message);
 
       // Check if the error response contains existing_project_data
       const errorResponseData = error.response?.data;
@@ -1480,12 +1357,6 @@ export default function AddCompoundDialog({
           errorResponseData.error_message
         );
         if (existingProjectData) {
-          console.log(
-            "[handleSubmit] Found existing_project_data in exception, showing preview:",
-            {
-              existingProjectData,
-            }
-          );
           setExistingProjectData(existingProjectData);
           setPreviewDialogOpen(true);
           setIsSubmitting(false);
@@ -1497,10 +1368,6 @@ export default function AddCompoundDialog({
           errorResponseData.error_message
         );
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log(
-            "[handleSubmit] Found validation errors:",
-            validationErrorKeys
-          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
           Object.keys(validationErrorKeys).forEach((fieldName) => {
@@ -1530,10 +1397,6 @@ export default function AddCompoundDialog({
           error.response.data.error_message
         );
         if (Object.keys(validationErrorKeys).length > 0) {
-          console.log(
-            "[handleSubmit] Found validation errors in error_message:",
-            validationErrorKeys
-          );
           // Convert translation keys to actual error messages
           const validationErrors = {};
           Object.keys(validationErrorKeys).forEach((fieldName) => {
@@ -1572,7 +1435,6 @@ export default function AddCompoundDialog({
     } finally {
       setIsSubmitting(false);
       isSubmittingRef.current = false;
-      console.log("[handleSubmit] Form submission completed");
     }
   }, [
     editMode,

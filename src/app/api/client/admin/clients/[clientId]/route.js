@@ -45,7 +45,7 @@ export async function PATCH(request, { params }) {
     return NextResponse.json(data);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[admin-clients] PATCH error:", error);
+      console.error("[admin-clients] PATCH error:", error?.message ?? error);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

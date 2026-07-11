@@ -48,8 +48,7 @@ export default function TeamTable({
     } catch (error) {
       console.error("[TeamTable] Failed to delete employee:", {
         id: idToDelete,
-        error: error.message,
-        response: error.response?.data,
+        error: error?.message ?? error,
         status: error.response?.status,
       });
       toast.error(

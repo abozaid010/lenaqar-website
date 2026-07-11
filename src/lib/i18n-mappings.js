@@ -167,7 +167,7 @@ export const formatDate = (date, locale = 'en') => {
       day: 'numeric',
     }).format(new Date(date));
   } catch (error) {
-    console.warn('Date formatting error:', error);
+    console.warn('Date formatting error:', error?.message ?? error);
     return date;
   }
 };
@@ -178,7 +178,7 @@ export const formatNumber = (number, locale = 'en') => {
   try {
     return new Intl.NumberFormat(locale === 'ar' ? 'ar-EG' : 'en-US').format(number);
   } catch (error) {
-    console.warn('Number formatting error:', error);
+    console.warn('Number formatting error:', error?.message ?? error);
     return number;
   }
 };
@@ -194,7 +194,7 @@ export const formatCurrency = (amount, currency = 'EGP', locale = 'en') => {
       maximumFractionDigits: 0,
     }).format(amount);
   } catch (error) {
-    console.warn('Currency formatting error:', error);
+    console.warn('Currency formatting error:', error?.message ?? error);
     return `${currency} ${amount}`;
   }
 };

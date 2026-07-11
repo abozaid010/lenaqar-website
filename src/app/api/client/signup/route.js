@@ -136,7 +136,7 @@ export async function POST(request) {
 
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[client-signup] Error:", error);
+      console.error("[client-signup] Error:", error?.message ?? error);
     }
     
     return NextResponse.json(

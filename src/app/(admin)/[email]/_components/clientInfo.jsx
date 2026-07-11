@@ -311,7 +311,7 @@ export default function ClientInfo({ client_email }) {
       await new Promise((resolve) => setTimeout(resolve, 100));
       toast.success(translate("header.logoutSuccess"));
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error?.message ?? error);
     } finally {
       window.location.href = "/";
     }

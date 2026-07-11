@@ -150,7 +150,7 @@ export function useExcelExport(filterKey) {
       });
       currentUsers = result?.users || [];
     } catch (error) {
-      console.error("Error loading users for export:", error);
+      console.error("Error loading users for export:", error?.message ?? error);
       alert(
         locale === "ar"
           ? "حدث خطأ أثناء تحميل البيانات للتصدير"
@@ -309,7 +309,7 @@ export function useExcelExport(filterKey) {
       // Trigger download using secure utility
       downloadExcelFile(excelBuffer, finalFilename);
     } catch (error) {
-      console.error("Error exporting to Excel:", error);
+      console.error("Error exporting to Excel:", error?.message ?? error);
       alert(
         locale === "ar"
           ? "حدث خطأ أثناء التصدير"

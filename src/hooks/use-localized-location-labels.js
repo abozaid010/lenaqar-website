@@ -36,7 +36,7 @@ export function useLocalizedLocationLabels({
         );
         if (!cancelled) setLabels(next);
       } catch (error) {
-        console.error("Failed to resolve location labels:", error);
+        console.error("Failed to resolve location labels:", error?.message ?? error);
         if (!cancelled) setLabels(EMPTY_LABELS);
       }
     };

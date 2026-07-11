@@ -32,7 +32,7 @@ export default function Error({ error, reset }) {
 
     useEffect(() => {
         // Keep logging for debugging without crashing the UI
-        console.error(error);
+        console.error(error?.message ?? error);
     }, [error]);
 
     // Stable key so auto-retries don't restart if the error boundary remounts.

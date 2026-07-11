@@ -20,7 +20,6 @@ export default function ProjectInquiryCard({ project }: ProjectInquiryCardProps)
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle form submission here
-    console.log('Form submitted:', formData);
     // Reset form or show success message
   };
 

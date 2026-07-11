@@ -146,7 +146,7 @@ const ChatPanel = ({
       setMessage("");
       await refetchSession();
     } catch (error) {
-      console.error("Failed to send reply:", error);
+      console.error("Failed to send reply:", error?.message ?? error);
     } finally {
       setIsSending(false);
     }

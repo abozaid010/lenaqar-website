@@ -15,7 +15,7 @@ class ImageErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.warn("Image rendering failed:", error?.message || error);
+    console.warn("Image rendering failed:", error?.message ?? error);
     if (this.props.onError) {
       this.props.onError(error);
     }
@@ -73,7 +73,6 @@ export default function ImageWithLoader({
     
     if (shouldRetryImage(src)) {
       // Retry the image after a short delay
-      console.log(`Retrying image ${src} (attempt ${retryCount + 1})`);
       setTimeout(() => {
         // Check if the element still exists before trying to modify it
         if (e.currentTarget && e.currentTarget.src) {
@@ -92,7 +91,6 @@ export default function ImageWithLoader({
       setIsLoading(false);
       setHasError(true);
       markImageAsBroken(src);
-      console.log(`Image ${src} marked as broken after ${retryCount} attempts`);
     }
     
     if (onError) onError(e);

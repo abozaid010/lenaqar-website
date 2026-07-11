@@ -80,7 +80,7 @@ export function useI18n() {
       }
       return validation.safeKey;
     } catch (error) {
-      console.error(`Translation error for key: ${validation.safeKey}`, error);
+      console.error(`Translation error for key: ${validation.safeKey}`, error?.message ?? error);
       return fallback || validation.safeKey;
     }
   }, [rawT, locale]);

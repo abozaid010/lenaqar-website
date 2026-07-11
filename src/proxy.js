@@ -16,12 +16,7 @@ const IS_DEV = process.env.NODE_ENV === "development";
  */
 function withProxyDebug(response, request) {
   if (!IS_DEV) return response;
-  const { pathname, search } = request.nextUrl;
   const location = response?.headers?.get?.("location");
-  // eslint-disable-next-line no-console
-  console.log(
-    `[proxy] ${request.method} ${pathname}${search} → ${location ? `redirect → ${location}` : "next"}`
-  );
   try {
     response?.headers?.set?.("x-mw-decision", location ? "redirect" : "next");
   } catch {

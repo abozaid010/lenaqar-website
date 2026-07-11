@@ -3,21 +3,11 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   isMessagingConfigReady,
-  logWhatsappMessaging,
   normalizeLinkedAutomatedWhatsappList,
   resolveSenderPhoneNumber,
 } from "@/lib/whatsapp-messaging-provider";
 import { getProfileData } from "@/utils/api";
 import { useQuery } from "@tanstack/react-query";
-
-function summarizeAccounts(accounts) {
-  return accounts.map((account) => ({
-    platform: account.platform,
-    whatsapp_number: account.whatsapp_number || null,
-    sender_phone_number: resolveSenderPhoneNumber(account) || null,
-    ready: isMessagingConfigReady(account),
-  }));
-}
 
 export function messagingProviderConfigQueryKey(clientId) {
   const resolved = clientId || LenaCookiesManager.getClientId();
@@ -50,7 +40,7 @@ export function seedMessagingProviderConfigCache(
   queryClient,
   clientId,
   profileResponse,
-  { source = "unknown" } = {},
+  _options = {},
 ) {
   const config = buildMessagingProviderConfigFromProfile(profileResponse);
   if (!config) return false;
@@ -60,15 +50,6 @@ export function seedMessagingProviderConfigCache(
     messagingProviderConfigQueryKey(resolvedClientId),
     config,
   );
-
-  logWhatsappMessaging("profile_messaging_seeded", {
-    source,
-    clientId: resolvedClientId,
-    accountCount: config.accounts.length,
-    canSendWhatsapp: config.canSendWhatsapp,
-    defaultSenderPhone: config.defaultSenderPhone || null,
-    accounts: summarizeAccounts(config.accounts),
-  });
 
   return true;
 }
@@ -86,17 +67,8 @@ export function useMessagingProviderConfig(clientId) {
   const query = useQuery({
     queryKey: messagingProviderConfigQueryKey(resolvedClientId),
     queryFn: async () => {
-      logWhatsappMessaging("profile_messaging_loading", {
-        clientId: resolvedClientId,
-        reason: "client_fetch",
-      });
-
       const response = await getProfileData();
       if (response?.error) {
-        logWhatsappMessaging("profile_messaging_failed", {
-          clientId: resolvedClientId,
-          error: response.error,
-        });
         throw new Error(response.error);
       }
 
@@ -104,18 +76,6 @@ export function useMessagingProviderConfig(clientId) {
       if (!result) {
         throw new Error("Invalid profile response");
       }
-
-      logWhatsappMessaging("profile_messaging_loaded", {
-        clientId: resolvedClientId,
-        source: "client_fetch",
-        accountCount: result.accounts.length,
-        readyCount: result.readyAccounts.length,
-        hasMultipleAccounts: result.hasMultipleAccounts,
-        canSendWhatsapp: result.canSendWhatsapp,
-        defaultPlatform: result.defaultAccount?.platform ?? null,
-        defaultSenderPhone: result.defaultSenderPhone || null,
-        accounts: summarizeAccounts(result.accounts),
-      });
 
       return result;
     },

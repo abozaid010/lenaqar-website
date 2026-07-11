@@ -176,7 +176,7 @@ async function buildSlugMapping(): Promise<void> {
       }
     } catch (error) {
       // Keep prior cache when refresh fails.
-      console.error("Error building slug mapping:", error);
+      console.error("Error building slug mapping:", error instanceof Error ? error.message : String(error));
     } finally {
       // Clear the promise when done (whether success or failure)
       cachePromise = null;
@@ -221,7 +221,7 @@ export async function findUnitBySlug(slug: string): Promise<string | null> {
 
     return null;
   } catch (error) {
-    console.error("Error finding unit by slug:", error);
+    console.error("Error finding unit by slug:", error instanceof Error ? error.message : String(error));
     return null;
   }
 }

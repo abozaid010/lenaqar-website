@@ -67,7 +67,7 @@ export async function PUT(request) {
     return await forwardRequest(request, "PUT");
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[whatsapp-instance] PUT error:", error);
+      console.error("[whatsapp-instance] PUT error:", error?.message ?? error);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
@@ -78,7 +78,7 @@ export async function DELETE(request) {
     return await forwardRequest(request, "DELETE");
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
-      console.error("[whatsapp-instance] DELETE error:", error);
+      console.error("[whatsapp-instance] DELETE error:", error?.message ?? error);
     }
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }

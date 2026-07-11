@@ -116,7 +116,7 @@ export default function CampaignDialog({
         );
         if (!cancelled) setProjectLocationLabels(labels);
       } catch (error) {
-        console.error("Failed to load project location labels:", error);
+        console.error("Failed to load project location labels:", error?.message ?? error);
         if (!cancelled) setProjectLocationLabels({});
       }
     };

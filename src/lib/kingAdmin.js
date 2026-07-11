@@ -48,7 +48,7 @@ export async function isCurrentUserKingAdmin() {
 
     return isKingAdmin(clientId);
   } catch (error) {
-    console.error('Error checking king admin status:', error);
+    console.error('Error checking king admin status:', error?.message ?? error);
     return false;
   }
 }
@@ -86,7 +86,7 @@ export async function isRequestFromKingAdmin(request) {
     // Verify the client ID is 'public' (king admin)
     return isKingAdmin(clientId);
   } catch (error) {
-    console.error('Error validating king admin request:', error);
+    console.error('Error validating king admin request:', error?.message ?? error);
     return false;
   }
 }

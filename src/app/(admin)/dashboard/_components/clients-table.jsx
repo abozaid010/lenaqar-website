@@ -89,7 +89,7 @@ export default function ClientsTable({ users, pagination }) {
       setRowActions(actions);
       setOpenActionModal(true);
     } catch (error) {
-      console.error("Error fetching actions:", error);
+      console.error("Error fetching actions:", error?.message ?? error);
       setLoadingClientActions(null);
       setActionUser(null);
     }
@@ -103,7 +103,7 @@ export default function ClientsTable({ users, pagination }) {
       setRowRequirements({ ...requirements, name: name, phone: phone });
       setOpenRequirementsModal(true);
     } catch (error) {
-      console.error("Error fetching requirements:", error);
+      console.error("Error fetching requirements:", error?.message ?? error);
       setLoadingRequirements(null);
     }
   };
@@ -143,7 +143,7 @@ export default function ClientsTable({ users, pagination }) {
       // Remove the deleted user from local state
       setLocalUsers((prev) => prev.filter((user) => user.user_id !== user_id));
     } catch (error) {
-      console.error("Error deleting client:", error);
+      console.error("Error deleting client:", error?.message ?? error);
       toast.error(t?.clientsTable?.deleteError || "Failed to delete client");
     } finally {
       setLoadingDelete(null);

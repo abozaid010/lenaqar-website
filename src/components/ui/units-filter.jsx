@@ -213,7 +213,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
         }
       } catch (error) {
-        console.error("Failed to normalize filter params:", error);
+        console.error("Failed to normalize filter params:", error?.message ?? error);
       }
     };
 
@@ -254,7 +254,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
         setCityLabels(labels);
       } catch (error) {
-        console.error("Failed to load city labels:", error);
+        console.error("Failed to load city labels:", error?.message ?? error);
       }
     };
 
@@ -274,7 +274,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
         setDistrictLabels(labels);
       } catch (error) {
-        console.error("Failed to load district labels:", error);
+        console.error("Failed to load district labels:", error?.message ?? error);
       }
     };
 
@@ -313,7 +313,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         }
         setSubDistrictLabels(labels);
       } catch (error) {
-        console.error("Failed to load sub-district labels:", error);
+        console.error("Failed to load sub-district labels:", error?.message ?? error);
       }
     };
 

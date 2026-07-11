@@ -42,7 +42,6 @@ const Header = ({ clientName, clientID, clientEmail }) => {
   };
 
   const sendMessageWhatsApp = () => {
-    console.log("WhatsApp message button clicked");
     const phoneNumber = "201556720323";
     const url = `https://wa.me/${phoneNumber}`;
     window.open(url, "_blank");
@@ -74,7 +73,7 @@ const Header = ({ clientName, clientID, clientEmail }) => {
       // Show success message
       toast.success(translate("header.logoutSuccess"));
     } catch (error) {
-      console.error("Logout error:", error);
+      console.error("Logout error:", error?.message);
     } finally {
       window.location.href = "/";
     }

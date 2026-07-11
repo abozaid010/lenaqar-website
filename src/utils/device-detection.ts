@@ -124,26 +124,19 @@ export interface TestResult {
 
 // Simple test runner function
 export function runTests(): TestResult {
-  console.log('Running device detection tests...');
-  
   let passed = 0;
   let failed = 0;
   
-  testCases.forEach((testCase, index) => {
+  testCases.forEach((testCase) => {
     const result = getDeviceInfo(testCase.userAgent);
     const passedTest = JSON.stringify(result) === JSON.stringify(testCase.expected);
     
     if (passedTest) {
-      console.log(`✅ Test ${index + 1} (${testCase.name}): PASSED`);
       passed++;
     } else {
-      console.log(`❌ Test ${index + 1} (${testCase.name}): FAILED`);
-      console.log(`   Expected: ${JSON.stringify(testCase.expected)}`);
-      console.log(`   Got: ${JSON.stringify(result)}`);
       failed++;
     }
   });
   
-  console.log(`\nTest Results: ${passed} passed, ${failed} failed`);
   return { passed, failed, total: testCases.length };
 }

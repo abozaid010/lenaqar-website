@@ -1,5 +1,4 @@
 import {
-  logWhatsappMessaging,
   resolveWhatsappSendContext,
   sendWhatsappWithClientConfig,
   WHATSAPP_MESSAGING_NOT_LOADED_CODE,
@@ -53,7 +52,6 @@ async function resolveSendContextWithRefetch({
   isMessagingFetching,
   isMessagingError,
   refetchMessagingConfig,
-  clientId,
 }) {
   if (isMessagingLoading || isMessagingFetching) {
     return {
@@ -63,7 +61,6 @@ async function resolveSendContextWithRefetch({
   }
 
   if (isMessagingError || !messagingData) {
-    logWhatsappMessaging("send_outbound_refetch_messaging", { clientId });
     const { data: refreshed } = await refetchMessagingConfig();
     return resolveWhatsappSendContext(refreshed, selectedPlatform);
   }
@@ -147,13 +144,6 @@ export async function sendWhatsappOutboundMessage({
     throw error;
   }
 
-  logWhatsappMessaging("send_outbound_dispatch", {
-    clientId,
-    platform: context.transportPlatform,
-    senderPhoneNumber: context.senderPhoneNumber,
-    recipient: whatsappRecipient,
-  });
-
   try {
     await sendWhatsappWithClientConfig({
       config: context.account,
@@ -170,11 +160,6 @@ export async function sendWhatsappOutboundMessage({
     });
   } catch (error) {
     if (fallbackToDeepLink && phoneNumber?.trim() && isWhatsappApiValidationError(error)) {
-      logWhatsappMessaging("send_outbound_api_fallback_deeplink", {
-        clientId,
-        recipient: whatsappRecipient,
-        status: error?.response?.status ?? error?.status ?? null,
-      });
       return openWhatsappDeepLink(phoneNumber, text, translate);
     }
     throw error;

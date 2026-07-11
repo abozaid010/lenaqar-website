@@ -84,12 +84,6 @@ export function withRetry(apiFunction, options = {}) {
     for (let attempt = 0; attempt <= retryOptions.maxRetries; attempt++) {
       try {
         const result = await apiFunction(...args);
-        
-        // If successful and this was a retry, log the success
-        if (attempt > 0) {
-          console.log(`API request succeeded on attempt ${attempt + 1}`);
-        }
-        
         return result;
       } catch (error) {
         lastError = error;
@@ -208,7 +202,6 @@ export function withCircuitBreaker(apiFunction, circuitOptions = {}, retryOption
     if (state === 'OPEN' && now - lastFailureTime > recoveryTimeout) {
       state = 'HALF_OPEN';
       successCount = 0;
-      console.log('Circuit breaker moving to HALF_OPEN state');
     }
     
     // If circuit is open, fail fast
@@ -227,7 +220,6 @@ export function withCircuitBreaker(apiFunction, circuitOptions = {}, retryOption
         successCount++;
         if (successCount >= 3) {
           state = 'CLOSED';
-          console.log('Circuit breaker moving to CLOSED state');
         }
       }
       

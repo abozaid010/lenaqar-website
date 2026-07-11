@@ -62,7 +62,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
       setShowDeleteDialog(false);
       handleBack();
     } catch (err) {
-      console.error("Delete developer failed:", err);
+      console.error("Delete developer failed:", err?.message ?? err);
       toast.error(
         t?.common?.failedToDeleteDeveloper || "Failed to delete developer"
       );
@@ -134,7 +134,7 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
   }
 
   if (isError) {
-    console.error("❌ Error loading developer details:", error);
+    console.error("❌ Error loading developer details:", error?.message ?? error);
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-4">

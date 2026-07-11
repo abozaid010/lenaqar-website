@@ -35,14 +35,14 @@ export async function addNewAction(prevState, formData) {
     // Handle specific error scenarios
     if (error.response) {
       // Server responded with a status code outside the 2xx range
-      console.error("Server response error:", error.response.data);
+      console.error("Server response error:", error.response?.status, error.message);
       return {
         success: false,
         message: `Failed to post action: ${error.response.data.detail || "Server error"}`,
       };
     } else if (error.request) {
       // Request was made but no response received
-      console.error("No response received:", error.request);
+      console.error("No response received from server");
       return {
         success: false,
         message: "Failed to post action: No response from server",
@@ -80,7 +80,7 @@ export async function sendNewMessage(prevState, formData) {
       timestamp: timeStamp,
     };
   } catch (error) {
-    console.log(error);
+    console.error("Failed to send message:", error?.message);
     return {
       success: false,
       message: "Failed to send message",

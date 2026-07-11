@@ -70,7 +70,7 @@ export async function generateMetadata({ params }) {
       },
     };
   } catch (error) {
-    console.error("Error generating project metadata:", error);
+    console.error("Error generating project metadata:", error?.message ?? error);
     return {
       title: "Project Details - AI Sales Agent | LENAAI",
       description: "View detailed project information with LENAAI's AI Sales Agent.",
@@ -165,7 +165,7 @@ export default async function ProjectDetailsPageWrapper({ params }) {
       </>
     );
   } catch (error) {
-    console.error("Error loading project:", error);
+    console.error("Error loading project:", error?.message ?? error);
     
     return (
       <div className="container mx-auto h-full flex items-center justify-center min-h-[60vh]">

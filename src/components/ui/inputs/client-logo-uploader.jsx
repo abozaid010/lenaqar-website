@@ -19,7 +19,7 @@ async function tryDeleteClientLogo() {
   try {
     await deleteClientLogo();
   } catch (e) {
-    console.warn("[ClientLogoUploader] deleteClientLogo:", e);
+    console.warn("[ClientLogoUploader] deleteClientLogo:", e?.message);
   }
 }
 
@@ -100,7 +100,6 @@ export default function ClientLogoUploader({
   };
 
   const handleFileSelect = (e) => {
-    console.log("[ClientLogoUploader] handleFileSelect triggered");
     if (e.target.files && e.target.files.length > 0) {
       processFile(e.target.files[0]);
     }
@@ -108,23 +107,15 @@ export default function ClientLogoUploader({
   };
 
   const processFile = async (file) => {
-    console.log("[ClientLogoUploader] processFile start", {
-      name: file?.name,
-      type: file?.type,
-      size: file?.size,
-      clientId,
-      deferred,
-      at: new Date().toISOString(),
-    });
     if (!file) return;
 
     if (!isSupportedImageFile(file)) {
-      console.warn("[ClientLogoUploader] blocked: unsupported file type", file?.type);
+      console.warn("[ClientLogoUploader] blocked: unsupported file type");
       toast.error(t.invalidFileType);
       return;
     }
     if (file.size > CLIENT_LOGO_MAX_BYTES) {
-      console.warn("[ClientLogoUploader] blocked: file too large", file?.size);
+      console.warn("[ClientLogoUploader] blocked: file too large");
       toast.error(
         t?.common?.fileSizeExceedsMb
           ? String(t.common.fileSizeExceedsMb).replace("{mb}", "5")
@@ -134,7 +125,6 @@ export default function ClientLogoUploader({
     }
 
     if (deferred) {
-      console.log("[ClientLogoUploader] deferred mode: storing preview only");
       if (deferredPreview) URL.revokeObjectURL(deferredPreview);
       const url = URL.createObjectURL(file);
       setDeferredPreview(url);
@@ -147,17 +137,14 @@ export default function ClientLogoUploader({
       toast.error("Client ID is required to upload.");
       return;
     }
-
-    console.log("[ClientLogoUploader] upload flow started");
     setUploadBusy(true);
     setIsUploading?.(true);
     try {
       const hadExisting = Boolean((logoUrl && logoUrl.trim()) || fileId);
       if (hadExisting) {
-        console.log("[ClientLogoUploader] replacing existing logo", { fileId });
         // Fire-and-forget: do not block upload on profile logo delete request.
         tryDeleteClientLogo().catch((error) => {
-          console.error("[ClientLogoUploader] deleteClientLogo failed:", error);
+          console.error("[ClientLogoUploader] deleteClientLogo failed:", error?.message);
         });
         if (fileId) {
           try {
@@ -167,53 +154,40 @@ export default function ClientLogoUploader({
               "Timed out while removing previous logo."
             );
           } catch (e) {
-            console.warn("[ClientLogoUploader] deleteImage before replace:", e);
+            console.warn("[ClientLogoUploader] deleteImage before replace:", e?.message);
           }
         }
       }
 
       let fileToUpload = file;
       try {
-        console.log("[ClientLogoUploader] compression started");
         fileToUpload = await withTimeout(
           processImage(file, { maxSizeMB: 5, maxWidthOrHeight: 1920 }),
           UPLOAD_TIMEOUT_MS,
           "Timed out while processing image."
         );
-        console.log("[ClientLogoUploader] compression finished", {
-          originalSize: file.size,
-          outputSize: fileToUpload?.size,
-          outputType: fileToUpload?.type,
-        });
       } catch (compressionError) {
         console.error(
           "[ClientLogoUploader] compression failed, uploading original file:",
-          compressionError
+          compressionError?.message
         );
       }
       const formDataToUpload = new FormData();
       formDataToUpload.append("file", fileToUpload);
-      console.log("[ClientLogoUploader] calling uploadImages", {
-        clientId,
-        uploadSize: fileToUpload?.size,
-        uploadType: fileToUpload?.type,
-      });
       const res = await withTimeout(
         uploadImages(formDataToUpload, clientId),
         UPLOAD_TIMEOUT_MS,
         "Timed out while uploading image."
       );
-      console.log("[ClientLogoUploader] uploadImages resolved", res);
       if (res?.url) {
         setLogo(res.url, res.fileId || "");
       } else {
         toast.error("Image upload failed. Please try again.");
       }
     } catch (err) {
-      console.error("Client logo upload failed:", err);
+      console.error("Client logo upload failed:", err?.message);
       toast.error("Failed to upload image. Please try again.");
     } finally {
-      console.log("[ClientLogoUploader] upload flow finished");
       if (isMountedRef.current) {
         setUploadBusy(false);
       }
@@ -234,14 +208,14 @@ export default function ClientLogoUploader({
       setIsUploading?.(true);
       try {
         tryDeleteClientLogo().catch((error) => {
-          console.error("[ClientLogoUploader] deleteClientLogo failed:", error);
+          console.error("[ClientLogoUploader] deleteClientLogo failed:", error?.message);
         });
         if (fileId) {
           try {
             await deleteImage(fileId);
             toast.success(t.imageDeletedSuccess);
           } catch (err) {
-            console.error(err);
+            console.error("Failed to delete image:", err?.message);
             toast.error(t.failedToDeleteImage);
           }
         } else {

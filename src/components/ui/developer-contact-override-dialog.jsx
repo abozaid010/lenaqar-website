@@ -66,7 +66,7 @@ export default function DeveloperContactOverrideDialog({
         });
       }
     } catch (e) {
-      console.error(e);
+      console.error(e?.message ?? e);
       toast.error(translate("common.error"));
     } finally {
       setLoading(false);

@@ -254,21 +254,6 @@ export default function LeadsListPane({
   const renderedCount = users.length;
   const visibleCount = visibleOnScreenCount;
   const totalFromAPI = totalMatchingLeads;
-  const filters = searchParams.toString();
-  const search = appliedSearchQuery;
-
-  if (typeof window !== "undefined") {
-    console.log("[LeadsListPane Counts]", {
-      totalFromAPI,
-      loadedCount,
-      renderedCount,
-      visibleCount,
-      pageCount,
-      hasNextPage,
-      filters,
-      search,
-    });
-  }
 
   const visibleCountLabel = (() => {
     if (renderedCount === 0) return "";

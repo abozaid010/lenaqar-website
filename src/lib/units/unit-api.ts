@@ -89,7 +89,7 @@ export async function getUnits(): Promise<UnitApiResponse> {
     const response = await axiosInstance.get('/units/all');
     return response.data;
   } catch (error) {
-    console.error('Error fetching units:', error);
+    console.error('Error fetching units:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }

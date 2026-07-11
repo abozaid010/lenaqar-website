@@ -59,11 +59,8 @@ const SidebarComponent = ({
   // Profile API is the source of truth for `module_actions` (not embedded in JWT in v2).
   const { setModuleActions } = useModuleActionsContext();
 
-  const isKingAdminUser = isCurrentUserKingAdmin();
   const {
     data: profilePayload,
-    isError: isProfileError,
-    error: profileError,
   } = useQuery({
     queryKey: ["clientProfile", "sidebarBrand", currentClientId || "unknown-client"],
     queryFn: getProfileData,
@@ -123,23 +120,6 @@ const SidebarComponent = ({
     clientName ??
     null;
 
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "development") return;
-    console.log("[SidebarLogo] profile query snapshot", {
-      isKingAdminUser,
-      hasProfilePayload: Boolean(profilePayload),
-      payloadKeys:
-        profilePayload && typeof profilePayload === "object"
-          ? Object.keys(profilePayload)
-          : [],
-      dataKeys:
-        pd && typeof pd === "object"
-          ? Object.keys(pd)
-          : [],
-      extractedClientLogoUrl: clientLogoUrl || null,
-    });
-  }, [isKingAdminUser, profilePayload, pd, clientLogoUrl]);
-
   // Persist latest profile logo into client_info cookie so branding is available
   // immediately across app sections that read client_info on startup.
   useEffect(() => {
@@ -153,28 +133,11 @@ const SidebarComponent = ({
       profilePayload?.logo ??
       "";
     if (!isProfileClientMatch) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[SidebarLogo] profile/cookie client mismatch, skip cookie persist", {
-          cookieClientId: currentClientId,
-          profileClientId,
-        });
-      }
       return;
-    }
-    if (process.env.NODE_ENV === "development") {
-      console.log("[SidebarLogo] persist logo step", {
-        rawLogoUrl: logoUrl || null,
-      });
     }
     if (!logoUrl) return;
 
     const currentInfo = LenaCookiesManager.getClientInfo() || {};
-    if (process.env.NODE_ENV === "development") {
-      console.log("[SidebarLogo] cookie before persist", {
-        currentClientInfoLogo: currentInfo.logo_url || null,
-        currentClientInfoName: currentInfo.client_name || null,
-      });
-    }
     if (
       currentInfo.logo_url === logoUrl &&
       (!pd?.client_name || currentInfo.client_name === pd.client_name)
@@ -187,14 +150,6 @@ const SidebarComponent = ({
       ...(pd?.client_name ? { client_name: pd.client_name } : null),
       logo_url: logoUrl,
     });
-    if (process.env.NODE_ENV === "development") {
-      const updatedInfo = LenaCookiesManager.getClientInfo() || {};
-      console.log("[SidebarLogo] cookie after persist", {
-        updatedClientInfoClientId: updatedInfo.client_id || null,
-        updatedClientInfoName: updatedInfo.client_name || null,
-        updatedClientInfoLogo: updatedInfo.logo_url || null,
-      });
-    }
   }, [profilePayload, pd, currentClientId, isProfileClientMatch, profileClientId]);
 
   useEffect(() => {
@@ -205,41 +160,6 @@ const SidebarComponent = ({
     typeof clientLogoUrl === "string" &&
     clientLogoUrl.trim() !== "" &&
     !brandImgFailed;
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "development") return;
-    console.log("[SidebarLogo] render decision", {
-      isKingAdminUser,
-      currentClientId,
-      profileClientId,
-      isProfileClientMatch,
-      clientLogoUrl: clientLogoUrl || null,
-      brandImgFailed,
-      showClientLogo,
-      fallbackLogoWillRender: !showClientLogo,
-      resolvedDisplayUrl: clientLogoUrl
-        ? getClientLogoDisplayUrl(clientLogoUrl)
-        : null,
-    });
-  }, [
-    isKingAdminUser,
-    currentClientId,
-    profileClientId,
-    isProfileClientMatch,
-    clientLogoUrl,
-    brandImgFailed,
-    showClientLogo,
-  ]);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV !== "development") return;
-    if (!isProfileError) return;
-    console.error("[SidebarLogo] profile query failed", {
-      currentClientId,
-      errorMessage: profileError?.message || String(profileError),
-      error: profileError,
-    });
-  }, [isProfileError, profileError, currentClientId]);
 
   const { canAccessCampaignChat: hasAccess } = useCampaignChatAccess();
 
@@ -342,20 +262,7 @@ const SidebarComponent = ({
                   src={getClientLogoDisplayUrl(clientLogoUrl)}
                   alt=""
                   className="w-14 h-14 rounded-full object-cover ring-1 ring-gray-200 bg-white"
-                  onLoad={(e) => {
-                    if (process.env.NODE_ENV === "development") {
-                      console.log("[SidebarLogo] image loaded", {
-                        renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
-                      });
-                    }
-                  }}
-                  onError={(e) => {
-                    if (process.env.NODE_ENV === "development") {
-                      console.error("[SidebarLogo] image failed", {
-                        renderedSrc: e.currentTarget?.currentSrc || e.currentTarget?.src || null,
-                        originalClientLogoUrl: clientLogoUrl || null,
-                      });
-                    }
+                  onError={() => {
                     setBrandImgFailed(true);
                   }}
                 />

@@ -87,7 +87,7 @@ export default function BasicDetailsStep({
           updateFormData(patch);
         }
       } catch (error) {
-        console.error("Failed to normalize location:", error);
+        console.error("Failed to normalize location:", error?.message ?? error);
       } finally {
         if (!cancelled) didNormalizeLocation.current = true;
       }

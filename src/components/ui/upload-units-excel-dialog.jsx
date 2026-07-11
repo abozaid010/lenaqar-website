@@ -233,7 +233,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         setIsProcessing(false);
       }
     } catch (err) {
-      console.error("Error applying mapping:", err);
+      console.error("Error applying mapping:", err?.message);
       setError(err.message || "Failed to apply mapping");
       if (isReapply) {
         setIsReapplyingMapping(false);
@@ -289,7 +289,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       }
     } catch (error) {
       // If localStorage is not available, just continue without tracking
-      console.warn("localStorage not available for tracking dialog opens:", error);
+      console.warn("localStorage not available for tracking dialog opens:", error?.message ?? error);
     }
   }, [isOpen]);
 
@@ -437,7 +437,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       // FIX: Return rawData so it can be passed directly to avoid closure issue
       return rawData;
     } catch (err) {
-      console.error("Error parsing Excel file:", err);
+      console.error("Error parsing Excel file:", err?.message);
       setError(err.message || "Failed to parse Excel file");
       throw err;
     }
@@ -585,7 +585,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         // Wait a tick to ensure state is updated
         await new Promise(resolve => setTimeout(resolve, 0));
       } catch (err) {
-        console.error("Error re-applying mapping before submit:", err);
+        console.error("Error re-applying mapping before submit:", err?.message);
         setError(err.message || "Failed to apply mapping");
         setIsReapplyingMapping(false);
         return;
@@ -631,7 +631,6 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         units: unitsWithDeveloper,
       });
 
-      console.log("Upload response:", response);
 
       // Check if the upload was successful.
       // This endpoint is wrapped by withErrorHandling(), which returns
@@ -784,7 +783,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
         );
       }
     } catch (err) {
-      console.error("Upload error:", err);
+      console.error("Upload error:", err?.message);
       // Mark all units as failed on error
       setUploadStatus((prev) =>
         prev.map((item) => ({
@@ -855,7 +854,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       // Trigger download using secure utility
       downloadExcelFile(excelBuffer, filename);
     } catch (error) {
-      console.error("Error exporting failed units:", error);
+      console.error("Error exporting failed units:", error?.message);
       alert(t.uploadExcel?.exportError || "Error occurred while exporting failed units");
     }
   };
@@ -1785,7 +1784,7 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
 
             setIsProjectsNotUpdatedDialogOpen(false);
           } catch (err) {
-            console.error("Failed to delete primary units:", err);
+            console.error("Failed to delete primary units:", err?.message);
             toast.error(
               err.message ||
               t.uploadExcel?.deletePrimaryUnitsError ||

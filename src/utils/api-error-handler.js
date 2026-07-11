@@ -228,7 +228,6 @@ export function withErrorHandling(apiFunction, options = {}) {
         console.error(`API Error [${errorInfo.type}]:`, {
           message: errorInfo.message,
           statusCode: errorInfo.statusCode,
-          details: errorInfo.details
         });
       }
       

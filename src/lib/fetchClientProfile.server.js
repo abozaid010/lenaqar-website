@@ -80,7 +80,6 @@ export async function fetchClientProfileFromCookies() {
   inflightProfileFetches.set(key, promise);
 
   void (async () => {
-    const startedAt = Date.now();
     const headers = {
       Accept: "application/json",
       Authorization: `Bearer ${token}`,
@@ -96,13 +95,7 @@ export async function fetchClientProfileFromCookies() {
         headers,
         cache: "no-store",
       });
-      const ms = Date.now() - startedAt;
       if (!res.ok) {
-        if (process.env.NODE_ENV === "development") {
-          console.warn(
-            `[auth][profile] GET ${PROFILE_PATH} → ${res.status} ${ms}ms clientId=${clientId ?? "none"} (non_ok)`
-          );
-        }
         resolvePromise(null);
         return;
       }
@@ -111,24 +104,8 @@ export async function fetchClientProfileFromCookies() {
       if (json) {
         profileShortCache.set(key, { at: Date.now(), value: json });
       }
-      if (process.env.NODE_ENV === "development") {
-        const ma = json?.data?.module_actions;
-        const moduleKeys =
-          ma && typeof ma === "object" && !Array.isArray(ma)
-            ? Object.keys(ma).sort().join(",")
-            : "";
-        console.log(
-          `[auth][profile] GET ${PROFILE_PATH} → ${res.status} ${ms}ms clientId=${clientId ?? "none"} modules=${moduleKeys || "none"}`
-        );
-      }
       resolvePromise(json);
     } catch {
-      const ms = Date.now() - startedAt;
-      if (process.env.NODE_ENV === "development") {
-        console.error(
-          `[auth][profile] GET ${PROFILE_PATH} → error ${ms}ms clientId=${clientId ?? "none"}`
-        );
-      }
       resolvePromise(null);
     } finally {
       inflightProfileFetches.delete(key);
