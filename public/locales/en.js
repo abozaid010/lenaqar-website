@@ -936,6 +936,7 @@ export default {
       visibleOnScreenTotal: "{visible} visible · {total} total",
       visibleOnScreenLoadedTotal:
         "{visible} visible · {loaded} loaded · {total} total",
+      loadedCount: "{loaded} loaded",
       recipientCount: "{count} recipient(s)",
       messageLabel: "Message",
       messagePlaceholder: "Type your WhatsApp message...",

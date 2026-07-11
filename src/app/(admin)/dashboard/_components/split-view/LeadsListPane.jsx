@@ -15,8 +15,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import LeadRow from "./LeadRow";
 
 const SEARCH_DEBOUNCE_MS = 3000;
-/** Fraction of row height that must intersect the scroll root to count as visible. */
-const VISIBLE_ROW_THRESHOLD = 0.15;
 
 function useClientMounted() {
   const [isMounted, setIsMounted] = useState(false);
@@ -29,25 +27,6 @@ function readFilterParam(params, key) {
   if (typeof params.get === "function") return params.get(key) || "";
   const value = params[key];
   return value == null || value === "" ? "" : String(value);
-}
-
-/**
- * Synchronously count rows intersecting the scroll root (avoids IO flash to 0 on reattach).
- * @param {Element} root
- * @param {NodeListOf<Element> | Element[]} rows
- */
-function countIntersectingRows(root, rows) {
-  const rootRect = root.getBoundingClientRect();
-  if (rootRect.height <= 0) return 0;
-  let n = 0;
-  for (const row of rows) {
-    const rect = row.getBoundingClientRect();
-    if (rect.height <= 0) continue;
-    const overlap =
-      Math.min(rect.bottom, rootRect.bottom) - Math.max(rect.top, rootRect.top);
-    if (overlap > rect.height * VISIBLE_ROW_THRESHOLD) n += 1;
-  }
-  return n;
 }
 
 function ListSkeleton({ rows = 8 }) {
@@ -97,11 +76,8 @@ export default function LeadsListPane({
   const debounceTimer = useRef(null);
   const lastPushedQueryRef = useRef(initialQuery);
   const observerRef = useRef(null);
-  const visibleRowsObserverRef = useRef(null);
-  const visibleRowIdsRef = useRef(new Set());
   const sentinelRef = useRef(null);
   const scrollRootRef = useRef(null);
-  const [visibleOnScreenCount, setVisibleOnScreenCount] = useState(0);
   const fetchNextPageRef = useRef(fetchNextPage);
   const hasNextPageRef = useRef(hasNextPage);
   const isFetchingNextPageRef = useRef(isFetchingNextPage);
@@ -222,103 +198,20 @@ export default function LeadsListPane({
     };
   }, [clientFilteredEmpty, hasNextPage, initialListPaint]);
 
-  useEffect(() => {
-    visibleRowsObserverRef.current?.disconnect();
-    visibleRowsObserverRef.current = null;
-    visibleRowIdsRef.current = new Set();
-
-    if (!initialListPaint || users.length === 0) {
-      setVisibleOnScreenCount(0);
-      return;
-    }
-
-    const root = scrollRootRef.current;
-    if (!root) {
-      setVisibleOnScreenCount(0);
-      return;
-    }
-
-    const rows = root.querySelectorAll("[data-user-id]");
-    if (!rows.length) {
-      setVisibleOnScreenCount(0);
-      return;
-    }
-
-    const syncVisibleCount = () => {
-      setVisibleOnScreenCount(visibleRowIdsRef.current.size);
-    };
-
-    // Seed from geometry so the label never flashes 0 when the observer reattaches
-    // after infinite-scroll / filter updates (IO callbacks are async).
-    const rootRect = root.getBoundingClientRect();
-    for (const row of rows) {
-      const id = row.getAttribute("data-user-id");
-      if (!id) continue;
-      const rect = row.getBoundingClientRect();
-      const overlap =
-        Math.min(rect.bottom, rootRect.bottom) - Math.max(rect.top, rootRect.top);
-      if (rect.height > 0 && overlap > rect.height * VISIBLE_ROW_THRESHOLD) {
-        visibleRowIdsRef.current.add(id);
-      }
-    }
-    setVisibleOnScreenCount(countIntersectingRows(root, rows));
-
-    visibleRowsObserverRef.current = new IntersectionObserver(
-      (entries) => {
-        let changed = false;
-        for (const entry of entries) {
-          const id = entry.target.getAttribute("data-user-id");
-          if (!id) continue;
-          if (entry.isIntersecting) {
-            if (!visibleRowIdsRef.current.has(id)) {
-              visibleRowIdsRef.current.add(id);
-              changed = true;
-            }
-          } else if (visibleRowIdsRef.current.delete(id)) {
-            changed = true;
-          }
-        }
-        if (changed) syncVisibleCount();
-      },
-      { root, threshold: VISIBLE_ROW_THRESHOLD }
-    );
-
-    rows.forEach((row) => visibleRowsObserverRef.current.observe(row));
-
-    return () => {
-      visibleRowsObserverRef.current?.disconnect();
-      visibleRowsObserverRef.current = null;
-      visibleRowIdsRef.current = new Set();
-    };
-  }, [users, initialListPaint]);
-
   const loadedCount = totalLoadedLeads;
-  const renderedCount = users.length;
-  const visibleCount = visibleOnScreenCount;
   const totalFromAPI = totalMatchingLeads;
 
-  const visibleCountLabel = (() => {
-    if (renderedCount === 0) return "";
+  const loadedCountLabel = (() => {
+    if (loadedCount <= 0 && !(totalFromAPI != null && !hasNextPage)) return "";
 
     const fmt = (n) => localeUtils.formatNumber(n);
-
-    // messages/v2/all has no grand-total field. Once every page is loaded,
-    // unique fetched leads === total matching for the current filters.
-    if (totalFromAPI != null && !hasNextPage) {
-      return translate(
-        "dashboardFilter.bulkWhatsapp.visibleOnScreenTotal",
-        "{visible} visible · {total} total"
-      )
-        .replace("{visible}", fmt(visibleCount))
-        .replace("{total}", fmt(totalFromAPI));
-    }
+    const count =
+      totalFromAPI != null && !hasNextPage ? totalFromAPI : loadedCount;
 
     return translate(
-      "dashboardFilter.bulkWhatsapp.visibleOnScreenLoaded",
-      "{visible} visible · {loaded} loaded"
-    )
-      .replace("{visible}", fmt(visibleCount))
-      .replace("{loaded}", fmt(loadedCount));
+      "dashboardFilter.bulkWhatsapp.loadedCount",
+      "{loaded} loaded",
+    ).replace("{loaded}", fmt(count));
   })();
 
   if (isError) {
@@ -440,16 +333,6 @@ export default function LeadsListPane({
               <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
             </button>
           </div>
-
-          {visibleCountLabel ? (
-            <span
-              className="text-[10px] leading-tight text-chat-text-faint shrink-0 tabular-nums max-w-[4.5rem] sm:max-w-none text-end"
-              aria-live="polite"
-              title={visibleCountLabel}
-            >
-              {visibleCountLabel}
-            </span>
-          ) : null}
         </div>
       </div>
 
@@ -521,6 +404,18 @@ export default function LeadsListPane({
           </>
         )}
       </div>
+
+      {loadedCountLabel ? (
+        <div className="px-2 py-1 border-t border-chat-border shrink-0 bg-chat-panel-bg">
+          <span
+            className="block text-[10px] leading-tight text-chat-text-faint tabular-nums text-end"
+            aria-live="polite"
+            title={loadedCountLabel}
+          >
+            {loadedCountLabel}
+          </span>
+        </div>
+      ) : null}
     </div>
   );
 }

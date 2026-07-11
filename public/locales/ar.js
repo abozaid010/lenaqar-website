@@ -808,6 +808,7 @@ export default {
       visibleOnScreenTotal: "{visible} ظاهر · {total} إجمالي",
       visibleOnScreenLoadedTotal:
         "{visible} ظاهر · {loaded} محمّل · {total} إجمالي",
+      loadedCount: "{loaded} محمّل",
       recipientCount: "{count} مستلم",
       messageLabel: "الرسالة",
       messagePlaceholder: "اكتب رسالة واتساب...",
