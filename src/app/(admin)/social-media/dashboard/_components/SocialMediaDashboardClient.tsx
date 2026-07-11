@@ -12,6 +12,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useI18n } from "@/hooks/useI18n";
+import { useModuleActions } from "@/hooks/useModuleActions";
 import { useSocialMediaDashboardSummary } from "@/hooks/social-media/useSocialMediaDashboardSummary";
 import { KpiCard } from "@/components/social-media/KpiCard";
 import { SocialMediaHeader } from "@/components/social-media/SocialMediaHeader";
@@ -19,12 +20,26 @@ import { KpiGridSkeleton } from "@/components/social-media/Skeletons";
 
 export default function SocialMediaDashboardClient() {
   const { translate, localeUtils } = useI18n();
+  const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
 
   const { data, isLoading, isError, error, refetch, isFetching } =
     useSocialMediaDashboardSummary();
 
   const title = translate("socialMedia.dashboard.title");
+
+  if (isReady && !canView) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+        <div className="text-sm font-semibold text-amber-900">
+          {translate("common.unauthorized")}
+        </div>
+        <div className="mt-2 text-sm text-amber-800">
+          {translate("common.noPermissionToView")}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

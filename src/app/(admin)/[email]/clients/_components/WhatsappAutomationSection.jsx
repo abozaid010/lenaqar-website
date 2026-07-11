@@ -31,6 +31,7 @@ import {
   getPlatformLabelKey,
   getWhatsappAccountKey,
   getWhatsappAccountKeyFromSnapshot,
+  hasWhatsappAccountDeleteIdentity,
   isOpenwaProvider,
   isUltramessageProvider,
   isWhatsappCloudApiProvider,
@@ -515,8 +516,19 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
           (a) => getWhatsappAccountKey(a) === accountKey
         );
         if (!account) continue;
+        const deleteParams = buildWhatsappAccountDeleteParams(account);
+        // Never call DELETE with platform alone when identity is missing —
+        // the API would be ambiguous for multi-account same-platform clients.
+        if (!hasWhatsappAccountDeleteIdentity(deleteParams)) {
+          throw new Error(
+            translate(
+              "editClient.whatsapp.unlinkMissingIdentity",
+              "Cannot unlink this account: missing session id or phone number."
+            )
+          );
+        }
         lastResult = await deleteClientWhatsappInstance({
-          ...buildWhatsappAccountDeleteParams(account),
+          ...deleteParams,
           targetClientId: targetId,
         });
       }
@@ -574,6 +586,7 @@ const WhatsappAutomationSection = forwardRef(function WhatsappAutomationSection(
       syncAccountsFromServer,
       targetClientId,
       tokenDirty,
+      translate,
     ]
   );
 

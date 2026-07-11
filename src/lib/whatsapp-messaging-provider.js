@@ -296,7 +296,11 @@ export function formatWhatsappAccountSubtitle(account) {
   return account.whatsapp_number?.trim() ?? "";
 }
 
-/** Query/body params for DELETE /client/whatsapp-instance. */
+/**
+ * Query params for DELETE /client/whatsapp-instance (single account only).
+ * Always includes the strongest available identity so the backend never falls
+ * back to "delete all accounts on this platform".
+ */
 export function buildWhatsappAccountDeleteParams(account) {
   if (!account) return {};
   const params = {
@@ -309,6 +313,19 @@ export function buildWhatsappAccountDeleteParams(account) {
   const instance = account.whatsapp_instance_id?.trim();
   if (instance) params.whatsapp_instance_id = instance;
   return params;
+}
+
+/** True when DELETE params can uniquely identify one account (not platform-only). */
+export function hasWhatsappAccountDeleteIdentity(params) {
+  if (!params || typeof params !== "object") return false;
+  return Boolean(
+    params.openwa_session_id?.trim?.() ||
+      params.openwa_session_id ||
+      params.whatsapp_instance_id?.trim?.() ||
+      params.whatsapp_instance_id ||
+      params.whatsapp_number?.trim?.() ||
+      params.whatsapp_number
+  );
 }
 
 /** Resolve the account to use for outbound send from hook data + optional picker value. */

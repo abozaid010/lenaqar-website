@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { useI18n } from "@/hooks/useI18n";
 import type { SocialMediaStatus, SocialPost } from "@/types/socialMedia";
+import { useModuleActions } from "@/hooks/useModuleActions";
 import { useSocialMediaPosts } from "@/hooks/social-media/useSocialMediaPosts";
 import { SocialMediaHeader } from "@/components/social-media/SocialMediaHeader";
 import { DataTable } from "@/components/social-media/DataTable";
@@ -39,6 +40,7 @@ function matchesSearch(post: SocialPost, q: string) {
 
 export default function PostsPageClient() {
   const { translate, localeUtils } = useI18n();
+  const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -93,6 +95,19 @@ export default function PostsPageClient() {
   }, [items, search]);
 
   const total = data?.total ?? 0;
+
+  if (isReady && !canView) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+        <div className="text-sm font-semibold text-amber-900">
+          {translate("common.unauthorized")}
+        </div>
+        <div className="mt-2 text-sm text-amber-800">
+          {translate("common.noPermissionToView")}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4">

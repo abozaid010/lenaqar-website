@@ -2,6 +2,8 @@
 
 /** @typedef {{ modules: PermissionSchemaModule[], allActions: string[] }} ParsedPermissionSchema */
 
+import { MODULE_BASE_ACTIONS } from "@/lib/default-module-actions";
+
 const FALLBACK_MODULES = [
   "projects",
   "developers",
@@ -18,29 +20,57 @@ const FALLBACK_MODULES = [
   "social_media",
 ];
 
+/** Never assign or surface these — permissions stay account-scoped (`*_own`). */
+const EXCLUDED_CLIENT_ACTIONS = new Set(["update_any", "delete_any"]);
+
+/**
+ * Legacy `whatsapp` kept so existing client matrices still display a label;
+ * new defaults use `whatsapp_api` (matches bulk WhatsApp runtime checks).
+ */
 const FALLBACK_ALL_ACTIONS = [
-  "view",
-  "create",
+  ...MODULE_BASE_ACTIONS,
   "import",
-  "update_own",
-  "update_any",
   "update_developer_contacts",
-  "delete_own",
-  "delete_any",
   "whatsapp",
+  "whatsapp_api",
   "whatsapp_automation",
 ];
+
+function filterClientActions(actions) {
+  return (Array.isArray(actions) ? actions : []).filter(
+    (a) => typeof a === "string" && !EXCLUDED_CLIENT_ACTIONS.has(a)
+  );
+}
+
+/**
+ * Per-module available actions for the fallback schema (base + extras only).
+ */
+function getFallbackAvailableActionsForModule(moduleKey) {
+  const actions = [...MODULE_BASE_ACTIONS];
+  const key = String(moduleKey || "").toLowerCase();
+
+  if (key === "developers") {
+    actions.push("update_developer_contacts");
+  }
+  if (key === "units") {
+    actions.push("import");
+  }
+  if (key === "conversation") {
+    actions.push("import", "whatsapp_api", "whatsapp_automation", "whatsapp");
+  }
+
+  return actions;
+}
 
 const ACTION_LABEL_FALLBACKS = {
   view: "View",
   create: "Create",
   import: "Import",
   update_own: "Update Own",
-  update_any: "Update Any",
   update_developer_contacts: "Update Developer Contacts",
   delete_own: "Delete Own",
-  delete_any: "Delete Any",
   whatsapp: "WhatsApp API Template",
+  whatsapp_api: "WhatsApp API Template",
   whatsapp_automation: "WhatsApp Automation",
 };
 
@@ -49,11 +79,10 @@ const ACTION_LABEL_KEYS = {
   create: "modulePermissions.actions.create",
   import: "modulePermissions.actions.import",
   update_own: "modulePermissions.actions.updateOwn",
-  update_any: "modulePermissions.actions.updateAny",
   update_developer_contacts: "modulePermissions.actions.updateDeveloperContacts",
   delete_own: "modulePermissions.actions.deleteOwn",
-  delete_any: "modulePermissions.actions.deleteAny",
   whatsapp: "modulePermissions.actions.whatsapp",
+  whatsapp_api: "modulePermissions.actions.whatsappApi",
   whatsapp_automation: "modulePermissions.actions.whatsappAutomation",
 };
 
@@ -61,7 +90,7 @@ export function getFallbackPermissionSchema() {
   return {
     modules: FALLBACK_MODULES.map((module) => ({
       module,
-      available_actions: [...FALLBACK_ALL_ACTIONS],
+      available_actions: getFallbackAvailableActionsForModule(module),
     })),
     allActions: [...FALLBACK_ALL_ACTIONS],
   };
@@ -87,17 +116,17 @@ export function parsePermissionSchemaResponse(response) {
   const modules = rawModules
     .map((entry) => {
       const module = entry?.module ?? entry?.name;
-      const available_actions = Array.isArray(entry?.available_actions)
-        ? entry.available_actions.filter((a) => typeof a === "string")
-        : [];
+      const available_actions = filterClientActions(
+        Array.isArray(entry?.available_actions) ? entry.available_actions : []
+      );
       if (!module || typeof module !== "string") return null;
       return { module, available_actions };
     })
     .filter(Boolean);
 
-  const allActions = Array.isArray(payload.all_actions)
-    ? payload.all_actions.filter((a) => typeof a === "string")
-    : [];
+  const allActions = filterClientActions(
+    Array.isArray(payload.all_actions) ? payload.all_actions : []
+  );
 
   if (modules.length === 0) return null;
 
@@ -121,9 +150,13 @@ export function getResolvedPermissionSchema(parsed) {
   }
 
   return {
-    modules: mergedModules,
-    allActions:
-      parsed.allActions?.length > 0 ? parsed.allActions : fallback.allActions,
+    modules: mergedModules.map((entry) => ({
+      ...entry,
+      available_actions: filterClientActions(entry.available_actions),
+    })),
+    allActions: filterClientActions(
+      parsed.allActions?.length > 0 ? parsed.allActions : fallback.allActions
+    ),
   };
 }
 
@@ -146,8 +179,10 @@ export function buildActionOptions(availableActions, translate) {
 
 export function getAvailableActionsForModule(schema, moduleName) {
   const entry = schema?.modules?.find((m) => m.module === moduleName);
-  if (entry?.available_actions?.length) return entry.available_actions;
-  return schema?.allActions ?? FALLBACK_ALL_ACTIONS;
+  if (entry?.available_actions?.length) {
+    return filterClientActions(entry.available_actions);
+  }
+  return filterClientActions(schema?.allActions ?? FALLBACK_ALL_ACTIONS);
 }
 
 /** Drop actions that are not allowed for their module per schema. */
@@ -160,7 +195,7 @@ export function sanitizeModuleActions(moduleActions, schema) {
   for (const [module, actions] of Object.entries(moduleActions)) {
     if (!Array.isArray(actions)) continue;
     const allowed = new Set(getAvailableActionsForModule(schema, module));
-    const filtered = actions.filter((a) => allowed.has(a));
+    const filtered = filterClientActions(actions).filter((a) => allowed.has(a));
     if (filtered.length > 0) next[module] = filtered;
   }
   return next;

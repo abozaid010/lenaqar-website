@@ -30,6 +30,7 @@ export async function addNewAction(prevState, formData) {
     return {
       success: true,
       message: "Action posted successfully",
+      submittedAt: Date.now(),
     };
   } catch (error) {
     // Handle specific error scenarios

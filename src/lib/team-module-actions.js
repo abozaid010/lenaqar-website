@@ -4,14 +4,22 @@
  *
  * Rules:
  * - **Viewer**: `view` only on each parent module (excluding analytics & team_members).
- * - **Editor** / **Admin**: `view`, `create`, `import`, `update_own`, `delete_own` on
- *   parent modules; **editor** cannot see `analytics` or `team_members`.
+ * - **Editor** / **Admin**: standardized base actions (+ module extras) on parent
+ *   modules; **editor** cannot see `analytics` or `team_members`.
  * - **Admin** only: always includes `team_members` and `analytics` (with the same
  *   privileged actions) so admins can manage team and see analytics.
  */
 
+import {
+  getDefaultActionsForModule,
+  MODULE_BASE_ACTIONS,
+} from "@/lib/default-module-actions";
+
 /** Modules hidden for editor and viewer (admin may still have them). */
-export const TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER = ["analytics", "team_members"];
+export const TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER = [
+  "analytics",
+  "team_members",
+];
 
 /** Fallback module list when parent `module_actions` is missing (same order as CRM areas). */
 export const TEAM_PARENT_MODULE_FALLBACK_KEYS = [
@@ -28,15 +36,8 @@ export const TEAM_PARENT_MODULE_FALLBACK_KEYS = [
 
 export const TEAM_MEMBER_ACTIONS_VIEWER = ["view"];
 
-/** Matches “create / edit / update / delete” for editor & admin on allowed modules. */
-export const TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN = [
-  "view",
-  "create",
-  "import",
-  "update_own",
-  "delete_own",
-  "update_developer_contacts"
-];
+/** @deprecated Prefer getDefaultActionsForModule — kept for callers expecting a flat list. */
+export const TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN = [...MODULE_BASE_ACTIONS];
 
 function normalizeRole(role) {
   return String(role || "viewer").toLowerCase().trim();
@@ -52,7 +53,8 @@ function parentModuleKeys(parentModuleActions) {
   }
   return Object.keys(parentModuleActions).filter(
     (key) =>
-      Array.isArray(parentModuleActions[key]) && parentModuleActions[key].length > 0
+      Array.isArray(parentModuleActions[key]) &&
+      parentModuleActions[key].length > 0
   );
 }
 
@@ -67,7 +69,10 @@ function isHiddenFromEditorAndViewer(moduleKey) {
  * @param {"admin"|"editor"|"viewer"|string} role
  * @returns {Record<string, string[]>}
  */
-export function deriveTeamMemberModuleActionsFromParent(parentModuleActions, role) {
+export function deriveTeamMemberModuleActionsFromParent(
+  parentModuleActions,
+  role
+) {
   const r = normalizeRole(role);
   const baseKeys = parentModuleKeys(parentModuleActions);
   const out = {};
@@ -76,12 +81,7 @@ export function deriveTeamMemberModuleActionsFromParent(parentModuleActions, rol
     const keySet = new Set(baseKeys);
     TEAM_MODULES_HIDDEN_FOR_EDITOR_AND_VIEWER.forEach((m) => keySet.add(m));
     for (const key of keySet) {
-      let actions = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
-      // Add WhatsApp actions for conversation module
-      if (key === "conversation") {
-        actions = [...actions, "whatsapp", "whatsapp_automation"];
-      }
-      out[key] = actions;
+      out[key] = getDefaultActionsForModule(key);
     }
     return out;
   }
@@ -89,7 +89,7 @@ export function deriveTeamMemberModuleActionsFromParent(parentModuleActions, rol
   if (r === "editor") {
     for (const key of baseKeys) {
       if (isHiddenFromEditorAndViewer(key)) continue;
-      out[key] = [...TEAM_MEMBER_ACTIONS_EDITOR_AND_ADMIN];
+      out[key] = getDefaultActionsForModule(key);
     }
     return out;
   }
