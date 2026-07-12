@@ -4,6 +4,7 @@ import { Copy, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
 import AndroidCallTipDialog from "@/components/phone/AndroidCallTipDialog";
+import CallFallbackDialog from "@/components/phone/CallFallbackDialog";
 import { useTelCall } from "@/hooks/useTelCall";
 import { useI18n } from "@/hooks/useI18n";
 import { copyToClipboard } from "@/utils/phone-utils";
@@ -36,9 +37,12 @@ export default function CallButton({
     phoneValue,
     telHref,
     tipOpen,
+    fallbackOpen,
     onTelClick,
     dismissTip,
     continueFromTip,
+    dismissFallback,
+    retryCall,
   } = useTelCall(phoneNumber, defaultCountry);
 
   const isDisabled = disabled ?? !telHref;
@@ -85,10 +89,10 @@ export default function CallButton({
       href={telHref}
       onClick={(e) => {
         if (stopPropagation) e.stopPropagation();
-        // Fire the tap handler first so selection happens on every tap, even
-        // when onTelClick defers the call (e.g. first-use Android tip).
-        onClick?.(e);
-        onTelClick(e);
+        // Drive the call ourselves and defer the tap handler (e.g. lead
+        // selection) to the next tick, so its SPA navigation can't cancel the
+        // OS handoff to the dialer. Selection still runs on every tap.
+        onTelClick(e, onClick ? () => onClick(e) : undefined);
       }}
       className={`${baseClass} ${className}`}
       title={callTitle}
@@ -124,6 +128,13 @@ export default function CallButton({
         phoneValue={phoneValue}
         onContinue={continueFromTip}
         onDismiss={dismissTip}
+      />
+      <CallFallbackDialog
+        isOpen={fallbackOpen}
+        phoneValue={phoneValue}
+        telHref={telHref}
+        onRetry={retryCall}
+        onClose={dismissFallback}
       />
     </>
   );

@@ -7,7 +7,7 @@ import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-da
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
-import { FileSpreadsheet, Trash2, X } from "lucide-react";
+import { FileSpreadsheet, SlidersHorizontal, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
@@ -322,6 +322,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [cityLabels, setCityLabels] = useState({});
   const [districtLabels, setDistrictLabels] = useState({});
@@ -332,6 +333,25 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  // Lock body scroll while the mobile filter sheet is open
+  useEffect(() => {
+    if (!isMobileFiltersOpen) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsMobileFiltersOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isMobileFiltersOpen]);
 
   const showBulkToolbar =
     !isPublic && isMounted && canShowBulkButton && bulkSelection;
@@ -509,6 +529,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const handleApplyFiltersSubmit = (event) => {
     event.preventDefault();
     applyDraftFilters();
+    setIsMobileFiltersOpen(false);
+  };
+
+  const handleClearAllAndCloseMobile = () => {
+    handleRemoveAllFilters();
+    setIsMobileFiltersOpen(false);
   };
 
   function getSelectedPropertyType() {
@@ -771,89 +797,134 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   );
 
 
+
   const draftFilterLabels = useMemo(
     () => buildSummaryLabelsFromFilters(draftFilters),
     [buildSummaryLabelsFromFilters, draftFilters]
   );
 
-  return (
-    <div className="p-4 space-y-3 bg-white rounded-lg shadow-md">
-      {/* Actions */}
-      {!isPublic && (
-        <div className="w-full space-y-2 pb-3 border-b border-[#E6E6E6]">
-          <div className="flex items-center gap-2">
+  const activeFilterCount = activeFilters.length;
+  const filtersLabel = translate("unitsFilter.filters", "Filters");
+
+  const activeFiltersChips = activeFilterCount > 0 && (
+    <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-2 min-w-0 overflow-x-auto overscroll-x-contain pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {activeFilters.map((filter, index) => (
+          <div
+            key={`${filter.key}-${index}`}
+            className="flex items-center gap-1.5 bg-gray-100 rounded-full ps-2.5 pe-1 py-1 text-sm text-gray-700 shrink-0 max-w-[200px]"
+          >
+            <p className="truncate text-xs">
+              {getFilterDisplayText(filter.key, filter.value)}
+            </p>
             <button
               type="button"
-              onClick={() => setIsUploadDialogOpen(true)}
-              className="min-w-0 flex-1 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+              className="shrink-0 flex items-center justify-center min-h-8 min-w-8 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+              aria-label={translate("unitsFilter.clearall", "Clear")}
+              onClick={() => {
+                if (filter.removeKeys) {
+                  filter.removeKeys.forEach((key) => handleRemoveFilter(key));
+                } else {
+                  handleRemoveFilter(filter.key);
+                }
+              }}
             >
-              <FileSpreadsheet size={16} className="shrink-0" />
-              <span className="whitespace-nowrap text-xs truncate">
-                {t.uploadExcel?.button || "Upload"}
-              </span>
+              <X size={14} />
             </button>
-            <AddUnitButton />
-            {showBulkToolbar && bulkSelection.hasSelection && (
-              <button
-                type="button"
-                onClick={handleOpenCheckAvailability}
-                className="flex items-center justify-center gap-1.5 px-3 h-10 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0"
-                title={translate(
-                  "unitsFilter.bulkAvailability.checkButton",
-                  "Send Message"
-                )}
-              >
-                <svg
-                  className="w-4 h-4 text-green-600 shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  aria-hidden
-                >
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
-                </svg>
-              </button>
-            )}
           </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="shrink-0 flex items-center gap-1.5 min-h-9 px-2.5 text-xs text-gray-600 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors"
+        onClick={handleRemoveAllFilters}
+      >
+        <Trash2 size={14} />
+        <span className="hidden xs:inline sm:inline">
+          {t.unitsFilter.clearall}
+        </span>
+      </button>
+    </div>
+  );
 
-          {showBulkToolbar && (
-            <label className="flex w-full items-center gap-2 h-9 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
-              <input
-                type="checkbox"
-                className="h-4 w-4 accent-primary shrink-0"
-                checked={bulkSelection.allSelectableVisibleSelected}
-                disabled={bulkSelection.selectableVisibleCount === 0}
-                onChange={() => bulkSelection.toggleSelectAllVisible()}
-              />
-              <span className="text-xs truncate">
-                {translate(
-                  "unitsFilter.bulkAvailability.selectAll",
-                  "Select all on page"
-                )}
-              </span>
-              {bulkSelection.hasSelection && (
-                <span className="ms-auto text-xs text-gray-500 shrink-0">
-                  {translate(
-                    "unitsFilter.bulkAvailability.selectedUnits",
-                    "{count} selected"
-                  ).replace("{count}", String(bulkSelection.selectedUnitIds.size))}
-                </span>
-              )}
-            </label>
+  const actionsBlock = !isPublic && (
+    <div className="w-full space-y-2 pb-3 border-b border-[#E6E6E6]">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setIsUploadDialogOpen(true)}
+          className="min-w-0 flex-1 px-3 py-2 h-10 bg-green-600 hover:bg-green-700 text-white rounded-md flex items-center justify-center gap-2 transition-colors text-sm font-medium shadow-sm hover:shadow-md"
+        >
+          <FileSpreadsheet size={16} className="shrink-0" />
+          <span className="whitespace-nowrap text-xs truncate">
+            {t.uploadExcel?.button || "Upload"}
+          </span>
+        </button>
+        <AddUnitButton />
+        {showBulkToolbar && bulkSelection.hasSelection && (
+          <button
+            type="button"
+            onClick={handleOpenCheckAvailability}
+            className="flex items-center justify-center gap-1.5 px-3 h-10 min-w-10 bg-white border border-gray-300 text-gray-800 rounded-md hover:bg-gray-50 transition-colors text-sm font-medium shadow-sm hover:shadow-md shrink-0"
+            title={translate(
+              "unitsFilter.bulkAvailability.checkButton",
+              "Send Message"
+            )}
+          >
+            <svg
+              className="w-4 h-4 text-green-600 shrink-0"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              aria-hidden
+            >
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
+            </svg>
+          </button>
+        )}
+      </div>
+
+      {showBulkToolbar && (
+        <label className="flex w-full items-center gap-2 h-10 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none hover:bg-gray-50">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-primary shrink-0"
+            checked={bulkSelection.allSelectableVisibleSelected}
+            disabled={bulkSelection.selectableVisibleCount === 0}
+            onChange={() => bulkSelection.toggleSelectAllVisible()}
+          />
+          <span className="text-xs truncate">
+            {translate(
+              "unitsFilter.bulkAvailability.selectAll",
+              "Select all on page"
+            )}
+          </span>
+          {bulkSelection.hasSelection && (
+            <span className="ms-auto text-xs text-gray-500 shrink-0">
+              {translate(
+                "unitsFilter.bulkAvailability.selectedUnits",
+                "{count} selected"
+              ).replace("{count}", String(bulkSelection.selectedUnitIds.size))}
+            </span>
           )}
-        </div>
+        </label>
       )}
+    </div>
+  );
 
-      {/* Filters */}
+  const filterFields = (
+    <>
       <UnitsFavoriteSearches
         filters={draftFilters}
         activeFilterLabels={draftFilterLabels}
         getSummaryLabels={buildSummaryLabelsFromFilters}
-        onApply={applyFavoriteSearch}
+        onApply={(savedFilters) => {
+          applyFavoriteSearch(savedFilters);
+          setIsMobileFiltersOpen(false);
+        }}
         isPublic={isPublic}
       />
 
-      <form onSubmit={handleApplyFiltersSubmit} className="space-y-3">
-        {/* City */}
+      <form onSubmit={handleApplyFiltersSubmit} className="space-y-3" id="units-filter-form">
         <div className="w-full min-w-0">
           <SearchableCitySelect
             value={draftFilters.city === "all" ? "" : draftFilters.city}
@@ -869,7 +940,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* District */}
         <div className="w-full min-w-0">
           <SearchableDistrictSelect
             value={draftFilters.district === "all" ? "" : draftFilters.district}
@@ -886,7 +956,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Sub-district */}
         <div className="w-full min-w-0">
           <SearchableSubDistrictSelect
             value={draftFilters.sub_district === "all" ? "" : draftFilters.sub_district}
@@ -914,7 +983,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Project */}
         <div className="w-full min-w-0">
           <SearchableProjectSelect
             value={draftFilters.project_name === "all" ? "" : draftFilters.project_name}
@@ -939,7 +1007,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Property Type */}
         <div className="w-full min-w-0">
           <SearchablePropertyTypeSelect
             value={draftFilters.property_type === "all" ? "" : draftFilters.property_type}
@@ -955,7 +1022,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Furnishing Type */}
         <div className="w-full min-w-0">
           <SearchableFurnishingTypeSelect
             value={draftFilters.furnished_type === "all" ? "" : draftFilters.furnished_type}
@@ -971,7 +1037,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Purpose */}
         <div className="w-full min-w-0">
           <p className="text-xs font-medium text-[#494A4B] mb-1.5">
             {translate("unitsFilter.purpose", "Purpose")}
@@ -1023,7 +1088,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </div>
         </div>
 
-        {/* My Inventory */}
         <div className="w-full min-w-0">
           <label
             className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium select-none ${
@@ -1044,7 +1108,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
-        {/* Resale */}
         <div className="w-full min-w-0">
           <label
             className={`flex w-full items-center gap-2 h-10 px-3 rounded-md border text-sm font-medium cursor-pointer select-none ${
@@ -1063,7 +1126,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           </label>
         </div>
 
-        {/* Price Range */}
         <div className="w-full min-w-0 grid grid-cols-2 gap-2">
           <LenaTextField
             name="min_price"
@@ -1093,7 +1155,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
-        {/* Area Range */}
         <div className="w-full min-w-0 grid grid-cols-2 gap-2">
           <LenaTextField
             name="min_area"
@@ -1123,9 +1184,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           />
         </div>
 
+        {/* Desktop apply — mobile uses sticky sheet footer */}
         <button
           type="submit"
-          className={`w-full h-11 rounded-md text-sm font-semibold transition-colors shadow-sm ${
+          className={`hidden lg:flex w-full h-11 items-center justify-center rounded-md text-sm font-semibold transition-colors shadow-sm ${
             hasPendingChanges
               ? "bg-primary text-white hover:bg-primary/90"
               : "bg-primary/80 text-white hover:bg-primary"
@@ -1134,51 +1196,225 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           {translate("unitsFilter.applyFilters", "Apply Filters")}
         </button>
       </form>
+    </>
+  );
 
-      {/* Active Filters — applied (URL) only */}
-      {activeFilters.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-gray-600">
-            {t.unitsFilter.activeFilter}
-          </span>
-          <div className="flex flex-wrap gap-2">
-            {activeFilters.map((filter, index) => (
-              <div
-                key={index}
-                className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
-              >
-                <p className="truncate max-w-[180px] text-xs">
-                  {getFilterDisplayText(filter.key, filter.value)}
-                </p>
+  return (
+    <>
+      {/* Mobile toolbar: filters trigger + primary actions */}
+      <div className="lg:hidden space-y-2 min-w-0">
+        <div className="sticky top-0 z-20 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
+          <div className="flex items-center gap-2 min-w-0">
+            <button
+              type="button"
+              onClick={() => setIsMobileFiltersOpen(true)}
+              className="relative flex items-center justify-center gap-2 min-h-11 flex-1 min-w-0 px-3 rounded-md bg-white border border-[#E6E6E6] text-[#494A4B] text-sm font-medium shadow-sm hover:border-primary/40"
+              aria-label={translate("unitsFilter.openFilters", "Open filters")}
+            >
+              <SlidersHorizontal size={18} className="shrink-0 text-primary" />
+              <span className="truncate">{filtersLabel}</span>
+              {activeFilterCount > 0 && (
+                <span className="shrink-0 inline-flex items-center justify-center min-w-5 h-5 px-1.5 rounded-full bg-primary text-white text-[11px] font-semibold">
+                  {activeFilterCount}
+                </span>
+              )}
+              {hasPendingChanges && (
+                <span className="absolute top-1.5 end-1.5 h-2 w-2 rounded-full bg-orange-500" aria-hidden />
+              )}
+            </button>
+
+            {!isPublic && (
+              <>
                 <button
                   type="button"
-                  className="text-gray-500 hover:text-gray-700"
-                  onClick={() => {
-                    if (filter.removeKeys) {
-                      filter.removeKeys.forEach((key) =>
-                        handleRemoveFilter(key)
-                      );
-                    } else {
-                      handleRemoveFilter(filter.key);
-                    }
-                  }}
+                  onClick={() => setIsUploadDialogOpen(true)}
+                  className="shrink-0 flex items-center justify-center min-h-11 min-w-11 px-2.5 rounded-md bg-green-600 hover:bg-green-700 text-white shadow-sm"
+                  aria-label={t.uploadExcel?.button || "Upload"}
+                  title={t.uploadExcel?.button || "Upload"}
                 >
-                  <X size={16} />
+                  <FileSpreadsheet size={18} />
                 </button>
-              </div>
-            ))}
+                <AddUnitButton />
+                {showBulkToolbar && bulkSelection.hasSelection && (
+                  <button
+                    type="button"
+                    onClick={handleOpenCheckAvailability}
+                    className="shrink-0 flex items-center justify-center min-h-11 min-w-11 px-2.5 rounded-md bg-white border border-gray-300 text-gray-800 shadow-sm"
+                    title={translate(
+                      "unitsFilter.bulkAvailability.checkButton",
+                      "Send Message"
+                    )}
+                    aria-label={translate(
+                      "unitsFilter.bulkAvailability.checkButton",
+                      "Send Message"
+                    )}
+                  >
+                    <svg
+                      className="w-5 h-5 text-green-600"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden
+                    >
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.188z" />
+                    </svg>
+                  </button>
+                )}
+              </>
+            )}
           </div>
 
+          {showBulkToolbar && (
+            <label className="mt-2 flex w-full items-center gap-2 min-h-10 px-3 rounded-md border border-gray-300 bg-white text-sm font-medium cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 accent-primary shrink-0"
+                checked={bulkSelection.allSelectableVisibleSelected}
+                disabled={bulkSelection.selectableVisibleCount === 0}
+                onChange={() => bulkSelection.toggleSelectAllVisible()}
+              />
+              <span className="text-xs truncate">
+                {translate(
+                  "unitsFilter.bulkAvailability.selectAll",
+                  "Select all on page"
+                )}
+              </span>
+              {bulkSelection.hasSelection && (
+                <span className="ms-auto text-xs text-gray-500 shrink-0">
+                  {translate(
+                    "unitsFilter.bulkAvailability.selectedUnits",
+                    "{count} selected"
+                  ).replace("{count}", String(bulkSelection.selectedUnitIds.size))}
+                </span>
+              )}
+            </label>
+          )}
+        </div>
+
+        {activeFiltersChips}
+      </div>
+
+      {/* Mobile sheet backdrop */}
+      {isMobileFiltersOpen && (
+        <button
+          type="button"
+          className="lg:hidden fixed inset-0 z-[55] bg-black/50"
+          aria-label={translate("unitsFilter.closeFilters", "Close filters")}
+          onClick={() => setIsMobileFiltersOpen(false)}
+        />
+      )}
+
+      {/*
+        Single filter panel instance:
+        - Desktop: always visible sidebar card
+        - Mobile: bottom sheet when open (hidden when closed)
+      */}
+      <div
+        className={
+          isMobileFiltersOpen
+            ? "fixed inset-x-0 bottom-0 z-[60] flex max-h-[min(92dvh,100%)] flex-col rounded-t-2xl bg-white shadow-2xl lg:static lg:z-auto lg:max-h-none lg:rounded-lg lg:shadow-md"
+            : "hidden lg:block lg:static bg-white rounded-lg shadow-md"
+        }
+        role={isMobileFiltersOpen ? "dialog" : undefined}
+        aria-modal={isMobileFiltersOpen ? "true" : undefined}
+        aria-label={isMobileFiltersOpen ? filtersLabel : undefined}
+      >
+        {/* Mobile sheet header */}
+        <div className="lg:hidden flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+          <div className="min-w-0">
+            <h2 className="text-base font-semibold text-gray-900 truncate">
+              {filtersLabel}
+            </h2>
+            {activeFilterCount > 0 && (
+              <p className="text-xs text-gray-500 truncate">
+                {translate("unitsFilter.filtersCount", "{count} filters").replace(
+                  "{count}",
+                  String(activeFilterCount)
+                )}
+              </p>
+            )}
+          </div>
           <button
             type="button"
-            className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
-            onClick={handleRemoveAllFilters}
+            onClick={() => setIsMobileFiltersOpen(false)}
+            className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+            aria-label={translate("unitsFilter.closeFilters", "Close filters")}
           >
-            <Trash2 size={16} />
-            {t.unitsFilter.clearall}
+            <X size={20} />
           </button>
         </div>
-      )}
+
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 lg:overflow-visible">
+          <div className="hidden lg:block">{actionsBlock}</div>
+          {filterFields}
+          {/* Desktop active chips */}
+          {activeFilterCount > 0 && (
+            <div className="hidden lg:block">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600">
+                  {t.unitsFilter.activeFilter}
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {activeFilters.map((filter, index) => (
+                    <div
+                      key={`desktop-${filter.key}-${index}`}
+                      className="flex items-center gap-3 bg-gray-100 rounded px-1.5 py-1 text-sm text-gray-700"
+                    >
+                      <p className="truncate max-w-[180px] text-xs">
+                        {getFilterDisplayText(filter.key, filter.value)}
+                      </p>
+                      <button
+                        type="button"
+                        className="text-gray-500 hover:text-gray-700 min-h-8 min-w-8 inline-flex items-center justify-center"
+                        onClick={() => {
+                          if (filter.removeKeys) {
+                            filter.removeKeys.forEach((key) =>
+                              handleRemoveFilter(key)
+                            );
+                          } else {
+                            handleRemoveFilter(filter.key);
+                          }
+                        }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="flex items-center gap-1.5 px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200 transition-colors"
+                  onClick={handleRemoveAllFilters}
+                >
+                  <Trash2 size={16} />
+                  {t.unitsFilter.clearall}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile sticky Apply / Clear footer */}
+        <div className="lg:hidden shrink-0 border-t border-gray-100 bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 z-[1]">
+          <button
+            type="button"
+            onClick={handleClearAllAndCloseMobile}
+            className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 truncate px-2"
+          >
+            {t.unitsFilter.clearall}
+          </button>
+          <button
+            type="submit"
+            form="units-filter-form"
+            className={`min-h-11 flex-[1.4] rounded-md text-sm font-semibold shadow-sm truncate px-2 ${
+              hasPendingChanges
+                ? "bg-primary text-white hover:bg-primary/90"
+                : "bg-primary/80 text-white hover:bg-primary"
+            }`}
+          >
+            {translate("unitsFilter.applyFilters", "Apply Filters")}
+          </button>
+        </div>
+      </div>
 
       <UploadUnitsExcelDialog
         isOpen={isUploadDialogOpen}
@@ -1195,6 +1431,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
           onSendSuccess={() => bulkSelection.clearUnitSelection()}
         />
       )}
-    </div>
+    </>
   );
+
 }

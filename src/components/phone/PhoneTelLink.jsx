@@ -1,6 +1,7 @@
 "use client";
 
 import AndroidCallTipDialog from "@/components/phone/AndroidCallTipDialog";
+import CallFallbackDialog from "@/components/phone/CallFallbackDialog";
 import { useTelCall } from "@/hooks/useTelCall";
 
 /**
@@ -23,9 +24,12 @@ export default function PhoneTelLink({
     phoneValue,
     telHref,
     tipOpen,
+    fallbackOpen,
     onTelClick,
     dismissTip,
     continueFromTip,
+    dismissFallback,
+    retryCall,
   } = useTelCall(phoneNumber, defaultCountry);
 
   const isDisabled = disabled || !telHref;
@@ -54,8 +58,9 @@ export default function PhoneTelLink({
         style={style}
         onClick={(e) => {
           if (stopPropagation) e.stopPropagation();
-          const allowed = onTelClick(e);
-          if (allowed !== false) onClick?.(e);
+          // Drive the call ourselves; defer the tap handler so a concurrent
+          // SPA navigation can't cancel the OS handoff to the dialer.
+          onTelClick(e, onClick ? () => onClick(e) : undefined);
         }}
       >
         {children}
@@ -65,6 +70,13 @@ export default function PhoneTelLink({
         phoneValue={phoneValue}
         onContinue={continueFromTip}
         onDismiss={dismissTip}
+      />
+      <CallFallbackDialog
+        isOpen={fallbackOpen}
+        phoneValue={phoneValue}
+        telHref={telHref}
+        onRetry={retryCall}
+        onClose={dismissFallback}
       />
     </>
   );

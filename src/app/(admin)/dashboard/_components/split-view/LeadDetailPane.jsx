@@ -60,6 +60,8 @@ import LeadDetailTabs from "./LeadDetailTabs";
 import BulkLeadActionDialog from "./BulkLeadActionDialog";
 import { getOwnerTypeLabel, normalizeOwnerType } from "@/constants/owner-type";
 import { useLocalizedLocationLabels } from "@/hooks/use-localized-location-labels";
+import { isDashboardAdminRole } from "@/lib/dashboard-lead-access";
+import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 
 const VALID_TABS = new Set(["conversations", "requirements", "actions"]);
 const DEFAULT_TAB = "conversations";
@@ -122,6 +124,8 @@ export default function LeadDetailPane({
     canDelete: canDeleteLead,
     isReady: actionsPermissionReady,
   } = useModuleActions("conversation");
+  const canShowDeleteLead =
+    canDeleteLead && isDashboardAdminRole(getRoleFromToken());
   const [bulkActionOpen, setBulkActionOpen] = useState(false);
   const [openActionsModal, setOpenActionsModal] = useState(false);
   const [rowActions, setRowActions] = useState(null);
@@ -1161,8 +1165,8 @@ export default function LeadDetailPane({
                 </div>
               </section>
 
-              {/* Danger zone */}
-              {canDeleteLead && (
+              {/* Danger zone — admin/owner only */}
+              {canShowDeleteLead && (
                 <section className="rounded-lg border border-red-200 bg-red-50/40 p-3">
                   <h5 className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700 uppercase tracking-wide mb-2">
                     <AlertTriangle className="w-3.5 h-3.5" aria-hidden="true" />
