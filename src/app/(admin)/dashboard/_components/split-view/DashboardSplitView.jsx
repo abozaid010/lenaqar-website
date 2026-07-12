@@ -148,6 +148,16 @@ function DashboardSplitViewComponent() {
     [isLg, router, searchParams]
   );
 
+  // Tapping Call initiates the phone call (the tel: link on the button) and also
+  // opens the lead's detail view, so the user lands on the right customer after
+  // the call instead of hunting for the row again.
+  const onCallLead = useCallback(
+    (user) => {
+      if (user?.user_id) onSelectLead(user);
+    },
+    [onSelectLead],
+  );
+
   const onInvalidateList = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: userKeys.all });
   }, [queryClient]);
@@ -208,6 +218,7 @@ function DashboardSplitViewComponent() {
             refetch={refetch}
             selectedUserId={isLg ? selectedUserId : undefined}
             onSelectLead={onSelectLead}
+            onCallLead={onCallLead}
             data={data}
             isLeadSelected={isLeadSelected}
             onToggleLeadSelection={toggleLeadSelection}

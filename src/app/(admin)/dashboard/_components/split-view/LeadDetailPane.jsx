@@ -260,10 +260,31 @@ export default function LeadDetailPane({
     }
   };
 
-  const handleActionUpdate = (uid, newAction) => {
-    onInvalidateList?.();
-    queryClient.invalidateQueries({ queryKey: userKeys.all });
-  };
+  // Optimistic last-action update — no refetch. Client caches stay the single
+  // source of truth until the next normal refresh, so every place that reads
+  // `last_action` (Actions button, list, sort) reflects the new action at once.
+  const handleActionUpdate = useCallback(
+    (uid, newAction, createdAction) => {
+      if (!uid) return;
+      const lastActionValue = createdAction?.action ?? newAction;
+      const updatedAt = createdAction?.created_at ?? new Date().toISOString();
+      patchUserInInfiniteUsersCaches(queryClient, uid, {
+        last_action: normalizeLastAction(lastActionValue),
+        updated_at: updatedAt,
+      });
+      queryClient.setQueryData(
+        ["chatHistory", uid, LEAD_CONVERSATION_MESSAGE_LIMIT],
+        (old) => {
+          if (!old?.data) return old;
+          return {
+            ...old,
+            data: { ...old.data, last_action: lastActionValue },
+          };
+        },
+      );
+    },
+    [queryClient],
+  );
 
   const afterMutation = () => {
     onInvalidateList?.();

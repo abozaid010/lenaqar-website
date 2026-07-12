@@ -12,6 +12,7 @@ export default function LeadRow({
   user,
   selected,
   onSelect,
+  onCall,
   bulkSelected = false,
   onToggleBulkSelection,
   showBulkCheckbox = false,
@@ -88,6 +89,7 @@ export default function LeadRow({
           phoneNumber={rawPhone}
           showCopy
           className="shrink-0 hover:text-primary"
+          onClick={onCall ? () => onCall(user) : undefined}
         />
       ) : null}
     </div>

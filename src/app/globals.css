@@ -319,6 +319,7 @@ select:disabled {
 }
 
 .chat-list-row {
+  position: relative;
   border-bottom: 1px solid var(--chat-border);
   transition: background-color 0.15s ease;
 }
@@ -328,7 +329,17 @@ select:disabled {
 }
 
 .chat-list-row--selected {
-  background-color: var(--chat-panel-alt);
+  background-color: color-mix(in srgb, var(--primary) 8%, var(--chat-panel-alt));
+}
+
+/* Clear, RTL-safe accent bar so the active lead is always obvious. */
+.chat-list-row--selected::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background-color: var(--primary);
 }
 
 .chat-messages-shell {

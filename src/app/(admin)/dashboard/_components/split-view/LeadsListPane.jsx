@@ -54,6 +54,7 @@ export default function LeadsListPane({
   refetch,
   selectedUserId,
   onSelectLead,
+  onCallLead,
   data,
   isLeadSelected,
   onToggleLeadSelection,
@@ -379,6 +380,7 @@ export default function LeadsListPane({
                 user={user}
                 selected={selectedUserId === user.user_id}
                 onSelect={onSelectLead}
+                onCall={onCallLead}
                 showBulkCheckbox={showBulkCheckbox}
                 bulkSelected={isLeadSelected?.(user.user_id)}
                 onToggleBulkSelection={onToggleLeadSelection}
