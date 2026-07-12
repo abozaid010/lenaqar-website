@@ -18,6 +18,7 @@ import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { createPortal } from "react-dom";
 import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
 import toast from "react-hot-toast";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
@@ -352,6 +353,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [isMobileFiltersOpen]);
+
+  // Close mobile sheet when switching to desktop layout
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const onChange = (event) => {
+      if (event.matches) setIsMobileFiltersOpen(false);
+    };
+    mediaQuery.addEventListener("change", onChange);
+    return () => mediaQuery.removeEventListener("change", onChange);
+  }, []);
 
   const showBulkToolbar =
     !isPublic && isMounted && canShowBulkButton && bulkSelection;
@@ -1202,7 +1214,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   return (
     <>
       {/* Mobile toolbar: filters trigger + primary actions */}
-      <div className="lg:hidden space-y-2 min-w-0">
+      <div className={`lg:hidden space-y-2 min-w-0 ${isMobileFiltersOpen ? "invisible pointer-events-none" : ""}`}>
         <div className="sticky top-0 z-20 -mx-1 px-1 py-1 bg-[#E2DBFF]/95 backdrop-blur-sm supports-[backdrop-filter]:bg-[#E2DBFF]/80">
           <div className="flex items-center gap-2 min-w-0">
             <button
@@ -1293,62 +1305,83 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         {activeFiltersChips}
       </div>
 
-      {/* Mobile sheet backdrop */}
-      {isMobileFiltersOpen && (
-        <button
-          type="button"
-          className="lg:hidden fixed inset-0 z-[55] bg-black/50"
-          aria-label={translate("unitsFilter.closeFilters", "Close filters")}
-          onClick={() => setIsMobileFiltersOpen(false)}
-        />
-      )}
+      {/* Mobile sheet — portaled to body so it is not trapped by sticky/overflow ancestors */}
+      {isMounted &&
+        isMobileFiltersOpen &&
+        createPortal(
+          <div className="lg:hidden">
+            <button
+              type="button"
+              className="fixed inset-0 z-[55] bg-black/50"
+              aria-label={translate("unitsFilter.closeFilters", "Close filters")}
+              onClick={() => setIsMobileFiltersOpen(false)}
+            />
+            <div
+              className="fixed inset-x-0 bottom-0 z-[60] flex max-h-[min(92dvh,100%)] flex-col rounded-t-2xl bg-white shadow-2xl"
+              role="dialog"
+              aria-modal="true"
+              aria-label={filtersLabel}
+            >
+              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold text-gray-900 truncate">
+                    {filtersLabel}
+                  </h2>
+                  {activeFilterCount > 0 && (
+                    <p className="text-xs text-gray-500 truncate">
+                      {translate("unitsFilter.filtersCount", "{count} filters").replace(
+                        "{count}",
+                        String(activeFilterCount)
+                      )}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                  aria-label={translate("unitsFilter.closeFilters", "Close filters")}
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-      {/*
-        Single filter panel instance:
-        - Desktop: always visible sidebar card
-        - Mobile: bottom sheet when open (hidden when closed)
-      */}
-      <div
-        className={
-          isMobileFiltersOpen
-            ? "fixed inset-x-0 bottom-0 z-[60] flex max-h-[min(92dvh,100%)] flex-col rounded-t-2xl bg-white shadow-2xl lg:static lg:z-auto lg:max-h-none lg:rounded-lg lg:shadow-md"
-            : "hidden lg:block lg:static bg-white rounded-lg shadow-md"
-        }
-        role={isMobileFiltersOpen ? "dialog" : undefined}
-        aria-modal={isMobileFiltersOpen ? "true" : undefined}
-        aria-label={isMobileFiltersOpen ? filtersLabel : undefined}
-      >
-        {/* Mobile sheet header */}
-        <div className="lg:hidden flex shrink-0 items-center justify-between gap-3 border-b border-gray-100 px-4 py-3">
-          <div className="min-w-0">
-            <h2 className="text-base font-semibold text-gray-900 truncate">
-              {filtersLabel}
-            </h2>
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3">
+                {filterFields}
+              </div>
+
+              <div className="shrink-0 border-t border-gray-100 bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleClearAllAndCloseMobile}
+                  className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 truncate px-2"
+                >
+                  {t.unitsFilter.clearall}
+                </button>
+                <button
+                  type="submit"
+                  form="units-filter-form"
+                  className={`min-h-11 flex-[1.4] rounded-md text-sm font-semibold shadow-sm truncate px-2 ${
+                    hasPendingChanges
+                      ? "bg-primary text-white hover:bg-primary/90"
+                      : "bg-primary/80 text-white hover:bg-primary"
+                  }`}
+                >
+                  {translate("unitsFilter.applyFilters", "Apply Filters")}
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+      {/* Desktop sidebar panel — owns the form when the mobile sheet is closed */}
+      {!isMobileFiltersOpen && (
+        <div className="hidden lg:block bg-white rounded-lg shadow-md">
+          <div className="p-4 space-y-3">
+            {actionsBlock}
+            {filterFields}
             {activeFilterCount > 0 && (
-              <p className="text-xs text-gray-500 truncate">
-                {translate("unitsFilter.filtersCount", "{count} filters").replace(
-                  "{count}",
-                  String(activeFilterCount)
-                )}
-              </p>
-            )}
-          </div>
-          <button
-            type="button"
-            onClick={() => setIsMobileFiltersOpen(false)}
-            className="shrink-0 flex items-center justify-center min-h-10 min-w-10 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700"
-            aria-label={translate("unitsFilter.closeFilters", "Close filters")}
-          >
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 space-y-3 lg:overflow-visible">
-          <div className="hidden lg:block">{actionsBlock}</div>
-          {filterFields}
-          {/* Desktop active chips */}
-          {activeFilterCount > 0 && (
-            <div className="hidden lg:block">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-sm text-gray-600">
                   {t.unitsFilter.activeFilter}
@@ -1389,32 +1422,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
                   {t.unitsFilter.clearall}
                 </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-
-        {/* Mobile sticky Apply / Clear footer */}
-        <div className="lg:hidden shrink-0 border-t border-gray-100 bg-white/95 backdrop-blur px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] flex gap-2 z-[1]">
-          <button
-            type="button"
-            onClick={handleClearAllAndCloseMobile}
-            className="min-h-11 flex-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 truncate px-2"
-          >
-            {t.unitsFilter.clearall}
-          </button>
-          <button
-            type="submit"
-            form="units-filter-form"
-            className={`min-h-11 flex-[1.4] rounded-md text-sm font-semibold shadow-sm truncate px-2 ${
-              hasPendingChanges
-                ? "bg-primary text-white hover:bg-primary/90"
-                : "bg-primary/80 text-white hover:bg-primary"
-            }`}
-          >
-            {translate("unitsFilter.applyFilters", "Apply Filters")}
-          </button>
-        </div>
-      </div>
+      )}
 
       <UploadUnitsExcelDialog
         isOpen={isUploadDialogOpen}
