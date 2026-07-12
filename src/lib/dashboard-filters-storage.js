@@ -1,4 +1,5 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { applyDashboardLeadAccessDefaults } from "@/lib/dashboard-lead-access";
 import {
   DASHBOARD_SORT,
   DASHBOARD_SORT_PARAM,
@@ -54,18 +55,21 @@ function normalizePersistedSortParams(filters) {
 
 /**
  * Fill dashboard filter defaults when unset.
- * - Author: for non-admin users only, default to logged-in email on first
- *   visit / Reset (`applyAuthorDefault`). Admins default to empty (all leads).
- *   Never re-add author on restore — the user may have cleared it.
+ * - Author: non-admin/non-owner users are always restricted to their own email
+ *   (all tenants). Admins/owners stay unrestricted.
+ * - Status: optional default `action=new` on first visit / Reset.
  * - Sort: Homey only — Oldest First when sort was never set.
  *
  * @param {Record<string, string> | null | undefined} filters
- * @param {{ applyAuthorDefault?: boolean }} [options]
+ * @param {{
+ *   applyStatusDefault?: boolean,
+ *   enforceAuthor?: boolean,
+ * }} [options]
  * @returns {Record<string, string>}
  */
-export function withHomeyOnlyMyLeadsDefault(
+export function withDashboardFilterDefaults(
   filters,
-  { applyAuthorDefault = true } = {},
+  { applyStatusDefault = false, enforceAuthor = true } = {},
 ) {
   const next =
     filters && typeof filters === "object"
@@ -73,34 +77,34 @@ export function withHomeyOnlyMyLeadsDefault(
       : {};
   if (typeof window === "undefined") return next;
 
+  const withAccess = applyDashboardLeadAccessDefaults(next, {
+    applyStatusDefault,
+    enforceAuthor,
+  });
+
   const clientId = LenaCookiesManager.getClientId();
-  const info = LenaCookiesManager.getClientInfo();
-  const role = String(info?.client_type ?? info?.role ?? "")
-    .trim()
-    .toLowerCase();
-  const isAdminUser = role === "admin" || role === "owner";
-  const email = typeof info?.email === "string" ? info.email.trim() : "";
-
-  if (applyAuthorDefault && !isAdminUser) {
-    const existingAuthor =
-      typeof next.author === "string" ? next.author.trim() : "";
-    if (!existingAuthor && email) {
-      next.author = email;
-    }
-  }
-
   if (isHomeyClientId(clientId)) {
     const existingSort = normalizeDashboardSort(
-      next[DASHBOARD_SORT_PARAM],
+      withAccess[DASHBOARD_SORT_PARAM],
       undefined,
     );
     if (!existingSort) {
-      next[DASHBOARD_SORT_PARAM] =
+      withAccess[DASHBOARD_SORT_PARAM] =
         getDefaultDashboardSort(clientId) || DASHBOARD_SORT.OLDEST;
     }
   }
 
-  return next;
+  return withAccess;
+}
+
+/**
+ * @deprecated Use {@link withDashboardFilterDefaults}.
+ * @param {Record<string, string> | null | undefined} filters
+ * @param {{ applyStatusDefault?: boolean, enforceAuthor?: boolean }} [options]
+ * @returns {Record<string, string>}
+ */
+export function withHomeyOnlyMyLeadsDefault(filters, options = {}) {
+  return withDashboardFilterDefaults(filters, options);
 }
 
 /**

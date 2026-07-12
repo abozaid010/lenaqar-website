@@ -10,9 +10,15 @@ import { useI18n } from "@/hooks/useI18n";
 import {
   getActionLabel,
   getDashboardFilterOptions,
+  NEW_LEAD_ACTION,
   parseDashboardActionFilter,
   serializeDashboardActionFilter,
 } from "@/utils/actions";
+import {
+  canViewAllDashboardLeads,
+  getDashboardLoggedInEmail,
+  isAllowedDashboardAuthor,
+} from "@/lib/dashboard-lead-access";
 import {
   OWNER_TYPES,
   getOwnerTypeLabel,
@@ -55,13 +61,6 @@ const formatDate = (date) => {
   const formattedDate = isoString.slice(0, 19);
   return formattedDate;
 };
-
-function isAdminRole(role) {
-  const normalized = String(role || "")
-    .trim()
-    .toLowerCase();
-  return normalized === "admin" || normalized === "owner";
-}
 
 /** w-72 (18rem) at 70% — tighter filter triggers and dropdown panels */
 const FILTER_MENU_WIDTH = "w-[12.6rem]";
@@ -153,9 +152,18 @@ export default function DashbordFilter({
   const [authorError, setAuthorError] = useState("");
 
   useEffect(() => {
-    const email = LenaCookiesManager.getClientInfo()?.email;
-    setLoggedInEmail(typeof email === "string" ? email.trim() : "");
-    setIsAdminUser(isAdminRole(getRoleFromToken()));
+    const email = getDashboardLoggedInEmail();
+    const isAdmin = canViewAllDashboardLeads();
+    setLoggedInEmail(email);
+    setIsAdminUser(isAdmin);
+    if (!isAdmin && email) {
+      setFilters((prev) => {
+        const current =
+          typeof prev.author === "string" ? prev.author.trim() : "";
+        if (current.toLowerCase() === email.toLowerCase()) return prev;
+        return { ...prev, author: email };
+      });
+    }
   }, []);
 
   const [filters, setFilters] = useState(() => {
@@ -536,7 +544,7 @@ export default function DashbordFilter({
 
   const handleAuthorChange = (event) => {
     const raw = typeof event?.target?.value === "string" ? event.target.value : "";
-    // Empty = "All" → do not send author to the API.
+    // Empty = "All" → do not send author to the API (admins/owners only).
     const nextAuthor = raw.trim();
 
     if (nextAuthor && !isValidEmail(nextAuthor)) {
@@ -549,12 +557,7 @@ export default function DashbordFilter({
       return;
     }
 
-    if (
-      !isAdminUser &&
-      nextAuthor &&
-      loggedInEmail &&
-      nextAuthor.toLowerCase() !== loggedInEmail.toLowerCase()
-    ) {
+    if (!isAllowedDashboardAuthor(nextAuthor)) {
       setAuthorError(
         translate(
           "dashboardFilter.author.ownEmailOnly",
@@ -643,7 +646,7 @@ export default function DashbordFilter({
       !isAdminUser && loggedInEmail ? loggedInEmail : "";
     setAuthorError("");
     setFilters({
-      actions: [],
+      actions: [NEW_LEAD_ACTION],
       owner_type: [],
       start_date: formatDate(twoMonthsAgo),
       end_date: formatDate(tomorrow),
@@ -661,6 +664,7 @@ export default function DashbordFilter({
       return;
     }
     const params = new URLSearchParams();
+    params.set("action", NEW_LEAD_ACTION);
     if (defaultAuthor) {
       params.set("author", defaultAuthor);
     }
@@ -954,7 +958,7 @@ export default function DashbordFilter({
               resolveSelectedLabel={resolveAuthorSelectedLabel}
               searchFields={["name", "email"]}
               placeholder={translate("dashboardFilter.author.placeholder", "Author")}
-              showAllOption
+              showAllOption={isAdminUser}
               allOptionLabel={translate("dashboardFilter.author.all", "All")}
               allOptionValue=""
               allowCreate={isAdminUser}

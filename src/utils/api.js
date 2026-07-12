@@ -28,6 +28,7 @@ import {
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/constants/whatsapp-messaging";
 import { normalizeLastAction } from "@/utils/actions";
+import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import { parsePhoneNumberFromString } from "libphonenumber-js/min";
@@ -66,14 +67,14 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
         : { limit: 100, ...(searchParams || {}) };
     const { action, clientId, tab, userId, cursor, direction, ...restMerged } =
       merged;
-    const params = {
+    const params = enforceDashboardAuthorOnParams({
       ...restMerged,
       limit: merged.limit ?? 100,
       ...(action && action !== "all" ? { action } : {}),
       ...(pageParam?.cursor
         ? { cursor: pageParam.cursor, direction: pageParam.direction ?? "forward" }
         : {}),
-    };
+    });
 
     const response = await axiosInstance.get(`messages/v2/all`, {
       params,

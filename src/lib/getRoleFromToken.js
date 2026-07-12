@@ -70,6 +70,16 @@ export async function canManageTeamFromToken() {
 }
 
 /**
+ * Whether the current user may view all dashboard leads (admin/owner).
+ * Same role gate as team management; JWT-only.
+ *
+ * @returns {Promise<boolean>}
+ */
+export async function canViewAllDashboardLeadsFromToken() {
+  return canManageTeamFromToken();
+}
+
+/**
  * Reject if JWT contains a role that is not admin/owner.
  * If role is not in JWT (null), does not reject – backend must enforce.
  *

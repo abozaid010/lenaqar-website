@@ -18,11 +18,23 @@ import {
   getCurrentUserDashboardFiltersStorageKey,
   hasPersistableDashboardFilters,
   readDashboardFilters,
-  withHomeyOnlyMyLeadsDefault,
+  withDashboardFilterDefaults,
   writeDashboardFilters,
 } from "@/lib/dashboard-filters-storage";
 
 const DashboardFilterPersistenceContext = createContext(null);
+
+/**
+ * @param {Record<string, string>} before
+ * @param {Record<string, string>} after
+ * @returns {boolean}
+ */
+function filtersChanged(before, after) {
+  const beforeKeys = Object.keys(before);
+  const afterKeys = Object.keys(after);
+  if (beforeKeys.length !== afterKeys.length) return true;
+  return afterKeys.some((key) => before[key] !== after[key]);
+}
 
 /**
  * Restores dashboard filters from localStorage into the URL before children
@@ -47,20 +59,38 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
     const urlFilters = extractPersistableDashboardFilters(searchParams);
 
     if (Object.keys(urlFilters).length > 0) {
-      // URL is current session state — persist as-is (do not re-apply author
-      // default; user may have cleared the Author filter).
-      if (storageKey) writeDashboardFilters(storageKey, urlFilters);
-      setBootAppliedFilters(urlFilters);
+      // URL is current session state — keep status as chosen; always enforce
+      // author for non-admins so visibility cannot be bypassed via the URL.
+      const enforced = withDashboardFilterDefaults(urlFilters, {
+        applyStatusDefault: false,
+        enforceAuthor: true,
+      });
+      if (storageKey) writeDashboardFilters(storageKey, enforced);
+      setBootAppliedFilters(enforced);
+
+      if (filtersChanged(urlFilters, enforced)) {
+        const params = new URLSearchParams(
+          dashboardFiltersToQueryString(enforced),
+        );
+        const userId = searchParams.get("userId");
+        if (userId) params.set("userId", userId);
+        const next = params.toString();
+        router.replace(next ? `${pathname}?${next}` : pathname, {
+          scroll: false,
+        });
+      }
+
       setIsReady(true);
       return;
     }
 
     const stored = storageKey ? readDashboardFilters(storageKey) : null;
     if (stored) {
-      // Restore exactly what the user last had. Fill Homey sort only if never
-      // set; never re-add author the user cleared.
-      const restored = withHomeyOnlyMyLeadsDefault(stored, {
-        applyAuthorDefault: false,
+      // Restore last filters; Homey sort if missing; always enforce author.
+      // Do not re-apply status default — user may have cleared "New".
+      const restored = withDashboardFilterDefaults(stored, {
+        applyStatusDefault: false,
+        enforceAuthor: true,
       });
       setRestoredFilters(restored);
       setBootAppliedFilters(restored);
@@ -78,14 +108,15 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
       return;
     }
 
-    // First visit (no URL filters, no storage) — role-based author default +
-    // Homey sort default applied here only.
+    // First visit (no URL filters, no storage) — New status + role-based
+    // author + Homey sort defaults.
     const fallback =
       serverAppliedFilters && typeof serverAppliedFilters === "object"
         ? extractPersistableDashboardFilters(serverAppliedFilters)
         : {};
-    const withDefault = withHomeyOnlyMyLeadsDefault(fallback, {
-      applyAuthorDefault: true,
+    const withDefault = withDashboardFilterDefaults(fallback, {
+      applyStatusDefault: true,
+      enforceAuthor: true,
     });
     setBootAppliedFilters(withDefault);
 
@@ -106,6 +137,7 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
 
   // Persist whenever URL filter params change (after hydration).
   // Empty URL must not wipe storage — reload / bare /dashboard reuses it.
+  // Non-admin author is re-enforced so a cleared author cannot stick in storage.
   useEffect(() => {
     if (!isReady) return;
     const storageKey = getCurrentUserDashboardFiltersStorageKey();
@@ -116,17 +148,31 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
       return;
     }
 
-    writeDashboardFilters(storageKey, urlFilters);
+    const enforced = withDashboardFilterDefaults(urlFilters, {
+      applyStatusDefault: false,
+      enforceAuthor: true,
+    });
+    writeDashboardFilters(storageKey, enforced);
     setRestoredFilters((prev) => (prev ? null : prev));
-  }, [searchParams, isReady]);
+
+    if (filtersChanged(urlFilters, enforced)) {
+      const params = new URLSearchParams(
+        dashboardFiltersToQueryString(enforced),
+      );
+      const userId = searchParams.get("userId");
+      if (userId) params.set("userId", userId);
+      const next = params.toString();
+      router.replace(next ? `${pathname}?${next}` : pathname, { scroll: false });
+    }
+  }, [searchParams, isReady, pathname, router]);
 
   const resetPersistedFilters = useCallback(() => {
     const storageKey = getCurrentUserDashboardFiltersStorageKey();
     clearDashboardFilters(storageKey);
 
-    const defaults = withHomeyOnlyMyLeadsDefault(
+    const defaults = withDashboardFilterDefaults(
       {},
-      { applyAuthorDefault: true },
+      { applyStatusDefault: true, enforceAuthor: true },
     );
     if (storageKey && Object.keys(defaults).length > 0) {
       writeDashboardFilters(storageKey, defaults);
@@ -145,13 +191,17 @@ function useDashboardFilterPersistenceState(serverAppliedFilters) {
   }, [pathname, router, searchParams]);
 
   const effectiveFilterParams = useMemo(() => {
-    if (hasPersistableDashboardFilters(searchParams)) {
-      return extractPersistableDashboardFilters(searchParams);
-    }
-    if (restoredFilters) {
-      return restoredFilters;
-    }
-    return extractPersistableDashboardFilters(searchParams);
+    const base = hasPersistableDashboardFilters(searchParams)
+      ? extractPersistableDashboardFilters(searchParams)
+      : restoredFilters
+        ? restoredFilters
+        : extractPersistableDashboardFilters(searchParams);
+
+    // Defense in depth: non-admin queries always include own author.
+    return withDashboardFilterDefaults(base, {
+      applyStatusDefault: false,
+      enforceAuthor: true,
+    });
   }, [searchParams, restoredFilters]);
 
   return {
