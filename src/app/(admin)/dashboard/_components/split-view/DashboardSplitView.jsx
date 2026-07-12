@@ -5,7 +5,7 @@ import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
 import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useCallback } from "react";
+import { useEffect, useMemo, useCallback, useState } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
@@ -66,6 +66,14 @@ function DashboardSplitViewComponent() {
   );
 
   const selectedUserId = searchParams.get("userId") || undefined;
+
+  /**
+   * Mobile-only: the lead the user is currently working with after tapping Call.
+   * Tapping a row navigates to the full-screen detail view, so on the list we
+   * keep this highlighted until another lead is called — making it obvious which
+   * customer a follow-up action belongs to.
+   */
+  const [callSelectedUserId, setCallSelectedUserId] = useState(null);
 
   const {
     data,
@@ -148,6 +156,10 @@ function DashboardSplitViewComponent() {
     [isLg, router, searchParams]
   );
 
+  const onCallLead = useCallback((user) => {
+    if (user?.user_id) setCallSelectedUserId(user.user_id);
+  }, []);
+
   const onInvalidateList = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: userKeys.all });
   }, [queryClient]);
@@ -206,8 +218,9 @@ function DashboardSplitViewComponent() {
             isError={isError}
             error={error}
             refetch={refetch}
-            selectedUserId={isLg ? selectedUserId : undefined}
+            selectedUserId={isLg ? selectedUserId : callSelectedUserId}
             onSelectLead={onSelectLead}
+            onCallLead={isLg ? undefined : onCallLead}
             data={data}
             isLeadSelected={isLeadSelected}
             onToggleLeadSelection={toggleLeadSelection}

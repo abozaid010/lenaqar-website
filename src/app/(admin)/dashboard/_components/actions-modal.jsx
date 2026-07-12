@@ -465,8 +465,12 @@ export default function ActionsModal({
     }
   };
 
-  const handleActionSaved = async () => {
-    await refreshActions();
+  // Optimistic append: the newly created action is added straight to the
+  // timeline (rendered newest-first) instead of refetching the whole list.
+  const handleActionSaved = (createdAction) => {
+    if (createdAction && createdAction.action) {
+      setActionItems((prev) => [...prev, createdAction]);
+    }
     cancelEdit();
   };
 

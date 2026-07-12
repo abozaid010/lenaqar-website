@@ -3,6 +3,17 @@
  * Ensures consistent cookie settings across the application
  */
 
+/**
+ * `Secure` cookies are silently dropped by browsers on non-HTTPS origins that
+ * aren't a secure context (e.g. a phone hitting the dev server over the LAN IP
+ * `http://192.168.x.x:3000`). That left the auth tokens unstored, so every
+ * protected route bounced back to /login — logging in "never worked".
+ *
+ * Mark cookies `Secure` only in production (served over HTTPS). Dev is HTTP, so
+ * cookies must be non-Secure to persist over localhost and LAN IP alike.
+ */
+const SECURE_COOKIES = process.env.NODE_ENV === "production";
+
 export const COOKIE_CONFIG = {
   /**
    * Access token configuration
@@ -11,7 +22,7 @@ export const COOKIE_CONFIG = {
   ACCESS_TOKEN: {
     maxAge: 60 * 60, // 1 hour in seconds
     path: "/",
-    secure: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     httpOnly: true,
   },
@@ -24,7 +35,7 @@ export const COOKIE_CONFIG = {
   ACCESS_TOKEN_EXP: {
     maxAge: 60 * 60, // 1 hour — matches ACCESS_TOKEN
     path: "/",
-    secure: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     httpOnly: false,
   },
@@ -37,7 +48,7 @@ export const COOKIE_CONFIG = {
   REFRESH_TOKEN: {
     maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
-    secure: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     httpOnly: true,
   },
@@ -49,7 +60,7 @@ export const COOKIE_CONFIG = {
   CLIENT_ID: {
     maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
-    secure: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     httpOnly: false,
   },
@@ -61,7 +72,7 @@ export const COOKIE_CONFIG = {
   CLIENT_INFO: {
     maxAge: 60 * 60 * 24 * 10, // 10 days in seconds
     path: "/",
-    secure: true,
+    secure: SECURE_COOKIES,
     sameSite: "lax",
     httpOnly: false,
   },

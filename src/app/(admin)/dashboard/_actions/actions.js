@@ -22,15 +22,25 @@ export async function addNewAction(prevState, formData) {
       meeting_time: formData.get("meeting_time") || null,
     };
 
-    await axiosInstance.post("action/v1/create", payload);
+    const response = await axiosInstance.post("action/v1/create", payload);
 
     revalidatePath("/dashboard");
     revalidatePath("/schedule");
+
+    // Return the persisted action so the client can append it optimistically
+    // (no refetch). Fall back to the submitted payload when the API echoes only
+    // a status message.
+    const created = response?.data?.data ?? response?.data ?? null;
+    const action =
+      created && typeof created === "object" && created.action
+        ? created
+        : payload;
 
     return {
       success: true,
       message: "Action posted successfully",
       submittedAt: Date.now(),
+      action,
     };
   } catch (error) {
     // Handle specific error scenarios

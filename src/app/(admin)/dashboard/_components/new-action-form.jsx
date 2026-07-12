@@ -43,6 +43,13 @@ export default function NewActionForm({
   const { translate, locale, t } = useI18n();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = LenaCookiesManager.getClientId();
+  const clientInfo = LenaCookiesManager.getClientInfo();
+  // Same author convention as the bulk action flow so the persisted record and
+  // the optimistic timeline entry agree on who logged the action.
+  const author =
+    (typeof clientInfo?.email === "string" && clientInfo.email.trim()) ||
+    (typeof clientInfo?.name === "string" && clientInfo.name.trim()) ||
+    "";
   const [updating, setUpdating] = useState(false);
   /** Collapse optional schedule in the Actions composer so Save stays above the fold. */
   const [scheduleOpen, setScheduleOpen] = useState(
@@ -175,12 +182,25 @@ export default function NewActionForm({
       }
     );
 
+    // Prefer the persisted action echoed by the server; fall back to a locally
+    // built record so consumers can append optimistically without a refetch.
+    const createdAction =
+      state.action && state.action.action
+        ? state.action
+        : {
+            action: formData.action,
+            comment: formData.comment,
+            created_at: new Date().toISOString(),
+            meeting_time: getFullMeetingDateTime(),
+            author,
+          };
+
     if (onActionUpdate && userId) {
-      onActionUpdate(userId, formData.action);
+      onActionUpdate(userId, createdAction.action, createdAction);
     }
 
     resetForm();
-    onSuccess?.();
+    onSuccess?.(createdAction);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on success identity
   }, [state.success, state.message, state.submittedAt]);
 
@@ -584,6 +604,7 @@ export default function NewActionForm({
       onSubmit={useUpdateApi ? handleUpdateSubmit : undefined}
     >
       <input type="hidden" name="user_id" value={userId || ""} />
+      <input type="hidden" name="author" value={author} />
       <input type="hidden" name="name" value={name || ""} />
       <input type="hidden" name="phone_number" value={phoneNumber || ""} />
       <input type="hidden" name="client_id" value={clientId || ""} />

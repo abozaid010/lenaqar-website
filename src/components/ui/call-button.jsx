@@ -85,8 +85,10 @@ export default function CallButton({
       href={telHref}
       onClick={(e) => {
         if (stopPropagation) e.stopPropagation();
-        const allowed = onTelClick(e);
-        if (allowed !== false) onClick?.(e);
+        // Fire the tap handler first so selection happens on every tap, even
+        // when onTelClick defers the call (e.g. first-use Android tip).
+        onClick?.(e);
+        onTelClick(e);
       }}
       className={`${baseClass} ${className}`}
       title={callTitle}
