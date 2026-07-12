@@ -14,6 +14,7 @@ import { developerKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useState, useRef } from "react";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 
 export default function DeveloperDetailsPage({ developerId, clientId, searchParams }) {
   const router = useRouter();
@@ -82,9 +83,6 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
     switch (type) {
       case "email":
         window.open(`mailto:${value}`, "_blank");
-        break;
-      case "phone":
-        window.open(`tel:${value}`, "_blank");
         break;
       case "whatsapp":
         window.open(`https://wa.me/${value.replace(/[^\d]/g, '')}`, "_blank");
@@ -264,13 +262,14 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                 </button>
               )}
               {developer.sales_phone && (
-                <button
-                  onClick={() => handleContactAction("phone", developer.sales_phone)}
+                <PhoneTelLink
+                  phoneNumber={developer.sales_phone}
                   className="p-3 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                   title={t.developerPage?.ariaPhone || "Phone"}
+                  aria-label={t.developerPage?.ariaPhone || "Phone"}
                 >
                   <Phone className="w-5 h-5 text-gray-700" />
-                </button>
+                </PhoneTelLink>
               )}
               {developer.whatsapp && (
                 <button
@@ -339,12 +338,12 @@ export default function DeveloperDetailsPage({ developerId, clientId, searchPara
                     <p className="text-sm font-medium text-gray-900">
                       {t.developerPage?.fieldPhone}
                     </p>
-                    <button
-                      onClick={() => handleContactAction("phone", developer.sales_phone)}
+                    <PhoneTelLink
+                      phoneNumber={developer.sales_phone}
                       className="text-[#030250] hover:underline"
                     >
                       {developer.sales_phone}
-                    </button>
+                    </PhoneTelLink>
                   </div>
                 </div>
               )}

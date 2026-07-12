@@ -37,7 +37,12 @@ export function useTokenRefresh() {
       setError(new Error(errorMessage));
       setIsLoading(false);
 
-      await TokenRefreshService.handleRefreshFailure();
+      // Only clear the session when the server explicitly rejected the refresh
+      // token. Network/timeout/backend failures are transient — leave the session
+      // intact and let the next scheduled check or visibility change retry.
+      if (!err?.transient) {
+        await TokenRefreshService.handleRefreshFailure();
+      }
       return null;
     }
   }, []);

@@ -1,6 +1,7 @@
 "use client";
 
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 import { getChatHistory, resetUnreadMessagesCount, deleteUser } from "@/utils/api";
 import { handleOpenWhatsApp, handleCopyPhoneNumber } from "@/utils/phone-utils";
 import { useQuery } from "@tanstack/react-query";
@@ -14,8 +15,10 @@ import NavigationButtons from "./NavigationButtons";
 import ToggleReplyType from "./reply-type";
 import SendNewMessageForm from "./send-new-message";
 import ShowRequirementBtn from "./showRequirementBtn";
+import { useI18n } from "@/hooks/useI18n";
 
 export default function ChatClientWrapper({ userId }) {
+  const { translate } = useI18n();
   const [chatHistory, setChatHistory] = useState([]);
   const [userName, setUserName] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
@@ -38,12 +41,12 @@ export default function ChatClientWrapper({ userId }) {
     setIsDeleting(true);
     try {
       await deleteUser(userId, data.data.client_id);
-      toast.success(t?.common?.userDeleted);
+      toast.success(translate("common.userDeleted", "User deleted"));
       // Redirect to dashboard after successful deletion
       window.location.href = "/dashboard";
     } catch (error) {
       console.error("Failed to delete user:", error?.message ?? error);
-      toast.error(error?.message || t?.common?.failedToDeleteUser);
+      toast.error(error?.message || translate("common.failedToDeleteUser", "Failed to delete user"));
     } finally {
       setIsDeleting(false);
       setShowDeleteConfirm(false);
@@ -125,31 +128,40 @@ export default function ChatClientWrapper({ userId }) {
           </div>
           {phoneNumber && (
             <div className="flex items-center gap-2 px-2 py-1 bg-gray-50 rounded-md">
-              <a
-                href={`tel:${phoneNumber}`}
+              <PhoneTelLink
+                phoneNumber={phoneNumber}
+                stopPropagation
                 className="text-sm text-gray-700 hover:text-primary transition-colors font-medium"
-                onClick={(e) => e.stopPropagation()}
               >
                 {phoneNumber}
-              </a>
+              </PhoneTelLink>
               <button
                 onClick={(e) =>
                   handleCopyPhoneNumber(
                     e,
                     phoneNumber,
-                    () => toast.success(t?.common?.phoneCopied),
-                    () => toast.error(t?.common?.failedToCopyPhone)
+                    () =>
+                      toast.success(
+                        translate("common.phoneCopied", "Phone number copied")
+                      ),
+                    () =>
+                      toast.error(
+                        translate(
+                          "common.failedToCopyPhone",
+                          "Failed to copy phone number"
+                        )
+                      )
                   )
                 }
                 className="p-1 hover:bg-gray-200 rounded transition-colors"
-                title="Copy phone number"
+                title={translate("common.copyPhoneNumber", "Copy number")}
               >
                 <Copy size={16} className="text-gray-600" />
               </button>
               <button
                 onClick={(e) => handleOpenWhatsApp(e, phoneNumber)}
                 className="flex items-center justify-center"
-                title="Open WhatsApp"
+                title={translate("common.openWhatsApp", "Open WhatsApp")}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

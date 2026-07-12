@@ -109,6 +109,12 @@ export function proxy(request) {
     // Access token missing or JWT expired — refresh then continue
     const accessMissingOrExpired = !accessToken || isJwtExpired(accessToken);
     if (accessMissingOrExpired) {
+      // A prior server-side refresh already hit a transient failure (network/backend
+      // hiccup, not an invalid refresh token) for this navigation — don't loop through
+      // another one. Let the page load and hand recovery to the client-side refresh.
+      if (request.nextUrl.searchParams.get("authRetry") === "1") {
+        return withProxyDebug(NextResponse.next(), request);
+      }
       const redirectParam = encodeURIComponent(
         request.nextUrl.pathname + request.nextUrl.search
       );

@@ -19,6 +19,7 @@ import EmptyStateVideo from "@/components/ui/empty-state-video";
 import QueryErrorState from "@/components/ui/query-error-state";
 import OwnerActions from "@/components/ui/owner-actions";
 import ImageWithLoader from "@/components/ui/image-with-loader";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 import { useBrokerPermission } from "@/hooks/useBrokerPermission";
 import { useModuleActions } from "@/hooks/useModuleActions";
 
@@ -283,12 +284,6 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
     window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
-  // Handle Call action
-  const handleCall = (phoneNumber) => {
-    if (!phoneNumber || phoneNumber.trim() === "") return;
-    window.location.href = `tel:${phoneNumber}`;
-  };
-
   // Handle Email action
   const handleEmail = (email) => {
     if (!email || email.trim() === "") return;
@@ -486,17 +481,16 @@ export default function DevelopersClientWrapper({ clientId, initialDevelopersDat
 
                           {/* Call Button */}
                           {d.sales_phone != null && String(d.sales_phone).trim() !== "" && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleCall(d.sales_phone);
-                              }}
+                            <PhoneTelLink
+                              phoneNumber={d.sales_phone}
+                              stopPropagation
+                              title="Call Developer"
+                              aria-label="Call Developer"
                               className="h-8 w-8 p-2 bg-blue-500 hover:bg-blue-600 rounded-full shadow transition-all duration-200 flex items-center justify-center aspect-square flex-shrink-0"
                               style={{ height: '32px', width: '32px', minHeight: '32px', maxHeight: '32px' }}
-                              title="Call Developer"
                             >
                               <Phone size={16} className="text-white" />
-                            </button>
+                            </PhoneTelLink>
                           )}
 
                           {/* Email Button */}

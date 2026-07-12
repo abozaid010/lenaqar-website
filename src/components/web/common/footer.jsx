@@ -97,7 +97,7 @@ const Footer = () => {
                         {t.footer.contact.sales} :
                       </span>
                       <a
-                        href="tel:01016080323"
+                        href="tel:+201016080323"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
                       >
                         01016080323
@@ -108,7 +108,7 @@ const Footer = () => {
                         {translate("footer.contact.support")} :
                       </span>
                       <a
-                        href="tel:01016080323"
+                        href="tel:+201016080323"
                         className="ml-2 text-white hover:text-blue-500 hover:underline transition-colors"
                       >
                         01016080323

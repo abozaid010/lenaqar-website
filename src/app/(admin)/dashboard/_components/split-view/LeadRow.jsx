@@ -1,9 +1,8 @@
 "use client";
 
+import CallButton from "@/components/ui/call-button";
 import { useI18n } from "@/hooks/useI18n";
-import { DASHBOARD_ICON_BUTTON } from "@/constants/ui-classes";
-import { Phone } from "lucide-react";
-import { formatPhoneForDisplay, phoneToE164 } from "@/components/phone/phone-utils";
+import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
 import {
   getOwnerTypeLabel,
   normalizeOwnerType,
@@ -19,7 +18,6 @@ export default function LeadRow({
 }) {
   const { t, translate } = useI18n();
   const rawPhone = user.phone_number;
-  const phoneE164 = phoneToE164(rawPhone, "EG") || rawPhone;
   const phoneDisplay =
     (rawPhone && (formatPhoneForDisplay(rawPhone, "EG") || rawPhone)) || "—";
   const ownerType = normalizeOwnerType(user.owner_type);
@@ -86,15 +84,11 @@ export default function LeadRow({
       </div>
 
       {rawPhone ? (
-        <a
-          href={`tel:${phoneE164 || rawPhone}`}
-          onClick={(e) => e.stopPropagation()}
-          className={`${DASHBOARD_ICON_BUTTON} shrink-0 hover:text-primary`}
-          title="Make a call"
-          aria-label="Call"
-        >
-          <Phone className="w-3.5 h-3.5" strokeWidth={2} />
-        </a>
+        <CallButton
+          phoneNumber={rawPhone}
+          showCopy
+          className="shrink-0 hover:text-primary"
+        />
       ) : null}
     </div>
   );

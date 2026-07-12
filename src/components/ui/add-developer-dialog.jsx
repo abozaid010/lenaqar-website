@@ -6,6 +6,7 @@ import { LenaTextField, LenaTextarea } from "@/components/ui/inputs";
 import { useI18n } from "@/hooks/useI18n";
 import { addDeveloper, updateDeveloper, getClientid } from "@/utils/api";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 as uuidv4 } from "uuid";
@@ -410,11 +411,6 @@ export default function AddDeveloperDialog({
     }
   };
 
-  const handleCall = (phoneNumber) => {
-    if (!phoneNumber || phoneNumber.trim() === "") return;
-    window.location.href = `tel:${phoneNumber}`;
-  };
-
   const handleEmail = (email) => {
     if (!email || email.trim() === "") return;
     window.location.href = `mailto:${email}`;
@@ -558,8 +554,8 @@ export default function AddDeveloperDialog({
             )}
 
             {formData.sales_phone && (
-              <button
-                onClick={() => handleCall(formData.sales_phone)}
+              <PhoneTelLink
+                phoneNumber={formData.sales_phone}
                 className="flex items-center gap-2 p-2 bg-white rounded-lg border hover:bg-gray-100 transition-colors text-left"
               >
                 <div className="h-8 w-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
@@ -573,7 +569,7 @@ export default function AddDeveloperDialog({
                     {formData.sales_phone}
                   </p>
                 </div>
-              </button>
+              </PhoneTelLink>
             )}
 
             {formData.whatsapp && (
