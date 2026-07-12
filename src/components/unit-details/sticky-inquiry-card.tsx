@@ -117,13 +117,6 @@ export default function StickyInquiryCard({
     loadContactInfo();
   }, [unit, showOwnerContact, currentClientId]);
 
-  const handleCall = () => {
-    if (contactData?.phone) {
-      window.open(`tel:${contactData.phone}`, '_blank');
-    } else {
-    }
-  };
-
   const handleWhatsApp = (event: MouseEvent) => {
     const phone = contactData?.whatsapp || contactData?.phone;
     if (!phone) return;
@@ -147,9 +140,8 @@ export default function StickyInquiryCard({
         <>
           <UnitInquiryContactHeader
             name={contactData?.name?.trim() || unit.ownerName?.trim()}
-            phone={receiverPhone}
+            phone={contactData?.phone || receiverPhone}
             actions={{
-              onCall: handleCall,
               onWhatsApp: handleWhatsApp,
               onRefresh: () => {
                 void conversationControls?.refetch();

@@ -3,6 +3,7 @@
 import { X, Globe, Mail, Phone, MessageCircle, Calendar, Building, Star, CheckCircle, AlertCircle } from "lucide-react";
 import LoadingSpinner from "./loading-spinner";
 import { useI18n } from "@/context/translate-api";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 
 export default function DeveloperDetailsDialog({ 
   isOpen, 
@@ -24,12 +25,6 @@ export default function DeveloperDetailsDialog({
   const handleEmailClick = (email) => {
     if (email && email.trim() !== "") {
       window.open(`mailto:${email}`, "_blank");
-    }
-  };
-
-  const handlePhoneClick = (phone) => {
-    if (phone && phone.trim() !== "") {
-      window.open(`tel:${phone}`, "_blank");
     }
   };
 
@@ -131,12 +126,12 @@ export default function DeveloperDetailsDialog({
             {developer.sales_phone && (
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-gray-400" />
-                <button
-                  onClick={() => handlePhoneClick(developer.sales_phone)}
+                <PhoneTelLink
+                  phoneNumber={developer.sales_phone}
                   className="text-green-600 hover:text-green-800 hover:underline"
                 >
                   {developer.sales_phone}
-                </button>
+                </PhoneTelLink>
               </div>
             )}
             

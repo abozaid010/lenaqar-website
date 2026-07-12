@@ -11,6 +11,7 @@ import { useModuleActions } from '@/hooks/useModuleActions';
 import { contactInfo } from '@/lib/contact-info';
 import { LenaCookiesManager } from '@/lib/LenaCookiesManager';
 import DeleteConfirmDialog from '@/components/ui/confirm-delete-dialog';
+import PhoneTelLink from '@/components/phone/PhoneTelLink';
 
 interface Props {
   project: ProjectViewModel;
@@ -83,11 +84,6 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
     };
   }, [project.id, project.clientId, project.developerId, project.developerName]);
 
-  const handleCall = useCallback(() => {
-    const phone = contactData?.phone;
-    if (phone) window.open(`tel:${phone}`, '_blank');
-  }, [contactData?.phone]);
-
   const handleWhatsApp = useCallback(() => {
     const wa = contactData?.whatsapp;
     if (wa) {
@@ -159,16 +155,27 @@ export default function ProjectContactCard({ project, onEdit }: Props) {
 
       {/* Contact CTAs — developer phone/WhatsApp from get_contact_info (primary) */}
       <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={handleCall}
-          disabled={contactLoading || !contactData?.phone}
-          className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
-          title={contactData?.phone || translate('unitInquiry.phoneUnavailable', 'Phone number not available')}
-        >
-          <PhoneCall className="w-4 h-4" />
-          {callLabel}
-        </button>
+        {contactLoading || !contactData?.phone ? (
+          <button
+            type="button"
+            disabled
+            className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium flex items-center justify-center gap-2 text-sm disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+            title={translate('unitInquiry.phoneUnavailable', 'Phone number not available')}
+          >
+            <PhoneCall className="w-4 h-4" />
+            {callLabel}
+          </button>
+        ) : (
+          <PhoneTelLink
+            phoneNumber={contactData.phone}
+            className="bg-blue-600 text-white rounded-lg py-2 px-3 font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-sm"
+            title={contactData.phone}
+            aria-label={callLabel}
+          >
+            <PhoneCall className="w-4 h-4" />
+            {callLabel}
+          </PhoneTelLink>
+        )}
         <button
           type="button"
           onClick={handleWhatsApp}

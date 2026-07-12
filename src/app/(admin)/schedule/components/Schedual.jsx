@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
+import PhoneTelLink from "@/components/phone/PhoneTelLink";
 import NewActionForm from "@/app/(admin)/dashboard/_components/new-action-form";
 import ScheduleUserDetailsDialog from "./ScheduleUserDetailsDialog";
 
@@ -384,15 +385,15 @@ const Schedule = ({ data, dataSales }) => {
                             ) : null}
                             {appointment.phone_number ? (
                               <span className="inline-flex items-center gap-1 min-w-0">
-                                <a
-                                  href={`tel:${phoneE164}`}
-                                  onClick={(e) => e.stopPropagation()}
+                                <PhoneTelLink
+                                  phoneNumber={appointment.phone_number}
+                                  stopPropagation
                                   aria-label={t.buttons?.call || "Call"}
                                   title={t.buttons?.call || "Call"}
                                   className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors shrink-0"
                                 >
                                   <Phone className="w-3 h-3" />
-                                </a>
+                                </PhoneTelLink>
                                 <button
                                   type="button"
                                   onClick={(e) =>

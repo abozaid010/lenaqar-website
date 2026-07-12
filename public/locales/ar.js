@@ -51,6 +51,13 @@ export default {
     failedToCopyPhone: "فشل نسخ رقم الهاتف",
     noPhone: "رقم الهاتف غير متوفر",
     clickToCopy: "انقر للنسخ",
+    copyPhoneNumber: "نسخ الرقم",
+    makePhoneCall: "إجراء مكالمة",
+    androidCallTipTitle: "الاتصال من هذا الهاتف",
+    androidCallTipBody:
+      "إذا طلب أندرويد اختيار تطبيق، اختر الهاتف (أو تطبيق الاتصال) ثم اضغط دائماً حتى تُفتح المكالمات مباشرة في المرة التالية.",
+    androidCallTipContinue: "متابعة الاتصال",
+    androidCallTipDismiss: "حسناً",
     copied: "تم النسخ!",
     copyLink: "نسخ مع الرابط",
     preview: "معاينة",

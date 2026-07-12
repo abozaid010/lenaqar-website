@@ -131,7 +131,7 @@ export default function SolutionsFooter() {
             <p className="text-sm text-blue-100">
               {translate("solutions.footer.support")}:{" "}
               <a
-                href={`tel:${WHATSAPP_DISPLAY}`}
+                href="tel:+201016080323"
                 className="hover:text-white underline-offset-2 hover:underline"
               >
                 {WHATSAPP_DISPLAY}

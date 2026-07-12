@@ -53,6 +53,13 @@ export default {
     failedToCopyPhone: "Failed to copy phone number",
     noPhone: "Phone number not available",
     clickToCopy: "Click to copy",
+    copyPhoneNumber: "Copy number",
+    makePhoneCall: "Make a call",
+    androidCallTipTitle: "Calling from this phone",
+    androidCallTipBody:
+      "If Android asks which app to use, choose Phone (or your dialer) and tap Always so calls open directly next time.",
+    androidCallTipContinue: "Continue call",
+    androidCallTipDismiss: "Got it",
     copied: "Copied!",
     copyLink: "Copy with Link",
     preview: "Preview",

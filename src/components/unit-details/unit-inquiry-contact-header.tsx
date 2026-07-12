@@ -1,11 +1,11 @@
 "use client";
 
-import { MessageCircle, PhoneCall, RefreshCw } from "lucide-react";
+import { MessageCircle, RefreshCw } from "lucide-react";
 import type { MouseEvent } from "react";
 import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
+import CallButton from "@/components/ui/call-button";
 
 export interface UnitInquiryContactHeaderActions {
-  onCall?: () => void;
   onWhatsApp?: (event: MouseEvent<HTMLButtonElement>) => void;
   onRefresh?: () => void;
   callDisabled?: boolean;
@@ -39,8 +39,9 @@ export default function UnitInquiryContactHeader({
     return null;
   }
 
+  const showCall = Boolean(phone) && !actions?.callDisabled;
   const showActions = Boolean(
-    actions?.onCall || actions?.onWhatsApp || actions?.onRefresh
+    showCall || actions?.onWhatsApp || actions?.onRefresh
   );
 
   return (
@@ -62,16 +63,14 @@ export default function UnitInquiryContactHeader({
 
       {showActions ? (
         <div className="flex items-center gap-1.5 shrink-0">
-          {actions?.onCall ? (
-            <button
-              type="button"
-              onClick={actions.onCall}
-              disabled={actions.callDisabled}
-              aria-label={actions.callLabel}
-              className="p-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-            >
-              <PhoneCall className="w-4 h-4" />
-            </button>
+          {showCall ? (
+            <CallButton
+              phoneNumber={phone}
+              showCopy
+              ariaLabel={actions?.callLabel}
+              title={actions?.callLabel}
+              className="!bg-blue-600 !text-white !border-blue-600 hover:!bg-blue-700"
+            />
           ) : null}
           {actions?.onWhatsApp ? (
             <button
