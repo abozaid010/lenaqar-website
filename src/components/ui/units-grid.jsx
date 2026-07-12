@@ -135,7 +135,7 @@ export default function UnitsGrid({
       {units.length === 0 ? (
         <EmptyStateVideo variant="units" autoPlay showControls loop />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3  mt-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mt-3 sm:mt-4 min-w-0">
           {units.map((u, idx) => {
             const unitHref = getUnitHref(u);
             const unitCode = resolveUnitCodeFromListItem(u);
@@ -149,7 +149,7 @@ export default function UnitsGrid({
             const cardBody = (
               <>
                 {/* Image Section */}
-                <div className="relative w-full h-92 overflow-hidden rounded-md shadow-lg bg-gray-100 isolate">
+                <div className="relative w-full aspect-[5/4] sm:aspect-auto sm:h-80 lg:h-92 overflow-hidden rounded-md shadow-lg bg-gray-100 isolate">
                   {u.images && u.images.length > 0 ? (
                     <ImageWithLoader
                       src={getDisplayImageUrl(getFirstValidImage(
@@ -227,10 +227,10 @@ export default function UnitsGrid({
                 </div>
 
                 {/* Text Overlay Section */}
-                <div className="absolute bottom-0 left-0 w-full bg-black/40 py-2 px-3 rounded-b-lg">
-                  <div className="flex items-center justify-between text-[12.5px] text-white font-semibold mb-1">
-                    <div className="flex items-center gap-2 line-clamp-1">
-                      <span className="text-[14px] font-bold">
+                <div className="absolute bottom-0 inset-x-0 bg-black/40 py-2 px-3 rounded-b-lg">
+                  <div className="flex items-center justify-between gap-2 text-[12.5px] text-white font-semibold mb-1 min-w-0">
+                    <div className="flex items-center gap-2 min-w-0 line-clamp-1">
+                      <span className="text-[14px] font-bold shrink-0">
                         {u.buildingType || u.property_type ? (
                           translate(
                             `buildingTypes.${String(u.buildingType || u.property_type).toLowerCase()}`,
@@ -238,7 +238,7 @@ export default function UnitsGrid({
                           )
                         ) : (allowMissingFields ? "—" : "Unit Type")}
                       </span>
-                      <span className="text-[14px]">
+                      <span className="text-[14px] truncate min-w-0">
                         {u.project
                           ? locale === "ar"
                             ? (u.project_ar || u.projectAr || u.ar_name || u.project)
@@ -256,10 +256,10 @@ export default function UnitsGrid({
                     )}
                   </div>
 
-                  <div className="text-sm flex items-center justify-between text-white">
+                  <div className="text-sm flex items-center justify-between text-white min-w-0">
                     {u.purpose === "Rent" || u.purpose === "rent" ? (
-                      <div className="flex items-center justify-between w-full">
-                        <div className="font-semibold text-[21px]">
+                      <div className="flex items-center justify-between w-full min-w-0">
+                        <div className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
                           {getRentPriceLabel(u) ||
                             (allowMissingFields
                               ? "—"
@@ -267,8 +267,8 @@ export default function UnitsGrid({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-between w-full">
-                        <span className="font-semibold text-[21px]">
+                      <div className="flex items-center justify-between w-full min-w-0">
+                        <span className="font-semibold text-base sm:text-lg lg:text-[21px] truncate">
                           {u.totalPrice != null && u.totalPrice !== "" && formatPrice(u.totalPrice)
                             ? `${formatPrice(u.totalPrice)} ${egpLabel}`
                             : u.price != null && u.price !== "" && formatPrice(u.price)
@@ -305,12 +305,12 @@ export default function UnitsGrid({
 
                 {showBulkCheckbox && unitSelectionId && (
                   <label
-                    className="absolute top-12 start-3 z-30 flex items-center justify-center p-1.5 rounded-md bg-white/90 shadow-md cursor-pointer hover:bg-white"
+                    className="absolute top-12 start-3 z-30 flex items-center justify-center min-h-10 min-w-10 p-2 rounded-md bg-white/90 shadow-md cursor-pointer hover:bg-white"
                     onClick={(e) => e.stopPropagation()}
                   >
                     <input
                       type="checkbox"
-                      className="h-4 w-4 accent-primary rounded border-gray-300"
+                      className="h-5 w-5 accent-primary rounded border-gray-300"
                       checked={Boolean(isSelected)}
                       aria-label={translate(
                         "unitsFilter.bulkAvailability.selectUnit",
@@ -329,7 +329,7 @@ export default function UnitsGrid({
                   <button
                     type="button"
                     onClick={(e) => handleShareClick(unitCode, e)}
-                    className="absolute top-3 end-3 z-30 p-2 rounded-full bg-white/90 text-primary shadow-md hover:bg-white transition-colors"
+                    className="absolute top-3 end-3 z-30 flex items-center justify-center min-h-10 min-w-10 p-2 rounded-full bg-white/90 text-primary shadow-md hover:bg-white transition-colors"
                     aria-label={translate("unitShare.title", "Share Property")}
                   >
                     <Share2 className="w-4 h-4" />

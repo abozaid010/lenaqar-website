@@ -1162,6 +1162,10 @@ export default {
     minArea: "الحد الأدنى للمساحة",
     maxArea: "الحد الأقصى للمساحة",
     applyFilters: "تطبيق الفلاتر",
+    filters: "الفلاتر",
+    openFilters: "فتح الفلاتر",
+    closeFilters: "إغلاق الفلاتر",
+    filtersCount: "{count} فلاتر",
     purposes: {
       buy: "شراء",
       rent: "إيجار",

@@ -1286,6 +1286,10 @@ export default {
     minArea: "Min Area",
     maxArea: "Max Area",
     applyFilters: "Apply Filters",
+    filters: "Filters",
+    openFilters: "Open filters",
+    closeFilters: "Close filters",
+    filtersCount: "{count} filters",
     purposes: {
       buy: "Buy",
       rent: "Rent",
