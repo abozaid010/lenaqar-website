@@ -5,7 +5,7 @@ import { useUsersInfiniteData } from "@/hooks/use-users-infinite-data";
 import { removeUserFromInfiniteUsersCache, userKeys } from "@/utils/query-utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useCallback, useState } from "react";
+import { useEffect, useMemo, useCallback } from "react";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useSearchParams } from "next/navigation";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
@@ -66,14 +66,6 @@ function DashboardSplitViewComponent() {
   );
 
   const selectedUserId = searchParams.get("userId") || undefined;
-
-  /**
-   * Mobile-only: the lead the user is currently working with after tapping Call.
-   * Tapping a row navigates to the full-screen detail view, so on the list we
-   * keep this highlighted until another lead is called — making it obvious which
-   * customer a follow-up action belongs to.
-   */
-  const [callSelectedUserId, setCallSelectedUserId] = useState(null);
 
   const {
     data,
@@ -156,9 +148,15 @@ function DashboardSplitViewComponent() {
     [isLg, router, searchParams]
   );
 
-  const onCallLead = useCallback((user) => {
-    if (user?.user_id) setCallSelectedUserId(user.user_id);
-  }, []);
+  // Tapping Call initiates the phone call (the tel: link on the button) and also
+  // opens the lead's detail view, so the user lands on the right customer after
+  // the call instead of hunting for the row again.
+  const onCallLead = useCallback(
+    (user) => {
+      if (user?.user_id) onSelectLead(user);
+    },
+    [onSelectLead],
+  );
 
   const onInvalidateList = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: userKeys.all });
@@ -218,9 +216,9 @@ function DashboardSplitViewComponent() {
             isError={isError}
             error={error}
             refetch={refetch}
-            selectedUserId={isLg ? selectedUserId : callSelectedUserId}
+            selectedUserId={isLg ? selectedUserId : undefined}
             onSelectLead={onSelectLead}
-            onCallLead={isLg ? undefined : onCallLead}
+            onCallLead={onCallLead}
             data={data}
             isLeadSelected={isLeadSelected}
             onToggleLeadSelection={toggleLeadSelection}
