@@ -27,7 +27,8 @@ import {
 } from "@/constants/owner-type";
 import { ChevronDown, FileSpreadsheet, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { formatDayMonthShort } from "@/utils/formateDate";
 import AverageScore from "./average-score";
 import VideoInstructionsDialog from "@/components/ui/video-instructions-dialog";
@@ -318,17 +319,21 @@ export default function DashbordFilter({
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
   const [isOwner, setIsOwner] = useState(false);
-  const isFilterMenuOpen =
+  /** Dropdowns inside the Filters panel section (excludes sort — separate section in panel mode). */
+  const isFiltersDropdownOpen =
     isActionDropdownOpen ||
     isOwnerTypeDropdownOpen ||
     isCampaignDropdownOpen ||
-    isSortDropdownOpen ||
     isAuthorDropdownOpen ||
     isDatePickerOpen;
+  const isFilterMenuOpen = isFiltersDropdownOpen || isSortDropdownOpen;
   const actionDropdownRef = useRef(null);
   const ownerTypeDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
+  const datePickerTriggerRef = useRef(null);
+  const datePickerPanelRef = useRef(null);
+  const [datePickerPosition, setDatePickerPosition] = useState(null);
 
   useEffect(() => {
     setIsMounted(true);
@@ -394,6 +399,37 @@ export default function DashbordFilter({
     };
   }, []);
 
+  useLayoutEffect(() => {
+    if (!isDatePickerOpen) {
+      setDatePickerPosition(null);
+      return;
+    }
+
+    const updatePosition = () => {
+      const trigger = datePickerTriggerRef.current;
+      if (!trigger) return;
+      const rect = trigger.getBoundingClientRect();
+      const gap = 4;
+      const openUpward = panel;
+      setDatePickerPosition({
+        top: openUpward ? undefined : rect.bottom + gap,
+        bottom: openUpward
+          ? Math.max(8, window.innerHeight - rect.top + gap)
+          : undefined,
+        left: rect.left,
+        width: rect.width,
+      });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [isDatePickerOpen, panel]);
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -420,13 +456,23 @@ export default function DashbordFilter({
       ) {
         setIsSortDropdownOpen(false);
       }
+      if (
+        isDatePickerOpen &&
+        datePickerTriggerRef.current &&
+        !datePickerTriggerRef.current.contains(event.target) &&
+        datePickerPanelRef.current &&
+        !datePickerPanelRef.current.contains(event.target)
+      ) {
+        setIsDatePickerOpen(false);
+      }
     };
 
     if (
       isActionDropdownOpen ||
       isOwnerTypeDropdownOpen ||
       isCampaignDropdownOpen ||
-      isSortDropdownOpen
+      isSortDropdownOpen ||
+      isDatePickerOpen
     ) {
       document.addEventListener("mousedown", handleClickOutside);
     }
@@ -438,6 +484,7 @@ export default function DashbordFilter({
     isOwnerTypeDropdownOpen,
     isCampaignDropdownOpen,
     isSortDropdownOpen,
+    isDatePickerOpen,
   ]);
 
   const formatDateForDisplay = (date) => formatDayMonthShort(date, locale);
@@ -862,7 +909,10 @@ export default function DashbordFilter({
             )}
           </div>
 
-          <div className={`relative ${isDatePickerOpen ? "z-[90]" : "z-[60]"} ${dateShellClass}`}>
+          <div
+            ref={datePickerTriggerRef}
+            className={`relative ${isDatePickerOpen ? "z-[120]" : "z-[60]"} ${dateShellClass}`}
+          >
             <div
               role="button"
               tabIndex={0}
@@ -889,56 +939,80 @@ export default function DashbordFilter({
               />
             </div>
 
-            {isDatePickerOpen && (
-              <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-3 shadow-lg`}>
-                <div className="space-y-2">
-                  <FormInput
-                    type="date"
-                    label={translate("dashboardFilter.datePicker.startDate")}
-                    value={filters.start_date.split("T")[0]}
-                    onChange={(filter) => {
-                      const selectedDate = filter.target.value;
-                      const dateObj = new Date(selectedDate + "T00:00:00.000Z");
-                      const formattedDate = formatDate(dateObj);
-                      setFilters((prev) => ({
-                        ...prev,
-                        start_date: formattedDate,
-                      }));
-                    }}
-                  />
+            {isDatePickerOpen &&
+              datePickerPosition &&
+              typeof document !== "undefined" &&
+              createPortal(
+                <div
+                  ref={datePickerPanelRef}
+                  role="dialog"
+                  aria-label={translate(
+                    "dashboardFilter.datePicker.title",
+                    "Date range",
+                  )}
+                  className="fixed z-[300] rounded-md border border-gray-200 bg-white p-3 shadow-xl"
+                  style={{
+                    top: datePickerPosition.top,
+                    bottom: datePickerPosition.bottom,
+                    left: datePickerPosition.left,
+                    width: datePickerPosition.width,
+                  }}
+                >
+                  <div className="space-y-2">
+                    <FormInput
+                      type="date"
+                      label={translate("dashboardFilter.datePicker.startDate")}
+                      value={filters.start_date.split("T")[0]}
+                      onChange={(filter) => {
+                        const selectedDate = filter.target.value;
+                        const dateObj = new Date(
+                          selectedDate + "T00:00:00.000Z",
+                        );
+                        const formattedDate = formatDate(dateObj);
+                        setFilters((prev) => ({
+                          ...prev,
+                          start_date: formattedDate,
+                        }));
+                      }}
+                    />
 
-                  <FormInput
-                    type="date"
-                    label={translate("dashboardFilter.datePicker.endDate")}
-                    value={filters.end_date.split("T")[0]}
-                    onChange={(filter) => {
-                      const selectedDate = filter.target.value;
-                      const dateObj = new Date(selectedDate + "T23:59:59.999Z");
-                      const formattedDate = formatDate(dateObj);
-                      setFilters((prev) => ({
-                        ...prev,
-                        end_date: formattedDate,
-                      }));
-                    }}
-                  />
+                    <FormInput
+                      type="date"
+                      label={translate("dashboardFilter.datePicker.endDate")}
+                      value={filters.end_date.split("T")[0]}
+                      onChange={(filter) => {
+                        const selectedDate = filter.target.value;
+                        const dateObj = new Date(
+                          selectedDate + "T23:59:59.999Z",
+                        );
+                        const formattedDate = formatDate(dateObj);
+                        setFilters((prev) => ({
+                          ...prev,
+                          end_date: formattedDate,
+                        }));
+                      }}
+                    />
 
-                  <div className="flex justify-end gap-2">
-                    <button
-                      onClick={() => setIsDatePickerOpen(false)}
-                      className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      {translate("dashboardFilter.datePicker.cancel")}
-                    </button>
-                    <button
-                      onClick={onApplyDateFilter}
-                      className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm"
-                    >
-                      {translate("dashboardFilter.datePicker.apply")}
-                    </button>
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsDatePickerOpen(false)}
+                        className="px-3 py-1 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        {translate("dashboardFilter.datePicker.cancel")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={onApplyDateFilter}
+                        className="bg-blue-600 hover:opacity-95 text-white px-3 py-1 rounded-md text-sm"
+                      >
+                        {translate("dashboardFilter.datePicker.apply")}
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+                </div>,
+                document.body,
+              )}
           </div>
 
           <div
@@ -1126,7 +1200,7 @@ export default function DashbordFilter({
           >
             <div
               className={`relative flex flex-col items-stretch justify-start gap-2 min-w-0 ${
-                isFilterMenuOpen ? "z-50" : "z-30"
+                isFiltersDropdownOpen ? "z-[120]" : "z-30"
               }`}
             >
               {filterControls}
@@ -1136,7 +1210,13 @@ export default function DashbordFilter({
           <PanelSection
             title={translate("dashboardFilter.panel.sections.sorting", "Sorting")}
           >
-            {sortControl}
+            <div
+              className={`relative min-w-0 ${
+                isSortDropdownOpen ? "z-[120]" : "z-30"
+              }`}
+            >
+              {sortControl}
+            </div>
           </PanelSection>
 
           <PanelSection
@@ -1170,7 +1250,7 @@ export default function DashbordFilter({
         <>
       <div
         className={`relative flex flex-wrap sm:flex-nowrap items-center justify-start gap-2 min-w-0 ${
-          isFilterMenuOpen ? "z-50" : "z-30"
+          isFilterMenuOpen ? "z-[120]" : "z-30"
         }`}
       >
         {filterControls}
