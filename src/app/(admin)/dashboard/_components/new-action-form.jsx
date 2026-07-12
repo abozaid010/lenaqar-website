@@ -3,11 +3,15 @@
 import { useI18n } from "@/hooks/useI18n";
 import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
-import { ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
+import { formatDateTimeAmPmShort } from "@/utils/formateDate";
+import { Calendar, ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
 import { updateUserAction } from "@/utils/api";
+
+/** Default follow-up time when the user picks a date but does not change time. */
+const DEFAULT_MEETING_TIME = "09:00";
 
 const initialState = {
   success: false,
@@ -51,9 +55,13 @@ export default function NewActionForm({
     (typeof clientInfo?.name === "string" && clientInfo.name.trim()) ||
     "";
   const [updating, setUpdating] = useState(false);
-  /** Collapse optional schedule in the Actions composer so Save stays above the fold. */
-  const [scheduleOpen, setScheduleOpen] = useState(
-    !(composerLayout && fieldPriority === "action")
+  /**
+   * Composer (Actions modal): do not expand an inline date/time panel on mobile —
+   * that grew the shrink-0 composer inside an overflow-hidden sheet and clipped fields.
+   * Open the native date picker instead; track whether the user set a schedule.
+   */
+  const [scheduleTouched, setScheduleTouched] = useState(
+    Boolean(defaultMeetingDate || defaultMeetingTime)
   );
   const notesRef = useRef(null);
   const lastHandledSuccessRef = useRef(null);
@@ -70,12 +78,7 @@ export default function NewActionForm({
     return now.toISOString().split("T")[0];
   };
 
-  const getDefaultTime = () => {
-    const now = new Date();
-    return `${String(now.getHours()).padStart(2, "0")}:${String(
-      now.getMinutes()
-    ).padStart(2, "0")}`;
-  };
+  const getDefaultTime = () => DEFAULT_MEETING_TIME;
 
   const initialMeetingDate = defaultMeetingDate || getDefaultDate();
   const initialMeetingTime = defaultMeetingTime || getDefaultTime();
@@ -145,6 +148,7 @@ export default function NewActionForm({
       minutes: converted.minutes,
       ampm: converted.ampm,
     });
+    setScheduleTouched(false);
 
     if (notesRef.current) {
       notesRef.current.style.height = "auto";
@@ -298,16 +302,40 @@ export default function NewActionForm({
   };
 
   const handleDateChange = (e) => {
+    setScheduleTouched(true);
     setFormData({
       ...formData,
       meeting_date: e.target.value || getDefaultDate(),
     });
   };
 
+  const handleNativeTimeChange = (e) => {
+    const next = e.target.value || getDefaultTime();
+    setScheduleTouched(true);
+    setFormData((prev) => ({ ...prev, meeting_time: next }));
+    setTimeState(to12HourFormat(next));
+  };
+
   const getFullMeetingDateTime = () => {
     const date = formData.meeting_date || getDefaultDate();
     const time = formData.meeting_time || getDefaultTime();
     return `${date}T${time}`;
+  };
+
+  const markScheduleTouched = () => {
+    setScheduleTouched(true);
+  };
+
+  const openPickerFromEvent = (e) => {
+    markScheduleTouched();
+    const el = e.currentTarget;
+    try {
+      if (typeof el.showPicker === "function") {
+        el.showPicker();
+      }
+    } catch {
+      // Unsupported or blocked; native click handling still applies.
+    }
   };
 
   const handleTimeBlur = (field) => () => {
@@ -505,19 +533,61 @@ export default function NewActionForm({
     </div>
   );
 
+  const scheduleSummary = scheduleTouched
+    ? formatDateTimeAmPmShort(getFullMeetingDateTime(), locale)
+    : null;
+
   const scheduleFields =
     composerLayout && fieldPriority === "action" ? (
       <div className="mb-3">
-        <button
-          type="button"
-          onClick={() => setScheduleOpen((open) => !open)}
-          className="flex w-full items-center justify-between rounded-lg px-1 py-1.5 text-start text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
-          aria-expanded={scheduleOpen}
-        >
-          <span>{scheduleOptionalLabel}</span>
-          {scheduleOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-        </button>
-        {scheduleOpen ? <div className="mt-2">{scheduleFieldsInner}</div> : null}
+        <div className="flex items-center gap-1">
+          {/*
+            Label + opacity overlay → native date picker (no accordion). Expanding
+            inline fields previously grew the mobile composer past the sheet and
+            clipped them. Overlay (not sr-only) so iOS/Android open the picker.
+          */}
+          <label className="relative flex min-w-0 flex-1 cursor-pointer items-center justify-between gap-2 rounded-lg px-1 py-1.5 text-start text-xs font-bold uppercase tracking-wider text-gray-500 hover:text-primary focus-within:text-primary focus-within:ring-2 focus-within:ring-primary/30">
+            <span className="pointer-events-none min-w-0 shrink">
+              {scheduleOptionalLabel}
+            </span>
+            {scheduleSummary ? (
+              <span className="pointer-events-none truncate font-semibold normal-case tracking-normal text-gray-700">
+                {scheduleSummary}
+              </span>
+            ) : (
+              <Calendar
+                size={14}
+                className="pointer-events-none shrink-0 text-gray-400"
+                aria-hidden
+              />
+            )}
+            <input
+              type="date"
+              value={formData.meeting_date}
+              onChange={handleDateChange}
+              onFocus={markScheduleTouched}
+              onClick={openPickerFromEvent}
+              className="absolute inset-0 z-10 cursor-pointer opacity-0"
+              aria-label={scheduleOptionalLabel}
+            />
+          </label>
+          {scheduleTouched ? (
+            <label
+              className="relative shrink-0 cursor-pointer rounded-lg p-1.5 text-gray-400 hover:bg-primary/5 hover:text-primary focus-within:ring-2 focus-within:ring-primary/30"
+              title={timeLabel}
+            >
+              <Clock size={14} className="pointer-events-none" aria-hidden />
+              <input
+                type="time"
+                value={formData.meeting_time}
+                onChange={handleNativeTimeChange}
+                onClick={openPickerFromEvent}
+                className="absolute inset-0 z-10 cursor-pointer opacity-0"
+                aria-label={timeLabel}
+              />
+            </label>
+          ) : null}
+        </div>
       </div>
     ) : (
       <div className="mb-4">
