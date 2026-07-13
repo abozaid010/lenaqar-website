@@ -55,6 +55,10 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { isValidEmail } from "@/utils/email";
+import {
+  getDefaultDashboardEndDate,
+  getDefaultDashboardStartDate,
+} from "@/utils/dashboardDate";
 import toast from "react-hot-toast";
 
 const formatDate = (date) => {
@@ -133,24 +137,29 @@ export default function DashbordFilter({
     );
   }, [selectedSort, sortOptions, translate]);
 
-  const tomorrow = useMemo(() => {
-    const date = new Date();
-    date.setDate(date.getDate() + 1);
-    return date;
-  }, []);
-
-  const twoMonthsAgo = useMemo(() => {
-    const date = new Date(tomorrow);
-    date.setMonth(tomorrow.getMonth() - 2);
-    return date;
-  }, [tomorrow]);
-
   // Cookie-backed; empty on SSR/first paint to avoid hydration mismatch.
   const [loggedInEmail, setLoggedInEmail] = useState("");
   const [isAdminUser, setIsAdminUser] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [isTeamMembersLoading, setIsTeamMembersLoading] = useState(false);
   const [authorError, setAuthorError] = useState("");
+
+  const [filters, setFilters] = useState(() => {
+    const authorFromUrl =
+      typeof appliedFilters.author === "string"
+        ? appliedFilters.author.trim()
+        : "";
+    return {
+      actions: parseDashboardActionFilter(appliedFilters.action),
+      owner_type: parseOwnerTypeFilter(appliedFilters.owner_type),
+      start_date: appliedFilters.start_date || getDefaultDashboardStartDate(),
+      end_date: appliedFilters.end_date || getDefaultDashboardEndDate(),
+      campaign_ids: appliedFilters.campaign_ids
+        ? appliedFilters.campaign_ids.split(",")
+        : [],
+      author: authorFromUrl,
+    };
+  });
 
   useEffect(() => {
     const email = getDashboardLoggedInEmail();
@@ -166,23 +175,6 @@ export default function DashbordFilter({
       });
     }
   }, []);
-
-  const [filters, setFilters] = useState(() => {
-    const authorFromUrl =
-      typeof appliedFilters.author === "string"
-        ? appliedFilters.author.trim()
-        : "";
-    return {
-      actions: parseDashboardActionFilter(appliedFilters.action),
-      owner_type: parseOwnerTypeFilter(appliedFilters.owner_type),
-      start_date: appliedFilters.start_date || formatDate(twoMonthsAgo),
-      end_date: appliedFilters.end_date || formatDate(tomorrow),
-      campaign_ids: appliedFilters.campaign_ids
-        ? appliedFilters.campaign_ids.split(",")
-        : [],
-      author: authorFromUrl,
-    };
-  });
 
   useEffect(() => {
     if (!isAdminUser) {
@@ -695,8 +687,8 @@ export default function DashbordFilter({
     setFilters({
       actions: [NEW_LEAD_ACTION],
       owner_type: [],
-      start_date: formatDate(twoMonthsAgo),
-      end_date: formatDate(tomorrow),
+      start_date: getDefaultDashboardStartDate(),
+      end_date: getDefaultDashboardEndDate(),
       campaign_ids: [],
       author: defaultAuthor,
     });
@@ -965,13 +957,9 @@ export default function DashbordFilter({
                       value={filters.start_date.split("T")[0]}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        const dateObj = new Date(
-                          selectedDate + "T00:00:00.000Z",
-                        );
-                        const formattedDate = formatDate(dateObj);
                         setFilters((prev) => ({
                           ...prev,
-                          start_date: formattedDate,
+                          start_date: `${selectedDate}T00:00:00`,
                         }));
                       }}
                     />
@@ -982,13 +970,9 @@ export default function DashbordFilter({
                       value={filters.end_date.split("T")[0]}
                       onChange={(filter) => {
                         const selectedDate = filter.target.value;
-                        const dateObj = new Date(
-                          selectedDate + "T23:59:59.999Z",
-                        );
-                        const formattedDate = formatDate(dateObj);
                         setFilters((prev) => ({
                           ...prev,
-                          end_date: formattedDate,
+                          end_date: `${selectedDate}T23:59:59`,
                         }));
                       }}
                     />

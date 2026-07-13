@@ -1,6 +1,7 @@
 "use client";
 
 import EmptyStateVideo from "@/components/ui/empty-state-video";
+import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
@@ -27,16 +28,6 @@ function readFilterParam(params, key) {
   if (typeof params.get === "function") return params.get(key) || "";
   const value = params[key];
   return value == null || value === "" ? "" : String(value);
-}
-
-function ListSkeleton({ rows = 8 }) {
-  return (
-    <div className="animate-pulse space-y-2 p-2">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="h-14 bg-gray-100 rounded border border-gray-50" />
-      ))}
-    </div>
-  );
 }
 
 export default function LeadsListPane({
@@ -344,7 +335,10 @@ export default function LeadsListPane({
         aria-label={common.leads}
       >
         {showInitialLoading ? (
-          <ListSkeleton />
+          <ThreeDotsLoader
+            label={common.loadingData || common.loading}
+            containerClassName="min-h-[200px] flex flex-col items-center justify-center gap-3"
+          />
         ) : showNoSearchMatches ? (
           <>
             <div className="min-h-[120px] flex items-center justify-center p-4 text-center text-sm text-chat-text-muted">
@@ -374,10 +368,11 @@ export default function LeadsListPane({
           </div>
         ) : (
           <>
-            {users.map((user) => (
+            {users.map((user, index) => (
               <LeadRow
                 key={user.user_id}
                 user={user}
+                index={index + 1}
                 selected={selectedUserId === user.user_id}
                 onSelect={onSelectLead}
                 onCall={onCallLead}

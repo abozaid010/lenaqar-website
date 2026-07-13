@@ -10,6 +10,7 @@ import {
 
 export default function LeadRow({
   user,
+  index,
   selected,
   onSelect,
   onCall,
@@ -41,18 +42,30 @@ export default function LeadRow({
         selected ? "chat-list-row--selected" : ""
       }`}
     >
-      {showBulkCheckbox && (
-        <input
-          type="checkbox"
-          checked={bulkSelected}
-          onChange={(e) => {
-            e.stopPropagation();
-            onToggleBulkSelection?.(user.user_id);
-          }}
-          onClick={(e) => e.stopPropagation()}
-          className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
-          aria-label={t.clientsTable?.headers?.name || "Select lead"}
-        />
+      {(showBulkCheckbox || index != null) && (
+        <div className="shrink-0 w-5 flex flex-col items-center gap-0.5">
+          {showBulkCheckbox ? (
+            <input
+              type="checkbox"
+              checked={bulkSelected}
+              onChange={(e) => {
+                e.stopPropagation();
+                onToggleBulkSelection?.(user.user_id);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              className="h-4 w-4 shrink-0 cursor-pointer accent-primary"
+              aria-label={t.clientsTable?.headers?.name || "Select lead"}
+            />
+          ) : null}
+          {index != null ? (
+            <span
+              className="text-[10px] leading-none text-chat-text-faint tabular-nums"
+              aria-hidden
+            >
+              {index}.
+            </span>
+          ) : null}
+        </div>
       )}
 
       <div className="flex-1 min-w-0 flex flex-col gap-0.5">
@@ -87,7 +100,6 @@ export default function LeadRow({
       {rawPhone ? (
         <CallButton
           phoneNumber={rawPhone}
-          showCopy
           className="shrink-0 hover:text-primary"
           onClick={onCall ? () => onCall(user) : undefined}
         />
