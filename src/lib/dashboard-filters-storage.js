@@ -1,6 +1,11 @@
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { applyDashboardLeadAccessDefaults } from "@/lib/dashboard-lead-access";
 import {
+  getDefaultDashboardEndDate,
+  getDefaultDashboardStartDate,
+  isDashboardDateBeforeToday,
+} from "@/utils/dashboardDate";
+import {
   DASHBOARD_SORT,
   DASHBOARD_SORT_PARAM,
   LEGACY_SORT_SCORE_PARAM,
@@ -92,6 +97,16 @@ export function withDashboardFilterDefaults(
       withAccess[DASHBOARD_SORT_PARAM] =
         getDefaultDashboardSort(clientId) || DASHBOARD_SORT.OLDEST;
     }
+  }
+
+  // Rolling date window: start = ~2 months ago, end = tomorrow EOD (covers today).
+  // Refresh a stale end_date that ended before today so reloads still include
+  // current leads (matches the date-picker default of "tomorrow").
+  if (!withAccess.start_date) {
+    withAccess.start_date = getDefaultDashboardStartDate();
+  }
+  if (!withAccess.end_date || isDashboardDateBeforeToday(withAccess.end_date)) {
+    withAccess.end_date = getDefaultDashboardEndDate();
   }
 
   return withAccess;
