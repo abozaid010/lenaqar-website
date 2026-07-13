@@ -24,6 +24,8 @@ import { leadMatchesSearchQuery } from "@/utils/lead-list-search";
 import { useLgViewport } from "@/hooks/use-lg-viewport";
 import { useDashboardFilterPersistence } from "@/hooks/useDashboardFilterPersistence";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
+import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
+import { useI18n } from "@/hooks/useI18n";
 import LeadDetailPane from "./LeadDetailPane";
 import LeadsListPane from "./LeadsListPane";
 
@@ -50,6 +52,7 @@ function DashboardSplitViewComponent() {
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const isLg = useLgViewport();
+  const { common } = useI18n();
   const { setAverageScore, setLoading } = useAverageScore();
   const { effectiveFilterParams } = useDashboardFilterPersistence();
   const {
@@ -78,6 +81,10 @@ function DashboardSplitViewComponent() {
     refetch,
     isFetching,
   } = useUsersInfiniteData(filterKey);
+
+  /** Initial load or filter change — not infinite scroll page fetches. */
+  const isLeadsLoading =
+    isLoading || (isFetching && !isFetchingNextPage && !data);
 
   const allUsers = useMemo(() => flattenUsers(data), [data]);
 
@@ -202,7 +209,7 @@ function DashboardSplitViewComponent() {
 
   return (
     <div className="flex flex-col min-h-0 flex-1 gap-1">
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
+      <div className="relative grid grid-cols-1 lg:grid-cols-[minmax(196px,252px)_1fr] min-h-0 flex-1 border border-gray-200 rounded-md overflow-hidden bg-white shadow-sm">
         {showMobileDetail ? null : (
           <LeadsListPane
             users={filteredUsers}
@@ -240,8 +247,17 @@ function DashboardSplitViewComponent() {
             onLeadRemoved={onLeadRemoved}
             showBackButton={showMobileDetail}
             onBack={showMobileDetail ? onMobileBack : undefined}
+            isListLoading={isLeadsLoading}
           />
         </div>
+        {isLeadsLoading ? (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/85 backdrop-blur-[1px]">
+            <ThreeDotsLoader
+              label={common.loadingData || common.loading}
+              containerClassName="flex flex-col items-center justify-center gap-3"
+            />
+          </div>
+        ) : null}
       </div>
     </div>
   );

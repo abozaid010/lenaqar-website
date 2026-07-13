@@ -54,6 +54,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { DASHBOARD_BUTTON } from "@/constants/ui-classes";
 import TagChip from "@/components/ui/tag-chip";
+import { ThreeDotsLoader } from "@/components/ui/loading-spinner";
 import EditRequirementDialog from "./EditRequirementDialog";
 import EditUserInfoDialog from "./EditUserInfoDialog";
 import LeadDetailTabs from "./LeadDetailTabs";
@@ -113,6 +114,7 @@ export default function LeadDetailPane({
   onLeadRemoved,
   showBackButton = false,
   onBack,
+  isListLoading = false,
 }) {
   const { translate, common, property, localeUtils, locale } = useI18n();
   const router = useRouter();
@@ -806,6 +808,14 @@ export default function LeadDetailPane({
   }, [data, leadSummary, translate, translateEnum]);
 
   if (!userId) {
+    if (isListLoading) {
+      return (
+        <ThreeDotsLoader
+          label={common.loadingData || common.loading}
+          containerClassName="flex-1 flex flex-col items-center justify-center gap-3 bg-gray-50"
+        />
+      );
+    }
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50 text-gray-500 text-sm p-6">
         {common.selectLead}
@@ -815,9 +825,10 @@ export default function LeadDetailPane({
 
   if (isLoading && !data) {
     return (
-      <div className="flex-1 flex items-center justify-center text-sm text-gray-500">
-        {common.loadingConversation}
-      </div>
+      <ThreeDotsLoader
+        label={common.loadingConversation}
+        containerClassName="flex-1 flex flex-col items-center justify-center gap-3 bg-white"
+      />
     );
   }
 
