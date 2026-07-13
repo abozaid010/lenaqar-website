@@ -6,9 +6,11 @@ import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { formatDateTimeAmPmShort } from "@/utils/formateDate";
 import { Calendar, ChevronDown, ChevronUp, Clock, Loader2 } from "lucide-react";
 import { useActionState, useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import { addNewAction } from "../_actions/actions";
 import { updateUserAction } from "@/utils/api";
+import { userKeys } from "@/utils/query-utils";
 
 /** Default follow-up time when the user picks a date but does not change time. */
 const DEFAULT_MEETING_TIME = "09:00";
@@ -45,6 +47,7 @@ export default function NewActionForm({
   composerLayout = false,
 }) {
   const { translate, locale, t } = useI18n();
+  const queryClient = useQueryClient();
   const [state, action, pending] = useActionState(addNewAction, initialState);
   const clientId = LenaCookiesManager.getClientId();
   const clientInfo = LenaCookiesManager.getClientInfo();
@@ -202,6 +205,12 @@ export default function NewActionForm({
     if (onActionUpdate && userId) {
       onActionUpdate(userId, createdAction.action, createdAction);
     }
+
+    // The optimistic patch above only touches leads already present in cached
+    // pages; other filter combinations (e.g. the just-registered action's
+    // filter) keep 15-min-fresh lists that predate this action. Mark all lead
+    // lists stale — no immediate refetch — so the next filter change refetches.
+    queryClient.invalidateQueries({ queryKey: userKeys.all, refetchType: "none" });
 
     resetForm();
     onSuccess?.(createdAction);
@@ -380,6 +389,7 @@ export default function NewActionForm({
       if (onActionUpdate) {
         onActionUpdate(userId, formData.action);
       }
+      queryClient.invalidateQueries({ queryKey: userKeys.all, refetchType: "none" });
       onSuccess?.();
     } catch (error) {
       toast.error(

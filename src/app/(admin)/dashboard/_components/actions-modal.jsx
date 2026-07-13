@@ -4,6 +4,8 @@ import { useI18n } from "@/hooks/useI18n";
 import { USER_ACTIONS, getActionLabel } from "@/utils/actions";
 import { formatDateForDisplay } from "@/utils/formateDate";
 import { getClientActions, updateUserAction } from "@/utils/api";
+import { userKeys } from "@/utils/query-utils";
+import { useQueryClient } from "@tanstack/react-query";
 import { ChevronDown, ChevronUp, Pencil, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
@@ -349,6 +351,7 @@ export default function ActionsModal({
   overlayClassName = "z-50",
 }) {
   const { locale, translate } = useI18n();
+  const queryClient = useQueryClient();
   const [actionItems, setActionItems] = useState(actions || []);
   const [editingIndex, setEditingIndex] = useState(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
@@ -444,6 +447,9 @@ export default function ActionsModal({
       });
       await refreshActions();
       onActionUpdate?.(userId, editForm.action);
+      // Editing the latest action can change last_action; stale-mark cached
+      // lead lists (no refetch now) so filtered views refresh on next visit.
+      queryClient.invalidateQueries({ queryKey: userKeys.all, refetchType: "none" });
       toast.success(
         translate(
           "actionForm.successMessage",
