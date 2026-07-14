@@ -5,6 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { usePendingApprovalUnitsPageData } from "@/hooks/use-pending-approval-units-page-data";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
+import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { unitsSourcePendingQueryString } from "@/utils/units-navigation-source";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
@@ -13,6 +14,10 @@ import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
+import {
+  resolveAuthorDisplayLabel,
+  useTeamAuthorOptions,
+} from "@/hooks/useTeamAuthorOptions";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { ChevronDown, SlidersHorizontal, Trash2, X } from "lucide-react";
@@ -66,6 +71,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [propertyType, setPropertyType] = useState("");
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [author, setAuthor] = useState("");
 
   // Mobile sheet draft (committed on Apply)
   const [draftFilter, setDraftFilter] = useState(DEFAULT_VISIBILITY);
@@ -73,12 +79,17 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
   const [draftPropertyType, setDraftPropertyType] = useState("");
   const [draftMinPrice, setDraftMinPrice] = useState("");
   const [draftMaxPrice, setDraftMaxPrice] = useState("");
+  const [draftAuthor, setDraftAuthor] = useState("");
 
   // Desktop price popover draft
   const [pricePopoverMin, setPricePopoverMin] = useState("");
   const [pricePopoverMax, setPricePopoverMax] = useState("");
   const [isPriceDropdownOpen, setIsPriceDropdownOpen] = useState(false);
   const priceDropdownRef = useRef(null);
+
+  const { authorOptions } = useTeamAuthorOptions({
+    selectedAuthor: author || draftAuthor || "",
+  });
 
   const BUILDING_TYPES = useMemo(() => {
     return getBuildingTypes({
@@ -103,14 +114,17 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     const withPrice = { ...withPropertyType };
     if (minPrice != null && minPrice !== "") withPrice.min_price = minPrice;
     if (maxPrice != null && maxPrice !== "") withPrice.max_price = maxPrice;
+    const authorValue = typeof author === "string" ? author.trim() : "";
+    if (authorValue) withPrice.author = authorValue;
     return JSON.stringify(withPrice);
-  }, [searchParams, filter, updatedAtDate, propertyType, minPrice, maxPrice]);
+  }, [searchParams, filter, updatedAtDate, propertyType, minPrice, maxPrice, author]);
 
   const hasActiveClientFilters =
     Boolean(updatedAtDate?.trim()) ||
     Boolean(propertyType?.trim()) ||
     Boolean(minPrice) ||
     Boolean(maxPrice) ||
+    Boolean(author?.trim()) ||
     filter !== DEFAULT_VISIBILITY;
 
   const initialDataForQuery =
@@ -204,6 +218,12 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
         value: getPriceLabel(minPrice, maxPrice),
       });
     }
+    if (author?.trim()) {
+      list.push({
+        key: "author",
+        value: resolveAuthorDisplayLabel(author, authorOptions),
+      });
+    }
     return list;
   }, [
     filter,
@@ -211,6 +231,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     propertyType,
     minPrice,
     maxPrice,
+    author,
+    authorOptions,
     visibilityOptions,
     t,
     getPropertyTypeLabel,
@@ -225,6 +247,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setDraftPropertyType(propertyType);
     setDraftMinPrice(minPrice);
     setDraftMaxPrice(maxPrice);
+    setDraftAuthor(author);
     setIsMobileFiltersOpen(true);
   };
 
@@ -234,6 +257,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setPropertyType(draftPropertyType);
     setMinPrice(draftMinPrice);
     setMaxPrice(draftMaxPrice);
+    setAuthor(draftAuthor || "");
     setIsMobileFiltersOpen(false);
   };
 
@@ -243,11 +267,13 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     setPropertyType("");
     setMinPrice("");
     setMaxPrice("");
+    setAuthor("");
     setDraftFilter(DEFAULT_VISIBILITY);
     setDraftUpdatedAtDate("");
     setDraftPropertyType("");
     setDraftMinPrice("");
     setDraftMaxPrice("");
+    setDraftAuthor("");
     setPricePopoverMin("");
     setPricePopoverMax("");
   }, []);
@@ -261,6 +287,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     if (key === "visibility") setFilter(DEFAULT_VISIBILITY);
     if (key === "updated_at") setUpdatedAtDate("");
     if (key === "property_type") setPropertyType("");
+    if (key === "author") setAuthor("");
     if (key === "price") {
       setMinPrice("");
       setMaxPrice("");
@@ -564,6 +591,15 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
             />
           </div>
 
+          <div className="w-full min-w-0">
+            <AuthorFilterSelect
+              name="author_mobile"
+              value={draftAuthor || ""}
+              onChange={(e) => setDraftAuthor(e?.target?.value || "")}
+              className={FILTER_BUTTON_CLASS}
+            />
+          </div>
+
           <div className="w-full min-w-0 rounded-md border border-[#E6E6E6] bg-[#F6F7FB] p-3">
             <p className="text-xs font-medium text-gray-700 mb-2">
               {t.unitsFilter?.price ?? "Price"}
@@ -599,7 +635,7 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
 
       {/* Desktop filter bar — unchanged layout, lg+ only */}
       <div className="hidden lg:block p-4 space-y-4 bg-white rounded-lg shadow-md min-w-0">
-        <div className="flex items-center flex-nowrap gap-2 justify-between min-w-0">
+        <div className="flex items-center flex-wrap gap-2 justify-between min-w-0">
           <div className="w-auto flex-1 min-w-0">
             <SearchableDropdownSelect
               name="filter"
@@ -647,6 +683,15 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
                   ? "ابحث عن نوع العقار..."
                   : "Search property types..."
               }
+              className={FILTER_BUTTON_CLASS}
+            />
+          </div>
+
+          <div className="w-auto flex-1 min-w-0">
+            <AuthorFilterSelect
+              name="author"
+              value={author || ""}
+              onChange={(e) => setAuthor(e?.target?.value || "")}
               className={FILTER_BUTTON_CLASS}
             />
           </div>
