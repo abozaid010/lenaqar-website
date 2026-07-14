@@ -1,8 +1,11 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { SITE_URL } from "../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
+import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
 import { resolvePublicUnitByCodeParam } from "@/lib/units/unit-legacy-redirect";
+import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import {
   buildPublicUnitShareUrl,
   encodeUnitCodeForPath,
@@ -11,15 +14,19 @@ import {
 import UnitDetailsPage from "@/components/unit-details/unit-details-page";
 import { getDisplayImageUrl } from "@/utils/imageUtils";
 
-async function fetchUnitData(rawCode) {
+async function fetchRawUnit(rawCode) {
   try {
-    const rawUnit = await resolvePublicUnitByCodeParam(rawCode);
-    return rawUnit ? transformUnitToViewModel(rawUnit) : null;
+    return await resolvePublicUnitByCodeParam(rawCode);
   } catch (error) {
     if (error?.digest?.startsWith?.("NEXT_REDIRECT")) throw error;
-    console.error("Failed to fetch unit for metadata:", error.message);
+    console.error("Failed to fetch unit:", error.message);
     return null;
   }
+}
+
+async function fetchUnitData(rawCode) {
+  const rawUnit = await fetchRawUnit(rawCode);
+  return rawUnit ? transformUnitToViewModel(rawUnit) : null;
 }
 
 // Same-origin fallback so social crawlers always receive a fetchable image
@@ -99,11 +106,17 @@ export default async function PublicUnitDetailsPage({ params }) {
     notFound();
   }
 
-  const unit = await fetchUnitData(rawCode);
-  if (!unit) {
+  const rawUnit = await fetchRawUnit(rawCode);
+  if (!rawUnit) {
     notFound();
   }
 
+  const cookieStore = await cookies();
+  const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
+  // Same authorization rule as Homey `/units/[code]` and `/units/[code]/edit`.
+  const isOwnUnit = isOwnClientUnit(rawUnit, clientId);
+
+  const unit = transformUnitToViewModel(rawUnit);
   const shareUrl = unit.referenceCode
     ? buildPublicUnitShareUrl(unit.referenceCode)
     : `${SITE_URL}/allProberties`;
@@ -122,7 +135,7 @@ export default async function PublicUnitDetailsPage({ params }) {
           },
         ]}
       />
-      <UnitDetailsPage unit={unit} />
+      <UnitDetailsPage unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
     </>
   );
 }

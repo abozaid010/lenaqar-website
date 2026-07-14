@@ -4,6 +4,7 @@ import { SITE_URL } from "../../../metadata";
 import BreadcrumbSchema from "@/components/schema/BreadcrumbSchema";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { transformUnitToViewModel } from "@/lib/units/unit-selectors";
+import { isOwnClientUnit } from "@/lib/units/unit-ownership";
 import { resolveAdminUnitByCodeParam } from "@/lib/units/unit-legacy-redirect";
 import {
   buildAdminUnitDetailPath,
@@ -92,6 +93,7 @@ export default async function PrivateUnitDetailsPage({ params }) {
     const unit = transformUnitToViewModel(rawUnit, t, locale);
     const normalizedCode = normalizeUnitCodeParam(rawUnit.code) || rawCode;
     const detailPath = buildAdminUnitDetailPath(normalizedCode, clientId);
+    const isOwnUnit = isOwnClientUnit(rawUnit, clientId);
 
     return (
       <>
@@ -107,7 +109,7 @@ export default async function PrivateUnitDetailsPage({ params }) {
             },
           ]}
         />
-        <UnitDetailsPage unit={unit} rawUnit={rawUnit} />
+        <UnitDetailsPage unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
       </>
     );
   } catch (error) {

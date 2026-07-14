@@ -20,7 +20,7 @@ export default function StickyInquiryCard({
 }: StickyInquiryCardProps) {
   const { translate, locale } = useI18n();
   const { myClientId: currentClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
-  const isOwnUnit = isOwnUnitProp ?? isOwnUnitFromHook;
+  const isOwnUnit = Boolean(isOwnUnitProp) || isOwnUnitFromHook;
   const [contactData, setContactData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [unitUrl, setUnitUrl] = useState('');

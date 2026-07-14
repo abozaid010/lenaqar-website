@@ -35,7 +35,8 @@ export default function UnitDetailsAdminActions({
   const { locale, translate } = useI18n();
   const router = useRouter();
   const { myClientId: currentClientId, isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
-  const isOwnUnit = isOwnUnitProp ?? isOwnUnitFromHook;
+  // Same ownership rule as Homey; allow client hook to upgrade after hydration.
+  const isOwnUnit = Boolean(isOwnUnitProp) || isOwnUnitFromHook;
   const unitsSection = useUnitsSectionSource();
   const showApproveButton = SHOW_UNIT_APPROVE_BUTTON && Boolean(
     rawUnit && isUnitPendingApproval(rawUnit, unitsSection === 'pending_approval'),
