@@ -2082,7 +2082,7 @@ export async function sendWhatsappMessages({
  * are left untouched server-side. `notes` is append-only (deduplicated) on the
  * backend — it does not replace existing notes.
  *
- * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string, owner_type?: "owner" | "broker" | "developer", notes?: string }} payload
+ * @param {{ user_id: string, phone_number?: string, name?: string, company_name?: string, owner_type?: "owner" | "broker" | "developer" | "renter" | "buyer" | "seller" | "rentee", notes?: string }} payload
  */
 export async function updateUserInfo(payload) {
   if (!payload?.user_id) {
@@ -2319,6 +2319,52 @@ export async function updateUserRequirements(requirementId, payload) {
     return response.data;
   } catch (error) {
     console.error("Failed to update requirements:", error.message);
+    throw error;
+  }
+}
+
+/**
+ * Bulk-assign author on leads (POST /api/leads/assign-author).
+ * `author` may be a team member id, team member email, or client account email.
+ *
+ * @param {{ lead_ids: string[], author: string }} payload
+ */
+export async function assignLeadsAuthor(payload) {
+  const leadIds = Array.isArray(payload?.lead_ids)
+    ? payload.lead_ids.filter((id) => typeof id === "string" && id.trim())
+    : [];
+  const author =
+    typeof payload?.author === "string" ? payload.author.trim() : "";
+
+  if (leadIds.length === 0) {
+    throw new Error("At least one lead_id is required");
+  }
+  if (!author) {
+    throw new Error("author is required");
+  }
+
+  try {
+    const response = await axiosInstance.post("/api/leads/assign-author", {
+      lead_ids: leadIds,
+      author,
+    });
+    const data = response.data;
+
+    if (
+      data &&
+      (data.status === false || data.error_message) &&
+      data.status !== true &&
+      data.code !== 200 &&
+      data.code !== 201
+    ) {
+      throw new Error(
+        data.error_message || data.message || "Failed to assign author",
+      );
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Failed to assign leads author:", error.message);
     throw error;
   }
 }
