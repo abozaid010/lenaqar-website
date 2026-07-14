@@ -1109,6 +1109,10 @@ export default {
     sendingFrom: "Sending from",
     rateLimitExceeded:
       "Daily message limit exceeded. Please try again later.",
+    userPhoneNotAssigned:
+      "Your account does not have a WhatsApp number assigned. Please contact your administrator.",
+    noLinkedAccountForAssignedPhone:
+      "No WhatsApp account is linked to your assigned phone number.",
   },
   openwaConnection: {
     title: "Connect WhatsApp",

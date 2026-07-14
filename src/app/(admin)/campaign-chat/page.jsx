@@ -14,6 +14,10 @@ import ErrorBoundary from "@/components/ui/error-boundary";
 import { useI18n } from "@/hooks/useI18n";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { buildUnifiedReplyProviderPayload, getEffectiveMessagingAccount } from "@/lib/whatsapp-messaging-provider";
+import {
+  assertWhatsappSenderAllowedForUser,
+  getWhatsappAccountRestrictionMessage,
+} from "@/lib/whatsapp-account-restriction";
 
 // Components
 import ChatMessagesArea from "@/components/ui/chat-messages-area";
@@ -301,6 +305,17 @@ const CampaignChat = () => {
     }
 
     const account = getEffectiveMessagingAccount(messagingConfig, selectedPlatform);
+    const senderGuard = assertWhatsappSenderAllowedForUser({
+      account,
+      accounts: messagingConfig?.accounts,
+    });
+    if (!senderGuard.ok) {
+      toast.error(
+        getWhatsappAccountRestrictionMessage(senderGuard.code, translate),
+      );
+      return;
+    }
+
     const providerPayload = account
       ? buildUnifiedReplyProviderPayload(account)
       : {};

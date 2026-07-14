@@ -979,6 +979,10 @@ export default {
     sendingFrom: "الإرسال من",
     rateLimitExceeded:
       "تم تجاوز الحد اليومي للرسائل. يرجى المحاولة مرة أخرى لاحقًا.",
+    userPhoneNotAssigned:
+      "حسابك لا يحتوي على رقم واتساب معيّن. يرجى التواصل مع المسؤول.",
+    noLinkedAccountForAssignedPhone:
+      "لا يوجد حساب واتساب مرتبط برقم هاتفك المعيّن.",
   },
   openwaConnection: {
     title: "ربط واتساب",

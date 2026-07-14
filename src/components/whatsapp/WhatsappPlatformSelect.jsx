@@ -8,6 +8,8 @@ const agentSelectCls =
 
 /**
  * Platform picker shown when a client has more than one linked WhatsApp account.
+ * Pass `locked` for restricted team roles (editor/viewer/marketing) so the
+ * control is hidden — selection is forced by useWhatsappSelectedAccount.
  */
 export default function WhatsappPlatformSelect({
   accounts = [],
@@ -18,8 +20,15 @@ export default function WhatsappPlatformSelect({
   className = "",
   required = false,
   error,
+  locked = false,
+  disabled = false,
 }) {
   const { translate } = useI18n();
+
+  // Restricted roles: hide switching UI entirely (auto-selected / blocked upstream).
+  if (locked) {
+    return null;
+  }
 
   if (!hasMultipleAccounts) {
     return null;
@@ -42,6 +51,7 @@ export default function WhatsappPlatformSelect({
         value={value ?? ""}
         onChange={(e) => onChange?.(e.target.value || null)}
         required={required}
+        disabled={disabled}
         aria-invalid={Boolean(error)}
       >
         <option value="">

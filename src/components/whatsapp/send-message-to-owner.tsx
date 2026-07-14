@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useState } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
+import WhatsappRestrictionNotice from "@/components/whatsapp/WhatsappRestrictionNotice";
 import {
   formatPhoneForDisplay,
   getPhoneValidationError,
@@ -83,6 +84,9 @@ export default function SendMessageToOwner({
     usesWhatsappApi,
     messagingReady,
     canSendWhatsapp,
+    isAccountSelectionLocked,
+    isWhatsappSendBlocked,
+    whatsappRestrictionCode,
   } = useSendWhatsappMessage({
     clientId,
     phoneNumber: phoneToE164(resolvedPhone, "EG") || resolvedPhone,
@@ -93,7 +97,13 @@ export default function SendMessageToOwner({
   const displayPhone = formatPhoneForDisplay(resolvedPhone, "EG") || resolvedPhone;
 
   const handleSend = async () => {
-    if (!canSendMessage || pending || !messagingReady || !canSendWhatsapp) {
+    if (
+      !canSendMessage ||
+      pending ||
+      !messagingReady ||
+      !canSendWhatsapp ||
+      isWhatsappSendBlocked
+    ) {
       return;
     }
 
@@ -119,7 +129,11 @@ export default function SendMessageToOwner({
   };
 
   const isSendDisabled =
-    pending || !canSendMessage || !messagingReady || !canSendWhatsapp;
+    pending ||
+    !canSendMessage ||
+    !messagingReady ||
+    !canSendWhatsapp ||
+    isWhatsappSendBlocked;
 
   return (
     <div
@@ -168,6 +182,10 @@ export default function SendMessageToOwner({
         </p>
       ) : null}
 
+      {isWhatsappSendBlocked ? (
+        <WhatsappRestrictionNotice code={whatsappRestrictionCode} />
+      ) : null}
+
       {messagingData?.hasMultipleAccounts ? (
         <WhatsappPlatformSelect
           accounts={accounts}
@@ -179,6 +197,7 @@ export default function SendMessageToOwner({
           }}
           error={platformError}
           required
+          locked={isAccountSelectionLocked}
           className="px-0"
         />
       ) : null}

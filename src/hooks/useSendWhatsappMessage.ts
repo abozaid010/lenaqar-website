@@ -8,9 +8,12 @@ import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
 import {
   getWhatsappSendContextErrorMessage,
   sendWhatsappOutboundMessage,
+  WHATSAPP_ACCOUNT_MISMATCH_CODE,
+  WHATSAPP_ACCOUNT_NOT_LINKED_CODE,
   WHATSAPP_NOT_CONFIGURED_CODE,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
+  WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE,
 } from "@/lib/whatsapp-send-outbound";
 import { resolveWhatsappSendContext } from "@/lib/whatsapp-messaging-provider";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
@@ -64,10 +67,13 @@ export function useSendWhatsappMessage({
     refetch: refetchMessagingConfig,
   } = useMessagingProviderConfig(resolvedClientId);
 
-  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
-    messagingData,
-    resolvedClientId,
-  );
+  const {
+    selectedPlatform,
+    setSelectedPlatform,
+    isAccountSelectionLocked,
+    isWhatsappSendBlocked,
+    whatsappRestrictionCode,
+  } = useWhatsappSelectedAccount(messagingData, resolvedClientId);
 
   const accounts = messagingData?.accounts ?? [];
   const resolvedChatId = chatId ? String(chatId).trim() : "";
@@ -87,16 +93,27 @@ export function useSendWhatsappMessage({
   const messagingReady =
     preferDeepLink || !usesWhatsappApi || (!isMessagingLoading && !isMessagingFetching);
   const canSendWhatsapp =
-    preferDeepLink ||
-    !usesWhatsappApi ||
-    sendContext?.ok === true ||
-    (isMessagingError && messagingReady) ||
-    (fallbackToDeepLink && Boolean(resolvedPhone));
+    !isWhatsappSendBlocked &&
+    (preferDeepLink ||
+      !usesWhatsappApi ||
+      sendContext?.ok === true ||
+      (isMessagingError && messagingReady) ||
+      (fallbackToDeepLink && Boolean(resolvedPhone)));
 
   const sendMessage = useCallback(
     async (rawText: string): Promise<WhatsappSendResult | null> => {
       const text = String(rawText ?? "").trim();
       if (!text) return null;
+
+      if (isWhatsappSendBlocked) {
+        toast.error(
+          getWhatsappSendContextErrorMessage(
+            whatsappRestrictionCode,
+            translate,
+          ),
+        );
+        return null;
+      }
 
       setPlatformError("");
       setPending(true);
@@ -217,7 +234,10 @@ export function useSendWhatsappMessage({
 
         if (
           code === WHATSAPP_NOT_CONFIGURED_CODE ||
-          code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE
+          code === WHATSAPP_SENDER_PHONE_REQUIRED_CODE ||
+          code === WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE ||
+          code === WHATSAPP_ACCOUNT_NOT_LINKED_CODE ||
+          code === WHATSAPP_ACCOUNT_MISMATCH_CODE
         ) {
           toast.error(getWhatsappSendContextErrorMessage(code, translate));
           return null;
@@ -258,6 +278,8 @@ export function useSendWhatsappMessage({
       fallbackToDeepLink,
       preferDeepLink,
       common.operationFailed,
+      isWhatsappSendBlocked,
+      whatsappRestrictionCode,
     ],
   );
 
@@ -279,5 +301,8 @@ export function useSendWhatsappMessage({
     messagingReady,
     canSendWhatsapp,
     resolvedClientId,
+    isAccountSelectionLocked,
+    isWhatsappSendBlocked,
+    whatsappRestrictionCode,
   };
 }
