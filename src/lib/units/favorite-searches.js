@@ -13,6 +13,7 @@ export const UNITS_FILTER_PARAM_KEYS = [
   "max_area",
   "my_inventory",
   "resale",
+  "author",
 ];
 
 const STORAGE_KEY_PREFIX = "lena_units_favorite_searches";
@@ -37,6 +38,7 @@ export function createEmptyFilters() {
     max_area: "",
     my_inventory: false,
     resale: false,
+    author: "",
   };
 }
 
@@ -56,6 +58,7 @@ export function filtersFromSearchParams(searchParams) {
     max_area: searchParams.get("max_area") || "",
     my_inventory: searchParams.get("my_inventory") === "true",
     resale: searchParams.get("resale") === "true",
+    author: searchParams.get("author") || "",
   };
 }
 

@@ -40,6 +40,12 @@ export function buildPendingApprovalSlimListParams(raw, clientId) {
     params.max_price = base.max_price;
   }
 
+  const author =
+    typeof base.author === "string" ? base.author.trim() : base.author;
+  if (author) {
+    params.author = author;
+  }
+
   if (clientId) {
     params.client_id = clientId;
   }

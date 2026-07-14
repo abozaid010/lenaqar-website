@@ -14,6 +14,7 @@ import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-d
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
 import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
+import AuthorFilterSelect from "@/components/ui/inputs/author-filter-select";
 import { getFurnishingTypes } from "@/data/constants";
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -27,6 +28,10 @@ import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_component
 import { BULK_AVAILABILITY_DEFAULT_MESSAGE_AR } from "@/lib/units/unit-whatsapp-recipient";
 import { createEmptyFilters } from "@/lib/units/favorite-searches";
 import { useUnitsFilterDraft } from "@/hooks/use-units-filter-draft";
+import {
+  resolveAuthorDisplayLabel,
+  useTeamAuthorOptions,
+} from "@/hooks/useTeamAuthorOptions";
 import UnitsFavoriteSearches from "@/components/ui/units-favorite-searches";
 
 // Helper functions defined outside component to avoid hoisting/initialization issues
@@ -120,6 +125,10 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     router,
     isPublic,
     locale,
+  });
+
+  const { authorOptions } = useTeamAuthorOptions({
+    selectedAuthor: draftFilters.author || filters.author || "",
   });
 
   // Normalize filter params in URL to canonical English values for the API.
@@ -385,6 +394,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   const buildActiveFilters = useCallback((nextFilters) => {
     const list = [];
+    if (nextFilters.author) {
+      list.push({
+        key: "author",
+        value: resolveAuthorDisplayLabel(nextFilters.author, authorOptions),
+      });
+    }
     if (nextFilters.my_inventory) {
       list.push({ key: "my_inventory", value: t.unitsFilter.myInventory });
     }
@@ -434,7 +449,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       list.push({ key: "sub_district", value: getSelectedSubDistrict() });
     }
     return list;
-  }, [locale, t, compounds, developers, cityLabels, districtLabels, subDistrictLabels, filters.city, filters.district]);
+  }, [
+    locale,
+    t,
+    compounds,
+    developers,
+    cityLabels,
+    districtLabels,
+    subDistrictLabels,
+    filters.city,
+    filters.district,
+    authorOptions,
+  ]);
 
   // Only show active developer filter if developer exists in loaded list
   // This prevents showing stale filter chips when data reloads
@@ -648,6 +674,8 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
   function getFilterDisplayText(key, value) {
     switch (key) {
+      case "author":
+        return resolveAuthorDisplayLabel(value, authorOptions) || value;
       case "my_inventory":
         return t.unitsFilter.myInventory;
       case "resale":
@@ -692,6 +720,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     (filterValues) => {
       const labels = [];
 
+      if (filterValues.author) {
+        labels.push(
+          resolveAuthorDisplayLabel(filterValues.author, authorOptions) ||
+            filterValues.author,
+        );
+      }
       if (filterValues.my_inventory) labels.push(t.unitsFilter.myInventory);
       if (filterValues.resale) labels.push(t.unitsFilter.resale);
 
@@ -797,6 +831,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     [
       BUILDING_TYPES,
       FURNISHING_TYPES,
+      authorOptions,
       cityLabels,
       compounds,
       developers,
@@ -1048,6 +1083,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
             buttonClassName={filterButtonClassName}
           />
         </div>
+
+        {!isPublic && (
+          <div className="w-full min-w-0">
+            <AuthorFilterSelect
+              name="units_author"
+              value={draftFilters.author || ""}
+              onChange={(e) => handleFilterChange("author", e?.target?.value || "")}
+              buttonClassName={filterButtonClassName}
+            />
+          </div>
+        )}
 
         <div className="w-full min-w-0">
           <p className="text-xs font-medium text-[#494A4B] mb-1.5">
