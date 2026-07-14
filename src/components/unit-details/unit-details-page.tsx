@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useI18n } from '@/hooks/useI18n';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import BackButton from '@/components/ui/back-button';
@@ -21,6 +21,8 @@ import {
 interface UnitDetailsPageProps {
   unit: UnitViewModel;
   rawUnit?: RawUnit;
+  /** Server-computed ownership (same isOwnClientUnit rule as Homey unit pages). */
+  isOwnUnit?: boolean;
 }
 
 function UnitLocationSection({ unit }: { unit: UnitViewModel }) {
@@ -116,9 +118,15 @@ function UnitLocationSection({ unit }: { unit: UnitViewModel }) {
   );
 }
 
-export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps) {
+export default function UnitDetailsPage({
+  unit,
+  rawUnit,
+  isOwnUnit: isOwnUnitProp,
+}: UnitDetailsPageProps) {
   const { t, locale, translate } = useI18n();
-  const { isOwnUnit } = useUnitOwnership(unit);
+  const { isOwnUnit: isOwnUnitFromHook } = useUnitOwnership(unit);
+  // Prefer server truth when true; allow client cookie read to upgrade after hydration.
+  const isOwnUnit = Boolean(isOwnUnitProp) || isOwnUnitFromHook;
   const [showShareDialog, setShowShareDialog] = useState(false);
   const unitNotes = typeof unit.notes === 'string' ? unit.notes.trim() : '';
   const canShare = Boolean(unit.referenceCode?.trim());
@@ -129,7 +137,9 @@ export default function UnitDetailsPage({ unit, rawUnit }: UnitDetailsPageProps)
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         <div className="mb-6 flex items-center justify-between gap-3">
           <BackButton fallbackRoute="/units" />
-          <UnitDetailsAdminActions unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
+          <Suspense fallback={null}>
+            <UnitDetailsAdminActions unit={unit} rawUnit={rawUnit} isOwnUnit={isOwnUnit} />
+          </Suspense>
         </div>
       </div>
 
