@@ -1,6 +1,7 @@
 "use client";
 
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
+import WhatsappRestrictionNotice from "@/components/whatsapp/WhatsappRestrictionNotice";
 import { useI18n } from "@/hooks/useI18n";
 import { useSendWhatsappMessage } from "@/hooks/useSendWhatsappMessage";
 import { ensureUrlInMessage } from "@/lib/whatsapp-message-compose";
@@ -45,6 +46,9 @@ export default function ChatInput({
     messagingReady,
     canSendWhatsapp,
     sendContext,
+    isAccountSelectionLocked,
+    isWhatsappSendBlocked,
+    whatsappRestrictionCode,
   } = useSendWhatsappMessage({
     clientId,
     phoneNumber: resolvedPhone,
@@ -53,8 +57,14 @@ export default function ChatInput({
     fallbackToDeepLink: true,
   });
 
-  const canSend = Boolean(message.trim() && (usesWhatsappApi || userId || resolvedPhone));
-  const canType = Boolean(usesWhatsappApi || userId || resolvedPhone);
+  const canSend = Boolean(
+    message.trim() &&
+      !isWhatsappSendBlocked &&
+      (usesWhatsappApi || userId || resolvedPhone),
+  );
+  const canType = Boolean(
+    !isWhatsappSendBlocked && (usesWhatsappApi || userId || resolvedPhone),
+  );
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -151,6 +161,13 @@ export default function ChatInput({
         </p>
       ) : null}
 
+      {isWhatsappSendBlocked ? (
+        <WhatsappRestrictionNotice
+          code={whatsappRestrictionCode}
+          className="px-0.5"
+        />
+      ) : null}
+
       {messagingData?.hasMultipleAccounts ? (
         <WhatsappPlatformSelect
           accounts={accounts}
@@ -162,6 +179,7 @@ export default function ChatInput({
           }}
           error={platformError}
           required
+          locked={isAccountSelectionLocked}
           className="px-0"
         />
       ) : null}

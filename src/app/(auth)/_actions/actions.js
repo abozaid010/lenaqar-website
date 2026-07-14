@@ -71,6 +71,7 @@ export async function loginAction(prevState, formData) {
     const client_name = data.client_name ?? userData.client_name;
     const userEmail = data.email ?? userData.email;
     const phone_number = data.phone_number ?? userData.phone_number;
+    const agent_number = data.agent_number ?? userData.agent_number;
     const client_type = data.client_type ?? userData.client_type;
     const role = data.role ?? userData.role ?? null;
     const permissions_version =
@@ -115,6 +116,10 @@ export async function loginAction(prevState, formData) {
         email: userEmail,
         client_name,
         phone_number,
+        // Future backend field — persist when present for WhatsApp account matching.
+        ...(agent_number != null && agent_number !== ""
+          ? { agent_number }
+          : {}),
         client_type,
         ...(role != null && typeof role === "string" ? { role } : {}),
         ...(permissions_version != null ? { permissions_version } : {}),

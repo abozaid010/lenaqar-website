@@ -8,6 +8,13 @@ import {
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
   WHATSAPP_MESSAGE_SOURCES,
 } from "@/lib/whatsapp-messaging-provider";
+import {
+  assertWhatsappSenderAllowedForUser,
+  getWhatsappAccountRestrictionMessage,
+  WHATSAPP_ACCOUNT_MISMATCH_CODE,
+  WHATSAPP_ACCOUNT_NOT_LINKED_CODE,
+  WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE,
+} from "@/lib/whatsapp-account-restriction";
 import { phoneToE164 } from "@/components/phone/phone-utils";
 import { copyToClipboard, openWhatsApp } from "@/utils/phone-utils";
 
@@ -17,6 +24,9 @@ export {
   WHATSAPP_PLATFORM_REQUIRED_CODE,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
   WHATSAPP_SENDER_PHONE_REQUIRED_CODE,
+  WHATSAPP_ACCOUNT_MISMATCH_CODE,
+  WHATSAPP_ACCOUNT_NOT_LINKED_CODE,
+  WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE,
 };
 
 /** Map WhatsApp send-context error codes to localized messages. */
@@ -38,6 +48,13 @@ export function getWhatsappSendContextErrorMessage(code, translate) {
       "whatsappSend.senderPhoneRequired",
       "Sender phone number is missing for the selected WhatsApp account.",
     );
+  }
+  if (
+    code === WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE ||
+    code === WHATSAPP_ACCOUNT_NOT_LINKED_CODE ||
+    code === WHATSAPP_ACCOUNT_MISMATCH_CODE
+  ) {
+    return getWhatsappAccountRestrictionMessage(code, translate);
   }
   return translate(
     "editClient.whatsapp.notConfigured",
@@ -141,6 +158,20 @@ export async function sendWhatsappOutboundMessage({
     }
     const error = new Error(err);
     error.code = context.code;
+    throw error;
+  }
+
+  // Action-layer check: restricted roles cannot send from another linked number
+  // when the client has multiple WhatsApp accounts.
+  const senderGuard = assertWhatsappSenderAllowedForUser({
+    account: context.account,
+    accounts: messagingData?.accounts,
+  });
+  if (!senderGuard.ok) {
+    const err = getWhatsappSendContextErrorMessage(senderGuard.code, translate);
+    onPlatformError?.(err);
+    const error = new Error(err);
+    error.code = senderGuard.code;
     throw error;
   }
 

@@ -10,6 +10,7 @@ import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
 import WhatsAppButton from "@/components/ui/whatsapp-button";
 import CallButton from "@/components/ui/call-button";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
+import WhatsappRestrictionNotice from "@/components/whatsapp/WhatsappRestrictionNotice";
 import { handleCopyFullPhoneNumber } from "@/utils/phone-utils";
 import MessageBubbleList from "./MessageBubble";
 import ChatMessagesArea from "@/components/ui/chat-messages-area";
@@ -17,6 +18,9 @@ import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { normalizeCampaignPhoneParam } from "@/utils/campaign-chat-session";
+import {
+  getWhatsappAccountRestrictionMessage,
+} from "@/lib/whatsapp-account-restriction";
 
 const NOTES_MAX_LENGTH = 500;
 
@@ -61,7 +65,7 @@ const ChatPanel = ({
     }),
     [messagingAccounts, hasMultipleMessagingAccounts],
   );
-  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
+  const { selectedPlatform, setSelectedPlatform, isAccountSelectionLocked, isWhatsappSendBlocked, whatsappRestrictionCode } = useWhatsappSelectedAccount(
     messagingSnapshot,
     clientId,
   );
@@ -141,9 +145,23 @@ const ChatPanel = ({
   };
 
   const handleSendReply = async () => {
+    if (isWhatsappSendBlocked) {
+      const err = getWhatsappAccountRestrictionMessage(
+        whatsappRestrictionCode,
+        translate,
+      );
+      setPlatformError(err);
+      toast.error(err);
+      return;
+    }
+
     if (!message.trim() || isSending) return;
 
-    if (hasMultipleMessagingAccounts && !selectedPlatform) {
+    if (
+      hasMultipleMessagingAccounts &&
+      !selectedPlatform &&
+      !isAccountSelectionLocked
+    ) {
       const err = translate(
         "whatsappSend.platformRequired",
         "Please choose which WhatsApp account to send from."
@@ -593,6 +611,9 @@ const ChatPanel = ({
       {/* Message Input */}
       <div className="chat-composer p-3 relative space-y-2 shrink-0">
         <LoadingOverlay isVisible={isSending} message="Sending message..." />
+        {isWhatsappSendBlocked ? (
+          <WhatsappRestrictionNotice code={whatsappRestrictionCode} />
+        ) : null}
         {hasMultipleMessagingAccounts ? (
           <WhatsappPlatformSelect
             accounts={messagingAccounts}
@@ -604,6 +625,7 @@ const ChatPanel = ({
             }}
             error={platformError}
             required
+            locked={isAccountSelectionLocked}
             id="campaign_chat_whatsapp_platform"
           />
         ) : null}
@@ -614,7 +636,7 @@ const ChatPanel = ({
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={translate("typeYourMessage", "Type your message...")}
-            disabled={isSending}
+            disabled={isSending || isWhatsappSendBlocked}
             className="chat-input-field flex-1 resize-none px-4 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
             rows={1}
             style={{ minHeight: "42px", maxHeight: "120px" }}
@@ -623,9 +645,9 @@ const ChatPanel = ({
             onClick={handleSendReply}
             isLoading={isSending}
             loadingText="Sending..."
-            disabled={!message.trim() || isSending}
+            disabled={!message.trim() || isSending || isWhatsappSendBlocked}
             className={`shrink-0 px-4 py-2.5 rounded-full transition-colors flex items-center gap-2 ${
-              message.trim() && !isSending
+              message.trim() && !isSending && !isWhatsappSendBlocked
                 ? "bg-[#25d366] text-white hover:opacity-90"
                 : "bg-chat-panel-alt text-chat-text-faint cursor-not-allowed"
             }`}

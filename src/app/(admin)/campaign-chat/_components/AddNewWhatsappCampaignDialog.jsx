@@ -10,6 +10,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useWhatsappSelectedAccount } from "@/hooks/useWhatsappSelectedAccount";
 import WhatsappPlatformSelect from "@/components/whatsapp/WhatsappPlatformSelect";
+import WhatsappRestrictionNotice from "@/components/whatsapp/WhatsappRestrictionNotice";
 import { useMessagingProviderConfig } from "@/hooks/useMessagingProviderConfig";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
@@ -22,6 +23,13 @@ import {
   WHATSAPP_NOT_CONFIGURED_CODE,
   WHATSAPP_RATE_LIMIT_EXCEEDED_CODE,
 } from "@/lib/whatsapp-messaging-provider";
+import {
+  assertWhatsappSenderAllowedForUser,
+  getWhatsappAccountRestrictionMessage,
+  WHATSAPP_ACCOUNT_MISMATCH_CODE,
+  WHATSAPP_ACCOUNT_NOT_LINKED_CODE,
+  WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE,
+} from "@/lib/whatsapp-account-restriction";
 import { resolveWhatsappRecipientFields } from "@/lib/whatsapp-recipient";
 import { ensureUrlInMessage } from "@/lib/whatsapp-message-compose";
 import { LoadingButton, LoadingOverlay } from "@/components/ui/loading-states";
@@ -72,10 +80,13 @@ const AddNewWhatsappCampaignDialog = ({
 
   const clientId = LenaCookiesManager.getClientId() || "public";
   const { data: messagingData } = useMessagingProviderConfig(clientId);
-  const { selectedPlatform, setSelectedPlatform } = useWhatsappSelectedAccount(
-    messagingData,
-    clientId,
-  );
+  const {
+    selectedPlatform,
+    setSelectedPlatform,
+    isAccountSelectionLocked,
+    isWhatsappSendBlocked,
+    whatsappRestrictionCode,
+  } = useWhatsappSelectedAccount(messagingData, clientId);
   const accounts = messagingData?.accounts ?? [];
   const selectedAccount = getEffectiveMessagingAccount(
     messagingData,
@@ -89,7 +100,21 @@ const AddNewWhatsappCampaignDialog = ({
   );
 
   const ensureMessagingConfigured = () => {
-    if (messagingData?.hasMultipleAccounts && !selectedPlatform) {
+    if (isWhatsappSendBlocked) {
+      const err = getWhatsappAccountRestrictionMessage(
+        whatsappRestrictionCode,
+        translate,
+      );
+      setPlatformError(err);
+      setError(err);
+      toast.error(err);
+      return false;
+    }
+    if (
+      messagingData?.hasMultipleAccounts &&
+      !selectedPlatform &&
+      !isAccountSelectionLocked
+    ) {
       const err = translate(
         "whatsappSend.platformRequired",
         "Please choose which WhatsApp account to send from."
@@ -100,6 +125,20 @@ const AddNewWhatsappCampaignDialog = ({
       return false;
     }
     if (isMessagingConfigReady(selectedAccount)) {
+      const senderGuard = assertWhatsappSenderAllowedForUser({
+        account: selectedAccount,
+        accounts,
+      });
+      if (!senderGuard.ok) {
+        const err = getWhatsappAccountRestrictionMessage(
+          senderGuard.code,
+          translate,
+        );
+        setPlatformError(err);
+        setError(err);
+        toast.error(err);
+        return false;
+      }
       setPlatformError("");
       return true;
     }
@@ -511,6 +550,20 @@ const AddNewWhatsappCampaignDialog = ({
         toast.error(notConfiguredMessage);
         return;
       }
+      if (
+        err?.code === WHATSAPP_USER_PHONE_NOT_ASSIGNED_CODE ||
+        err?.code === WHATSAPP_ACCOUNT_NOT_LINKED_CODE ||
+        err?.code === WHATSAPP_ACCOUNT_MISMATCH_CODE
+      ) {
+        const restrictionMsg = getWhatsappAccountRestrictionMessage(
+          err.code,
+          translate,
+        );
+        setError(restrictionMsg);
+        setPlatformError(restrictionMsg);
+        toast.error(restrictionMsg);
+        return;
+      }
       if (err?.code === WHATSAPP_RATE_LIMIT_EXCEEDED_CODE || err?.status === 429) {
         const rateLimitMessage =
           err?.message ||
@@ -832,6 +885,12 @@ const AddNewWhatsappCampaignDialog = ({
         </div>
       ) : (
         <>
+          {isWhatsappSendBlocked ? (
+            <WhatsappRestrictionNotice
+              code={whatsappRestrictionCode}
+              className="mb-4"
+            />
+          ) : null}
           {messagingData?.hasMultipleAccounts ? (
             <WhatsappPlatformSelect
               accounts={accounts}
@@ -843,12 +902,15 @@ const AddNewWhatsappCampaignDialog = ({
               }}
               error={platformError}
               required
+              locked={isAccountSelectionLocked}
               id="bulk_whatsapp_platform"
               className="mb-4"
             />
           ) : null}
-          {renderModeTabs()}
-          {showAutomation ? (
+          {isWhatsappSendBlocked ? null : (
+            <>
+              {renderModeTabs()}
+              {showAutomation ? (
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               {error && (
                 <div className="p-3 bg-red-50 border border-red-200 rounded-md">
@@ -877,9 +939,11 @@ const AddNewWhatsappCampaignDialog = ({
                 </LoadingButton>
               </div>
             </form>
-          ) : showApi ? (
-            renderApiForm()
-          ) : null}
+              ) : showApi ? (
+                renderApiForm()
+              ) : null}
+            </>
+          )}
         </>
       )}
     </Dialog>
