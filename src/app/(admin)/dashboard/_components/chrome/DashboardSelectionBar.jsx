@@ -4,12 +4,17 @@ import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import { useI18n } from "@/hooks/useI18n";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
-import { X } from "lucide-react";
-import { useState } from "react";
+import BulkAssignAuthorDialog from "@/app/(admin)/dashboard/_components/split-view/BulkAssignAuthorDialog";
+import { canViewAllDashboardLeads } from "@/lib/dashboard-lead-access";
+import { userKeys } from "@/utils/query-utils";
+import { useQueryClient } from "@tanstack/react-query";
+import { UserRoundPen, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function DashboardSelectionBar() {
   const { translate, localeUtils } = useI18n();
+  const queryClient = useQueryClient();
   const { canShowBulkButton } = useWhatsappBulkAccess();
   const {
     selectedLeads,
@@ -18,6 +23,12 @@ export default function DashboardSelectionBar() {
     hasSelection,
   } = useDashboardLeadsBulk();
   const [isWhatsappOpen, setIsWhatsappOpen] = useState(false);
+  const [isAssignAuthorOpen, setIsAssignAuthorOpen] = useState(false);
+  const [canAssignAuthor, setCanAssignAuthor] = useState(false);
+
+  useEffect(() => {
+    setCanAssignAuthor(canViewAllDashboardLeads());
+  }, []);
 
   if (!hasSelection) return null;
 
@@ -51,6 +62,25 @@ export default function DashboardSelectionBar() {
           {countLabel}
         </span>
         <div className="flex items-center gap-1 min-w-0 ms-auto">
+          {canAssignAuthor ? (
+            <button
+              type="button"
+              onClick={() => setIsAssignAuthorOpen(true)}
+              className="inline-flex items-center justify-center gap-1 h-7 min-h-7 px-2 rounded-md bg-white border border-gray-300 text-gray-800 text-xs font-medium hover:bg-gray-50 transition-colors shrink-0"
+              title={translate(
+                "dashboardFilter.bulkAssignAuthor.openButton",
+                "Assign author",
+              )}
+            >
+              <UserRoundPen className="w-3.5 h-3.5 text-primary shrink-0" aria-hidden />
+              <span className="truncate max-w-[7rem]">
+                {translate(
+                  "dashboardFilter.bulkAssignAuthor.openButton",
+                  "Assign author",
+                )}
+              </span>
+            </button>
+          ) : null}
           {canShowBulkButton ? (
             <button
               type="button"
@@ -94,6 +124,18 @@ export default function DashboardSelectionBar() {
         onClose={() => setIsWhatsappOpen(false)}
         recipients={selectedRecipients}
       />
+
+      {canAssignAuthor && isAssignAuthorOpen ? (
+        <BulkAssignAuthorDialog
+          isOpen
+          onClose={() => setIsAssignAuthorOpen(false)}
+          selectedLeads={selectedLeads}
+          onSuccess={() => {
+            clearLeadSelection();
+            queryClient.invalidateQueries({ queryKey: userKeys.all });
+          }}
+        />
+      ) : null}
     </>
   );
 }

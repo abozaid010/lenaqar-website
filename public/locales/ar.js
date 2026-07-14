@@ -835,6 +835,16 @@ export default {
       success: "تم تعيين الإجراء لـ {count} عميل",
       error: "فشل تعيين الإجراء. حاول مرة أخرى.",
     },
+    bulkAssignAuthor: {
+      openButton: "تعيين المسئول",
+      dialogTitle: "تعيين المسئول لـ {count} عميل",
+      authorLabel: "المؤلف",
+      authorPlaceholder: "اختر أو اكتب بريداً إلكترونياً",
+      applyButton: "تعيين المسئول",
+      assigning: "جارٍ التعيين...",
+      success: "تم تعيين المسئول لـ {count} عميل",
+      error: "فشل تعيين المسئول. حاول مرة أخرى.",
+    },
   },
   searchPlaceholder: "ابحث بالاسم أو الرقم...",
   search: {
@@ -2124,6 +2134,10 @@ export default {
     owner: "مالك",
     broker: "وسيط",
     developer: "مطوّر",
+    renter: "مستأجر",
+    buyer: "مشتري",
+    seller: "بائع",
+    rentee: "راغب بالإيجار",
   },
   editContact: {
     title: "تعديل جهة الاتصال",

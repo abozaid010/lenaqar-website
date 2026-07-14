@@ -4,20 +4,34 @@
  * IMPORTANT: This is the lead's identity (who is chatting), NOT `client_type`
  * (the tenant/account type in auth). Identity must always live on `owner_type`,
  * never on `tags`.
+ *
+ * `developer` is kept for backward compatibility.
  */
-export const OWNER_TYPES = ["owner", "broker", "developer"];
+export const OWNER_TYPES = [
+  "owner",
+  "broker",
+  "developer",
+  "renter",
+  "buyer",
+  "seller",
+  "rentee",
+];
 
 /** Translation keys for each owner type label (see locales `ownerType`). */
 export const OWNER_TYPE_TRANSLATION_KEYS = {
   owner: "ownerType.owner",
   broker: "ownerType.broker",
   developer: "ownerType.developer",
+  renter: "ownerType.renter",
+  buyer: "ownerType.buyer",
+  seller: "ownerType.seller",
+  rentee: "ownerType.rentee",
 };
 
 /**
  * Normalize an arbitrary owner_type value to a canonical option or null.
  * @param {unknown} value
- * @returns {"owner" | "broker" | "developer" | null}
+ * @returns {"owner" | "broker" | "developer" | "renter" | "buyer" | "seller" | "rentee" | null}
  */
 export function normalizeOwnerType(value) {
   if (value == null) return null;
@@ -41,7 +55,7 @@ export function getOwnerTypeLabel(value, translate) {
 /**
  * Parse a comma-separated owner_type filter string into canonical values.
  * @param {string | null | undefined} raw
- * @returns {Array<"owner" | "broker" | "developer">}
+ * @returns {Array<"owner" | "broker" | "developer" | "renter" | "buyer" | "seller" | "rentee">}
  */
 export function parseOwnerTypeFilter(raw) {
   if (!raw) return [];

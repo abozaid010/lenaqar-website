@@ -50,7 +50,6 @@ import {
   LEGACY_SORT_SCORE_PARAM,
   resolveDashboardSort,
 } from "@/utils/dashboard-lead-sort";
-import { getRoleFromToken } from "@/lib/getRoleFromToken.client";
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useDashboardLeadsBulk } from "@/context/dashboard-leads-bulk-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
@@ -310,7 +309,6 @@ export default function DashbordFilter({
   const [isWhatsappBulkOpen, setIsWhatsappBulkOpen] = useState(false);
   const [availableCampaigns, setAvailableCampaigns] = useState([]);
   const [isMounted, setIsMounted] = useState(false);
-  const [isOwner, setIsOwner] = useState(false);
   /** Dropdowns inside the Filters panel section (excludes sort — separate section in panel mode). */
   const isFiltersDropdownOpen =
     isActionDropdownOpen ||
@@ -329,8 +327,6 @@ export default function DashbordFilter({
 
   useEffect(() => {
     setIsMounted(true);
-    const role = getRoleFromToken();
-    setIsOwner(role != null && String(role).toLowerCase() === "owner");
   }, []);
 
   const { canShowBulkButton: canSendBulkWhatsapp } = useWhatsappBulkAccess();
@@ -340,8 +336,8 @@ export default function DashbordFilter({
   const whatsappRecipients = panel ? allVisibleRecipients : resolvedRecipients;
 
   const showSendWhatsappButton = canSendBulkWhatsapp;
-  /** Export uses cookies (client-only). WhatsApp uses server-hydrated module_actions. */
-  const showExportButton = isMounted && isOwner;
+  /** Export: admin/owner only (same roles as full author access). */
+  const showExportButton = isMounted && isAdminUser;
   const showWhatsappToolbarButton = isMounted && showSendWhatsappButton;
   const showAddLeadButton = !hideAddLead;
 
