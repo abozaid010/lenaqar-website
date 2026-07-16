@@ -104,6 +104,7 @@ export const propertyMappings = {
     Interested: "dashboard.actionTypes.interested",
     notInterested: "dashboard.actionTypes.notInterested",
     notQualified: "dashboard.actionTypes.notQualified",
+    didNotReply: "dashboard.actionTypes.didNotReply",
     followUpLater: "dashboard.actionTypes.followUpLater",
     missingRequirement: "dashboard.actionTypes.missingRequirement",
     blocked: "dashboard.actionTypes.blocked",

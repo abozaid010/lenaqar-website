@@ -45,6 +45,11 @@ export const USER_ACTIONS = [
     ar_label: "غير مؤهل",
   },
   {
+    value: "Did not reply",
+    en_label: "Did not reply",
+    ar_label: "لم يرد",
+  },
+  {
     value: "Follow up later",
     en_label: "Follow Up Later",
     ar_label: "متابعة لاحقاً",
@@ -131,6 +136,7 @@ export const ACTIONS_COLORS = {
   "Property view": "text-teal-800",
   "Not interested": "text-gray-800",
   "Not qualified": "text-red-800",
+  "Did not reply": "text-slate-600",
   "Follow up later": "text-orange-800",
   "Missing requirement": "text-purple-800",
   Blocked: "text-red-600",
