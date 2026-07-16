@@ -15,6 +15,7 @@ const NOPREFRERED_TIME = [
   "Qualified lead",
   "Not interested",
   "Not qualified",
+  "Did not reply",
   "Follow up later",
   "Missing requirement",
 ];
