@@ -2676,6 +2676,7 @@ export default {
     referenceCode: "الكود المرجعي",
     lastUpdated: "آخر تحديث",
     source: "المصدر",
+    employee: "الموظف",
     primaryUnit: "الوحدة الأساسية",
     noImages: "لا توجد صور متاحة",
     noImagesDescription: "لا توجد صور لهذا العقار",

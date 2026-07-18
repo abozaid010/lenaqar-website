@@ -47,6 +47,7 @@ export interface RawUnit {
   video?: string;
   visibility?: string;
   status?: string;
+  author?: string;
 }
 
 export interface UnitApiResponse {
@@ -125,6 +126,7 @@ export interface UnitViewModel {
   phase: string | null;
   notes?: string | null;
   visibility: string | null;
+  author: string | null;
 }
 
 // Component prop types

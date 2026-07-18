@@ -2617,6 +2617,7 @@ export default {
     referenceCode: "Reference Code",
     lastUpdated: "Last Updated",
     source: "Source",
+    employee: "Employee",
     primaryUnit: "Primary Unit",
     noImages: "No images available",
     noImagesDescription: "This property has no photos yet",
