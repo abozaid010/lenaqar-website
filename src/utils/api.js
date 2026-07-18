@@ -116,9 +116,13 @@ export async function fetchUsersData(searchParams, pageParam = {}) {
  */
 const fetchUnitsFilterBase = async (searchParams, { usePublicEndpoint = false } = {}) => {
   try {
-    const params = safeMergeParams(searchParams, { page_size: 16 });
+    const merged = safeMergeParams(searchParams, { page_size: 16 });
     // Slim-list is the visible-inventory grid; always scope to published units.
-    params.visibility = "visible";
+    merged.visibility = "visible";
+    // Same author ACL as Leads: non-admin/non-owner always scoped to own email.
+    const params = usePublicEndpoint
+      ? merged
+      : enforceDashboardAuthorOnParams(merged);
     const url = usePublicEndpoint ? "/public/v1/slim-list" : "/units/v1/slim-list";
     const qs = new URLSearchParams(params).toString();
 
@@ -160,7 +164,9 @@ export async function fetchPendingApprovalUnits(searchParams = {}) {
     const parsed = safeMergeParams(searchParams, {});
 
     const clientId = createSafeClientId(LenaCookiesManager.getClientId());
-    const params = buildPendingApprovalSlimListParams(parsed, clientId);
+    const params = enforceDashboardAuthorOnParams(
+      buildPendingApprovalSlimListParams(parsed, clientId),
+    );
     const url = buildPendingApprovalSlimListUrl(params);
 
     const response = await axiosInstance.get(url);

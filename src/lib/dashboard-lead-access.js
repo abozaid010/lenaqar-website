@@ -1,12 +1,12 @@
 /**
- * Centralized Leads (dashboard) visibility and default-filter rules.
+ * Centralized Leads (dashboard) + Units visibility and default-filter rules.
  *
- * - admin / owner → view all leads; full author filter
- * - all other roles → only own leads (author forced to logged-in email)
- * - default status filter → "New" (`action=new`) on first visit / Reset
+ * - admin / owner → view all; full author filter
+ * - all other roles → only own records (author forced to logged-in email)
+ * - Leads default status filter → "New" (`action=new`) on first visit / Reset
  *
  * Client helpers read CLIENT_INFO (UX). Prefer JWT on the server for real auth;
- * always force `author` in fetchUsersData for non-admins as defense in depth.
+ * always force `author` in list fetches for non-admins as defense in depth.
  */
 
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";

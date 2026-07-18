@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { applyDashboardLeadAccessDefaults } from "@/lib/dashboard-lead-access";
 import {
   areFiltersEqual,
   createEmptyFilters,
@@ -16,6 +17,22 @@ import {
 } from "@/lib/units/session-filters";
 
 export const UNITS_FILTER_APPLY_DEBOUNCE_MS = 5000;
+
+/**
+ * Same author ACL as Leads: non-admin/non-owner users always get author=self.
+ * Public listings are unrestricted.
+ *
+ * @param {Record<string, unknown>} filters
+ * @param {boolean} isPublic
+ * @returns {Record<string, unknown>}
+ */
+function withUnitsAuthorAccess(filters, isPublic) {
+  if (isPublic) return filters && typeof filters === "object" ? { ...filters } : {};
+  return applyDashboardLeadAccessDefaults(filters, {
+    applyStatusDefault: false,
+    enforceAuthor: true,
+  });
+}
 
 const parseNumeric = (v) => {
   if (v === undefined || v === null) return null;
@@ -48,8 +65,9 @@ export function useUnitsFilterDraft({
   );
 
   const appliedFilters = useMemo(
-    () => filtersFromSearchParams(searchParams),
-    [searchParams]
+    () =>
+      withUnitsAuthorAccess(filtersFromSearchParams(searchParams), isPublic),
+    [isPublic, searchParams]
   );
   const appliedSignature = useMemo(
     () => filtersSignature(appliedFilters),
@@ -119,7 +137,10 @@ export function useUnitsFilterDraft({
         return false;
       }
 
-      const normalized = { ...createEmptyFilters(), ...nextFilters };
+      const normalized = withUnitsAuthorAccess(
+        { ...createEmptyFilters(), ...nextFilters },
+        isPublic
+      );
       const currentApplied = appliedFiltersRef.current;
       const currentParams = searchParamsRef.current;
       const hasPagination =
@@ -163,7 +184,7 @@ export function useUnitsFilterDraft({
 
       return true;
     },
-    [clearApplyDebounce, pathname, router, storageKey, validateRanges]
+    [clearApplyDebounce, isPublic, pathname, router, storageKey, validateRanges]
   );
 
   const scheduleApply = useCallback(
@@ -177,22 +198,48 @@ export function useUnitsFilterDraft({
   );
 
   // Bootstrap once: URL wins; otherwise restore session filters into the URL.
+  // Always enforce author for non-admins so visibility cannot be bypassed.
   useEffect(() => {
     if (didBootstrapRef.current) return;
     didBootstrapRef.current = true;
 
-    const urlFilters = filtersFromSearchParams(searchParams);
-    if (hasActiveFilters(urlFilters)) {
+    const urlFilters = withUnitsAuthorAccess(
+      filtersFromSearchParams(searchParams),
+      isPublic
+    );
+    const urlBeforeEnforce = filtersFromSearchParams(searchParams);
+    const urlNeedsAuthorRewrite =
+      !isPublic &&
+      String(urlBeforeEnforce.author || "").trim().toLowerCase() !==
+        String(urlFilters.author || "").trim().toLowerCase();
+
+    if (hasActiveFilters(urlFilters) || urlNeedsAuthorRewrite) {
       writeSessionFilters(storageKey, urlFilters);
       lastSeenAppliedSignatureRef.current = filtersSignature(urlFilters);
       setDraftFilters(urlFilters);
+      if (urlNeedsAuthorRewrite || !areFiltersEqual(urlFilters, urlBeforeEnforce)) {
+        const params = filtersToSearchParamsResettingPagination(
+          urlFilters,
+          searchParams
+        );
+        const qs = params.toString();
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      }
       return;
     }
 
-    const stored = readSessionFilters(storageKey);
+    const stored = withUnitsAuthorAccess(readSessionFilters(storageKey), isPublic);
     if (!hasActiveFilters(stored)) {
       lastSeenAppliedSignatureRef.current = filtersSignature(urlFilters);
       setDraftFilters(urlFilters);
+      if (urlFilters.author) {
+        const params = filtersToSearchParamsResettingPagination(
+          urlFilters,
+          searchParams
+        );
+        const qs = params.toString();
+        router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+      }
       return;
     }
 
@@ -202,15 +249,22 @@ export function useUnitsFilterDraft({
     const params = filtersToSearchParamsResettingPagination(stored, searchParams);
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [pathname, router, searchParams, storageKey]);
+  }, [isPublic, pathname, router, searchParams, storageKey]);
 
   // Keep session in sync whenever applied URL filters change (back/forward, deep links).
+  // Re-enforce author if a deep link omitted/changed it for a restricted user.
   useEffect(() => {
     if (!didBootstrapRef.current) return;
-    if (hasActiveFilters(appliedFilters)) {
-      writeSessionFilters(storageKey, appliedFilters);
+    const raw = filtersFromSearchParams(searchParams);
+    const enforced = withUnitsAuthorAccess(raw, isPublic);
+    if (!areFiltersEqual(enforced, raw)) {
+      commitFiltersToUrl(enforced);
+      return;
     }
-  }, [appliedFilters, storageKey]);
+    if (hasActiveFilters(enforced)) {
+      writeSessionFilters(storageKey, enforced);
+    }
+  }, [commitFiltersToUrl, isPublic, searchParams, storageKey]);
 
   // Sync draft from URL only when applied filter values change externally
   // (back/forward, deep link). Draft edits do not change appliedSignature.
@@ -228,23 +282,24 @@ export function useUnitsFilterDraft({
     }
 
     lastSeenAppliedSignatureRef.current = appliedSignature;
-    setDraftFilters(appliedFilters);
+    setDraftFilters(withUnitsAuthorAccess(appliedFilters, isPublic));
     setPriceRangeError("");
     setAreaRangeError("");
-  }, [appliedFilters, appliedSignature]);
+  }, [appliedFilters, appliedSignature, isPublic]);
 
   const updateDraftFilters = useCallback(
     (updater, { schedule = true } = {}) => {
       setDraftFilters((prev) => {
-        const next =
+        const raw =
           typeof updater === "function"
             ? updater(prev)
             : { ...prev, ...updater };
+        const next = withUnitsAuthorAccess(raw, isPublic);
         if (schedule) scheduleApply(next);
         return next;
       });
     },
-    [scheduleApply]
+    [isPublic, scheduleApply]
   );
 
   const applyDraftFilters = useCallback(() => {
@@ -255,22 +310,33 @@ export function useUnitsFilterDraft({
     (filters) => {
       setPriceRangeError("");
       setAreaRangeError("");
-      return commitFiltersToUrl({ ...createEmptyFilters(), ...filters });
+      return commitFiltersToUrl(
+        withUnitsAuthorAccess({ ...createEmptyFilters(), ...filters }, isPublic)
+      );
     },
-    [commitFiltersToUrl]
+    [commitFiltersToUrl, isPublic]
   );
 
   const clearAllFilters = useCallback(() => {
     clearApplyDebounce();
-    clearSessionFilters(storageKey);
     setPriceRangeError("");
     setAreaRangeError("");
-    const empty = createEmptyFilters();
+    const empty = withUnitsAuthorAccess(createEmptyFilters(), isPublic);
+    if (hasActiveFilters(empty)) {
+      writeSessionFilters(storageKey, empty);
+    } else {
+      clearSessionFilters(storageKey);
+    }
     skipNextDraftSyncRef.current = true;
     lastSeenAppliedSignatureRef.current = filtersSignature(empty);
     setDraftFilters(empty);
-    router.replace(pathname, { scroll: false });
-  }, [clearApplyDebounce, pathname, router, storageKey]);
+    const params = filtersToSearchParamsResettingPagination(
+      empty,
+      new URLSearchParams()
+    );
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [clearApplyDebounce, isPublic, pathname, router, storageKey]);
 
   const removeFilterKey = useCallback(
     (key) => {
@@ -287,10 +353,11 @@ export function useUnitsFilterDraft({
         next = { ...next, [key]: "" };
       }
 
+      next = withUnitsAuthorAccess(next, isPublic);
       setDraftFilters(next);
       commitFiltersToUrl(next);
     },
-    [commitFiltersToUrl]
+    [commitFiltersToUrl, isPublic]
   );
 
   const hasPendingChanges = !areFiltersEqual(draftFilters, appliedFilters);
