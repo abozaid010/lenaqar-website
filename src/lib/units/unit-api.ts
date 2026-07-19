@@ -5,6 +5,7 @@ import {
   buildPendingApprovalSlimListParams,
   buildPendingApprovalSlimListUrl,
 } from '@/lib/units/pending-approval-list-params';
+import { getRestrictedDashboardAuthorEmailFromToken } from '@/lib/getRoleFromToken';
 import { safeMergeParams } from '@/utils/safeJsonParser';
 import type { UnitApiResponse } from './unit-types';
 
@@ -129,6 +130,12 @@ export async function fetchUnitsFilterServer(
       params.client_id = clientId;
     }
 
+    // Same author ACL as Leads: non-admin/non-owner always scoped to own email.
+    const restrictedAuthor = await getRestrictedDashboardAuthorEmailFromToken();
+    if (restrictedAuthor) {
+      params.author = restrictedAuthor;
+    }
+
     // Drop empty/undefined values
     Object.keys(params).forEach((k) => {
       const v = params[k];
@@ -165,6 +172,10 @@ export async function fetchPendingApprovalUnitsServer(
   try {
     const base: Record<string, unknown> = { ...(searchParams ?? {}) };
     const params = buildPendingApprovalSlimListParams(base, clientId);
+    const restrictedAuthor = await getRestrictedDashboardAuthorEmailFromToken();
+    if (restrictedAuthor) {
+      params.author = restrictedAuthor;
+    }
     const url = buildPendingApprovalSlimListUrl(params);
     const response = await axiosInstance.get(url);
 

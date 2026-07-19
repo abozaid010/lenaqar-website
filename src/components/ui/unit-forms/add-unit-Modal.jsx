@@ -272,7 +272,7 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     phase: unitData?.phase || "",
     city: unitData?.city || "",
     district: unitData?.district || "",
-    sub_district: unitData?.sub_district || "",
+    sub_district: unitData?.sub_district || unitData?.subDistrict || "",
     developer: unitData?.developer || "",
     developer_id: unitData?.developer_id || unitData?.developerId || "",
     unitId: unitData?.unitId || uuidv4(),

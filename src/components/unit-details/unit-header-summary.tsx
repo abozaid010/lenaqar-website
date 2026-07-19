@@ -1,8 +1,7 @@
 import Link from 'next/link';
-import { MapPin, Building, User, Tag, DollarSign, Calendar, TrendingUp } from 'lucide-react';
+import { User, DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import type { UnitHeaderSummaryProps } from '@/lib/units/unit-types';
 import { useI18n } from '@/hooks/useI18n';
-import LocalizedLocationText from '@/components/ui/localized-location-text';
 
 export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
   const { t, translate } = useI18n();
@@ -17,84 +16,38 @@ export default function UnitHeaderSummary({ unit }: UnitHeaderSummaryProps) {
           {unit.title || `${buildingTypeLabel || 'Property'} Details`}
         </h1>
 
-        {unit.referenceCode && (
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium">
-            <Tag className="w-4 h-4" />
-            <span>
-              {translate('unitLabels.referenceCode', 'Reference Code')}: {unit.referenceCode}
-            </span>
+        {/* Developer — skip when it duplicates the project name (location/project live in UnitLocationSection) */}
+        {unit.developerName &&
+          unit.developerName.trim().toLowerCase() !==
+            (unit.projectName || '').trim().toLowerCase() && (
+          <div className="flex flex-wrap items-center gap-4 text-sm">
+            {unit.developerHref ? (
+              <Link
+                href={unit.developerHref}
+                className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <User className="w-4 h-4" />
+                {unit.developerName}
+              </Link>
+            ) : (
+              <span className="flex items-center gap-1 text-gray-600">
+                <User className="w-4 h-4" />
+                {unit.developerName}
+              </span>
+            )}
           </div>
-        )}
-
-        {/* Project, Developer, and Location */}
-      <div className="flex flex-wrap items-center gap-4 text-sm">
-        {/* Project */}
-        {unit.projectHref && unit.projectName && (
-          <Link 
-            href={unit.projectHref}
-            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <Building className="w-4 h-4" />
-            {unit.projectName}
-          </Link>
-        )}
-        {unit.projectName && !unit.projectHref && (
-          <span className="flex items-center gap-1 text-gray-600">
-            <Building className="w-4 h-4" />
-            {unit.projectName}
-          </span>
-        )}
-
-        {/* Location */}
-        {(unit.city || unit.district || unit.subDistrict) && (
-          <span className="flex items-center gap-1 text-gray-600">
-            <MapPin className="w-4 h-4" />
-            <LocalizedLocationText
-              city={unit.city || ''}
-              district={unit.district || ''}
-              subDistrict={unit.subDistrict || ''}
-            />
-          </span>
-        )}
-
-        {/* Developer */}
-        {unit.developerHref && unit.developerName && (
-          <Link 
-            href={unit.developerHref}
-            className="flex items-center gap-1 text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            <User className="w-4 h-4" />
-            {unit.developerName}
-          </Link>
-        )}
-        {unit.developerName && !unit.developerHref && (
-          <span className="flex items-center gap-1 text-gray-600">
-            <User className="w-4 h-4" />
-            {unit.developerName}
-          </span>
         )}
       </div>
-    </div>
 
-      {/* Key Information Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Building Type */}
-        {unit.buildingType && (
-          <div className="space-y-1">
-            <div className="text-sm text-gray-600">{t?.unitHeader?.propertyType || "Property Type"}</div>
-            <div className="text-lg font-semibold text-gray-900">{buildingTypeLabel}</div>
-          </div>
-        )}
-
-        {/* Delivery Date */}
-        {unit.deliveryDateLabel && (
+      {/* Delivery Date */}
+      {unit.deliveryDateLabel && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-1">
             <div className="text-sm text-gray-600">{t?.unitPricing?.expectedDelivery || "Delivery"}</div>
             <div className="text-lg font-semibold text-gray-900">{unit.deliveryDateLabel}</div>
           </div>
-        )}
-
-              </div>
+        </div>
+      )}
 
       {/* Pricing & Payment Information */}
       {(unit.totalPrice || unit.downPayment || unit.yearlyInstallment || unit.monthlyInstallmentEstimate || unit.installmentYearsLabel) && (

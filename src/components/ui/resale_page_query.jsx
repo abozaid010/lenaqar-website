@@ -18,6 +18,11 @@ import {
   resolveAuthorDisplayLabel,
   useTeamAuthorOptions,
 } from "@/hooks/useTeamAuthorOptions";
+import {
+  canViewAllDashboardLeads,
+  enforceDashboardAuthorOnParams,
+  getDashboardLoggedInEmail,
+} from "@/lib/dashboard-lead-access";
 import en from "../../../public/locales/en";
 import ar from "../../../public/locales/ar";
 import { ChevronDown, SlidersHorizontal, Trash2, X } from "lucide-react";
@@ -91,6 +96,20 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     selectedAuthor: author || draftAuthor || "",
   });
 
+  // Same author ACL as Leads: non-admin/non-owner forced to own email.
+  useEffect(() => {
+    const email = getDashboardLoggedInEmail();
+    if (canViewAllDashboardLeads() || !email) return;
+    setAuthor((prev) => {
+      const current = typeof prev === "string" ? prev.trim() : "";
+      return current.toLowerCase() === email.toLowerCase() ? prev : email;
+    });
+    setDraftAuthor((prev) => {
+      const current = typeof prev === "string" ? prev.trim() : "";
+      return current.toLowerCase() === email.toLowerCase() ? prev : email;
+    });
+  }, []);
+
   const BUILDING_TYPES = useMemo(() => {
     return getBuildingTypes({
       en: { buildingTypes: en.buildingTypes || {} },
@@ -116,7 +135,8 @@ export default function ResalePageQuery({ searchParams, initialUnitsData = null 
     if (maxPrice != null && maxPrice !== "") withPrice.max_price = maxPrice;
     const authorValue = typeof author === "string" ? author.trim() : "";
     if (authorValue) withPrice.author = authorValue;
-    return JSON.stringify(withPrice);
+    // Defense in depth: query key + fetch always include own author for non-admins.
+    return JSON.stringify(enforceDashboardAuthorOnParams(withPrice));
   }, [searchParams, filter, updatedAtDate, propertyType, minPrice, maxPrice, author]);
 
   const hasActiveClientFilters =

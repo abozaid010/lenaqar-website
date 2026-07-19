@@ -114,6 +114,11 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
   const notes = isNonEmptyString(rawUnit.notes) ? rawUnit.notes.trim() : null;
   const rawVisibility = (rawUnit as RawUnit).visibility ?? (rawUnit as RawUnit).status;
   const visibility = isNonEmptyString(rawVisibility) ? rawVisibility.trim() : null;
+  const author = isNonEmptyString(rawUnit.author)
+    ? rawUnit.author.trim()
+    : isNonEmptyString((rawUnit as any).created_by)
+      ? String((rawUnit as any).created_by).trim()
+      : null;
 
   const videoHeroItem = youtubeEmbed
     ? {
@@ -190,7 +195,9 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     district: isNonEmptyString(rawUnit.district) ? rawUnit.district : null,
     subDistrict: isNonEmptyString((rawUnit as any).sub_district)
       ? (rawUnit as any).sub_district
-      : null,
+      : isNonEmptyString((rawUnit as any).subDistrict)
+        ? (rawUnit as any).subDistrict
+        : null,
     heroImages,
     badges,
     totalPrice,
@@ -211,6 +218,7 @@ export const transformUnitToViewModel = (rawUnit: RawUnit, t?: T, locale: string
     notes,
     isPrimary,
     visibility,
+    author,
   };
 };
 
@@ -313,10 +321,6 @@ export const getUnitSpecs = (unit: RawUnit, t?: T, locale: string = 'en'): SpecI
     specs.push({ key: 'deliveryDate', label: getT(t, 'unitDetails', 'deliveryDate') || 'Delivery Date', value: deliveryDate });
   }
 
-  if (isNonEmptyString(unit.phase)) {
-    specs.push({ key: 'phase', label: getT(t, 'unitLabels', 'phase') || 'Phase', value: capitalizeWords(unit.phase) });
-  }
-
   if (isNonEmptyString(unit.code)) {
     specs.push({ key: 'referenceCode', label: getT(t, 'unitLabels', 'referenceCode') || 'Reference Code', value: unit.code });
   }
@@ -347,6 +351,19 @@ export const getTrustItems = (unit: RawUnit, t?: T, locale: string = 'en'): Trus
       key: 'source',
       label: getT(t, 'unitLabels', 'source') || 'Source',
       value: capitalizeWords(unit.dataSource.replace('_', ' ')),
+    });
+  }
+
+  const author = isNonEmptyString(unit.author)
+    ? unit.author.trim()
+    : isNonEmptyString((unit as any).created_by)
+      ? String((unit as any).created_by).trim()
+      : '';
+  if (author) {
+    items.push({
+      key: 'employee',
+      label: getT(t, 'unitLabels', 'employee') || 'Employee',
+      value: author,
     });
   }
 

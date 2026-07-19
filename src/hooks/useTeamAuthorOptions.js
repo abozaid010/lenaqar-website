@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { getDashboardLoggedInEmail } from "@/lib/dashboard-lead-access";
+import {
+  canViewAllDashboardLeads,
+  getDashboardLoggedInEmail,
+} from "@/lib/dashboard-lead-access";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   loadDashboardTeamMembersOnce,
@@ -34,25 +37,27 @@ export function resolveAuthorDisplayLabel(value, options) {
 }
 
 /**
- * Team author options for Units filters.
+ * Team author options for Units / Leads-style Author filters.
  * Uses the same Team API + session cache as the Leads Author filter.
- * Always exposes the full team list (all users can filter by any author).
+ * admin/owner → full team list; other roles → own email only.
  *
  * @param {{ selectedAuthor?: string }} [options]
  */
 export function useTeamAuthorOptions({ selectedAuthor = "" } = {}) {
   const [clientId, setClientId] = useState("");
   const [loggedInEmail, setLoggedInEmail] = useState("");
+  const [isAdminUser, setIsAdminUser] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setClientId(LenaCookiesManager.getClientId() || "");
     setLoggedInEmail(getDashboardLoggedInEmail());
+    setIsAdminUser(canViewAllDashboardLeads());
   }, []);
 
   useEffect(() => {
-    if (!clientId) {
+    if (!isAdminUser || !clientId) {
       setTeamMembers([]);
       setIsLoading(false);
       return;
@@ -80,9 +85,13 @@ export function useTeamAuthorOptions({ selectedAuthor = "" } = {}) {
     return () => {
       cancelled = true;
     };
-  }, [clientId]);
+  }, [clientId, isAdminUser]);
 
   const authorOptions = useMemo(() => {
+    if (!isAdminUser) {
+      return loggedInEmail ? [{ email: loggedInEmail, name: "" }] : [];
+    }
+
     /** @type {Map<string, { email: string, name: string }>} */
     const byEmail = new Map();
     for (const member of teamMembers) {
@@ -114,7 +123,12 @@ export function useTeamAuthorOptions({ selectedAuthor = "" } = {}) {
       const labelB = (b.name || b.email).toLowerCase();
       return labelA.localeCompare(labelB);
     });
-  }, [loggedInEmail, teamMembers, selectedAuthor]);
+  }, [isAdminUser, loggedInEmail, teamMembers, selectedAuthor]);
 
-  return { authorOptions, isLoading };
+  return {
+    authorOptions,
+    isLoading: isAdminUser && isLoading,
+    isAdminUser,
+    loggedInEmail,
+  };
 }

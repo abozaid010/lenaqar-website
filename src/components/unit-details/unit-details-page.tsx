@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
+import Link from 'next/link';
 import { useI18n } from '@/hooks/useI18n';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 import BackButton from '@/components/ui/back-button';
@@ -12,11 +13,7 @@ import StickyInquiryCard from './sticky-inquiry-card';
 import UnitDetailsAdminActions from './unit-details-admin-actions';
 import MobileStickyActionBar from './mobile-sticky-action-bar';
 import UnitShareLinksDialog from './unit-share-links-dialog';
-import {
-  formatCityLabel,
-  formatDistrictLabel,
-  formatSubDistrictLabel,
-} from '@/utils/formatters';
+import CityManager from '@/utils/city_manager';
 
 interface UnitDetailsPageProps {
   unit: UnitViewModel;
@@ -38,23 +35,20 @@ function UnitLocationSection({ unit }: { unit: UnitViewModel }) {
 
     const loadLabels = async () => {
       try {
-        const city = unit.city ? await formatCityLabel(unit.city, locale) : '';
-        const district =
-          unit.city && unit.district
-            ? await formatDistrictLabel(unit.district, unit.city, locale)
-            : unit.district || '';
-        const subDistrict =
-          unit.city && unit.district && unit.subDistrict
-            ? await formatSubDistrictLabel(
-                unit.subDistrict,
-                unit.city,
-                unit.district,
-                locale
-              )
-            : unit.subDistrict || '';
+        const manager = CityManager.getInstance();
+        const resolved = await manager.resolveLocationHierarchyAsync({
+          city: unit.city || '',
+          district: unit.district || '',
+          sub_district: unit.subDistrict || '',
+        });
+        const next = await manager.getLocationDisplayLabels(resolved, locale);
 
         if (!cancelled) {
-          setLabels({ city, district, subDistrict });
+          setLabels({
+            city: next.city || resolved.city || '',
+            district: next.district || resolved.district || '',
+            subDistrict: next.subDistrict || resolved.sub_district || '',
+          });
         }
       } catch {
         if (!cancelled) {
@@ -96,6 +90,15 @@ function UnitLocationSection({ unit }: { unit: UnitViewModel }) {
       key: 'project',
       label: translate('basicDetails.compound', t.basicDetails?.compound),
       value: projectLabel,
+      href: unit.projectHref || undefined,
+    },
+    {
+      key: 'phase',
+      label: translate(
+        'basicDetails.phase',
+        locale === 'ar' ? 'المرحلة / المبنى' : 'Phase / Building'
+      ),
+      value: unit.phase || '',
     },
   ].filter((row) => row.value);
 
@@ -110,7 +113,18 @@ function UnitLocationSection({ unit }: { unit: UnitViewModel }) {
         {rows.map((row) => (
           <div key={row.key}>
             <dt className="text-sm text-gray-600">{row.label}</dt>
-            <dd className="text-sm font-medium text-gray-900 mt-1">{row.value}</dd>
+            <dd className="text-sm font-medium text-gray-900 mt-1">
+              {row.href ? (
+                <Link
+                  href={row.href}
+                  className="text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  {row.value}
+                </Link>
+              ) : (
+                row.value
+              )}
+            </dd>
           </div>
         ))}
       </dl>

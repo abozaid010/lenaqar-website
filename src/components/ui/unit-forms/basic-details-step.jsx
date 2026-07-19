@@ -40,6 +40,7 @@ export default function BasicDetailsStep({
 
   const [locationFromProject, setLocationFromProject] = useState(false);
   const didNormalizeLocation = useRef(false);
+  const didFillFromProject = useRef(false);
 
   const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
 
@@ -51,7 +52,7 @@ export default function BasicDetailsStep({
 
   const allProjects = useMemo(() => Array.isArray(projectsData) ? projectsData : [], [projectsData]);
 
-  // Normalize existing city/district to canonical API values once (edit / pre-filled units)
+  // Resolve full city → district → sub-district hierarchy once (edit / pre-filled units)
   useEffect(() => {
     if (didNormalizeLocation.current) return;
     if (!formData.city && !formData.district && !formData.sub_district) return;
@@ -59,29 +60,24 @@ export default function BasicDetailsStep({
     let cancelled = false;
     (async () => {
       try {
-        const nextCity = await cityManager.normalizeCityValueAsync(formData.city);
-        const nextDistrict = formData.district
-          ? await cityManager.normalizeDistrictValueAsync(
-              formData.district,
-              formData.city || nextCity
-            )
-          : "";
-        const nextSubDistrict =
-          formData.sub_district && (nextDistrict || formData.district)
-            ? await cityManager.normalizeSubDistrictValueAsync(
-                formData.sub_district,
-                formData.city || nextCity,
-                formData.district || nextDistrict
-              )
-            : "";
+        const resolved = await cityManager.resolveLocationHierarchyAsync({
+          city: formData.city || "",
+          district: formData.district || "",
+          sub_district: formData.sub_district || "",
+        });
 
         const patch = {};
-        if (nextCity && nextCity !== formData.city) patch.city = nextCity;
-        if (nextDistrict && nextDistrict !== formData.district) {
-          patch.district = nextDistrict;
+        if (resolved.city && resolved.city !== formData.city) {
+          patch.city = resolved.city;
         }
-        if (nextSubDistrict && nextSubDistrict !== formData.sub_district) {
-          patch.sub_district = nextSubDistrict;
+        if (resolved.district && resolved.district !== formData.district) {
+          patch.district = resolved.district;
+        }
+        if (
+          resolved.sub_district &&
+          resolved.sub_district !== formData.sub_district
+        ) {
+          patch.sub_district = resolved.sub_district;
         }
         if (!cancelled && Object.keys(patch).length) {
           updateFormData(patch);
@@ -144,30 +140,16 @@ export default function BasicDetailsStep({
       const rawSubDistrict = proj.sub_district ?? "";
       if (!rawCity && !rawDistrict && !rawSubDistrict) return;
 
-      const nextCity = rawCity
-        ? await cityManager.normalizeCityValueAsync(rawCity)
-        : "";
-      const nextDistrict =
-        rawDistrict && (nextCity || rawCity)
-          ? await cityManager.normalizeDistrictValueAsync(
-              rawDistrict,
-              nextCity || rawCity
-            )
-          : "";
-      const nextSubDistrict =
-        rawSubDistrict && (nextDistrict || rawDistrict) && (nextCity || rawCity)
-          ? await cityManager.normalizeSubDistrictValueAsync(
-              rawSubDistrict,
-              nextCity || rawCity,
-              nextDistrict || rawDistrict
-            )
-          : "";
+      const resolved = await cityManager.resolveLocationHierarchyAsync({
+        city: rawCity,
+        district: rawDistrict,
+        sub_district: rawSubDistrict,
+      });
 
-      const resolvedSubDistrict = nextSubDistrict || rawSubDistrict || "";
       const patch = {};
-      if (nextCity) patch.city = nextCity;
-      if (nextDistrict) patch.district = nextDistrict;
-      if (resolvedSubDistrict) patch.sub_district = resolvedSubDistrict;
+      if (resolved.city) patch.city = resolved.city;
+      if (resolved.district) patch.district = resolved.district;
+      if (resolved.sub_district) patch.sub_district = resolved.sub_district;
 
       if (Object.keys(patch).length === 0) return;
 
@@ -268,18 +250,58 @@ export default function BasicDetailsStep({
     [allProjects, formData.project]
   );
 
-  // On edit: if project is set but city/district empty, fill from project once
+  // On edit: fill any missing location fields from the selected project once
   useEffect(() => {
-    if (!isEdit || !selectedProjectFromList) return;
-    if (formData.city && formData.district) return;
-    applyLocationFromProject(selectedProjectFromList);
+    if (!isEdit || !selectedProjectFromList || didFillFromProject.current) return;
+    if (formData.city && formData.district && formData.sub_district) {
+      didFillFromProject.current = true;
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const proj = selectedProjectFromList;
+        const resolved = await cityManager.resolveLocationHierarchyAsync({
+          city: proj.city ?? "",
+          district: proj.district ?? "",
+          sub_district: proj.sub_district ?? "",
+        });
+
+        const patch = {};
+        if (!formData.city && resolved.city) patch.city = resolved.city;
+        if (!formData.district && resolved.district) {
+          patch.district = resolved.district;
+        }
+        if (!formData.sub_district && resolved.sub_district) {
+          patch.sub_district = resolved.sub_district;
+        }
+
+        if (!cancelled && Object.keys(patch).length) {
+          updateFormData(patch);
+          setLocationFromProject(true);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to fill location from project:",
+          error?.message ?? error
+        );
+      } finally {
+        if (!cancelled) didFillFromProject.current = true;
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [
     isEdit,
     selectedProjectFromList,
     formData.city,
     formData.district,
     formData.sub_district,
-    applyLocationFromProject,
+    cityManager,
+    updateFormData,
   ]);
 
   const buildingTypeOptions = useMemo(() => getBuildingTypeOptions(translate), [translate]);

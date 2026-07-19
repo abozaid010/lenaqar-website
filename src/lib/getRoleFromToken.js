@@ -80,6 +80,30 @@ export async function canViewAllDashboardLeadsFromToken() {
 }
 
 /**
+ * Author email that must be applied for non-admin/non-owner users on Units
+ * (and Leads-parity) list fetches. Role from JWT; email from CLIENT_INFO.
+ * Returns null when the user may view all, role is unknown, or email missing.
+ *
+ * @returns {Promise<string|null>}
+ */
+export async function getRestrictedDashboardAuthorEmailFromToken() {
+  const role = await getRoleFromToken();
+  if (role == null) return null;
+  if (ALLOWED_MANAGE_ROLES.includes(role.toLowerCase())) return null;
+
+  const cookieStore = await cookies();
+  const raw = cookieStore.get(COOKIE_KEYS.CLIENT_INFO)?.value;
+  if (!raw) return null;
+  try {
+    const info = JSON.parse(raw);
+    const email = typeof info?.email === "string" ? info.email.trim() : "";
+    return email || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Reject if JWT contains a role that is not admin/owner.
  * If role is not in JWT (null), does not reject – backend must enforce.
  *

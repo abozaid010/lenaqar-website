@@ -5,6 +5,7 @@ import UnitsGrid from "@/components/ui/units-grid";
 import QueryErrorState from "@/components/ui/query-error-state";
 import { useUnitsPageData } from "@/hooks/use-units-page-data";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
+import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { useEffect, useMemo } from "react";
 
 export default function UnitsPageQueryOptimized({
@@ -39,18 +40,25 @@ export default function UnitsPageQueryOptimized({
       params.client_id = currentClientId;
     }
 
+    // Same author ACL as Leads (skip on public listings).
+    const scoped = publicUnits
+      ? params
+      : enforceDashboardAuthorOnParams(params);
+
     // Ensure we never send empty/undefined keys
-    Object.keys(params).forEach((k) => {
-      const v = params[k];
-      if (v === undefined || v === null || v === "") delete params[k];
+    Object.keys(scoped).forEach((k) => {
+      const v = scoped[k];
+      if (v === undefined || v === null || v === "") delete scoped[k];
     });
 
-    return params;
+    return scoped;
   };
 
   const searchParamsWithClient = useMemo(() => {
     return buildUnitsListParams(searchParams);
-  }, [searchParams, currentClientId]);
+    // buildUnitsListParams closes over currentClientId + publicUnits
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional param rebuild inputs
+  }, [searchParams, currentClientId, publicUnits]);
 
   // Stringify searchParams for query key - this changes when filters change
   const searchParamsKey = useMemo(

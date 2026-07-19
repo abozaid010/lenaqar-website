@@ -343,6 +343,107 @@ class CityManager {
   }
 
   /**
+   * Match a district raw value against known districts (any city).
+   */
+  matchDistrictsByRaw(districtRaw) {
+    if (!districtRaw) return [];
+    const normalized = String(districtRaw).toLowerCase().trim();
+    return this.districts.filter(
+      (district) =>
+        district.value === normalized ||
+        district.id === districtRaw ||
+        district.id.toLowerCase() === normalized ||
+        district.en_name.toLowerCase() === normalized ||
+        district.ar_name === districtRaw ||
+        (district.aliases || []).some(
+          (alias) => alias.toLowerCase() === normalized
+        )
+    );
+  }
+
+  /**
+   * Match a sub-district raw value against known sub-districts (any city/district).
+   */
+  matchSubDistrictsByRaw(subRaw) {
+    if (!subRaw) return [];
+    const normalized = String(subRaw).toLowerCase().trim();
+    return this.subDistricts.filter(
+      (sub) =>
+        sub.value === normalized ||
+        sub.id === subRaw ||
+        sub.id.toLowerCase() === normalized ||
+        sub.en_name.toLowerCase() === normalized ||
+        sub.ar_name === subRaw ||
+        (sub.aliases || []).some((alias) => alias.toLowerCase() === normalized)
+    );
+  }
+
+  /**
+   * Resolve the full location hierarchy from any subset of city/district/sub_district.
+   * Fills missing parents when a unique match exists in the cities list.
+   */
+  resolveLocationHierarchy({
+    city = "",
+    district = "",
+    sub_district = "",
+  } = {}) {
+    let resolvedCity = city ? this.normalizeCityValue(city) : "";
+    let resolvedDistrict = "";
+    let resolvedSub = "";
+
+    if (district && resolvedCity) {
+      resolvedDistrict = this.normalizeDistrictValue(district, resolvedCity);
+    } else if (district && !resolvedCity) {
+      const matches = this.matchDistrictsByRaw(district);
+      if (matches.length === 1) {
+        const cityObj = this.cities.find((c) => c.id === matches[0].city_id);
+        resolvedCity = cityObj?.value || "";
+        resolvedDistrict = matches[0].value;
+      } else if (matches.length > 1) {
+        resolvedDistrict = String(district).toLowerCase().trim();
+      } else {
+        resolvedDistrict = String(district).toLowerCase().trim();
+      }
+    }
+
+    if (sub_district) {
+      if (resolvedCity) {
+        let sub = resolvedDistrict
+          ? this.resolveSubDistrict(sub_district, resolvedCity, resolvedDistrict)
+          : null;
+        if (!sub) sub = this.resolveSubDistrictInCity(sub_district, resolvedCity);
+        if (sub) {
+          resolvedSub = sub.value;
+          if (!resolvedDistrict) resolvedDistrict = sub.district_value;
+        } else {
+          resolvedSub = String(sub_district).toLowerCase().trim();
+        }
+      } else {
+        const matches = this.matchSubDistrictsByRaw(sub_district);
+        if (matches.length === 1) {
+          const cityObj = this.cities.find((c) => c.id === matches[0].city_id);
+          resolvedCity = cityObj?.value || "";
+          resolvedDistrict = matches[0].district_value;
+          resolvedSub = matches[0].value;
+        } else {
+          resolvedSub = String(sub_district).toLowerCase().trim();
+        }
+      }
+    }
+
+    // Re-normalize district once city is known (e.g. filled from sub-district)
+    if (district && resolvedCity && !resolvedDistrict) {
+      resolvedDistrict = this.normalizeDistrictValue(district, resolvedCity);
+    }
+
+    return {
+      city: resolvedCity || "",
+      district: resolvedDistrict || "",
+      sub_district: resolvedSub || "",
+    };
+  }
+
+  /**
    * Async wrappers for normalization (ensures data is loaded).
    */
   async normalizeCityValueAsync(cityRaw) {
@@ -358,6 +459,11 @@ class CityManager {
   async normalizeSubDistrictValueAsync(subRaw, cityRaw, districtRaw) {
     await this.initializeData();
     return this.normalizeSubDistrictValue(subRaw, cityRaw, districtRaw);
+  }
+
+  async resolveLocationHierarchyAsync(location = {}) {
+    await this.initializeData();
+    return this.resolveLocationHierarchy(location);
   }
 
   /**
@@ -446,15 +552,29 @@ class CityManager {
     locale = "en"
   ) {
     await this.initializeData();
-    const cityLabel = city ? await this.getCityLabel(city, locale) : "";
+    const resolved = this.resolveLocationHierarchy({
+      city,
+      district,
+      sub_district,
+    });
+    const cityLabel = resolved.city
+      ? await this.getCityLabel(resolved.city, locale)
+      : "";
     const districtLabel =
-      district && city ? await this.getDistrictLabel(district, city, locale) : "";
+      resolved.district && resolved.city
+        ? await this.getDistrictLabel(resolved.district, resolved.city, locale)
+        : resolved.district || "";
     const subDistrictLabel =
-      sub_district && city
-        ? await this.getSubDistrictLabel(sub_district, city, district, locale)
-        : "";
+      resolved.sub_district && resolved.city
+        ? await this.getSubDistrictLabel(
+            resolved.sub_district,
+            resolved.city,
+            resolved.district,
+            locale
+          )
+        : resolved.sub_district || "";
     return {
-      city: cityLabel,
+      city: cityLabel || resolved.city || "",
       district: districtLabel,
       subDistrict: subDistrictLabel,
     };

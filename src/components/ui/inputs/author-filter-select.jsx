@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import { useI18n } from "@/hooks/useI18n";
 import {
@@ -8,13 +8,19 @@ import {
   resolveAuthorDisplayLabel,
   useTeamAuthorOptions,
 } from "@/hooks/useTeamAuthorOptions";
+import {
+  canViewAllDashboardLeads,
+  getDashboardLoggedInEmail,
+  isAllowedDashboardAuthor,
+} from "@/lib/dashboard-lead-access";
 import { isValidEmail } from "@/utils/email";
 
 /**
- * Author filter dropdown — same Team-member source and UX as Leads Author,
- * with full author list available to all users.
+ * Author filter dropdown — same Team-member source and ACL as Leads Author.
+ * admin/owner → full team list + "All"; other roles → own email only.
  *
- * Empty selection (= "All") yields "" so callers can omit/send null to the API.
+ * Empty selection (= "All") yields "" so callers can omit/send null to the API
+ * (admins/owners only).
  */
 export default function AuthorFilterSelect({
   value = "",
@@ -26,11 +32,32 @@ export default function AuthorFilterSelect({
 }) {
   const { translate } = useI18n();
   const [authorError, setAuthorError] = useState("");
+  const [isAdminUser, setIsAdminUser] = useState(false);
+  const [loggedInEmail, setLoggedInEmail] = useState("");
+
   const selected =
     typeof value === "string" ? value.trim() : value == null ? "" : String(value);
 
+  useEffect(() => {
+    const email = getDashboardLoggedInEmail();
+    const isAdmin = canViewAllDashboardLeads();
+    setLoggedInEmail(email);
+    setIsAdminUser(isAdmin);
+    if (!isAdmin && email) {
+      const current = selected.toLowerCase();
+      if (current !== email.toLowerCase()) {
+        onChange?.({ target: { name, value: email } });
+      }
+    }
+    // Sync once on mount (and when role/email become available).
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentional mount ACL sync
+  }, []);
+
+  const effectiveValue =
+    !isAdminUser && loggedInEmail ? loggedInEmail : selected;
+
   const { authorOptions, isLoading } = useTeamAuthorOptions({
-    selectedAuthor: selected,
+    selectedAuthor: effectiveValue,
   });
 
   const handleChange = (event) => {
@@ -48,6 +75,16 @@ export default function AuthorFilterSelect({
       return;
     }
 
+    if (!isAllowedDashboardAuthor(nextAuthor)) {
+      setAuthorError(
+        translate(
+          "dashboardFilter.author.ownEmailOnly",
+          "You can only filter by your own email",
+        ),
+      );
+      return;
+    }
+
     setAuthorError("");
     onChange?.({ target: { name, value: nextAuthor || "" } });
   };
@@ -56,7 +93,7 @@ export default function AuthorFilterSelect({
     <SearchableDropdownSelect
       name={name}
       options={authorOptions}
-      value={selected}
+      value={effectiveValue}
       onChange={handleChange}
       menuPlacement={menuPlacement}
       getValue={(option) => option.email}
@@ -64,10 +101,10 @@ export default function AuthorFilterSelect({
       resolveSelectedLabel={(v) => resolveAuthorDisplayLabel(v, authorOptions)}
       searchFields={["name", "email"]}
       placeholder={translate("dashboardFilter.author.placeholder", "Author")}
-      showAllOption
+      showAllOption={isAdminUser}
       allOptionLabel={translate("dashboardFilter.author.all", "All")}
       allOptionValue=""
-      allowCreate
+      allowCreate={isAdminUser}
       isValidCreateValue={(query) => isValidEmail(query)}
       formatCreateLabel={(query) =>
         translate("dashboardFilter.author.useEmail", "Use {email}").replace(
@@ -75,7 +112,7 @@ export default function AuthorFilterSelect({
           query,
         )
       }
-      isLoading={isLoading}
+      isLoading={isAdminUser && isLoading}
       error={Boolean(authorError)}
       errorMessage={authorError}
       searchPlaceholder={translate(
