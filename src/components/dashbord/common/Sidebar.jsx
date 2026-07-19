@@ -14,6 +14,7 @@ import {
   Share2,
   Menu,
   Settings,
+  LineChart,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,6 +31,7 @@ import { useCampaignChatAccess } from "@/hooks/useCampaignChatAccess";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { useModuleActionsContext } from "@/context/module-actions-context";
 import { isCurrentUserKingAdmin } from "@/lib/kingAdmin.client";
+import { isMarketIndexVisible } from "@/lib/market-index/access.client";
 import { SearchParamsWrapper } from "@/components/ui/searchParamsWrapper";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import { extractModuleActionsFromProfile } from "@/lib/whatsapp-bulk-access";
@@ -447,6 +449,21 @@ const SidebarComponent = ({
             >
               <Users2 className="h-5 w-5 mr-3" />
               <span>{translate('sidebar.clients')}</span>
+            </Link>
+          )}
+
+          {isMounted && isMarketIndexVisible() && (
+            <Link
+              href={navHref("/market-index")}
+              prefetch={false}
+              className={`flex items-center px-4 py-2 mb-1 gap-2 transition-colors relative ${
+                isLinkActive("/market-index")
+                  ? SELECTION_COLORS.SELECTED
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <LineChart className="h-5 w-5 mr-3" />
+              <span>{translate("sidebar.marketIndex")}</span>
             </Link>
           )}
 

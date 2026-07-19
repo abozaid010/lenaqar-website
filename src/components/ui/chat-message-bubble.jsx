@@ -1,5 +1,8 @@
 "use client";
 
+import { Phone } from "lucide-react";
+import { formatPhoneForDisplay } from "@/components/phone/phone-utils";
+
 function ChatReadTicks() {
   return (
     <svg
@@ -18,6 +21,25 @@ function ChatReadTicks() {
         fill="currentColor"
       />
     </svg>
+  );
+}
+
+/** Small icon + phone label for `whatsapp_business_number` (nullable; omit when missing). */
+export function ChatMessageSenderLabel({ phoneNumber, className = "" }) {
+  const trimmed = phoneNumber != null ? String(phoneNumber).trim() : "";
+  if (!trimmed) return null;
+
+  const display = formatPhoneForDisplay(trimmed, "EG") || trimmed;
+
+  return (
+    <div
+      className={`chat-bubble-sender ${className}`.trim()}
+      dir="ltr"
+      title={display}
+    >
+      <Phone className="chat-bubble-sender-icon" aria-hidden="true" />
+      <span>{display}</span>
+    </div>
   );
 }
 

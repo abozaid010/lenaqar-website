@@ -435,6 +435,27 @@ select:disabled {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
+.chat-bubble-sender {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 0.125rem;
+  max-width: 100%;
+  font-size: 0.625rem;
+  line-height: 1.2;
+  color: var(--chat-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-bubble-sender-icon {
+  width: 0.6875rem;
+  height: 0.6875rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
 .chat-bubble {
   position: relative;
   border-radius: 0.5rem;

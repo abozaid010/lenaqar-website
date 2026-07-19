@@ -2,7 +2,9 @@
 
 import SafeImage from "@/components/ui/safe-image";
 import ChatDatePill from "@/components/ui/chat-date-pill";
-import ChatMessageBubble from "@/components/ui/chat-message-bubble";
+import ChatMessageBubble, {
+  ChatMessageSenderLabel,
+} from "@/components/ui/chat-message-bubble";
 import { useI18n } from "@/hooks/useI18n";
 import {
   formatChatDatePillLabel,
@@ -89,6 +91,8 @@ function MessageBubbleItem({ message, translate, locale }) {
             )}
           </div>
         )}
+
+        <ChatMessageSenderLabel phoneNumber={message.whatsapp_business_number} />
 
         {imageUrl && (
           <SafeImage
