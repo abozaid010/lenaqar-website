@@ -8,8 +8,27 @@ import {
 } from "@/lib/whatsapp-messaging-provider";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+/** Once per browser tab/session — survives navigating away from leads and back. */
+const OPENWA_AUTO_PROMPT_SESSION_KEY = "openwa-auto-prompt-done";
+
+function hasAutoPromptedThisSession() {
+  try {
+    return sessionStorage.getItem(OPENWA_AUTO_PROMPT_SESSION_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markAutoPromptedThisSession() {
+  try {
+    sessionStorage.setItem(OPENWA_AUTO_PROMPT_SESSION_KEY, "1");
+  } catch {
+    // private mode / quota — degrade to in-memory ref only
+  }
+}
+
 export function useOpenwaConnection({
-  /** Leads: check on mount and open dialog only when not fully connected */
+  /** Leads: check once per website session; open dialog only when not fully connected */
   autoOpenOnMount = false,
 } = {}) {
   const [showOpenwaDialog, setShowOpenwaDialog] = useState(false);
@@ -61,9 +80,11 @@ export function useOpenwaConnection({
   useEffect(() => {
     if (!autoOpenOnMount) return;
     if (hasPromptedOpenwaRef.current) return;
+    if (hasAutoPromptedThisSession()) return;
     if (!isMessagingReady || !hasOpenwaLinkedAccounts) return;
 
     hasPromptedOpenwaRef.current = true;
+    markAutoPromptedThisSession();
 
     void (async () => {
       const result = await fetchStatus();
