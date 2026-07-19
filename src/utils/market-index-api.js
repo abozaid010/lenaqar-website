@@ -1,24 +1,45 @@
 /**
  * Browser Market Index API via BFF catch-all `/api/crm/market-index/*`.
+ * Unwraps success envelopes; maps HTTP failures to Error with `.status`.
  */
 
-async function crm(path, options) {
+function detailMessage(json, status) {
+  const detail = json?.detail;
+  const detailMsg =
+    typeof detail === "string"
+      ? detail
+      : Array.isArray(detail)
+        ? detail.map((d) => d?.msg || String(d)).join("; ")
+        : null;
+  return (
+    json?.error_message || detailMsg || `Request failed (${status})`
+  );
+}
+
+async function crm(path, options = {}, { retry429 = true, allow404Null = false } = {}) {
   const res = await fetch(`/api/crm/market-index${path}`, options);
   const json = await res.json().catch(() => null);
+
+  if (res.status === 404 && allow404Null) {
+    return null;
+  }
+
+  if (res.status === 429 && retry429) {
+    await new Promise((r) => setTimeout(r, 1100));
+    return crm(path, options, { retry429: false, allow404Null });
+  }
+
   if (!res.ok || json?.status === false) {
-    const detail = json?.detail;
-    const detailMsg =
-      typeof detail === "string"
-        ? detail
-        : Array.isArray(detail)
-          ? detail.map((d) => d?.msg || String(d)).join("; ")
-          : null;
-    const msg =
-      json?.error_message || detailMsg || `Request failed (${res.status})`;
+    const msg = detailMessage(json, res.status);
     const err = new Error(typeof msg === "string" ? msg : "Request failed");
     err.status = res.status;
     err.error_message = json?.error_message || null;
+    err.detail = json?.detail ?? null;
     throw err;
+  }
+
+  if (json && json.status === true) {
+    return json.data;
   }
   return json?.data;
 }
@@ -29,6 +50,28 @@ export async function fetchLocationRoots() {
 
 export async function fetchLocationChildren(locationId) {
   return crm(`/locations/${encodeURIComponent(locationId)}/children`);
+}
+
+export async function fetchLocationNode(locationId) {
+  return crm(`/locations/${encodeURIComponent(locationId)}`);
+}
+
+/** Published card for a leaf; `null` when no published data (404). */
+export async function fetchActiveCard(locationId) {
+  return crm(`/cards/${encodeURIComponent(locationId)}/active`, undefined, {
+    allow404Null: true,
+  });
+}
+
+/**
+ * @param {import('@/lib/market-index/evaluate.types').EstimateRequest} body
+ */
+export async function postEstimate(body) {
+  return crm("/estimate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
 }
 
 export async function fetchCards({ status, limit } = {}) {

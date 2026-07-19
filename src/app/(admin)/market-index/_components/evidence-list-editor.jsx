@@ -34,11 +34,22 @@ export function validateEvidenceList(list, translate) {
   return errors;
 }
 
+/**
+ * API expects Evidence.date as ISO date string `YYYY-MM-DD` (not datetime).
+ * HTML date inputs already produce that; normalize any longer ISO values too.
+ */
+export function normalizeEvidenceDate(value) {
+  if (value == null || value === "") return "";
+  const raw = String(value).trim();
+  const match = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : raw;
+}
+
 export function serializeEvidence(list) {
   return (list || []).map((item) => ({
     source: item.source,
     url: item.url?.trim() ? item.url.trim() : null,
-    date: item.date,
+    date: normalizeEvidenceDate(item.date),
     notes: item.notes?.trim() ? item.notes.trim() : null,
   }));
 }

@@ -5,6 +5,10 @@ import {
   fetchCards,
   fetchCard,
   fetchLocationChildren,
+  fetchLocationRoots,
+  fetchLocationNode,
+  fetchActiveCard,
+  postEstimate,
   saveCard,
   saveUnit,
   deleteUnit,
@@ -13,9 +17,14 @@ import {
   fetchVersion,
 } from "@/utils/market-index-api";
 
+const LOCATION_STALE_MS = 1000 * 60 * 60;
+
 export const marketIndexKeys = {
   cards: (status) => ["market-index", "cards", status ?? "all"],
   card: (id) => ["market-index", "card", id],
+  activeCard: (id) => ["market-index", "active-card", id],
+  locationRoots: () => ["market-index", "locations", "roots"],
+  location: (id) => ["market-index", "location", id],
   children: (id) => ["market-index", "locations", id],
   history: (id) => ["market-index", "history", id],
   version: (id, v) => ["market-index", "version", id, v],
@@ -46,13 +55,55 @@ export function useMarketCard(locationId, initialData) {
   });
 }
 
+export function useLocationRoots(enabled = true) {
+  return useQuery({
+    queryKey: marketIndexKeys.locationRoots(),
+    queryFn: fetchLocationRoots,
+    enabled,
+    staleTime: LOCATION_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useLocationNode(locationId, enabled = true) {
+  return useQuery({
+    queryKey: marketIndexKeys.location(locationId),
+    queryFn: () => fetchLocationNode(locationId),
+    enabled: !!locationId && enabled,
+    staleTime: LOCATION_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+}
+
 export function useLocationChildren(locationId) {
   return useQuery({
     queryKey: marketIndexKeys.children(locationId),
     queryFn: () => fetchLocationChildren(locationId),
     enabled: !!locationId,
-    staleTime: 1000 * 60 * 30,
+    staleTime: LOCATION_STALE_MS,
     refetchOnWindowFocus: false,
+  });
+}
+
+/** `data === null` means no published card (404). */
+export function useActiveCard(locationId) {
+  return useQuery({
+    queryKey: marketIndexKeys.activeCard(locationId),
+    queryFn: () => fetchActiveCard(locationId),
+    enabled: !!locationId,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error?.status === 404) return false;
+      if (error?.status === 429 && failureCount < 1) return true;
+      return failureCount < 1;
+    },
+  });
+}
+
+export function useEstimate() {
+  return useMutation({
+    mutationFn: (body) => postEstimate(body),
   });
 }
 
@@ -71,13 +122,16 @@ export function useMarketVersion(locationId, version, enabled = false) {
     queryKey: marketIndexKeys.version(locationId, version),
     queryFn: () => fetchVersion(locationId, version),
     enabled: !!locationId && version != null && enabled,
-    staleTime: 1000 * 60 * 30,
+    staleTime: LOCATION_STALE_MS,
     refetchOnWindowFocus: false,
   });
 }
 
 function invalidateCardQueries(queryClient, locationId) {
   queryClient.invalidateQueries({ queryKey: marketIndexKeys.card(locationId) });
+  queryClient.invalidateQueries({
+    queryKey: marketIndexKeys.activeCard(locationId),
+  });
   queryClient.invalidateQueries({ queryKey: ["market-index", "cards"] });
 }
 

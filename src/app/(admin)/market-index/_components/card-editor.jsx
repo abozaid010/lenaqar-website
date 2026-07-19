@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import BackButton from "@/components/ui/back-button";
 import { useI18n } from "@/hooks/useI18n";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import { useMarketCard, useSaveCard } from "@/hooks/use-market-index";
+import { getPublishBlockingIssues } from "@/lib/market-index/publish-validation";
 import CardGeneralForm, {
   generalToFormState,
   serializeGeneral,
@@ -29,8 +31,10 @@ export default function CardEditor({
   isNewDraft = false,
 }) {
   const { translate, locale } = useI18n();
+  const router = useRouter();
   const clientId = getClientIdFromToken() || "";
   const fallbackRoute = `/${clientId}/market-index`;
+  const publishIssuesRef = useRef(null);
 
   const initialData = useMemo(() => {
     if (unavailable || !initialCard) return undefined;
@@ -58,6 +62,7 @@ export default function CardEditor({
   const [evidenceErrors, setEvidenceErrors] = useState([]);
   const [publishConfirmOpen, setPublishConfirmOpen] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [publishIssues, setPublishIssues] = useState([]);
 
   const saveMutation = useSaveCard(locationId);
 
@@ -68,6 +73,14 @@ export default function CardEditor({
     setViewRows(rows.viewRows);
     setFinishingRows(rows.finishingRows);
   }, [card?.updated_at, card?.general, card?.adjustments]);
+
+  useEffect(() => {
+    if (publishIssues.length === 0) return;
+    publishIssuesRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }, [publishIssues]);
 
   const breadcrumb =
     Array.isArray(location?.path_en) && location.path_en.length
@@ -87,7 +100,7 @@ export default function CardEditor({
     setFieldErrors(errors);
     setEvidenceErrors(evErrs);
     if (Object.keys(errors).length > 0 || evErrs.length > 0) {
-      toast.error(translate("marketIndex.validation.fixInvalid"));
+      toast.error(translate("marketIndex.validation.formInvalid"));
       return;
     }
 
@@ -96,10 +109,27 @@ export default function CardEditor({
         general: serializeGeneral(generalState),
         adjustments: serializeAdjustments(viewRows, finishingRows),
       });
+      setPublishIssues([]);
       toast.success(translate("marketIndex.toasts.draftSaved"));
     } catch (err) {
       toast.error(err?.message || translate("marketIndex.errors.saveFailed"));
     }
+  };
+
+  const handlePublishClick = () => {
+    if (!canEdit || !cardExistsOnServer) return;
+    // Publish validates the saved server draft — not unsaved form edits.
+    const issues = getPublishBlockingIssues({
+      general: card?.general,
+      units,
+      translate,
+    });
+    setPublishIssues(issues);
+    if (issues.length > 0) {
+      toast.error(translate("marketIndex.publish.validationTitle"));
+      return;
+    }
+    setPublishConfirmOpen(true);
   };
 
   if (unavailable) {
@@ -180,7 +210,7 @@ export default function CardEditor({
               </button>
               <button
                 type="button"
-                onClick={() => setPublishConfirmOpen(true)}
+                onClick={handlePublishClick}
                 disabled={!cardExistsOnServer}
                 className="px-4 py-2 rounded-lg border border-primary text-primary text-sm font-medium hover:bg-primary/5 disabled:opacity-50 disabled:pointer-events-none"
               >
@@ -190,6 +220,22 @@ export default function CardEditor({
           )}
         </div>
       </div>
+
+      {publishIssues.length > 0 && (
+        <div
+          ref={publishIssuesRef}
+          className="rounded-lg border border-red-200 bg-red-50 p-4 text-start"
+        >
+          <p className="font-medium text-red-800 mb-2">
+            {translate("marketIndex.publish.validationTitle")}
+          </p>
+          <ul className="list-disc ps-5 text-sm text-red-700 space-y-1">
+            {publishIssues.map((issue, i) => (
+              <li key={i}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <CardGeneralForm
         state={generalState}
@@ -228,7 +274,14 @@ export default function CardEditor({
             canEdit={canEdit}
             confirmOpen={publishConfirmOpen}
             onConfirmOpenChange={setPublishConfirmOpen}
-            onPublished={() => cardQuery.refetch()}
+            onValidationIssues={setPublishIssues}
+            onPublished={() => {
+              setHistoryOpen(false);
+              router.replace(
+                `${fallbackRoute}?published=${encodeURIComponent(locationId)}`
+              );
+              router.refresh();
+            }}
           />
           <VersionHistoryDialog
             isOpen={historyOpen}

@@ -52,6 +52,18 @@ export const PROPERTY_TYPES = [
   "hostel",
 ];
 
+/** Residential subset for the public unit-evaluation form. */
+export const EVALUATE_PROPERTY_TYPES = [
+  "apartment",
+  "villa",
+  "townhouse",
+  "twinhouse",
+  "duplex",
+  "penthouse",
+  "studio",
+  "chalet",
+];
+
 export const VIEWS = [
   "park",
   "street",
