@@ -3,8 +3,6 @@
 import { useMemo, useCallback } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { getFurnishingTypes } from "@/data/constants";
-import en from "../../../../public/locales/en";
-import ar from "../../../../public/locales/ar";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
 
 const FURNISHING_TRANSLATION_KEYS = {
@@ -32,16 +30,14 @@ export default function SearchableFurnishingTypeSelect({
   disabled = false,
   ...rest
 }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, t } = useI18n();
 
-  const furnishingTypes = useMemo(
-    () =>
-      getFurnishingTypes({
-        en: { unitDetails: { furnishingTypes: en.unitDetails?.furnishingTypes || {} } },
-        ar: { unitDetails: { furnishingTypes: ar.unitDetails?.furnishingTypes || {} } },
-      }),
-    []
-  );
+  const furnishingTypes = useMemo(() => {
+    const slice = {
+      unitDetails: { furnishingTypes: t.unitDetails?.furnishingTypes || {} },
+    };
+    return getFurnishingTypes({ en: slice, ar: slice });
+  }, [t]);
 
   const getTypeLabel = useCallback(
     (type, currentLocale) => {

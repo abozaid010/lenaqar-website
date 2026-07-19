@@ -2,6 +2,7 @@
 
 import ImageSwiperModal from "@/components/ui/images-swiper-modal";
 import PropertyCard from "@/components/ui/property-card";
+import { ChatMessageSenderLabel } from "@/components/ui/chat-message-bubble";
 import { useI18n } from "@/context/translate-api";
 import { formatChatMessageTime } from "@/utils/chat-date-format";
 import SafeImage from "@/components/ui/safe-image";
@@ -15,7 +16,11 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-export default function BotMessageCard({ message, variant = "outgoing" }) {
+export default function BotMessageCard({
+  message,
+  variant = "outgoing",
+  businessNumber,
+}) {
   const {
     properties,
     bot_response,
@@ -25,7 +30,10 @@ export default function BotMessageCard({ message, variant = "outgoing" }) {
     project_data,
     crm_link,
     project_phases,
+    whatsapp_business_number,
   } = message;
+  const senderPhone =
+    businessNumber !== undefined ? businessNumber : whatsapp_business_number;
 
   const [fullscreenImg, setFullscreenImg] = useState(null);
   const [swiperImages, setSwiperImages] = useState([]);
@@ -44,7 +52,9 @@ export default function BotMessageCard({ message, variant = "outgoing" }) {
   }
 
   return (
-    <div className={`chat-bubble chat-bubble--${variant} chat-bubble--rich`}>
+    <div className="flex flex-col items-end max-w-[min(85%,36rem)]">
+      <ChatMessageSenderLabel phoneNumber={senderPhone} />
+      <div className={`chat-bubble chat-bubble--${variant} chat-bubble--rich`}>
       {messageImageUrl && (
         <SafeImage
           src={messageImageUrl}
@@ -405,6 +415,7 @@ export default function BotMessageCard({ message, variant = "outgoing" }) {
           )}
         </span>
       )}
+      </div>
     </div>
   );
 }

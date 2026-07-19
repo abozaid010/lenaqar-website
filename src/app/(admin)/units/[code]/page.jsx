@@ -82,7 +82,7 @@ export default async function PrivateUnitDetailsPage({ params }) {
   const cookieStore = await cookies();
   const locale = cookieStore.get("lang")?.value || "ar";
   const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value || null;
-  const { t } = getServerTranslations(locale);
+  const { t } = await getServerTranslations(locale);
 
   try {
     const rawUnit = await resolveAdminUnitByCodeParam(rawCode, clientId);

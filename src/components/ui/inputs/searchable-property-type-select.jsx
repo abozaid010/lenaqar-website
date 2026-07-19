@@ -3,8 +3,6 @@
 import { useMemo, useCallback } from "react";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
-import en from "../../../../public/locales/en";
-import ar from "../../../../public/locales/ar";
 import SearchableDropdownSelect from "./searchable-dropdown-select";
 
 /**
@@ -22,16 +20,12 @@ export default function SearchablePropertyTypeSelect({
   disabled = false,
   ...rest
 }) {
-  const { locale, translate } = useI18n();
+  const { locale, translate, t } = useI18n();
 
-  const buildingTypes = useMemo(
-    () =>
-      getBuildingTypes({
-        en: { buildingTypes: en.buildingTypes || {} },
-        ar: { buildingTypes: ar.buildingTypes || {} },
-      }),
-    []
-  );
+  const buildingTypes = useMemo(() => {
+    const slice = { buildingTypes: t.buildingTypes || {} };
+    return getBuildingTypes({ en: slice, ar: slice });
+  }, [t]);
 
   const getTypeLabel = useCallback(
     (type, currentLocale) => {

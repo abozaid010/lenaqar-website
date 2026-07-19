@@ -7,7 +7,14 @@ import { fetchManagerAnalytics } from "@/utils/api";
 import { useI18n } from "@/hooks/useI18n";
 import FiltersBar from "./FiltersBar";
 import SummaryCards from "./SummaryCards";
-import TrendsChart from "./TrendsChart";
+import dynamic from "next/dynamic";
+
+const TrendsChart = dynamic(() => import("./TrendsChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 h-[380px] animate-pulse" />
+  ),
+});
 import EmployeesTable from "./EmployeesTable";
 
 function DashboardSkeleton() {

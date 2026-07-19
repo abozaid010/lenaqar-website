@@ -5,9 +5,7 @@ import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
-import en from "../../../public/locales/en";
-import ar from "../../../public/locales/ar";
-import { FileSpreadsheet, SlidersHorizontal, Trash2, X } from "lucide-react";
+import { FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
 import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
 import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
 import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
@@ -20,8 +18,20 @@ import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { createPortal } from "react-dom";
-import UploadUnitsExcelDialog from "./upload-units-excel-dialog";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
+
+const UploadUnitsExcelDialog = dynamic(
+  () => import("./upload-units-excel-dialog"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
+      </div>
+    ),
+  }
+);
 import { useWhatsappBulkAccess } from "@/hooks/useWhatsappBulkAccess";
 import { useUnitsBulkSelectionOptional } from "@/context/units-bulk-selection-context";
 import AddNewWhatsappCampaignDialog from "@/app/(admin)/campaign-chat/_components/AddNewWhatsappCampaignDialog";
@@ -92,20 +102,18 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Get building types with translations
+  // Labels come from the active locale via i18n (no dual locale import).
   const BUILDING_TYPES = useMemo(() => {
-    return getBuildingTypes({
-      en: { buildingTypes: en.buildingTypes || {} },
-      ar: { buildingTypes: ar.buildingTypes || {} },
-    });
-  }, []);
+    const slice = { buildingTypes: t.buildingTypes || {} };
+    return getBuildingTypes({ en: slice, ar: slice });
+  }, [t]);
 
   const FURNISHING_TYPES = useMemo(() => {
-    return getFurnishingTypes({
-      en: { unitDetails: { furnishingTypes: en.unitDetails?.furnishingTypes || {} } },
-      ar: { unitDetails: { furnishingTypes: ar.unitDetails?.furnishingTypes || {} } },
-    });
-  }, []);
+    const slice = {
+      unitDetails: { furnishingTypes: t.unitDetails?.furnishingTypes || {} },
+    };
+    return getFurnishingTypes({ en: slice, ar: slice });
+  }, [t]);
 
   // URL = applied filters (API). Draft = form state until Apply / Enter / 5s debounce.
   const {
@@ -1473,10 +1481,12 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         </div>
       )}
 
-      <UploadUnitsExcelDialog
-        isOpen={isUploadDialogOpen}
-        onClose={() => setIsUploadDialogOpen(false)}
-      />
+      {isUploadDialogOpen && (
+        <UploadUnitsExcelDialog
+          isOpen={isUploadDialogOpen}
+          onClose={() => setIsUploadDialogOpen(false)}
+        />
+      )}
 
       {showBulkToolbar && (
         <AddNewWhatsappCampaignDialog

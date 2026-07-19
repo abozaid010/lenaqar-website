@@ -38,7 +38,7 @@ function createStrictTProxy(node, path = []) {
 }
 
 export function useI18n() {
-  const { t: rawT, locale, changeLanguage } = useTranslation();
+  const { t: rawT, locale, changeLanguage, isLocaleLoading } = useTranslation();
   const t = useMemo(() => createStrictTProxy(rawT || {}), [rawT]);
 
   // Enhanced translation function with security and fallback
@@ -282,6 +282,7 @@ export function useI18n() {
     translateStrict,
     locale,
     changeLanguage,
+    isLocaleLoading: Boolean(isLocaleLoading),
     isRTL: locale === 'ar',
     direction: locale === 'ar' ? 'rtl' : 'ltr',
     common,

@@ -13,7 +13,14 @@ import {
 import { cairoDateSubtract, cairoDateToday } from "@/utils/cairoDate";
 import FollowUpAgentHeader from "./FollowUpAgentHeader";
 import FollowUpAgentKpiCards from "./FollowUpAgentKpiCards";
-import FollowUpAgentTrendChart from "./FollowUpAgentTrendChart";
+import dynamic from "next/dynamic";
+
+const FollowUpAgentTrendChart = dynamic(() => import("./FollowUpAgentTrendChart"), {
+  ssr: false,
+  loading: () => (
+    <div className="bg-white rounded-xl shadow-sm p-4 md:p-6 mb-4 h-[380px] animate-pulse" />
+  ),
+});
 import FollowUpAgentLeadsTable from "./FollowUpAgentLeadsTable";
 
 function SectionSkeleton() {

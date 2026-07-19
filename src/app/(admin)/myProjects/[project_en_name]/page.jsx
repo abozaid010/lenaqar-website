@@ -136,7 +136,7 @@ export default async function ProjectDetailsPageWrapper({ params }) {
     const cookieStore = await cookies();
     const clientId = cookieStore.get(COOKIE_KEYS.CLIENT_ID)?.value;
     const locale = cookieStore.get('lang')?.value || 'ar';
-    const { t } = getServerTranslations(locale);
+    const { t } = await getServerTranslations(locale);
 
     const project = {
       ...transformProjectToViewModel(response.data.project, t, locale),

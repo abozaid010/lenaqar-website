@@ -29,6 +29,7 @@ function withProxyDebug(response, request) {
 const adminPaths = [
   'dashboard', 'campaigns', 'campaign-chat', 'schedule',
   'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
+  'market-index',
 ];
 
 export function proxy(request) {

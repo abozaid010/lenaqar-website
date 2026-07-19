@@ -3,10 +3,8 @@
 import React, { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import Analytics from "../_component/Analtics";
-import AnalyticsDashboard from "./AnalyticsDashboard";
+import dynamic from "next/dynamic";
 import DashboardSummarySection from "./DashboardSummarySection";
-import FollowUpAgentSection from "./follow-up-agent/FollowUpAgentSection";
 import {
   fetchLegacyMonthData,
   fetchLegacyUserAnalytics,
@@ -16,6 +14,24 @@ import {
 function SectionSkeleton({ height = "h-64" }) {
   return <div className={`w-full rounded-xl bg-white shadow-sm animate-pulse ${height}`} />;
 }
+
+const Analytics = dynamic(() => import("../_component/Analtics"), {
+  ssr: false,
+  loading: () => <SectionSkeleton height="h-[520px]" />,
+});
+
+const AnalyticsDashboard = dynamic(() => import("./AnalyticsDashboard"), {
+  ssr: false,
+  loading: () => <SectionSkeleton height="h-[520px]" />,
+});
+
+const FollowUpAgentSection = dynamic(
+  () => import("./follow-up-agent/FollowUpAgentSection"),
+  {
+    ssr: false,
+    loading: () => <SectionSkeleton height="h-[520px]" />,
+  }
+);
 
 export default function AnalyticsPageClient() {
   const searchParams = useSearchParams();

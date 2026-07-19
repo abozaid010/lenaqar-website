@@ -84,6 +84,7 @@ const nextConfig = {
       'dashboard', 'campaigns', 'campaign-chat', 'schedule',
       'analytics', 'units', 'team', 'myProjects', 'developers', 'news', 'map', 'notifications',
       'social-media',
+      'market-index',
     ];
     // `api` is excluded so `/api/social-media/*` BFF routes are not rewritten to pages.
     const clientIdSegment = "/:clientId((?!api$)[^/]+)";

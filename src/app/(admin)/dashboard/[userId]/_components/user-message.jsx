@@ -1,7 +1,9 @@
 "use client";
 
 import SafeImage from "@/components/ui/safe-image";
-import ChatMessageBubble from "@/components/ui/chat-message-bubble";
+import ChatMessageBubble, {
+  ChatMessageSenderLabel,
+} from "@/components/ui/chat-message-bubble";
 import { useI18n } from "@/hooks/useI18n";
 import { formatChatMessageTime } from "@/utils/chat-date-format";
 import { resolveChatMessageImageUrl, getDisplayUserMessageText } from "@/utils/imageUtils";
@@ -11,6 +13,7 @@ export default function UserMessageCard({
   imageUrl,
   timestamp,
   variant = "incoming",
+  businessNumber,
 }) {
   const { locale } = useI18n();
   const messageText = getDisplayUserMessageText(message);
@@ -24,6 +27,7 @@ export default function UserMessageCard({
 
   return (
     <div className={`flex flex-col ${isOutgoing ? "items-end" : "items-start"} max-w-[min(65%,28rem)]`}>
+      <ChatMessageSenderLabel phoneNumber={businessNumber} />
       {resolvedImageUrl && (
         <SafeImage
           src={resolvedImageUrl}

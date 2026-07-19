@@ -1,6 +1,5 @@
 import Sidebar from "@/components/dashbord/common/Sidebar";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import { I18nProvider } from "@/context/translate-api";
 import { TokenRefreshProvider } from "@/components/auth/TokenRefreshProvider";
 import ModuleActionsProvider from "@/components/auth/ModuleActionsProvider";
 import { Suspense } from "react";
@@ -21,32 +20,31 @@ const Layout = async ({ children }) => {
   const clientName = clientInfoCookie
     ? safeCookieParse(clientInfoCookie, {})?.client_name
     : null;
-  const profileResponse = await getCachedClientProfile();
-  const initialModuleActions = extractModuleActionsFromProfile(profileResponse);
-  const unreadNotificationsCount = await getUnreadNotificationsCount();
 
-  // Get the initial locale from the cookie
-  const langCookie = cookieStore.get(COOKIE_KEYS.LANG)?.value;
-  const supportedLocales = ["en", "ar"];
-  const defaultLocale = "ar";
-  const initialLocale = supportedLocales.includes(langCookie)
-    ? langCookie
-    : defaultLocale;
+  // Independent server fetches — run in parallel (same error semantics per call).
+  const [profileResponse, unreadNotificationsCount] = await Promise.all([
+    getCachedClientProfile(),
+    getUnreadNotificationsCount(),
+  ]);
+  const initialModuleActions = extractModuleActionsFromProfile(profileResponse);
+
+  // I18nProvider lives in the root layout only (avoids nested providers + dual locale loads).
 
   return (
-    <I18nProvider initialLocal={initialLocale}>
-      <TokenRefreshProvider>
-        <ModuleActionsProvider initialModuleActions={initialModuleActions}>
-<div className="flex flex-col lg:flex-row h-screen bg-gray-50">
-            <Sidebar
-              serverProfileInitial={profileResponse}
-              clientId={clientID}
-              clientName={clientName}
-              unreadNotificationsCount={unreadNotificationsCount}
-            />
+    <TokenRefreshProvider>
+      <ModuleActionsProvider initialModuleActions={initialModuleActions}>
+        <div className="flex flex-col lg:flex-row h-screen bg-gray-50">
+          <Sidebar
+            serverProfileInitial={profileResponse}
+            clientId={clientID}
+            clientName={clientName}
+            unreadNotificationsCount={unreadNotificationsCount}
+          />
 
           <div className="flex-1 flex flex-col overflow-hidden lg:pl-0">
-            <main className={`overflow-y-auto p-3 pt-12 lg:pt-3 relative flex-1 flex flex-col min-h-0 ${SELECTION_COLORS.BG}`}>
+            <main
+              className={`overflow-y-auto p-3 pt-12 lg:pt-3 relative flex-1 flex flex-col min-h-0 ${SELECTION_COLORS.BG}`}
+            >
               <Suspense
                 fallback={
                   <LoadingSpinner
@@ -60,9 +58,8 @@ const Layout = async ({ children }) => {
             </main>
           </div>
         </div>
-        </ModuleActionsProvider>
-      </TokenRefreshProvider>
-    </I18nProvider>
+      </ModuleActionsProvider>
+    </TokenRefreshProvider>
   );
 };
 

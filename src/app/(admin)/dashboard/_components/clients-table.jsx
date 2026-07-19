@@ -3,8 +3,6 @@
 import PropertyDetailsModal from "@/components/ui/property-requirements-modal";
 import { useI18n } from "@/context/translate-api";
 import { getBuildingTypes } from "@/data/constants";
-import en from "../../../../../public/locales/en";
-import ar from "../../../../../public/locales/ar";
 import {
   ACTIONS_COLORS,
   getActionLabel,
@@ -26,13 +24,11 @@ export default function ClientsTable({ users, pagination }) {
   const { t, locale } = useI18n();
   const router = useRouter();
 
-  // Get building types with translations
+  // Get building types with translations from the active locale only
   const BUILDING_TYPES = useMemo(() => {
-    return getBuildingTypes({
-      en: { buildingTypes: en.buildingTypes || {} },
-      ar: { buildingTypes: ar.buildingTypes || {} },
-    });
-  }, []);
+    const slice = { buildingTypes: t.buildingTypes || {} };
+    return getBuildingTypes({ en: slice, ar: slice });
+  }, [t]);
 
   const [rowSelection, setRowSelection] = useState([]);
   const [loadingClientActions, setLoadingClientActions] = useState(null);

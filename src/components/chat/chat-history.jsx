@@ -59,6 +59,12 @@ export default function ChatHistory({
         if (turnTimestamp) previousTimestamp = turnTimestamp;
 
         const userVariant = getChatBubbleVariant(message);
+        const hasUser = hasUserTurnContent(message);
+        const hasBot = hasBotTurnContent(message);
+        const businessNumber = message.whatsapp_business_number;
+        // One label per API turn — attach to the first rendered bubble.
+        const userBusinessNumber = hasUser ? businessNumber : null;
+        const botBusinessNumber = !hasUser && hasBot ? businessNumber : null;
 
         return (
           <div key={index} className="w-full flex flex-col">
@@ -72,7 +78,7 @@ export default function ChatHistory({
               />
             )}
 
-            {hasUserTurnContent(message) && (
+            {hasUser && (
               <div
                 className={`flex mb-1 px-1 ${
                   userVariant === "outgoing" ? "justify-end" : "justify-start"
@@ -83,13 +89,18 @@ export default function ChatHistory({
                   imageUrl={resolveUserTurnImageUrl(message)}
                   timestamp={message.timestamp}
                   variant={userVariant}
+                  businessNumber={userBusinessNumber}
                 />
               </div>
             )}
 
-            {hasBotTurnContent(message) && (
+            {hasBot && (
               <div className="flex justify-end mb-1 px-1">
-                <BotMessageCard message={message} variant="outgoing" />
+                <BotMessageCard
+                  message={message}
+                  variant="outgoing"
+                  businessNumber={botBusinessNumber}
+                />
               </div>
             )}
           </div>

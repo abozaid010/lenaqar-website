@@ -1,6 +1,4 @@
 import { useI18n } from "@/context/translate-api";
-import en from "../../public/locales/en";
-import ar from "../../public/locales/ar";
 import {
   getBuildingTypes,
   getViewTypes,
@@ -13,40 +11,31 @@ import {
 } from "@/data/constants";
 import { formatDistanceToNow } from "date-fns";
 import { ar as arLocale, enUS as enLocale } from "date-fns/locale";
+import { useMemo } from "react";
 
 
 export const useLocaleConstants = () => {
   const { t, locale } = useI18n();
 
-  // Create translations object with both English and Arabic for helper functions
-  const translations = {
-    en: {
-      buildingTypes: en.buildingTypes || {},
+  // Use the active locale dictionary only (avoids bundling both languages).
+  // Both `en`/`ar` keys point at the same active slice so existing
+  // en_label/ar_label pickers keep working for the current language.
+  const translations = useMemo(() => {
+    const slice = {
+      buildingTypes: t.buildingTypes || {},
       unitDetails: {
-        viewTypes: en.unitDetails?.viewTypes || {},
-        finishingTypes: en.unitDetails?.finishingTypes || {},
-        furnishingTypes: en.unitDetails?.furnishingTypes || {},
+        viewTypes: t.unitDetails?.viewTypes || {},
+        finishingTypes: t.unitDetails?.finishingTypes || {},
+        furnishingTypes: t.unitDetails?.furnishingTypes || {},
       },
-      propertyStatus: en.propertyStatus || {},
-      propertyUsage: en.propertyUsage || {},
-      propertyPurpose: en.propertyPurpose || {},
-      purpose: en.purpose || {},
-      propertyIntent: en.propertyIntent || en.purpose || {},
-    },
-    ar: {
-      buildingTypes: ar.buildingTypes || {},
-      unitDetails: {
-        viewTypes: ar.unitDetails?.viewTypes || {},
-        finishingTypes: ar.unitDetails?.finishingTypes || {},
-        furnishingTypes: ar.unitDetails?.furnishingTypes || {},
-      },
-      propertyStatus: ar.propertyStatus || {},
-      propertyUsage: ar.propertyUsage || {},
-      propertyPurpose: ar.propertyPurpose || {},
-      purpose: ar.purpose || {},
-      propertyIntent: ar.propertyIntent || ar.purpose || {},
-    },
-  };
+      propertyStatus: t.propertyStatus || {},
+      propertyUsage: t.propertyUsage || {},
+      propertyPurpose: t.propertyPurpose || {},
+      purpose: t.purpose || {},
+      propertyIntent: t.propertyIntent || t.purpose || {},
+    };
+    return { en: slice, ar: slice };
+  }, [t]);
 
   const getBuildingTypesWithLabels = () => {
     return getBuildingTypes(translations);

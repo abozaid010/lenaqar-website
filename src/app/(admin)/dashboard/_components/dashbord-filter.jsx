@@ -1,6 +1,5 @@
 "use client";
 
-import ExcelExportButton from "@/components/ui/excel-export-button";
 import FormInput from "@/components/ui/inputs/form-input";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
 import {
@@ -25,9 +24,27 @@ import {
   parseOwnerTypeFilter,
   serializeOwnerTypeFilter,
 } from "@/constants/owner-type";
-import { ChevronDown, FileSpreadsheet, X, UserPlus } from "lucide-react";
+import { ChevronDown, FileSpreadsheet, Loader2, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
+
+const ExcelExportButton = dynamic(
+  () => import("@/components/ui/excel-export-button"),
+  {
+    ssr: false,
+    loading: () => (
+      <button
+        type="button"
+        disabled
+        aria-busy
+        className="flex items-center justify-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-md text-xs sm:text-sm font-medium opacity-70 cursor-wait h-10 min-w-[44px]"
+      >
+        <Loader2 size={16} className="animate-spin shrink-0" />
+      </button>
+    ),
+  }
+);
 import { createPortal } from "react-dom";
 import { formatDayMonthShort } from "@/utils/formateDate";
 import AverageScore from "./average-score";
