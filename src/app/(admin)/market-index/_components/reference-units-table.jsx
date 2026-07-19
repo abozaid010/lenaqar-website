@@ -1,12 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
 import { useI18n } from "@/hooks/useI18n";
 import DeleteConfirmDialog from "@/components/ui/confirm-delete-dialog";
 import { useDeleteUnit, useSaveUnit } from "@/hooks/use-market-index";
-import UnitFormDialog from "./unit-form-dialog";
+
+const UnitFormDialog = dynamic(() => import("./unit-form-dialog"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
+    </div>
+  ),
+});
 
 function formatDate(value, locale) {
   if (!value) return "—";
@@ -182,16 +191,18 @@ export default function ReferenceUnitsTable({
 
       {editable && (
         <>
-          <UnitFormDialog
-            isOpen={formOpen}
-            onClose={() => {
-              setFormOpen(false);
-              setEditingUnit(null);
-            }}
-            unit={editingUnit}
-            onSubmit={handleSave}
-            submitLoading={saveMutation.isPending}
-          />
+          {formOpen && (
+            <UnitFormDialog
+              isOpen={formOpen}
+              onClose={() => {
+                setFormOpen(false);
+                setEditingUnit(null);
+              }}
+              unit={editingUnit}
+              onSubmit={handleSave}
+              submitLoading={saveMutation.isPending}
+            />
+          )}
           <DeleteConfirmDialog
             isOpen={Boolean(deleteTarget)}
             onClose={() => setDeleteTarget(null)}

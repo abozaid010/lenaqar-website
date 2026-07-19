@@ -9,7 +9,7 @@ import ChatImagesToUnit from '@/components/unit-details/chat-images-to-unit';
 import UnitInquiryContactHeader from '@/components/unit-details/unit-inquiry-contact-header';
 import { UNIT_CONVERSATION_MESSAGE_LIMIT } from '@/constants/conversation-limits';
 import { formatPhoneForDisplay } from '@/components/phone/phone-utils';
-import { normalizeConversationPhone } from '@/utils/api';
+import { normalizeConversationPhone } from '@/utils/normalize-conversation-phone';
 import { handleOpenWhatsApp } from '@/utils/phone-utils';
 import { useUnitOwnership } from '@/hooks/useUnitOwnership';
 

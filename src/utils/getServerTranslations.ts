@@ -1,9 +1,14 @@
-import en from '../../public/locales/en';
-import ar from '../../public/locales/ar';
+import { loadLocaleMessages } from "@/lib/i18n/load-locale-messages";
 
-export function getServerTranslations(locale: string): { t: typeof en; locale: string } {
-  return {
-    t: locale === 'ar' ? (ar as unknown as typeof en) : en,
-    locale,
-  };
+type LocaleMessages = Record<string, unknown>;
+
+/**
+ * Server-only: load a single locale dictionary (no dual-language import).
+ */
+export async function getServerTranslations(
+  locale: string
+): Promise<{ t: LocaleMessages; locale: string }> {
+  const normalized = locale === "en" ? "en" : "ar";
+  const t = await loadLocaleMessages(normalized);
+  return { t, locale: normalized };
 }

@@ -6,9 +6,11 @@
  * - ExcelJS is actively maintained and has no known CVEs
  * - Protects against Prototype Pollution attacks
  * - Protects against ReDoS vulnerabilities
+ *
+ * ExcelJS is loaded on demand so it never enters the initial page bundle.
  */
 
-import ExcelJS from "exceljs";
+import { loadExcelJS } from "@/utils/load-exceljs";
 
 /**
  * Parse Excel file and extract data
@@ -17,6 +19,7 @@ import ExcelJS from "exceljs";
  */
 export async function parseExcelFile(file) {
   try {
+    const ExcelJS = await loadExcelJS();
     const buffer = await file.arrayBuffer();
     const workbook = new ExcelJS.Workbook();
 
@@ -205,6 +208,7 @@ export async function createExcelFile({
   styles = {},
 }) {
   try {
+    const ExcelJS = await loadExcelJS();
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet(sheetName);
 
@@ -270,6 +274,7 @@ export async function appendSheetToExcel(
   columns = []
 ) {
   try {
+    const ExcelJS = await loadExcelJS();
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer);
 

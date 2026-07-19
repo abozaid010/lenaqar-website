@@ -30,10 +30,10 @@ import {
 import { normalizeLastAction } from "@/utils/actions";
 import { enforceDashboardAuthorOnParams } from "@/lib/dashboard-lead-access";
 import { toApiStartDate, toApiEndDate } from "@/utils/dashboardDate";
-import { phoneToE164 } from "@/components/phone/phone-utils";
-import { parsePhoneNumberFromString } from "libphonenumber-js/min";
 
 // Auth API
+// Phone normalization lives in `@/utils/normalize-conversation-phone`
+// so libphonenumber is not part of every route that imports this module.
 export async function loginUser(credentials) {
   const params = new URLSearchParams();
   params.append('grant_type', 'password');
@@ -1335,26 +1335,6 @@ export async function resetUnreadMessagesCount(userId) {
   }
 }
 
-/**
- * Normalize a phone for GET /messages/conversation?phone_number=…
- * Preserves international E.164 (+212…, +1…); falls back to EG parsing.
- */
-export function normalizeConversationPhone(phoneNumber, defaultCountry = "EG") {
-  const trimmed = String(phoneNumber ?? "").trim();
-  if (!trimmed) return null;
-
-  if (trimmed.startsWith("+")) {
-    const parsed = parsePhoneNumberFromString(trimmed);
-    if (parsed?.isPossible()) return parsed.number;
-    return trimmed;
-  }
-
-  return (
-    phoneToE164(trimmed, defaultCountry) ||
-    trimmed
-  );
-}
-
 export async function getChatHistory(userId, { limit = 50, offset = 0 } = {}) {
   const response = await axiosInstance.get(`/messages/conversation/${userId}`, {
     params: { limit, offset },
@@ -1370,6 +1350,9 @@ export async function getConversationByPhone(
   phoneNumber,
   { client_id = null, limit = 30, offset = 0 } = {},
 ) {
+  const { normalizeConversationPhone } = await import(
+    "@/utils/normalize-conversation-phone"
+  );
   const normalized = normalizeConversationPhone(phoneNumber);
   if (!normalized) {
     throw new Error("phone_number is required");

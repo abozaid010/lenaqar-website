@@ -2,13 +2,28 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calculator, Plus } from "lucide-react";
+import { Calculator, Loader2, Plus } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useI18n } from "@/hooks/useI18n";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import { useMarketCards } from "@/hooks/use-market-index";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-import LocationPickerDialog from "./location-picker-dialog";
-import EvaluateUnitDialog from "./evaluate-unit-dialog";
+
+const dialogLoading = () => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+    <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
+  </div>
+);
+
+const LocationPickerDialog = dynamic(() => import("./location-picker-dialog"), {
+  ssr: false,
+  loading: dialogLoading,
+});
+
+const EvaluateUnitDialog = dynamic(() => import("./evaluate-unit-dialog"), {
+  ssr: false,
+  loading: dialogLoading,
+});
 
 const FILTERS = [
   { key: "all", status: undefined },
@@ -161,10 +176,12 @@ export default function MarketIndexDashboard({
             {translate("marketIndex.unavailable.message")}
           </p>
         </div>
-        <EvaluateUnitDialog
-          isOpen={evaluateOpen}
-          onClose={() => setEvaluateOpen(false)}
-        />
+        {evaluateOpen && (
+          <EvaluateUnitDialog
+            isOpen={evaluateOpen}
+            onClose={() => setEvaluateOpen(false)}
+          />
+        )}
       </div>
     );
   }
@@ -295,7 +312,7 @@ export default function MarketIndexDashboard({
         </div>
       )}
 
-      {canEdit && (
+      {canEdit && pickerOpen && (
         <LocationPickerDialog
           isOpen={pickerOpen}
           onClose={() => setPickerOpen(false)}
@@ -306,10 +323,12 @@ export default function MarketIndexDashboard({
         />
       )}
 
-      <EvaluateUnitDialog
-        isOpen={evaluateOpen}
-        onClose={() => setEvaluateOpen(false)}
-      />
+      {evaluateOpen && (
+        <EvaluateUnitDialog
+          isOpen={evaluateOpen}
+          onClose={() => setEvaluateOpen(false)}
+        />
+      )}
     </div>
   );
 }

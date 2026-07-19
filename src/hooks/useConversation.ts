@@ -9,9 +9,9 @@ import {
 import {
   getChatHistory,
   getConversationByPhone,
-  normalizeConversationPhone,
   resetUnreadMessagesCount,
 } from "@/utils/api";
+import { normalizeConversationPhone } from "@/utils/normalize-conversation-phone";
 
 export type ChatTurn = {
   user_message?: string;

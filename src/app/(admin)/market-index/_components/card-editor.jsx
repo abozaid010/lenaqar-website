@@ -19,7 +19,17 @@ import AdjustmentsEditor, {
 } from "./adjustments-editor";
 import ReferenceUnitsTable from "./reference-units-table";
 import PublishPanel from "./publish-panel";
-import VersionHistoryDialog from "./version-history-dialog";
+import dynamic from "next/dynamic";
+import { Loader2 } from "lucide-react";
+
+const VersionHistoryDialog = dynamic(() => import("./version-history-dialog"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <Loader2 className="h-8 w-8 animate-spin text-white" aria-hidden />
+    </div>
+  ),
+});
 
 export default function CardEditor({
   canEdit = false,
@@ -283,11 +293,13 @@ export default function CardEditor({
               router.refresh();
             }}
           />
-          <VersionHistoryDialog
-            isOpen={historyOpen}
-            onClose={() => setHistoryOpen(false)}
-            locationId={locationId}
-          />
+          {historyOpen && (
+            <VersionHistoryDialog
+              isOpen={historyOpen}
+              onClose={() => setHistoryOpen(false)}
+              locationId={locationId}
+            />
+          )}
         </>
       )}
     </div>

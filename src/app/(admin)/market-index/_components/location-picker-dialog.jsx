@@ -5,8 +5,7 @@ import { ChevronRight } from "lucide-react";
 import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
-import { fetchLocationRoots } from "@/utils/market-index-api";
-import { useLocationChildren } from "@/hooks/use-market-index";
+import { useLocationChildren, useLocationRoots } from "@/hooks/use-market-index";
 
 function locationLabel(node, locale) {
   if (!node) return "";
@@ -17,51 +16,34 @@ function locationLabel(node, locale) {
 export default function LocationPickerDialog({ isOpen, onClose, onConfirm }) {
   const { translate, locale } = useI18n();
   const [stack, setStack] = useState([]); // breadcrumb of selected parents
-  const [roots, setRoots] = useState([]);
-  const [rootsLoading, setRootsLoading] = useState(false);
-  const [rootsError, setRootsError] = useState(null);
   const [selected, setSelected] = useState(null);
 
   const parentId = stack.length > 0 ? stack[stack.length - 1].id : null;
+  const rootsQuery = useLocationRoots(isOpen && !parentId);
   const childrenQuery = useLocationChildren(isOpen && parentId ? parentId : null);
 
   useEffect(() => {
     if (!isOpen) return;
-    let cancelled = false;
     setStack([]);
     setSelected(null);
-    setRootsError(null);
-    setRootsLoading(true);
-    fetchLocationRoots()
-      .then((data) => {
-        if (cancelled) return;
-        setRoots(Array.isArray(data?.locations) ? data.locations : []);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setRootsError(err?.message || translate("marketIndex.errors.loadFailed"));
-        setRoots([]);
-      })
-      .finally(() => {
-        if (!cancelled) setRootsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, translate]);
+  }, [isOpen]);
 
   const list = parentId
     ? Array.isArray(childrenQuery.data?.locations)
       ? childrenQuery.data.locations
       : []
-    : roots;
+    : Array.isArray(rootsQuery.data?.locations)
+      ? rootsQuery.data.locations
+      : [];
 
-  const listLoading = parentId ? childrenQuery.isLoading : rootsLoading;
+  const listLoading = parentId ? childrenQuery.isLoading : rootsQuery.isLoading;
   const listError = parentId
     ? childrenQuery.isError
       ? childrenQuery.error?.message
       : null
-    : rootsError;
+    : rootsQuery.isError
+      ? rootsQuery.error?.message
+      : null;
 
   const canConfirm = selected?.is_leaf === true;
 

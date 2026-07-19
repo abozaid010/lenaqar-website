@@ -1,7 +1,7 @@
 "use client";
 
-import ExcelJS from "exceljs";
 import { useI18n } from "@/hooks/useI18n";
+import { loadExcelJS } from "@/utils/load-exceljs";
 import { LenaCookiesManager } from "@/lib/LenaCookiesManager";
 import {
   Upload,
@@ -819,7 +819,8 @@ export default function UploadUnitsExcelDialog({ isOpen, onClose }) {
       // Filter rows to only include failed units
       const failedRows = failedIndices.map((index) => parsedData.rows[index]);
 
-      // Create workbook
+      // Create workbook (ExcelJS loaded on demand)
+      const ExcelJS = await loadExcelJS();
       const workbook = new ExcelJS.Workbook();
 
       // Prepare worksheet
