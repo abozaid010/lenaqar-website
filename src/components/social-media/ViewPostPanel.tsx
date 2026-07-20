@@ -30,7 +30,7 @@ export function ViewPostPanel({
         </div>
       </div>
 
-      {hasContent ? (
+      {hasContent || onHandled ? (
         <PostCommunicationActions
           postContent={postContent}
           phoneNumber={phoneNumber}

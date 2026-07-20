@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Copy, Loader2, MessageCircle, Phone } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, MessageCircle, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 
 import ChatConversation from "@/components/chat/chat-conversation";
@@ -32,7 +32,7 @@ const HANDLED_BUTTON_CLASS =
  * WhatsApp opens the existing ChatConversation panel (not WhatsApp Web).
  *
  * Phone resolution: prefer API `phoneNumber`, fallback to local extractPhoneFromText.
- * When Call or WhatsApp succeeds, invoke `onHandled` so the parent can mark reviewed.
+ * "Mark as handled" is explicit; Call / WhatsApp also mark reviewed when used.
  */
 export function PostCommunicationActions({
   postContent,
@@ -45,7 +45,7 @@ export function PostCommunicationActions({
   /** E.164 from API when available. */
   phoneNumber?: string | null;
   isReviewed?: boolean;
-  /** Fired after Call click or successful WhatsApp open (marks lead handled). */
+  /** Fired after Call click, successful WhatsApp open, or Mark as handled. */
   onHandled?: () => void | Promise<void>;
   className?: string;
 }) {
@@ -72,11 +72,19 @@ export function PostCommunicationActions({
     ? `${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box}`
     : `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
 
-  const markHandled = async () => {
+  const markHandled = async (options?: { showSuccessToast?: boolean }) => {
     if (!onHandled || isReviewed || isMarkingHandled) return;
     setIsMarkingHandled(true);
     try {
       await onHandled();
+      if (options?.showSuccessToast) {
+        toast.success(
+          translate(
+            "socialMedia.actions.markAsHandledSuccess",
+            "Marked as handled by human.",
+          ),
+        );
+      }
     } catch (error) {
       console.error("Failed to mark post handled:", error);
       toast.error(
@@ -154,6 +162,57 @@ export function PostCommunicationActions({
   return (
     <div className={`flex flex-col gap-3 ${className}`.trim()}>
       <div className="flex flex-wrap items-center gap-2 shrink-0">
+        {onHandled ? (
+          isReviewed ? (
+            <button
+              type="button"
+              disabled
+              className={`${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box} opacity-90 cursor-default`}
+              title={translate(
+                "socialMedia.actions.handledByHuman",
+                "Handled by human",
+              )}
+              aria-label={translate(
+                "socialMedia.actions.handledByHuman",
+                "Handled by human",
+              )}
+            >
+              <CheckCircle2 className={buttonSize.icon} strokeWidth={1.75} aria-hidden />
+              <span className="whitespace-nowrap">
+                {translate(
+                  "socialMedia.actions.handledByHuman",
+                  "Handled by human",
+                )}
+              </span>
+            </button>
+          ) : (
+            <ActionButton
+              size="md"
+              icon={isMarkingHandled ? Loader2 : CheckCircle2}
+              disabled={isMarkingHandled}
+              onClick={() => {
+                void markHandled({ showSuccessToast: true });
+              }}
+              title={translate(
+                "socialMedia.actions.markAsHandled",
+                "Mark as handled",
+              )}
+              ariaLabel={translate(
+                "socialMedia.actions.markAsHandled",
+                "Mark as handled",
+              )}
+              className={isMarkingHandled ? "[&_svg]:animate-spin" : ""}
+            >
+              {isMarkingHandled
+                ? translate("common.loading", "Loading...")
+                : translate(
+                    "socialMedia.actions.markAsHandled",
+                    "Mark as handled",
+                  )}
+            </ActionButton>
+          )
+        ) : null}
+
         <ActionButton
           size="md"
           icon={Copy}
