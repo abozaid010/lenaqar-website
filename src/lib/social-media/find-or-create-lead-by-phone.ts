@@ -1,7 +1,6 @@
 import { phoneToE164 } from "@/components/phone/phone-utils";
-import { digitsOnlyNormalized } from "@/utils/lead-list-search";
-import { fetchUsersData, getClientid } from "@/utils/api";
-import { addNewLeadAction } from "@/app/(admin)/dashboard/_actions/leads";
+import { axiosInstance } from "@/lib/axiosInstance";
+import { getClientid } from "@/utils/api";
 
 export type LeadByPhoneResult = {
   userId: string;
@@ -10,16 +9,11 @@ export type LeadByPhoneResult = {
   created: boolean;
 };
 
-function phonesMatch(a?: string | null, b?: string | null): boolean {
-  const left = digitsOnlyNormalized(phoneToE164(a, "EG") || a || "");
-  const right = digitsOnlyNormalized(phoneToE164(b, "EG") || b || "");
-  if (!left || !right) return false;
-  return left === right || left.endsWith(right) || right.endsWith(left);
-}
-
 /**
- * Find an existing lead by phone, or create one with the minimum required fields.
- * Reuses dashboard lead list search + addNewLeadAction (same as manual add lead).
+ * Upsert a lead by phone via POST /api/leads/addnew (client BFF).
+ * Skips the heavy messages/v2/all search — backend get_or_create is deterministic
+ * and dashboard upsert preserves an existing display name when the incoming name
+ * is blank or equals the phone number.
  */
 export async function findOrCreateLeadByPhone(
   phoneE164: string,
@@ -27,25 +21,6 @@ export async function findOrCreateLeadByPhone(
   const normalized = phoneToE164(phoneE164, "EG") || String(phoneE164).trim();
   if (!normalized) {
     throw new Error("Invalid phone number");
-  }
-
-  const searchQuery = digitsOnlyNormalized(normalized) || normalized;
-  const data = await fetchUsersData({ query: searchQuery, limit: 50 });
-  const users = Array.isArray(data?.users) ? data.users : [];
-
-  const existing = users.find((user) =>
-    phonesMatch(user?.phone_number, normalized),
-  );
-
-  if (existing?.user_id) {
-    return {
-      userId: String(existing.user_id),
-      phoneNumber:
-        phoneToE164(existing.phone_number, "EG") ||
-        String(existing.phone_number || normalized),
-      name: String(existing.name || existing.user_name || normalized),
-      created: false,
-    };
   }
 
   const clientId = getClientid() || "public";
@@ -59,21 +34,46 @@ export async function findOrCreateLeadByPhone(
     campaign_id: "added_manually",
   };
 
-  const result = await addNewLeadAction(payload);
-  if (!result?.success) {
-    throw new Error(result?.message || "Failed to create lead");
+  try {
+    const response = await axiosInstance.post("/api/leads/addnew", payload);
+    const body = response?.data;
+    if (body?.status === false) {
+      throw new Error(
+        body?.error_message || body?.message || "Failed to create lead",
+      );
+    }
+
+    const data = body?.data || {};
+    const dashboard = data?.dashboard || {};
+    const userId = String(data.user_id || payload.user_id);
+    const phoneNumber =
+      phoneToE164(dashboard.phone_number || data.phone_number, "EG") ||
+      normalized;
+    const name = String(
+      dashboard.name || data.user_name || data.name || phoneNumber,
+    ).trim();
+    const created =
+      !name ||
+      name === phoneNumber ||
+      name === normalized;
+
+    return {
+      userId,
+      phoneNumber,
+      name: name || phoneNumber,
+      created,
+    };
+  } catch (error: unknown) {
+    const axiosError = error as {
+      response?: { data?: { detail?: string; message?: string; error_message?: string } };
+      message?: string;
+    };
+    const message =
+      axiosError?.response?.data?.detail ||
+      axiosError?.response?.data?.error_message ||
+      axiosError?.response?.data?.message ||
+      axiosError?.message ||
+      "Failed to create lead";
+    throw new Error(typeof message === "string" ? message : "Failed to create lead");
   }
-
-  const created = result.data || payload;
-  const userId = String(created.user_id || payload.user_id);
-  const phoneNumber =
-    phoneToE164(created.phone_number, "EG") ||
-    String(created.phone_number || normalized);
-
-  return {
-    userId,
-    phoneNumber,
-    name: String(created.user_name || created.name || phoneNumber),
-    created: true,
-  };
 }

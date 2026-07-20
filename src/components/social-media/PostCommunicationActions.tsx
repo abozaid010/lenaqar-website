@@ -127,6 +127,8 @@ export function PostCommunicationActions({
 
     openingLockRef.current = true;
     setIsOpeningChat(true);
+    // Review does not depend on the lead — start in parallel and never block chat open.
+    void markHandled();
     try {
       const lead = await findOrCreateLeadByPhone(phone);
       setChatTarget({
@@ -145,7 +147,6 @@ export function PostCommunicationActions({
               "Chat opened.",
             ),
       );
-      await markHandled();
     } catch (error) {
       console.error("Failed to open post WhatsApp chat:", error);
       toast.error(
