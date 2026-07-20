@@ -29,6 +29,27 @@ function safeDate(v?: string | null) {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/** e.g. "20 July, 2:00 am" (EN) / localized AR equivalent */
+function formatCreatedDateTime(value: string | Date | null, locale: string) {
+  if (!value) return "—";
+  const dateObj = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dateObj.getTime())) return "—";
+
+  const isAr = String(locale || "").toLowerCase().startsWith("ar");
+  const loc = isAr ? "ar-EG" : "en-GB";
+  const day = dateObj.toLocaleDateString(loc, { day: "numeric" });
+  const month = dateObj.toLocaleDateString(loc, { month: "long" });
+
+  let hours = dateObj.getHours();
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? (isAr ? "م" : "pm") : isAr ? "ص" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const separator = isAr ? "،" : ",";
+
+  return `${day} ${month}${separator} ${hours}:${minutes} ${ampm}`;
+}
+
 function matchesSearch(item: SocialComment, q: string) {
   const s = q.trim().toLowerCase();
   if (!s) return true;
@@ -44,7 +65,7 @@ function matchesSearch(item: SocialComment, q: string) {
 }
 
 export default function CommentsPageClient() {
-  const { translate, localeUtils } = useI18n();
+  const { translate, locale } = useI18n();
   const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -266,10 +287,8 @@ export default function CommentsPageClient() {
         <DataTable
           columns={[
             { key: "account", header: translate("socialMedia.table.account") },
-            { key: "group", header: translate("socialMedia.table.groupName") },
             { key: "status", header: translate("socialMedia.table.status") },
             { key: "createdAt", header: translate("socialMedia.table.createdAt") },
-            { key: "publishedAt", header: translate("socialMedia.table.publishedAt") },
             { key: "text", header: translate("socialMedia.table.commentText") },
             { key: "viewPost", header: translate("socialMedia.actions.viewPost") },
             { key: "postUrl", header: translate("socialMedia.table.postUrl") },
@@ -279,24 +298,10 @@ export default function CommentsPageClient() {
             key: c.id,
             cells: {
               account: <div className="font-medium text-gray-900">{c.account_name}</div>,
-              group: (
-                <div className="max-w-[220px] truncate text-gray-800" title={c.group_name}>
-                  {c.group_name}
-                </div>
-              ),
               status: <StatusBadge status={c.status} />,
               createdAt: (
                 <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {c.created_at
-                    ? localeUtils.formatDate(safeDate(c.created_at) ?? c.created_at)
-                    : "—"}
-                </div>
-              ),
-              publishedAt: (
-                <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {c.published_at
-                    ? localeUtils.formatDate(safeDate(c.published_at) ?? c.published_at)
-                    : "—"}
+                  {formatCreatedDateTime(safeDate(c.created_at) ?? c.created_at, locale)}
                 </div>
               ),
               text: (
