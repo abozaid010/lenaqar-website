@@ -24,19 +24,37 @@ type ChatTarget = {
   name: string;
 };
 
+const HANDLED_BUTTON_CLASS =
+  "!bg-emerald-50 !border-emerald-300 !text-emerald-800 hover:!bg-emerald-100 hover:!border-emerald-400 focus-visible:!ring-emerald-400/40";
+
 /**
  * Copy / Call / WhatsApp actions for post content.
  * WhatsApp opens the existing ChatConversation panel (not WhatsApp Web).
+ *
+ * Phone resolution: prefer API `phoneNumber`, fallback to local extractPhoneFromText.
+ * When Call or WhatsApp succeeds, invoke `onHandled` so the parent can mark reviewed.
  */
 export function PostCommunicationActions({
   postContent,
+  phoneNumber = null,
+  isReviewed = false,
+  onHandled,
   className = "",
 }: {
   postContent: string;
+  /** E.164 from API when available. */
+  phoneNumber?: string | null;
+  isReviewed?: boolean;
+  /** Fired after Call click or successful WhatsApp open (marks lead handled). */
+  onHandled?: () => void | Promise<void>;
   className?: string;
 }) {
   const { translate } = useI18n();
-  const phone = useMemo(() => extractPhoneFromText(postContent), [postContent]);
+  const phone = useMemo(() => {
+    const fromApi = String(phoneNumber ?? "").trim();
+    if (fromApi) return fromApi;
+    return extractPhoneFromText(postContent);
+  }, [phoneNumber, postContent]);
   const hasPhone = Boolean(phone);
   const noPhoneTitle = translate(
     "socialMedia.actions.noPhoneFound",
@@ -45,11 +63,31 @@ export function PostCommunicationActions({
 
   const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
   const [isOpeningChat, setIsOpeningChat] = useState(false);
+  const [isMarkingHandled, setIsMarkingHandled] = useState(false);
   const openingLockRef = useRef(false);
 
   const clientId = getClientid() || undefined;
   const buttonSize = ACTION_BUTTON_SIZES.md;
-  const callClassName = `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
+  const contactClassName = isReviewed
+    ? `${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box}`
+    : `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
+
+  const markHandled = async () => {
+    if (!onHandled || isReviewed || isMarkingHandled) return;
+    setIsMarkingHandled(true);
+    try {
+      await onHandled();
+    } catch (error) {
+      console.error("Failed to mark post handled:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : translate("common.operationFailed"),
+      );
+    } finally {
+      setIsMarkingHandled(false);
+    }
+  };
 
   const handleCopyPost = async () => {
     const text = String(postContent ?? "").trim();
@@ -99,6 +137,7 @@ export function PostCommunicationActions({
               "Chat opened.",
             ),
       );
+      await markHandled();
     } catch (error) {
       console.error("Failed to open post WhatsApp chat:", error);
       toast.error(
@@ -128,10 +167,13 @@ export function PostCommunicationActions({
         {hasPhone ? (
           <PhoneTelLink
             phoneNumber={phone}
-            className={callClassName}
+            className={contactClassName}
             title={translate("buttons.call", "Call")}
             aria-label={translate("buttons.call", "Call")}
             stopPropagation
+            onClick={() => {
+              void markHandled();
+            }}
           >
             <Phone className={buttonSize.icon} strokeWidth={1.75} aria-hidden />
             <span className="whitespace-nowrap">
@@ -142,7 +184,7 @@ export function PostCommunicationActions({
           <button
             type="button"
             disabled
-            className={`${callClassName} opacity-50 cursor-not-allowed`}
+            className={`${contactClassName} opacity-50 cursor-not-allowed`}
             title={noPhoneTitle}
             aria-label={translate("buttons.call", "Call")}
           >
@@ -161,7 +203,9 @@ export function PostCommunicationActions({
             onClick={handleWhatsApp}
             title={translate("buttons.whatsapp", "WhatsApp")}
             ariaLabel={translate("buttons.whatsapp", "WhatsApp")}
-            className={isOpeningChat ? "[&_svg]:animate-spin" : ""}
+            className={`${isOpeningChat ? "[&_svg]:animate-spin" : ""} ${
+              isReviewed ? HANDLED_BUTTON_CLASS : ""
+            }`.trim()}
           >
             {isOpeningChat
               ? translate("common.loading", "Loading...")
@@ -171,7 +215,7 @@ export function PostCommunicationActions({
           <button
             type="button"
             disabled
-            className={`${callClassName} opacity-50 cursor-not-allowed`}
+            className={`${contactClassName} opacity-50 cursor-not-allowed`}
             title={noPhoneTitle}
             aria-label={translate("buttons.whatsapp", "WhatsApp")}
           >

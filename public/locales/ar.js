@@ -2907,6 +2907,10 @@ export default {
         errors: "أخطاء",
       },
       filters: {
+      reviewStatus: "المراجعة",
+      reviewAll: "الكل",
+      notReviewed: "غير مراجع",
+      reviewed: "تمت المراجعة",
         all: "الكل",
         sent: "مرسل",
         units: "وحدات",
@@ -3039,6 +3043,7 @@ export default {
       copyPostSuccess: "تم نسخ المنشور",
       copyPostEmpty: "لا يوجد محتوى للنسخ.",
       noPhoneFound: "لم يتم العثور على رقم هاتف.",
+      missingPostId: "تعذر التحديد كمُعالَج: معرّف المنشور غير موجود.",
       chatOpened: "تم فتح المحادثة.",
       leadCreatedChat: "تم إنشاء العميل وفتح المحادثة.",
       chatWith: "محادثة",

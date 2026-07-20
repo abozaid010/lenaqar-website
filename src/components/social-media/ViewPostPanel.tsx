@@ -3,7 +3,17 @@
 import { useI18n } from "@/hooks/useI18n";
 import { PostCommunicationActions } from "@/components/social-media/PostCommunicationActions";
 
-export function ViewPostPanel({ postContent }: { postContent: string }) {
+export function ViewPostPanel({
+  postContent,
+  phoneNumber = null,
+  isReviewed = false,
+  onHandled,
+}: {
+  postContent: string;
+  phoneNumber?: string | null;
+  isReviewed?: boolean;
+  onHandled?: () => void | Promise<void>;
+}) {
   const { translate } = useI18n();
   const hasContent = Boolean(postContent?.trim());
 
@@ -23,6 +33,9 @@ export function ViewPostPanel({ postContent }: { postContent: string }) {
       {hasContent ? (
         <PostCommunicationActions
           postContent={postContent}
+          phoneNumber={phoneNumber}
+          isReviewed={isReviewed}
+          onHandled={onHandled}
           className="flex-1 min-h-0"
         />
       ) : null}

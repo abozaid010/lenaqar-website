@@ -2849,6 +2849,10 @@ export default {
         errors: "Errors",
       },
       filters: {
+      reviewStatus: "Review",
+      reviewAll: "All",
+      notReviewed: "Not reviewed",
+      reviewed: "Reviewed",
         all: "All",
         sent: "Sent",
         units: "Units",
@@ -2981,6 +2985,7 @@ export default {
       copyPostSuccess: "Post copied",
       copyPostEmpty: "Nothing to copy.",
       noPhoneFound: "No phone number found.",
+      missingPostId: "Cannot mark handled: linked post id is missing.",
       chatOpened: "Chat opened.",
       leadCreatedChat: "Lead created. Chat opened.",
       chatWith: "Chat",

@@ -12,6 +12,8 @@ export function DataTable({
   rows: {
     key: string;
     cells: Record<string, ReactNode>;
+    /** Optional Tailwind classes for the primary <tr> (e.g. reviewed highlight). */
+    rowClassName?: string;
     /** When set, renders a full-width row beneath this row (e.g. expanded post content). */
     expandedContent?: ReactNode;
   }[];
@@ -46,9 +48,9 @@ export function DataTable({
             {rows.map((r) => (
               <Fragment key={r.key}>
                 <tr
-                  className={`hover:bg-gray-50/70 ${
+                  className={`${r.rowClassName ?? "hover:bg-gray-50/70"} ${
                     onRowClick ? "cursor-pointer" : ""
-                  }`}
+                  }`.trim()}
                   onClick={() => onRowClick?.(r.key)}
                 >
                   {columns.map((c) => (
