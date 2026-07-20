@@ -1637,6 +1637,11 @@ export default {
     selectDistrictFirst: "Select a district first",
     selectCityFirst: "Select a city first",
     locationFromProject: "Location filled from project — you can change it",
+    locationSearchLabel: "Location / Project",
+    locationSearchPlaceholder: "Search project, area, district, or city…",
+    locationSearchEmpty: "No matching locations or projects",
+    locationSearchHint:
+      "Type a project or place name. Choosing a project fills city, district, and area.",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",

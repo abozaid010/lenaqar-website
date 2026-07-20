@@ -2,10 +2,7 @@
 
 import LenaTextField from "@/components/ui/inputs/lena-text-field";
 import SearchableDropdownSelect from "@/components/ui/inputs/searchable-dropdown-select";
-import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
-import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
-import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
-import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
+import UnitLocationSearch from "@/components/ui/unit-forms/unit-location-search";
 import { useI18n } from "@/hooks/useI18n";
 import { getBuildingTypeOptions } from "@/lib/enums/buildingTypes";
 import { useLocaleConstants } from "@/utils/localeConstants";
@@ -42,7 +39,7 @@ export default function BasicDetailsStep({
   const didNormalizeLocation = useRef(false);
   const didFillFromProject = useRef(false);
 
-  const { data: projectsData, isLoading: isLoadingProjectsFromApi } = useProjectsNames(false);
+  const { data: projectsData } = useProjectsNames(false);
 
   useEffect(() => {
     if (Array.isArray(projectsData) && projectsData.length > 0) {
@@ -161,54 +158,6 @@ export default function BasicDetailsStep({
     [cityManager, updateFormData]
   );
 
-  const handleProjectChange = async (e) => {
-    const value = e?.target?.value ?? "";
-    const proj = allProjects.find((p) => p.en_name === value || p.name === value);
-    updateFormData({
-      project: value,
-      project_ar: proj?.ar_name ?? "",
-      project_id: proj?.id ?? "",
-      phase: "",
-      developer_id: "",
-      developer: "",
-    });
-    await applyLocationFromProject(proj);
-    if (invalidFields.includes("project") && value) {
-      setInvalidFields((prev) => prev.filter((field) => field !== "project"));
-    }
-  };
-
-  const handleCityChange = (e) => {
-    const { value } = e.target;
-    setLocationFromProject(false);
-    updateFormData({
-      city: value,
-      district: "",
-      sub_district: "",
-    });
-    if (invalidFields.includes("city") && value) {
-      setInvalidFields((prev) => prev.filter((field) => field !== "city"));
-    }
-    if (invalidFields.includes("district")) {
-      setInvalidFields((prev) => prev.filter((field) => field !== "district"));
-    }
-  };
-
-  const handleDistrictChange = (e) => {
-    const { value } = e.target;
-    setLocationFromProject(false);
-    updateFormData({ district: value, sub_district: "" });
-    if (invalidFields.includes("district") && value) {
-      setInvalidFields((prev) => prev.filter((field) => field !== "district"));
-    }
-  };
-
-  const handleSubDistrictChange = (e) => {
-    const { value } = e.target;
-    setLocationFromProject(false);
-    updateFormData({ sub_district: value });
-  };
-
   const applyDeveloperFromProject = useCallback(
     async (fullProject) => {
       if (!fullProject || typeof fullProject !== "object") return;
@@ -243,6 +192,54 @@ export default function BasicDetailsStep({
       await applyLocationFromProject(fullProject);
     },
     [locale, updateFormData, applyLocationFromProject]
+  );
+
+  const handleLocationSearchProject = useCallback(
+    async (proj, meta = {}) => {
+      if (!proj) return;
+      const enName = proj.en_name || proj.name || "";
+      if (!meta.full) {
+        updateFormData({
+          project: enName,
+          project_ar: proj.ar_name ?? "",
+          project_id: proj.id ? String(proj.id) : "",
+          phase: "",
+          developer_id: "",
+          developer: "",
+        });
+        await applyLocationFromProject(proj);
+      } else {
+        await applyDeveloperFromProject(proj);
+      }
+      if (invalidFields.includes("project") && enName) {
+        setInvalidFields((prev) => prev.filter((field) => field !== "project"));
+      }
+    },
+    [
+      updateFormData,
+      applyLocationFromProject,
+      applyDeveloperFromProject,
+      invalidFields,
+      setInvalidFields,
+    ],
+  );
+
+  const handleLocationSearchLocation = useCallback(
+    (payload) => {
+      setLocationFromProject(false);
+      updateFormData({
+        city: payload.city ?? "",
+        district: payload.district ?? "",
+        sub_district: payload.sub_district ?? "",
+        project: payload.project ?? "",
+        project_ar: payload.project_ar ?? "",
+        project_id: payload.project_id ?? "",
+        phase: "",
+        developer_id: "",
+        developer: "",
+      });
+    },
+    [updateFormData],
   );
 
   const selectedProjectFromList = useMemo(
@@ -405,62 +402,12 @@ export default function BasicDetailsStep({
 
       <div className="rounded-lg border border-gray-200 p-4 sm:p-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
-          <SearchableCitySelect
-            name="city"
-            label={translate("basicDetails.city", t.basicDetails.city)}
-            value={formData.city || ""}
-            onChange={handleCityChange}
-            placeholder={translate("basicDetails.selectCity", t.basicDetails.selectCity)}
-          />
-
-          <SearchableDistrictSelect
-            name="district"
-            label={translate("basicDetails.district", t.basicDetails.district)}
-            value={formData.district || ""}
-            onChange={handleDistrictChange}
-            city={formData.city || ""}
-            disabled={!formData.city}
-            placeholder={
-              !formData.city
-                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
-                : translate("basicDetails.selectDistrict", t.basicDetails.selectDistrict)
-            }
-          />
-
-          <SearchableSubDistrictSelect
-            name="sub_district"
-            label={translate("basicDetails.subDistrict", t.basicDetails?.subDistrict)}
-            value={formData.sub_district || ""}
-            onChange={handleSubDistrictChange}
-            city={formData.city || ""}
-            district={formData.district || ""}
-            disabled={!formData.city || !formData.district}
-            placeholder={
-              !formData.city
-                ? translate("basicDetails.selectCityFirst", t.basicDetails.selectCityFirst)
-                : !formData.district
-                  ? translate(
-                      "basicDetails.selectDistrictFirst",
-                      t.basicDetails?.selectDistrictFirst
-                    )
-                  : translate(
-                      "basicDetails.selectSubDistrict",
-                      t.basicDetails?.selectSubDistrict
-                    )
-            }
-          />
-
-          <SearchableProjectSelect
-            name="project"
-            label={translate("basicDetails.compound", t.basicDetails.compound)}
-            value={formData.project || ""}
-            onChange={handleProjectChange}
-            onProjectSelect={applyDeveloperFromProject}
-            projects={allProjects}
-            isLoading={isLoadingProjectsFromApi}
+          <UnitLocationSearch
+            formData={formData}
+            onSelectProject={handleLocationSearchProject}
+            onSelectLocation={handleLocationSearchLocation}
             required
             error={invalidFields.includes("project")}
-            placeholder={translate("basicDetails.selectCompound", t.basicDetails.selectCompound)}
           />
 
           <LenaTextField

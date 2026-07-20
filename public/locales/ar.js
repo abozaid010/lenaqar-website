@@ -1464,6 +1464,11 @@ export default {
     selectDistrictFirst: "اختر المنطقة أولاً",
     selectCityFirst: "اختر المدينة أولاً",
     locationFromProject: "تم تعبئة الموقع من المشروع — يمكنك تعديله",
+    locationSearchLabel: "الموقع / المشروع",
+    locationSearchPlaceholder: "ابحث عن مشروع أو منطقة أو حي أو مدينة…",
+    locationSearchEmpty: "لا توجد مواقع أو مشاريع مطابقة",
+    locationSearchHint:
+      "اكتب اسم مشروع أو مكان. اختيار مشروع يملأ المدينة والحي والمنطقة.",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",
