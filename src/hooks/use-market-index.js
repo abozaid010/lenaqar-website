@@ -5,6 +5,7 @@ import {
   fetchCards,
   fetchCard,
   fetchLocationChildren,
+  fetchLocationLeaves,
   fetchLocationRoots,
   fetchLocationNode,
   fetchActiveCard,
@@ -24,6 +25,7 @@ export const marketIndexKeys = {
   card: (id) => ["market-index", "card", id],
   activeCard: (id) => ["market-index", "active-card", id],
   locationRoots: () => ["market-index", "locations", "roots"],
+  locationLeaves: () => ["market-index", "locations", "leaves"],
   location: (id) => ["market-index", "location", id],
   children: (id) => ["market-index", "locations", id],
   history: (id) => ["market-index", "history", id],
@@ -59,6 +61,16 @@ export function useLocationRoots(enabled = true) {
   return useQuery({
     queryKey: marketIndexKeys.locationRoots(),
     queryFn: fetchLocationRoots,
+    enabled,
+    staleTime: LOCATION_STALE_MS,
+    refetchOnWindowFocus: false,
+  });
+}
+
+export function useLocationLeaves(enabled = true) {
+  return useQuery({
+    queryKey: marketIndexKeys.locationLeaves(),
+    queryFn: () => fetchLocationLeaves({ limit: 2000 }),
     enabled,
     staleTime: LOCATION_STALE_MS,
     refetchOnWindowFocus: false,

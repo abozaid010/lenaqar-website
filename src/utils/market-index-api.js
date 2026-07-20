@@ -48,6 +48,14 @@ export async function fetchLocationRoots() {
   return crm("/locations/roots");
 }
 
+/** Flat leaf locations for single-field typeahead search. */
+export async function fetchLocationLeaves({ limit } = {}) {
+  const params = new URLSearchParams();
+  if (limit != null) params.set("limit", String(limit));
+  const qs = params.toString();
+  return crm(`/locations/leaves${qs ? `?${qs}` : ""}`);
+}
+
 export async function fetchLocationChildren(locationId) {
   return crm(`/locations/${encodeURIComponent(locationId)}/children`);
 }

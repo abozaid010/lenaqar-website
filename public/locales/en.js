@@ -3052,7 +3052,7 @@ export default {
       roots: "Cities",
       empty: "No locations found.",
       leaf: "leaf",
-      leafHint: "Select a leaf location to attach a market card.",
+      leafHint: "Search and pick a specific area (leaf) to attach a market card.",
     },
     sections: {
       general: "General data",
@@ -3184,7 +3184,7 @@ export default {
       roots: "Cities",
       empty: "No locations found.",
       leaf: "area",
-      leafHint: "Select city, then district, then a specific area.",
+      leafHint: "Type an area, district, or city — then pick a specific area.",
       selected: "Selected:",
       change: "Change location",
     },
@@ -3192,6 +3192,8 @@ export default {
       city: "City",
       district: "District",
       area: "Area",
+      searchLabel: "Location",
+      searchPlaceholder: "Search area, district, or city…",
     },
     empty: {
       title: "No verified market data yet",
