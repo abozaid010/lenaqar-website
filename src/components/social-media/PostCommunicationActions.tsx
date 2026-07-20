@@ -30,8 +30,10 @@ type ChatTarget = {
  */
 export function PostCommunicationActions({
   postContent,
+  className = "",
 }: {
   postContent: string;
+  className?: string;
 }) {
   const { translate } = useI18n();
   const phone = useMemo(() => extractPhoneFromText(postContent), [postContent]);
@@ -111,8 +113,8 @@ export function PostCommunicationActions({
   };
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className={`flex flex-col gap-3 ${className}`.trim()}>
+      <div className="flex flex-wrap items-center gap-2 shrink-0">
         <ActionButton
           size="md"
           icon={Copy}
@@ -182,7 +184,7 @@ export function PostCommunicationActions({
       </div>
 
       {chatTarget ? (
-        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden flex flex-col min-h-[360px] max-h-[520px]">
+        <div className="rounded-2xl border border-gray-200 bg-white overflow-hidden flex flex-col flex-1 min-h-0">
           <div className="px-3 py-2 border-b border-gray-100 shrink-0">
             <div className="text-xs font-semibold text-gray-600">
               {translate("socialMedia.actions.chatWith", "Chat")}

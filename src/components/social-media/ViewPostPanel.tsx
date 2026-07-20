@@ -8,8 +8,8 @@ export function ViewPostPanel({ postContent }: { postContent: string }) {
   const hasContent = Boolean(postContent?.trim());
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="rounded-2xl border border-gray-200 bg-white p-4">
+    <div className="flex flex-col gap-3 h-full min-h-0">
+      <div className="rounded-2xl border border-gray-200 bg-white p-4 shrink-0 max-h-[40%] overflow-y-auto">
         <div className="text-sm font-semibold text-gray-900">
           {translate("socialMedia.table.postContent")}
         </div>
@@ -20,7 +20,12 @@ export function ViewPostPanel({ postContent }: { postContent: string }) {
         </div>
       </div>
 
-      {hasContent ? <PostCommunicationActions postContent={postContent} /> : null}
+      {hasContent ? (
+        <PostCommunicationActions
+          postContent={postContent}
+          className="flex-1 min-h-0"
+        />
+      ) : null}
     </div>
   );
 }
