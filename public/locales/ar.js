@@ -2979,6 +2979,8 @@ export default {
       loadError: "تعذر تحميل التعليقات",
       detailsTitle: "تفاصيل التعليق",
       text: "التعليق",
+      viewPostTitle: "المنشور الأصلي",
+      postContentUnavailable: "محتوى المنشور غير متاح",
     },
     kpi: {
       totalPosts: "إجمالي المنشورات",
@@ -3032,6 +3034,14 @@ export default {
       openGroup: "فتح المجموعة",
       viewContent: "عرض المحتوى",
       hideContent: "إخفاء المحتوى",
+      viewPost: "عرض المنشور",
+      copyPost: "نسخ المنشور",
+      copyPostSuccess: "تم نسخ المنشور",
+      copyPostEmpty: "لا يوجد محتوى للنسخ.",
+      noPhoneFound: "لم يتم العثور على رقم هاتف.",
+      chatOpened: "تم فتح المحادثة.",
+      leadCreatedChat: "تم إنشاء العميل وفتح المحادثة.",
+      chatWith: "محادثة",
     },
     empty: {
       title: "لا توجد منشورات",

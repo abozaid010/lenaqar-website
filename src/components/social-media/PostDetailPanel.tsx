@@ -7,6 +7,7 @@ import { useSocialMediaPostDetail } from "@/hooks/social-media/useSocialMediaPos
 import { StatusBadge } from "@/components/social-media/StatusBadge";
 import { CopyIdButton } from "@/components/social-media/UrlLinkCell";
 import { DetailSkeleton } from "@/components/social-media/Skeletons";
+import { PostCommunicationActions } from "@/components/social-media/PostCommunicationActions";
 
 function safeDate(v?: string | null) {
   if (!v) return null;
@@ -55,6 +56,10 @@ export function PostDetailPanel({ postId }: { postId: string }) {
         </div>
         <div className="mt-2 text-sm text-gray-800 whitespace-pre-wrap">{data.post_content}</div>
       </div>
+
+      {data.post_content?.trim() ? (
+        <PostCommunicationActions postContent={data.post_content} />
+      ) : null}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-2xl border border-gray-200 bg-white p-4">

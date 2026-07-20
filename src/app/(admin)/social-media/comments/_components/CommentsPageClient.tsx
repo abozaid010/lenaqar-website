@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import type { MouseEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { FileText } from "lucide-react";
 
 import { useI18n } from "@/hooks/useI18n";
 import type { SocialComment } from "@/types/socialMedia";
@@ -16,6 +18,7 @@ import { TableSkeleton } from "@/components/social-media/Skeletons";
 import { SocialMediaPagination } from "@/components/social-media/SocialMediaPagination";
 import { UrlLinkCell } from "@/components/social-media/UrlLinkCell";
 import { CommentDetailPanel } from "@/components/social-media/CommentDetailPanel";
+import { ViewPostPanel } from "@/components/social-media/ViewPostPanel";
 
 const PAGE_SIZE = 50;
 
@@ -33,6 +36,7 @@ function matchesSearch(item: SocialComment, q: string) {
     item.account_name.toLowerCase().includes(s) ||
     item.group_name.toLowerCase().includes(s) ||
     item.comment_text.toLowerCase().includes(s) ||
+    (item.post_content || "").toLowerCase().includes(s) ||
     (item.post_url || "").toLowerCase().includes(s) ||
     item.group_url.toLowerCase().includes(s)
   );
@@ -54,6 +58,7 @@ export default function CommentsPageClient() {
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [viewPostComment, setViewPostComment] = useState<SocialComment | null>(null);
   const [localAccountId, setLocalAccountId] = useState(accountId);
   const [localPostId, setLocalPostId] = useState(postId);
 
@@ -265,6 +270,7 @@ export default function CommentsPageClient() {
             { key: "createdAt", header: translate("socialMedia.table.createdAt") },
             { key: "publishedAt", header: translate("socialMedia.table.publishedAt") },
             { key: "text", header: translate("socialMedia.table.commentText") },
+            { key: "viewPost", header: translate("socialMedia.actions.viewPost") },
             { key: "postUrl", header: translate("socialMedia.table.postUrl") },
             { key: "groupUrl", header: translate("socialMedia.table.groupUrl") },
           ]}
@@ -297,11 +303,28 @@ export default function CommentsPageClient() {
                   {c.comment_text}
                 </div>
               ),
+              viewPost: (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30 whitespace-nowrap"
+                  onClick={(e: MouseEvent) => {
+                    e.stopPropagation();
+                    setSelectedId(null);
+                    setViewPostComment(c);
+                  }}
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  {translate("socialMedia.actions.viewPost")}
+                </button>
+              ),
               postUrl: <UrlLinkCell url={c.post_url} variant="post" />,
               groupUrl: <UrlLinkCell url={c.group_url} variant="group" />,
             },
           }))}
-          onRowClick={(id) => setSelectedId(id)}
+          onRowClick={(id) => {
+            setViewPostComment(null);
+            setSelectedId(id);
+          }}
           empty={
             <div className="flex flex-col gap-1">
               <div className="font-semibold text-gray-900">
@@ -319,6 +342,21 @@ export default function CommentsPageClient() {
         title={translate("socialMedia.comments.detailsTitle")}
       >
         {selectedId ? <CommentDetailPanel commentId={selectedId} /> : null}
+      </Drawer>
+
+      <Drawer
+        isOpen={viewPostComment != null}
+        onClose={() => setViewPostComment(null)}
+        title={translate("socialMedia.comments.viewPostTitle")}
+      >
+        {viewPostComment ? (
+          <ViewPostPanel
+            postContent={viewPostComment.post_content || ""}
+            postUrl={viewPostComment.post_url}
+            groupName={viewPostComment.group_name}
+            groupUrl={viewPostComment.group_url}
+          />
+        ) : null}
       </Drawer>
     </div>
   );

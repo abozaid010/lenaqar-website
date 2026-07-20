@@ -2921,6 +2921,8 @@ export default {
       loadError: "Failed to load comments",
       detailsTitle: "Comment details",
       text: "Comment",
+      viewPostTitle: "Original post",
+      postContentUnavailable: "Post content unavailable",
     },
     kpi: {
       totalPosts: "Total posts",
@@ -2974,6 +2976,14 @@ export default {
       openGroup: "Open group",
       viewContent: "View Content",
       hideContent: "Hide Content",
+      viewPost: "View Post",
+      copyPost: "Copy Post",
+      copyPostSuccess: "Post copied",
+      copyPostEmpty: "Nothing to copy.",
+      noPhoneFound: "No phone number found.",
+      chatOpened: "Chat opened.",
+      leadCreatedChat: "Lead created. Chat opened.",
+      chatWith: "Chat",
     },
     empty: {
       title: "No posts found",
