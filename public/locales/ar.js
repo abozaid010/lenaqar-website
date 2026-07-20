@@ -3030,6 +3030,8 @@ export default {
       copyUrl: "نسخ الرابط",
       openUrl: "فتح الرابط",
       openGroup: "فتح المجموعة",
+      viewContent: "عرض المحتوى",
+      hideContent: "إخفاء المحتوى",
     },
     empty: {
       title: "لا توجد منشورات",
