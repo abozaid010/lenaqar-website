@@ -16,6 +16,10 @@ import { TableSkeleton } from "@/components/social-media/Skeletons";
 import { SocialMediaPagination } from "@/components/social-media/SocialMediaPagination";
 import { UrlLinkCell } from "@/components/social-media/UrlLinkCell";
 import { PostDetailPanel } from "@/components/social-media/PostDetailPanel";
+import {
+  PostContentCell,
+  PostContentExpanded,
+} from "@/components/social-media/PostContentCell";
 
 const PAGE_SIZE = 50;
 
@@ -54,6 +58,7 @@ export default function PostsPageClient() {
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [localAccountId, setLocalAccountId] = useState(accountId);
 
   useEffect(() => {
@@ -249,39 +254,49 @@ export default function PostsPageClient() {
             { key: "groupUrl", header: translate("socialMedia.table.groupUrl") },
             { key: "postUrl", header: translate("socialMedia.table.postUrl") },
           ]}
-          rows={filtered.map((p) => ({
-            key: p.id,
-            cells: {
-              account: <div className="font-medium text-gray-900">{p.account_name}</div>,
-              group: (
-                <div className="max-w-[220px] truncate text-gray-800" title={p.group_name}>
-                  {p.group_name}
-                </div>
-              ),
-              status: <StatusBadge status={p.status} />,
-              createdAt: (
-                <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {p.created_at
-                    ? localeUtils.formatDate(safeDate(p.created_at) ?? p.created_at)
-                    : "—"}
-                </div>
-              ),
-              publishedAt: (
-                <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {p.published_at
-                    ? localeUtils.formatDate(safeDate(p.published_at) ?? p.published_at)
-                    : "—"}
-                </div>
-              ),
-              content: (
-                <div className="max-w-[320px] line-clamp-2 text-gray-700" title={p.post_content}>
-                  {p.post_content}
-                </div>
-              ),
-              groupUrl: <UrlLinkCell url={p.group_url} variant="group" />,
-              postUrl: <UrlLinkCell url={p.post_url} variant="post" />,
-            },
-          }))}
+          rows={filtered.map((p) => {
+            const isExpanded = expandedId === p.id;
+            return {
+              key: p.id,
+              cells: {
+                account: <div className="font-medium text-gray-900">{p.account_name}</div>,
+                group: (
+                  <div className="max-w-[220px] truncate text-gray-800" title={p.group_name}>
+                    {p.group_name}
+                  </div>
+                ),
+                status: <StatusBadge status={p.status} />,
+                createdAt: (
+                  <div className="text-xs text-gray-700 whitespace-nowrap">
+                    {p.created_at
+                      ? localeUtils.formatDate(safeDate(p.created_at) ?? p.created_at)
+                      : "—"}
+                  </div>
+                ),
+                publishedAt: (
+                  <div className="text-xs text-gray-700 whitespace-nowrap">
+                    {p.published_at
+                      ? localeUtils.formatDate(safeDate(p.published_at) ?? p.published_at)
+                      : "—"}
+                  </div>
+                ),
+                content: (
+                  <PostContentCell
+                    content={p.post_content}
+                    isExpanded={isExpanded}
+                    onToggle={() =>
+                      setExpandedId((prev) => (prev === p.id ? null : p.id))
+                    }
+                  />
+                ),
+                groupUrl: <UrlLinkCell url={p.group_url} variant="group" />,
+                postUrl: <UrlLinkCell url={p.post_url} variant="post" />,
+              },
+              expandedContent: isExpanded ? (
+                <PostContentExpanded content={p.post_content} />
+              ) : undefined,
+            };
+          })}
           onRowClick={(id) => setSelectedId(id)}
           empty={
             <div className="flex flex-col gap-1">

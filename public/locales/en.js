@@ -2972,6 +2972,8 @@ export default {
       copyUrl: "Copy URL",
       openUrl: "Open URL",
       openGroup: "Open group",
+      viewContent: "View Content",
+      hideContent: "Hide Content",
     },
     empty: {
       title: "No posts found",

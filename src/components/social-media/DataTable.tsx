@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 export function DataTable({
   columns,
@@ -9,7 +9,12 @@ export function DataTable({
   empty,
 }: {
   columns: { key: string; header: ReactNode; className?: string }[];
-  rows: { key: string; cells: Record<string, ReactNode> }[];
+  rows: {
+    key: string;
+    cells: Record<string, ReactNode>;
+    /** When set, renders a full-width row beneath this row (e.g. expanded post content). */
+    expandedContent?: ReactNode;
+  }[];
   onRowClick?: (rowKey: string) => void;
   empty?: ReactNode;
 }) {
@@ -39,19 +44,27 @@ export function DataTable({
           </thead>
           <tbody className="divide-y divide-gray-100">
             {rows.map((r) => (
-              <tr
-                key={r.key}
-                className={`hover:bg-gray-50/70 ${
-                  onRowClick ? "cursor-pointer" : ""
-                }`}
-                onClick={() => onRowClick?.(r.key)}
-              >
-                {columns.map((c) => (
-                  <td key={c.key} className="px-4 py-3 text-sm text-gray-800 align-top">
-                    {r.cells[c.key]}
-                  </td>
-                ))}
-              </tr>
+              <Fragment key={r.key}>
+                <tr
+                  className={`hover:bg-gray-50/70 ${
+                    onRowClick ? "cursor-pointer" : ""
+                  }`}
+                  onClick={() => onRowClick?.(r.key)}
+                >
+                  {columns.map((c) => (
+                    <td key={c.key} className="px-4 py-3 text-sm text-gray-800 align-top">
+                      {r.cells[c.key]}
+                    </td>
+                  ))}
+                </tr>
+                {r.expandedContent ? (
+                  <tr className="bg-gray-50/80">
+                    <td colSpan={columns.length} className="px-4 py-3">
+                      {r.expandedContent}
+                    </td>
+                  </tr>
+                ) : null}
+              </Fragment>
             ))}
           </tbody>
         </table>
