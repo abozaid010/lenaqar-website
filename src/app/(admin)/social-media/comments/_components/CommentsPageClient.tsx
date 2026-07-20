@@ -349,6 +349,7 @@ export default function CommentsPageClient() {
         isOpen={viewPostComment != null}
         onClose={() => setViewPostComment(null)}
         title={translate("socialMedia.comments.viewPostTitle")}
+        fillHeight
         headerTrailing={
           viewPostComment ? (
             <ViewPostHeaderLinks

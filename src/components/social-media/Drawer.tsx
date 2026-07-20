@@ -10,6 +10,7 @@ export function Drawer({
   onClose,
   title,
   headerTrailing,
+  fillHeight = false,
   children,
 }: {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export function Drawer({
   title: string;
   /** Optional actions rendered before the close button (aligned end). */
   headerTrailing?: ReactNode;
+  /** When true, body is a flex column so children can fill remaining height. */
+  fillHeight?: boolean;
   children: React.ReactNode;
 }) {
   const { locale, translate } = useI18n();
@@ -73,7 +76,13 @@ export function Drawer({
             </button>
           </div>
         </div>
-        <div className="flex-1 min-h-0 overflow-hidden p-4 flex flex-col">
+        <div
+          className={`flex-1 min-h-0 p-4 ${
+            fillHeight
+              ? "overflow-hidden flex flex-col"
+              : "overflow-y-auto"
+          }`}
+        >
           {children}
         </div>
       </div>
