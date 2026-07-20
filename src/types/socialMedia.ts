@@ -66,6 +66,8 @@ export interface SocialComment {
   group_name: string;
   group_url: string;
   post_url: string | null;
+  /** Full text of the original FB post that was commented on. Empty for legacy records. */
+  post_content: string;
   comment_text: string;
   status: SocialMediaStatus;
   created_at: string | null;

@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import type { MouseEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
+import { FileText } from "lucide-react";
 
 import { useI18n } from "@/hooks/useI18n";
 import type { SocialComment } from "@/types/socialMedia";
@@ -16,6 +18,8 @@ import { TableSkeleton } from "@/components/social-media/Skeletons";
 import { SocialMediaPagination } from "@/components/social-media/SocialMediaPagination";
 import { UrlLinkCell } from "@/components/social-media/UrlLinkCell";
 import { CommentDetailPanel } from "@/components/social-media/CommentDetailPanel";
+import { ViewPostPanel } from "@/components/social-media/ViewPostPanel";
+import { ViewPostHeaderLinks } from "@/components/social-media/ViewPostHeaderLinks";
 
 const PAGE_SIZE = 50;
 
@@ -23,6 +27,27 @@ function safeDate(v?: string | null) {
   if (!v) return null;
   const d = new Date(v);
   return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/** e.g. "20 July, 2:00 am" (EN) / localized AR equivalent */
+function formatCreatedDateTime(value: string | Date | null, locale: string) {
+  if (!value) return "—";
+  const dateObj = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dateObj.getTime())) return "—";
+
+  const isAr = String(locale || "").toLowerCase().startsWith("ar");
+  const loc = isAr ? "ar-EG" : "en-GB";
+  const day = dateObj.toLocaleDateString(loc, { day: "numeric" });
+  const month = dateObj.toLocaleDateString(loc, { month: "long" });
+
+  let hours = dateObj.getHours();
+  const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+  const ampm = hours >= 12 ? (isAr ? "م" : "pm") : isAr ? "ص" : "am";
+  hours = hours % 12;
+  hours = hours ? hours : 12;
+  const separator = isAr ? "،" : ",";
+
+  return `${day} ${month}${separator} ${hours}:${minutes} ${ampm}`;
 }
 
 function matchesSearch(item: SocialComment, q: string) {
@@ -33,13 +58,14 @@ function matchesSearch(item: SocialComment, q: string) {
     item.account_name.toLowerCase().includes(s) ||
     item.group_name.toLowerCase().includes(s) ||
     item.comment_text.toLowerCase().includes(s) ||
+    (item.post_content || "").toLowerCase().includes(s) ||
     (item.post_url || "").toLowerCase().includes(s) ||
     item.group_url.toLowerCase().includes(s)
   );
 }
 
 export default function CommentsPageClient() {
-  const { translate, localeUtils } = useI18n();
+  const { translate, locale } = useI18n();
   const { canView, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -54,6 +80,7 @@ export default function CommentsPageClient() {
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [viewPostComment, setViewPostComment] = useState<SocialComment | null>(null);
   const [localAccountId, setLocalAccountId] = useState(accountId);
   const [localPostId, setLocalPostId] = useState(postId);
 
@@ -260,11 +287,10 @@ export default function CommentsPageClient() {
         <DataTable
           columns={[
             { key: "account", header: translate("socialMedia.table.account") },
-            { key: "group", header: translate("socialMedia.table.groupName") },
             { key: "status", header: translate("socialMedia.table.status") },
             { key: "createdAt", header: translate("socialMedia.table.createdAt") },
-            { key: "publishedAt", header: translate("socialMedia.table.publishedAt") },
             { key: "text", header: translate("socialMedia.table.commentText") },
+            { key: "viewPost", header: translate("socialMedia.actions.viewPost") },
             { key: "postUrl", header: translate("socialMedia.table.postUrl") },
             { key: "groupUrl", header: translate("socialMedia.table.groupUrl") },
           ]}
@@ -272,24 +298,10 @@ export default function CommentsPageClient() {
             key: c.id,
             cells: {
               account: <div className="font-medium text-gray-900">{c.account_name}</div>,
-              group: (
-                <div className="max-w-[220px] truncate text-gray-800" title={c.group_name}>
-                  {c.group_name}
-                </div>
-              ),
               status: <StatusBadge status={c.status} />,
               createdAt: (
                 <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {c.created_at
-                    ? localeUtils.formatDate(safeDate(c.created_at) ?? c.created_at)
-                    : "—"}
-                </div>
-              ),
-              publishedAt: (
-                <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {c.published_at
-                    ? localeUtils.formatDate(safeDate(c.published_at) ?? c.published_at)
-                    : "—"}
+                  {formatCreatedDateTime(safeDate(c.created_at) ?? c.created_at, locale)}
                 </div>
               ),
               text: (
@@ -297,11 +309,28 @@ export default function CommentsPageClient() {
                   {c.comment_text}
                 </div>
               ),
+              viewPost: (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30 whitespace-nowrap"
+                  onClick={(e: MouseEvent) => {
+                    e.stopPropagation();
+                    setSelectedId(null);
+                    setViewPostComment(c);
+                  }}
+                >
+                  <FileText className="h-3.5 w-3.5 shrink-0" />
+                  {translate("socialMedia.actions.viewPost")}
+                </button>
+              ),
               postUrl: <UrlLinkCell url={c.post_url} variant="post" />,
               groupUrl: <UrlLinkCell url={c.group_url} variant="group" />,
             },
           }))}
-          onRowClick={(id) => setSelectedId(id)}
+          onRowClick={(id) => {
+            setViewPostComment(null);
+            setSelectedId(id);
+          }}
           empty={
             <div className="flex flex-col gap-1">
               <div className="font-semibold text-gray-900">
@@ -319,6 +348,26 @@ export default function CommentsPageClient() {
         title={translate("socialMedia.comments.detailsTitle")}
       >
         {selectedId ? <CommentDetailPanel commentId={selectedId} /> : null}
+      </Drawer>
+
+      <Drawer
+        isOpen={viewPostComment != null}
+        onClose={() => setViewPostComment(null)}
+        title={translate("socialMedia.comments.viewPostTitle")}
+        fillHeight
+        headerTrailing={
+          viewPostComment ? (
+            <ViewPostHeaderLinks
+              groupName={viewPostComment.group_name}
+              groupUrl={viewPostComment.group_url}
+              postUrl={viewPostComment.post_url}
+            />
+          ) : null
+        }
+      >
+        {viewPostComment ? (
+          <ViewPostPanel postContent={viewPostComment.post_content || ""} />
+        ) : null}
       </Drawer>
     </div>
   );

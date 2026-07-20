@@ -59,6 +59,17 @@ export function CommentDetailPanel({ commentId }: { commentId: string }) {
         </div>
       </div>
 
+      <div className="rounded-2xl border border-gray-200 bg-white p-4">
+        <div className="text-sm font-semibold text-gray-900">
+          {translate("socialMedia.table.postContent")}
+        </div>
+        <div className="mt-2 text-sm text-gray-800 whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+          {data.post_content?.trim()
+            ? data.post_content
+            : translate("socialMedia.comments.postContentUnavailable")}
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="rounded-2xl border border-gray-200 bg-white p-4">
           <div className="text-xs font-semibold text-gray-600">
