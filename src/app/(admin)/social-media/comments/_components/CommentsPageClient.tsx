@@ -101,6 +101,7 @@ export default function CommentsPageClient() {
   const [localAccountId, setLocalAccountId] = useState(accountId);
   const [localPostId, setLocalPostId] = useState(postId);
   const [reviewedOverrides, setReviewedOverrides] = useState<Record<string, boolean>>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setLocalAccountId(accountId);
@@ -151,6 +152,14 @@ export default function CommentsPageClient() {
   }, [items, search, reviewFilter, reviewedOverrides]);
 
   const total = data?.total ?? 0;
+
+  const activeFilterCount = [
+    accountId,
+    postId,
+    dateFrom,
+    dateTo,
+    reviewFilter !== "all" ? reviewFilter : "",
+  ].filter(Boolean).length;
 
   const markCommentHandled = useCallback(
     async (comment: SocialComment) => {
@@ -206,9 +215,16 @@ export default function CommentsPageClient() {
           await refetch();
         }}
         isRefreshing={isFetching}
+        filtersOpen={filtersOpen}
+        onFiltersOpenChange={setFiltersOpen}
+        activeFilterCount={activeFilterCount}
       />
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div
+        className={`rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
+          filtersOpen ? "block" : "hidden"
+        } lg:block`}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">

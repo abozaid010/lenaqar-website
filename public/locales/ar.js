@@ -2960,6 +2960,7 @@ export default {
     themeToggle: "تبديل السمة",
     search: {
       placeholder: "بحث…",
+      open: "بحث",
     },
     nav: {
       label: "تنقل وسائل التواصل",
@@ -3007,6 +3008,11 @@ export default {
       postPlaceholder: "معرّف المنشور",
       dateFrom: "من تاريخ",
       dateTo: "إلى تاريخ",
+      open: "الفلاتر",
+      reviewStatus: "المراجعة",
+      reviewAll: "الكل",
+      notReviewed: "غير مراجع",
+      reviewed: "مراجع",
     },
     status: {
       published: "منشور",

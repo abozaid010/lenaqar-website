@@ -2902,6 +2902,7 @@ export default {
     themeToggle: "Toggle theme",
     search: {
       placeholder: "Search…",
+      open: "Search",
     },
     nav: {
       label: "Social media navigation",
@@ -2949,6 +2950,11 @@ export default {
       postPlaceholder: "Post ID",
       dateFrom: "Date from",
       dateTo: "Date to",
+      open: "Filters",
+      reviewStatus: "Review",
+      reviewAll: "All",
+      notReviewed: "Not reviewed",
+      reviewed: "Reviewed",
     },
     status: {
       published: "Published",
