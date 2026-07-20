@@ -675,7 +675,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                         <div
                           key={optionKey}
                           onClick={() => handleSelect(optionValue)}
-                          className={`w-full text-left hover:bg-gray-100 transition-colors cursor-pointer ${
+                          className={`w-full px-4 py-2.5 text-left hover:bg-gray-100 transition-colors cursor-pointer ${
                             isSelected
                               ? "bg-blue-50 text-blue-600 font-medium"
                               : "text-gray-900"
