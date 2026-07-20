@@ -1,6 +1,7 @@
 import type {
   DashboardSummary,
   PaginatedResponse,
+  ReviewUpdateResponse,
   SocialComment,
   SocialMediaCommentsParams,
   SocialMediaPostsParams,
@@ -18,10 +19,22 @@ function toQuery(params: Record<string, unknown>) {
   return qs ? `?${qs}` : "";
 }
 
-async function fetchJson<T>(path: string) {
+async function fetchJson<T>(
+  path: string,
+  init?: { method?: string; body?: unknown },
+) {
+  const method = (init?.method || "GET").toUpperCase();
+  const headers: Record<string, string> = { accept: "application/json" };
+  let body: string | undefined;
+  if (init?.body !== undefined) {
+    headers["content-type"] = "application/json";
+    body = JSON.stringify(init.body);
+  }
+
   const res = await fetch(path, {
-    method: "GET",
-    headers: { accept: "application/json" },
+    method,
+    headers,
+    body,
     cache: "no-store",
   });
 
@@ -72,5 +85,12 @@ export function getComments(params: SocialMediaCommentsParams) {
 export function getComment(commentId: string) {
   return fetchJson<SocialComment>(
     `/api/bff/social-media/comments/${encodeURIComponent(commentId)}`
+  );
+}
+
+export function setDiscoveredPostReview(postId: string, isReviewed: boolean) {
+  return fetchJson<ReviewUpdateResponse>(
+    `/api/bff/social-media/discovered-posts/${encodeURIComponent(postId)}/review`,
+    { method: "PATCH", body: { is_reviewed: isReviewed } },
   );
 }

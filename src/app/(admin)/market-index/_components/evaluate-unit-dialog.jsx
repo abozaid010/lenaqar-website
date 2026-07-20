@@ -6,7 +6,7 @@ import UnifiedDialog from "@/components/ui/UnifiedDialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
 import { useI18n } from "@/hooks/useI18n";
 import { useActiveCard, useEstimate } from "@/hooks/use-market-index";
-import MarketLocationCascade from "./market-location-cascade";
+import MarketLocationSearch from "./market-location-search";
 import MarketSnapshot from "./market-snapshot";
 import EvaluateForm, {
   formToEstimateRequest,
@@ -27,7 +27,6 @@ function emptyForm() {
 
 export default function EvaluateUnitDialog({ isOpen, onClose }) {
   const { translate, locale } = useI18n();
-  const [path, setPath] = useState([]);
   const [leaf, setLeaf] = useState(null);
   const [locationError, setLocationError] = useState(null);
   const [form, setForm] = useState(emptyForm);
@@ -40,7 +39,6 @@ export default function EvaluateUnitDialog({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!isOpen) return;
-    setPath([]);
     setLeaf(null);
     setLocationError(null);
     setForm(emptyForm());
@@ -141,12 +139,8 @@ export default function EvaluateUnitDialog({ isOpen, onClose }) {
           <h2 className="text-sm font-semibold text-gray-900">
             {translate("marketEvaluate.picker.sectionTitle")}
           </h2>
-          <MarketLocationCascade
-            path={path}
-            onPathChange={(next) => {
-              setPath(next);
-              setLocationError(null);
-            }}
+          <MarketLocationSearch
+            enabled={isOpen}
             leaf={leaf}
             onLeafChange={(next) => {
               setLeaf(next);

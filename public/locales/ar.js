@@ -1464,6 +1464,11 @@ export default {
     selectDistrictFirst: "اختر المنطقة أولاً",
     selectCityFirst: "اختر المدينة أولاً",
     locationFromProject: "تم تعبئة الموقع من المشروع — يمكنك تعديله",
+    locationSearchLabel: "الموقع / المشروع",
+    locationSearchPlaceholder: "ابحث عن مشروع أو منطقة أو حي أو مدينة…",
+    locationSearchEmpty: "لا توجد مواقع أو مشاريع مطابقة",
+    locationSearchHint:
+      "اكتب اسم مشروع أو مكان. اختيار مشروع يملأ المدينة والحي والمنطقة.",
     selectView: "اختر الإطلالة",
     placeholders: {
       unitTitle: "أدخل عنوان الوحدة",
@@ -2907,6 +2912,10 @@ export default {
         errors: "أخطاء",
       },
       filters: {
+      reviewStatus: "المراجعة",
+      reviewAll: "الكل",
+      notReviewed: "غير مراجع",
+      reviewed: "تمت المراجعة",
         all: "الكل",
         sent: "مرسل",
         units: "وحدات",
@@ -2956,6 +2965,7 @@ export default {
     themeToggle: "تبديل السمة",
     search: {
       placeholder: "بحث…",
+      open: "بحث",
     },
     nav: {
       label: "تنقل وسائل التواصل",
@@ -3003,6 +3013,11 @@ export default {
       postPlaceholder: "معرّف المنشور",
       dateFrom: "من تاريخ",
       dateTo: "إلى تاريخ",
+      open: "الفلاتر",
+      reviewStatus: "المراجعة",
+      reviewAll: "الكل",
+      notReviewed: "غير مراجع",
+      reviewed: "مراجع",
     },
     status: {
       published: "منشور",
@@ -3039,6 +3054,10 @@ export default {
       copyPostSuccess: "تم نسخ المنشور",
       copyPostEmpty: "لا يوجد محتوى للنسخ.",
       noPhoneFound: "لم يتم العثور على رقم هاتف.",
+      missingPostId: "تعذر التحديد كمُعالَج: معرّف المنشور غير موجود.",
+      markAsHandled: "تحديد كمُعالَج",
+      handledByHuman: "تمت المعالجة بواسطة إنسان",
+      markAsHandledSuccess: "تم التحديد كمُعالَج بواسطة إنسان.",
       chatOpened: "تم فتح المحادثة.",
       leadCreatedChat: "تم إنشاء العميل وفتح المحادثة.",
       chatWith: "محادثة",
@@ -3096,7 +3115,7 @@ export default {
       roots: "المدن",
       empty: "لا توجد مواقع.",
       leaf: "ورقة",
-      leafHint: "اختر موقعًا نهائيًا (ورقة) لربط بطاقة السوق.",
+      leafHint: "ابحث واختر منطقة محددة (ورقة) لربط بطاقة السوق.",
     },
     sections: {
       general: "البيانات العامة",
@@ -3227,7 +3246,7 @@ export default {
       roots: "المدن",
       empty: "لا توجد مواقع.",
       leaf: "منطقة",
-      leafHint: "اختر المدينة، ثم الحي، ثم المنطقة المحددة.",
+      leafHint: "اكتب منطقة أو حي أو مدينة — ثم اختر المنطقة المحددة.",
       selected: "المحدد:",
       change: "تغيير الموقع",
     },
@@ -3235,6 +3254,8 @@ export default {
       city: "المدينة",
       district: "الحي",
       area: "المنطقة",
+      searchLabel: "الموقع",
+      searchPlaceholder: "ابحث عن منطقة أو حي أو مدينة…",
     },
     empty: {
       title: "لا توجد بيانات سوق موثقة بعد",

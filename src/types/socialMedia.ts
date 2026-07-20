@@ -6,6 +6,9 @@
  * - GET /posts/{post_id}
  * - GET /comments
  * - GET /comments/{comment_id}
+ * - GET /discovered-posts
+ * - GET /discovered-posts/{post_id}
+ * - PATCH /discovered-posts/{post_id}/review
  * - GET /dashboard/summary
  *
  * Browser calls same-origin BFF: `/api/bff/social-media/*`
@@ -72,6 +75,19 @@ export interface SocialComment {
   status: SocialMediaStatus;
   created_at: string | null;
   published_at: string | null;
+  /** Linked Firestore `posts` document id (discovered post). */
+  post_id?: string | null;
+  /** Human handled the lead (joined from discovered post). */
+  is_reviewed?: boolean;
+  /** First E.164 contact from discovered post; may be null. */
+  phone_number?: string | null;
+}
+
+export interface ReviewUpdateResponse {
+  id: string;
+  is_reviewed: boolean;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
 }
 
 export interface PaginatedResponse<TItem> {

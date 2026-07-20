@@ -60,6 +60,7 @@ export default function PostsPageClient() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [localAccountId, setLocalAccountId] = useState(accountId);
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setLocalAccountId(accountId);
@@ -101,6 +102,13 @@ export default function PostsPageClient() {
 
   const total = data?.total ?? 0;
 
+  const activeFilterCount = [
+    status !== "all" ? status : "",
+    accountId,
+    dateFrom,
+    dateTo,
+  ].filter(Boolean).length;
+
   if (isReady && !canView) {
     return (
       <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
@@ -125,9 +133,16 @@ export default function PostsPageClient() {
           await refetch();
         }}
         isRefreshing={isFetching}
+        filtersOpen={filtersOpen}
+        onFiltersOpenChange={setFiltersOpen}
+        activeFilterCount={activeFilterCount}
       />
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+      <div
+        className={`rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
+          filtersOpen ? "block" : "hidden"
+        } lg:block`}
+      >
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">

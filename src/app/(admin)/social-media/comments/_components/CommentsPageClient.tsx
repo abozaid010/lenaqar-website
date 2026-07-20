@@ -5,11 +5,13 @@ import type { MouseEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
+import toast from "react-hot-toast";
 
 import { useI18n } from "@/hooks/useI18n";
 import type { SocialComment } from "@/types/socialMedia";
 import { useModuleActions } from "@/hooks/useModuleActions";
 import { useSocialMediaComments } from "@/hooks/social-media/useSocialMediaComments";
+import { setDiscoveredPostReview } from "@/services/socialMedia";
 import { SocialMediaHeader } from "@/components/social-media/SocialMediaHeader";
 import { DataTable } from "@/components/social-media/DataTable";
 import { StatusBadge } from "@/components/social-media/StatusBadge";
@@ -22,6 +24,8 @@ import { ViewPostPanel } from "@/components/social-media/ViewPostPanel";
 import { ViewPostHeaderLinks } from "@/components/social-media/ViewPostHeaderLinks";
 
 const PAGE_SIZE = 50;
+
+type ReviewFilter = "all" | "not_reviewed" | "reviewed";
 
 function safeDate(v?: string | null) {
   if (!v) return null;
@@ -60,8 +64,20 @@ function matchesSearch(item: SocialComment, q: string) {
     item.comment_text.toLowerCase().includes(s) ||
     (item.post_content || "").toLowerCase().includes(s) ||
     (item.post_url || "").toLowerCase().includes(s) ||
-    item.group_url.toLowerCase().includes(s)
+    item.group_url.toLowerCase().includes(s) ||
+    (item.phone_number || "").toLowerCase().includes(s)
   );
+}
+
+function isCommentReviewed(
+  comment: SocialComment,
+  overrides: Record<string, boolean>,
+): boolean {
+  if (comment.post_id && comment.post_id in overrides) {
+    return overrides[comment.post_id];
+  }
+  if (comment.id in overrides) return overrides[comment.id];
+  return Boolean(comment.is_reviewed);
 }
 
 export default function CommentsPageClient() {
@@ -77,12 +93,15 @@ export default function CommentsPageClient() {
   const postId = searchParams.get("post_id") || "";
   const dateFrom = searchParams.get("date_from") || "";
   const dateTo = searchParams.get("date_to") || "";
+  const reviewFilter = (searchParams.get("is_reviewed") || "all") as ReviewFilter;
 
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [viewPostComment, setViewPostComment] = useState<SocialComment | null>(null);
   const [localAccountId, setLocalAccountId] = useState(accountId);
   const [localPostId, setLocalPostId] = useState(postId);
+  const [reviewedOverrides, setReviewedOverrides] = useState<Record<string, boolean>>({});
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     setLocalAccountId(accountId);
@@ -96,7 +115,7 @@ export default function CommentsPageClient() {
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(updates)) {
-        if (!value) params.delete(key);
+        if (!value || value === "all") params.delete(key);
         else params.set(key, value);
       }
       startTransition(() => {
@@ -117,16 +136,60 @@ export default function CommentsPageClient() {
 
   const items = data?.items ?? [];
   const filtered = useMemo(() => {
-    const next = items.filter((c) => matchesSearch(c, search));
+    const next = items.filter((c) => {
+      if (!matchesSearch(c, search)) return false;
+      const reviewed = isCommentReviewed(c, reviewedOverrides);
+      if (reviewFilter === "reviewed") return reviewed;
+      if (reviewFilter === "not_reviewed") return !reviewed;
+      return true;
+    });
     next.sort((a, b) => {
       const da = safeDate(a.created_at)?.getTime() ?? 0;
       const db = safeDate(b.created_at)?.getTime() ?? 0;
       return db - da;
     });
     return next;
-  }, [items, search]);
+  }, [items, search, reviewFilter, reviewedOverrides]);
 
   const total = data?.total ?? 0;
+
+  const activeFilterCount = [
+    accountId,
+    postId,
+    dateFrom,
+    dateTo,
+    reviewFilter !== "all" ? reviewFilter : "",
+  ].filter(Boolean).length;
+
+  const markCommentHandled = useCallback(
+    async (comment: SocialComment) => {
+      const discoveredPostId = (comment.post_id || "").trim();
+      if (!discoveredPostId) {
+        toast.error(
+          translate(
+            "socialMedia.actions.missingPostId",
+            "Cannot mark handled: linked post id is missing.",
+          ),
+        );
+        return;
+      }
+      if (isCommentReviewed(comment, reviewedOverrides)) return;
+
+      await setDiscoveredPostReview(discoveredPostId, true);
+      setReviewedOverrides((prev) => ({
+        ...prev,
+        [discoveredPostId]: true,
+        [comment.id]: true,
+      }));
+      setViewPostComment((current) =>
+        current && current.id === comment.id
+          ? { ...current, is_reviewed: true }
+          : current,
+      );
+      await queryClient.invalidateQueries({ queryKey: ["social-media", "comments"] });
+    },
+    [queryClient, reviewedOverrides, translate],
+  );
 
   if (isReady && !canView) {
     return (
@@ -152,10 +215,17 @@ export default function CommentsPageClient() {
           await refetch();
         }}
         isRefreshing={isFetching}
+        filtersOpen={filtersOpen}
+        onFiltersOpenChange={setFiltersOpen}
+        activeFilterCount={activeFilterCount}
       />
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div
+        className={`rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
+          filtersOpen ? "block" : "hidden"
+        } lg:block`}
+      >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
               {translate("socialMedia.filters.account")}
@@ -212,6 +282,32 @@ export default function CommentsPageClient() {
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1">
+              {translate("socialMedia.filters.reviewStatus", "Review")}
+            </label>
+            <select
+              value={reviewFilter === "all" ? "all" : reviewFilter}
+              onChange={(e) => {
+                const value = e.target.value as ReviewFilter;
+                pushParams({
+                  is_reviewed: value === "all" ? null : value,
+                  page: "1",
+                });
+              }}
+              className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              <option value="all">
+                {translate("socialMedia.filters.reviewAll", "All")}
+              </option>
+              <option value="not_reviewed">
+                {translate("socialMedia.filters.notReviewed", "Not reviewed")}
+              </option>
+              <option value="reviewed">
+                {translate("socialMedia.filters.reviewed", "Reviewed")}
+              </option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-600 mb-1">
               {translate("socialMedia.filters.dateFrom")}
             </label>
             <input
@@ -237,7 +333,7 @@ export default function CommentsPageClient() {
             />
           </div>
         </div>
-        {(accountId || postId || dateFrom || dateTo) && (
+        {(accountId || postId || dateFrom || dateTo || reviewFilter !== "all") && (
           <div className="mt-3">
             <button
               type="button"
@@ -249,6 +345,7 @@ export default function CommentsPageClient() {
                   post_id: null,
                   date_from: null,
                   date_to: null,
+                  is_reviewed: null,
                   page: "1",
                 });
               }}
@@ -294,39 +391,45 @@ export default function CommentsPageClient() {
             { key: "postUrl", header: translate("socialMedia.table.postUrl") },
             { key: "groupUrl", header: translate("socialMedia.table.groupUrl") },
           ]}
-          rows={filtered.map((c) => ({
-            key: c.id,
-            cells: {
-              account: <div className="font-medium text-gray-900">{c.account_name}</div>,
-              status: <StatusBadge status={c.status} />,
-              createdAt: (
-                <div className="text-xs text-gray-700 whitespace-nowrap">
-                  {formatCreatedDateTime(safeDate(c.created_at) ?? c.created_at, locale)}
-                </div>
-              ),
-              text: (
-                <div className="max-w-[360px] line-clamp-2 text-gray-700" title={c.comment_text}>
-                  {c.comment_text}
-                </div>
-              ),
-              viewPost: (
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30 whitespace-nowrap"
-                  onClick={(e: MouseEvent) => {
-                    e.stopPropagation();
-                    setSelectedId(null);
-                    setViewPostComment(c);
-                  }}
-                >
-                  <FileText className="h-3.5 w-3.5 shrink-0" />
-                  {translate("socialMedia.actions.viewPost")}
-                </button>
-              ),
-              postUrl: <UrlLinkCell url={c.post_url} variant="post" />,
-              groupUrl: <UrlLinkCell url={c.group_url} variant="group" />,
-            },
-          }))}
+          rows={filtered.map((c) => {
+            const reviewed = isCommentReviewed(c, reviewedOverrides);
+            return {
+              key: c.id,
+              rowClassName: reviewed
+                ? "bg-emerald-50 hover:bg-emerald-100/80"
+                : "hover:bg-gray-50/70",
+              cells: {
+                account: <div className="font-medium text-gray-900">{c.account_name}</div>,
+                status: <StatusBadge status={c.status} />,
+                createdAt: (
+                  <div className="text-xs text-gray-700 whitespace-nowrap">
+                    {formatCreatedDateTime(safeDate(c.created_at) ?? c.created_at, locale)}
+                  </div>
+                ),
+                text: (
+                  <div className="max-w-[360px] line-clamp-2 text-gray-700" title={c.comment_text}>
+                    {c.comment_text}
+                  </div>
+                ),
+                viewPost: (
+                  <button
+                    type="button"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-primary hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary/30 whitespace-nowrap"
+                    onClick={(e: MouseEvent) => {
+                      e.stopPropagation();
+                      setSelectedId(null);
+                      setViewPostComment(c);
+                    }}
+                  >
+                    <FileText className="h-3.5 w-3.5 shrink-0" />
+                    {translate("socialMedia.actions.viewPost")}
+                  </button>
+                ),
+                postUrl: <UrlLinkCell url={c.post_url} variant="post" />,
+                groupUrl: <UrlLinkCell url={c.group_url} variant="group" />,
+              },
+            };
+          })}
           onRowClick={(id) => {
             setViewPostComment(null);
             setSelectedId(id);
@@ -366,7 +469,12 @@ export default function CommentsPageClient() {
         }
       >
         {viewPostComment ? (
-          <ViewPostPanel postContent={viewPostComment.post_content || ""} />
+          <ViewPostPanel
+            postContent={viewPostComment.post_content || ""}
+            phoneNumber={viewPostComment.phone_number}
+            isReviewed={isCommentReviewed(viewPostComment, reviewedOverrides)}
+            onHandled={() => markCommentHandled(viewPostComment)}
+          />
         ) : null}
       </Drawer>
     </div>

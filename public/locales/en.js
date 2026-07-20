@@ -1637,6 +1637,11 @@ export default {
     selectDistrictFirst: "Select a district first",
     selectCityFirst: "Select a city first",
     locationFromProject: "Location filled from project — you can change it",
+    locationSearchLabel: "Location / Project",
+    locationSearchPlaceholder: "Search project, area, district, or city…",
+    locationSearchEmpty: "No matching locations or projects",
+    locationSearchHint:
+      "Type a project or place name. Choosing a project fills city, district, and area.",
     selectView: "Select view",
     placeholders: {
       unitTitle: "Enter unit title",
@@ -2849,6 +2854,10 @@ export default {
         errors: "Errors",
       },
       filters: {
+      reviewStatus: "Review",
+      reviewAll: "All",
+      notReviewed: "Not reviewed",
+      reviewed: "Reviewed",
         all: "All",
         sent: "Sent",
         units: "Units",
@@ -2898,6 +2907,7 @@ export default {
     themeToggle: "Toggle theme",
     search: {
       placeholder: "Search…",
+      open: "Search",
     },
     nav: {
       label: "Social media navigation",
@@ -2945,6 +2955,11 @@ export default {
       postPlaceholder: "Post ID",
       dateFrom: "Date from",
       dateTo: "Date to",
+      open: "Filters",
+      reviewStatus: "Review",
+      reviewAll: "All",
+      notReviewed: "Not reviewed",
+      reviewed: "Reviewed",
     },
     status: {
       published: "Published",
@@ -2981,6 +2996,10 @@ export default {
       copyPostSuccess: "Post copied",
       copyPostEmpty: "Nothing to copy.",
       noPhoneFound: "No phone number found.",
+      missingPostId: "Cannot mark handled: linked post id is missing.",
+      markAsHandled: "Mark as handled",
+      handledByHuman: "Handled by human",
+      markAsHandledSuccess: "Marked as handled by human.",
       chatOpened: "Chat opened.",
       leadCreatedChat: "Lead created. Chat opened.",
       chatWith: "Chat",
@@ -3038,7 +3057,7 @@ export default {
       roots: "Cities",
       empty: "No locations found.",
       leaf: "leaf",
-      leafHint: "Select a leaf location to attach a market card.",
+      leafHint: "Search and pick a specific area (leaf) to attach a market card.",
     },
     sections: {
       general: "General data",
@@ -3170,7 +3189,7 @@ export default {
       roots: "Cities",
       empty: "No locations found.",
       leaf: "area",
-      leafHint: "Select city, then district, then a specific area.",
+      leafHint: "Type an area, district, or city — then pick a specific area.",
       selected: "Selected:",
       change: "Change location",
     },
@@ -3178,6 +3197,8 @@ export default {
       city: "City",
       district: "District",
       area: "Area",
+      searchLabel: "Location",
+      searchPlaceholder: "Search area, district, or city…",
     },
     empty: {
       title: "No verified market data yet",

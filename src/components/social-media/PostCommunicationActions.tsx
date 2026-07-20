@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
-import { Copy, Loader2, MessageCircle, Phone } from "lucide-react";
+import { CheckCircle2, Copy, Loader2, MessageCircle, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 
 import ChatConversation from "@/components/chat/chat-conversation";
@@ -24,19 +24,37 @@ type ChatTarget = {
   name: string;
 };
 
+const HANDLED_BUTTON_CLASS =
+  "!bg-emerald-50 !border-emerald-300 !text-emerald-800 hover:!bg-emerald-100 hover:!border-emerald-400 focus-visible:!ring-emerald-400/40";
+
 /**
  * Copy / Call / WhatsApp actions for post content.
  * WhatsApp opens the existing ChatConversation panel (not WhatsApp Web).
+ *
+ * Phone resolution: prefer API `phoneNumber`, fallback to local extractPhoneFromText.
+ * "Mark as handled" is explicit; Call / WhatsApp also mark reviewed when used.
  */
 export function PostCommunicationActions({
   postContent,
+  phoneNumber = null,
+  isReviewed = false,
+  onHandled,
   className = "",
 }: {
   postContent: string;
+  /** E.164 from API when available. */
+  phoneNumber?: string | null;
+  isReviewed?: boolean;
+  /** Fired after Call click, successful WhatsApp open, or Mark as handled. */
+  onHandled?: () => void | Promise<void>;
   className?: string;
 }) {
   const { translate } = useI18n();
-  const phone = useMemo(() => extractPhoneFromText(postContent), [postContent]);
+  const phone = useMemo(() => {
+    const fromApi = String(phoneNumber ?? "").trim();
+    if (fromApi) return fromApi;
+    return extractPhoneFromText(postContent);
+  }, [phoneNumber, postContent]);
   const hasPhone = Boolean(phone);
   const noPhoneTitle = translate(
     "socialMedia.actions.noPhoneFound",
@@ -45,11 +63,39 @@ export function PostCommunicationActions({
 
   const [chatTarget, setChatTarget] = useState<ChatTarget | null>(null);
   const [isOpeningChat, setIsOpeningChat] = useState(false);
+  const [isMarkingHandled, setIsMarkingHandled] = useState(false);
   const openingLockRef = useRef(false);
 
   const clientId = getClientid() || undefined;
   const buttonSize = ACTION_BUTTON_SIZES.md;
-  const callClassName = `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
+  const contactClassName = isReviewed
+    ? `${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box}`
+    : `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
+
+  const markHandled = async (options?: { showSuccessToast?: boolean }) => {
+    if (!onHandled || isReviewed || isMarkingHandled) return;
+    setIsMarkingHandled(true);
+    try {
+      await onHandled();
+      if (options?.showSuccessToast) {
+        toast.success(
+          translate(
+            "socialMedia.actions.markAsHandledSuccess",
+            "Marked as handled by human.",
+          ),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to mark post handled:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : translate("common.operationFailed"),
+      );
+    } finally {
+      setIsMarkingHandled(false);
+    }
+  };
 
   const handleCopyPost = async () => {
     const text = String(postContent ?? "").trim();
@@ -81,6 +127,8 @@ export function PostCommunicationActions({
 
     openingLockRef.current = true;
     setIsOpeningChat(true);
+    // Review does not depend on the lead — start in parallel and never block chat open.
+    void markHandled();
     try {
       const lead = await findOrCreateLeadByPhone(phone);
       setChatTarget({
@@ -115,6 +163,57 @@ export function PostCommunicationActions({
   return (
     <div className={`flex flex-col gap-3 ${className}`.trim()}>
       <div className="flex flex-wrap items-center gap-2 shrink-0">
+        {onHandled ? (
+          isReviewed ? (
+            <button
+              type="button"
+              disabled
+              className={`${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box} opacity-90 cursor-default`}
+              title={translate(
+                "socialMedia.actions.handledByHuman",
+                "Handled by human",
+              )}
+              aria-label={translate(
+                "socialMedia.actions.handledByHuman",
+                "Handled by human",
+              )}
+            >
+              <CheckCircle2 className={buttonSize.icon} strokeWidth={1.75} aria-hidden />
+              <span className="whitespace-nowrap">
+                {translate(
+                  "socialMedia.actions.handledByHuman",
+                  "Handled by human",
+                )}
+              </span>
+            </button>
+          ) : (
+            <ActionButton
+              size="md"
+              icon={isMarkingHandled ? Loader2 : CheckCircle2}
+              disabled={isMarkingHandled}
+              onClick={() => {
+                void markHandled({ showSuccessToast: true });
+              }}
+              title={translate(
+                "socialMedia.actions.markAsHandled",
+                "Mark as handled",
+              )}
+              ariaLabel={translate(
+                "socialMedia.actions.markAsHandled",
+                "Mark as handled",
+              )}
+              className={isMarkingHandled ? "[&_svg]:animate-spin" : ""}
+            >
+              {isMarkingHandled
+                ? translate("common.loading", "Loading...")
+                : translate(
+                    "socialMedia.actions.markAsHandled",
+                    "Mark as handled",
+                  )}
+            </ActionButton>
+          )
+        ) : null}
+
         <ActionButton
           size="md"
           icon={Copy}
@@ -128,10 +227,13 @@ export function PostCommunicationActions({
         {hasPhone ? (
           <PhoneTelLink
             phoneNumber={phone}
-            className={callClassName}
+            className={contactClassName}
             title={translate("buttons.call", "Call")}
             aria-label={translate("buttons.call", "Call")}
             stopPropagation
+            onClick={() => {
+              void markHandled();
+            }}
           >
             <Phone className={buttonSize.icon} strokeWidth={1.75} aria-hidden />
             <span className="whitespace-nowrap">
@@ -142,7 +244,7 @@ export function PostCommunicationActions({
           <button
             type="button"
             disabled
-            className={`${callClassName} opacity-50 cursor-not-allowed`}
+            className={`${contactClassName} opacity-50 cursor-not-allowed`}
             title={noPhoneTitle}
             aria-label={translate("buttons.call", "Call")}
           >
@@ -161,7 +263,9 @@ export function PostCommunicationActions({
             onClick={handleWhatsApp}
             title={translate("buttons.whatsapp", "WhatsApp")}
             ariaLabel={translate("buttons.whatsapp", "WhatsApp")}
-            className={isOpeningChat ? "[&_svg]:animate-spin" : ""}
+            className={`${isOpeningChat ? "[&_svg]:animate-spin" : ""} ${
+              isReviewed ? HANDLED_BUTTON_CLASS : ""
+            }`.trim()}
           >
             {isOpeningChat
               ? translate("common.loading", "Loading...")
@@ -171,7 +275,7 @@ export function PostCommunicationActions({
           <button
             type="button"
             disabled
-            className={`${callClassName} opacity-50 cursor-not-allowed`}
+            className={`${contactClassName} opacity-50 cursor-not-allowed`}
             title={noPhoneTitle}
             aria-label={translate("buttons.whatsapp", "WhatsApp")}
           >
