@@ -19,6 +19,7 @@ import { SocialMediaPagination } from "@/components/social-media/SocialMediaPagi
 import { UrlLinkCell } from "@/components/social-media/UrlLinkCell";
 import { CommentDetailPanel } from "@/components/social-media/CommentDetailPanel";
 import { ViewPostPanel } from "@/components/social-media/ViewPostPanel";
+import { ViewPostHeaderLinks } from "@/components/social-media/ViewPostHeaderLinks";
 
 const PAGE_SIZE = 50;
 
@@ -348,14 +349,18 @@ export default function CommentsPageClient() {
         isOpen={viewPostComment != null}
         onClose={() => setViewPostComment(null)}
         title={translate("socialMedia.comments.viewPostTitle")}
+        headerTrailing={
+          viewPostComment ? (
+            <ViewPostHeaderLinks
+              groupName={viewPostComment.group_name}
+              groupUrl={viewPostComment.group_url}
+              postUrl={viewPostComment.post_url}
+            />
+          ) : null
+        }
       >
         {viewPostComment ? (
-          <ViewPostPanel
-            postContent={viewPostComment.post_content || ""}
-            postUrl={viewPostComment.post_url}
-            groupName={viewPostComment.group_name}
-            groupUrl={viewPostComment.group_url}
-          />
+          <ViewPostPanel postContent={viewPostComment.post_content || ""} />
         ) : null}
       </Drawer>
     </div>
