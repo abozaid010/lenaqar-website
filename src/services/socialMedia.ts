@@ -1,4 +1,5 @@
 import type {
+  ActivatePostsResponse,
   DashboardSummary,
   PaginatedResponse,
   ReviewUpdateResponse,
@@ -92,5 +93,13 @@ export function setDiscoveredPostReview(postId: string, isReviewed: boolean) {
   return fetchJson<ReviewUpdateResponse>(
     `/api/bff/social-media/discovered-posts/${encodeURIComponent(postId)}/review`,
     { method: "PATCH", body: { is_reviewed: isReviewed } },
+  );
+}
+
+/** AI catch-up batch: activates up to `limit` unhandled discovered posts (live WhatsApp send). */
+export function activateDiscoveredPosts(limit = 100) {
+  return fetchJson<ActivatePostsResponse>(
+    `/api/bff/social-media/api/discovered-posts/activate`,
+    { method: "POST", body: { limit } },
   );
 }

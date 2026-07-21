@@ -10,6 +10,7 @@
  * - GET /discovered-posts/{post_id}
  * - PATCH /discovered-posts/{post_id}/review
  * - GET /dashboard/summary
+ * - POST /api/discovered-posts/activate (AI catch-up batch; live WhatsApp send)
  *
  * Browser calls same-origin BFF: `/api/bff/social-media/*`
  */
@@ -88,6 +89,18 @@ export interface ReviewUpdateResponse {
   is_reviewed: boolean;
   reviewed_by: string | null;
   reviewed_at: string | null;
+}
+
+/** Response from the AI catch-up batch activation endpoint. */
+export interface ActivatePostsResponse {
+  processed: number;
+  sent: number;
+  skipped: number;
+  failed: number;
+  disabled: boolean;
+  client_id: string;
+  skip_reason: string;
+  post_id: string;
 }
 
 export interface PaginatedResponse<TItem> {

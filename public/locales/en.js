@@ -3003,6 +3003,13 @@ export default {
       chatOpened: "Chat opened.",
       leadCreatedChat: "Lead created. Chat opened.",
       chatWith: "Chat",
+      aiHandleComments: "Let AI handle",
+      aiHandleConfirm:
+        "AI will review unhandled comments and send WhatsApp messages to leads with a phone number. Continue?",
+      aiHandleSuccess:
+        "Processed {processed}: {sent} sent, {skipped} skipped, {failed} failed.",
+      aiHandleNothingToDo: "No new comments for AI to handle.",
+      aiHandleDisabled: "AI handling is currently disabled.",
     },
     empty: {
       title: "No posts found",

@@ -3061,6 +3061,13 @@ export default {
       chatOpened: "تم فتح المحادثة.",
       leadCreatedChat: "تم إنشاء العميل وفتح المحادثة.",
       chatWith: "محادثة",
+      aiHandleComments: "تفعيل الذكاء الاصطناعي",
+      aiHandleConfirm:
+        "سيقوم الذكاء الاصطناعي بمراجعة التعليقات غير المعالجة وإرسال رسائل واتساب للعملاء المحتملين الذين لديهم رقم هاتف. متابعة؟",
+      aiHandleSuccess:
+        "تمت معالجة {processed}: {sent} تم الإرسال، {skipped} تم التخطي، {failed} فشل.",
+      aiHandleNothingToDo: "لا توجد تعليقات جديدة ليعالجها الذكاء الاصطناعي.",
+      aiHandleDisabled: "معالجة الذكاء الاصطناعي معطّلة حاليًا.",
     },
     empty: {
       title: "لا توجد منشورات",
