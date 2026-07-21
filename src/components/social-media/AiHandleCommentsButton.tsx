@@ -178,7 +178,7 @@ export function AiHandleCommentsButton() {
             size="md"
             type="default"
             icon={controlBusy || phase === "pausing" ? Loader2 : Pause}
-            disabled={controlBusy || phase === "pausing"}
+            disabled={controlBusy || phase === "pausing" || phase === "disabled"}
             onClick={handlePause}
             title={translate("socialMedia.activation.pause", "Pause")}
             ariaLabel={translate("socialMedia.activation.pause", "Pause")}
@@ -209,28 +209,29 @@ export function AiHandleCommentsButton() {
           </ActionButton>
         ) : null}
 
-        {phase === "idle" || phase === "disabled" ? (
-          <ActionButton
-            size="md"
-            type="primary"
-            icon={Sparkles}
-            disabled={phase === "disabled" || pending <= 0 || isStatusLoading}
-            onClick={() => setIsConfirmOpen(true)}
-            title={translate(
-              "socialMedia.actions.aiHandleComments",
-              "Let AI handle",
-            )}
-            ariaLabel={translate(
-              "socialMedia.actions.aiHandleComments",
-              "Let AI handle",
-            )}
-          >
-            {translate(
-              "socialMedia.actions.aiHandleComments",
-              "Let AI handle",
-            )}
-          </ActionButton>
-        ) : null}
+        {/* Start stays visible but locked outside idle — matches §7 state machine. */}
+        <ActionButton
+          size="md"
+          type="primary"
+          icon={Sparkles}
+          disabled={
+            phase !== "idle" || pending <= 0 || isStatusLoading
+          }
+          onClick={() => setIsConfirmOpen(true)}
+          title={translate(
+            "socialMedia.actions.aiHandleComments",
+            "Let AI handle",
+          )}
+          ariaLabel={translate(
+            "socialMedia.actions.aiHandleComments",
+            "Let AI handle",
+          )}
+        >
+          {translate(
+            "socialMedia.actions.aiHandleComments",
+            "Let AI handle",
+          )}
+        </ActionButton>
       </div>
 
       <UnifiedDialog

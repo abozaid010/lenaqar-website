@@ -73,8 +73,9 @@ async function fetchJson<T>(
 
   const json = await res.json().catch(() => null);
   if (!res.ok) {
+    // Upstream global error envelope uses `error_message` (no `detail`).
     const message =
-      (json && (json.error || json.detail || json.error_message || json.message)) ||
+      (json && (json.error_message || json.error || json.message)) ||
       `Request failed (${res.status})`;
     throw new Error(typeof message === "string" ? message : "Request failed");
   }
