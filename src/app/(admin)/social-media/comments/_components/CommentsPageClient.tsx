@@ -13,6 +13,10 @@ import { useModuleActions } from "@/hooks/useModuleActions";
 import { useSocialMediaComments } from "@/hooks/social-media/useSocialMediaComments";
 import { setDiscoveredPostReview } from "@/services/socialMedia";
 import { SocialMediaHeader } from "@/components/social-media/SocialMediaHeader";
+import {
+  AiActivationProgress,
+  AiHandleCommentsButton,
+} from "@/components/social-media/AiHandleCommentsButton";
 import { DataTable } from "@/components/social-media/DataTable";
 import { StatusBadge } from "@/components/social-media/StatusBadge";
 import { Drawer } from "@/components/social-media/Drawer";
@@ -82,7 +86,7 @@ function isCommentReviewed(
 
 export default function CommentsPageClient() {
   const { translate, locale } = useI18n();
-  const { canView, isReady } = useModuleActions("social_media");
+  const { canView, canEdit, isReady } = useModuleActions("social_media");
   const queryClient = useQueryClient();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -218,7 +222,10 @@ export default function CommentsPageClient() {
         filtersOpen={filtersOpen}
         onFiltersOpenChange={setFiltersOpen}
         activeFilterCount={activeFilterCount}
+        extraActions={canEdit ? <AiHandleCommentsButton /> : null}
       />
+
+      {canEdit || canView ? <AiActivationProgress /> : null}
 
       <div
         className={`rounded-2xl border border-gray-200 bg-white p-4 shadow-sm ${
@@ -470,6 +477,7 @@ export default function CommentsPageClient() {
       >
         {viewPostComment ? (
           <ViewPostPanel
+            key={viewPostComment.id}
             postContent={viewPostComment.post_content || ""}
             phoneNumber={viewPostComment.phone_number}
             isReviewed={isCommentReviewed(viewPostComment, reviewedOverrides)}

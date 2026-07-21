@@ -13,7 +13,7 @@
 export const MOCK_WHATSAPP_AGENT_NUMBERS_BY_EMAIL = {
   "marwa.said@lena.ai": "+201036364340",
   "fatma.said@lena.ai": "+201556720323",
-  "ghada.hossam@lena.ai": "+201036364340",
+  "ghada.hossam@lena.ai": "+201515491686",
   "hanan.ahmed@homey.com": "+201515491686",
   "hager.nassar@lena.ai": "+201556720323",
   default: "+201556720323",

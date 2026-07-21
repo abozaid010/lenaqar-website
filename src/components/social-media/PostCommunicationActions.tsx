@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CheckCircle2, Copy, Loader2, MessageCircle, Phone } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -33,6 +33,7 @@ const HANDLED_BUTTON_CLASS =
  *
  * Phone resolution: prefer API `phoneNumber`, fallback to local extractPhoneFromText.
  * "Mark as handled" is explicit; Call / WhatsApp also mark reviewed when used.
+ * When a phone is present, chat auto-loads on open (existing lead / handled by human or AI).
  */
 export function PostCommunicationActions({
   postContent,
@@ -65,6 +66,7 @@ export function PostCommunicationActions({
   const [isOpeningChat, setIsOpeningChat] = useState(false);
   const [isMarkingHandled, setIsMarkingHandled] = useState(false);
   const openingLockRef = useRef(false);
+  const autoOpenedForPhoneRef = useRef<string | null>(null);
 
   const clientId = getClientid() || undefined;
   const buttonSize = ACTION_BUTTON_SIZES.md;
@@ -72,30 +74,96 @@ export function PostCommunicationActions({
     ? `${ACTION_BUTTON_BASE} ${HANDLED_BUTTON_CLASS} ${buttonSize.box}`
     : `${ACTION_BUTTON_BASE} ${ACTION_BUTTON_VARIANTS.default} ${buttonSize.box}`;
 
-  const markHandled = async (options?: { showSuccessToast?: boolean }) => {
-    if (!onHandled || isReviewed || isMarkingHandled) return;
-    setIsMarkingHandled(true);
-    try {
-      await onHandled();
-      if (options?.showSuccessToast) {
-        toast.success(
-          translate(
-            "socialMedia.actions.markAsHandledSuccess",
-            "Marked as handled by human.",
-          ),
+  const markHandled = useCallback(
+    async (options?: { showSuccessToast?: boolean }) => {
+      if (!onHandled || isReviewed || isMarkingHandled) return;
+      setIsMarkingHandled(true);
+      try {
+        await onHandled();
+        if (options?.showSuccessToast) {
+          toast.success(
+            translate(
+              "socialMedia.actions.markAsHandledSuccess",
+              "Marked as handled by human.",
+            ),
+          );
+        }
+      } catch (error) {
+        console.error("Failed to mark post handled:", error);
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : translate("common.operationFailed"),
         );
+      } finally {
+        setIsMarkingHandled(false);
       }
-    } catch (error) {
-      console.error("Failed to mark post handled:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate("common.operationFailed"),
-      );
-    } finally {
-      setIsMarkingHandled(false);
+    },
+    [onHandled, isReviewed, isMarkingHandled, translate],
+  );
+
+  const openChat = useCallback(
+    async (options?: { markHandled?: boolean; quiet?: boolean }) => {
+      if (!phone) {
+        if (!options?.quiet) toast.error(noPhoneTitle);
+        return;
+      }
+      if (openingLockRef.current) return;
+
+      openingLockRef.current = true;
+      setIsOpeningChat(true);
+      if (options?.markHandled) {
+        // Review does not depend on the lead — never block chat open.
+        void markHandled();
+      }
+      try {
+        const lead = await findOrCreateLeadByPhone(phone);
+        setChatTarget({
+          userId: lead.userId,
+          phoneNumber: lead.phoneNumber,
+          name: lead.name,
+        });
+        if (!options?.quiet) {
+          toast.success(
+            lead.created
+              ? translate(
+                  "socialMedia.actions.leadCreatedChat",
+                  "Lead created. Chat opened.",
+                )
+              : translate(
+                  "socialMedia.actions.chatOpened",
+                  "Chat opened.",
+                ),
+          );
+        }
+      } catch (error) {
+        console.error("Failed to open post WhatsApp chat:", error);
+        if (!options?.quiet) {
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : translate("common.operationFailed"),
+          );
+        }
+      } finally {
+        openingLockRef.current = false;
+        setIsOpeningChat(false);
+      }
+    },
+    [phone, noPhoneTitle, translate, markHandled],
+  );
+
+  // Auto-load chat when the panel opens with a phone (handled by human/AI or existing lead).
+  useEffect(() => {
+    if (!phone) {
+      autoOpenedForPhoneRef.current = null;
+      setChatTarget(null);
+      return;
     }
-  };
+    if (autoOpenedForPhoneRef.current === phone) return;
+    autoOpenedForPhoneRef.current = phone;
+    void openChat({ markHandled: false, quiet: true });
+  }, [phone, openChat]);
 
   const handleCopyPost = async () => {
     const text = String(postContent ?? "").trim();
@@ -118,46 +186,8 @@ export function PostCommunicationActions({
     );
   };
 
-  const handleWhatsApp = async () => {
-    if (!phone) {
-      toast.error(noPhoneTitle);
-      return;
-    }
-    if (openingLockRef.current || isOpeningChat) return;
-
-    openingLockRef.current = true;
-    setIsOpeningChat(true);
-    // Review does not depend on the lead — start in parallel and never block chat open.
-    void markHandled();
-    try {
-      const lead = await findOrCreateLeadByPhone(phone);
-      setChatTarget({
-        userId: lead.userId,
-        phoneNumber: lead.phoneNumber,
-        name: lead.name,
-      });
-      toast.success(
-        lead.created
-          ? translate(
-              "socialMedia.actions.leadCreatedChat",
-              "Lead created. Chat opened.",
-            )
-          : translate(
-              "socialMedia.actions.chatOpened",
-              "Chat opened.",
-            ),
-      );
-    } catch (error) {
-      console.error("Failed to open post WhatsApp chat:", error);
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : translate("common.operationFailed"),
-      );
-    } finally {
-      openingLockRef.current = false;
-      setIsOpeningChat(false);
-    }
+  const handleWhatsApp = () => {
+    void openChat({ markHandled: true, quiet: false });
   };
 
   return (
@@ -308,6 +338,11 @@ export function PostCommunicationActions({
             fillHeight
             className="flex-1 min-h-0"
           />
+        </div>
+      ) : isOpeningChat && hasPhone ? (
+        <div className="rounded-2xl border border-gray-200 bg-white px-3 py-6 flex items-center justify-center gap-2 text-sm text-gray-500 flex-1 min-h-0">
+          <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden />
+          {translate("common.loading", "Loading...")}
         </div>
       ) : null}
     </div>
