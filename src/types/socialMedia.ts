@@ -11,6 +11,9 @@
  * - PATCH /discovered-posts/{post_id}/review
  * - GET /dashboard/summary
  * - POST /api/discovered-posts/activate (AI catch-up batch; live WhatsApp send)
+ * - POST /api/activation/stop
+ * - POST /api/activation/resume
+ * - GET  /api/activation/status
  *
  * Browser calls same-origin BFF: `/api/bff/social-media/*`
  */
@@ -91,6 +94,12 @@ export interface ReviewUpdateResponse {
   reviewed_at: string | null;
 }
 
+/** Why a batch ended early via the operator brake. */
+export type ActivationStopReason =
+  | "stop_requested"
+  | "disabled_by_operator"
+  | "control_unavailable";
+
 /** Response from the AI catch-up batch activation endpoint. */
 export interface ActivatePostsResponse {
   processed: number;
@@ -99,9 +108,33 @@ export interface ActivatePostsResponse {
   failed: number;
   disabled: boolean;
   client_id: string;
-  skip_reason: string;
-  post_id: string;
+  /** True when the operator brake ended the run early. */
+  stopped?: boolean;
+  stop_reason?: ActivationStopReason | string;
 }
+
+/** Polling snapshot for AI activation progress / control state. */
+export interface ActivationStatusResponse {
+  enabled: boolean;
+  stop_requested: boolean;
+  pending_posts: number;
+  running: boolean;
+}
+
+/** Response from POST /api/activation/stop or /resume. */
+export interface ActivationControlResponse {
+  success: boolean;
+  message: string;
+  stop_requested?: boolean;
+}
+
+/** UI phase derived from activation status (+ local start-in-flight). */
+export type ActivationPhase =
+  | "idle"
+  | "running"
+  | "pausing"
+  | "paused"
+  | "disabled";
 
 export interface PaginatedResponse<TItem> {
   total: number;

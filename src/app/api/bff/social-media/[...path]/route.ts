@@ -4,6 +4,9 @@ import { API_BASE_URL } from "@/lib/apiConfig";
 import { COOKIE_KEYS } from "@/constants/cookieKeys";
 import { rateLimit, getClientIp, rateLimitExceededResponse } from "@/lib/rateLimit";
 
+/** Activate batches can run several minutes; keep the BFF open for the full call. */
+export const maxDuration = 300;
+
 const BFF_RATE_LIMIT = 300;
 const BFF_WINDOW_MS = 60_000;
 

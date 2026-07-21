@@ -3011,6 +3011,31 @@ export default {
       aiHandleNothingToDo: "No new comments for AI to handle.",
       aiHandleDisabled: "AI handling is currently disabled.",
     },
+    activation: {
+      postsReady: "{count} posts ready",
+      pause: "Pause",
+      pausing: "Stopping…",
+      resume: "Resume",
+      runningLabel: "AI working…",
+      remaining: "{count} left",
+      progressLabel: "Activation progress",
+      progressDetail: "~{processed} of {total}",
+      batchHint:
+        "This run handles up to {limit} posts and may take a few minutes. You can pause anytime.",
+      pauseRequested: "Pause requested. Current post will finish first.",
+      resumeSuccess: "Activation resumed. You can start a new batch.",
+      stillRunning:
+        "AI is still working in the background. Progress will keep updating.",
+      stoppedEarly:
+        "Batch stopped early: {processed} processed ({sent} sent, {skipped} skipped, {failed} failed).",
+      disabledTitle: "Activation disabled by operator",
+      disabledBody:
+        "AI handling and automatic activation are turned off. Contact an operator to re-enable.",
+      pausedTitle: "AI activation paused",
+      pausingTitle: "Stopping — finishing current post…",
+      pausedBody:
+        "Manual batches and automatic webhook activation are on hold until someone resumes.",
+    },
     empty: {
       title: "No posts found",
       subtitle: "Try changing filters or clearing your search.",
