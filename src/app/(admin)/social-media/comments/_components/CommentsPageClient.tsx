@@ -477,6 +477,7 @@ export default function CommentsPageClient() {
       >
         {viewPostComment ? (
           <ViewPostPanel
+            key={viewPostComment.id}
             postContent={viewPostComment.post_content || ""}
             phoneNumber={viewPostComment.phone_number}
             isReviewed={isCommentReviewed(viewPostComment, reviewedOverrides)}
