@@ -178,7 +178,7 @@ export function AiHandleCommentsButton() {
             size="md"
             type="default"
             icon={controlBusy || phase === "pausing" ? Loader2 : Pause}
-            disabled={controlBusy || phase === "pausing" || phase === "disabled"}
+            disabled={controlBusy || phase === "pausing"}
             onClick={handlePause}
             title={translate("socialMedia.activation.pause", "Pause")}
             ariaLabel={translate("socialMedia.activation.pause", "Pause")}
