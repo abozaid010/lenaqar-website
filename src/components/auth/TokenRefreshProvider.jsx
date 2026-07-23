@@ -23,7 +23,6 @@ export function TokenRefreshProvider({
   const intervalRef = useRef(null);
   const timeoutRef = useRef(null);
   const isRefreshingRef = useRef(false);
-  const refreshPendingRef = useRef(false);
 
   /**
    * Performs proactive token refresh if needed
@@ -49,7 +48,6 @@ export function TokenRefreshProvider({
         // Error handling is done in TokenRefreshService
       } finally {
         isRefreshingRef.current = false;
-        refreshPendingRef.current = false;
       }
     }
   }, [refreshToken, refreshThreshold]);
