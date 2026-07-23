@@ -52,7 +52,12 @@ axiosInstance.interceptors.response.use(
           }
         }
 
-        await TokenRefreshService.handleRefreshFailure();
+        // Only clear the session when the server explicitly rejected the refresh
+        // token. Network/timeout/backend failures are transient — leave the
+        // session intact so the next action can retry (mirrors useTokenRefresh.js).
+        if (!refreshError?.transient) {
+          await TokenRefreshService.handleRefreshFailure();
+        }
         return Promise.reject(refreshError);
       }
     }
