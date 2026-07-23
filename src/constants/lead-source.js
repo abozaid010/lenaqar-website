@@ -6,8 +6,6 @@
  * leads whose stored source is null/missing.
  */
 
-import { isHomeyClientId } from "@/lib/dashboard-filters-storage";
-
 export const LEAD_SOURCE_NULL = "null";
 
 export const LEAD_SOURCES = [
@@ -91,6 +89,6 @@ export function serializeLeadSourceFilter(values) {
  * @returns {boolean}
  */
 export function canShowLeadSourceFilter(clientId, isAdminOrOwner) {
-  return Boolean(isAdminOrOwner) && isHomeyClientId(clientId);
+  if (!isAdminOrOwner) return false;
+  return String(clientId || "").trim().toLowerCase() === "homey";
 }
-
