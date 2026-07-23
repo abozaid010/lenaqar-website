@@ -682,6 +682,13 @@ export default {
       allTypes: "كل الأنواع",
       selected: "{count} محدد",
     },
+    source: {
+      allSources: "كل المصادر",
+      selected: "{count} محدد",
+      facebookActivation: "تفعيل فيسبوك",
+      addedManually: "أُضيف يدوياً",
+      none: "بدون مصدر",
+    },
     datePicker: {
       startDate: "تاريخ البداية",
       endDate: "تاريخ النهاية",

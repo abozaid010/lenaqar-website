@@ -24,6 +24,13 @@ import {
   parseOwnerTypeFilter,
   serializeOwnerTypeFilter,
 } from "@/constants/owner-type";
+import {
+  LEAD_SOURCES,
+  canShowLeadSourceFilter,
+  getLeadSourceLabel,
+  parseLeadSourceFilter,
+  serializeLeadSourceFilter,
+} from "@/constants/lead-source";
 import { ChevronDown, FileSpreadsheet, Loader2, X, UserPlus } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
@@ -173,6 +180,7 @@ export default function DashbordFilter({
       campaign_ids: appliedFilters.campaign_ids
         ? appliedFilters.campaign_ids.split(",")
         : [],
+      source: parseLeadSourceFilter(appliedFilters.source),
       author: authorFromUrl,
     };
   });
@@ -302,6 +310,28 @@ export default function DashbordFilter({
     );
   }, [filters.owner_type, translate]);
 
+  const sourceOptions = useMemo(
+    () =>
+      LEAD_SOURCES.map((value) => ({
+        value,
+        label: getLeadSourceLabel(value, translate),
+      })),
+    [translate],
+  );
+
+  const sourceFilterLabel = useMemo(() => {
+    if (filters.source.length === 0) {
+      return translate("dashboardFilter.source.allSources", "All Sources");
+    }
+    if (filters.source.length === 1) {
+      return getLeadSourceLabel(filters.source[0], translate);
+    }
+    return translate("dashboardFilter.source.selected", "{count} selected").replace(
+      "{count}",
+      filters.source.length,
+    );
+  }, [filters.source, translate]);
+
   const actionFilterLabel = useMemo(() => {
     if (filters.actions.length === 0) {
       return translate("dashboardFilter.actions.allActions");
@@ -319,6 +349,7 @@ export default function DashbordFilter({
   const [isActionDropdownOpen, setIsActionDropdownOpen] = useState(false);
   const [isOwnerTypeDropdownOpen, setIsOwnerTypeDropdownOpen] = useState(false);
   const [isCampaignDropdownOpen, setIsCampaignDropdownOpen] = useState(false);
+  const [isSourceDropdownOpen, setIsSourceDropdownOpen] = useState(false);
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [isAuthorDropdownOpen, setIsAuthorDropdownOpen] = useState(false);
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
@@ -331,12 +362,14 @@ export default function DashbordFilter({
     isActionDropdownOpen ||
     isOwnerTypeDropdownOpen ||
     isCampaignDropdownOpen ||
+    isSourceDropdownOpen ||
     isAuthorDropdownOpen ||
     isDatePickerOpen;
   const isFilterMenuOpen = isFiltersDropdownOpen || isSortDropdownOpen;
   const actionDropdownRef = useRef(null);
   const ownerTypeDropdownRef = useRef(null);
   const campaignDropdownRef = useRef(null);
+  const sourceDropdownRef = useRef(null);
   const sortDropdownRef = useRef(null);
   const datePickerTriggerRef = useRef(null);
   const datePickerPanelRef = useRef(null);
@@ -357,6 +390,9 @@ export default function DashbordFilter({
   const showExportButton = isMounted && isAdminUser;
   const showWhatsappToolbarButton = isMounted && showSendWhatsappButton;
   const showAddLeadButton = !hideAddLead;
+  /** Source filter: Homey + admin/owner only. */
+  const showSourceFilter =
+    isMounted && canShowLeadSourceFilter(clientId, isAdminUser);
 
   const handleOpenWhatsappBulk = () => {
     if (whatsappRecipients.length === 0) {
@@ -456,6 +492,12 @@ export default function DashbordFilter({
         setIsCampaignDropdownOpen(false);
       }
       if (
+        sourceDropdownRef.current &&
+        !sourceDropdownRef.current.contains(event.target)
+      ) {
+        setIsSourceDropdownOpen(false);
+      }
+      if (
         sortDropdownRef.current &&
         !sortDropdownRef.current.contains(event.target)
       ) {
@@ -476,6 +518,7 @@ export default function DashbordFilter({
       isActionDropdownOpen ||
       isOwnerTypeDropdownOpen ||
       isCampaignDropdownOpen ||
+      isSourceDropdownOpen ||
       isSortDropdownOpen ||
       isDatePickerOpen
     ) {
@@ -488,6 +531,7 @@ export default function DashbordFilter({
     isActionDropdownOpen,
     isOwnerTypeDropdownOpen,
     isCampaignDropdownOpen,
+    isSourceDropdownOpen,
     isSortDropdownOpen,
     isDatePickerOpen,
   ]);
@@ -536,6 +580,13 @@ export default function DashbordFilter({
         const serializedOwnerType = serializeOwnerTypeFilter(v);
         if (serializedOwnerType != null) {
           params.append("owner_type", serializedOwnerType);
+        }
+      } else if (k === "source" && Array.isArray(v)) {
+        if (canShowLeadSourceFilter(clientId, canViewAllDashboardLeads())) {
+          const serializedSource = serializeLeadSourceFilter(v);
+          if (serializedSource != null) {
+            params.append("source", serializedSource);
+          }
         }
       } else if (k === "campaign_ids" && Array.isArray(v)) {
         if (v.length > 0) {
@@ -667,6 +718,26 @@ export default function DashbordFilter({
     onFilterChange("campaign_ids", []);
   };
 
+  const toggleSourceSelection = (sourceValue) => {
+    const newSources = filters.source.includes(sourceValue)
+      ? filters.source.filter((value) => value !== sourceValue)
+      : [...filters.source, sourceValue];
+
+    setFilters((prev) => ({
+      ...prev,
+      source: newSources,
+    }));
+    onFilterChange("source", newSources);
+  };
+
+  const clearSourceFilters = () => {
+    setFilters((prev) => ({
+      ...prev,
+      source: [],
+    }));
+    onFilterChange("source", []);
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -703,11 +774,13 @@ export default function DashbordFilter({
       start_date: getDefaultDashboardStartDate(),
       end_date: getDefaultDashboardEndDate(),
       campaign_ids: [],
+      source: [],
       author: defaultAuthor,
     });
     setIsActionDropdownOpen(false);
     setIsOwnerTypeDropdownOpen(false);
     setIsCampaignDropdownOpen(false);
+    setIsSourceDropdownOpen(false);
     setIsSortDropdownOpen(false);
     setIsAuthorDropdownOpen(false);
     setIsDatePickerOpen(false);
@@ -913,6 +986,62 @@ export default function DashbordFilter({
               </div>
             )}
           </div>
+
+          {showSourceFilter ? (
+            <div
+              className={`relative ${isSourceDropdownOpen ? "z-[90]" : "z-[60]"} ${fieldShellClass}`}
+              ref={sourceDropdownRef}
+            >
+              <div
+                id="lead_source"
+                role="button"
+                tabIndex={0}
+                aria-haspopup="listbox"
+                aria-expanded={isSourceDropdownOpen}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ")
+                    setIsSourceDropdownOpen((open) => !open);
+                }}
+                onClick={() => setIsSourceDropdownOpen(!isSourceDropdownOpen)}
+                className={`${DASHBOARD_TRIGGER} ${triggerWidthClass} ${
+                  compact ? "h-9 min-h-[36px]" : "h-10"
+                }`}
+              >
+                <span className="whitespace-nowrap">{sourceFilterLabel}</span>
+                <ChevronDown className="text-gray-400 w-5 h-5 flex-shrink-0" />
+              </div>
+
+              {isSourceDropdownOpen && (
+                <div className={`absolute ltr:left-0 rtl:right-0 top-full z-[100] mt-1 ${menuWidthClass} rounded-md border border-gray-200 bg-white p-2 shadow-lg max-h-64 overflow-y-auto`}>
+                  {filters.source.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearSourceFilters}
+                      className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded flex items-center gap-2 mb-1"
+                    >
+                      <X size={16} />
+                      {translate("dashboardFilter.actions.clearAll", "Clear All")}
+                    </button>
+                  )}
+
+                  {sourceOptions.map((option) => (
+                    <label
+                      key={option.value}
+                      className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 rounded cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={filters.source.includes(option.value)}
+                        onChange={() => toggleSourceSelection(option.value)}
+                        className="cursor-pointer"
+                      />
+                      <span className="text-sm text-gray-700">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : null}
 
           <div
             ref={datePickerTriggerRef}

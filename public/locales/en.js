@@ -814,6 +814,13 @@ export default {
       allTypes: "All Types",
       selected: "{count} selected",
     },
+    source: {
+      allSources: "All Sources",
+      selected: "{count} selected",
+      facebookActivation: "Facebook Activation",
+      addedManually: "Added Manually",
+      none: "No Source",
+    },
     datePicker: {
       startDate: "Start Date",
       endDate: "End Date",
