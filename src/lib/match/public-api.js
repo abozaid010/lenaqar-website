@@ -1,55 +1,53 @@
+"use client";
+
 import {
   LOWERCASE_UNIT_FILTER_KEYS,
   MATCH_UNITS_PAGE_SIZE,
 } from "@/lib/match/requirement-to-units-filter";
-import { mapSlimPublicUnitsPayload } from "@/lib/units/slim-unit-list-mapper";
-
-// X-API-Key is added server-side by /api/crm/[...path]/route.js for /public/* paths.
-// No key or backend URL in the client bundle.
-
-async function parseJsonResponse(response) {
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const msg =
-      body?.error_message ||
-      body?.message ||
-      body?.detail ||
-      `Request failed (${response.status})`;
-    throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
-  }
-  return body?.data ?? body;
-}
+import { fetchUnitsFilter } from "@/utils/api";
 
 /**
- * Fetch public units with filter params (no auth) — slim list payload.
- * Routes through the same-origin BFF catch-all (/api/crm/public/v1/slim-list)
- * so the backend URL never appears in the browser Network tab.
+ * Normalize share `unit_filters` into the same query shape the Units page uses
+ * for GET /units/v1/slim-list (via fetchUnitsFilter).
  */
-export async function fetchPublicMatchedUnits(filters = {}) {
-  const params = new URLSearchParams();
-  params.set("page_size", String(filters.page_size ?? MATCH_UNITS_PAGE_SIZE));
-  if (filters.cursor) params.set("cursor", String(filters.cursor));
+function normalizeMatchUnitFilters(filters = {}) {
+  const params = {
+    page_size: filters.page_size ?? MATCH_UNITS_PAGE_SIZE,
+  };
+
+  if (filters.cursor) params.cursor = String(filters.cursor);
 
   Object.entries(filters).forEach(([key, value]) => {
     if (key === "page_size" || key === "cursor") return;
     if (value == null || value === "") return;
-    let paramValue = String(value).trim();
-    if (LOWERCASE_UNIT_FILTER_KEYS.has(key)) {
-      paramValue = paramValue.toLowerCase();
-    }
-    params.set(key, paramValue);
+
+    // Backend may return multi-value filters as arrays (e.g. district: ["new cairo"]).
+    const raw = Array.isArray(value)
+      ? value.filter((v) => v != null && v !== "").map(String).join(",")
+      : String(value).trim();
+    if (!raw) return;
+
+    params[key] = LOWERCASE_UNIT_FILTER_KEYS.has(key) ? raw.toLowerCase() : raw;
   });
 
-  const qs = params.toString();
-  const url = `/api/crm/public/v1/slim-list${qs ? `?${qs}` : ""}`;
-  const response = await fetch(url, { method: "GET", cache: "no-store" });
+  return params;
+}
 
-  const data = await parseJsonResponse(response);
-  const mapped = mapSlimPublicUnitsPayload(data);
-  const units = mapped.units;
-  const pagination = mapped.pagination ?? {
+/**
+ * Fetch matched units with the same slim-list API as the Units page.
+ * Uses `/units/v1/slim-list` through `fetchUnitsFilter` (BFF: /api/crm/...).
+ */
+export async function fetchPublicMatchedUnits(filters = {}) {
+  const params = normalizeMatchUnitFilters(filters);
+  const response = await fetchUnitsFilter(params);
+  const units = response?.data?.units ?? [];
+  const pagination = response?.data?.pagination ?? {
     next_cursor: null,
     has_more_next: false,
   };
-  return { units, pagination, count: mapped.count ?? units.length };
+  return {
+    units,
+    pagination,
+    count: response?.data?.count ?? units.length,
+  };
 }
