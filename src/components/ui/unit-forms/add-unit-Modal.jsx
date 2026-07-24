@@ -109,12 +109,15 @@ function sanitizeAmountsForApi(data) {
     Object.keys(out.rentDurationType).forEach((duration) => {
       const block = out.rentDurationType[duration];
       if (block && typeof block === "object") {
+        // TEMP: fee UI hidden — only rent price is user-entered.
+        // securityDeposit defaults to serviceFee; cleaningFee forced to 0.
+        const serviceFee = toAmount(block.serviceFee);
         out.rentDurationType[duration] = {
           ...block,
           price: toAmount(block.price),
-          securityDeposit: toAmount(block.securityDeposit),
-          cleaningFee: toAmount(block.cleaningFee),
-          serviceFee: toAmount(block.serviceFee),
+          securityDeposit: serviceFee,
+          cleaningFee: 0,
+          serviceFee,
         };
       }
     });
@@ -264,7 +267,8 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
     country: unitData?.country || "Egypt",
     dataSource: unitData?.dataSource || "website",
     buildingType: unitData?.buildingType || "apartment",
-    purpose: unitData?.purpose || "",
+    // TEMP: default new units to rent; edit keeps existing purpose
+    purpose: unitData?.purpose || "rent",
     project: unitData?.project || "",
     project_ar: unitData?.project_ar || "",
     project_id: unitData?.project_id || unitData?.projectId || "",

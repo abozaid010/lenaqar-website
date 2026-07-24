@@ -150,7 +150,7 @@ const valuesMatch = (a, b) => {
  * @param {boolean} required - Whether field is required
  * @param {boolean} error - Whether to show error state
  * @param {string} errorMessage - Error message to display
- * @param {string} placeholder - Placeholder text
+ * @param {string} placeholder - Placeholder text when nothing is selected (default: "Select...")
  * @param {boolean} showAllOption - Show "All" option (for filters)
  * @param {string} allOptionLabel - Label for "All" option
  * @param {string} allOptionValue - Value for "All" option (default: "")
@@ -178,7 +178,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
   required = false,
   error = false,
   errorMessage = "",
-  placeholder,
+  placeholder = "Select...",
   showAllOption = false,
   allOptionLabel,
   allOptionValue = "",
@@ -307,7 +307,7 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
       if (showAllOption && allOptionLabel) {
         return allOptionLabel;
       }
-      return placeholder || "Select...";
+      return placeholder;
     }
 
     const resolved = resolveSelectedLabel?.(value, locale);
@@ -558,9 +558,11 @@ const SearchableDropdownSelect = forwardRef(function SearchableDropdownSelect({
                     : "text-gray-900"
                   : isAllSelected
                     ? "text-inherit"
-                  : shouldFloatLabel && placeholder
-                    ? "text-gray-400"
-                    : "text-transparent"
+                    : // Floating label sits in-field as the cue; hide button text.
+                      // Without a label, show placeholder in muted color.
+                      usesFloatingLabel && !shouldFloatLabel
+                      ? "text-transparent"
+                      : "text-gray-400"
               }`}
             >
               {buttonDisplayText}

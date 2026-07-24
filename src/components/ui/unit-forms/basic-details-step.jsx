@@ -122,6 +122,13 @@ export default function BasicDetailsStep({
       updatedValue = normalizeViewTypeValue(updatedValue);
     }
 
+    if (name === "roomsCount" && updatedValue !== "" && updatedValue != null) {
+      const n = Number(updatedValue);
+      if (!Number.isNaN(n)) {
+        updatedValue = Math.min(Math.max(0, n), 15);
+      }
+    }
+
     updateFormData({ [name]: updatedValue });
 
     if (invalidFields.includes(name) && (updatedValue === 0 || updatedValue)) {
@@ -343,17 +350,17 @@ export default function BasicDetailsStep({
           error={invalidFields.includes("purpose")}
           options={[
             {
-              value: "sell",
-              label: translate(
-                "basicDetails.purposes.sell",
-                t.basicDetails.purposes.sell
-              ),
-            },
-            {
               value: "rent",
               label: translate(
                 "basicDetails.purposes.rent",
                 t.basicDetails.purposes.rent
+              ),
+            },
+            {
+              value: "sell",
+              label: translate(
+                "basicDetails.purposes.sell",
+                t.basicDetails.purposes.sell
               ),
             },
           ]}
@@ -372,7 +379,7 @@ export default function BasicDetailsStep({
           options={getViewTypes()}
           getValue={(opt) => opt.value}
           getLabel={(opt) => (locale === "ar" ? opt.ar_label : opt.en_label)}
-          placeholder={translate("basicDetails.selectView", t.basicDetails.selectView)}
+          placeholder={translate("basicDetails.view", t.basicDetails.view)}
         />
 
         {/* code */}
@@ -449,10 +456,11 @@ export default function BasicDetailsStep({
                 name="roomsCount"
                 required
                 value={numericValue(formData.roomsCount)}
-                onChange={handleChange}
+                onChange={(e) => handleChange(e, "number")}
                 placeholder="0"
                 error={invalidFields.includes("roomsCount")}
                 type="number"
+                max={15}
               />
             </div>
             {/* Bathrooms */}

@@ -225,7 +225,8 @@ export default function RentalDetailsStep({
           adornment="EGP"
         />
 
-        {/* Security Deposit */}
+        {/* TEMP: fee fields hidden — user only enters rent price.
+            On submit: securityDeposit = serviceFee; cleaningFee = 0.
         <LenaTextField
           label={t.rentalDetails.securityDeposit}
           value={activeDurationValues.securityDeposit}
@@ -237,7 +238,6 @@ export default function RentalDetailsStep({
           adornment="EGP"
         />
 
-        {/* Cleaning Fee */}
         <LenaTextField
           label={t.rentalDetails.cleaningFee}
           value={activeDurationValues.cleaningFee}
@@ -249,7 +249,6 @@ export default function RentalDetailsStep({
           adornment="EGP"
         />
 
-        {/* Service Fee */}
         <LenaTextField
           label={t.rentalDetails.serviceFee}
           value={activeDurationValues.serviceFee}
@@ -260,6 +259,7 @@ export default function RentalDetailsStep({
           type="money"
           adornment="EGP"
         />
+        */}
       </div>
 
       {/* Amenities */}
