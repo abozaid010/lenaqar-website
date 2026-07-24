@@ -56,10 +56,16 @@ export default function UnitsGrid({
 
   const egpLabel = translate("currency.egp") || "EGP";
 
-  const formatPrice = (price) => {
+  const parsePrice = (price) => {
     if (price === null || price === undefined || price === "") return null;
     const n = typeof price === "number" ? price : Number(String(price).replace(/,/g, ""));
-    if (!Number.isFinite(n)) return null;
+    if (!Number.isFinite(n) || n < 0) return null;
+    return n;
+  };
+
+  const formatPrice = (price) => {
+    const n = parsePrice(price);
+    if (n === null) return null;
     return localeUtils?.formatNumber ? localeUtils.formatNumber(n) : n.toLocaleString();
   };
 
@@ -80,26 +86,23 @@ export default function UnitsGrid({
     );
 
   const formatRentPriceWithPeriod = (price, period) => {
-    const formatted = formatPrice(price);
+    const n = parsePrice(price);
+    // Rent cards: show monthly only when a real amount exists (0 = unset default).
+    if (n === null || n <= 0) return null;
+    const formatted = formatPrice(n);
     if (!formatted) return null;
     return `${formatted} ${egpLabel}/${getRentPeriodLabel(period)}`;
   };
 
   const getRentPriceLabel = (unit) => {
-    // TEMP: monthly only (was daily → weekly → monthly priority)
-    // const durations = [
-    //   ["daily", unit.rentDurationType?.daily?.price],
-    //   ["weekly", unit.rentDurationType?.weekly?.price],
-    //   ["monthly", unit.rentDurationType?.monthly?.price],
-    // ];
-    const durations = [
-      ["monthly", unit.rentDurationType?.monthly?.price],
-    ];
-    for (const [period, price] of durations) {
-      const label = formatRentPriceWithPeriod(price, period);
-      if (label) return label;
-    }
-    return formatRentPriceWithPeriod(unit.rentPrice, "monthly");
+    // Monthly only — never fall back to daily/weekly temporary rates.
+    const monthlyLabel = formatRentPriceWithPeriod(
+      unit.rentDurationType?.monthly?.price,
+      "monthly"
+    );
+    if (monthlyLabel) return monthlyLabel;
+    // Slim list exposes monthly as rentPrice / price when rentDurationType is absent.
+    return formatRentPriceWithPeriod(unit.rentPrice ?? unit.price, "monthly");
   };
 
   const getUnitHref = (unit) =>

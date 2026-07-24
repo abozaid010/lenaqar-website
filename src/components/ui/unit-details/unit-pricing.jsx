@@ -207,6 +207,7 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
             const raw = activeRent?.price;
             const n =
               typeof raw === "number" ? raw : raw != null && raw !== "" ? Number(raw) : NaN;
+            // Monthly only; reject negatives and treat 0 as unset.
             const hasPrice = Number.isFinite(n) && n > 0;
             const na = getTranslation("unitDetails.common.na", "N/A");
             const currencyLabel =
