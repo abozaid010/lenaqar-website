@@ -109,6 +109,9 @@ export function requirementToUnitsFilter(requirement, clientId) {
   const district = normalizeFilterString(requirement.district);
   if (district) filters.district = district;
 
+  const subDistrict = normalizeFilterString(requirement.sub_district);
+  if (subDistrict) filters.sub_district = subDistrict;
+
   const project = normalizeFilterString(requirement.project);
   if (project) filters.project_name = project;
 

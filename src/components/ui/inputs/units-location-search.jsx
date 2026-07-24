@@ -31,8 +31,8 @@ function optionKey(kind, parts) {
 }
 
 /**
- * Combined location filter: search and pick city, district, or sub-district.
- * Unlike leaf-only pickers, any hierarchy level is valid (or "all").
+ * Combined location picker: search and pick city, district, or sub-district.
+ * Unlike leaf-only pickers, any hierarchy level is valid (or clear / "all").
  */
 export default function UnitsLocationSearch({
   city = "",
@@ -40,7 +40,12 @@ export default function UnitsLocationSearch({
   subDistrict = "",
   onChange,
   name = "units_location_search",
+  label,
+  className = "",
   buttonClassName = "",
+  showAllOption = true,
+  allOptionLabel,
+  placeholder,
   disabled = false,
 }) {
   const { locale, translate } = useI18n();
@@ -86,7 +91,7 @@ export default function UnitsLocationSearch({
     const rows = [];
 
     for (const cityRow of cities) {
-      const label = labelFor(cityRow.en_name, cityRow.ar_name);
+      const optLabel = labelFor(cityRow.en_name, cityRow.ar_name);
       const searchText = normalizeQuery(
         [cityRow.en_name, cityRow.ar_name, cityRow.value].filter(Boolean).join(" "),
       );
@@ -94,7 +99,7 @@ export default function UnitsLocationSearch({
         key: optionKey("city", [cityRow.value]),
         kind: "city",
         value: cityRow.value,
-        label,
+        label: optLabel,
         path: "",
         kindLabel: translate("basicDetails.city", "City"),
         searchText,
@@ -104,7 +109,7 @@ export default function UnitsLocationSearch({
 
     for (const districtRow of districts) {
       const cityValue = normalizeQuery(districtRow.city_en_name);
-      const label = labelFor(districtRow.en_name, districtRow.ar_name);
+      const optLabel = labelFor(districtRow.en_name, districtRow.ar_name);
       const path = labelFor(districtRow.city_en_name, districtRow.city_ar_name);
       const aliases = Array.isArray(districtRow.aliases) ? districtRow.aliases : [];
       const searchText = normalizeQuery(
@@ -116,7 +121,7 @@ export default function UnitsLocationSearch({
         key: optionKey("district", [cityValue, districtRow.value]),
         kind: "district",
         value: districtRow.value,
-        label,
+        label: optLabel,
         path,
         kindLabel: translate("basicDetails.district", "District"),
         searchText,
@@ -136,7 +141,7 @@ export default function UnitsLocationSearch({
           normalizeQuery(d.city_en_name) === cityValue &&
           normalizeQuery(d.value) === districtValue,
       );
-      const label = labelFor(sub.en_name, sub.ar_name);
+      const optLabel = labelFor(sub.en_name, sub.ar_name);
       const path = joinPath([
         labelFor(sub.city_en_name, sub.city_ar_name),
         labelFor(
@@ -163,7 +168,7 @@ export default function UnitsLocationSearch({
         key: optionKey("sub_district", [cityValue, districtValue, sub.value]),
         kind: "sub_district",
         value: sub.value,
-        label,
+        label: optLabel,
         path,
         kindLabel: translate("basicDetails.subDistrict", "Sub-district"),
         searchText,
@@ -213,20 +218,23 @@ export default function UnitsLocationSearch({
     onChange?.(opt.payload);
   };
 
-  const allOptionLabel = translate("unitsFilter.allLocations", "All Locations");
+  const resolvedAllLabel =
+    allOptionLabel || translate("unitsFilter.allLocations", "All Locations");
+  const resolvedPlaceholder = placeholder || resolvedAllLabel;
 
   return (
     <SearchableDropdownSelect
       name={name}
+      label={label}
       options={options}
       value={selectedKey}
       onChange={handleChange}
       disabled={disabled}
       isLoading={geoLoading}
-      showAllOption
-      allOptionLabel={allOptionLabel}
+      showAllOption={showAllOption}
+      allOptionLabel={resolvedAllLabel}
       allOptionValue=""
-      placeholder={allOptionLabel}
+      placeholder={resolvedPlaceholder}
       searchPlaceholder={translate(
         "unitsFilter.locationSearchPlaceholder",
         "Search city, district, or area…",
@@ -235,6 +243,7 @@ export default function UnitsLocationSearch({
         "unitsFilter.locationSearchEmpty",
         "No matching locations",
       )}
+      className={className}
       buttonClassName={buttonClassName}
       getValue={(opt) => opt.key}
       getLabel={(opt) => opt.label}
@@ -260,11 +269,11 @@ export default function UnitsLocationSearch({
         </div>
       )}
       resolveSelectedLabel={() => {
-        if (!selectedKey) return allOptionLabel;
+        if (!selectedKey) return resolvedAllLabel;
         if (selectedSummary.title && selectedSummary.path) {
           return `${selectedSummary.title} · ${selectedSummary.path}`;
         }
-        return selectedSummary.title || allOptionLabel;
+        return selectedSummary.title || resolvedAllLabel;
       }}
     />
   );
