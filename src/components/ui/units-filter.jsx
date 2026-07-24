@@ -6,9 +6,7 @@ import { getBuildingTypes } from "@/data/constants";
 import { useProjectsNames, useDeveloperNames } from "@/hooks/use-admin-shared-data";
 import { getClientIdFromToken } from "@/lib/getRoleFromToken.client";
 import { FileSpreadsheet, Loader2, SlidersHorizontal, Trash2, X } from "lucide-react";
-import SearchableCitySelect from "@/components/ui/inputs/searchable-city-select";
-import SearchableDistrictSelect from "@/components/ui/inputs/searchable-district-select";
-import SearchableSubDistrictSelect from "@/components/ui/inputs/searchable-sub-district-select";
+import UnitsLocationSearch from "@/components/ui/inputs/units-location-search";
 import SearchableProjectSelect from "@/components/ui/inputs/searchable-project-select";
 import SearchablePropertyTypeSelect from "@/components/ui/inputs/searchable-property-type-select";
 import SearchableFurnishingTypeSelect from "@/components/ui/inputs/searchable-furnishing-type-select";
@@ -447,14 +445,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       else if (max) value = `${t.unitsFilter.upTo || "Up to"} ${max} EGP`;
       list.push({ key: "price_range", value });
     }
-    if (nextFilters.city) {
-      list.push({ key: "city", value: getSelectedCity() });
-    }
-    if (nextFilters.district) {
-      list.push({ key: "district", value: getSelectedDistrict() });
-    }
-    if (nextFilters.sub_district) {
-      list.push({ key: "sub_district", value: getSelectedSubDistrict() });
+    if (nextFilters.city || nextFilters.district || nextFilters.sub_district) {
+      list.push({
+        key: "location",
+        value: getSelectedLocation(nextFilters),
+      });
     }
     return list;
   }, [
@@ -486,6 +481,32 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return buildActiveFilters(safeFilters);
   }, [filters, buildActiveFilters, hasValidDeveloper]);
 
+  const handleLocationChange = (payload) => {
+    updateDraftFilters((prev) => {
+      const nextCity = payload?.city
+        ? String(payload.city).toLowerCase().trim()
+        : "";
+      const nextDistrict = payload?.district
+        ? String(payload.district).toLowerCase().trim()
+        : "";
+      const nextSubDistrict = payload?.sub_district
+        ? String(payload.sub_district).toLowerCase().trim()
+        : "";
+      const cityChanged = nextCity !== (prev.city || "");
+      const districtChanged = nextDistrict !== (prev.district || "");
+
+      return {
+        ...prev,
+        city: nextCity,
+        district: nextDistrict,
+        sub_district: nextSubDistrict,
+        // Match prior cascade: city/district changes reset project scope
+        project_name:
+          cityChanged || districtChanged ? "" : prev.project_name || "",
+      };
+    });
+  };
+
   const handleFilterChange = (key, value) => {
     updateDraftFilters((prev) => {
       const next = { ...prev };
@@ -502,9 +523,7 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
       } else if (value && value !== "" && value !== "all") {
         let normalizedValue = value;
 
-        if (key === "city" || key === "district" || key === "sub_district") {
-          normalizedValue = String(value).toLowerCase().trim();
-        } else if (key === "project_name") {
+        if (key === "project_name") {
           normalizedValue = resolveProjectEnName(compounds, value);
         } else if (key === "property_type") {
           const type =
@@ -525,16 +544,6 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         next[key] = normalizedValue;
       } else {
         next[key] = "";
-      }
-
-      if (key === "city") {
-        next.district = "";
-        next.sub_district = "";
-        next.project_name = "";
-      }
-      if (key === "district") {
-        next.sub_district = "";
-        next.project_name = "";
       }
 
       return next;
@@ -655,29 +664,20 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
     return getDeveloperLabel(d, locale) || filters.developer_name;
   }
 
-  function getSelectedCity() {
-    if (!filters.city || filters.city === "all" || filters.city === "") {
-      return t.unitsFilter.allCities || "All Cities";
+  function getSelectedLocation(filterValues = filters) {
+    const parts = [];
+    if (filterValues.city && filterValues.city !== "all") {
+      parts.push(cityLabels[filterValues.city] || filterValues.city);
     }
-    return cityLabels[filters.city] || filters.city;
-  }
-
-  function getSelectedDistrict() {
-    if (!filters.district || filters.district === "all" || filters.district === "") {
-      return translate("unitsFilter.allDistricts", "All Districts");
+    if (filterValues.district && filterValues.district !== "all") {
+      parts.push(districtLabels[filterValues.district] || filterValues.district);
     }
-    return districtLabels[filters.district] || filters.district;
-  }
-
-  function getSelectedSubDistrict() {
-    if (
-      !filters.sub_district ||
-      filters.sub_district === "all" ||
-      filters.sub_district === ""
-    ) {
-      return translate("unitsFilter.allSubDistricts", "All Sub-districts");
+    if (filterValues.sub_district && filterValues.sub_district !== "all") {
+      parts.push(
+        subDistrictLabels[filterValues.sub_district] || filterValues.sub_district
+      );
     }
-    return subDistrictLabels[filters.sub_district] || filters.sub_district;
+    return parts.join(" › ");
   }
 
   function getFilterDisplayText(key, value) {
@@ -708,12 +708,11 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         return getSelectedPropertyType();
       case "furnished_type":
         return getSelectedFurnishingType();
+      case "location":
       case "city":
-        return getSelectedCity();
       case "district":
-        return getSelectedDistrict();
       case "sub_district":
-        return getSelectedSubDistrict();
+        return value || getSelectedLocation();
       case "price_range":
         return getPriceDisplayText();
       default:
@@ -822,16 +821,27 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
         else if (max) labels.push(`${t.unitsFilter.upTo || "Up to"} ${max} EGP`);
       }
 
-      if (filterValues.city) {
-        labels.push(cityLabels[filterValues.city] || filterValues.city);
-      }
-      if (filterValues.district) {
-        labels.push(districtLabels[filterValues.district] || filterValues.district);
-      }
-      if (filterValues.sub_district) {
-        labels.push(
-          subDistrictLabels[filterValues.sub_district] || filterValues.sub_district
-        );
+      if (
+        filterValues.city ||
+        filterValues.district ||
+        filterValues.sub_district
+      ) {
+        const parts = [];
+        if (filterValues.city && filterValues.city !== "all") {
+          parts.push(cityLabels[filterValues.city] || filterValues.city);
+        }
+        if (filterValues.district && filterValues.district !== "all") {
+          parts.push(
+            districtLabels[filterValues.district] || filterValues.district
+          );
+        }
+        if (filterValues.sub_district && filterValues.sub_district !== "all") {
+          parts.push(
+            subDistrictLabels[filterValues.sub_district] ||
+              filterValues.sub_district
+          );
+        }
+        if (parts.length > 0) labels.push(parts.join(" › "));
       }
 
       return labels;
@@ -981,59 +991,17 @@ export default function UnitsFilter({ appliedFilters, isPublic }) {
 
       <form onSubmit={handleApplyFiltersSubmit} className="space-y-3" id="units-filter-form">
         <div className="w-full min-w-0">
-          <SearchableCitySelect
-            value={draftFilters.city === "all" ? "" : draftFilters.city}
-            onChange={(e) => {
-              const cityValue = e.target.value || "all";
-              handleFilterChange("city", cityValue);
-            }}
-            name="city"
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allCities", "All Cities")}
-            placeholder={translate("unitsFilter.allCities", "All Cities")}
-            buttonClassName={filterButtonClassName}
-          />
-        </div>
-
-        <div className="w-full min-w-0">
-          <SearchableDistrictSelect
-            value={draftFilters.district === "all" ? "" : draftFilters.district}
-            onChange={(e) => {
-              const districtValue = e.target.value || "all";
-              handleFilterChange("district", districtValue);
-            }}
-            name="district"
-            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allDistricts", "All Districts")}
-            placeholder={translate("unitsFilter.allDistricts", "All Districts")}
-            buttonClassName={filterButtonClassName}
-          />
-        </div>
-
-        <div className="w-full min-w-0">
-          <SearchableSubDistrictSelect
-            value={draftFilters.sub_district === "all" ? "" : draftFilters.sub_district}
-            onChange={(e) => {
-              const subValue = e.target.value || "all";
-              handleFilterChange("sub_district", subValue);
-            }}
-            name="sub_district"
-            city={draftFilters.city && draftFilters.city !== "all" ? draftFilters.city : ""}
+          <UnitsLocationSearch
+            city={draftFilters.city === "all" ? "" : draftFilters.city}
             district={
-              draftFilters.district && draftFilters.district !== "all"
-                ? draftFilters.district
-                : ""
+              draftFilters.district === "all" ? "" : draftFilters.district
             }
-            disabled={
-              !draftFilters.city ||
-              draftFilters.city === "all" ||
-              !draftFilters.district ||
-              draftFilters.district === "all"
+            subDistrict={
+              draftFilters.sub_district === "all"
+                ? ""
+                : draftFilters.sub_district
             }
-            showAllOption={true}
-            allOptionLabel={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
-            placeholder={translate("unitsFilter.allSubDistricts", "All Sub-districts")}
+            onChange={handleLocationChange}
             buttonClassName={filterButtonClassName}
           />
         </div>

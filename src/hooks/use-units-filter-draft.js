@@ -347,6 +347,8 @@ export function useUnitsFilterDraft({
         next = { ...next, min_price: "", max_price: "" };
       } else if (key === "area_range") {
         next = { ...next, min_area: "", max_area: "" };
+      } else if (key === "location") {
+        next = { ...next, city: "", district: "", sub_district: "" };
       } else if (key === "my_inventory" || key === "resale") {
         next = { ...next, [key]: false };
       } else {
