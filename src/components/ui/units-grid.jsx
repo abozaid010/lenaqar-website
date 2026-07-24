@@ -86,9 +86,13 @@ export default function UnitsGrid({
   };
 
   const getRentPriceLabel = (unit) => {
+    // TEMP: monthly only (was daily → weekly → monthly priority)
+    // const durations = [
+    //   ["daily", unit.rentDurationType?.daily?.price],
+    //   ["weekly", unit.rentDurationType?.weekly?.price],
+    //   ["monthly", unit.rentDurationType?.monthly?.price],
+    // ];
     const durations = [
-      ["daily", unit.rentDurationType?.daily?.price],
-      ["weekly", unit.rentDurationType?.weekly?.price],
       ["monthly", unit.rentDurationType?.monthly?.price],
     ];
     for (const [period, price] of durations) {

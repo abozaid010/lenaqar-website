@@ -2,7 +2,13 @@
 export const MAX_UNIT_IMAGES = 10;
 
 /** Supported rent duration tabs, in display order. */
-export const RENT_DURATION_KEYS = ["daily", "weekly", "monthly"];
+// TEMP: daily/weekly hidden — focus on monthly rent only. Restore when re-enabled.
+// export const RENT_DURATION_KEYS = ["daily", "weekly", "monthly"];
+export const RENT_DURATION_KEYS = ["monthly"];
+
+/** Full set kept for API normalize so existing daily/weekly data is not dropped. */
+// TEMP: restore when daily/weekly UI is re-enabled.
+export const RENT_DURATION_KEYS_ALL = ["daily", "weekly", "monthly"];
 
 /** Numeric (money) fields that live inside every rent duration block. */
 export const RENT_DURATION_AMOUNT_FIELDS = [
@@ -48,7 +54,9 @@ export function normalizeRentDurationBlock(raw) {
  */
 export function normalizeRentDurationType(raw) {
   const source = raw && typeof raw === "object" ? raw : {};
-  return RENT_DURATION_KEYS.reduce((acc, key) => {
+  // Keep all duration keys in the payload shape so existing daily/weekly
+  // values from the API are preserved even while the UI is monthly-only.
+  return RENT_DURATION_KEYS_ALL.reduce((acc, key) => {
     acc[key] = normalizeRentDurationBlock(source[key]);
     return acc;
   }, {});

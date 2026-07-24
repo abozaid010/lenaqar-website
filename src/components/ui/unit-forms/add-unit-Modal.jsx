@@ -697,10 +697,12 @@ export default function AddUnitModal({ isEdit, unitData, onClose, onUnitsExtract
           return false;
         }
 
-        // Check if at least one rentDurationType has a price > 0
-        const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
-          (duration) => duration?.price > 0
-        );
+        // TEMP: require monthly rent price only (was: any duration with price > 0)
+        // const hasValidPrice = Object.values(rentFormData.rentDurationType).some(
+        //   (duration) => duration?.price > 0
+        // );
+        const hasValidPrice =
+          Number(rentFormData.rentDurationType?.monthly?.price) > 0;
 
         if (!hasValidPrice) {
           toast.error(t.toasts.enterValidPrice);

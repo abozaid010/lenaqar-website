@@ -2,7 +2,6 @@
 
 import { useI18n } from "@/hooks/useI18n";
 import { formatCurrency } from "@/utils/formatters";
-import { useState } from "react";
 
 import { DollarSign, Calendar, TrendingUp } from 'lucide-react';
 import { useLocaleConstants } from '@/utils/localeConstants';
@@ -10,7 +9,9 @@ import { isRentVisibilityAvailable } from '@/constants/property-visibility';
 
 export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   const { formatDate } = useLocaleConstants();
-  const [activeDuration, setActiveDuration] = useState("monthly");
+  // TEMP: daily/weekly tabs hidden — monthly rent only.
+  // const [activeDuration, setActiveDuration] = useState("monthly");
+  const activeDuration = "monthly";
   const { t } = useI18n();
   const u = unit || {};
   const missing = missingRequiredFields || [];
@@ -19,10 +20,12 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
   const unitVisibility = u.visibility ?? u.status;
   const isAvailableForRent = isRentVisibilityAvailable(unitVisibility);
   const rentDurationType = u.rentDurationType || {};
-  const durationKeys = Object.keys(rentDurationType);
-  const activeRent = durationKeys.length > 0 && rentDurationType[activeDuration] != null
-    ? rentDurationType[activeDuration]
-    : rentDurationType.daily ?? rentDurationType.weekly ?? rentDurationType.monthly ?? {};
+  // TEMP: prefer monthly only (was: activeDuration, then daily ?? weekly ?? monthly)
+  const activeRent =
+    rentDurationType.monthly ??
+    // rentDurationType.daily ??
+    // rentDurationType.weekly ??
+    {};
 
   // Helper function to safely get translations with fallbacks
   const getTranslation = (path, fallback) => {
@@ -52,10 +55,11 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
     if (rentalDuration) {
       // Add "per" prefix based on duration
       switch (duration) {
-        case "daily":
-          return getTranslation("rental.per_night", " ");
-        case "weekly":
-          return getTranslation("rental.per_week", "");
+        // TEMP: daily/weekly hidden
+        // case "daily":
+        //   return getTranslation("rental.per_night", " ");
+        // case "weekly":
+        //   return getTranslation("rental.per_week", "");
         case "monthly":
           return getTranslation("rental.per_month", "");
         default:
@@ -67,9 +71,10 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
     return "";
   };
 
-  const getDurationLabel = (duration) => {
-    return getTranslation(`rental.${duration}`, duration);
-  };
+  // TEMP: unused while duration tabs are hidden
+  // const getDurationLabel = (duration) => {
+  //   return getTranslation(`rental.${duration}`, duration);
+  // };
 
   return (
     <div className="mt-2">
@@ -176,7 +181,7 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
             isMissing("rentDurationType") ? MISSING_FIELD_CLASS + " p-3" : ""
           }`}
         >
-          {/* Rental Duration Tabs */}
+          {/* TEMP: Rental Duration Tabs (Daily/Weekly/Monthly) hidden — monthly only.
           {durationKeys.length > 0 && (
           <div className="flex border-b border-gray-200 mb-4">
             {durationKeys.map((duration) => (
@@ -195,6 +200,7 @@ export default function UnitPricing({ unit, missingRequiredFields = [] }) {
             ))}
           </div>
           )}
+          */}
 
           {/* Price Display */}
           {(() => {

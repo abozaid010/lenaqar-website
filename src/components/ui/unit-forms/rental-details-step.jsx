@@ -8,7 +8,7 @@ import {
   isRentVisibilityAvailable,
   resolveRentVisibilityForCheckbox,
 } from "@/constants/property-visibility";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { normalizeRentDurationBlock } from "./unit-form-constants";
 
 const availableAmenities = [
@@ -40,7 +40,9 @@ export default function RentalDetailsStep({
   invalidFields = [],
   setInvalidFields = () => {},
 }) {
-  const [activeDuration, setActiveDuration] = useState("monthly");
+  // TEMP: daily/weekly tabs hidden — monthly rent only.
+  // const [activeDuration, setActiveDuration] = useState("monthly");
+  const activeDuration = "monthly";
   const { t, translate, translateStrict } = useI18n();
 
   // Defense-in-depth: even if a duration is missing from the incoming data,
@@ -165,10 +167,11 @@ export default function RentalDetailsStep({
       </div>
 
       <h3 className="text-xl font-semibold mb-3 mt-6 text-slate-800">
-        {t.rentalDetails.rentDurationOptions}
+        {/* TEMP: was rentDurationOptions (Daily/Weekly/Monthly tabs). Monthly only for now. */}
+        {t.rentalDetails.monthly || t.rentalDetails.rentDurationOptions}
       </h3>
 
-      {/* Rent Duration Options */}
+      {/* TEMP: Daily / Weekly / Monthly tabs hidden — monthly only.
       <div className="mb-3">
         <div className="flex border-b border-gray-200">
           <button
@@ -206,6 +209,7 @@ export default function RentalDetailsStep({
           </button>
         </div>
       </div>
+      */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-4">
         {/* Price */}
